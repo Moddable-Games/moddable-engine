@@ -423,6 +423,43 @@ Migration complete when: (1) file lives in moddable-engine, (2) existing repo im
 
 ---
 
+## 11a. Isolation and parallel development — CRITICAL
+
+**moddable-engine develops in complete isolation from all existing repos until each migration phase is proven.**
+
+This means:
+
+- moddable-chess, moddable-hexmaps, moddable-rules, moddable-website, and dungeon-chess continue operating exactly as they do today throughout the entire moddable-engine build
+- The nightly variant pipeline keeps running. New chess variants keep shipping. Rulebook content keeps being added. DC keeps being worked on. None of this stops.
+- **No existing repo is modified to depend on moddable-engine until the relevant phase is complete and proven.** Phase 5 (plugin-grid-square) must pass all 73+ chess variants before moddable-chess imports from it. Phase 7 (plugin-rules) must regenerate all existing rulebook content correctly before moddable-rules uses it.
+- **No existing repo is deprecated or frozen at any point during the migration.** Work continues in existing repos until moddable-engine demonstrably replaces each concern.
+
+### The cutover test for each phase
+
+A phase is complete — and only then should the corresponding existing repo be updated to use it — when all four of these are true:
+
+1. The concern lives in moddable-engine and is importable as a package
+2. The existing repo imports from moddable-engine instead of its own code
+3. All existing tests pass without modification
+4. No user-facing URL, behaviour, or output changes
+
+If any of these four fail, the migration for that phase is not complete. The existing code stays in place.
+
+### Why this matters
+
+Attempting to migrate and develop new content simultaneously in the same repo creates conflicts, breaks the nightly pipeline, and risks shipping regressions. The isolation approach means:
+
+- Existing users and content are never affected by moddable-engine development
+- Each phase can be developed, tested, and proven independently
+- A failed or stalled phase does not block any other work
+- The existing repos serve as the acceptance test suite — if they don't work identically after migration, the migration has failed
+
+### The one exception
+
+If a major refactor in an existing repo would need to be immediately undone when its moddable-engine migration phase lands — for example, a large chess engine rewrite in moddable-chess that duplicates Phase 2 work already underway in moddable-engine — then at that point it makes sense to pause new engine work in the existing repo and direct it into moddable-engine instead. This is a judgement call made at the time, not a policy. It will be obvious when it arises.
+
+---
+
 ## 12. Migration phases
 
 | Phase | Work | Unblocks |
@@ -569,3 +606,16 @@ Every significant decision recorded with alternatives considered and why they we
 - *Three layers: core / plugins / configs* — without topology and piece-behaviour layers, either core hardcodes grid assumptions or every plugin reimplicates them.
 
 **Why:** Layer count determined by concerns that exist. Each layer has exactly one reason to change. No ripple effects up or down.
+
+---
+
+### moddable-engine develops in isolation — 2026-06-26
+
+**Chosen:** moddable-engine is built in a completely isolated monorepo. Existing repos (moddable-chess, moddable-hexmaps, moddable-rules, dungeon-chess) continue unchanged until each migration phase is proven. Existing repos are not deprecated, frozen, or modified until moddable-engine demonstrably replaces each concern. See section 11a for the full cutover test.
+
+**Rejected alternatives:**
+- *Migrate in-place* — refactor moddable-chess directly into the new architecture. Rejected: breaks the nightly pipeline during migration. Any regression ships immediately to production. There is no safe fallback.
+- *Feature-flag migration* — keep old and new code in the same repo behind flags. Rejected: doubles the code surface during transition. Flags accumulate and are never cleaned up. Testing both paths simultaneously is error-prone.
+- *Big-bang cutover* — build everything, then switch all repos at once. Rejected: the highest-risk approach. If any phase fails, everything fails together. No incremental validation.
+
+**Why:** Isolation is the only approach where a failed or stalled phase does not block any other work, existing users are never affected, and each phase can be independently proven before being adopted. The existing repos become the acceptance test suite — identical output after migration means migration succeeded.
