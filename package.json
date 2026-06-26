@@ -1,0 +1,22 @@
+{
+  "name": "moddable-engine",
+  "private": true,
+  "description": "Micro-kernel master engine for all Moddable Games titles",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "build": "npm run build --workspaces",
+    "lint": "eslint packages/*/src/**/*.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Moddable-Games/moddable-engine.git"
+  },
+  "license": "MIT"
+}
