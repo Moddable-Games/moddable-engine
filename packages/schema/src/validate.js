@@ -6,7 +6,7 @@ import { schema as pitSchema } from '../../topology-pit/src/topology-pit.js'
 const TOPOLOGY_SCHEMAS = [gridSchema, hexSchema, trackSchema, pitSchema]
 
 const REQUIRED_FIELDS = ['title', 'slug', 'parent', 'players']
-const REQUIRED_ENGINE_FIELDS = ['topology']
+const REQUIRED_ENGINE_FIELDS = []
 
 export function validate(meta, extraSchemas = []) {
   const errors = []

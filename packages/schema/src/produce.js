@@ -5,10 +5,13 @@ export function produce(meta) {
     title: meta.title,
     family: meta.parent,
     slug: meta.slug,
-    topology: buildTopologyConfig(engine.topology),
     players: buildPlayersConfig(engine, meta),
     plugins: buildPluginConfigs(engine),
     render: buildRenderConfig(engine),
+  }
+
+  if (engine.topology) {
+    definition.topology = buildTopologyConfig(engine.topology)
   }
 
   if (engine.pieces) {
