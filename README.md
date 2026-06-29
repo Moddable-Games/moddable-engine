@@ -8,9 +8,9 @@ Every game in the Moddable Games collection — from standard chess to Endless S
 
 ## Status
 
-**Schema package in progress.** Core engine, four topologies, piece-behaviour, render layer, and schema parser are implemented and tested (362 tests across 33 suites, all passing).
+**Engine foundation complete.** Five topologies, piece-behaviour, render layer, and schema package are implemented and proven (464 tests across 41 suites, all passing). All 7 proof games (Chess, Go, Backgammon, Mancala, Morris, Hex, Big 2) play moves from schema-driven definitions.
 
-Current work: **Schema package** — parses game frontmatter and produces game definition objects consumed by core/topology/render.
+Next milestone: **Plugin library + game factory** — extract proof game logic into reusable plugins, wire up a single `createGame(definition)` entry point.
 
 Read [`SPEC.md`](./SPEC.md) before contributing anything.
 
@@ -26,16 +26,16 @@ moddable-engine/
     topology-hex/        ← @moddable/topology-hex (done)
     topology-track/      ← @moddable/topology-track (done)
     topology-pit/        ← @moddable/topology-pit (done)
+    topology-graph/      ← @moddable/topology-graph (done)
     piece-behaviour/     ← @moddable/piece-behaviour (done)
     render/              ← @moddable/render (done)
-    schema/              ← @moddable/schema (in progress)
+    schema/              ← @moddable/schema (done)
   SPEC.md                ← architecture spec — read this first
   package.json           ← workspace root
 ```
 
 ### Planned packages (not yet implemented)
 
-- `@moddable/topology-graph` — arbitrary graph topologies
 - `@moddable/ai` — search, evaluation protocol, Worker bridge
 - `@moddable/plugin-*` — game family plugins (grid-square, grid-hex, track, pit-sow, card-deck, terrain, dice, etc.)
 
@@ -46,10 +46,10 @@ moddable-engine/
 | Layer | Package(s) | Purpose |
 |---|---|---|
 | 0 | `@moddable/core` | State, moves, players, history, events, RNG, timer, plugin registry |
-| 1 | `@moddable/topology-*` | Coordinate systems: grid, hex, track, pit |
+| 1 | `@moddable/topology-*` | Coordinate systems: grid, hex, track, pit, graph |
 | 2 | `@moddable/piece-behaviour` | Movement primitives (topology-agnostic) |
 | 3 | `@moddable/render` | Topology-agnostic SVG board renderer |
-| 4 | `@moddable/schema` | Frontmatter → game definitions |
+| 4 | `@moddable/schema` | Frontmatter → game definitions (done) |
 | 5 | `@moddable/plugin-*` | Game families and utility systems (planned) |
 | 6 | Game configs | Frontmatter only — no code |
 
@@ -86,8 +86,10 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-06-29
-- Implemented @moddable/schema: frontmatter parser, validator, and game definition producer
-- Proof tests for chess, mancala, backgammon, and hex game families
+- Implemented @moddable/topology-graph: arbitrary node-edge structures (morris proof)
+- Implemented @moddable/schema: full pipeline (parse, validate, produce, load, infer, enrich)
+- Proved all 7 games playable from schema-driven definitions
+- Made schema fully topology-agnostic (topologies self-describe via exported schema objects)
 - Updated README to reflect actual project state
 
 #### 2026-06-28
