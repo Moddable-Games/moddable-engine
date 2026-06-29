@@ -1,0 +1,14 @@
+{
+  "name": "@moddable/game",
+  "version": "0.1.0",
+  "description": "Game factory — instantiates playable games from schema definitions",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "scripts": {
+    "test": "node --experimental-vm-modules ../../node_modules/.bin/jest"
+  },
+  "license": "MIT"
+}
