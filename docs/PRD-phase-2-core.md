@@ -1,1 +1,719 @@
-IyBQUkQg4oCUIFBoYXNlIDI6IEBtb2RkYWJsZS9jb3JlCgoqKlN0YXR1czoqKiBSZWFkeSB0byBpbXBsZW1lbnQgIAoqKlJlcG86KiogYE1vZGRhYmxlLUdhbWVzL21vZGRhYmxlLWVuZ2luZWAgIAoqKk91dHB1dCBwYXRoOioqIGBwYWNrYWdlcy9jb3JlL2AgIAoqKkRlcGVuZHMgb246KiogUGhhc2UgMSAoU1BFQy5tZCBhZ3JlZWQg4pyUKSAgCioqVW5ibG9ja3M6KiogQWxsIG90aGVyIHBoYXNlcyDigJQgZXZlcnkgcGx1Z2luLCB0b3BvbG9neSwgYW5kIHBpZWNlLWJlaGF2aW91ciBwYWNrYWdlIGltcG9ydHMgZnJvbSBjb3JlICAKKipTcGVjIHJlZmVyZW5jZToqKiBTUEVDLm1kIHNlY3Rpb25zIDEsIDMsIDExYQoKLS0tCgojIyBXaGF0IHRoaXMgcGhhc2UgZGVsaXZlcnMKCkEgc2luZ2xlIG5wbSBwYWNrYWdlIOKAlCBgQG1vZGRhYmxlL2NvcmVgIOKAlCBjb250YWluaW5nIHRoZSBuaW5lIGdhbWUtYWdub3N0aWMgcHJpbWl0aXZlcyB0aGF0IGV2ZXJ5IGdhbWUgYnVpbHQgb24gbW9kZGFibGUtZW5naW5lIHdpbGwgdXNlLiBObyBnYW1lLXNwZWNpZmljIGtub3dsZWRnZSBhbnl3aGVyZSBpbiB0aGlzIHBhY2thZ2UuIE5vIGJvYXJkIGNvbmNlcHRzLiBObyBwaWVjZSBjb25jZXB0cy4gTm8gcmVuZGVyaW5nLgoKVGhlIHRlc3QgZm9yIGNvcnJlY3Qgc2NvcGU6IHlvdSBzaG91bGQgYmUgYWJsZSB0byBkZXNjcmliZSBldmVyeSBmaWxlIGluIHRoaXMgcGFja2FnZSB3aXRob3V0IG1lbnRpb25pbmcgY2hlc3MsIGhleG1hcHMsIGRyYXVnaHRzLCBvciBhbnkgb3RoZXIgZ2FtZS4KCi0tLQoKIyMgV2h5IHRoaXMgcGhhc2UgY29tZXMgZmlyc3QKCkV2ZXJ5IG90aGVyIHBhY2thZ2UgaW4gbW9kZGFibGUtZW5naW5lIGRlcGVuZHMgb24gY29yZS4gVG9wb2xvZ2llcyBpbXBsZW1lbnQgdGhlIGNvb3JkaW5hdGUgcHJvdG9jb2wuIFBpZWNlLWJlaGF2aW91ciB1c2VzIHRoZSBtb3ZlIHBpcGVsaW5lLiBQbHVnaW5zIG93biBzdGF0ZSBzbGljZXMuIFRoZSByZW5kZXIgbGF5ZXIgdXNlcyB0aGUgZXZlbnQgYnVzLiBOb25lIG9mIHRoYXQgY2FuIGJlIHdyaXR0ZW4gdW50aWwgdGhlIGludGVyZmFjZXMgaW4gY29yZSBhcmUgZGVmaW5lZCBhbmQgc3RhYmxlLgoKUGhhc2UgMiBpcyBhbHNvIHRoZSBsb3dlc3QtdW5jZXJ0YWludHkgcGhhc2UuIEV2ZXJ5dGhpbmcgaXQgY29udGFpbnMgYWxyZWFkeSBleGlzdHMgaW1wbGljaXRseSBpbnNpZGUgYG1vZGRhYmxlLWNoZXNzL2pzL2NoZXNzLWVuZ2luZS5qc2AgKE1DRSkuIFRoaXMgcGhhc2UgaXMgZXh0cmFjdGlvbiBhbmQgZm9ybWFsaXNhdGlvbiwgbm90IGludmVudGlvbi4gVGhlIGNvbnRyYWN0cyBhcmUgYWxyZWFkeSBwcm92ZW4gYnkgNzMrIHZhcmlhbnRzIHJ1bm5pbmcgYWdhaW5zdCB0aGVtLgoKLS0tCgojIyBQYWNrYWdlIHN0cnVjdHVyZQoKYGBgCnBhY2thZ2VzL2NvcmUvCiAgc3JjLwogICAgY29vcmRpbmF0ZS1wcm90b2NvbC5qcwogICAgc3RhdGUtc3RvcmUuanMKICAgIG1vdmUtcGlwZWxpbmUuanMKICAgIHBsYXllci1zeXN0ZW0uanMKICAgIGhpc3RvcnkuanMKICAgIGV2ZW50LWJ1cy5qcwogICAgcm5nLmpzCiAgICB0aW1lci5qcwogICAgcGx1Z2luLXJlZ2lzdHJ5LmpzCiAgaW5kZXguanMKICBwYWNrYWdlLmpzb24KICBSRUFETUUubWQKICBfX3Rlc3RzX18vCiAgICBzdGF0ZS1zdG9yZS50ZXN0LmpzCiAgICBtb3ZlLXBpcGVsaW5lLnRlc3QuanMKICAgIHBsYXllci1zeXN0ZW0udGVzdC5qcwogICAgaGlzdG9yeS50ZXN0LmpzCiAgICBldmVudC1idXMudGVzdC5qcwogICAgcm5nLnRlc3QuanMKICAgIHBsdWdpbi1yZWdpc3RyeS50ZXN0LmpzCmBgYAoKLS0tCgojIyBGaWxlLWJ5LWZpbGUgc3BlY2lmaWNhdGlvbgoKIyMjIGNvb3JkaW5hdGUtcHJvdG9jb2wuanMKCioqV2hhdCBpdCBpczoqKiBBbiBpbnRlcmZhY2UgZGVmaW5pdGlvbiAobm90IGFuIGltcGxlbWVudGF0aW9uKS4gRGVmaW5lcyB0aGUgY29udHJhY3QgdGhhdCBldmVyeSB0b3BvbG9neSBtdXN0IHNhdGlzZnkuCgoqKldoYXQgaXQgZXhwb3J0czoqKgpgYGBqcwovLyBUaGUgaW50ZXJmYWNlIGV2ZXJ5IHRvcG9sb2d5IG11c3QgaW1wbGVtZW50CmV4cG9ydCBjb25zdCBDb29yZGluYXRlUHJvdG9jb2wgPSB7CiAgLy8gUmVxdWlyZWQgbWV0aG9kcyDigJQgdG9wb2xvZ2llcyB0aHJvdyBpZiBub3QgaW1wbGVtZW50ZWQKICBuZWlnaGJvdXJzKGNvb3JkLCBzdGF0ZSkgLT4gY29vcmRbXSAgICAgICAgIC8vIGFsbCBhZGphY2VudCBjb29yZHMKICBpc1ZhbGlkKGNvb3JkLCBzdGF0ZSkgLT4gYm9vbGVhbiAgICAgICAgICAgIC8vIGNvb3JkIGlzIG9uIHRoaXMgYm9hcmQKICB0b0pTT04oY29vcmQpIC0+IHN0cmluZyAgICAgICAgICAgICAgICAgICAgICAvLyBzdGFibGUgc2VyaWFsaXNhYmxlIGtleQogIGZyb21KU09OKHN0cikgLT4gY29vcmQgICAgICAgICAgICAgICAgICAgICAgIC8vIGludmVyc2Ugb2YgdG9KU09OCiAgZGlzdGFuY2UoYSwgYiwgc3RhdGUpIC0+IG51bWJlciAgICAgICAgICAgICAgLy8gdG9wb2xvZ3ktYXBwcm9wcmlhdGUgZGlzdGFuY2UKfQoKLy8gVmFsaWRhdGUgdGhhdCBhbiBvYmplY3QgaW1wbGVtZW50cyB0aGUgcHJvdG9jb2wKZXhwb3J0IGZ1bmN0aW9uIGFzc2VydEltcGxlbWVudHModG9wb2xvZ3kpIC0+IHZvaWQgIC8vIHRocm93cyBpZiBtaXNzaW5nIG1ldGhvZHMKYGBgCgoqKldoYXQgaXQgZG9lcyBub3QgY29udGFpbjoqKiBBbnkgaW1wbGVtZW50YXRpb24uIEFueSBib2FyZC1zaXplIGFzc3VtcHRpb25zLiBBbnkgY29vcmRpbmF0ZSBmb3JtYXQuCgoqKldoeSBpdCBleGlzdHM6KiogRXZlcnkgcGx1Z2luIHRoYXQgbmVlZHMgdG8ga25vdyBhYm91dCBib2FyZCBwb3NpdGlvbnMgY2FsbHMgdG9wb2xvZ3kgbWV0aG9kcyB0aHJvdWdoIHRoaXMgcHJvdG9jb2wuIFBsdWdpbi10ZXJyYWluIGRvZXNuJ3Qga25vdyBpZiBpdCdzIHJ1bm5pbmcgb24gYSBncmlkIG9yIGEgaGV4IOKAlCBpdCBjYWxscyBgdG9wb2xvZ3kubmVpZ2hib3Vycyhjb29yZClgIGFuZCBnZXRzIGJhY2sgd2hhdGV2ZXIgdGhlIGFjdGl2ZSB0b3BvbG9neSBwcm92aWRlcy4gVGhpcyBpcyB3aGF0IG1ha2VzIHRlcnJhaW4gd29yayBvbiBib3RoIERDIChncmlkKSBhbmQgRW5kbGVzcyBTa2llcyAoaGV4KS4KCi0tLQoKIyMjIHN0YXRlLXN0b3JlLmpzCgoqKldoYXQgaXQgaXM6KiogQSBjZW50cmFsIHN0YXRlIGNvbnRhaW5lciB3aXRoIG93bmVkIHNsaWNlcyBwZXIgcGx1Z2luLgoKYGBganMKZXhwb3J0IGZ1bmN0aW9uIGNyZWF0ZVN0b3JlKGluaXRpYWxTbGljZXMgPSB7fSkgLT4gc3RvcmUKCnN0b3JlID0gewogIGdldChzbGljZU5hbWUpIC0+IHNsaWNlU3RhdGUgICAgICAgICAgIC8vIHJlYWQgYW55IHNsaWNlCiAgc2V0KHNsaWNlTmFtZSwgbmV3U2xpY2VTdGF0ZSkgLT4gdm9pZCAgLy8gd3JpdGUgb25seSB5b3VyIG93biBzbGljZSAoZW5mb3JjZWQpCiAgZ2V0QWxsKCkgLT4gZnVsbFN0YXRlICAgICAgICAgICAgICAgICAgLy8gcmV0dXJucyBjb21wbGV0ZSBKU09OLXNlcmlhbGlzYWJsZSBzbmFwc2hvdAogIGZyb21TbmFwc2hvcChzbmFwc2hvdCkgLT4gdm9pZCAgICAgICAgIC8vIHJlc3RvcmUgZnJvbSBnZXRBbGwoKSBvdXRwdXQKICBzdWJzY3JpYmUoc2xpY2VOYW1lLCBmbikgLT4gdW5zdWJzY3JpYmUgLy8gY2FsbGVkIHdoZW4gc2xpY2UgY2hhbmdlcwogIGNsYWltU2xpY2Uoc2xpY2VOYW1lLCBvd25lcikgLT4gdm9pZCAgIC8vIHBsdWdpbnMgZGVjbGFyZSBvd25lcnNoaXAgYXQgaW5pdAogIGFzc2VydE93bmVyKHNsaWNlTmFtZSwgY2FsbGVyKSAtPiB2b2lkICAvLyBlbmZvcmNlZCBpbiBkZXYsIHN0cmlwcGVkIGluIHByb2QKfQpgYGAKCioqSlNPTiBjb25zdHJhaW50OioqIEFmdGVyIGV2ZXJ5IGBzZXQoKWAgY2FsbCBpbiBkZXZlbG9wbWVudCwgdGhlIHN0b3JlIHJ1bnMgYEpTT04uc3RyaW5naWZ5KG5ld1NsaWNlU3RhdGUpYC4gSWYgaXQgdGhyb3dzLCB0aGUgYHNldCgpYCB0aHJvd3Mgd2l0aCBhIGNsZWFyIG1lc3NhZ2UgaWRlbnRpZnlpbmcgdGhlIHBsdWdpbiBhbmQgdGhlIG5vbi1zZXJpYWxpc2FibGUgdmFsdWUuIFRoaXMgY2hlY2sgaXMgc3RyaXBwZWQgaW4gcHJvZHVjdGlvbiBidWlsZHMgKHRyZWUtc2hha2VuIHZpYSBgcHJvY2Vzcy5lbnYuTk9ERV9FTlZgKS4KCioqV2hhdCBpdCBkb2VzIG5vdCBjb250YWluOioqIEFueSBrbm93bGVkZ2Ugb2Ygd2hhdCBzbGljZXMgY29udGFpbi4gQW55IGdhbWUtc3BlY2lmaWMga2V5cy4gQW55IGRlZmF1bHQgc3RhdGUuCgoqKlJlbGF0aW9uc2hpcCB0byBNQ0U6KiogTUNFJ3MgY3VycmVudCBnYW1lIHN0YXRlIG9iamVjdCBpcyBhIGZsYXQgb2JqZWN0IG11dGF0ZWQgZGlyZWN0bHkuIFN0YXRlLXN0b3JlIGZvcm1hbGlzZXMgdGhpcyBpbnRvIG93bmVkIHNsaWNlcyB3aXRoIGVuZm9yY2VkIHNlcmlhbGlzYWJpbGl0eS4gVGhlIG1pZ3JhdGlvbiBpbiBQaGFzZSA1IG1hcHMgTUNFJ3Mgc3RhdGUgZmllbGRzIGludG8gcGx1Z2luLW93bmVkIHNsaWNlcy4KCi0tLQoKIyMjIG1vdmUtcGlwZWxpbmUuanMKCioqV2hhdCBpdCBpczoqKiBUaGUgZml2ZS1zdGVwIHNlcXVlbmNlIGV2ZXJ5IG1vdmUgZ29lcyB0aHJvdWdoLCByZWdhcmRsZXNzIG9mIGdhbWUuCgpgYGBqcwpleHBvcnQgZnVuY3Rpb24gY3JlYXRlUGlwZWxpbmUocmVnaXN0cnkpIC0+IHBpcGVsaW5lCgpwaXBlbGluZSA9IHsKICBleGVjdXRlKG1vdmUsIHN0b3JlKSAtPiByZXN1bHQKICAgIC8vIDEuIHJlZ2lzdHJ5LmNhbGwoJ3BsdWdpbi52YWxpZGF0ZU1vdmUnLCBtb3ZlLCBzdG9yZS5nZXRBbGwoKSkKICAgIC8vIDIuIHJlZ2lzdHJ5LmNhbGwoJ3BsdWdpbi5hcHBseU1vdmUnLCBtb3ZlLCBzdG9yZS5nZXRBbGwoKSkgIC0+IG5ld1NsaWNlU3RhdGVzCiAgICAvLyAzLiBzdG9yZS5zZXQoKSBmb3IgZWFjaCBjaGFuZ2VkIHNsaWNlCiAgICAvLyA0LiBoaXN0b3J5LnJlY29yZChtb3ZlLCBiZWZvcmUsIGFmdGVyKQogICAgLy8gNS4gcmVnaXN0cnkuY2FsbCgncGx1Z2luLmNoZWNrV2luJywgc3RvcmUuZ2V0QWxsKCkpICAgICAgIC0+IHdpbm5lciB8IG51bGwKICAgIC8vIDYuIHBsYXllclN5c3RlbS5hZHZhbmNlKHN0b3JlKQogICAgLy8gNy4gZXZlbnRCdXMuZW1pdCgnbW92ZS5hcHBsaWVkJywgeyBtb3ZlLCBzdGF0ZTogc3RvcmUuZ2V0QWxsKCkgfSkKICAgIC8vIHJldHVybnMgeyBvazogdHJ1ZSwgd2lubmVyIH0gfCB7IG9rOiBmYWxzZSwgcmVhc29uIH0KCiAgZ2V0TGVnYWxNb3ZlcyhzdG9yZSkgLT4gbW92ZVtdCiAgICAvLyBkZWxlZ2F0ZXMgdG8gcmVnaXN0cnkuY2FsbCgncGx1Z2luLmdldExlZ2FsTW92ZXMnLCBzdG9yZS5nZXRBbGwoKSkKfQpgYGAKCioqV2h5IHRoZSBwaXBlbGluZSBpcyBpbiBjb3JlOioqIFRoZSBzZXF1ZW5jZSB2YWxpZGF0ZSAtPiBhcHBseSAtPiByZWNvcmQgLT4gY2hlY2std2luIC0+IGFkdmFuY2UtdHVybiBpcyB0aGUgc2FtZSBmb3IgY2hlc3MsIEdvLCBTaG9naSwgQmFja2dhbW1vbiwgT3dhcmUsIGFuZCBFbmRsZXNzIFNraWVzLiBDb3JlIG93bnMgdGhlIHNlcXVlbmNlOyBwbHVnaW5zIG93biB0aGUgbG9naWMuCgotLS0KCiMjIyBwbGF5ZXItc3lzdGVtLmpzCgpgYGBqcwpleHBvcnQgZnVuY3Rpb24gY3JlYXRlUGxheWVyU3lzdGVtKGNvbmZpZykgLT4gcGxheWVyU3lzdGVtCgovLyBjb25maWcgPSB7IHBsYXllcnM6IFsnd2hpdGUnLCAnYmxhY2snXSwgdHVybk9yZGVyOiAnc2VxdWVudGlhbCcgfCAnY3VzdG9tJyB9CgpwbGF5ZXJTeXN0ZW0gPSB7CiAgY3VycmVudChzdG9yZSkgLT4gcGxheWVySWQKICBhZHZhbmNlKHN0b3JlKSAtPiB2b2lkICAgICAgICAgICAgICAgICAgLy8gbmV4dCBwbGF5ZXIsIHdyYXBzCiAgcGFzcyhzdG9yZSkgLT4gdm9pZCAgICAgICAgICAgICAgICAgICAgICAvLyBza2lwIHdpdGhvdXQgYWR2YW5jaW5nIGhpc3RvcnkKICBmb3JjZVR1cm4ocGxheWVySWQsIHN0b3JlKSAtPiB2b2lkICAgICAgIC8vIGZvciB2YXJpYW50cyB3aXRoIHR1cm4gZWZmZWN0cwogIGlzQ3VycmVudFBsYXllcihwbGF5ZXJJZCwgc3RvcmUpIC0+IGJvb2xlYW4KICBnZXRBbGwoc3RvcmUpIC0+IHBsYXllcklkW10KICBnZXRQbGF5ZXJDb3VudCgpIC0+IG51bWJlcgp9CmBgYAoKKipSZWxhdGlvbnNoaXAgdG8gTUNFOioqIE1DRSBoYXJkY29kZXMgdHdvLXBsYXllciBhbHRlcm5hdGlvbi4gUGxheWVyLXN5c3RlbSBtYWtlcyBwbGF5ZXIgY291bnQgYSBjb25maWcgcGFyYW1ldGVyLCByZXF1aXJlZCBmb3IgNC1wbGF5ZXIgdmFyaWFudHMgYW5kIEVuZGxlc3MgU2tpZXMnIDgtZmFjdGlvbiBwbGF5LgoKLS0tCgojIyMgaGlzdG9yeS5qcwoKYGBganMKZXhwb3J0IGZ1bmN0aW9uIGNyZWF0ZUhpc3RvcnkoKSAtPiBoaXN0b3J5CgpoaXN0b3J5ID0gewogIHJlY29yZChtb3ZlLCBzdGF0ZUJlZm9yZSwgc3RhdGVBZnRlcikgLT4gZW50cnkKICB1bmRvKHN0b3JlKSAtPiBtb3ZlIHwgbnVsbCAgICAgICAgICAgICAvLyByZXN0b3JlcyBzdGF0ZUJlZm9yZSBkaXJlY3RseQogIHJlZG8oc3RvcmUpIC0+IG1vdmUgfCBudWxsCiAgcmVwbGF5KGVudHJpZXMsIHN0b3JlKSAtPiB2b2lkCiAgZ2V0RW50cmllcygpIC0+IGVudHJ5W10KICB0b0pTT04oKSAtPiBzdHJpbmcKICBmcm9tSlNPTihzdHIsIHN0b3JlKSAtPiB2b2lkCiAgZ2V0Q3VycmVudCgpIC0+IGVudHJ5IHwgbnVsbAogIGxlbmd0aCgpIC0+IG51bWJlcgp9CgovLyBlbnRyeSA9IHsgbW92ZSwgc3RhdGVCZWZvcmUsIHN0YXRlQWZ0ZXIsIHRpbWVzdGFtcCwgbW92ZU51bWJlciB9CmBgYAoKKipXaHkgYXBwZW5kLW9ubHk6KiogVW5kbyByZXN0b3JlcyBgc3RhdGVCZWZvcmVgIGRpcmVjdGx5IOKAlCBjb3JyZWN0IGZvciBldmVyeSBnYW1lIGluY2x1ZGluZyBpcnJldmVyc2libGUgbW92ZXMgKERyYXVnaHRzIGNhcHR1cmVzLCBBdG9taWMgZXhwbG9zaW9ucyksIHdpdGhvdXQgZ2FtZS1zcGVjaWZpYyB1bmRvIGxvZ2ljLgoKLS0tCgojIyMgZXZlbnQtYnVzLmpzCgpgYGBqcwpleHBvcnQgZnVuY3Rpb24gY3JlYXRlRXZlbnRCdXMoKSAtPiBidXMKCmJ1cyA9IHsKICBlbWl0KGV2ZW50VHlwZSwgcGF5bG9hZCkgLT4gdm9pZCAgICAgICAvLyBzeW5jaHJvbm91cywgYWxsIGhhbmRsZXJzIGNhbGxlZAogIG9uKGV2ZW50VHlwZSwgaGFuZGxlcikgLT4gdW5zdWJzY3JpYmUKICBvZmYoZXZlbnRUeXBlLCBoYW5kbGVyKSAtPiB2b2lkCiAgb25jZShldmVudFR5cGUsIGhhbmRsZXIpIC0+IHZvaWQKICBjbGVhcihldmVudFR5cGU/KSAtPiB2b2lkCn0KCi8vIEJ1aWx0LWluIGV2ZW50cyAoZW1pdHRlZCBieSBjb3JlKTogJ21vdmUuYXBwbGllZCcgJ2dhbWUuc3RhcnRlZCcgJ2dhbWUuZW5kZWQnICdwaGFzZS5zdGFydGVkJyAncGhhc2UuZW5kZWQnICd0dXJuLnN0YXJ0ZWQnCmBgYAoKKipDdXN0b20gZXZlbnRzOioqIEFueSBwbHVnaW4gY2FuIGVtaXQgYW55IHN0cmluZyBldmVudCB0eXBlLiBgcGx1Z2luLXRlcnJhaW5gIGVtaXRzIGB0ZXJyYWluLmFjdGl2YXRlZGAsIGBwbHVnaW4tYXVkaW9gIGxpc3RlbnMuIE5laXRoZXIgaW1wb3J0cyB0aGUgb3RoZXIuCgoqKldoeSBzeW5jaHJvbm91czoqKiBBc3luYyBldmVudHMgY3JlYXRlIHN1YnRsZSBvcmRlcmluZyBidWdzLiBTeW5jaHJvbm91cyBkaXNwYXRjaCBtZWFucyBhbGwgaGFuZGxlcnMgY29tcGxldGUgYmVmb3JlIHRoZSBuZXh0IHRyYW5zaXRpb24uCgotLS0KCiMjIyBybmcuanMKCmBgYGpzCmV4cG9ydCBmdW5jdGlvbiBjcmVhdGVSbmcoc2VlZD8pIC0+IHJuZwoKcm5nID0gewogIG5leHQoKSAtPiBudW1iZXIgICAgICAgICAgICAgIC8vIFswLCAxKQogIG5leHRJbnQobWluLCBtYXgpIC0+IG51bWJlciAgICAvLyBbbWluLCBtYXhdIGluY2x1c2l2ZQogIG5leHRDaG9pY2UoYXJyKSAtPiBpdGVtCiAgc2h1ZmZsZShhcnIpIC0+IGFyciAgICAgICAgICAgIC8vIEZpc2hlci1ZYXRlcwogIGdldFNlZWQoKSAtPiBudW1iZXIKICBmcm9tU2VlZChzZWVkKSAtPiB2b2lkCn0KYGBgCgoqKkFsZ29yaXRobToqKiB4b3JzaGlmdDEyOCsuICoqV2h5IHNlZWRlZDoqKiBSZXBsYXkgKyBtdWx0aXBsYXllciBzeW5jICsgc2F2ZS9sb2FkIGFsbCByZXF1aXJlIGlkZW50aWNhbCBvdXRjb21lcyBmcm9tIHRoZSBzYW1lIHNlZWQuCgotLS0KCiMjIyB0aW1lci5qcwoKYGBganMKZXhwb3J0IGZ1bmN0aW9uIGNyZWF0ZVRpbWVyKCkgLT4gdGltZXIKdGltZXIgPSB7IHN0YXJ0LCBwYXVzZSwgcmVzdW1lLCBlbGFwc2VkLCBzbmFwc2hvdCwgcmVzdG9yZSwgcmVzZXQsIG9uRXhwaXJ5IH0KYGBgCgpObyBjaGVzcyBjbG9jayBsb2dpYy4gTm8gcGVyLXBsYXllciB0aW1pbmcuIEVhY2ggcGxheWVyIGdldHMgdGhlaXIgb3duIGluc3RhbmNlIG1hbmFnZWQgYnkgdGhlIHBsdWdpbi4KCi0tLQoKIyMjIHBsdWdpbi1yZWdpc3RyeS5qcwoKYGBganMKZXhwb3J0IGZ1bmN0aW9uIGNyZWF0ZVJlZ2lzdHJ5KCkgLT4gcmVnaXN0cnkKCnJlZ2lzdHJ5ID0gewogIHJlZ2lzdGVyKHBsdWdpbikgLT4gdm9pZCAgICAgICAgICAgICAgICAgICAgICAgIC8vIHsgc2xpY2VOYW1lLCBpbml0LCBhcHBseU1vdmUsIGdldExlZ2FsTW92ZXMsIGNoZWNrV2luIH0KICBwcm92aWRlKGNhcGFiaWxpdHlOYW1lLCBmbikgLT4gdm9pZCAgICAgICAgICAgICAvLyBleHBvc2UgYSBjYXBhYmlsaXR5CiAgcmVxdWVzdChjYXBhYmlsaXR5TmFtZSkgLT4gZm4gfCBudWxsICAgICAgICAgICAgLy8gbnVsbCBpZiBub3QgcmVnaXN0ZXJlZCAtIG5ldmVyIHRocm93cwogIGluaXRBbGwoY29uZmlnLCBzdG9yZSkgLT4gdm9pZAogIGNhbGwobWV0aG9kTmFtZSwgLi4uYXJncykgLT4gcmVzdWx0c1tdCiAgcmVxdWlyZVZlcnNpb24ocGFja2FnZU5hbWUsIHNlbXZlcikgLT4gdm9pZAp9CmBgYAoKKipUaGUgcnVsZToqKiBQbHVnaW5zIG5ldmVyIGltcG9ydCBlYWNoIG90aGVyLiBgcmVnaXN0cnkucmVxdWVzdCgnZ3JpZC5nZXRTcXVhcmUnKWAgcmV0dXJucyBudWxsIGlmIHRoZSBjYXBhYmlsaXR5IGlzbid0IGxvYWRlZCwgYW5kIHBsdWdpbnMgZGVncmFkZSBncmFjZWZ1bGx5LiBUaGlzIGlzIHdoYXQgbWFrZXMgYHBsdWdpbi10ZXJyYWluYCB3b3JrIG9uIGJvdGggZ3JpZCBhbmQgaGV4IHRvcG9sb2dpZXMuCgotLS0KCiMjIGluZGV4LmpzIOKAlCB0aGUgcHVibGljIEFQSQoKYGBganMKZXhwb3J0IHsgQ29vcmRpbmF0ZVByb3RvY29sLCBhc3NlcnRJbXBsZW1lbnRzIH0gZnJvbSAnLi9zcmMvY29vcmRpbmF0ZS1wcm90b2NvbC5qcyc7CmV4cG9ydCB7IGNyZWF0ZVN0b3JlIH0gICAgICAgIGZyb20gJy4vc3JjL3N0YXRlLXN0b3JlLmpzJzsKZXhwb3J0IHsgY3JlYXRlUGlwZWxpbmUgfSAgICAgZnJvbSAnLi9zcmMvbW92ZS1waXBlbGluZS5qcyc7CmV4cG9ydCB7IGNyZWF0ZVBsYXllclN5c3RlbSB9IGZyb20gJy4vc3JjL3BsYXllci1zeXN0ZW0uanMnOwpleHBvcnQgeyBjcmVhdGVIaXN0b3J5IH0gICAgICBmcm9tICcuL3NyYy9oaXN0b3J5LmpzJzsKZXhwb3J0IHsgY3JlYXRlRXZlbnRCdXMgfSAgICAgZnJvbSAnLi9zcmMvZXZlbnQtYnVzLmpzJzsKZXhwb3J0IHsgY3JlYXRlUm5nIH0gICAgICAgICAgZnJvbSAnLi9zcmMvcm5nLmpzJzsKZXhwb3J0IHsgY3JlYXRlVGltZXIgfSAgICAgICAgZnJvbSAnLi9zcmMvdGltZXIuanMnOwpleHBvcnQgeyBjcmVhdGVSZWdpc3RyeSB9ICAgICAgZnJvbSAnLi9zcmMvcGx1Z2luLXJlZ2lzdHJ5LmpzJzsKYGBgCgpObyBkZWZhdWx0IGV4cG9ydC4gTmFtZWQgZmFjdG9yeSBmdW5jdGlvbnMgb25seS4gQ29uc3VtZXJzIGNvbXBvc2Ugd2hhdCB0aGV5IG5lZWQuCgotLS0KCiMjIHBhY2thZ2UuanNvbgoKYGBganNvbgp7CiAgIm5hbWUiOiAiQG1vZGRhYmxlL2NvcmUiLAogICJ2ZXJzaW9uIjogIjAuMS4wIiwKICAidHlwZSI6ICJtb2R1bGUiLAogICJtYWluIjogImluZGV4LmpzIiwKICAiZXhwb3J0cyI6IHsgIi4iOiAiLi9pbmRleC5qcyIgfSwKICAic2NyaXB0cyI6IHsgInRlc3QiOiAibm9kZSAtLWV4cGVyaW1lbnRhbC12bS1tb2R1bGVzIG5vZGVfbW9kdWxlcy8uYmluL2plc3QiIH0sCiAgImRldkRlcGVuZGVuY2llcyI6IHsgImplc3QiOiAiXjI5LjAuMCIgfQp9CmBgYAoKTm8gcnVudGltZSBkZXBlbmRlbmNpZXMuCgotLS0KCiMjIFdoYXQgY29yZSBkb2VzIE5PVCBjb250YWluCgp8IE5vdCBpbiBjb3JlIHwgTGl2ZXMgaW4gfAp8LS0tfC0tLXwKfCBCb2FyZCBnZW9tZXRyeSB8IHRvcG9sb2d5LSogfAp8IFBpZWNlIGRlZmluaXRpb25zLCBtb3ZlIGdlbmVyYXRpb24gfCBwaWVjZS1iZWhhdmlvdXIgfAp8IFNWR3JlbmRlcmluZywgRE9NIGV2ZW50cyB8IHJlbmRlciB8CnwgQUkgc2VhcmNoIHwgYWkgfAp8IEdhbWUtc3BlY2lmaWMgcnVsZXMgfCBwbHVnaW5zIHwKfCBWaXN1YWwgdGhlbWVzIHwgcmVuZGVyIHwKfCBQaGFzZSBkZWZpbml0aW9ucyB8IGdhbWUgY29uZmlnIGZyb250bWF0dGVyIHwKCi0tLQoKIyMgUmVsYXRpb25zaGlwIHRvIGV4aXN0aW5nIE1DRQoKQ29yZSBkb2VzIG5vdCBkZXBlbmQgb24gTUNFLiBNQ0UgZG9lcyBub3QgZGVwZW5kIG9uIGNvcmUuIFRoZXkgY29leGlzdCBpbiBpc29sYXRpb24gdW50aWwgUGhhc2UgNSwgd2hlbiBwbHVnaW4tZ3JpZC1zcXVhcmUgd3JhcHMgTUNFIGFuZCBNQ0UncyBpbXBsaWNpdCBzdGF0ZSBtYW5hZ2VtZW50IGlzIHJlcGxhY2VkIGJ5IGNvcmUgcHJpbWl0aXZlcy4KCioqTm8gbWlncmF0aW9uIGluIHRoaXMgcGhhc2UuKiogUGhhc2UgMiBwcm9kdWNlcyBhIGNsZWFuIHN0YW5kYWxvbmUgcGFja2FnZS4gTm90aGluZyBpbiBtb2RkYWJsZS1jaGVzcyBjaGFuZ2VzLgoKLS0tCgojIyBBY2NlcHRhbmNlIGNyaXRlcmlhCgotIFsgXSBgcGFja2FnZXMvY29yZS9gIGV4aXN0cyBpbiBtb2RkYWJsZS1lbmdpbmUKLSBbIF0gQWxsIG5pbmUgc291cmNlIGZpbGVzIGltcGxlbWVudGVkCi0gWyBdIEFsbCB0ZXN0cyBwYXNzCi0gWyBdIEpTT04gY29uc3RyYWludCBlbmZvcmNlZCBhbmQgdGVzdGVkIChzdGF0ZS1zdG9yZSkKLSBbIF0gYGFzc2VydEltcGxlbWVudHNgIHRocm93cyBmb3IgaW5jb21wbGV0ZSB0b3BvbG9neSBvYmplY3RzCi0gWyBdIGByZWdpc3RyeS5yZXF1ZXN0KClgIHJldHVybnMgbnVsbCAobm90IHRocm93cykgZm9yIHVucmVnaXN0ZXJlZCBjYXBhYmlsaXRpZXMKLSBbIF0gYGhpc3RvcnkuZnJvbUpTT04oaGlzdG9yeS50b0pTT04oKSlgIHJvdW5kLXRyaXAgdGVzdCBwYXNzZXMKLSBbIF0gYHJuZy5mcm9tU2VlZChybmcuZ2V0U2VlZCgpKWAgcHJvZHVjZXMgaWRlbnRpY2FsIHNlcXVlbmNlCi0gWyBdIE5vIGZpbGUgcmVmZXJlbmNlcyBgZG9jdW1lbnRgLCBgd2luZG93YCwgb3IgYW55IERPTSBBUEkKLSBbIF0gTm8gZmlsZSByZWZlcmVuY2VzIGFueSBnYW1lIG5hbWUKLSBbIF0gYG5wbSBwYWNrYCBzdWNjZWVkcyB3aXRoIG5vIG1pc3NpbmcgZGVwZW5kZW5jaWVzCgotLS0KCiMjIFdoYXQgdGhpcyBwaGFzZSBkb2VzIE5PVCBkbwoKLSBEb2VzIG5vdCBtb2RpZnkgYW55IGV4aXN0aW5nIHJlcG8KLSBEb2VzIG5vdCBpbXBsZW1lbnQgYW55IGdhbWUgbG9naWMgb3IgcmVuZGVyaW5nCi0gRG9lcyBub3QgbWFrZSBhbnkgZ2FtZSBwbGF5YWJsZSBvbiBtb2RkYWJsZS1lbmdpbmUKLSBEb2VzIG5vdCBicmVhayBhbnkgZXhpc3RpbmcgcGlwZWxpbmVzCgotLS0KCiMjIFNlc3Npb24gbm90ZXMgZm9yIENsYXVkZSBDb2RlCgpSZWFkIFNQRUMubWQgZmlyc3QuIEltcGxlbWVudCBpbiB0aGlzIG9yZGVyIChlYWNoIGhhcyBubyBkZXBlbmRlbmN5IG9uIHdoYXQgZm9sbG93cyk6CgoxLiBgZXZlbnQtYnVzLmpzYAoyLiBgcm5nLmpzYAozLiBgdGltZXIuanNgCjQuIGBjb29yZGluYXRlLXByb3RvY29sLmpzYAo1LiBgc3RhdGUtc3RvcmUuanNgCjYuIGBwbGF5ZXItc3lzdGVtLmpzYCAoZGVwZW5kcyBvbiBzdGF0ZS1zdG9yZSkKNy4gYGhpc3RvcnkuanNgIChkZXBlbmRzIG9uIHN0YXRlLXN0b3JlKQo4LiBgcGx1Z2luLXJlZ2lzdHJ5LmpzYCAoZGVwZW5kcyBvbiBzdGF0ZS1zdG9yZSkKOS4gYG1vdmUtcGlwZWxpbmUuanNgIChkZXBlbmRzIG9uIGFsbCBvZiB0aGUgYWJvdmUpCgpXcml0ZSB0ZXN0cyBhbG9uZ3NpZGUgZWFjaCBmaWxlLiBEbyBub3Qgc2tpcCB0ZXN0cy4gVGhlIEpTT04gY29uc3RyYWludCB0ZXN0IGluIHN0YXRlLXN0b3JlIGlzIGltcG9ydGFudDogdGVzdCB0aGF0IHB1dHRpbmcgYSBjbGFzcyBpbnN0YW5jZSBpbiBzdGF0ZSB0aHJvd3MgaW4gZGV2IG1vZGUuCg==
+# PRD — Phase 2: @moddable/core (revised)
+
+**Status:** Draft — awaiting Mark's review
+**Repo:** `Moddable-Games/moddable-engine`
+**Output path:** `packages/core/`
+**Depends on:** Phase 1 (SPEC.md agreed)
+**Unblocks:** All other phases — every plugin, topology, and piece-behaviour package imports from core
+**Spec reference:** SPEC.md sections 1, 3, 11a
+
+---
+
+## Why this PRD was rewritten
+
+The original PRD was validated only against chess. Core must prove it works for
+ALL game types before a single line of implementation code is written. This
+revision adds 7 proof games spanning every topology and turn model in the engine.
+If core cannot express all 7, the interfaces are wrong.
+
+---
+
+## What this phase delivers
+
+A single npm package — `@moddable/core` — containing nine game-agnostic
+primitives. No game-specific knowledge anywhere. No board concepts. No piece
+concepts. No rendering.
+
+The test for correct scope: you should be able to describe every file in this
+package without mentioning chess, hexmaps, draughts, or any other game.
+
+---
+
+## Critical interface decisions
+
+### 1. Moves are opaque
+
+Core never inspects move contents. A move is whatever the plugin says it is.
+
+- Chess: `{ from: 0, to: 16 }`
+- Mancala: `{ pit: 3 }`
+- Go: `{ coord: { q: 4, r: 7 }, action: 'place' }`
+- Backgammon: `{ actions: [{ from: 12, to: 7 }, { from: 7, to: 2 }] }`
+- Big 2: `{ cards: ['S-A', 'H-A'], action: 'play' }`
+- Morris: `{ phase: 'place', coord: 'a1' }`
+
+Core passes moves to plugins. Core never parses, validates structure, or assumes
+fields. This is what makes one move pipeline work for every game.
+
+### 2. Topology is an interface, not part of core
+
+Core defines the coordinate protocol (5 methods). Implementations live in
+topology-* packages. Plugins call topology via the registry. Core has zero
+knowledge of grids, hexes, tracks, pits, or graphs.
+
+### 3. State store with owned slices
+
+Each plugin owns a named slice. Any plugin reads any slice. Only the owner
+writes. Always JSON-serialisable. This solves save/load, replay, multiplayer
+sync, and debugging with one constraint.
+
+### 4. Turn structure is plugin-configured
+
+The player system supports:
+- **Sequential** — chess, Go, Morris (alternating turns)
+- **Multi-action** — backgammon (multiple moves per turn from dice)
+- **Forced-chain** — mancala, draughts (must continue capturing)
+- **Phase-based** — Morris (placement phase then movement phase)
+- **Pass-to-end** — Go (both pass = game over)
+- **Simultaneous** — Big 2 style (play or pass in rotation)
+
+Core provides the primitives. Plugins compose them.
+
+### 5. Undo via full state snapshots
+
+Every history entry stores `stateBefore` and `stateAfter`. Undo restores
+`stateBefore` directly. Correct for all games including irreversible moves
+(Draughts captures, Atomic explosions, mancala sowing). No game-specific undo
+logic needed.
+
+### 6. Effects are NOT in core
+
+Effects (timed board modifiers, spell durations, terrain activations) are plugin
+state. Core provides the event bus for signalling. Plugins manage their own
+effect lifecycles in their own state slices.
+
+---
+
+## The 7 proof games
+
+Phase 2 is complete when mock plugins for all 7 games run correctly against
+core. Each game proves a different capability that chess alone cannot validate.
+
+### Game 1: Chess (grid-square topology)
+
+**What it proves:** From-to displacement moves, piece capture, check/checkmate
+win condition, promotion as a move modifier. Variant: 4-player (proves N-player
+turn advancement).
+
+**Mock plugin sketch:**
+```js
+export default {
+  sliceName: 'chess',
+  init(config, registry) {
+    const topology = registry.request('topology.grid')
+    return { board: parseFEN(config.startFen), captured: [] }
+  },
+  applyMove(move, slice, full) {
+    // move = { from: 0, to: 16, promotion?: 'q' }
+    const newBoard = [...slice.board]
+    newBoard[move.to] = newBoard[move.from]
+    newBoard[move.from] = null
+    return { ...slice, board: newBoard }
+  },
+  getLegalMoves(slice, full) {
+    // Returns all { from, to } pairs for current player's pieces
+  },
+  checkWin(slice, full) {
+    // Returns winner if opponent king has no escape
+    return null
+  }
+}
+```
+
+**Core capabilities exercised:** move-pipeline (full cycle), state-store (board
+array in slice), player-system (2 or 4 player sequential), history (undo a
+capture restores piece), event-bus (`move.applied`).
+
+---
+
+### Game 2: Go (grid-square topology, placement-only)
+
+**What it proves:** Placement moves (no from-to), group capture (removing
+multiple stones after a single move), territory scoring as win condition,
+pass-to-end turn model, ko rule (requires history awareness).
+
+**Mock plugin sketch:**
+```js
+export default {
+  sliceName: 'go',
+  init(config, registry) {
+    return { intersections: new Array(config.size * config.size).fill(null), passes: 0, ko: null }
+  },
+  applyMove(move, slice, full) {
+    // move = { coord: 45, action: 'place' } or { action: 'pass' }
+    if (move.action === 'pass') return { ...slice, passes: slice.passes + 1 }
+    const newState = { ...slice, passes: 0, intersections: [...slice.intersections] }
+    newState.intersections[move.coord] = full.players.current
+    // Remove captured groups, update ko
+    return newState
+  },
+  getLegalMoves(slice, full) {
+    // All empty intersections minus ko point and suicide
+  },
+  checkWin(slice, full) {
+    if (slice.passes >= 2) return scoreTerritory(slice)
+    return null
+  }
+}
+```
+
+**Core capabilities exercised:** player-system (`pass()` — both pass ends game),
+state-store (large flat array), history (ko detection via previous state
+comparison), move-pipeline (placement move with no `from` field).
+
+---
+
+### Game 3: Backgammon (track topology, dice-driven multi-action)
+
+**What it proves:** Dice rolls determining available moves, multiple actions per
+turn (2-4 moves from one roll), track-based topology (linear positions, no grid),
+race win condition (all pieces borne off), direction-of-travel per player.
+
+**Mock plugin sketch:**
+```js
+export default {
+  sliceName: 'backgammon',
+  init(config, registry) {
+    const rng = registry.request('core.rng')
+    return { points: initialPosition(), bar: [0, 0], borneOff: [0, 0], dice: [], movesRemaining: [] }
+  },
+  applyMove(move, slice, full) {
+    // move = { from: 12, to: 7 } (single action within a turn)
+    // After each action, decrement movesRemaining
+    const newSlice = { ...slice, points: [...slice.points] }
+    // Move checker, handle hitting opponent
+    newSlice.movesRemaining = slice.movesRemaining.filter((_, i) => i !== move.dieIndex)
+    return newSlice
+  },
+  getLegalMoves(slice, full) {
+    // For each remaining die value, all legal from-to pairs
+  },
+  checkWin(slice, full) {
+    if (slice.borneOff[0] === 15) return full.players.list[0]
+    if (slice.borneOff[1] === 15) return full.players.list[1]
+    return null
+  }
+}
+```
+
+**Core capabilities exercised:** rng (seeded dice), player-system (multi-action
+turn — advance only when movesRemaining is empty), state-store (bar, points,
+borneOff as separate arrays), event-bus (`dice.rolled` custom event for
+renderer).
+
+---
+
+### Game 4: Mancala/Oware (pit topology, sowing, chaining)
+
+**What it proves:** Sowing mechanic (distributing seeds around pits), no pieces
+(seeds are counts, not individual entities), forced chaining (if last seed lands
+in non-empty pit, continue sowing), count-based capture (capture when final pit
+reaches specific count), pit topology (circular sequence, not a grid).
+
+**Mock plugin sketch:**
+```js
+export default {
+  sliceName: 'mancala',
+  init(config, registry) {
+    // config = { pits: 6, seeds: 4, stores: 2 }
+    const pits = new Array(config.pits * 2).fill(config.seeds)
+    return { pits, stores: [0, 0], sowingFrom: null }
+  },
+  applyMove(move, slice, full) {
+    // move = { pit: 3 }
+    const newSlice = { ...slice, pits: [...slice.pits], stores: [...slice.stores] }
+    let seeds = newSlice.pits[move.pit]
+    newSlice.pits[move.pit] = 0
+    let pos = move.pit
+    while (seeds > 0) {
+      pos = (pos + 1) % newSlice.pits.length
+      newSlice.pits[pos]++
+      seeds--
+    }
+    // Capture logic: if last seed makes count 2 or 3 in opponent row
+    return newSlice
+  },
+  getLegalMoves(slice, full) {
+    // All non-empty pits on current player's side
+    // If opponent's side is empty, must feed if possible
+  },
+  checkWin(slice, full) {
+    // Game ends when one side is empty; most seeds in store wins
+    return null
+  }
+}
+```
+
+**Core capabilities exercised:** state-store (counts, not piece objects),
+player-system (sequential but with forced-feed rule), move-pipeline (single
+field move `{ pit: 3 }`), history (sowing is irreversible without snapshots —
+proves snapshot undo works).
+
+---
+
+### Game 5: Nine Men's Morris (graph topology, phase transitions)
+
+**What it proves:** Phase-based gameplay (placement phase then movement phase),
+graph topology (24 named nodes with explicit adjacency, not a grid), mill
+detection as a triggered effect (forming a line of 3 grants a removal action),
+compound moves (place/move + optional remove), isolation win condition (opponent
+has no legal moves OR fewer than 3 pieces).
+
+**Mock plugin sketch:**
+```js
+export default {
+  sliceName: 'morris',
+  init(config, registry) {
+    // 24 nodes, explicit adjacency graph
+    return { nodes: Object.fromEntries(POSITIONS.map(p => [p, null])), phase: 'place', piecesInHand: [9, 9] }
+  },
+  applyMove(move, slice, full) {
+    // Placement: move = { action: 'place', coord: 'a1' }
+    // Movement: move = { action: 'move', from: 'a1', to: 'd1' }
+    // Mill removal: move = { action: 'remove', coord: 'g7' }
+    const newSlice = { ...slice, nodes: { ...slice.nodes } }
+    if (move.action === 'place') {
+      newSlice.nodes[move.coord] = full.players.current
+      newSlice.piecesInHand[currentIdx]--
+      if (newSlice.piecesInHand.every(n => n === 0)) newSlice.phase = 'move'
+    }
+    return newSlice
+  },
+  getLegalMoves(slice, full) {
+    // Depends on phase: empty nodes (place) or adjacent empty (move) or fly (<=3 pieces)
+  },
+  checkWin(slice, full) {
+    // Opponent has < 3 pieces OR no legal moves
+    return null
+  }
+}
+```
+
+**Core capabilities exercised:** state-store (phase field driving different move
+sets), player-system (compound turn: place/move then conditional remove),
+move-pipeline (3 different move shapes from one plugin), event-bus
+(`mill.formed` triggers removal sub-turn).
+
+---
+
+### Game 6: Hex (hex topology, connection win)
+
+**What it proves:** Hex coordinate system (axial {q, r}), placement-only (like
+Go but different topology), connection-based win condition (path from one side
+to the opposite side), no draws possible (every game has a winner), topology
+providing neighbours in 6 directions.
+
+**Mock plugin sketch:**
+```js
+export default {
+  sliceName: 'hex',
+  init(config, registry) {
+    const topology = registry.request('topology.hex')
+    // config = { size: 11 }
+    return { cells: {}, size: config.size }
+  },
+  applyMove(move, slice, full) {
+    // move = { q: 3, r: 5 }
+    const key = `${move.q},${move.r}`
+    return { ...slice, cells: { ...slice.cells, [key]: full.players.current } }
+  },
+  getLegalMoves(slice, full) {
+    // All empty hex cells
+  },
+  checkWin(slice, full) {
+    // BFS/DFS: does current player have a connected path from their start edge to end edge?
+    return hasWinningPath(slice, full.players.current) ? full.players.current : null
+  }
+}
+```
+
+**Core capabilities exercised:** coordinate-protocol (hex topology via registry),
+state-store (sparse object map keyed by coordinate string), player-system
+(simple 2-player alternation), move-pipeline (single-field placement),
+history (simple but proves hex coords serialise cleanly via toJSON/fromJSON).
+
+---
+
+### Game 7: Big 2 / Dai Di (no topology, cards, 4-player)
+
+**What it proves:** No spatial topology at all (hand-only card game), 4-player
+rotation, combination comparison (poker hands ranked by game-specific rules),
+passing mechanic (pass until all others pass, then reset), non-spatial state
+(hands, discard pile, last played combination), variable-size moves (1, 2, 3,
+or 5 cards per play).
+
+**Mock plugin sketch:**
+```js
+export default {
+  sliceName: 'big2',
+  init(config, registry) {
+    const rng = registry.request('core.rng')
+    const deck = shuffle(STANDARD_52, rng)
+    return {
+      hands: [deck.slice(0,13), deck.slice(13,26), deck.slice(26,39), deck.slice(39,52)],
+      lastPlay: null,
+      lastPlayer: null,
+      consecutivePasses: 0
+    }
+  },
+  applyMove(move, slice, full) {
+    // move = { cards: ['S-A', 'H-A'], action: 'play' } or { action: 'pass' }
+    if (move.action === 'pass') {
+      const newSlice = { ...slice, consecutivePasses: slice.consecutivePasses + 1 }
+      if (newSlice.consecutivePasses >= 3) {
+        newSlice.lastPlay = null  // Reset — next player plays freely
+        newSlice.consecutivePasses = 0
+      }
+      return newSlice
+    }
+    const playerIdx = full.players.currentIndex
+    const newHands = slice.hands.map((h, i) => i === playerIdx ? h.filter(c => !move.cards.includes(c)) : h)
+    return { ...slice, hands: newHands, lastPlay: move.cards, lastPlayer: playerIdx, consecutivePasses: 0 }
+  },
+  getLegalMoves(slice, full) {
+    // All combinations from hand that beat lastPlay (or any if lastPlay is null)
+    // Plus { action: 'pass' } unless you won the last round
+  },
+  checkWin(slice, full) {
+    const empty = slice.hands.findIndex(h => h.length === 0)
+    return empty >= 0 ? full.players.list[empty] : null
+  }
+}
+```
+
+**Core capabilities exercised:** player-system (4-player sequential, pass
+tracking), state-store (arrays of card strings, no spatial data), rng (seeded
+shuffle for deterministic replay), move-pipeline (variable-shape moves — 1 to 5
+cards), history (full snapshot needed because cards leave hands permanently),
+NO topology (proves core has zero spatial assumptions).
+
+---
+
+## What the 7 games prove collectively
+
+| Core module | Games that exercise it |
+|---|---|
+| coordinate-protocol | Chess, Go, Hex, Morris (4 different topologies) |
+| state-store | All 7 (every game owns a slice) |
+| move-pipeline | All 7 (every game validates/applies/checks) |
+| player-system | Chess-4P, Big 2 (4-player), Backgammon (multi-action), Go (pass), Morris (compound) |
+| history | All 7 (snapshot undo), Go (ko detection), Backgammon (mid-turn undo) |
+| event-bus | Morris (mill.formed), Backgammon (dice.rolled), all (move.applied) |
+| rng | Backgammon (dice), Big 2 (shuffle) |
+| timer | Chess (clock), Backgammon (move timer) |
+| plugin-registry | All 7 (register + provide/request) |
+
+If any module is unused by any game, the module is either wrong or unnecessary.
+If any game cannot be expressed, the interfaces need revision before implementation.
+
+---
+
+## Package structure
+
+```
+packages/core/
+  src/
+    coordinate-protocol.js
+    state-store.js
+    move-pipeline.js
+    player-system.js
+    history.js
+    event-bus.js
+    rng.js
+    timer.js
+    plugin-registry.js
+  index.js
+  package.json
+  __tests__/
+    coordinate-protocol.test.js
+    state-store.test.js
+    move-pipeline.test.js
+    player-system.test.js
+    history.test.js
+    event-bus.test.js
+    rng.test.js
+    timer.test.js
+    plugin-registry.test.js
+    proof-chess.test.js
+    proof-go.test.js
+    proof-backgammon.test.js
+    proof-mancala.test.js
+    proof-morris.test.js
+    proof-hex.test.js
+    proof-big2.test.js
+```
+
+The 7 `proof-*.test.js` files ARE the acceptance tests. Each instantiates core,
+registers its mock plugin, and plays through a short game scenario proving the
+core interfaces work for that game type.
+
+---
+
+## File-by-file specification
+
+### coordinate-protocol.js
+
+An interface definition (not an implementation). Defines the contract every
+topology must satisfy.
+
+```js
+export const CoordinateProtocol = {
+  neighbours(coord, state) -> coord[],
+  isValid(coord, state) -> boolean,
+  toJSON(coord) -> string,
+  fromJSON(str) -> coord,
+  distance(a, b, state) -> number,
+}
+
+export function assertImplements(topology) -> void  // throws if missing methods
+```
+
+Does not contain any implementation, board-size assumptions, or coordinate format.
+
+### state-store.js
+
+Central state container with owned slices per plugin.
+
+```js
+export function createStore(initialSlices = {}) -> store
+
+store = {
+  get(sliceName) -> sliceState,
+  set(sliceName, newSliceState) -> void,
+  getAll() -> fullState,
+  fromSnapshot(snapshot) -> void,
+  subscribe(sliceName, fn) -> unsubscribe,
+  claimSlice(sliceName, owner) -> void,
+  assertOwner(sliceName, caller) -> void,
+}
+```
+
+JSON constraint: after every `set()` in development, runs `JSON.stringify`. If
+it throws, `set()` throws identifying the plugin and non-serialisable value.
+Stripped in production.
+
+### move-pipeline.js
+
+The sequence every move goes through, regardless of game.
+
+```js
+export function createPipeline(registry, store, history, playerSystem, eventBus) -> pipeline
+
+pipeline = {
+  execute(move) -> { ok: true, winner } | { ok: false, reason },
+  getLegalMoves() -> move[],
+}
+```
+
+Steps: validate -> apply -> record -> check-win -> advance-turn -> emit event.
+
+### player-system.js
+
+```js
+export function createPlayerSystem(config) -> playerSystem
+
+// config = { players: ['white', 'black'], turnMode: 'sequential' | 'custom' }
+
+playerSystem = {
+  current(store) -> playerId,
+  advance(store) -> void,
+  pass(store) -> void,
+  forceTurn(playerId, store) -> void,
+  isCurrentPlayer(playerId, store) -> boolean,
+  getAll(store) -> playerId[],
+  getPlayerCount() -> number,
+  getCurrentIndex(store) -> number,
+}
+```
+
+### history.js
+
+```js
+export function createHistory() -> history
+
+history = {
+  record(move, stateBefore, stateAfter) -> entry,
+  undo(store) -> move | null,
+  redo(store) -> move | null,
+  replay(entries, store) -> void,
+  getEntries() -> entry[],
+  toJSON() -> string,
+  fromJSON(str, store) -> void,
+  getCurrent() -> entry | null,
+  length() -> number,
+}
+
+// entry = { move, stateBefore, stateAfter, timestamp, moveNumber }
+```
+
+### event-bus.js
+
+```js
+export function createEventBus() -> bus
+
+bus = {
+  emit(eventType, payload) -> void,
+  on(eventType, handler) -> unsubscribe,
+  off(eventType, handler) -> void,
+  once(eventType, handler) -> void,
+  clear(eventType?) -> void,
+}
+```
+
+Built-in events emitted by core: `move.applied`, `game.started`, `game.ended`,
+`phase.started`, `phase.ended`, `turn.started`.
+
+### rng.js
+
+```js
+export function createRng(seed?) -> rng
+
+rng = {
+  next() -> number,           // [0, 1)
+  nextInt(min, max) -> number, // [min, max] inclusive
+  nextChoice(arr) -> item,
+  shuffle(arr) -> arr,
+  getSeed() -> number,
+  fromSeed(seed) -> void,
+}
+```
+
+Algorithm: xorshift128+. Deterministic from seed.
+
+### timer.js
+
+```js
+export function createTimer() -> timer
+
+timer = { start, pause, resume, elapsed, snapshot, restore, reset, onExpiry }
+```
+
+No chess clock logic. No per-player timing. Plugins compose multiple timers.
+
+### plugin-registry.js
+
+```js
+export function createRegistry() -> registry
+
+registry = {
+  register(plugin) -> void,
+  provide(capabilityName, fn) -> void,
+  request(capabilityName) -> fn | null,
+  initAll(config, store) -> void,
+  call(methodName, ...args) -> results[],
+  requireVersion(packageName, semver) -> void,
+}
+```
+
+`request()` returns null (never throws) for unregistered capabilities. Plugins
+degrade gracefully.
+
+---
+
+## index.js — the public API
+
+```js
+export { CoordinateProtocol, assertImplements } from './src/coordinate-protocol.js'
+export { createStore }         from './src/state-store.js'
+export { createPipeline }      from './src/move-pipeline.js'
+export { createPlayerSystem }  from './src/player-system.js'
+export { createHistory }       from './src/history.js'
+export { createEventBus }      from './src/event-bus.js'
+export { createRng }           from './src/rng.js'
+export { createTimer }         from './src/timer.js'
+export { createRegistry }      from './src/registry.js'
+```
+
+No default export. Named factory functions only.
+
+---
+
+## package.json
+
+```json
+{
+  "name": "@moddable/core",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "index.js",
+  "exports": { ".": "./index.js" },
+  "scripts": { "test": "node --experimental-vm-modules node_modules/.bin/jest" },
+  "devDependencies": { "jest": "^29.0.0" }
+}
+```
+
+No runtime dependencies.
+
+---
+
+## Acceptance criteria
+
+Phase 2 is complete when ALL of the following pass:
+
+- [ ] `packages/core/` exists in moddable-engine
+- [ ] All nine source files implemented
+- [ ] All unit tests pass
+- [ ] All 7 proof game tests pass (proof-chess through proof-big2)
+- [ ] JSON constraint enforced and tested (class instance in state throws)
+- [ ] `assertImplements` throws for incomplete topology objects
+- [ ] `registry.request()` returns null (not throws) for unregistered capabilities
+- [ ] `history.fromJSON(history.toJSON())` round-trip test passes
+- [ ] `rng.fromSeed(rng.getSeed())` produces identical sequence
+- [ ] No file references `document`, `window`, or any DOM API
+- [ ] No file references any game name (chess, go, hex, etc.)
+- [ ] `npm pack` succeeds with no missing dependencies
+- [ ] 4-player turn advancement works (proof-chess 4P variant, proof-big2)
+- [ ] Multi-action turn works (proof-backgammon: 2-4 moves per turn)
+- [ ] Pass-to-end works (proof-go: both pass ends game)
+- [ ] Phase transition works (proof-morris: place phase then move phase)
+- [ ] Compound turn works (proof-morris: move + conditional remove)
+- [ ] No-topology game works (proof-big2: zero spatial assumptions)
+
+---
+
+## What this phase does NOT do
+
+- Does not modify any existing repo
+- Does not implement any real game logic (mock plugins only)
+- Does not make any game playable on moddable-engine
+- Does not break any existing pipelines
+- Does not add rendering, AI, or topology implementations
+
+---
+
+## Implementation order
+
+Each file depends only on what precedes it:
+
+1. `event-bus.js` (no dependencies)
+2. `rng.js` (no dependencies)
+3. `timer.js` (no dependencies)
+4. `coordinate-protocol.js` (no dependencies)
+5. `state-store.js` (no dependencies)
+6. `player-system.js` (depends on state-store)
+7. `history.js` (depends on state-store)
+8. `plugin-registry.js` (depends on state-store)
+9. `move-pipeline.js` (depends on all of the above)
+
+Write tests alongside each file. The JSON constraint test in state-store is
+critical: test that putting a class instance in state throws in dev mode.
+
+After all 9 modules pass their unit tests, write the 7 proof-game tests.
+Each proof test instantiates core from scratch, registers the mock plugin,
+and plays through a short scenario (5-10 moves minimum) proving the interfaces
+work for that game type.
+
+---
+
+## Relationship to existing MCE
+
+Core does not depend on MCE. MCE does not depend on core. They coexist in
+isolation until Phase 5, when plugin-grid-square wraps MCE and MCE's implicit
+state management is replaced by core primitives.
+
+No migration in this phase. Phase 2 produces a clean standalone package.
+Nothing in moddable-chess changes.
+
+
+
+
