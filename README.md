@@ -8,7 +8,9 @@ Every game in the Moddable Games collection — from standard chess to Endless S
 
 ## Status
 
-Phase 1 — Architecture spec. No production code yet.
+**Phase 2 complete.** Core engine, four topologies, piece-behaviour, and render layer are implemented and tested (303 tests across 26 suites, all passing).
+
+Next milestone: **Schema package** — reads game frontmatter from moddable-rules and produces game definition objects consumed by core/topology/render.
 
 Read [`SPEC.md`](./SPEC.md) before contributing anything.
 
@@ -19,32 +21,23 @@ Read [`SPEC.md`](./SPEC.md) before contributing anything.
 ```
 moddable-engine/
   packages/
-    core/                    ← @moddable/core
-    render/                  ← @moddable/render
-    topology-grid/           ← @moddable/topology-grid
-    topology-hex/            ← @moddable/topology-hex
-    topology-track/          ← @moddable/topology-track
-    topology-pit/            ← @moddable/topology-pit
-    topology-graph/          ← @moddable/topology-graph
-    piece-behaviour/         ← @moddable/piece-behaviour
-    ai/                      ← @moddable/ai
-    plugin-grid-square/      ← @moddable/plugin-grid-square
-    plugin-grid-hex/         ← @moddable/plugin-grid-hex
-    plugin-track/            ← @moddable/plugin-track
-    plugin-pit-sow/          ← @moddable/plugin-pit-sow
-    plugin-card-deck/        ← @moddable/plugin-card-deck
-    plugin-terrain/          ← @moddable/plugin-terrain
-    plugin-dice/             ← @moddable/plugin-dice
-    plugin-resource-track/   ← @moddable/plugin-resource-track
-    plugin-worker-placement/ ← @moddable/plugin-worker-placement
-    plugin-ai/               ← @moddable/plugin-ai
-    plugin-multiplayer/      ← @moddable/plugin-multiplayer
-    plugin-audio/            ← @moddable/plugin-audio
-    plugin-character/        ← @moddable/plugin-character
-    plugin-rules/            ← @moddable/plugin-rules
-  SPEC.md                    ← architecture spec — read this first
-  package.json               ← workspace root
+    core/                ← @moddable/core (done)
+    topology-grid/       ← @moddable/topology-grid (done)
+    topology-hex/        ← @moddable/topology-hex (done)
+    topology-track/      ← @moddable/topology-track (done)
+    topology-pit/        ← @moddable/topology-pit (done)
+    piece-behaviour/     ← @moddable/piece-behaviour (done)
+    render/              ← @moddable/render (done)
+  SPEC.md                ← architecture spec — read this first
+  package.json           ← workspace root
 ```
+
+### Planned packages (not yet implemented)
+
+- `@moddable/schema` — frontmatter → game definitions
+- `@moddable/topology-graph` — arbitrary graph topologies
+- `@moddable/ai` — search, evaluation protocol, Worker bridge
+- `@moddable/plugin-*` — game family plugins (grid-square, grid-hex, track, pit-sow, card-deck, terrain, dice, etc.)
 
 ---
 
@@ -53,27 +46,62 @@ moddable-engine/
 | Layer | Package(s) | Purpose |
 |---|---|---|
 | 0 | `@moddable/core` | State, moves, players, history, events, RNG, timer, plugin registry |
-| 1 | `@moddable/render` | Layer compositor, annotations, SVG builder, DOM interaction, asset resolver, theme registry |
-| 2 | `@moddable/topology-*` | Coordinate systems: grid, hex, track, pit, graph |
-| 3 | `@moddable/piece-behaviour` | Movement primitives, piece registry, piece set resolver |
-| 4 | `@moddable/ai` | Search, evaluation protocol, Worker bridge |
-| 5 | `@moddable/plugin-*` | Game families and utility systems |
+| 1 | `@moddable/topology-*` | Coordinate systems: grid, hex, track, pit |
+| 2 | `@moddable/piece-behaviour` | Movement primitives (topology-agnostic) |
+| 3 | `@moddable/render` | Topology-agnostic SVG board renderer |
+| 4 | `@moddable/schema` | Frontmatter → game definitions (planned) |
+| 5 | `@moddable/plugin-*` | Game families and utility systems (planned) |
 | 6 | Game configs | Frontmatter only — no code |
 
 ---
 
-## Key principle
+## Key principles
 
-If you have to mention a game's name to explain what a piece of code does, that code is in the wrong layer.
+- If you have to mention a game's name to explain what a piece of code does, that code is in the wrong layer.
+- Topologies are the universal adapter layer. Higher packages define contracts; topologies implement them.
+- No if/else for topology type anywhere in the codebase.
 
 See `SPEC.md` section 0 (Philosophy) for the full reasoning behind every architectural decision.
 
 ---
 
+## Running tests
+
+```bash
+NODE_OPTIONS='--experimental-vm-modules' npx jest
+```
+
+---
+
 ## Related repos
 
-- [`moddable-chess`](https://github.com/Moddable-Games/moddable-chess) — migrating to `plugin-grid-square`
-- [`moddable-hexmaps`](https://github.com/Moddable-Games/moddable-hexmaps) — migrating to `plugin-grid-hex`
-- [`moddable-rules`](https://github.com/Moddable-Games/moddable-rules) — migrating build system to `plugin-rules`
+- [`moddable-chess`](https://github.com/Moddable-Games/moddable-chess) — migrating to plugin-grid-square
+- [`moddable-hexmaps`](https://github.com/Moddable-Games/moddable-hexmaps) — migrating to plugin-grid-hex
+- [`moddable-rules`](https://github.com/Moddable-Games/moddable-rules) — migrating build system to plugin-rules
 - [`dungeon-chess`](https://github.com/Moddable-Games/dungeon-chess) — north star proof of concept
-- [`moddable-ops`](https://github.com/Moddable-Games/moddable-ops) — coordination, issue #28 is the master tracking issue
+- [`moddable-ops`](https://github.com/Moddable-Games/moddable-ops) — coordination and planning
+
+---
+
+## Changelog
+
+#### 2026-06-29
+- Updated README to reflect actual project state
+
+#### 2026-06-28
+- Implemented render layer with topology-provided layouts
+- Made piece-behaviour fully topology-agnostic
+
+#### 2026-06-27
+- Implemented topology-track and topology-pit
+- Implemented topology-hex (axial coordinates)
+- Implemented topology-grid and piece-behaviour
+- Added continueTurn to move pipeline
+
+#### 2026-06-26
+- Implemented @moddable/core — 9 modules + 7 proof game tests
+- Rewrote Phase 2 PRD with 7 proof games
+
+#### 2026-06-25
+- Added SPEC.md — architecture spec with philosophy and decisions log
+- Initial repo setup
