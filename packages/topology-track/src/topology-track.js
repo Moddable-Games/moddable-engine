@@ -121,6 +121,51 @@ export function createTrackTopology(config) {
     return circuit
   }
 
+  function getLayout(opts = {}) {
+    const { cellSize = 40, style = 'linear' } = opts
+    const all = getAll()
+
+    return {
+      getDimensions() {
+        if (circuit && style === 'circuit') {
+          const side = Math.ceil(all.length / 4)
+          const dim = (side + 1) * cellSize
+          return { width: dim, height: dim }
+        }
+        return { width: all.length * cellSize, height: cellSize * 2 }
+      },
+      getCells() {
+        const cells = []
+        if (circuit && style === 'circuit') {
+          const side = Math.ceil(all.length / 4)
+          const dim = (side + 1) * cellSize
+          let idx = 0
+          for (let i = 0; i < Math.min(side, all.length - idx); i++)
+            cells.push({ key: all[idx++], center: { x: i * cellSize + cellSize / 2, y: cellSize / 2 }, shape: 'rect', size: cellSize * 0.85 })
+          for (let i = 0; i < Math.min(side, all.length - idx); i++)
+            cells.push({ key: all[idx++], center: { x: dim - cellSize / 2, y: i * cellSize + cellSize / 2 }, shape: 'rect', size: cellSize * 0.85 })
+          for (let i = 0; i < Math.min(side, all.length - idx); i++)
+            cells.push({ key: all[idx++], center: { x: dim - i * cellSize - cellSize / 2, y: dim - cellSize / 2 }, shape: 'rect', size: cellSize * 0.85 })
+          for (let i = 0; i < Math.min(side, all.length - idx); i++)
+            cells.push({ key: all[idx++], center: { x: cellSize / 2, y: dim - i * cellSize - cellSize / 2 }, shape: 'rect', size: cellSize * 0.85 })
+        } else {
+          for (let i = 0; i < all.length; i++)
+            cells.push({ key: all[i], center: { x: i * cellSize + cellSize / 2, y: cellSize }, shape: 'rect', size: cellSize * 0.85 })
+        }
+        return cells
+      },
+      getLines() {
+        const cells = this.getCells()
+        const lines = []
+        for (let i = 0; i < cells.length - 1; i++)
+          lines.push({ x1: cells[i].center.x, y1: cells[i].center.y, x2: cells[i + 1].center.x, y2: cells[i + 1].center.y })
+        if (circuit && cells.length > 1)
+          lines.push({ x1: cells[cells.length - 1].center.x, y1: cells[cells.length - 1].center.y, x2: cells[0].center.x, y2: cells[0].center.y })
+        return lines
+      },
+    }
+  }
+
   return {
     isValid,
     getIndex,
@@ -137,5 +182,6 @@ export function createTrackTopology(config) {
     toJSON,
     fromJSON,
     isCircuit,
+    getLayout,
   }
 }

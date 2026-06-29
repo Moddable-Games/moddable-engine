@@ -147,6 +147,44 @@ export function createGridTopology(config) {
     return pairs
   }
 
+  function getLayout(opts = {}) {
+    const { tileSize = 56, alternating = true, colors = {} } = opts
+    const lightFill = colors.light || '#f0d9b5'
+    const darkFill = colors.dark || '#b58863'
+
+    return {
+      getDimensions() {
+        return { width: cols * tileSize, height: rows * tileSize }
+      },
+      getCells() {
+        const cells = []
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const fill = alternating ? ((r + c) % 2 === 0 ? lightFill : darkFill) : lightFill
+            cells.push({
+              key: toIndex(r, c),
+              center: { x: c * tileSize + tileSize / 2, y: r * tileSize + tileSize / 2 },
+              shape: 'rect',
+              size: tileSize,
+              fill,
+            })
+          }
+        }
+        return cells
+      },
+      getLabels() {
+        const labels = []
+        for (let c = 0; c < cols; c++) {
+          labels.push({ x: c * tileSize + tileSize / 2, y: rows * tileSize + 12, text: String.fromCharCode(97 + c), anchor: 'middle' })
+        }
+        for (let r = 0; r < rows; r++) {
+          labels.push({ x: -10, y: r * tileSize + tileSize / 2, text: String(rows - r), anchor: 'middle', baseline: 'central' })
+        }
+        return labels
+      },
+    }
+  }
+
   return {
     rows,
     cols,
@@ -169,5 +207,6 @@ export function createGridTopology(config) {
     jumpPairs,
     adjacentPairs,
     onBoard,
+    getLayout,
   }
 }

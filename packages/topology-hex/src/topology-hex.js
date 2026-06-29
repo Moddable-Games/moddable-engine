@@ -205,6 +205,46 @@ export function createHexTopology(config) {
     return pairs
   }
 
+  function getLayout(opts = {}) {
+    const { cellSize = 20 } = opts
+    let cachedDims = null
+
+    function computeDims() {
+      if (cachedDims) return cachedDims
+      const allKeys = getAllCells()
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
+      for (const k of allKeys) {
+        const px = toPixel(k, cellSize)
+        minX = Math.min(minX, px.x); maxX = Math.max(maxX, px.x)
+        minY = Math.min(minY, px.y); maxY = Math.max(maxY, px.y)
+      }
+      cachedDims = {
+        width: (maxX - minX) + cellSize * 2.5,
+        height: (maxY - minY) + cellSize * 2.5,
+        offsetX: -minX + cellSize * 1.25,
+        offsetY: -minY + cellSize * 1.25,
+      }
+      return cachedDims
+    }
+
+    return {
+      getDimensions() { return computeDims() },
+      getCells() {
+        const dims = computeDims()
+        return getAllCells().map(k => {
+          const px = toPixel(k, cellSize)
+          const center = { x: px.x + dims.offsetX, y: px.y + dims.offsetY }
+          return { key: k, center, shape: 'hex', size: cellSize, corners: getCorners(center, cellSize) }
+        })
+      },
+      getAnnotations() {
+        const dims = computeDims()
+        const center = toPixel('0,0', cellSize)
+        return [{ type: 'dot', x: center.x + dims.offsetX, y: center.y + dims.offsetY, radius: 3 }]
+      },
+    }
+  }
+
   return {
     radius,
     orientation,
@@ -225,6 +265,7 @@ export function createHexTopology(config) {
     getAllCells,
     getCellCount,
     getRing,
+    getLayout,
     DIRECTIONS,
   }
 }

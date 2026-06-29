@@ -98,6 +98,38 @@ export function createPitTopology(config) {
     return totalPits
   }
 
+  function getLayout(opts = {}) {
+    const { pitRadius = 25, storeRadius = 35, spacing = 15 } = opts
+    const pitDiameter = pitRadius * 2
+    const storeWidth = storeRadius * 2
+    const pitsStartX = storeWidth + spacing * 2
+
+    return {
+      getDimensions() {
+        const width = storeWidth + spacing * 2 + pitsPerSide * (pitDiameter + spacing) + spacing
+        const height = pitDiameter * 2 + spacing * 3 + storeRadius
+        return { width, height }
+      },
+      getCells() {
+        const cells = []
+        const dims = this.getDimensions()
+        for (let i = 0; i < pitsPerSide; i++) {
+          const x = pitsStartX + i * (pitDiameter + spacing) + pitRadius
+          cells.push({ key: pitIndex(1, pitsPerSide - 1 - i), center: { x, y: pitRadius + spacing }, shape: 'pit', radius: pitRadius })
+        }
+        for (let i = 0; i < pitsPerSide; i++) {
+          const x = pitsStartX + i * (pitDiameter + spacing) + pitRadius
+          cells.push({ key: pitIndex(0, i), center: { x, y: dims.height - pitRadius - spacing }, shape: 'pit', radius: pitRadius })
+        }
+        if (stores > 0) {
+          cells.push({ key: storeIndex(0), center: { x: dims.width - storeRadius - spacing / 2, y: dims.height / 2 }, shape: 'pit', radius: storeRadius })
+          cells.push({ key: storeIndex(1), center: { x: storeRadius + spacing / 2, y: dims.height / 2 }, shape: 'pit', radius: storeRadius })
+        }
+        return cells
+      },
+    }
+  }
+
   return {
     pitIndex,
     storeIndex,
@@ -115,6 +147,7 @@ export function createPitTopology(config) {
     getCount,
     getPitsPerSide,
     getTotalPits,
+    getLayout,
     pitsPerSide,
     totalPits,
     stores,
