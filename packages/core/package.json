@@ -1,0 +1,14 @@
+{
+  "name": "@moddable/core",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "index.js",
+  "exports": { ".": "./index.js" },
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/.bin/jest --testPathPattern=__tests__"
+  },
+  "devDependencies": {
+    "@jest/globals": "^29.0.0",
+    "jest": "^29.0.0"
+  }
+}
