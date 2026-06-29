@@ -1,18 +1,9 @@
-import { schema as gridSchema } from '../../topology-grid/src/topology-grid.js'
-import { schema as hexSchema } from '../../topology-hex/src/topology-hex.js'
-import { schema as trackSchema } from '../../topology-track/src/topology-track.js'
-import { schema as pitSchema } from '../../topology-pit/src/topology-pit.js'
-import { schema as graphSchema } from '../../topology-graph/src/topology-graph.js'
-
-const TOPOLOGY_SCHEMAS = [gridSchema, hexSchema, trackSchema, pitSchema, graphSchema]
-
 const REQUIRED_FIELDS = ['title', 'slug', 'parent', 'players']
 const REQUIRED_ENGINE_FIELDS = []
 
-export function validate(meta, extraSchemas = []) {
+export function validate(meta, topologySchemas = []) {
   const errors = []
-  const allSchemas = [...TOPOLOGY_SCHEMAS, ...extraSchemas]
-  const schemaMap = new Map(allSchemas.map(s => [s.type, s]))
+  const schemaMap = new Map(topologySchemas.map(s => [s.type, s]))
 
   for (const field of REQUIRED_FIELDS) {
     if (meta[field] === undefined || meta[field] === null || meta[field] === '') {
@@ -37,16 +28,16 @@ export function validate(meta, extraSchemas = []) {
     const topo = engine.topology
     if (!topo.type) {
       errors.push({ field: 'engine.topology.type', message: 'topology type is required' })
-    } else if (!schemaMap.has(topo.type)) {
-      const known = allSchemas.map(s => s.type).join(', ')
-      errors.push({ field: 'engine.topology.type', message: `unknown topology type "${topo.type}", must be one of: ${known}` })
-    } else {
+    } else if (schemaMap.has(topo.type)) {
       const topoSchema = schemaMap.get(topo.type)
       for (const field of topoSchema.required) {
         if (topo[field] === undefined) {
           errors.push({ field: `engine.topology.${field}`, message: `"${field}" is required for topology type "${topo.type}"` })
         }
       }
+    } else if (topologySchemas.length > 0) {
+      const known = topologySchemas.map(s => s.type).join(', ')
+      errors.push({ field: 'engine.topology.type', message: `unknown topology type "${topo.type}", must be one of: ${known}` })
     }
   }
 

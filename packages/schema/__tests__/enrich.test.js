@@ -2,7 +2,13 @@ import { enrichMeta, serializeFrontmatter, enrichDryRun } from '../src/enrich.js
 import { parseFrontmatter } from '../src/parse-frontmatter.js'
 import { validate } from '../src/validate.js'
 import { join } from 'node:path'
+import { schema as gridSchema } from '../../topology-grid/src/topology-grid.js'
+import { schema as hexSchema } from '../../topology-hex/src/topology-hex.js'
+import { schema as trackSchema } from '../../topology-track/src/topology-track.js'
+import { schema as pitSchema } from '../../topology-pit/src/topology-pit.js'
+import { schema as graphSchema } from '../../topology-graph/src/topology-graph.js'
 
+const ALL_TOPOLOGIES = [gridSchema, hexSchema, trackSchema, pitSchema, graphSchema]
 const RULES_DIR = '/Applications/MAMP/htdocs/MODDABLE/moddable-rules/games'
 
 describe('enrichMeta', () => {
@@ -82,7 +88,7 @@ describe('serializeFrontmatter', () => {
     }
     const serialized = serializeFrontmatter(meta)
     const parsed = parseFrontmatter(serialized + '\n')
-    const validation = validate(parsed.meta)
+    const validation = validate(parsed.meta, ALL_TOPOLOGIES)
     expect(validation.valid).toBe(true)
   })
 
@@ -107,9 +113,11 @@ describe('serializeFrontmatter', () => {
 })
 
 describe('enrichDryRun against real files', () => {
+  const enrichOpts = { topologySchemas: ALL_TOPOLOGIES }
+
   test('chess variant can be enriched', async () => {
     const path = join(RULES_DIR, 'moddable-chess', 'content', 'variants', 'standard.md')
-    const result = await enrichDryRun(path)
+    const result = await enrichDryRun(path, enrichOpts)
     expect(result.wouldChange).toBe(true)
     expect(result.preview).toContain('engine:')
     expect(result.preview).toContain('type: grid')
@@ -119,7 +127,7 @@ describe('enrichDryRun against real files', () => {
 
   test('mancala variant can be enriched', async () => {
     const path = join(RULES_DIR, 'mancala', 'content', 'variants', 'oware.md')
-    const result = await enrichDryRun(path)
+    const result = await enrichDryRun(path, enrichOpts)
     expect(result.wouldChange).toBe(true)
     expect(result.preview).toContain('type: pit')
     expect(result.preview).toContain('pitsPerSide: 6')
@@ -127,7 +135,7 @@ describe('enrichDryRun against real files', () => {
 
   test('backgammon variant can be enriched', async () => {
     const path = join(RULES_DIR, 'backgammon', 'content', 'variants', 'standard.md')
-    const result = await enrichDryRun(path)
+    const result = await enrichDryRun(path, enrichOpts)
     expect(result.wouldChange).toBe(true)
     expect(result.preview).toContain('type: track')
     expect(result.preview).toContain('positions: 24')
@@ -135,7 +143,7 @@ describe('enrichDryRun against real files', () => {
 
   test('go variant can be enriched', async () => {
     const path = join(RULES_DIR, 'go', 'content', 'variants', 'standard.md')
-    const result = await enrichDryRun(path)
+    const result = await enrichDryRun(path, enrichOpts)
     expect(result.wouldChange).toBe(true)
     expect(result.preview).toContain('type: grid')
     expect(result.preview).toContain('rows: 19')
@@ -144,9 +152,9 @@ describe('enrichDryRun against real files', () => {
 
   test('enriched preview round-trips to valid definition', async () => {
     const path = join(RULES_DIR, 'moddable-chess', 'content', 'variants', 'standard.md')
-    const result = await enrichDryRun(path)
+    const result = await enrichDryRun(path, enrichOpts)
     const parsed = parseFrontmatter(result.preview + '\n')
-    const validation = validate(parsed.meta)
+    const validation = validate(parsed.meta, ALL_TOPOLOGIES)
     expect(validation.valid).toBe(true)
   })
 })

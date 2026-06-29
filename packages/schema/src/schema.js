@@ -2,9 +2,9 @@ import { parseFrontmatter } from './parse-frontmatter.js'
 import { validate } from './validate.js'
 import { produce } from './produce.js'
 
-export function parseGameDefinition(content) {
+export function parseGameDefinition(content, topologySchemas = []) {
   const { meta, body } = parseFrontmatter(content)
-  const validation = validate(meta)
+  const validation = validate(meta, topologySchemas)
 
   if (!validation.valid) {
     return { ok: false, errors: validation.errors, meta }
@@ -19,12 +19,12 @@ export function parseVariantFile(content) {
   return { meta, body }
 }
 
-export function validateMeta(meta) {
-  return validate(meta)
+export function validateMeta(meta, topologySchemas = []) {
+  return validate(meta, topologySchemas)
 }
 
-export function produceDefinition(meta) {
-  const validation = validate(meta)
+export function produceDefinition(meta, topologySchemas = []) {
+  const validation = validate(meta, topologySchemas)
   if (!validation.valid) {
     throw new Error(`Invalid meta: ${validation.errors.map(e => e.message).join(', ')}`)
   }

@@ -5,29 +5,27 @@ import { inferEngineBlock } from '../src/infer.js'
 import { enrichMeta, serializeFrontmatter } from '../src/enrich.js'
 import { validate } from '../src/validate.js'
 import { produce } from '../src/produce.js'
-import { createGridTopology } from '../../topology-grid/src/topology-grid.js'
-import { createPitTopology } from '../../topology-pit/src/topology-pit.js'
-import { createTrackTopology } from '../../topology-track/src/topology-track.js'
-import { createHexTopology } from '../../topology-hex/src/topology-hex.js'
+import { schema as gridSchema, createGridTopology } from '../../topology-grid/src/topology-grid.js'
+import { schema as pitSchema, createPitTopology } from '../../topology-pit/src/topology-pit.js'
+import { schema as trackSchema, createTrackTopology } from '../../topology-track/src/topology-track.js'
+import { schema as hexSchema, createHexTopology } from '../../topology-hex/src/topology-hex.js'
+import { schema as graphSchema } from '../../topology-graph/src/topology-graph.js'
 import { createPlayerSystem } from '../../core/src/player-system.js'
 import { createStore } from '../../core/src/state-store.js'
 
-const RULES_DIR = '/Applications/MAMP/htdocs/MODDABLE/moddable-rules/games'
+const ALL_TOPOLOGIES = [gridSchema, hexSchema, trackSchema, pitSchema, graphSchema]
+const INFER_CONFIG = { topologySchemas: ALL_TOPOLOGIES }
 
-const FACTORIES = {
-  grid: createGridTopology,
-  hex: createHexTopology,
-  pit: createPitTopology,
-}
+const RULES_DIR = '/Applications/MAMP/htdocs/MODDABLE/moddable-rules/games'
 
 async function roundTrip(familyPath) {
   const content = await readFile(familyPath, 'utf-8')
   const { meta, body } = parseFrontmatter(content)
-  const engineBlock = inferEngineBlock(meta)
+  const engineBlock = inferEngineBlock(meta, INFER_CONFIG)
   const enriched = enrichMeta(meta, engineBlock)
   const serialized = serializeFrontmatter(enriched)
   const reparsed = parseFrontmatter(serialized + '\n')
-  const validation = validate(reparsed.meta)
+  const validation = validate(reparsed.meta, ALL_TOPOLOGIES)
   if (!validation.valid) throw new Error(`Validation failed: ${validation.errors.map(e => e.message).join(', ')}`)
   const definition = produce(reparsed.meta)
   return definition
@@ -117,7 +115,7 @@ describe('proof: full round-trip from real moddable-rules files', () => {
 
     for (const family of families) {
       for (const variant of family.variants) {
-        const engineBlock = inferEngineBlock(variant.meta)
+        const engineBlock = inferEngineBlock(variant.meta, INFER_CONFIG)
         expect(engineBlock).not.toBeNull()
         expect(engineBlock.topology.type).toBeDefined()
 
@@ -128,7 +126,7 @@ describe('proof: full round-trip from real moddable-rules files', () => {
         expect(reparsed.meta.engine).toBeDefined()
         expect(reparsed.meta.engine.topology.type).toBe(engineBlock.topology.type)
 
-        const validation = validate(reparsed.meta)
+        const validation = validate(reparsed.meta, ALL_TOPOLOGIES)
         if (validation.valid) {
           const definition = produce(reparsed.meta)
           expect(definition.topology.type).toBeDefined()

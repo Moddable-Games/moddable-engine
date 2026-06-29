@@ -1,25 +1,19 @@
-import { schema as gridSchema } from '../../topology-grid/src/topology-grid.js'
-import { schema as hexSchema } from '../../topology-hex/src/topology-hex.js'
-import { schema as trackSchema } from '../../topology-track/src/topology-track.js'
-import { schema as pitSchema } from '../../topology-pit/src/topology-pit.js'
-import { schema as graphSchema } from '../../topology-graph/src/topology-graph.js'
-
-const TOPOLOGY_SCHEMAS = [pitSchema, trackSchema, hexSchema, graphSchema, gridSchema]
-
-export function inferTopology(meta, familyMap = DEFAULT_FAMILY_MAP) {
+export function inferTopology(meta, config = {}) {
+  const { familyMap = DEFAULT_FAMILY_MAP, topologySchemas = [] } = config
   const family = meta.parent
   const board = meta.board || ''
 
   if (familyMap[family]) {
     const type = familyMap[family]
-    const schema = TOPOLOGY_SCHEMAS.find(s => s.type === type)
+    const schema = topologySchemas.find(s => s.type === type)
     if (schema) {
       const parsed = schema.parseBoard(board)
       return parsed || { type }
     }
+    return { type }
   }
 
-  for (const schema of TOPOLOGY_SCHEMAS) {
+  for (const schema of topologySchemas) {
     if (schema.matchBoard(board)) {
       const parsed = schema.parseBoard(board)
       return parsed || { type: schema.type }
@@ -43,8 +37,8 @@ export function inferPlayers(meta, familyPlayers = DEFAULT_FAMILY_PLAYERS) {
 }
 
 export function inferEngineBlock(meta, config = {}) {
-  const { familyMap = DEFAULT_FAMILY_MAP, familyPlayers = DEFAULT_FAMILY_PLAYERS } = config
-  const topology = inferTopology(meta, familyMap)
+  const { familyPlayers = DEFAULT_FAMILY_PLAYERS } = config
+  const topology = inferTopology(meta, config)
   if (!topology) return null
 
   const block = { topology }

@@ -10,9 +10,9 @@ export async function loadVariantFile(filePath) {
   return { path: filePath, meta, body }
 }
 
-export async function loadGameDefinition(filePath) {
+export async function loadGameDefinition(filePath, topologySchemas = []) {
   const { meta, body } = await loadVariantFile(filePath)
-  const validation = validate(meta)
+  const validation = validate(meta, topologySchemas)
 
   if (!validation.valid) {
     return { ok: false, path: filePath, errors: validation.errors, meta }
@@ -96,7 +96,7 @@ export async function scanFrontmatter(gamesDir) {
   }
 }
 
-export async function loadEngineReady(gamesDir) {
+export async function loadEngineReady(gamesDir, topologySchemas = []) {
   const families = await loadAllFamilies(gamesDir)
   const ready = []
   const notReady = []
@@ -104,7 +104,7 @@ export async function loadEngineReady(gamesDir) {
   for (const family of families) {
     for (const variant of family.variants) {
       if (variant.meta.engine) {
-        const validation = validate(variant.meta)
+        const validation = validate(variant.meta, topologySchemas)
         if (validation.valid) {
           ready.push({
             path: variant.path,

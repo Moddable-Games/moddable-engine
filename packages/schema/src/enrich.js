@@ -3,6 +3,12 @@ import { parseFrontmatter } from './parse-frontmatter.js'
 import { inferEngineBlock } from './infer.js'
 import { validate } from './validate.js'
 
+function extractConfig(opts = {}) {
+  const { topologySchemas = [], ...inferConfig } = opts
+  if (topologySchemas.length) inferConfig.topologySchemas = topologySchemas
+  return { topologySchemas, inferConfig }
+}
+
 export function enrichMeta(meta, engineBlock) {
   return { ...meta, engine: engineBlock }
 }
@@ -114,7 +120,8 @@ function serializeValue(value) {
   return String(value)
 }
 
-export async function enrichFile(filePath, engineBlock) {
+export async function enrichFile(filePath, engineBlock, opts = {}) {
+  const { topologySchemas, inferConfig } = extractConfig(opts)
   const content = await readFile(filePath, 'utf-8')
   const { meta, body } = parseFrontmatter(content)
 
@@ -122,12 +129,12 @@ export async function enrichFile(filePath, engineBlock) {
     return { changed: false, reason: 'already-enriched' }
   }
 
-  const enriched = enrichMeta(meta, engineBlock || inferEngineBlock(meta))
+  const enriched = enrichMeta(meta, engineBlock || inferEngineBlock(meta, inferConfig))
   if (!enriched.engine) {
     return { changed: false, reason: 'cannot-infer' }
   }
 
-  const validation = validate(enriched)
+  const validation = validate(enriched, topologySchemas)
   if (!validation.valid) {
     return { changed: false, reason: 'invalid', errors: validation.errors }
   }
@@ -137,7 +144,8 @@ export async function enrichFile(filePath, engineBlock) {
   return { changed: true, meta: enriched }
 }
 
-export async function enrichDryRun(filePath) {
+export async function enrichDryRun(filePath, opts = {}) {
+  const { topologySchemas, inferConfig } = extractConfig(opts)
   const content = await readFile(filePath, 'utf-8')
   const { meta, body } = parseFrontmatter(content)
 
@@ -145,13 +153,13 @@ export async function enrichDryRun(filePath) {
     return { wouldChange: false, reason: 'already-enriched' }
   }
 
-  const engineBlock = inferEngineBlock(meta)
+  const engineBlock = inferEngineBlock(meta, inferConfig)
   if (!engineBlock) {
     return { wouldChange: false, reason: 'cannot-infer' }
   }
 
   const enriched = enrichMeta(meta, engineBlock)
-  const validation = validate(enriched)
+  const validation = validate(enriched, topologySchemas)
   if (!validation.valid) {
     return { wouldChange: false, reason: 'invalid', errors: validation.errors }
   }
