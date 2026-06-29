@@ -2,8 +2,9 @@ import { schema as gridSchema } from '../../topology-grid/src/topology-grid.js'
 import { schema as hexSchema } from '../../topology-hex/src/topology-hex.js'
 import { schema as trackSchema } from '../../topology-track/src/topology-track.js'
 import { schema as pitSchema } from '../../topology-pit/src/topology-pit.js'
+import { schema as graphSchema } from '../../topology-graph/src/topology-graph.js'
 
-const TOPOLOGY_SCHEMAS = [gridSchema, hexSchema, trackSchema, pitSchema]
+const TOPOLOGY_SCHEMAS = [gridSchema, hexSchema, trackSchema, pitSchema, graphSchema]
 
 const REQUIRED_FIELDS = ['title', 'slug', 'parent', 'players']
 const REQUIRED_ENGINE_FIELDS = []

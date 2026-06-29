@@ -1,0 +1,14 @@
+{
+  "name": "@moddable/topology-graph",
+  "version": "0.1.0",
+  "description": "Arbitrary graph topology for moddable-engine",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "scripts": {
+    "test": "node --experimental-vm-modules ../../node_modules/.bin/jest"
+  },
+  "license": "MIT"
+}

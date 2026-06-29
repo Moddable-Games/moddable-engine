@@ -2,8 +2,9 @@ import { schema as gridSchema } from '../../topology-grid/src/topology-grid.js'
 import { schema as hexSchema } from '../../topology-hex/src/topology-hex.js'
 import { schema as trackSchema } from '../../topology-track/src/topology-track.js'
 import { schema as pitSchema } from '../../topology-pit/src/topology-pit.js'
+import { schema as graphSchema } from '../../topology-graph/src/topology-graph.js'
 
-const TOPOLOGY_SCHEMAS = [pitSchema, trackSchema, hexSchema, gridSchema]
+const TOPOLOGY_SCHEMAS = [pitSchema, trackSchema, hexSchema, graphSchema, gridSchema]
 
 export function inferTopology(meta, familyMap = DEFAULT_FAMILY_MAP) {
   const family = meta.parent
@@ -95,7 +96,7 @@ export const DEFAULT_FAMILY_MAP = {
   'endless-skies': 'hex',
   'hyper-imperium': 'hex',
   'hex': 'hex',
-  'morris': 'grid',
+  'morris': 'graph',
 }
 
 export const DEFAULT_FAMILY_PLAYERS = {
