@@ -1,1 +1,1 @@
-export { createHexTopology } from './src/topology-hex.js'
+export { createHexTopology, schema } from './src/topology-hex.js'

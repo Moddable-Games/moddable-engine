@@ -1,3 +1,16 @@
+export const schema = {
+  type: 'track',
+  required: ['positions'],
+  parseBoard(board) {
+    const match = board.match(/(\d+)/)
+    if (!match) return null
+    return { type: 'track', positions: parseInt(match[1], 10) }
+  },
+  matchBoard(board) {
+    return /\d+[- ]point/i.test(board)
+  },
+}
+
 export function createTrackTopology(config) {
   const { positions, circuit = false, branches = {} } = config
   const posMap = new Map()

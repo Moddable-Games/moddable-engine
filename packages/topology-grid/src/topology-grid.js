@@ -1,3 +1,16 @@
+export const schema = {
+  type: 'grid',
+  required: ['rows', 'cols'],
+  parseBoard(board) {
+    const match = board.match(/(\d+)\s*[×x]\s*(\d+)/)
+    if (!match) return null
+    return { type: 'grid', rows: parseInt(match[1], 10), cols: parseInt(match[2], 10) }
+  },
+  matchBoard(board) {
+    return /^\d+\s*[×x]\s*\d+$/.test(board)
+  },
+}
+
 export function createGridTopology(config) {
   const { rows, cols, wrap = false } = config
 

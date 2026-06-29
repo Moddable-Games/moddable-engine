@@ -1,1 +1,1 @@
-export { createTrackTopology } from './src/topology-track.js'
+export { createTrackTopology, schema } from './src/topology-track.js'

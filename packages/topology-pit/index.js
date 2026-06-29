@@ -1,1 +1,1 @@
-export { createPitTopology } from './src/topology-pit.js'
+export { createPitTopology, schema } from './src/topology-pit.js'

@@ -1,3 +1,16 @@
+export const schema = {
+  type: 'pit',
+  required: ['pitsPerSide'],
+  parseBoard(board) {
+    const match = board.match(/(\d+)\s*[×x]\s*(\d+)/)
+    if (!match) return null
+    return { type: 'pit', pitsPerSide: parseInt(match[2], 10) }
+  },
+  matchBoard(board) {
+    return /\d+\s*[×x]\s*\d+\s*pits?/i.test(board)
+  },
+}
+
 export function createPitTopology(config) {
   const { pitsPerSide, players = 2, hasStores = true } = config
   const totalPits = pitsPerSide * players

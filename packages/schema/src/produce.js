@@ -23,31 +23,7 @@ export function produce(meta) {
 }
 
 function buildTopologyConfig(topo) {
-  const config = { type: topo.type }
-
-  switch (topo.type) {
-    case 'grid':
-      config.rows = topo.rows
-      config.cols = topo.cols
-      if (topo.wrap !== undefined) config.wrap = topo.wrap
-      break
-    case 'hex':
-      config.radius = topo.radius
-      if (topo.orientation) config.orientation = topo.orientation
-      break
-    case 'track':
-      config.positions = topo.positions
-      if (topo.circuit !== undefined) config.circuit = topo.circuit
-      if (topo.branches) config.branches = topo.branches
-      break
-    case 'pit':
-      config.pitsPerSide = topo.pitsPerSide
-      if (topo.players !== undefined) config.players = topo.players
-      if (topo.hasStores !== undefined) config.hasStores = topo.hasStores
-      break
-  }
-
-  return config
+  return { ...topo }
 }
 
 function buildPlayersConfig(engine, meta) {
