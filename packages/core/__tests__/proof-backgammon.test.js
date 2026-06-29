@@ -38,11 +38,11 @@ const backgammonPlugin = {
   },
   applyMove(move, slice, full) {
     if (move.action === 'roll') {
-      const rng = full.__rng || { nextInt: () => 3 }
       const d1 = move.d1 || 3
       const d2 = move.d2 || 1
       const movesRemaining = d1 === d2 ? [d1, d1, d1, d1] : [d1, d2]
-      return { ...slice, dice: [d1, d2], movesRemaining }
+      const newState = { ...slice, dice: [d1, d2], movesRemaining }
+      return { state: newState, continueTurn: true }
     }
     if (move.action === 'move') {
       const points = slice.points.map(p => ({ ...p }))
@@ -54,7 +54,8 @@ const backgammonPlugin = {
       to.colour = from.colour || to.colour
       const movesRemaining = [...slice.movesRemaining]
       movesRemaining.splice(movesRemaining.indexOf(move.die), 1)
-      return { ...slice, points, movesRemaining, dice: movesRemaining.length ? slice.dice : [] }
+      const newState = { ...slice, points, movesRemaining, dice: movesRemaining.length ? slice.dice : [] }
+      return { state: newState, continueTurn: movesRemaining.length > 0 }
     }
     return slice
   },
@@ -106,18 +107,23 @@ describe('proof: backgammon', () => {
     expect(store.get('backgammon').movesRemaining).toHaveLength(4)
   })
 
-  test('move consumes one die', () => {
+  test('move consumes one die but keeps turn', () => {
     pipeline.execute({ action: 'roll', d1: 3, d2: 5 })
-    pipeline.execute({ action: 'move', from: 0, to: 3, die: 3 })
+    const result = pipeline.execute({ action: 'move', from: 0, to: 3, die: 3 })
     expect(store.get('backgammon').movesRemaining).toEqual([5])
+    expect(result.continueTurn).toBe(true)
+    expect(playerSystem.current(store)).toBe('white')
   })
 
-  test('multi-action turn: two moves before turn advances', () => {
+  test('multi-action turn: all moves before turn advances', () => {
     pipeline.execute({ action: 'roll', d1: 3, d2: 5 })
-    expect(playerSystem.current(store)).toBe('black')
+    // Roll signals continueTurn — still white's turn
+    expect(playerSystem.current(store)).toBe('white')
     pipeline.execute({ action: 'move', from: 0, to: 3, die: 3 })
+    // One die remaining — still white's turn
     expect(playerSystem.current(store)).toBe('white')
     pipeline.execute({ action: 'move', from: 3, to: 8, die: 5 })
+    // All dice used — NOW turn advances to black
     expect(playerSystem.current(store)).toBe('black')
   })
 

@@ -17,12 +17,17 @@ export function createPipeline(registry, store, history, playerSystem, eventBus)
     // 2. Snapshot before
     const stateBefore = store.getAll()
 
-    // 3. Apply
+    // 3. Apply — plugins return new slice state, or { state, continueTurn }
+    let continueTurn = false
     for (const plugin of plugins) {
       if (typeof plugin.applyMove === 'function') {
-        const newSlice = plugin.applyMove(move, store.get(plugin.sliceName), store.getAll())
-        if (newSlice !== undefined) {
-          store.set(plugin.sliceName, newSlice, plugin.sliceName)
+        const result = plugin.applyMove(move, store.get(plugin.sliceName), store.getAll())
+        if (result === undefined) continue
+        if (result !== null && typeof result === 'object' && 'state' in result) {
+          store.set(plugin.sliceName, result.state, plugin.sliceName)
+          if (result.continueTurn) continueTurn = true
+        } else {
+          store.set(plugin.sliceName, result, plugin.sliceName)
         }
       }
     }
@@ -43,19 +48,19 @@ export function createPipeline(registry, store, history, playerSystem, eventBus)
       }
     }
 
-    // 6. Advance turn
-    if (!winner) {
+    // 6. Advance turn — only if no plugin signalled continueTurn and no winner
+    if (!winner && !continueTurn) {
       playerSystem.advance(store)
     }
 
     // 7. Emit
-    eventBus.emit('move.applied', { move, state: store.getAll(), winner })
+    eventBus.emit('move.applied', { move, state: store.getAll(), winner, continueTurn })
 
     if (winner) {
       eventBus.emit('game.ended', { winner })
     }
 
-    return { ok: true, winner }
+    return { ok: true, winner, continueTurn }
   }
 
   function getLegalMoves() {

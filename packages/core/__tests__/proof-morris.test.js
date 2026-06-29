@@ -59,7 +59,7 @@ const morrisPlugin = {
 
     if (move.action === 'remove') {
       nodes[move.coord] = null
-      return { ...slice, nodes, awaitingRemoval: false }
+      return { state: { ...slice, nodes, awaitingRemoval: false }, continueTurn: false }
     }
 
     if (move.action === 'place') {
@@ -76,7 +76,8 @@ const morrisPlugin = {
     const formed = MILLS.some(mill => mill.every(pos => nodes[pos] === player))
     if (formed) awaitingRemoval = true
 
-    return { nodes, phase, piecesInHand, awaitingRemoval }
+    const newState = { nodes, phase, piecesInHand, awaitingRemoval }
+    return { state: newState, continueTurn: awaitingRemoval }
   },
   getLegalMoves(slice, full) {
     const playerIdx = full.__players.currentIndex
@@ -176,22 +177,21 @@ describe('proof: morris', () => {
     expect(store.get('morris').awaitingRemoval).toBe(true)
   })
 
-  test('removal takes opponent piece', () => {
-    pipeline.execute({ action: 'place', coord: 'a1' })
-    pipeline.execute({ action: 'place', coord: 'd1' })
-    pipeline.execute({ action: 'place', coord: 'a4' })
-    pipeline.execute({ action: 'place', coord: 'd2' })
-    pipeline.execute({ action: 'place', coord: 'a7' })
-    // Mill formed. Turn advanced to player2, but awaitingRemoval is set.
-    // Player2 must do the removal (forced move pattern — proves
-    // the pipeline handles forced/compound turns via plugin state).
-    // In real implementation, UI would force the mill-forming player
-    // to remove before yielding. For this proof, the forced move
-    // demonstrates that plugin state can constrain legal moves.
-    pipeline.execute({ action: 'remove', coord: 'a1' })
-    // Player2 can only remove player1 pieces when awaitingRemoval
-    // Actually let's verify the awaitingRemoval clears after removal
+  test('removal takes opponent piece (same player, compound turn)', () => {
+    pipeline.execute({ action: 'place', coord: 'a1' })  // p1
+    pipeline.execute({ action: 'place', coord: 'd1' })  // p2
+    pipeline.execute({ action: 'place', coord: 'a4' })  // p1
+    pipeline.execute({ action: 'place', coord: 'd2' })  // p2
+    const result = pipeline.execute({ action: 'place', coord: 'a7' })  // p1 forms mill
+    // continueTurn prevents turn advancement — still player1's turn
+    expect(result.continueTurn).toBe(true)
+    expect(playerSystem.current(store)).toBe('player1')
+    // Player1 removes an opponent piece
+    pipeline.execute({ action: 'remove', coord: 'd1' })
+    expect(store.get('morris').nodes.d1).toBeNull()
     expect(store.get('morris').awaitingRemoval).toBe(false)
+    // NOW turn advances to player2
+    expect(playerSystem.current(store)).toBe('player2')
   })
 
   test('graph topology: movement along edges only', () => {

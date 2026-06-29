@@ -93,4 +93,38 @@ describe('move-pipeline', () => {
     pipeline.execute({ amount: 4 })
     expect(store.get('counter')).toEqual({ value: 7 })
   })
+
+  test('continueTurn prevents turn advancement', () => {
+    const contRegistry = createRegistry()
+    contRegistry.register({
+      sliceName: 'multi',
+      init: () => ({ steps: 0, remaining: 0 }),
+      validateMove: () => true,
+      applyMove: (move, slice) => {
+        const remaining = move.start ? move.count - 1 : slice.remaining - 1
+        return { state: { steps: slice.steps + 1, remaining }, continueTurn: remaining > 0 }
+      },
+      getLegalMoves: () => [{ step: true }],
+      checkWin: () => null,
+    })
+    const ps = createPlayerSystem({ players: ['a', 'b'] })
+    const s = createStore({})
+    contRegistry.initAll({ multi: {} }, s)
+    s.set(ps.sliceName, ps.initState())
+    const h = createHistory()
+    const eb = createEventBus()
+    const p = createPipeline(contRegistry, s, h, ps, eb)
+
+    const r1 = p.execute({ start: true, count: 3 })
+    expect(r1.continueTurn).toBe(true)
+    expect(ps.current(s)).toBe('a')
+
+    const r2 = p.execute({ step: true })
+    expect(r2.continueTurn).toBe(true)
+    expect(ps.current(s)).toBe('a')
+
+    const r3 = p.execute({ step: true })
+    expect(r3.continueTurn).toBe(false)
+    expect(ps.current(s)).toBe('b')
+  })
 })
