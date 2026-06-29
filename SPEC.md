@@ -82,7 +82,24 @@ In each case, the easier route produces a system that works for today's games bu
 
 **When facing a new decision, always ask: does this approach work for a game we haven't built yet? Does it require changes to shared infrastructure to accommodate the next game, or does the next game simply compose what already exists?** If the answer requires infrastructure changes for every new game, the abstraction is at the wrong level.
 
-### 0.9 Why Dungeon Chess is the north star test
+### 0.9 Topologies are the universal adapter layer
+
+This principle was discovered during implementation and is now load-bearing:
+
+**Every package above Layer 2 (topologies) defines a contract. Topologies implement that contract. The higher package never knows which topology it's consuming.**
+
+- piece-behaviour defines: "I need `rays()`, `leapTargets()`, `jumpPairs()`"
+- render defines: "I need `getLayout()` returning cells with centers and shapes"
+- AI will define: "I need evaluation context"
+- Rules-gen will define: "I need diagram specs"
+
+Each topology implements whichever contracts make sense for it. `topology-track` has no `rays()` because tracks don't slide. `topology-pit` has no `leapTargets()` because pits don't leap. That's fine — the game plugin for mancala simply doesn't call `slide()`.
+
+**The consequence:** new packages never modify existing topologies. They define what they need, and topologies grow a new method. New topologies never modify existing packages. They implement the contracts and everything works.
+
+**The development rule:** build all topologies first, then layer capabilities horizontally. Never build one game end-to-end before another — that creates vertical silos instead of horizontal composability.
+
+### 0.10 Why Dungeon Chess is the north star test
 
 DC is the most complex, most feature-rich consumer of the engine. It uses terrain, multi-floor movement, spell effects, asymmetric factions, campaign progression, and audio. If the architecture can express DC entirely in frontmatter config — with no hand-written plugin code specific to DC — then the architecture is general enough for everything simpler.
 
