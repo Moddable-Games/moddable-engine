@@ -1,5 +1,5 @@
 import { createGridTopology } from '../src/topology-grid.js'
-import { jump, slide, DIRECTIONS } from '../../piece-behaviour/src/movement-primitives.js'
+import { jump } from '../../piece-behaviour/src/movement-primitives.js'
 import { createRegistry } from '../../core/src/plugin-registry.js'
 import { createStore } from '../../core/src/state-store.js'
 import { createHistory } from '../../core/src/history.js'
@@ -17,12 +17,8 @@ function annotateBoard(board, currentPlayer) {
 }
 
 function getJumps(topology, from, board, directions) {
-  const moves = []
-  for (const dir of directions) {
-    const jumps = jump(topology, from, dir, board)
-    moves.push(...jumps)
-  }
-  return moves
+  const pairs = topology.jumpPairs(from, directions)
+  return jump(pairs, from, board)
 }
 
 function getDiagMoves(topology, from, board, directions) {

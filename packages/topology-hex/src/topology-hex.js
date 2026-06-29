@@ -148,6 +148,63 @@ export function createHexTopology(config) {
     return cell ? cell.ring : -1
   }
 
+  function rays(from, directionIndices, maxSteps) {
+    const indices = directionIndices || [0, 1, 2, 3, 4, 5]
+    return indices.map(d => ray(from, d, maxSteps))
+  }
+
+  function leapTargets(from, range) {
+    const a = typeof from === 'string' ? parse(from) : from
+    const targets = []
+    for (let q = -range; q <= range; q++) {
+      const r1 = Math.max(-range, -q - range)
+      const r2 = Math.min(range, -q + range)
+      for (let r = r1; r <= r2; r++) {
+        if (q === 0 && r === 0) continue
+        const dist = (Math.abs(q) + Math.abs(q + r) + Math.abs(r)) / 2
+        if (dist === range) {
+          const k = key(a.q + q, a.r + r)
+          if (cells.has(k)) targets.push(k)
+        }
+      }
+    }
+    return targets
+  }
+
+  function jumpPairs(from, directionIndices) {
+    const a = typeof from === 'string' ? parse(from) : from
+    const indices = directionIndices || [0, 1, 2, 3, 4, 5]
+    const pairs = []
+    for (const di of indices) {
+      const d = DIRECTIONS[di]
+      const overQ = a.q + d.q, overR = a.r + d.r
+      const overKey = key(overQ, overR)
+      if (!cells.has(overKey)) continue
+      const landQ = overQ + d.q, landR = overR + d.r
+      const landKey = key(landQ, landR)
+      if (!cells.has(landKey)) continue
+      pairs.push({ over: overKey, landing: landKey })
+    }
+    return pairs
+  }
+
+  function adjacentPairs(from, directionIndices) {
+    const a = typeof from === 'string' ? parse(from) : from
+    const indices = directionIndices || [0, 1, 2, 3, 4, 5]
+    const pairs = []
+    for (const di of indices) {
+      const d = DIRECTIONS[di]
+      const adjQ = a.q + d.q, adjR = a.r + d.r
+      const adjKey = key(adjQ, adjR)
+      if (!cells.has(adjKey)) continue
+      const farQ = adjQ + d.q, farR = adjR + d.r
+      const farKey = key(farQ, farR)
+      if (!cells.has(farKey)) continue
+      pairs.push({ adjacent: adjKey, far: farKey })
+    }
+    return pairs
+  }
+
   return {
     radius,
     orientation,
@@ -157,6 +214,10 @@ export function createHexTopology(config) {
     ring,
     lineOfSight,
     ray,
+    rays,
+    leapTargets,
+    jumpPairs,
+    adjacentPairs,
     toJSON,
     fromJSON,
     toPixel,

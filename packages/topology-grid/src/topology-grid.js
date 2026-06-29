@@ -100,6 +100,53 @@ export function createGridTopology(config) {
     return r >= 0 && r < rows && c >= 0 && c < cols
   }
 
+  function rays(from, directions, maxSteps) {
+    return directions.map(([dr, dc]) => ray(from, dr, dc, maxSteps))
+  }
+
+  function leapTargets(from, offsets) {
+    const [r, c] = toRC(from)
+    const targets = []
+    for (const [dr, dc] of offsets) {
+      let nr = r + dr, nc = c + dc
+      if (wrap) [nr, nc] = wrapCoords(nr, nc)
+      if (onBoard(nr, nc)) targets.push(toIndex(nr, nc))
+    }
+    return targets
+  }
+
+  function jumpPairs(from, directions) {
+    const [r, c] = toRC(from)
+    const pairs = []
+    for (const [dr, dc] of directions) {
+      let nr = r + dr, nc = c + dc
+      if (wrap) [nr, nc] = wrapCoords(nr, nc)
+      if (!onBoard(nr, nc)) continue
+      const over = toIndex(nr, nc)
+      let lr = nr + dr, lc = nc + dc
+      if (wrap) [lr, lc] = wrapCoords(lr, lc)
+      if (!onBoard(lr, lc)) continue
+      pairs.push({ over, landing: toIndex(lr, lc) })
+    }
+    return pairs
+  }
+
+  function adjacentPairs(from, directions) {
+    const [r, c] = toRC(from)
+    const pairs = []
+    for (const [dr, dc] of directions) {
+      let nr = r + dr, nc = c + dc
+      if (wrap) [nr, nc] = wrapCoords(nr, nc)
+      if (!onBoard(nr, nc)) continue
+      const adjacent = toIndex(nr, nc)
+      let fr = nr + dr, fc = nc + dc
+      if (wrap) [fr, fc] = wrapCoords(fr, fc)
+      if (!onBoard(fr, fc)) continue
+      pairs.push({ adjacent, far: toIndex(fr, fc) })
+    }
+    return pairs
+  }
+
   return {
     rows,
     cols,
@@ -117,6 +164,10 @@ export function createGridTopology(config) {
     toJSON,
     fromJSON,
     ray,
+    rays,
+    leapTargets,
+    jumpPairs,
+    adjacentPairs,
     onBoard,
   }
 }

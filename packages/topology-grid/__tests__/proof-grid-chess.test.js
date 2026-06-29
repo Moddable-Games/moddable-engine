@@ -1,6 +1,11 @@
 import { createGridTopology } from '../src/topology-grid.js'
-import { slide, leap, DIRECTIONS } from '../../piece-behaviour/src/movement-primitives.js'
+import { slide, leap } from '../../piece-behaviour/src/movement-primitives.js'
 import { createPieceRegistry } from '../../piece-behaviour/src/piece-registry.js'
+
+const ORTHOGONAL = [[-1, 0], [1, 0], [0, -1], [0, 1]]
+const DIAGONAL = [[-1, -1], [-1, 1], [1, -1], [1, 1]]
+const ALL_DIRS = [...ORTHOGONAL, ...DIAGONAL]
+const KNIGHT = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]]
 import { createRegistry } from '../../core/src/plugin-registry.js'
 import { createStore } from '../../core/src/state-store.js'
 import { createHistory } from '../../core/src/history.js'
@@ -11,11 +16,11 @@ import { createPipeline } from '../../core/src/move-pipeline.js'
 const topology = createGridTopology({ rows: 8, cols: 8 })
 const pieces = createPieceRegistry()
 
-pieces.register('K', { genMoves: (t, from, board) => slide(t, from, DIRECTIONS.all, board, { maxSteps: 1 }) })
-pieces.register('Q', { genMoves: (t, from, board) => slide(t, from, DIRECTIONS.all, board) })
-pieces.register('R', { genMoves: (t, from, board) => slide(t, from, DIRECTIONS.orthogonal, board) })
-pieces.register('B', { genMoves: (t, from, board) => slide(t, from, DIRECTIONS.diagonal, board) })
-pieces.register('N', { genMoves: (t, from, board) => leap(t, from, DIRECTIONS.knight, board) })
+pieces.register('K', { genMoves: (t, from, board) => slide(t.rays(from, ALL_DIRS), from, board, { maxSteps: 1 }) })
+pieces.register('Q', { genMoves: (t, from, board) => slide(t.rays(from, ALL_DIRS), from, board) })
+pieces.register('R', { genMoves: (t, from, board) => slide(t.rays(from, ORTHOGONAL), from, board) })
+pieces.register('B', { genMoves: (t, from, board) => slide(t.rays(from, DIAGONAL), from, board) })
+pieces.register('N', { genMoves: (t, from, board) => leap(t.leapTargets(from, KNIGHT), from, board) })
 
 function makeBoard(placements) {
   const board = new Array(64).fill(null)

@@ -1,95 +1,89 @@
-export const DIRECTIONS = {
-  orthogonal: [[-1, 0], [1, 0], [0, -1], [0, 1]],
-  diagonal: [[-1, -1], [-1, 1], [1, -1], [1, 1]],
-  all: [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, -1], [1, 1]],
-  knight: [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]],
-}
+/**
+ * Movement primitives — topology-agnostic.
+ *
+ * These functions take traversal results from the topology, not raw coordinates.
+ * Each topology provides its own traversal methods (rays, steps, sequences).
+ * Piece-behaviour never does coordinate math — it only evaluates positions.
+ *
+ * The contract between topology and piece-behaviour:
+ *   topology.traverse(from, pattern) → ordered position[]
+ *
+ * Each topology defines what "patterns" it supports (directions, step counts,
+ * ring indices, etc). Piece-behaviour doesn't know what those patterns mean —
+ * it just iterates the resulting positions and applies game rules (block, capture, pass).
+ */
 
-export function slide(topology, from, directions, board, opts = {}) {
+export function slide(traversal, from, board, opts = {}) {
   const { maxSteps, canCapture = true, moveOnly = false, attackOnly = false, blockFn } = opts
   const moves = []
-  const [r, c] = topology.toRC(from)
 
-  for (const [dr, dc] of directions) {
-    const squares = topology.ray(from, dr, dc, maxSteps)
-    for (const sq of squares) {
-      if (blockFn && blockFn(sq)) break
-      const occupant = board[sq]
+  for (const ray of traversal) {
+    let steps = 0
+    for (const pos of ray) {
+      if (maxSteps && steps >= maxSteps) break
+      if (blockFn && blockFn(pos)) break
+      const occupant = board[pos]
       if (occupant) {
         if (canCapture && occupant.enemy && !moveOnly) {
-          moves.push({ from, to: sq, capture: true })
+          moves.push({ from, to: pos, capture: true })
         }
         break
       }
       if (!attackOnly) {
-        moves.push({ from, to: sq })
+        moves.push({ from, to: pos })
       }
+      steps++
     }
   }
   return moves
 }
 
-export function leap(topology, from, offsets, board, opts = {}) {
+export function leap(positions, from, board, opts = {}) {
   const { canCapture = true, moveOnly = false, attackOnly = false, blockFn } = opts
   const moves = []
-  const [r, c] = topology.toRC(from)
 
-  for (const [dr, dc] of offsets) {
-    let nr = r + dr, nc = c + dc
-    if (topology.wrap) [nr, nc] = topology.wrapCoords(nr, nc)
-    if (!topology.onBoard(nr, nc)) continue
-    const sq = topology.toIndex(nr, nc)
-    if (blockFn && blockFn(sq)) continue
-    const occupant = board[sq]
+  for (const pos of positions) {
+    if (blockFn && blockFn(pos)) continue
+    const occupant = board[pos]
     if (occupant && occupant.friendly) continue
     if (occupant && occupant.enemy) {
-      if (canCapture && !moveOnly) moves.push({ from, to: sq, capture: true })
+      if (canCapture && !moveOnly) moves.push({ from, to: pos, capture: true })
     } else if (!occupant) {
-      if (!attackOnly) moves.push({ from, to: sq })
+      if (!attackOnly) moves.push({ from, to: pos })
     }
   }
   return moves
 }
 
-export function jump(topology, from, direction, board, opts = {}) {
-  const { mustCapture = true } = opts
+export function jump(pairs, from, board, opts = {}) {
   const moves = []
-  const [r, c] = topology.toRC(from)
-  const [dr, dc] = direction
 
-  let nr = r + dr, nc = c + dc
-  if (!topology.onBoard(nr, nc)) return moves
-  const over = topology.toIndex(nr, nc)
-  const occupant = board[over]
-  if (!occupant || !occupant.enemy) return moves
-
-  let lr = nr + dr, lc = nc + dc
-  if (topology.wrap) [lr, lc] = topology.wrapCoords(lr, lc)
-  if (!topology.onBoard(lr, lc)) return moves
-  const landing = topology.toIndex(lr, lc)
-  if (board[landing]) return moves
-
-  moves.push({ from, to: landing, capture: true, captured: over })
+  for (const { over, landing } of pairs) {
+    const occupant = board[over]
+    if (!occupant || !occupant.enemy) continue
+    if (board[landing]) continue
+    moves.push({ from, to: landing, capture: true, captured: over })
+  }
   return moves
 }
 
-export function custodian(topology, from, board, opts = {}) {
-  const { directions = DIRECTIONS.orthogonal } = opts
+export function custodian(adjacentPairs, from, board) {
   const captures = []
-  const [r, c] = topology.toRC(from)
 
-  for (const [dr, dc] of directions) {
-    let nr = r + dr, nc = c + dc
-    if (!topology.onBoard(nr, nc)) continue
-    const adjacent = topology.toIndex(nr, nc)
+  for (const { adjacent, far } of adjacentPairs) {
     if (!board[adjacent] || !board[adjacent].enemy) continue
-
-    let fr = nr + dr, fc = nc + dc
-    if (!topology.onBoard(fr, fc)) continue
-    const far = topology.toIndex(fr, fc)
     if (board[far] && board[far].friendly) {
       captures.push(adjacent)
     }
   }
   return captures
+}
+
+export function advance(sequence, from, steps, board, opts = {}) {
+  const { canLandOnOccupied = false } = opts
+  if (steps > sequence.length) return []
+  const target = sequence[steps - 1]
+  if (!target) return []
+  if (!canLandOnOccupied && board[target]) return []
+  return [{ from, to: target }]
 }
