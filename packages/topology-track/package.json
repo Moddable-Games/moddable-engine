@@ -1,0 +1,10 @@
+{
+  "name": "@moddable/topology-track",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "index.js",
+  "exports": { ".": "./index.js" },
+  "dependencies": {
+    "@moddable/core": "^0.1.0"
+  }
+}
