@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="49.999996mm"
+   height="50mm"
+   viewBox="0 0 49.999996 50"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <title
+     id="title1">Tile front Null Crown Piecepack</title>
+  <defs
+     id="defs1" />
+  <g
+     id="layer1"
+     transform="translate(-59.266668,-71.437498)">
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.999608;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none"
+       id="rect1924"
+       width="49.000389"
+       height="49.000393"
+       x="59.766472"
+       y="71.937302" />
+    <path
+       d="m 65.891544,75.343469 -0.62826,0.720686 v 1.473294 l -0.35644,0.491378 -0.55229,-0.471583 v -1.405965 l -0.76223,-0.772821 -0.55634,0.977875 0.1702,1.410286 -0.24938,0.395054 -0.68235,-0.389896 -0.17871,-1.314381 -1.24426,-0.70591 0.64974,2.700133 c 0,0 -0.202,0.07671 -0.17802,0.284929 0.024,0.20822 0.28911,0.243667 0.28911,0.243667 l 0.2144,0.781046 c 0,0 -0.10353,0.06777 -0.0767,0.308348 0.0269,0.240575 0.23001,0.281444 0.23001,0.281444 0,0 0.88385,0.430187 3.91149,0.430181 3.02765,-5e-6 3.91136,-0.430181 3.91136,-0.430181 0,0 0.20314,-0.04087 0.23001,-0.281444 0.0269,-0.240576 -0.0767,-0.308348 -0.0767,-0.308348 l 0.21439,-0.781046 c 0,0 0.26513,-0.03545 0.28912,-0.243667 0.024,-0.208219 -0.17801,-0.284929 -0.17801,-0.284929 l 0.64987,-2.700133 -1.24441,0.70591 -0.1787,1.314381 -0.68236,0.389896 -0.24938,-0.395054 0.17021,-1.410286 -0.55634,-0.977875 -0.76223,0.772821 v 1.405965 l -0.55229,0.471583 -0.35644,-0.491378 v -1.473294 z"
+       style="fill:#fcc602;fill-opacity:1;stroke-width:0.0713715px"
+       id="path10-1-5" />
+  </g>
+  <metadata
+     id="metadata1">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>Tile front Null Crown Piecepack</dc:title>
+        <dc:date>2024/03</dc:date>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Miguel de Dios Matias</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>CC0</dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>piecepack</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+        <cc:license
+           rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/" />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+</svg>
