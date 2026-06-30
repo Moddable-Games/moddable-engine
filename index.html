@@ -198,27 +198,30 @@
 <section class="developer">
   <div class="developer-inner">
     <h2 class="section-heading">For Developers</h2>
-    <div class="dev-columns">
-      <div class="dev-col">
-        <h3 class="dev-subtitle">Embed</h3>
+    <div class="dev-tabs">
+      <button class="dev-tab active" data-tab="embed">Embed</button>
+      <button class="dev-tab" data-tab="sdk">SDK</button>
+      <button class="dev-tab" data-tab="mcp">MCP Tools</button>
+    </div>
+    <div class="dev-panels">
+      <div class="dev-panel active" id="dev-panel-embed">
         <pre class="dev-code"><code>&lt;iframe src="engine.moddable.games/play/?game=chess/standard&amp;embed=1"&gt;&lt;/iframe&gt;</code></pre>
-        <p class="dev-note">Bidirectional postMessage bridge for state sync, move submission, and event handling.</p>
+        <p class="dev-note">Bidirectional postMessage bridge for state sync, move submission, and event handling. Embed any game in any page with a single line.</p>
       </div>
-      <div class="dev-col">
-        <h3 class="dev-subtitle">SDK</h3>
+      <div class="dev-panel" id="dev-panel-sdk">
         <pre class="dev-code"><code>import { createGame } from '@moddable/engine'
 
 const game = createGame('reversi/standard')
 const moves = game.getLegalMoves()
 game.execute(moves[0])</code></pre>
-        <p class="dev-note">ES module. Zero dependencies. Mount into any DOM container or run headless.</p>
+        <p class="dev-note">ES module. Zero dependencies. Mount into any DOM container or run headless. Full game lifecycle from one import.</p>
       </div>
-      <div class="dev-col">
-        <h3 class="dev-subtitle">MCP Tools</h3>
+      <div class="dev-panel" id="dev-panel-mcp">
         <pre class="dev-code"><code>play_move | get_legal_moves
 suggest_move | render_board
-create_game | list_variants</code></pre>
-        <p class="dev-note">AI assistant integration. Let Claude or any MCP client play and analyse games.</p>
+create_game | list_variants
+evaluate_position | validate_game_def</code></pre>
+        <p class="dev-note">AI assistant integration. Let Claude or any MCP client play, analyse, and generate games via tool protocol.</p>
       </div>
     </div>
   </div>
@@ -280,5 +283,6 @@ create_game | list_variants</code></pre>
   </div>
 </footer>
 
+<script src="js/home.js"></script>
 </body>
 </html>
