@@ -44,18 +44,18 @@ const PRESETS = {
 
 const THEMES = {
   classic: {
-    background: { fill: '#f5f0e8' },
+    background: { fill: '#f5e6c8' },
     cells: {
       default: { fill: '#e8dcc8', stroke: '#8b7355', 'stroke-width': '1' },
       light: { fill: '#f0d9b5', stroke: 'none' },
       dark: { fill: '#b58863', stroke: 'none' },
       uniform: { fill: '#dcb35c', stroke: '#b8952e', 'stroke-width': '0.5' },
-      pit: { fill: '#8B4513', stroke: '#5C3010', 'stroke-width': '2' },
-      store: { fill: '#6B3410', stroke: '#4a2008', 'stroke-width': '2' },
-      node: { fill: '#e8dcc8', stroke: '#8b7355', 'stroke-width': '1.5' },
+      pit: { fill: '#4E3320', stroke: '#3A2515', 'stroke-width': '1.5' },
+      store: { fill: '#4E3320', stroke: '#3A2515', 'stroke-width': '1.5' },
+      node: { fill: '#4a3520', stroke: 'none' },
     },
-    lines: { stroke: '#333', 'stroke-width': '1.5' },
-    annotations: { default: { fill: '#333', r: '3' } },
+    lines: { stroke: '#4a3520', 'stroke-width': '2.5' },
+    annotations: { default: { fill: '#4a3520', r: '3' } },
   },
   midnight: {
     background: { fill: '#1a1a2e' },
@@ -64,11 +64,11 @@ const THEMES = {
       light: { fill: '#1e2a4a', stroke: 'none' },
       dark: { fill: '#0f1630', stroke: 'none' },
       uniform: { fill: '#16213e', stroke: '#4a6fa5', 'stroke-width': '0.5' },
-      pit: { fill: '#1a1a4e', stroke: '#4a6fa5', 'stroke-width': '2' },
-      store: { fill: '#0d0d3a', stroke: '#4a6fa5', 'stroke-width': '2' },
-      node: { fill: '#1e2a4a', stroke: '#6fb5ff', 'stroke-width': '1.5' },
+      pit: { fill: '#0d0d3a', stroke: '#4a6fa5', 'stroke-width': '1.5' },
+      store: { fill: '#0d0d3a', stroke: '#4a6fa5', 'stroke-width': '1.5' },
+      node: { fill: '#6fb5ff', stroke: 'none' },
     },
-    lines: { stroke: '#6fb5ff', 'stroke-width': '1.5' },
+    lines: { stroke: '#6fb5ff', 'stroke-width': '2.5' },
     annotations: { default: { fill: '#6fb5ff', r: '3' } },
   },
   parchment: {
@@ -78,11 +78,11 @@ const THEMES = {
       light: { fill: '#faf3e0', stroke: 'none' },
       dark: { fill: '#d4a56a', stroke: 'none' },
       uniform: { fill: '#f0e6c8', stroke: '#a0855b', 'stroke-width': '0.5' },
-      pit: { fill: '#a0855b', stroke: '#7a5c3a', 'stroke-width': '2' },
-      store: { fill: '#7a5c3a', stroke: '#5c3d20', 'stroke-width': '2' },
-      node: { fill: '#faf3e0', stroke: '#5c4033', 'stroke-width': '1.5' },
+      pit: { fill: '#5c3d20', stroke: '#3a2815', 'stroke-width': '1.5' },
+      store: { fill: '#5c3d20', stroke: '#3a2815', 'stroke-width': '1.5' },
+      node: { fill: '#5c4033', stroke: 'none' },
     },
-    lines: { stroke: '#5c4033', 'stroke-width': '1.5' },
+    lines: { stroke: '#5c4033', 'stroke-width': '2.5' },
     annotations: { default: { fill: '#5c4033', r: '3' } },
   },
   wood: {
@@ -92,11 +92,11 @@ const THEMES = {
       light: { fill: '#deb887', stroke: 'none' },
       dark: { fill: '#8b6914', stroke: 'none' },
       uniform: { fill: '#c8a46e', stroke: '#8b6914', 'stroke-width': '0.5' },
-      pit: { fill: '#6b4e1e', stroke: '#4a3512', 'stroke-width': '2' },
-      store: { fill: '#4a3512', stroke: '#2d1f0a', 'stroke-width': '2' },
-      node: { fill: '#deb887', stroke: '#6b4e1e', 'stroke-width': '1.5' },
+      pit: { fill: '#3a2510', stroke: '#2d1f0a', 'stroke-width': '1.5' },
+      store: { fill: '#3a2510', stroke: '#2d1f0a', 'stroke-width': '1.5' },
+      node: { fill: '#4a3512', stroke: 'none' },
     },
-    lines: { stroke: '#4a3512', 'stroke-width': '1.5' },
+    lines: { stroke: '#4a3512', 'stroke-width': '2.5' },
     annotations: { default: { fill: '#4a3512', r: '3' } },
   },
   green: {
@@ -106,12 +106,12 @@ const THEMES = {
       light: { fill: '#4a8a42', stroke: 'none' },
       dark: { fill: '#2d5a27', stroke: 'none' },
       uniform: { fill: '#3d7a37', stroke: '#1e4a18', 'stroke-width': '0.5' },
-      pit: { fill: '#1e4a18', stroke: '#0f2a0c', 'stroke-width': '2' },
-      store: { fill: '#0f2a0c', stroke: '#051505', 'stroke-width': '2' },
-      node: { fill: '#4a8a42', stroke: '#1e4a18', 'stroke-width': '1.5' },
+      pit: { fill: '#0f2a0c', stroke: '#051505', 'stroke-width': '1.5' },
+      store: { fill: '#0f2a0c', stroke: '#051505', 'stroke-width': '1.5' },
+      node: { fill: '#c8e6c0', stroke: 'none' },
     },
-    lines: { stroke: '#0f2a0c', 'stroke-width': '1.5' },
-    annotations: { default: { fill: '#ddd', r: '3' } },
+    lines: { stroke: '#143d10', 'stroke-width': '2.5' },
+    annotations: { default: { fill: '#c8e6c0', r: '3' } },
   },
 }
 
@@ -477,9 +477,13 @@ function getGraphConfig(variant) {
   }
 }
 
+function isGoPreset() {
+  return state.preset && state.preset.startsWith('go-')
+}
+
 function getLayoutOpts() {
   switch (state.topology) {
-    case 'grid': return { tileSize: 44 }
+    case 'grid': return { tileSize: 44, alternating: !isGoPreset() }
     case 'hex': return { cellSize: 22 }
     case 'track': return { cellSize: 36, style: state.config.circuit ? 'circuit' : 'linear' }
     case 'pit': return { pitRadius: 28, storeRadius: 38, spacing: 16 }
