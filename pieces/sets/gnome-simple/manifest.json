@@ -1,0 +1,26 @@
+{
+  "id": "gnome-simple",
+  "name": "Gnome Simple",
+  "family": "chess",
+  "author": "Max Froumentin",
+  "license": "W3C",
+  "source": "https://github.com/GNOME/gnome-chess/tree/main/data/pieces/simple",
+  "authorUrl": "W3C",
+  "licenseUrl": "https://www.w3.org/copyright/software-license-2023/",
+  "playable": true,
+  "recolorable": true,
+  "pieces": {
+    "wK": "whiteKing.svg",
+    "wQ": "whiteQueen.svg",
+    "wR": "whiteRook.svg",
+    "wB": "whiteBishop.svg",
+    "wN": "whiteKnight.svg",
+    "wP": "whitePawn.svg",
+    "bK": "blackKing.svg",
+    "bQ": "blackQueen.svg",
+    "bR": "blackRook.svg",
+    "bB": "blackBishop.svg",
+    "bN": "blackKnight.svg",
+    "bP": "blackPawn.svg"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "id": "firi",
+  "name": "Firi",
+  "family": "chess",
+  "author": "James Faure",
+  "license": "CC-BY-4.0",
+  "source": "https://github.com/jfaure/Firi-pieceset",
+  "authorUrl": "https://github.com/jfaure",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "playable": true,
+  "recolorable": true,
+  "pieces": {
+    "wK": "wK.svg",
+    "wQ": "wQ.svg",
+    "wR": "wR.svg",
+    "wB": "wB.svg",
+    "wN": "wN.svg",
+    "wP": "wP.svg",
+    "bK": "bK.svg",
+    "bQ": "bQ.svg",
+    "bR": "bR.svg",
+    "bB": "bB.svg",
+    "bN": "bN.svg",
+    "bP": "bP.svg"
+  }
+}

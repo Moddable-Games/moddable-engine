@@ -1,0 +1,26 @@
+{
+  "id": "wikimedia-monge-spatial",
+  "name": "Wikimedia Monge Spatial",
+  "family": "chess",
+  "author": "Various (Wikimedia Commons)",
+  "authorUrl": "https://commons.wikimedia.org",
+  "source": "https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces",
+  "license": "CC-BY-SA-3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "recolorable": true,
+  "playable": true,
+  "pieces": {
+    "Chess_Maurizio_Monge_Spatial_bb": "Chess_Maurizio_Monge_Spatial_bb.svg",
+    "Chess_Maurizio_Monge_Spatial_bk": "Chess_Maurizio_Monge_Spatial_bk.svg",
+    "Chess_Maurizio_Monge_Spatial_bn": "Chess_Maurizio_Monge_Spatial_bn.svg",
+    "Chess_Maurizio_Monge_Spatial_bp": "Chess_Maurizio_Monge_Spatial_bp.svg",
+    "Chess_Maurizio_Monge_Spatial_bq": "Chess_Maurizio_Monge_Spatial_bq.svg",
+    "Chess_Maurizio_Monge_Spatial_br": "Chess_Maurizio_Monge_Spatial_br.svg",
+    "Chess_Maurizio_Monge_Spatial_wb": "Chess_Maurizio_Monge_Spatial_wb.svg",
+    "Chess_Maurizio_Monge_Spatial_wk": "Chess_Maurizio_Monge_Spatial_wk.svg",
+    "Chess_Maurizio_Monge_Spatial_wn": "Chess_Maurizio_Monge_Spatial_wn.svg",
+    "Chess_Maurizio_Monge_Spatial_wp": "Chess_Maurizio_Monge_Spatial_wp.svg",
+    "Chess_Maurizio_Monge_Spatial_wq": "Chess_Maurizio_Monge_Spatial_wq.svg",
+    "Chess_Maurizio_Monge_Spatial_wr": "Chess_Maurizio_Monge_Spatial_wr.svg"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "playstrategy-amazons-counter-arrow",
+  "name": "Playstrategy Amazons Counter Arrow",
+  "family": "amazons",
+  "author": "PlayStrategy / pychess.org contributors",
+  "license": "AGPL-3.0+",
+  "source": "https://github.com/Mind-Sports-Games/lila/tree/master/public/piece",
+  "licenseUrl": "https://www.gnu.org/licenses/agpl-3.0.txt",
+  "playable": false,
+  "recolorable": false,
+  "pieces": {
+    "P": "P.svg",
+    "bQ": "bQ.svg",
+    "wQ": "wQ.svg"
+  }
+}

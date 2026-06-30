@@ -1,0 +1,20 @@
+{
+  "id": "wikimedia-dobutsu",
+  "name": "Wikimedia Dobutsu",
+  "family": "shogi",
+  "author": "Various (Wikimedia Commons)",
+  "authorUrl": "https://commons.wikimedia.org",
+  "source": "https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces",
+  "license": "CC-BY-SA-3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "recolorable": true,
+  "playable": false,
+  "pieces": {
+    "Dobutsu_Chess_Bishop": "Dobutsu_Chess_Bishop.svg",
+    "Dobutsu_Chess_King": "Dobutsu_Chess_King.svg",
+    "Dobutsu_Chess_Knight": "Dobutsu_Chess_Knight.svg",
+    "Dobutsu_Chess_Pawn": "Dobutsu_Chess_Pawn.svg",
+    "Dobutsu_Chess_Queen": "Dobutsu_Chess_Queen.svg",
+    "Dobutsu_Chess_Rook": "Dobutsu_Chess_Rook.svg"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "playstrategy-go-cross",
+  "name": "Playstrategy Go Cross",
+  "family": "go",
+  "author": "PlayStrategy / pychess.org contributors",
+  "license": "AGPL-3.0+",
+  "source": "https://github.com/Mind-Sports-Games/lila/tree/master/public/piece/go/cross",
+  "licenseUrl": "https://www.gnu.org/licenses/agpl-3.0.txt",
+  "playable": false,
+  "recolorable": false,
+  "pieces": {
+    "bS": "bS.svg",
+    "display": "display.svg",
+    "wS": "wS.svg"
+  }
+}

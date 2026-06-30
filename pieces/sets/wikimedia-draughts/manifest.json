@@ -1,0 +1,18 @@
+{
+  "id": "wikimedia-draughts",
+  "name": "Wikimedia Draughts",
+  "family": "draughts",
+  "author": "Various (Wikimedia Commons)",
+  "authorUrl": "https://commons.wikimedia.org",
+  "source": "https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces",
+  "license": "CC-BY-SA-3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "recolorable": true,
+  "playable": false,
+  "pieces": {
+    "Draughts_kdt45": "Draughts_kdt45.svg",
+    "Draughts_klt45": "Draughts_klt45.svg",
+    "Draughts_mdt45": "Draughts_mdt45.svg",
+    "Draughts_mlt45": "Draughts_mlt45.svg"
+  }
+}

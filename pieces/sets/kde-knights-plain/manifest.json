@@ -1,0 +1,25 @@
+{
+  "id": "kde-knights-plain",
+  "name": "Kde Knights Plain",
+  "family": "chess",
+  "author": "KDE Project contributors",
+  "license": "GPL-2.0",
+  "source": "https://github.com/KDE/knights/tree/master/themes",
+  "licenseUrl": "https://www.gnu.org/licenses/gpl-2.0.txt",
+  "playable": true,
+  "recolorable": true,
+  "pieces": {
+    "wK": "wK.svg",
+    "wQ": "wQ.svg",
+    "wR": "wR.svg",
+    "wB": "wB.svg",
+    "wN": "wN.svg",
+    "wP": "wP.svg",
+    "bK": "bK.svg",
+    "bQ": "bQ.svg",
+    "bR": "bR.svg",
+    "bB": "bB.svg",
+    "bN": "bN.svg",
+    "bP": "bP.svg"
+  }
+}

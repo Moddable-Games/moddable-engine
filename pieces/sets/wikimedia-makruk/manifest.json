@@ -1,0 +1,28 @@
+{
+  "id": "wikimedia-makruk",
+  "name": "Wikimedia Makruk",
+  "family": "makruk",
+  "author": "Various (Wikimedia Commons)",
+  "authorUrl": "https://commons.wikimedia.org",
+  "source": "https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces",
+  "license": "CC-BY-SA-3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "recolorable": true,
+  "playable": true,
+  "pieces": {
+    "Bia_black": "Bia_black.svg",
+    "Bia_white": "Bia_white.svg",
+    "Biangai_black": "Biangai_black.svg",
+    "Biangai_white": "Biangai_white.svg",
+    "Khon_black": "Khon_black.svg",
+    "Khon_white": "Khon_white.svg",
+    "Khun_black": "Khun_black.svg",
+    "Khun_white": "Khun_white.svg",
+    "Ma_black": "Ma_black.svg",
+    "Ma_white": "Ma_white.svg",
+    "Met_black": "Met_black.svg",
+    "Met_white": "Met_white.svg",
+    "Ruea_black": "Ruea_black.svg",
+    "Ruea_white": "Ruea_white.svg"
+  }
+}

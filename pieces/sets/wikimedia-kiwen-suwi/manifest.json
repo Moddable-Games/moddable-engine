@@ -1,0 +1,26 @@
+{
+  "id": "wikimedia-kiwen-suwi",
+  "name": "Wikimedia Kiwen Suwi",
+  "family": "chess",
+  "author": "Various (Wikimedia Commons)",
+  "authorUrl": "https://commons.wikimedia.org",
+  "source": "https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces",
+  "license": "CC-BY-SA-3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "recolorable": true,
+  "playable": true,
+  "pieces": {
+    "Kiwen_Suwi_bdt": "Kiwen_Suwi_bdt.svg",
+    "Kiwen_Suwi_blt": "Kiwen_Suwi_blt.svg",
+    "Kiwen_Suwi_kdt": "Kiwen_Suwi_kdt.svg",
+    "Kiwen_Suwi_klt": "Kiwen_Suwi_klt.svg",
+    "Kiwen_Suwi_ndt": "Kiwen_Suwi_ndt.svg",
+    "Kiwen_Suwi_nlt": "Kiwen_Suwi_nlt.svg",
+    "Kiwen_Suwi_pdt": "Kiwen_Suwi_pdt.svg",
+    "Kiwen_Suwi_plt": "Kiwen_Suwi_plt.svg",
+    "Kiwen_Suwi_qdt": "Kiwen_Suwi_qdt.svg",
+    "Kiwen_Suwi_qlt": "Kiwen_Suwi_qlt.svg",
+    "Kiwen_Suwi_rdt": "Kiwen_Suwi_rdt.svg",
+    "Kiwen_Suwi_rlt": "Kiwen_Suwi_rlt.svg"
+  }
+}

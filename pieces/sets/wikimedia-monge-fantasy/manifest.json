@@ -1,0 +1,26 @@
+{
+  "id": "wikimedia-monge-fantasy",
+  "name": "Wikimedia Monge Fantasy",
+  "family": "chess",
+  "author": "Various (Wikimedia Commons)",
+  "authorUrl": "https://commons.wikimedia.org",
+  "source": "https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces",
+  "license": "CC-BY-SA-3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "recolorable": true,
+  "playable": true,
+  "pieces": {
+    "Chess_Maurizio_Monge_Fantasy_bb": "Chess_Maurizio_Monge_Fantasy_bb.svg",
+    "Chess_Maurizio_Monge_Fantasy_bk": "Chess_Maurizio_Monge_Fantasy_bk.svg",
+    "Chess_Maurizio_Monge_Fantasy_bn": "Chess_Maurizio_Monge_Fantasy_bn.svg",
+    "Chess_Maurizio_Monge_Fantasy_bp": "Chess_Maurizio_Monge_Fantasy_bp.svg",
+    "Chess_Maurizio_Monge_Fantasy_bq": "Chess_Maurizio_Monge_Fantasy_bq.svg",
+    "Chess_Maurizio_Monge_Fantasy_br": "Chess_Maurizio_Monge_Fantasy_br.svg",
+    "Chess_Maurizio_Monge_Fantasy_wb": "Chess_Maurizio_Monge_Fantasy_wb.svg",
+    "Chess_Maurizio_Monge_Fantasy_wk": "Chess_Maurizio_Monge_Fantasy_wk.svg",
+    "Chess_Maurizio_Monge_Fantasy_wn": "Chess_Maurizio_Monge_Fantasy_wn.svg",
+    "Chess_Maurizio_Monge_Fantasy_wp": "Chess_Maurizio_Monge_Fantasy_wp.svg",
+    "Chess_Maurizio_Monge_Fantasy_wq": "Chess_Maurizio_Monge_Fantasy_wq.svg",
+    "Chess_Maurizio_Monge_Fantasy_wr": "Chess_Maurizio_Monge_Fantasy_wr.svg"
+  }
+}

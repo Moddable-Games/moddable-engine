@@ -1,0 +1,26 @@
+{
+  "id": "kiwen-suwi",
+  "name": "Kiwen Suwi",
+  "family": "chess",
+  "author": "neverRare",
+  "license": "CC-BY-4.0",
+  "source": "https://github.com/neverRare/kiwen-suwi",
+  "authorUrl": "https://github.com/neverRare",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "playable": true,
+  "recolorable": true,
+  "pieces": {
+    "wK": "white-king.svg",
+    "wQ": "white-queen.svg",
+    "wR": "white-rook.svg",
+    "wB": "white-bishop.svg",
+    "wN": "white-knight.svg",
+    "wP": "white-pawn.svg",
+    "bK": "black-king.svg",
+    "bQ": "black-queen.svg",
+    "bR": "black-rook.svg",
+    "bB": "black-bishop.svg",
+    "bN": "black-knight.svg",
+    "bP": "black-pawn.svg"
+  }
+}

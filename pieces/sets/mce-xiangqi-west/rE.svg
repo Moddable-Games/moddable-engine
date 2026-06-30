@@ -1,0 +1,3 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<g transform="translate(50,50)"><circle r="48.5" stroke-width="3" stroke="#000" fill="#fda"/><circle r="43.5" stroke-width="3" stroke="#c00" fill="none"/><path transform="scale(0.2)" stroke-linecap="round" stroke-linejoin="round" stroke-width="20" stroke="#c00" fill="none" d="M135,-50 160,-50Q125,135 60,40Q12,60 -18,-7Q-50,70 -140,10L-90,-100Q-70,-130 -25,-110Q70,-170 100,0L118,8zM28,48Q40,75 40,108L-138,108Q-138,60 -120,30M35,-10 35,30 180,10zM50,-60A5,5 180 0 0 50,-50A5,5 180 0 0 50,-60"/></g>
+</svg>

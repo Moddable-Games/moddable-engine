@@ -1,0 +1,26 @@
+{
+  "id": "chessnut",
+  "name": "Chessnut",
+  "family": "chess",
+  "author": "Alexis Luengas",
+  "license": "Apache-2.0",
+  "source": "https://github.com/LexLuengas/chessnut-pieces",
+  "authorUrl": "https://github.com/LexLuengas",
+  "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0",
+  "playable": true,
+  "recolorable": true,
+  "pieces": {
+    "wK": "wK.svg",
+    "wQ": "wQ.svg",
+    "wR": "wR.svg",
+    "wB": "wB.svg",
+    "wN": "wN.svg",
+    "wP": "wP.svg",
+    "bK": "bK.svg",
+    "bQ": "bQ.svg",
+    "bR": "bR.svg",
+    "bB": "bB.svg",
+    "bN": "bN.svg",
+    "bP": "bP.svg"
+  }
+}

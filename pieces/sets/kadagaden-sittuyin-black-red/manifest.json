@@ -1,0 +1,26 @@
+{
+  "id": "kadagaden-sittuyin-black-red",
+  "name": "Kadagaden Sittuyin Black Red",
+  "family": "sittuyin",
+  "author": "Kadagaden",
+  "license": "CC-BY-4.0",
+  "source": "https://github.com/Kadagaden/chess-pieces",
+  "authorUrl": "https://github.com/Kadagaden",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "playable": true,
+  "recolorable": false,
+  "pieces": {
+    "wK": "wK.svg",
+    "wF": "wQ.svg",
+    "wG": "wB.svg",
+    "wN": "wN.svg",
+    "wR": "wR.svg",
+    "wP": "wP.svg",
+    "bK": "bK.svg",
+    "bF": "bQ.svg",
+    "bG": "bB.svg",
+    "bN": "bN.svg",
+    "bR": "bR.svg",
+    "bP": "bP.svg"
+  }
+}

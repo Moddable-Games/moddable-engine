@@ -1,0 +1,26 @@
+{
+  "id": "lichess-rhosgfx",
+  "name": "RhosGFX (CC0)",
+  "family": "chess",
+  "author": "RhosGFX",
+  "license": "CC0-1.0",
+  "source": "https://github.com/lichess-org/lila/tree/master/public/piece/rhosgfx",
+  "authorUrl": "https://rhosgfx.itch.io/",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "playable": true,
+  "recolorable": true,
+  "pieces": {
+    "wK": "wK.svg",
+    "wQ": "wQ.svg",
+    "wR": "wR.svg",
+    "wB": "wB.svg",
+    "wN": "wN.svg",
+    "wP": "wP.svg",
+    "bK": "bK.svg",
+    "bQ": "bQ.svg",
+    "bR": "bR.svg",
+    "bB": "bB.svg",
+    "bN": "bN.svg",
+    "bP": "bP.svg"
+  }
+}

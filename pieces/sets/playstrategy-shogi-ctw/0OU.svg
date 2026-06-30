@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 60 60">
+    <defs>
+        <linearGradient xlink:href="#0OU_svg__a" id="0OU_svg__c" x1="-30.849" x2="-15.094" y1="30.267" y2="30.267" gradientUnits="userSpaceOnUse" spreadMethod="repeat"/>
+        <linearGradient id="0OU_svg__a">
+            <stop offset="0" stop-color="#dfb459"/>
+            <stop offset=".041" stop-color="#dead54"/>
+            <stop offset=".082" stop-color="#e1b85f"/>
+            <stop offset=".165" stop-color="#dba84d"/>
+            <stop offset=".305" stop-color="#dfb765"/>
+            <stop offset=".539" stop-color="#d8a94e"/>
+            <stop offset=".586" stop-color="#d5ab53"/>
+            <stop offset=".84" stop-color="#e0bf6e"/>
+            <stop offset=".924" stop-color="#daae52"/>
+            <stop offset=".962" stop-color="#d9af57"/>
+            <stop offset="1" stop-color="#e1b663"/>
+        </linearGradient>
+        <filter id="0OU_svg__b">
+            <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation="2"/>
+            <feOffset dx="2" dy="2" result="offsetBlur"/>
+            <feBlend in="SourceGraphic" in2="offsetBlur"/>
+        </filter>
+    </defs>
+    <g fill="#75581b" filter="url(#0OU_svg__b)">
+        <path fill="#84631f" d="m30.236 7.139-12.839 3.609-6.865 43.28-.815.001.63 1.168H50.28c-2.303-14.885-4.075-30.55-6.79-44.162l-.628-1.17.203 1.045z"/>
+    </g>
+    <path fill="url(#0OU_svg__c)" d="m-10.96 6.237-12.838 3.608-7.051 44.45H9.085c-2.303-14.885-4.076-30.55-6.79-44.163z" transform="translate(40.568 -.267)"/>
+    <path fill="#654b13" d="m9.719 54.029.629 1.168H50.28l-.628-1.168z"/>
+    <path d="M18.902 18.31a.764.687 0 0 0-.734.88l.966 2.982a.764.687 0 0 0 .733.495h7.482v7.03h-5.476a.764.687 0 0 0-.724.466l-.966 2.576a.764.687 0 0 0 .725.908h6.441v8.114H16.616a.764.687 0 0 0-.733.495l-.968 2.982a.764.687 0 0 0 .733.879h28.076a.764.687 0 0 0 .733-.88l-.966-2.981a.764.687 0 0 0-.733-.495H31.894v-8.114h6.259a.764.687 0 0 0 .722-.908l-.966-2.576a.764.687 0 0 0-.724-.466h-5.291v-7.03h7.527a.764.687 0 0 0 .733-.495l.966-2.982a.764.687 0 0 0-.733-.88zm1.017 1.375h19.45l-.521 1.608h-7.72a.764.687 0 0 0-.762.686v8.404a.764.687 0 0 0 .763.688h5.508l.45 1.202H31.13a.764.687 0 0 0-.763.686v9.49a.764.687 0 0 0 .763.686h11.056l.521 1.608H16.668l.521-1.608h10.923a.764.687 0 0 0 .765-.686v-9.49a.764.687 0 0 0-.765-.686H21.97l.452-1.202h5.69a.764.687 0 0 0 .765-.688v-8.404a.764.687 0 0 0-.765-.686h-7.671z" enable-background="accumulate" opacity=".99" overflow="visible"/>
+</svg>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="9.00689 128.527 45 45" width="45" height="45">
+<g transform="translate(9.00689,128.527)" id="BlackBishop">
+      <g transform="translate(5.25,5.09289)" id="BB">
+        <path d="M 3,2 C 6.38526,1.02767 13.1147,2.43082 16.5,0 C 19.8853,2.43082 26.6147,1.02767 30,2 C 30,2 31.6459,2.54151 33,4 C 32.3229,4.97233 31.3541,4.98616 30,4.5 C 26.6147,3.52767 19.8853,4.95849 16.5,3.5 C 13.1147,4.95849 6.38526,3.52767 3,4.5 C 1.6459,4.98616 0.677051,4.97233 0,4 C 1.3541,2.05534 3,2 3,2 z" transform="translate(0.75,29.25)" id="path4582" style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:round" />
+        <path d="M 1.3047,21.5 C 3.8047,24 13.8047,24 16.3047,21.5 C 16.8047,20 16.3047,19.5 16.3047,19.5 C 16.3047,17 13.8047,15.5 13.8047,15.5 C 19.3047,14 19.8047,4 8.8047,0 C -2.1953,4 -1.6953,14 3.8047,15.5 C 3.8047,15.5 1.3047,17 1.3047,19.5 C 1.3047,19.5 0.804725,20 1.3047,21.5 z" transform="translate(8.4453,5.75)" id="path4584" style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:round" />
+        <path d="M 5,2.5 C 5,3.88071 3.88071,5 2.5,5 C 1.11929,5 0,3.88071 0,2.5 C 0,1.11929 1.11929,0 2.5,0 C 3.88071,0 5,1.11929 5,2.5 z" transform="translate(14.75,0.75)" id="path4586" style="fill:#000000;stroke:#000000;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:round" />
+        <path d="M 0,0 L 10,0" transform="translate(12.25,21.25)" id="path4588" style="fill:none;stroke:#ffffff;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4" />
+        <path d="M 0,0 L 15,0" transform="translate(9.75,25.25)" id="path4590" style="fill:none;stroke:#ffffff;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4" />
+        <path d="M 0,0 L 0,5" transform="translate(17.25,10.75)" id="path4592" style="fill:none;stroke:#ffffff;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4" />
+        <path d="M 0,0 L 5,0" transform="translate(14.75,13.25)" id="path4594" style="fill:none;stroke:#ffffff;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4" />
+      </g>
+      
+    </g>
+    
+</svg>

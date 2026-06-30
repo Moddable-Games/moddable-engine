@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="63.6705 75.4531 45 45" width="45" height="45">
+<g transform="translate(63.6705,75.4531)" id="WhiteKing">
+      <g transform="translate(5.10733,4.9375)" id="WK">
+        <path d="M 0,5.625 L 0,0" transform="translate(17.4231,0.75)" id="path6570-1" style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4" />
+        <path d="M 3.30612,13 C 3.30612,13 7.80612,5.5 6.30612,2.5 C 6.30612,2.5 5.30612,0 3.30612,0 C 1.30612,0 0.306124,2.5 0.306124,2.5 C -1.19388,5.5 3.30612,13 3.30612,13" transform="translate(14.117,6.75)" id="path5683-0" style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4" />
+        <path d="M 5.67313,21.069 C 11.1731,24.569 21.1731,24.569 26.6731,21.069 L 26.6731,14.069 C 26.6731,14.069 35.6731,9.56896 32.6731,3.56896 C 28.6731,-2.93104 19.1731,0.0689612 16.6731,7.56896 L 16.6731,11.069 L 16.6731,7.56896 C 13.1731,0.0689612 3.67313,-2.93104 0.67313,3.56896 C -2.32687,9.56896 5.67313,13.569 5.67313,13.569 L 5.67313,21.069 z" transform="translate(0.75,10.681)" id="path5681-6" style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" />
+        <path d="M 0,0 L 5,0" transform="translate(14.9231,2.75)" id="path6572-3" style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4" />
+        <path d="M 0,1.81677 C 5.5,-0.683234 15.5,-0.683234 21,2.31677" transform="translate(6.42313,22.4332)" id="path6574-2" style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4" />
+        <path d="M 0,1.875 C 5.5,-0.625 15.5,-0.625 21,1.875" transform="translate(6.42313,29.875)" id="path6576-0" style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" />
+        <path d="M 0,1.5 C 5.5,-0.5 15.5,-0.5 21,1.5" transform="translate(6.42313,26.75)" id="path6578-6" style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" />
+      </g>
+      
+    </g>
+    
+</svg>

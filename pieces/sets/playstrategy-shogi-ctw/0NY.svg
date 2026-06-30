@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 60 60">
+    <defs>
+        <linearGradient id="0NY_svg__b">
+            <stop offset="0" stop-color="#c80000"/>
+            <stop offset="1" stop-color="#c80000" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="0NY_svg__a">
+            <stop offset="0" stop-color="#dfb459"/>
+            <stop offset=".093" stop-color="#dead54"/>
+            <stop offset=".093" stop-color="#e1b85f"/>
+            <stop offset=".165" stop-color="#dba84d"/>
+            <stop offset=".305" stop-color="#dfb765"/>
+            <stop offset=".539" stop-color="#d8a94e"/>
+            <stop offset=".586" stop-color="#d5ab53"/>
+            <stop offset=".84" stop-color="#e0bf6e"/>
+            <stop offset=".924" stop-color="#daae52"/>
+            <stop offset=".962" stop-color="#d9af57"/>
+            <stop offset="1" stop-color="#e1b663"/>
+        </linearGradient>
+        <linearGradient xlink:href="#0NY_svg__a" id="0NY_svg__c" x1="287.356" x2="301.335" y1="53.513" y2="53.513" gradientUnits="userSpaceOnUse" spreadMethod="repeat"/>
+        <linearGradient xlink:href="#0NY_svg__b" id="0NY_svg__f" x1="369.67" x2="389.608" y1="1493.295" y2="1493.295" gradientUnits="userSpaceOnUse"/>
+        <linearGradient xlink:href="#0NY_svg__a" id="0NY_svg__e" x1="287.356" x2="301.335" y1="53.513" y2="53.513" gradientUnits="userSpaceOnUse" spreadMethod="repeat"/>
+        <filter id="0NY_svg__d">
+            <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation="2"/>
+            <feOffset dx="2" dy="2" result="offsetBlur"/>
+            <feBlend in="SourceGraphic" in2="offsetBlur"/>
+        </filter>
+    </defs>
+    <g fill="url(#0NY_svg__c)" filter="url(#0NY_svg__d)" transform="translate(39.64 2.874)scale(.91071)">
+        <path fill="#826015" d="M-10.368 7.618c-4.319 1-8.69 2.09-12.837 3.61l-7.052 44.45H9.678l-6.79-44.163-.594-1.383.197 1.265c-4.285-1.259-8.575-2.522-12.859-3.779"/>
+        <path fill="url(#0NY_svg__e)" d="M-10.96 6.237c-4.319 1-8.69 2.088-12.838 3.608l-7.051 44.45H9.085l-6.79-44.162c-4.418-1.298-8.839-2.6-13.255-3.896"/>
+    </g>
+    <path fill="#654b13" d="m11.546 52.322.54 1.258h36.368l-.54-1.258z"/>
+    <g fill="#c80000">
+        <path stroke="#c80000" stroke-width="4.938" d="M372.14 1666.57v-346.55h15v346.55z" transform="matrix(-.07194 0 0 .05254 57.358 -46.94)"/>
+        <path stroke="#c80000" stroke-width="7.713" d="m373.444 1325.142-13.45-8.57 2.65-111.341 16.688-28.568 17.542 27.755 2.373 111.247-13.382 9.224z" transform="matrix(-.05076 0 0 .03707 49.317 -25.798)"/>
+        <path d="M30.047 24.054a8.44 8.44 0 0 1 8.443 8.442 8.44 8.44 0 0 1-8.443 8.443 8.44 8.44 0 0 1-8.442-8.443 8.44 8.44 0 0 1 8.442-8.442m0 1.84a6.6 6.6 0 0 0-6.6 6.602 6.6 6.6 0 0 0 6.6 6.6 6.6 6.6 0 0 0 6.602-6.6 6.6 6.6 0 0 0-6.601-6.601z"/>
+        <path stroke="url(#0NY_svg__f)" stroke-width="4.938" d="M372.14 1666.57v-346.55h15v346.55z" transform="matrix(-.07194 0 0 -.05254 57.358 111.99)"/>
+        <path stroke="#c80000" stroke-width="7.713" d="m373.444 1325.142-13.45-8.57 2.65-111.341 16.688-28.568 17.542 27.755 2.373 111.247-13.382 9.224z" transform="matrix(-.05076 0 0 -.03707 49.315 90.848)"/>
+        <path stroke="#c80000" stroke-width="4.938" d="M372.14 1666.57v-346.55h15v346.55z" transform="rotate(135 5.63 -22.85)scale(.07194 -.05254)"/>
+        <path stroke="#c80000" stroke-width="4.938" d="M372.14 1666.57v-346.55h15v346.55z" transform="rotate(44.999 85.346 59.288)scale(.07194 .05254)"/>
+        <path stroke="#c80000" stroke-width="4.938" d="M372.14 1666.57v-346.55h15v346.55z" transform="matrix(0 -.07194 -.05254 0 108.957 59.806)"/>
+        <path stroke="#c80000" stroke-width="7.713" d="m373.444 1325.142-13.45-8.57 2.65-111.341 16.688-28.568 17.542 27.755 2.373 111.247-13.382 9.224z" transform="matrix(0 -.05076 -.03707 0 88.396 51.764)"/>
+        <path stroke="#c80000" stroke-width="4.938" d="M372.14 1666.57v-346.55h15v346.55z" transform="matrix(0 -.07194 .05254 0 -48.9 59.806)"/>
+        <path stroke="#c80000" stroke-width="7.713" d="m373.444 1325.142-13.45-8.57 2.65-111.341 16.688-28.568 17.542 27.755 2.373 111.247-13.382 9.224z" transform="matrix(0 -.05076 .03707 0 -28.396 51.764)"/>
+        <path stroke="#c80000" stroke-width="7.713" d="m373.444 1325.142-13.45-8.57 2.65-111.341 16.688-28.568 17.542 27.755 2.373 111.247-13.382 9.224z" transform="rotate(-45 -6.864 32.29)scale(.05077 .03707)"/>
+        <path stroke="#c80000" stroke-width="7.713" d="m373.444 1325.142-13.45-8.57 2.65-111.341 16.688-28.568 17.542 27.755 2.373 111.247-13.382 9.224z" transform="rotate(45 37.056 105.175)scale(-.05077 .03707)"/>
+    </g>
+</svg>

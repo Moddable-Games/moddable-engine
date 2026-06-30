@@ -1,0 +1,18 @@
+{
+  "id": "luffykudo-draughts-chess",
+  "name": "Luffykudo Draughts Chess",
+  "family": "draughts",
+  "author": "LuffyKudo / Jemierry J.I. Maglinte Jumawan",
+  "license": "CC-BY-SA-4.0",
+  "source": "https://github.com/LuffyKudo/Lidraughts-Themes/tree/main/Chess%20Pieces",
+  "authorUrl": "https://github.com/LuffyKudo",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "playable": false,
+  "recolorable": false,
+  "pieces": {
+    "bK": "bK.svg",
+    "bM": "bM.svg",
+    "wK": "wK.svg",
+    "wM": "wM.svg"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "id": "kadagaden-janggi-kakao",
+  "name": "Kadagaden Janggi Kakao",
+  "family": "janggi",
+  "author": "Kadagaden",
+  "license": "CC-BY-4.0",
+  "source": "https://github.com/Kadagaden/chess-pieces",
+  "authorUrl": "https://github.com/Kadagaden",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "playable": true,
+  "recolorable": false,
+  "pieces": {
+    "wK": "red_king.svg",
+    "wA": "red_advisor.svg",
+    "wE": "red_elephant.svg",
+    "wN": "red_horse.svg",
+    "wR": "red_chariot.svg",
+    "wC": "red_cannon.svg",
+    "wP": "red_pawn.svg",
+    "bK": "blue_king.svg",
+    "bA": "blue_advisor.svg",
+    "bE": "blue_elephant.svg",
+    "bN": "blue_horse.svg",
+    "bR": "blue_chariot.svg",
+    "bC": "blue_cannon.svg",
+    "bP": "blue_pawn.svg"
+  }
+}

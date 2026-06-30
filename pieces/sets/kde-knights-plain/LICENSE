@@ -1,0 +1,6 @@
+GPL-2.0
+Source: https://github.com/KDE/knights/tree/master/themes
+Author: KDE Project contributors
+License: GNU General Public License v2.0
+https://www.gnu.org/licenses/gpl-2.0.txt
+Note: These are sprite sheets (full board + all pieces per SVG), will need slicing for individual piece use

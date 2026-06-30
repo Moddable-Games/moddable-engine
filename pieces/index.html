@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Piece Gallery — Moddable Engine</title>
+<meta name="description" content="96 piece sets across 13 game families. Chess, shogi, xiangqi, draughts, reversi, go, backgammon, mancala, and more.">
+<meta name="theme-color" content="#0a0d2a">
+<meta name="base-path" content="..">
+<link rel="stylesheet" href="../css/home.css">
+<link rel="stylesheet" href="../css/gallery.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../play/" class="nav-link nav-link--soon">Play</a>
+      <a href="../generate/" class="nav-link nav-link--soon">Generate</a>
+      <a href="./" class="nav-link nav-link--active">Pieces</a>
+      <a href="../docs/" class="nav-link nav-link--soon">Docs</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<section class="gallery-hero">
+  <div class="gallery-hero-content">
+    <div class="hero-eyebrow">Piece Gallery</div>
+    <h1 class="hero-title">96 Sets. 13 Families.</h1>
+    <p class="hero-lede">Every piece set available to the engine. Licensed, verified, ready for play.</p>
+  </div>
+</section>
+
+<section class="gallery-controls">
+  <div class="controls-inner">
+    <div class="filter-bar">
+      <button class="filter-btn filter-btn--active" data-family="all">All <span class="filter-count">96</span></button>
+    </div>
+  </div>
+</section>
+
+<section class="gallery-grid-section">
+  <div class="gallery-grid" id="gallery-grid"></div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="footer-brand">moddable.engine</p>
+    <p class="footer-sub">Part of <a href="https://moddable.games" target="_blank" rel="noopener">Moddable.Games</a></p>
+  </div>
+</footer>
+
+<script type="module" src="../js/gallery.js"></script>
+</body>
+</html>

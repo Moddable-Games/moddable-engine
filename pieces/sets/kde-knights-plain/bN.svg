@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="118.858 128.527 45 45" width="45" height="45">
+<g transform="translate(118.858,128.527)" id="BlackKnight">
+      <g transform="translate(5.98552,6)" id="BN">
+        <path d="M 7,0 C 17.5,1 23.5,8 23,29 L 0,29 C 0,20 10,22.5 8,8" transform="translate(9.5,3.5)" id="path3491" style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:2" />
+        <path d="M 18,11 C 18.3845,13.9113 12.4471,18.3686 10,20 C 7,22 7.1808,24.3429 5,24 C 3.95828,23.056 6.41343,20.9625 5,21 C 4,21 5.18733,22.2317 4,23 C 3,23 -0.00315831,24 2.49315e-06,19 C 2.49315e-06,17 6,7 6,7 C 6,7 7.88587,5.09787 8,3.5 C 7.27396,2.50563 7.5,1.5 7.5,0.5 C 8.5,-0.5 10.5,3 10.5,3 L 12.5,3 C 12.5,3 13.2818,1.00807 15,0 C 16,0 16,3 16,3" transform="translate(0.5,0.5)" id="path3495" style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:round;stroke-linejoin:round" />
+        <path d="M 1,0.5 C 1,0.776142 0.776142,1 0.5,1 C 0.223858,1 0,0.776142 0,0.5 C 0,0.223858 0.223858,0 0.5,0 C 0.776142,0 1,0.223858 1,0.5 z" transform="translate(3,18.5)" id="path3499" style="fill:#000000;stroke:#ffffff;stroke-width:1;stroke-linecap:round;stroke-linejoin:round" />
+        <path d="M 1,1.5 C 1,2.32843 0.776142,3 0.5,3 C 0.223858,3 0,2.32843 0,1.5 C 0,0.671573 0.223858,0 0.5,0 C 0.776142,0 1,0.671573 1,1.5 z" transform="matrix(0.866025,0.5,-0.5,0.866025,9.31698,7.45096)" id="path3501" style="fill:#000000;stroke:#ffffff;stroke-width:1;stroke-linecap:round;stroke-linejoin:round" />
+        <path d="M 0.3,0 L 0,1.1 L 0.55,1.2 C 3.65146,1.67715 6.87353,3.4342 9.125,7.69375 C 11.3765,11.9533 12.0472,18.6569 11.55,28.6 L 11.5,29.1 L 13.25,29.1 L 13.25,28.6 C 13.7528,18.5431 12.3735,11.7467 10,7.25625 C 7.62647,2.7658 4.21104,0.622853 0.8125,0.1 L 0.3,0 z" transform="translate(18.75,3.9)" id="path8049" style="fill:#ffffff;fill-rule:evenodd" />
+      </g>
+      
+    </g>
+    
+</svg>

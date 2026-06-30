@@ -1,0 +1,26 @@
+{
+  "id": "flugsio-shapes",
+  "name": "Flugsio Shapes",
+  "family": "chess",
+  "author": "flugsio",
+  "license": "CC-BY-SA-4.0",
+  "source": "https://github.com/flugsio/chess_shapes",
+  "authorUrl": "https://github.com/flugsio",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "playable": true,
+  "recolorable": true,
+  "pieces": {
+    "wK": "wK.svg",
+    "wQ": "wQ.svg",
+    "wR": "wR.svg",
+    "wB": "wB.svg",
+    "wN": "wN.svg",
+    "wP": "wP.svg",
+    "bK": "bK.svg",
+    "bQ": "bQ.svg",
+    "bR": "bR.svg",
+    "bB": "bB.svg",
+    "bN": "bN.svg",
+    "bP": "bP.svg"
+  }
+}

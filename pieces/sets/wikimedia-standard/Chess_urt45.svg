@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="45"
+   height="45"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="Chess_url45.svg">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.979899"
+     inkscape:cx="59.901837"
+     inkscape:cy="58.076894"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="462"
+     inkscape:window-height="445"
+     inkscape:window-x="458"
+     inkscape:window-y="377"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-1007.3622)">
+    <path
+       style="font-size:40px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial Bold"
+       inkscape:connector-curvature="0"
+       id="path3027-3-7-9"
+       d="m 26.417051,1017.8172 -1.03598,1.0631 c 1.63656,0.5221 2.81261,0.8591 3.52817,1.011 0.71559,0.1519 1.86631,0.3097 3.45215,0.4734 l -21.74182,22.3105 1.41277,1.3768 21.74183,-22.3106 c 0.062,1.9513 0.60311,4.2785 1.62325,6.9817 l 1.06324,-1.0911 c -0.17054,-2.5115 -0.1806,-4.5394 -0.0302,-6.0837 0.15041,-1.5443 0.45165,-2.9961 0.90369,-4.3555 l -0.62945,-0.6134 c -1.13564,0.4751 -2.49856,0.8196 -4.08877,1.0334 -1.5902,0.2139 -3.65648,0.2821 -6.19887,0.2044 z"
+       inkscape:transform-center-x="-75.508476"
+       inkscape:transform-center-y="171.61017" />
+  </g>
+</svg>

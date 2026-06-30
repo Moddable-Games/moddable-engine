@@ -1,0 +1,26 @@
+{
+  "id": "maurimo-skulls",
+  "name": "Maurimo Skulls",
+  "family": "chess",
+  "author": "Maurizio Monge",
+  "license": "MIT",
+  "source": "https://github.com/maurimo/chess-art",
+  "authorUrl": "https://github.com/maurimo",
+  "licenseUrl": "https://opensource.org/licenses/MIT",
+  "playable": false,
+  "recolorable": false,
+  "pieces": {
+    "wK": "wk.svg",
+    "wQ": "wq.svg",
+    "wR": "wr.svg",
+    "wB": "wb.svg",
+    "wN": "wn.svg",
+    "wP": "wp.svg",
+    "bK": "bk.svg",
+    "bQ": "bq.svg",
+    "bR": "br.svg",
+    "bB": "bb.svg",
+    "bN": "bn.svg",
+    "bP": "bp.svg"
+  }
+}

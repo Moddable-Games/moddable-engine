@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="172.998 75.4531 45 45" width="45" height="45">
+<g transform="translate(172.998,75.4531)" id="WhitePawn">
+      <g transform="translate(10.25,6.5)" id="WP">
+        <path d="M 11.5,0 C 9.292,0 7.5,1.792 7.5,4 C 7.5,4.8851 7.79397,5.71223 8.28125,6.375 C 6.32927,7.49692 5,9.58849 5,12 C 5,14.0339 5.94204,15.8391 7.40625,17.0312 C 4.4071,18.0891 0,22.578 0,30.5 L 23,30.5 C 23,22.578 18.5929,18.0891 15.5938,17.0312 C 17.058,15.8391 18,14.0339 18,12 C 18,9.58849 16.6707,7.49692 14.7187,6.375 C 15.206,5.71223 15.5,4.8851 15.5,4 C 15.5,1.792 13.708,0 11.5,0 z" transform="translate(0.75,0.75)" id="path3194-5" style="fill:#ffffff;stroke:#000000;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4" />
+      </g>
+      
+    </g>
+    
+</svg>

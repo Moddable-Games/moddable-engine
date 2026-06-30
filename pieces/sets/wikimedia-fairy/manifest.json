@@ -1,0 +1,32 @@
+{
+  "id": "wikimedia-fairy",
+  "name": "Wikimedia Fairy",
+  "family": "fairy-chess",
+  "author": "Various (Wikimedia Commons)",
+  "authorUrl": "https://commons.wikimedia.org",
+  "source": "https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces",
+  "license": "CC-BY-SA-3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "recolorable": true,
+  "playable": true,
+  "pieces": {
+    "BLACK_CHESS_ALFIL": "BLACK_CHESS_ALFIL.svg",
+    "BLACK_CHESS_FERZ": "BLACK_CHESS_FERZ.svg",
+    "BLancer": "BLancer.svg",
+    "Black_alfil": "Black_alfil.svg",
+    "Black_chess_camel": "Black_chess_camel.svg",
+    "Black_chess_giraffe": "Black_chess_giraffe.svg",
+    "Black_dabbaba": "Black_dabbaba.svg",
+    "Black_ferz": "Black_ferz.svg",
+    "Black_wazir": "Black_wazir.svg",
+    "Chess_Flt45": "Chess_Flt45.svg",
+    "Chess_Gdt45": "Chess_Gdt45.svg",
+    "WHITE_CHESS_ALFIL": "WHITE_CHESS_ALFIL.svg",
+    "WHITE_CHESS_FERZ": "WHITE_CHESS_FERZ.svg",
+    "White_alfil": "White_alfil.svg",
+    "White_chess_camel": "White_chess_camel.svg",
+    "White_chess_giraffe": "White_chess_giraffe.svg",
+    "White_dabbaba": "White_dabbaba.svg",
+    "White_ferz": "White_ferz.svg"
+  }
+}

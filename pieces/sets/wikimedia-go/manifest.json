@@ -1,0 +1,16 @@
+{
+  "id": "wikimedia-go",
+  "name": "Wikimedia Go",
+  "family": "go",
+  "author": "Various (Wikimedia Commons)",
+  "authorUrl": "https://commons.wikimedia.org",
+  "source": "https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces",
+  "license": "CC-BY-SA-3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "recolorable": true,
+  "playable": false,
+  "pieces": {
+    "black_stone": "black_stone.svg",
+    "white_stone": "white_stone.svg"
+  }
+}

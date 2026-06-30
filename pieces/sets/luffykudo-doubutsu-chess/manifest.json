@@ -1,0 +1,20 @@
+{
+  "id": "luffykudo-doubutsu-chess",
+  "name": "Luffykudo Doubutsu Chess",
+  "family": "chess",
+  "author": "LuffyKudo / Jemierry J.I. Maglinte Jumawan",
+  "license": "CC-BY-SA-4.0",
+  "source": "https://github.com/LuffyKudo/Doubutsu-Chess",
+  "authorUrl": "https://github.com/LuffyKudo",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "playable": false,
+  "recolorable": false,
+  "pieces": {
+    "Bishop": "Bishop.svg",
+    "King": "King.svg",
+    "Knight": "Knight.svg",
+    "Pawn": "Pawn.svg",
+    "Queen": "Queen.svg",
+    "Rook": "Rook.svg"
+  }
+}
