@@ -57,10 +57,14 @@ export function resolveRuleOverrides(baseRules, overrides, registry) {
 }
 
 export function wrapPluginWithRules(plugin, registry, overrides = []) {
-  const baseRules = plugin.rules.map(id => {
-    const config = (plugin.ruleDefaults && plugin.ruleDefaults[id]) || {}
-    return registry.create(id, config)
-  })
+  const baseRules = plugin.rules
+    .filter(id => registry.has(id))
+    .map(id => {
+      const config = (plugin.ruleDefaults && plugin.ruleDefaults[id]) || {}
+      return registry.create(id, config)
+    })
+
+  if (baseRules.length === 0 && overrides.length === 0) return
 
   const finalRules = resolveRuleOverrides(baseRules, overrides, registry)
   const ruleConfigs = {}
