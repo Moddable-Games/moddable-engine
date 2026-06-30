@@ -10,3 +10,7 @@
 .piece-cell.shape-square img {
   border-radius: 2px;
 }
+.badge--format {
+  color: var(--cosmic-pale);
+  border: 1px solid rgba(168, 212, 255, 0.3);
+}

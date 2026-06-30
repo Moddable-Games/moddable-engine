@@ -50,6 +50,7 @@ function bindControls() {
   document.getElementById('search-input').addEventListener('input', render)
   document.getElementById('shape-filter').addEventListener('change', render)
   document.getElementById('family-filter').addEventListener('change', render)
+  document.getElementById('format-filter').addEventListener('change', render)
   document.getElementById('set-filter').addEventListener('change', render)
   document.getElementById('size-select').addEventListener('change', onSizeChange)
 }
@@ -65,10 +66,12 @@ function getFiltered() {
   const shape = document.getElementById('shape-filter').value
   const family = document.getElementById('family-filter').value
   const setId = document.getElementById('set-filter').value
+  const format = document.getElementById('format-filter').value
 
   return SETS.filter(s => {
     if (shape !== 'all' && s.shape !== shape) return false
     if (family !== 'all' && s.family !== family) return false
+    if (format !== 'all' && s.format !== format) return false
     if (setId !== 'all' && s.id !== setId) return false
     if (search) {
       const inName = s.name.toLowerCase().includes(search)
@@ -103,6 +106,7 @@ function render() {
     html += `<div class="set-meta-row">`
     html += `<span class="set-family-badge">${set.family}</span>`
     html += `<span class="set-family-badge">${set.shape}</span>`
+    html += `<span class="badge badge--format">${set.format.toUpperCase()}</span>`
     if (set.license) html += `<span class="set-license-badge">${set.license}</span>`
     html += `<span class="set-count">${tileEntries.length} tiles</span>`
     if (set.orientation) html += `<span class="badge">${set.orientation}</span>`
