@@ -51,6 +51,7 @@ function bindControls() {
   document.getElementById('shape-filter').addEventListener('change', render)
   document.getElementById('family-filter').addEventListener('change', render)
   document.getElementById('format-filter').addEventListener('change', render)
+  document.getElementById('orientation-filter').addEventListener('change', render)
   document.getElementById('set-filter').addEventListener('change', render)
   document.getElementById('bg-select').addEventListener('change', render)
   document.getElementById('size-select').addEventListener('change', onSizeChange)
@@ -68,11 +69,15 @@ function getFiltered() {
   const family = document.getElementById('family-filter').value
   const setId = document.getElementById('set-filter').value
   const format = document.getElementById('format-filter').value
+  const orientation = document.getElementById('orientation-filter').value
 
   return SETS.filter(s => {
     if (shape !== 'all' && s.shape !== shape) return false
     if (family !== 'all' && s.family !== family) return false
     if (format !== 'all' && s.format !== format) return false
+    if (orientation !== 'all' && s.shape === 'hex') {
+      if (s.orientation !== 'both' && s.orientation !== orientation) return false
+    }
     if (setId !== 'all' && s.id !== setId) return false
     if (search) {
       const inName = s.name.toLowerCase().includes(search)
@@ -89,6 +94,7 @@ function render() {
   const container = document.getElementById('gallery-container')
   const search = document.getElementById('search-input').value.toLowerCase().trim()
   const bg = document.getElementById('bg-select').value
+  const orientationFilter = document.getElementById('orientation-filter').value
 
   let totalShown = 0
   let html = ''
@@ -111,7 +117,10 @@ function render() {
     html += `<span class="badge badge--format">${set.format.toUpperCase()}</span>`
     if (set.license) html += `<span class="set-license-badge">${set.license}</span>`
     html += `<span class="set-count">${tileEntries.length} tiles</span>`
-    if (set.orientation) html += `<span class="badge">${set.orientation}</span>`
+    if (set.orientation) {
+      const label = set.orientation === 'both' ? 'pointy + flat' : set.orientation
+      html += `<span class="badge">${label}</span>`
+    }
     html += `</div></div>`
 
     html += `<div class="piece-grid">`
@@ -119,7 +128,10 @@ function render() {
       const src = `${SETS_BASE}/${set.id}/${file}`
       let clipClass = ''
       if (set.shape === 'hex' && set.clipped) {
-        clipClass = set.orientation === 'flat' ? ' hex-clip-flat' : ' hex-clip-pointy'
+        const effectiveOrientation = set.orientation === 'both'
+          ? (orientationFilter !== 'all' ? orientationFilter : 'pointy')
+          : set.orientation
+        clipClass = effectiveOrientation === 'flat' ? ' hex-clip-flat' : ' hex-clip-pointy'
       }
       html += `<div class="piece-cell bg-${bg} shape-${set.shape}${clipClass}">`
       html += `<img src="${src}" alt="${key}" loading="lazy">`
