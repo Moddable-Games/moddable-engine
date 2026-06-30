@@ -11,8 +11,13 @@ export function createPromotionRule(config = {}) {
     provides: {
       getChoices() { return choices },
       isPromotionZone(pos, owner, ctx) {
+        if (config.promotionCells) {
+          const cells = config.promotionCells[owner]
+          if (cells) return cells.has ? cells.has(pos) : cells.includes(pos)
+          return false
+        }
         const { topology } = ctx
-        if (!topology) return false
+        if (!topology || topology.cols === undefined) return false
         const cols = topology.cols
         const row = Math.floor(pos / cols)
 
@@ -38,12 +43,26 @@ export function createPromotionRule(config = {}) {
     hooks: {
       applyMove(move, state, ctx) {
         if (!move.promotion) return null
-        const board = [...state.board]
-        const piece = board[move.to] || board[move.from]
+        const board = cloneBoard(state.board)
+        const piece = getCell(board, move.to) || getCell(board, move.from)
         const owner = piece ? piece.owner : ctx.playerIndex
-        board[move.to] = { type: move.promotion, owner }
+        setCell(board, move.to, { type: move.promotion, owner })
         return { board }
       },
     },
   }
+}
+
+function getCell(board, pos) {
+  if (Array.isArray(board)) return board[pos]
+  return board[pos] || null
+}
+
+function setCell(board, pos, value) {
+  board[pos] = value
+}
+
+function cloneBoard(board) {
+  if (Array.isArray(board)) return [...board]
+  return { ...board }
 }

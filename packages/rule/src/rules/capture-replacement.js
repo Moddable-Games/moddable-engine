@@ -9,15 +9,29 @@ export function createCaptureReplacementRule(config = {}) {
       applyMove(move, state, ctx) {
         if (move.castle || move.enPassant) return null
 
-        const board = [...state.board]
-        const piece = board[move.from]
+        const board = cloneBoard(state.board)
+        const piece = getCell(board, move.from)
         if (!piece) return null
 
-        board[move.from] = null
-        board[move.to] = piece
+        setCell(board, move.from, null)
+        setCell(board, move.to, piece)
 
         return { board }
       },
     },
   }
+}
+
+function getCell(board, pos) {
+  if (Array.isArray(board)) return board[pos]
+  return board[pos] || null
+}
+
+function setCell(board, pos, value) {
+  board[pos] = value
+}
+
+function cloneBoard(board) {
+  if (Array.isArray(board)) return [...board]
+  return { ...board }
 }

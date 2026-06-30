@@ -24,17 +24,17 @@ export function createCastlingRule(config = {}) {
         if (!enabled || !state.castlingRights) return null
 
         if (move.castle) {
-          const board = [...state.board]
-          board[move.to] = board[move.from]
-          board[move.from] = null
-          board[move.rookTo] = board[move.rookFrom]
-          board[move.rookFrom] = null
+          const board = cloneBoard(state.board)
+          setCell(board, move.to, getCell(board, move.from))
+          setCell(board, move.from, null)
+          setCell(board, move.rookTo, getCell(board, move.rookFrom))
+          setCell(board, move.rookFrom, null)
           const castlingRights = deepCopy(state.castlingRights)
           castlingRights[ctx.playerIndex] = { king: false, queen: false }
           return { board, castlingRights, handled: true }
         }
 
-        const piece = state.board[move.from]
+        const piece = getCell(state.board, move.from)
         if (!piece) return null
 
         const castlingRights = deepCopy(state.castlingRights)
@@ -59,7 +59,7 @@ export function createCastlingRule(config = {}) {
           }
         }
 
-        const captured = state.board[move.to]
+        const captured = getCell(state.board, move.to)
         if (captured && captured.type === rookType) {
           const rookPositions = findRookPositions(state, captured.owner, ctx)
           if (move.to === rookPositions.king) {
@@ -79,14 +79,13 @@ export function createCastlingRule(config = {}) {
         const { topology, playerIndex } = ctx
         const rights = state.castlingRights[playerIndex]
         if (!rights || (!rights.king && !rights.queen)) return null
+        if (!topology || topology.cols === undefined) return null
 
         const royalType = config.royalType || 'king'
-        const rookType = config.rookType || 'rook'
+        const cols = topology.cols
 
-        const kingPos = state.board.findIndex(
-          c => c && c.type === royalType && c.owner === playerIndex
-        )
-        if (kingPos === -1) return null
+        const kingPos = findRoyalPos(state.board, royalType, playerIndex, topology)
+        if (kingPos === null || kingPos === -1) return null
 
         const attackDetection = ctx.rules.get('attack-detection')
         if (!attackDetection) return null
@@ -94,8 +93,6 @@ export function createCastlingRule(config = {}) {
         if (attackDetection.isAttacked(kingPos, state, ctx)) return null
 
         const rookPositions = findRookPositions(state, playerIndex, ctx)
-        const cols = topology ? topology.cols : 8
-
         const kingRow = Math.floor(kingPos / cols)
         const moves = []
 
@@ -107,7 +104,7 @@ export function createCastlingRule(config = {}) {
             ? kingRow * cols + config.rookDestKing
             : kingRow * cols + 5
 
-          if (canCastle(state, kingPos, kingDest, rookPositions.king, rookDest, attackDetection, ctx, cols)) {
+          if (canCastle(state, kingPos, kingDest, rookPositions.king, rookDest, attackDetection, ctx)) {
             moves.push({ from: kingPos, to: kingDest, castle: true, rookFrom: rookPositions.king, rookTo: rookDest, handled: true })
           }
         }
@@ -120,7 +117,7 @@ export function createCastlingRule(config = {}) {
             ? kingRow * cols + config.rookDestQueen
             : kingRow * cols + 3
 
-          if (canCastle(state, kingPos, kingDest, rookPositions.queen, rookDest, attackDetection, ctx, cols)) {
+          if (canCastle(state, kingPos, kingDest, rookPositions.queen, rookDest, attackDetection, ctx)) {
             moves.push({ from: kingPos, to: kingDest, castle: true, rookFrom: rookPositions.queen, rookTo: rookDest, handled: true })
           }
         }
@@ -131,14 +128,29 @@ export function createCastlingRule(config = {}) {
   }
 }
 
+function findRoyalPos(board, royalType, playerIndex, topology) {
+  if (Array.isArray(board)) {
+    const idx = board.findIndex(c => c && c.type === royalType && c.owner === playerIndex)
+    return idx === -1 ? null : idx
+  }
+  const positions = topology ? topology.getAllCells() : Object.keys(board)
+  for (const pos of positions) {
+    const cell = board[pos] || null
+    if (cell && cell.type === royalType && cell.owner === playerIndex) return pos
+  }
+  return null
+}
+
 function findRookPositions(state, owner, ctx) {
   const { topology } = ctx
   const cols = topology ? topology.cols : 8
-  const rows = topology ? topology.rows : 8
-  const rookType = ctx.config?.rookType || 'rook'
+  const rookType = ctx.config?.rookType || config?.rookType || 'rook'
   const royalType = ctx.config?.royalType || 'king'
+  const board = state.board
 
-  const kingPos = state.board.findIndex(c => c && c.type === royalType && c.owner === owner)
+  if (!Array.isArray(board)) return { king: -1, queen: -1 }
+
+  const kingPos = board.findIndex(c => c && c.type === royalType && c.owner === owner)
   if (kingPos === -1) return { king: -1, queen: -1 }
 
   const kingRow = Math.floor(kingPos / cols)
@@ -153,7 +165,7 @@ function findRookPositions(state, owner, ctx) {
 
   for (let c = cols - 1; c > kingCol; c--) {
     const idx = kingRow * cols + c
-    if (state.board[idx] && state.board[idx].type === rookType && state.board[idx].owner === owner) {
+    if (board[idx] && board[idx].type === rookType && board[idx].owner === owner) {
       kingSideRook = idx
       break
     }
@@ -161,7 +173,7 @@ function findRookPositions(state, owner, ctx) {
 
   for (let c = 0; c < kingCol; c++) {
     const idx = kingRow * cols + c
-    if (state.board[idx] && state.board[idx].type === rookType && state.board[idx].owner === owner) {
+    if (board[idx] && board[idx].type === rookType && board[idx].owner === owner) {
       queenSideRook = idx
       break
     }
@@ -170,16 +182,16 @@ function findRookPositions(state, owner, ctx) {
   return { king: kingSideRook, queen: queenSideRook }
 }
 
-function canCastle(state, kingFrom, kingDest, rookFrom, rookDest, attackDetection, ctx, cols) {
+function canCastle(state, kingFrom, kingDest, rookFrom, rookDest, attackDetection, ctx) {
   const board = state.board
   if (rookFrom === -1) return false
-  if (!board[rookFrom]) return false
+  if (!getCell(board, rookFrom)) return false
 
   const minSq = Math.min(kingFrom, kingDest, rookFrom, rookDest)
   const maxSq = Math.max(kingFrom, kingDest, rookFrom, rookDest)
   for (let sq = minSq; sq <= maxSq; sq++) {
     if (sq === kingFrom || sq === rookFrom) continue
-    if (board[sq] !== null) return false
+    if (getCell(board, sq) !== null) return false
   }
 
   const step = kingDest > kingFrom ? 1 : -1
@@ -188,6 +200,20 @@ function canCastle(state, kingFrom, kingDest, rookFrom, rookDest, attackDetectio
   }
 
   return true
+}
+
+function getCell(board, pos) {
+  if (Array.isArray(board)) return board[pos]
+  return board[pos] || null
+}
+
+function setCell(board, pos, value) {
+  board[pos] = value
+}
+
+function cloneBoard(board) {
+  if (Array.isArray(board)) return [...board]
+  return { ...board }
 }
 
 function deepCopy(rights) {

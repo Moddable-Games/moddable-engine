@@ -290,6 +290,25 @@ export function createGridTopology(config) {
     }
   }
 
+  function getAllCells() {
+    const result = []
+    for (let i = 0; i < rows * cols; i++) result.push(i)
+    return result
+  }
+
+  function getCellCount() {
+    return rows * cols
+  }
+
+  function step(from, direction) {
+    const [dr, dc] = direction
+    const [r, c] = toRC(from)
+    let nr = r + dr, nc = c + dc
+    if (wrap) [nr, nc] = wrapCoords(nr, nc)
+    if (!onBoard(nr, nc)) return null
+    return toIndex(nr, nc)
+  }
+
   return {
     rows,
     cols,
@@ -314,6 +333,9 @@ export function createGridTopology(config) {
     onBoard,
     getDirections,
     getLayout,
+    getAllCells,
+    getCellCount,
+    step,
     serializePosition,
     parsePosition,
   }

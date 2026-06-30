@@ -8,9 +8,9 @@ Every game in the Moddable Games collection — from standard chess to Endless S
 
 ## Status
 
-**Rule registry + composable chess in progress.** Rules are now a first-class resource type alongside topologies, components, and themes. The engine has 5 resource types that compose independently: topology (spatial), component (operational), rule (behavioural), theme (visual), setup (initial state). 860 tests across 71 suites, all passing.
+**Cross-topology chess complete.** Rules are a first-class resource type alongside topologies, components, and themes. The engine has 5 resource types that compose independently: topology (spatial), component (operational), rule (behavioural), theme (visual), setup (initial state). 893 tests across 74 suites, all passing.
 
-Current milestone: **Production chess via composable rules** — parametric rules that assume nothing (no hardcoded piece types, positions, directions). Every MCE variant (76 total) must work by config alone. Same rules work on any topology.
+Current milestone: **Cross-game rule extraction** — rules like capture-by-replacement, turn-continuation, and ko/repetition are shared between game families. Next: variant proof tests (antichess, atomic, chess960), browser play UI, MCE port.
 
 Read [`SPEC.md`](./SPEC.md) before contributing anything.
 
@@ -42,7 +42,7 @@ moddable-engine/
     plugin-morris/       ← Nine Men's + Six Men's
     plugin-backgammon/   ← Standard + nackgammon
     plugin-big2/         ← Big 2 + President
-    plugin-chess/        ← Standard chess (production port in progress)
+    plugin-chess/        ← Standard chess + Glinski hex (topology-agnostic, rule-composed)
   SPEC.md                ← architecture spec — read this first
   package.json           ← workspace root
 ```
@@ -98,6 +98,13 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-06-30
+- Refactored plugin-chess to be fully topology-agnostic (board via getCell/setCell, pawn via topology.step + pawnConfig)
+- Added topology.step(from, direction) to grid and hex — universal single-step advancement
+- Added getAllCells()/getCellCount() to grid topology (matching hex contract)
+- Proved Glinski hexagonal chess: full game on hex topology (init, moves, check, checkmate)
+- Refactored all 8 rule implementations to be topology-agnostic (support arrays + objects)
+- Wired plugin-chess to use composed rules via game factory (opt-in, backwards-compatible)
+- wrapPluginWithRules replaces plugin hooks with composed versions (init, getLegalMoves, applyMove, checkWin)
 - Implemented rule registry: rules as first-class resource type with composition engine
 - Per-hook composition strategies: AND (validate), CHAIN (apply), PIPELINE (filter), UNION (moves)
 - Dependency resolution via topological sort with cycle detection

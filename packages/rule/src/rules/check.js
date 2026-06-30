@@ -3,13 +3,22 @@ export function createCheckRule(config = {}) {
   const royalType = config.royalType || 'king'
   const checkBothSides = config.checkBothSides || false
 
-  function findRoyal(board, playerIdx) {
-    return board.findIndex(c => c && c.type === royalType && c.owner === playerIdx)
+  function findRoyal(board, playerIdx, topology) {
+    if (Array.isArray(board)) {
+      return board.findIndex(c => c && c.type === royalType && c.owner === playerIdx)
+    }
+    const positions = topology ? topology.getAllCells() : Object.keys(board)
+    for (const pos of positions) {
+      const cell = board[pos] || null
+      if (cell && cell.type === royalType && cell.owner === playerIdx) return pos
+    }
+    return Array.isArray(board) ? -1 : null
   }
 
   function isInCheck(board, playerIdx, ctx) {
-    const royalPos = findRoyal(board, playerIdx)
-    if (royalPos === -1) return true
+    const royalPos = findRoyal(board, playerIdx, ctx.topology)
+    const missing = Array.isArray(board) ? royalPos === -1 : royalPos === null
+    if (missing) return true
     const attackDetection = ctx.rules.get('attack-detection')
     if (!attackDetection) return false
     const checkCtx = { ...ctx, playerIndex: playerIdx }
@@ -32,22 +41,22 @@ export function createCheckRule(config = {}) {
         if (!attackDetection) return moves
 
         return moves.filter(move => {
-          const testBoard = [...state.board]
+          const testBoard = cloneBoard(state.board)
           if (move.castle) {
-            testBoard[move.to] = testBoard[move.from]
-            testBoard[move.from] = null
-            testBoard[move.rookTo] = testBoard[move.rookFrom]
-            testBoard[move.rookFrom] = null
+            setCell(testBoard, move.to, getCell(testBoard, move.from))
+            setCell(testBoard, move.from, null)
+            setCell(testBoard, move.rookTo, getCell(testBoard, move.rookFrom))
+            setCell(testBoard, move.rookFrom, null)
           } else if (move.enPassant) {
-            testBoard[move.to] = testBoard[move.from]
-            testBoard[move.from] = null
-            testBoard[move.captured] = null
+            setCell(testBoard, move.to, getCell(testBoard, move.from))
+            setCell(testBoard, move.from, null)
+            setCell(testBoard, move.captured, null)
           } else {
-            testBoard[move.to] = testBoard[move.from]
-            testBoard[move.from] = null
+            setCell(testBoard, move.to, getCell(testBoard, move.from))
+            setCell(testBoard, move.from, null)
           }
           if (move.promotion) {
-            testBoard[move.to] = { type: move.promotion, owner: playerIndex }
+            setCell(testBoard, move.to, { type: move.promotion, owner: playerIndex })
           }
 
           const selfCheck = isInCheck(testBoard, playerIndex, ctx)
@@ -64,4 +73,18 @@ export function createCheckRule(config = {}) {
       },
     },
   }
+}
+
+function getCell(board, pos) {
+  if (Array.isArray(board)) return board[pos]
+  return board[pos] || null
+}
+
+function setCell(board, pos, value) {
+  board[pos] = value
+}
+
+function cloneBoard(board) {
+  if (Array.isArray(board)) return [...board]
+  return { ...board }
 }

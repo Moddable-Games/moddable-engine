@@ -73,4 +73,95 @@ export function wrapPluginWithRules(plugin, registry, overrides = []) {
 
   const composed = composeRules(finalRules, ruleConfigs)
   plugin._composedRules = composed
+  plugin._rules = finalRules
+
+  const originalGetLegalMoves = plugin.getLegalMoves
+  const originalApplyMove = plugin.applyMove
+  const originalCheckWin = plugin.checkWin
+  const originalInit = plugin.init
+
+  if (composed.init) {
+    plugin.init = function wrappedInit(pluginConfig, context) {
+      const baseState = originalInit.call(plugin, pluginConfig, context)
+      const topology = context.request('core.topology')
+      const ruleState = composed.init({ topology, playerCount: 2 })
+      return { ...baseState, ...ruleState }
+    }
+  }
+
+  if (composed.getLegalMoves) {
+    plugin.getLegalMoves = function wrappedGetLegalMoves(slice, full) {
+      const baseMoves = originalGetLegalMoves.call(plugin, slice, full)
+      const playerIndex = full.__players.currentIndex
+      const topology = plugin._topology
+      const ctx = {
+        topology,
+        playerIndex,
+        playerCount: 2,
+        fullState: full,
+        sliceState: slice,
+        config: plugin._ruleConfig || {},
+      }
+      const ruleMoves = composed.getLegalMoves(slice, ctx) || []
+      const allMoves = [...baseMoves, ...ruleMoves]
+
+      if (composed.moveFilter) {
+        return composed.moveFilter(allMoves, slice, ctx)
+      }
+      return allMoves
+    }
+  }
+
+  if (composed.applyMove) {
+    plugin.applyMove = function wrappedApplyMove(move, slice, full) {
+      const playerIndex = full.__players.currentIndex
+      const topology = plugin._topology
+      const ctx = {
+        topology,
+        playerIndex,
+        playerCount: 2,
+        fullState: full,
+        sliceState: slice,
+        config: plugin._ruleConfig || {},
+      }
+
+      let current = slice
+      if (composed.beforeMove) {
+        current = composed.beforeMove(move, current, ctx)
+      }
+
+      const baseResult = originalApplyMove.call(plugin, move, current, full)
+      let result = baseResult
+
+      const ruleResult = composed.applyMove(move, current, ctx)
+      if (ruleResult) {
+        result = { ...result, ...ruleResult }
+      }
+
+      if (composed.afterMove) {
+        result = composed.afterMove(move, result, ctx)
+      }
+
+      return result
+    }
+  }
+
+  if (composed.checkWin) {
+    plugin.checkWin = function wrappedCheckWin(slice, full) {
+      const baseResult = originalCheckWin.call(plugin, slice, full)
+      if (baseResult !== null) return baseResult
+
+      const playerIndex = full.__players.currentIndex
+      const topology = plugin._topology
+      const ctx = {
+        topology,
+        playerIndex,
+        playerCount: 2,
+        fullState: full,
+        sliceState: slice,
+        config: plugin._ruleConfig || {},
+      }
+      return composed.checkWin(slice, ctx)
+    }
+  }
 }

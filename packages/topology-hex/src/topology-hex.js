@@ -424,6 +424,13 @@ export function createHexTopology(config) {
     }
   }
 
+  function step(from, direction) {
+    const a = typeof from === 'string' ? parse(from) : from
+    const d = typeof direction === 'number' ? DIRECTIONS[direction] : direction
+    const k = key(a.q + d.q, a.r + d.r)
+    return cells.has(k) ? k : null
+  }
+
   return {
     radius,
     size: cells.size,
@@ -451,6 +458,7 @@ export function createHexTopology(config) {
       return DIRECTION_CATEGORIES[category] || []
     },
     getLayout,
+    step,
     serializePosition,
     parsePosition,
     DIRECTIONS,
