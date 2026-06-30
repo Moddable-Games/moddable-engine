@@ -399,7 +399,7 @@
     "name": "Colony (Artistic)",
     "family": "colony",
     "shape": "hex",
-    "orientation": "flat",
+    "orientation": "pointy",
     "license": "proprietary",
     "format": "png",
     "colors": {
