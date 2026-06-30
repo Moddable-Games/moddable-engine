@@ -255,7 +255,9 @@ export function createHexTopology(config) {
       getAnnotations() {
         const dims = computeDims()
         const center = toPixel('0,0', cellSize)
-        return [{ type: 'dot', x: center.x + dims.offsetX, y: center.y + dims.offsetY, radius: 3 }]
+        const cx = center.x + dims.offsetX
+        const cy = center.y + dims.offsetY
+        return [{ element: 'circle', attrs: { cx, cy, r: 3, fill: '#333' } }]
       },
     }
   }

@@ -53,7 +53,7 @@ export function createBoardRenderer(opts = {}) {
     parts.push(renderCells(cells, highlights))
 
     if (layout.getAnnotations) {
-      parts.push(renderAnnotations(layout.getAnnotations(), colors))
+      parts.push(renderAnnotations(layout.getAnnotations()))
     }
 
     if (Object.keys(pieces).length > 0) {
@@ -84,14 +84,10 @@ export function createBoardRenderer(opts = {}) {
     return parts.join('\n')
   }
 
-  function renderAnnotations(annotations, colors) {
+  function renderAnnotations(annotations) {
     const parts = []
     for (const ann of annotations) {
-      if (ann.type === 'dot') {
-        parts.push(`<circle cx="${ann.x}" cy="${ann.y}" r="${ann.radius || 3}" fill="${colors.annotation || '#333'}"/>`)
-      } else if (ann.type === 'label') {
-        parts.push(`<text x="${ann.x}" y="${ann.y}" text-anchor="middle" dominant-baseline="central" font-size="${ann.fontSize || 10}" fill="${colors.labelText || '#333'}">${ann.text}</text>`)
-      }
+      parts.push(svgElement(ann.element, ann.attrs))
     }
     return parts.join('\n')
   }
