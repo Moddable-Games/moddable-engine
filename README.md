@@ -8,9 +8,9 @@ Every game in the Moddable Games collection — from standard chess to Endless S
 
 ## Status
 
-**Cross-topology chess complete.** Rules are a first-class resource type alongside topologies, components, and themes. The engine has 5 resource types that compose independently: topology (spatial), component (operational), rule (behavioural), theme (visual), setup (initial state). 893 tests across 74 suites, all passing.
+**All classic game families implemented.** 13 plugins covering 154 variants across chess, go, draughts, reversi, mancala, backgammon, morris, hex, big 2, halma, shogi, xiangqi, and race games. Rules are a first-class resource type: parametric, composable, topology-agnostic. Shared rules (capture, promotion, repetition, turn-continuation) work across all families. 1095 tests across 87 suites, all passing.
 
-Current milestone: **Cross-game rule extraction** — rules like capture-by-replacement, turn-continuation, and ko/repetition are shared between game families. Next: variant proof tests (antichess, atomic, chess960), browser play UI, MCE port.
+Current milestone: **Full pipeline proof + AI adapter** — factory instantiates every variant from frontmatter config alone, then generic minimax/MCTS for pass-and-play and AI opponents.
 
 Read [`SPEC.md`](./SPEC.md) before contributing anything.
 
@@ -43,6 +43,12 @@ moddable-engine/
     plugin-backgammon/   ← Standard + nackgammon
     plugin-big2/         ← Big 2 + President
     plugin-chess/        ← Standard chess + Glinski hex (topology-agnostic, rule-composed)
+    plugin-draughts/     ← 20 variants (English, International, Turkish, Lasca...)
+    plugin-reversi/      ← 3 variants (standard, anti-reversi, mini)
+    plugin-halma/        ← 2 variants (standard, 4-player)
+    plugin-shogi/        ← 4 variants (standard, minishogi, chu-shogi, kyoto)
+    plugin-xiangqi/      ← 2 variants (xiangqi, janggi)
+    plugin-race/         ← 9 variants (pachisi, chaupar, landlords-game)
   SPEC.md                ← architecture spec — read this first
   package.json           ← workspace root
 ```
