@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Moddable Engine — Universal Game Engine</title>
+<meta name="description" content="One engine for every board game. 13 families, 154 variants, 5 topologies. Any game expressible as configuration, not code.">
+<meta property="og:title" content="Moddable Engine — Universal Game Engine">
+<meta property="og:description" content="One engine for every board game. 13 families, 154 variants, 5 topologies. Any game expressible as configuration, not code.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable.Games">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="/play/" class="nav-link nav-link--soon">Play</a>
+      <a href="/generate/" class="nav-link nav-link--soon">Generate</a>
+      <a href="/pieces/" class="nav-link nav-link--soon">Pieces</a>
+      <a href="/docs/" class="nav-link nav-link--soon">Docs</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-bg">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Universal Game Engine</div>
+    <h1 class="hero-title">Any game.<br>Any topology.<br>Zero game-specific code.</h1>
+    <p class="hero-lede">One micro-kernel engine that plays chess, go, draughts, reversi, mancala, backgammon, shogi, xiangqi, and every variant in between. Games are configuration files. The engine does the rest.</p>
+    <div class="hero-actions">
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="btn btn--primary" target="_blank" rel="noopener">View Source</a>
+      <a href="/play/" class="btn btn--ghost btn--soon">Play a Game</a>
+    </div>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="stats-inner">
+    <div class="stat">
+      <span class="stat-value">1166</span>
+      <span class="stat-label">Tests passing</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">13</span>
+      <span class="stat-label">Game families</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">154</span>
+      <span class="stat-label">Variants</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">5</span>
+      <span class="stat-label">Topologies</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">96</span>
+      <span class="stat-label">Piece sets</span>
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  <div class="features-inner">
+    <h2 class="section-heading">The Platform</h2>
+    <div class="feature-grid">
+
+      <a href="/play/" class="feature-card feature-card--soon">
+        <div class="feature-icon">&#x265F;</div>
+        <h3 class="feature-title">Play</h3>
+        <p class="feature-desc">AI opponents at 5 difficulty levels. Pass-and-play. Any game, any variant. Minimax with transposition tables or MCTS for complex games.</p>
+        <span class="feature-status">Coming soon</span>
+      </a>
+
+      <a href="/generate/" class="feature-card feature-card--soon">
+        <div class="feature-icon">&#x2B21;</div>
+        <h3 class="feature-title">Generate</h3>
+        <p class="feature-desc">Produce board SVGs for any topology. Hex maps, grid diagrams, graph boards, track layouts. Seed-based for reproducibility.</p>
+        <span class="feature-status">Coming soon</span>
+      </a>
+
+      <a href="/create/" class="feature-card feature-card--soon">
+        <div class="feature-icon">&#x2699;</div>
+        <h3 class="feature-title">Create</h3>
+        <p class="feature-desc">Build your own game through form options alone. Select topology, configure rules, set pieces, export playable config. No code required.</p>
+        <span class="feature-status">Coming soon</span>
+      </a>
+
+      <a href="/pieces/" class="feature-card feature-card--soon">
+        <div class="feature-icon">&#x2656;</div>
+        <h3 class="feature-title">Pieces</h3>
+        <p class="feature-desc">96 piece sets across chess, shogi, xiangqi, draughts, reversi, go, backgammon, and mancala. Recolorable SVGs with manifest system.</p>
+        <span class="feature-status">Coming soon</span>
+      </a>
+
+      <a href="/docs/" class="feature-card feature-card--soon">
+        <div class="feature-icon">&#x2630;</div>
+        <h3 class="feature-title">Docs</h3>
+        <p class="feature-desc">SDK reference, embed API, MCP tools specification. Everything developers need to integrate the engine into their own projects.</p>
+        <span class="feature-status">Coming soon</span>
+      </a>
+
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="feature-card" target="_blank" rel="noopener">
+        <div class="feature-icon">&#x2B22;</div>
+        <h3 class="feature-title">Source</h3>
+        <p class="feature-desc">Pure ESM, zero dependencies, no build step. 15 packages composing into a universal game runtime. MIT licensed.</p>
+        <span class="feature-status feature-status--live">Live</span>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<section class="families">
+  <div class="families-inner">
+    <h2 class="section-heading">13 Game Families</h2>
+    <p class="section-sub">Each plugin handles all variants in its family. Same engine, different configuration.</p>
+    <div class="family-grid">
+      <div class="family-chip"><span class="family-symbol">&#x265A;</span> Chess <span class="family-count">75</span></div>
+      <div class="family-chip"><span class="family-symbol">&#x25CB;</span> Go <span class="family-count">14</span></div>
+      <div class="family-chip"><span class="family-symbol">&#x26C0;</span> Draughts <span class="family-count">20</span></div>
+      <div class="family-chip"><span class="family-symbol">&#x25C9;</span> Reversi <span class="family-count">3</span></div>
+      <div class="family-chip"><span class="family-symbol">&#x2B22;</span> Hex <span class="family-count">1</span></div>
+      <div class="family-chip"><span class="family-symbol">&#x26AB;</span> Mancala <span class="family-count">8</span></div>
+      <div class="family-chip"><span class="family-symbol">&#x25A0;</span> Morris <span class="family-count">7</span></div>
+      <div class="family-chip"><span class="family-symbol">&#x2680;</span> Backgammon <span class="family-count">8</span></div>
+      <div class="family-chip"><span class="family-symbol">&#x2660;</span> Big 2 <span class="family-count">1</span></div>
+      <div class="family-chip"><span class="family-symbol">&#x25B2;</span> Halma <span class="family-count">2</span></div>
+      <div class="family-chip"><span class="family-symbol">&#x5C06;</span> Shogi <span class="family-count">4</span></div>
+      <div class="family-chip"><span class="family-symbol">&#x8ECA;</span> Xiangqi <span class="family-count">2</span></div>
+      <div class="family-chip"><span class="family-symbol">&#x2316;</span> Race <span class="family-count">9</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="topologies">
+  <div class="topologies-inner">
+    <h2 class="section-heading">5 Topology Types</h2>
+    <p class="section-sub">The universal adapter layer. Every package above topologies defines a contract. Topologies implement it. Higher packages never know which topology they consume.</p>
+    <div class="topo-grid">
+      <div class="topo-card">
+        <div class="topo-visual topo-visual--grid"></div>
+        <h4 class="topo-name">Grid</h4>
+        <p class="topo-desc">Rectangular boards. Chess, draughts, reversi, halma, shogi, xiangqi.</p>
+        <span class="topo-count">119 variants</span>
+      </div>
+      <div class="topo-card">
+        <div class="topo-visual topo-visual--hex"></div>
+        <h4 class="topo-name">Hex</h4>
+        <p class="topo-desc">Axial coordinates. Hexagonal and rhombus shapes. Hex, Glinski chess.</p>
+        <span class="topo-count">5 variants</span>
+      </div>
+      <div class="topo-card">
+        <div class="topo-visual topo-visual--track"></div>
+        <h4 class="topo-name">Track</h4>
+        <p class="topo-desc">Linear and circuit paths. Pachisi, chaupar, backgammon, landlords.</p>
+        <span class="topo-count">17 variants</span>
+      </div>
+      <div class="topo-card">
+        <div class="topo-visual topo-visual--pit"></div>
+        <h4 class="topo-name">Pit</h4>
+        <p class="topo-desc">Mancala sow layouts. Kalah-correct paths with stores.</p>
+        <span class="topo-count">8 variants</span>
+      </div>
+      <div class="topo-card">
+        <div class="topo-visual topo-visual--graph"></div>
+        <h4 class="topo-name">Graph</h4>
+        <p class="topo-desc">Arbitrary node-edge structures. Morris, alquerque, custom boards.</p>
+        <span class="topo-count">7 variants</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="developer">
+  <div class="developer-inner">
+    <h2 class="section-heading">For Developers</h2>
+    <div class="dev-columns">
+      <div class="dev-col">
+        <h3 class="dev-subtitle">Embed</h3>
+        <pre class="dev-code"><code>&lt;iframe src="engine.moddable.games/play/?game=chess/standard&amp;embed=1"&gt;&lt;/iframe&gt;</code></pre>
+        <p class="dev-note">Bidirectional postMessage bridge for state sync, move submission, and event handling.</p>
+      </div>
+      <div class="dev-col">
+        <h3 class="dev-subtitle">SDK</h3>
+        <pre class="dev-code"><code>import { createGame } from '@moddable/engine'
+
+const game = createGame('reversi/standard')
+const moves = game.getLegalMoves()
+game.execute(moves[0])</code></pre>
+        <p class="dev-note">ES module. Zero dependencies. Mount into any DOM container or run headless.</p>
+      </div>
+      <div class="dev-col">
+        <h3 class="dev-subtitle">MCP Tools</h3>
+        <pre class="dev-code"><code>play_move | get_legal_moves
+suggest_move | render_board
+create_game | list_variants</code></pre>
+        <p class="dev-note">AI assistant integration. Let Claude or any MCP client play and analyse games.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="architecture">
+  <div class="architecture-inner">
+    <h2 class="section-heading">Architecture</h2>
+    <p class="section-sub">Five resource types compose independently. No game names in core. No topology-specific logic in schema. Every new topology auto-works with all existing packages.</p>
+    <div class="arch-layers">
+      <div class="arch-layer">
+        <span class="arch-label">Layer 4</span>
+        <div class="arch-packages">
+          <span class="arch-pkg">AI</span>
+          <span class="arch-pkg">Game Factory</span>
+        </div>
+      </div>
+      <div class="arch-layer">
+        <span class="arch-label">Layer 3</span>
+        <div class="arch-packages">
+          <span class="arch-pkg">Render</span>
+          <span class="arch-pkg">Schema</span>
+          <span class="arch-pkg">Themes</span>
+        </div>
+      </div>
+      <div class="arch-layer">
+        <span class="arch-label">Layer 2</span>
+        <div class="arch-packages">
+          <span class="arch-pkg">Piece Behaviour</span>
+          <span class="arch-pkg">Rules</span>
+          <span class="arch-pkg">Components</span>
+        </div>
+      </div>
+      <div class="arch-layer">
+        <span class="arch-label">Layer 1</span>
+        <div class="arch-packages">
+          <span class="arch-pkg">Grid</span>
+          <span class="arch-pkg">Hex</span>
+          <span class="arch-pkg">Track</span>
+          <span class="arch-pkg">Pit</span>
+          <span class="arch-pkg">Graph</span>
+        </div>
+      </div>
+      <div class="arch-layer">
+        <span class="arch-label">Layer 0</span>
+        <div class="arch-packages">
+          <span class="arch-pkg arch-pkg--core">Core</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="footer-brand">moddable.engine</p>
+    <p class="footer-sub">Part of <a href="https://moddable.games" target="_blank" rel="noopener">Moddable.Games</a></p>
+    <p class="footer-copy">MIT License. Engine code is free. Games are configuration.</p>
+  </div>
+</footer>
+
+</body>
+</html>
