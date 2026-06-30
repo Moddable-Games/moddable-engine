@@ -31,21 +31,63 @@
 <section class="gallery-hero">
   <div class="gallery-hero-content">
     <div class="hero-eyebrow">Piece Gallery</div>
-    <h1 class="hero-title">96 Sets. 13 Families.</h1>
-    <p class="hero-lede">Every piece set available to the engine. Licensed, verified, ready for play.</p>
+    <h1 class="hero-title">Every piece. Every set.</h1>
+    <p class="hero-lede" id="gallery-intro">Loading...</p>
   </div>
 </section>
 
 <section class="gallery-controls">
   <div class="controls-inner">
-    <div class="filter-bar">
-      <button class="filter-btn filter-btn--active" data-family="all">All <span class="filter-count">96</span></button>
+    <div class="control-row">
+      <label class="control-group">
+        <span class="control-label">Search</span>
+        <input type="text" id="search-input" placeholder="king, elephant, pawn...">
+      </label>
+      <label class="control-group">
+        <span class="control-label">View</span>
+        <select id="view-select">
+          <option value="by-set">By set</option>
+          <option value="by-piece">By piece type</option>
+        </select>
+      </label>
+      <label class="control-group">
+        <span class="control-label">Family</span>
+        <select id="family-filter">
+          <option value="all">All families</option>
+        </select>
+      </label>
+      <label class="control-group">
+        <span class="control-label">Set</span>
+        <select id="set-filter">
+          <option value="all">All sets</option>
+        </select>
+      </label>
+      <label class="control-group">
+        <span class="control-label">Background</span>
+        <select id="bg-select">
+          <option value="checkered">Checkered</option>
+          <option value="light">Light square</option>
+          <option value="dark">Dark square</option>
+          <option value="none">None</option>
+        </select>
+      </label>
+      <label class="control-group">
+        <span class="control-label">Size</span>
+        <select id="size-select">
+          <option value="40">40px</option>
+          <option value="56" selected>56px</option>
+          <option value="72">72px</option>
+          <option value="96">96px</option>
+          <option value="120">120px</option>
+        </select>
+      </label>
     </div>
+    <div class="gallery-stats" id="gallery-stats"></div>
   </div>
 </section>
 
-<section class="gallery-grid-section">
-  <div class="gallery-grid" id="gallery-grid"></div>
+<section class="gallery-body">
+  <div id="gallery-container"></div>
 </section>
 
 <footer class="site-footer">
