@@ -249,7 +249,7 @@ export function createHexTopology(config) {
           const center = { x: px.x + dims.offsetX, y: px.y + dims.offsetY }
           const corners = getCorners(center, cellSize)
           const points = corners.map(c => `${c.x},${c.y}`).join(' ')
-          return { key: k, center, element: 'polygon', attrs: { points, fill: 'none', stroke: '#333', 'stroke-width': 1 } }
+          return { key: k, center, cellType: 'default', element: 'polygon', attrs: { points } }
         })
       },
       getAnnotations() {
@@ -257,7 +257,11 @@ export function createHexTopology(config) {
         const center = toPixel('0,0', cellSize)
         const cx = center.x + dims.offsetX
         const cy = center.y + dims.offsetY
-        return [{ element: 'circle', attrs: { cx, cy, r: 3, fill: '#333' } }]
+        return [{ element: 'circle', attrs: { cx, cy, r: 3 }, cellType: 'annotation' }]
+      },
+      defaults: {
+        cells: { default: { fill: 'none', stroke: '#333', 'stroke-width': 1 } },
+        annotations: { annotation: { fill: '#333' } },
       },
     }
   }

@@ -143,7 +143,7 @@ export function createGraphTopology(config) {
       getCells() {
         return nodeList.map(node => {
           const c = positions[node] || { x: 0, y: 0 }
-          return { key: node, center: c, element: 'circle', attrs: { cx: c.x, cy: c.y, r: nodeRadius, fill: '#333' } }
+          return { key: node, center: c, cellType: 'node', element: 'circle', attrs: { cx: c.x, cy: c.y, r: nodeRadius } }
         })
       },
       getLines() {
@@ -151,6 +151,10 @@ export function createGraphTopology(config) {
           from: positions[from] || { x: 0, y: 0 },
           to: positions[to] || { x: 0, y: 0 },
         }))
+      },
+      defaults: {
+        cells: { node: { fill: '#333' } },
+        lines: { stroke: '#333', 'stroke-width': 1.5 },
       },
     }
   }

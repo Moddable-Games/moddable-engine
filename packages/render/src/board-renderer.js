@@ -20,24 +20,42 @@ export function createBoardRenderer(opts = {}) {
   const { padding = 20 } = opts
 
   function render(layout, config = {}) {
-    const { colors = {}, pieces = {}, highlights = [], labels = true } = config
+    const { theme = null, pieces = {}, highlights = [], labels = true, colors = {} } = config
+    const defaults = layout.defaults || {}
     const dims = layout.getDimensions()
     const width = dims.width + padding * 2
     const height = dims.height + padding * 2
 
+    function resolveCell(cell) {
+      const source = theme ? theme.cells : (defaults.cells || {})
+      return source[cell.cellType] || source.default || {}
+    }
+
+    function resolveLines() {
+      if (theme) return theme.lines || {}
+      return defaults.lines || {}
+    }
+
+    function resolveAnnotation(ann) {
+      const source = theme ? theme.annotations : (defaults.annotations || {})
+      return source[ann.cellType] || source.default || {}
+    }
+
     const parts = []
     parts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">`)
 
-    if (colors.background) {
-      parts.push(`<rect x="0" y="0" width="${width}" height="${height}" fill="${colors.background}" rx="4"/>`)
+    if (colors.background || (theme && theme.background)) {
+      const bg = colors.background || (theme && theme.background.fill) || null
+      if (bg) parts.push(`<rect x="0" y="0" width="${width}" height="${height}" fill="${bg}" rx="4"/>`)
     }
 
     parts.push(`<g transform="translate(${padding},${padding})">`)
 
     if (layout.getLines) {
       const lines = layout.getLines()
-      const lineColor = colors.line || '#333'
-      const lineWidth = colors.lineWidth || 1.5
+      const lineStyle = resolveLines()
+      const lineColor = lineStyle.stroke || '#333'
+      const lineWidth = lineStyle['stroke-width'] || 1.5
       parts.push(`<g stroke="${lineColor}" stroke-width="${lineWidth}" stroke-linecap="round">`)
       for (const line of lines) {
         const x1 = line.x1 !== undefined ? line.x1 : line.from.x
@@ -50,10 +68,10 @@ export function createBoardRenderer(opts = {}) {
     }
 
     const cells = layout.getCells()
-    parts.push(renderCells(cells, highlights))
+    parts.push(renderCells(cells, highlights, resolveCell))
 
     if (layout.getAnnotations) {
-      parts.push(renderAnnotations(layout.getAnnotations()))
+      parts.push(renderAnnotations(layout.getAnnotations(), resolveAnnotation))
     }
 
     if (Object.keys(pieces).length > 0) {
@@ -69,12 +87,13 @@ export function createBoardRenderer(opts = {}) {
     return parts.join('\n')
   }
 
-  function renderCells(cells, highlights) {
+  function renderCells(cells, highlights, resolveCell) {
     const parts = []
     const highlightSet = new Set(highlights.map(h => h.key))
 
     for (const cell of cells) {
-      const attrs = { ...cell.attrs }
+      const themeAttrs = resolveCell(cell)
+      const attrs = { ...cell.attrs, ...themeAttrs }
       if (highlightSet.has(cell.key)) {
         const h = highlights.find(h => h.key === cell.key)
         attrs.fill = h.color || '#ffff00'
@@ -84,10 +103,12 @@ export function createBoardRenderer(opts = {}) {
     return parts.join('\n')
   }
 
-  function renderAnnotations(annotations) {
+  function renderAnnotations(annotations, resolveAnnotation) {
     const parts = []
     for (const ann of annotations) {
-      parts.push(svgElement(ann.element, ann.attrs))
+      const themeAttrs = resolveAnnotation(ann)
+      const attrs = { ...ann.attrs, ...themeAttrs }
+      parts.push(svgElement(ann.element, attrs))
     }
     return parts.join('\n')
   }

@@ -151,7 +151,7 @@ export function createTrackTopology(config) {
         const cells = []
         const s = cellSize * 0.85
         function makeCell(key, cx, cy) {
-          return { key, center: { x: cx, y: cy }, element: 'rect', attrs: { x: cx - s / 2, y: cy - s / 2, width: s, height: s, fill: 'none', stroke: '#333', 'stroke-width': 1 } }
+          return { key, center: { x: cx, y: cy }, cellType: 'default', element: 'rect', attrs: { x: cx - s / 2, y: cy - s / 2, width: s, height: s } }
         }
         if (circuit && style === 'circuit') {
           const side = Math.ceil(all.length / 4)
@@ -179,6 +179,10 @@ export function createTrackTopology(config) {
         if (circuit && cells.length > 1)
           lines.push({ x1: cells[cells.length - 1].center.x, y1: cells[cells.length - 1].center.y, x2: cells[0].center.x, y2: cells[0].center.y })
         return lines
+      },
+      defaults: {
+        cells: { default: { fill: 'none', stroke: '#333', 'stroke-width': 1 } },
+        lines: { stroke: '#333', 'stroke-width': 1.5 },
       },
     }
   }

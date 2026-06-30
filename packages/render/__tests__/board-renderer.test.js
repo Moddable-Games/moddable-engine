@@ -25,9 +25,10 @@ describe('board-renderer — topology-agnostic', () => {
       expect(layout.getCells()[0].element).toBe('rect')
     })
 
-    test('alternating fills via attrs', () => {
+    test('alternating cell types', () => {
       const cells = layout.getCells()
-      expect(cells[0].attrs.fill).not.toBe(cells[1].attrs.fill)
+      expect(cells[0].cellType).toBe('light')
+      expect(cells[1].cellType).toBe('dark')
     })
 
     test('renders with pieces', () => {

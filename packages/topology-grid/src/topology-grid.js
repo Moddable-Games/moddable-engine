@@ -161,9 +161,7 @@ export function createGridTopology(config) {
   }
 
   function getLayout(opts = {}) {
-    const { tileSize = 56, alternating = true, colors = {} } = opts
-    const lightFill = colors.light || '#f0d9b5'
-    const darkFill = colors.dark || '#b58863'
+    const { tileSize = 56, alternating = true } = opts
 
     return {
       getDimensions() {
@@ -173,18 +171,23 @@ export function createGridTopology(config) {
         const cells = []
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
-            const fill = alternating ? ((r + c) % 2 === 0 ? lightFill : darkFill) : lightFill
+            const cellType = alternating ? ((r + c) % 2 === 0 ? 'light' : 'dark') : 'uniform'
             const x = c * tileSize
             const y = r * tileSize
             cells.push({
               key: toIndex(r, c),
               center: { x: x + tileSize / 2, y: y + tileSize / 2 },
+              cellType,
               element: 'rect',
-              attrs: { x, y, width: tileSize, height: tileSize, fill, stroke: 'none', 'stroke-width': 0.5 },
+              attrs: { x, y, width: tileSize, height: tileSize },
             })
           }
         }
         return cells
+      },
+      defaults: {
+        cells: { light: { fill: '#f0d9b5' }, dark: { fill: '#b58863' }, uniform: { fill: '#dcb35c' } },
+        lines: { stroke: '#333', 'stroke-width': 1.5 },
       },
       getLabels() {
         const labels = []

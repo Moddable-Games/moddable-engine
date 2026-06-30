@@ -129,21 +129,24 @@ export function createPitTopology(config) {
         for (let i = 0; i < pitsPerSide; i++) {
           const x = pitsStartX + i * (pitDiameter + spacing) + pitRadius
           const cy1 = pitRadius + spacing
-          cells.push({ key: pitIndex(1, pitsPerSide - 1 - i), center: { x, y: cy1 }, element: 'ellipse', attrs: { cx: x, cy: cy1, rx: pitRadius, ry: pitRadius * 0.8, fill: '#8B4513', stroke: '#5C3010', 'stroke-width': 2 } })
+          cells.push({ key: pitIndex(1, pitsPerSide - 1 - i), center: { x, y: cy1 }, cellType: 'pit', element: 'ellipse', attrs: { cx: x, cy: cy1, rx: pitRadius, ry: pitRadius * 0.8 } })
         }
         for (let i = 0; i < pitsPerSide; i++) {
           const x = pitsStartX + i * (pitDiameter + spacing) + pitRadius
           const cy2 = dims.height - pitRadius - spacing
-          cells.push({ key: pitIndex(0, i), center: { x, y: cy2 }, element: 'ellipse', attrs: { cx: x, cy: cy2, rx: pitRadius, ry: pitRadius * 0.8, fill: '#8B4513', stroke: '#5C3010', 'stroke-width': 2 } })
+          cells.push({ key: pitIndex(0, i), center: { x, y: cy2 }, cellType: 'pit', element: 'ellipse', attrs: { cx: x, cy: cy2, rx: pitRadius, ry: pitRadius * 0.8 } })
         }
         if (stores > 0) {
           const sx0 = dims.width - storeRadius - spacing / 2
           const sy = dims.height / 2
           const sx1 = storeRadius + spacing / 2
-          cells.push({ key: storeIndex(0), center: { x: sx0, y: sy }, element: 'ellipse', attrs: { cx: sx0, cy: sy, rx: storeRadius, ry: storeRadius * 0.8, fill: '#8B4513', stroke: '#5C3010', 'stroke-width': 2 } })
-          cells.push({ key: storeIndex(1), center: { x: sx1, y: sy }, element: 'ellipse', attrs: { cx: sx1, cy: sy, rx: storeRadius, ry: storeRadius * 0.8, fill: '#8B4513', stroke: '#5C3010', 'stroke-width': 2 } })
+          cells.push({ key: storeIndex(0), center: { x: sx0, y: sy }, cellType: 'store', element: 'ellipse', attrs: { cx: sx0, cy: sy, rx: storeRadius, ry: storeRadius * 0.8 } })
+          cells.push({ key: storeIndex(1), center: { x: sx1, y: sy }, cellType: 'store', element: 'ellipse', attrs: { cx: sx1, cy: sy, rx: storeRadius, ry: storeRadius * 0.8 } })
         }
         return cells
+      },
+      defaults: {
+        cells: { pit: { fill: '#8B4513', stroke: '#5C3010', 'stroke-width': 2 }, store: { fill: '#8B4513', stroke: '#5C3010', 'stroke-width': 2 } },
       },
     }
   }
