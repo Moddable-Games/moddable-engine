@@ -1,8 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { parseFrontmatter } from '../src/parse-frontmatter.js'
-import { inferEngineBlock } from '../src/infer.js'
-import { enrichMeta, serializeFrontmatter } from '../src/enrich.js'
+import { serializeFrontmatter } from '../src/enrich.js'
 import { validate } from '../src/validate.js'
 import { produce } from '../src/produce.js'
 import { schema as gridSchema, createGridTopology } from '../../topology-grid/src/topology-grid.js'
@@ -14,20 +13,15 @@ import { createPlayerSystem } from '../../core/src/player-system.js'
 import { createStore } from '../../core/src/state-store.js'
 
 const ALL_TOPOLOGIES = [gridSchema, hexSchema, trackSchema, pitSchema, graphSchema]
-const INFER_CONFIG = { topologySchemas: ALL_TOPOLOGIES }
 
 const RULES_DIR = '/Applications/MAMP/htdocs/MODDABLE/moddable-rules/games'
 
 async function roundTrip(familyPath) {
   const content = await readFile(familyPath, 'utf-8')
   const { meta, body } = parseFrontmatter(content)
-  const engineBlock = inferEngineBlock(meta, INFER_CONFIG)
-  const enriched = enrichMeta(meta, engineBlock)
-  const serialized = serializeFrontmatter(enriched)
-  const reparsed = parseFrontmatter(serialized + '\n')
-  const validation = validate(reparsed.meta, ALL_TOPOLOGIES)
+  const validation = validate(meta, ALL_TOPOLOGIES)
   if (!validation.valid) throw new Error(`Validation failed: ${validation.errors.map(e => e.message).join(', ')}`)
-  const definition = produce(reparsed.meta)
+  const definition = produce(meta)
   return definition
 }
 
@@ -107,37 +101,25 @@ describe('proof: full round-trip from real moddable-rules files', () => {
     }
   })
 
-  test('all 154 variants infer a topology type and round-trip serialization', async () => {
+  test('all 154 variants validate and produce definitions from their engine blocks', async () => {
     const { loadAllFamilies } = await import('../src/loader.js')
     const families = await loadAllFamilies(RULES_DIR)
-    let fullSuccess = 0
-    let partialSuccess = 0
+    let success = 0
 
     for (const family of families) {
       for (const variant of family.variants) {
-        const engineBlock = inferEngineBlock(variant.meta, INFER_CONFIG)
-        expect(engineBlock).not.toBeNull()
-        expect(engineBlock.topology.type).toBeDefined()
+        expect(variant.meta.engine).toBeDefined()
+        expect(variant.meta.engine.topology.type).toBeDefined()
 
-        const enriched = enrichMeta(variant.meta, engineBlock)
-        const serialized = serializeFrontmatter(enriched)
-        const reparsed = parseFrontmatter(serialized + '\n')
+        const validation = validate(variant.meta, ALL_TOPOLOGIES)
+        expect(validation.valid).toBe(true)
 
-        expect(reparsed.meta.engine).toBeDefined()
-        expect(reparsed.meta.engine.topology.type).toBe(engineBlock.topology.type)
-
-        const validation = validate(reparsed.meta, ALL_TOPOLOGIES)
-        if (validation.valid) {
-          const definition = produce(reparsed.meta)
-          expect(definition.topology.type).toBeDefined()
-          fullSuccess++
-        } else {
-          partialSuccess++
-        }
+        const definition = produce(variant.meta)
+        expect(definition.topology.type).toBeDefined()
+        success++
       }
     }
 
-    expect(fullSuccess + partialSuccess).toBe(154)
-    expect(fullSuccess).toBeGreaterThan(130)
+    expect(success).toBe(154)
   })
 })

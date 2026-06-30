@@ -115,46 +115,20 @@ describe('serializeFrontmatter', () => {
 describe('enrichDryRun against real files', () => {
   const enrichOpts = { topologySchemas: ALL_TOPOLOGIES }
 
-  test('chess variant can be enriched', async () => {
+  test('already-enriched files are detected', async () => {
     const path = join(RULES_DIR, 'moddable-chess', 'content', 'variants', 'standard.md')
     const result = await enrichDryRun(path, enrichOpts)
-    expect(result.wouldChange).toBe(true)
-    expect(result.preview).toContain('engine:')
-    expect(result.preview).toContain('type: grid')
-    expect(result.preview).toContain('rows: 8')
-    expect(result.preview).toContain('cols: 8')
+    expect(result.wouldChange).toBe(false)
+    expect(result.reason).toBe('already-enriched')
   })
 
-  test('mancala variant can be enriched', async () => {
-    const path = join(RULES_DIR, 'mancala', 'content', 'variants', 'oware.md')
-    const result = await enrichDryRun(path, enrichOpts)
-    expect(result.wouldChange).toBe(true)
-    expect(result.preview).toContain('type: pit')
-    expect(result.preview).toContain('pitsPerSide: 6')
-  })
-
-  test('backgammon variant can be enriched', async () => {
-    const path = join(RULES_DIR, 'backgammon', 'content', 'variants', 'standard.md')
-    const result = await enrichDryRun(path, enrichOpts)
-    expect(result.wouldChange).toBe(true)
-    expect(result.preview).toContain('type: track')
-    expect(result.preview).toContain('positions: 24')
-  })
-
-  test('go variant can be enriched', async () => {
-    const path = join(RULES_DIR, 'go', 'content', 'variants', 'standard.md')
-    const result = await enrichDryRun(path, enrichOpts)
-    expect(result.wouldChange).toBe(true)
-    expect(result.preview).toContain('type: grid')
-    expect(result.preview).toContain('rows: 19')
-    expect(result.preview).toContain('cols: 19')
-  })
-
-  test('enriched preview round-trips to valid definition', async () => {
-    const path = join(RULES_DIR, 'moddable-chess', 'content', 'variants', 'standard.md')
-    const result = await enrichDryRun(path, enrichOpts)
-    const parsed = parseFrontmatter(result.preview + '\n')
-    const validation = validate(parsed.meta, ALL_TOPOLOGIES)
-    expect(validation.valid).toBe(true)
+  test('all real variant files are already enriched', async () => {
+    const { loadAllFamilies } = await import('../src/loader.js')
+    const families = await loadAllFamilies(RULES_DIR)
+    for (const family of families) {
+      for (const variant of family.variants) {
+        expect(variant.meta.engine).toBeDefined()
+      }
+    }
   })
 })

@@ -54,6 +54,14 @@ function serializeArray(key, arr, lines, indent) {
     return
   }
 
+  if (arr.every(item => Array.isArray(item))) {
+    lines.push(`${prefix}${key}:`)
+    for (const item of arr) {
+      lines.push(`${prefix}  - [${item.map(serializeValue).join(', ')}]`)
+    }
+    return
+  }
+
   lines.push(`${prefix}${key}:`)
   for (const item of arr) {
     if (typeof item === 'object' && item !== null) {
