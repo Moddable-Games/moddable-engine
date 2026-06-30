@@ -52,6 +52,7 @@ function bindControls() {
   document.getElementById('family-filter').addEventListener('change', render)
   document.getElementById('format-filter').addEventListener('change', render)
   document.getElementById('set-filter').addEventListener('change', render)
+  document.getElementById('bg-select').addEventListener('change', render)
   document.getElementById('size-select').addEventListener('change', onSizeChange)
 }
 
@@ -87,6 +88,7 @@ function render() {
   const filtered = getFiltered()
   const container = document.getElementById('gallery-container')
   const search = document.getElementById('search-input').value.toLowerCase().trim()
+  const bg = document.getElementById('bg-select').value
 
   let totalShown = 0
   let html = ''
@@ -115,7 +117,7 @@ function render() {
     html += `<div class="piece-grid">`
     tileEntries.forEach(([key, file]) => {
       const src = `${SETS_BASE}/${set.id}/${file}`
-      html += `<div class="piece-cell shape-${set.shape}">`
+      html += `<div class="piece-cell bg-${bg} shape-${set.shape}">`
       html += `<img src="${src}" alt="${key}" loading="lazy">`
       html += `<span class="piece-label">${key}</span>`
       html += `</div>`
