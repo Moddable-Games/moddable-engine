@@ -114,13 +114,15 @@ export function createGridTopology(config) {
   }
 
   function rays(from, directions, maxSteps) {
-    return directions.map(([dr, dc]) => ray(from, dr, dc, maxSteps))
+    const resolved = typeof directions === 'string' ? getDirections(directions) : directions
+    return resolved.map(([dr, dc]) => ray(from, dr, dc, maxSteps))
   }
 
   function leapTargets(from, offsets) {
+    const resolved = typeof offsets === 'string' ? getDirections(offsets) : offsets
     const [r, c] = toRC(from)
     const targets = []
-    for (const [dr, dc] of offsets) {
+    for (const [dr, dc] of resolved) {
       let nr = r + dr, nc = c + dc
       if (wrap) [nr, nc] = wrapCoords(nr, nc)
       if (onBoard(nr, nc)) targets.push(toIndex(nr, nc))
@@ -158,6 +160,16 @@ export function createGridTopology(config) {
       pairs.push({ adjacent, far: toIndex(fr, fc) })
     }
     return pairs
+  }
+
+  const DIRECTIONS = {
+    orthogonal: [[-1, 0], [1, 0], [0, -1], [0, 1]],
+    diagonal: [[-1, -1], [-1, 1], [1, -1], [1, 1]],
+    all: [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, -1], [1, 1]],
+  }
+
+  function getDirections(category) {
+    return DIRECTIONS[category] || []
   }
 
   function getLayout(opts = {}) {
@@ -202,6 +214,82 @@ export function createGridTopology(config) {
     }
   }
 
+  function serializePosition(cellStates, vocabulary) {
+    const symbolMap = buildSymbolMap(vocabulary)
+    const rowStrings = []
+    for (let r = 0; r < rows; r++) {
+      let rowStr = ''
+      let empty = 0
+      for (let c = 0; c < cols; c++) {
+        const idx = toIndex(r, c)
+        const cell = cellStates[idx] || cellStates.get?.(idx) || null
+        if (cell === null || cell === undefined) {
+          empty++
+        } else {
+          if (empty > 0) { rowStr += String(empty); empty = 0 }
+          rowStr += symbolMap.toSymbol(cell)
+        }
+      }
+      if (empty > 0) rowStr += String(empty)
+      rowStrings.push(rowStr)
+    }
+    return rowStrings.join('/')
+  }
+
+  function parsePosition(notation, vocabulary) {
+    const symbolMap = buildSymbolMap(vocabulary)
+    const cells = new Array(rows * cols).fill(null)
+    const rowStrings = notation.split('/')
+    for (let r = 0; r < rowStrings.length && r < rows; r++) {
+      let c = 0
+      for (const ch of rowStrings[r]) {
+        if (ch >= '0' && ch <= '9') {
+          c += parseInt(ch, 10)
+        } else {
+          const piece = symbolMap.fromSymbol(ch)
+          if (piece && c < cols) {
+            cells[toIndex(r, c)] = piece
+          }
+          c++
+        }
+      }
+    }
+    return cells
+  }
+
+  function buildSymbolMap(vocabulary) {
+    const toSym = new Map()
+    const fromSym = new Map()
+
+    if (!vocabulary) {
+      return {
+        toSymbol: (cell) => cell.symbol || '?',
+        fromSymbol: (ch) => ({ symbol: ch }),
+      }
+    }
+
+    for (const [type, def] of Object.entries(vocabulary)) {
+      if (def.symbols && !def.symbols.count) {
+        for (const [owner, symbol] of Object.entries(def.symbols)) {
+          const ownerKey = /^\d+$/.test(owner) ? parseInt(owner, 10) : owner
+          toSym.set(`${type}.${ownerKey}`, symbol)
+          fromSym.set(symbol, { type, owner: ownerKey })
+        }
+      }
+    }
+
+    return {
+      toSymbol(cell) {
+        if (typeof cell === 'string') return cell
+        const key = `${cell.type}.${cell.owner}`
+        return toSym.get(key) || '?'
+      },
+      fromSymbol(ch) {
+        return fromSym.get(ch) || null
+      },
+    }
+  }
+
   return {
     rows,
     cols,
@@ -224,6 +312,9 @@ export function createGridTopology(config) {
     jumpPairs,
     adjacentPairs,
     onBoard,
+    getDirections,
     getLayout,
+    serializePosition,
+    parsePosition,
   }
 }

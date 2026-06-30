@@ -35,6 +35,9 @@ export function validate(meta, topologySchemas = []) {
           errors.push({ field: `engine.topology.${field}`, message: `"${field}" is required for topology type "${topo.type}"` })
         }
       }
+      if (typeof topoSchema.validate === 'function' && !topoSchema.validate(topo)) {
+        errors.push({ field: 'engine.topology', message: `invalid configuration for topology type "${topo.type}"` })
+      }
     } else if (topologySchemas.length > 0) {
       const known = topologySchemas.map(s => s.type).join(', ')
       errors.push({ field: 'engine.topology.type', message: `unknown topology type "${topo.type}", must be one of: ${known}` })

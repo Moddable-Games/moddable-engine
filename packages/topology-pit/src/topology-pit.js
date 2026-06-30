@@ -45,23 +45,32 @@ export function createPitTopology(config) {
   function sowSequence(fromPit, player, opts = {}) {
     const { skipOpponentStore = true, skipOwnPit = true } = opts
     const sequence = []
-    let idx = fromPit
-    const totalPositions = totalPits + stores
 
-    for (let i = 0; i < totalPositions; i++) {
-      idx = (idx + 1) % totalPositions
+    const boardPath = buildBoardPath()
+    const startIdx = boardPath.indexOf(fromPit)
 
-      if (skipOwnPit && idx === fromPit) continue
+    for (let i = 1; i < boardPath.length; i++) {
+      const pos = boardPath[(startIdx + i) % boardPath.length]
 
-      if (isStore(idx)) {
-        const storeOwner = idx - totalPits
+      if (skipOwnPit && pos === fromPit) continue
+
+      if (isStore(pos)) {
+        const storeOwner = pos - totalPits
         if (skipOpponentStore && storeOwner !== player) continue
-        sequence.push(idx)
-      } else {
-        sequence.push(idx)
       }
+
+      sequence.push(pos)
     }
     return sequence
+  }
+
+  function buildBoardPath() {
+    const path = []
+    for (let i = 0; i < pitsPerSide; i++) path.push(i)
+    if (hasStores) path.push(storeIndex(0))
+    for (let i = pitsPerSide; i < totalPits; i++) path.push(i)
+    if (hasStores) path.push(storeIndex(1))
+    return path
   }
 
   function getOpposite(pitIdx) {

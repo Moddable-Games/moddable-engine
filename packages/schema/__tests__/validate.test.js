@@ -59,11 +59,11 @@ describe('validate', () => {
     expect(result.valid).toBe(true)
   })
 
-  test('rejects hex without radius', () => {
+  test('rejects hex without radius or size', () => {
     const meta = { ...validMeta, engine: { topology: { type: 'hex' } } }
     const result = validate(meta, ALL_TOPOLOGIES)
     expect(result.valid).toBe(false)
-    expect(result.errors.some(e => e.message.includes('"radius"'))).toBe(true)
+    expect(result.errors.some(e => e.message.includes('hex'))).toBe(true)
   })
 
   test('accepts valid track game', () => {

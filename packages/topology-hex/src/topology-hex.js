@@ -1,6 +1,9 @@
 export const schema = {
   type: 'hex',
-  required: ['radius'],
+  required: [],
+  validate(config) {
+    return config.radius !== undefined || config.size !== undefined
+  },
   parseBoard(board) {
     const match = board.match(/(\d+)\s*[×x]\s*(\d+)/)
     if (!match) return null
@@ -16,18 +19,42 @@ const DIRECTIONS = [
   { q: -1, r: 0 }, { q: -1, r: 1 }, { q: 0, r: 1 },
 ]
 
-export function createHexTopology(config) {
-  const { radius, orientation = 'pointy' } = config
-  const cells = new Map()
-  generateGrid(radius, cells)
+const HEX_DIAGONALS = [
+  { q: 2, r: -1 }, { q: 1, r: -2 }, { q: -1, r: -1 },
+  { q: -2, r: 1 }, { q: -1, r: 2 }, { q: 1, r: 1 },
+]
 
-  function generateGrid(r, map) {
+const DIRECTION_CATEGORIES = {
+  orthogonal: DIRECTIONS,
+  diagonal: HEX_DIAGONALS,
+  all: [...DIRECTIONS, ...HEX_DIAGONALS],
+}
+
+export function createHexTopology(config) {
+  const { radius, size, shape = 'hexagonal', orientation = 'pointy' } = config
+  const cells = new Map()
+
+  if (shape === 'rhombus' && size) {
+    generateRhombus(size, cells)
+  } else {
+    generateHexGrid(radius, cells)
+  }
+
+  function generateHexGrid(r, map) {
     for (let q = -r; q <= r; q++) {
       const r1 = Math.max(-r, -q - r)
       const r2 = Math.min(r, -q + r)
       for (let ri = r1; ri <= r2; ri++) {
         const ring = Math.max(Math.abs(q), Math.abs(ri), Math.abs(-q - ri))
         map.set(key(q, ri), { q, r: ri, ring })
+      }
+    }
+  }
+
+  function generateRhombus(s, map) {
+    for (let q = 0; q < s; q++) {
+      for (let r = 0; r < s; r++) {
+        map.set(key(q, r), { q, r, ring: 0 })
       }
     }
   }
@@ -161,12 +188,37 @@ export function createHexTopology(config) {
     return cell ? cell.ring : -1
   }
 
-  function rays(from, directionIndices, maxSteps) {
-    const indices = directionIndices || [0, 1, 2, 3, 4, 5]
+  function rays(from, directionInput, maxSteps) {
+    if (typeof directionInput === 'string') {
+      const dirs = DIRECTION_CATEGORIES[directionInput] || DIRECTIONS
+      return dirs.map(d => ray(from, d, maxSteps))
+    }
+    const indices = directionInput || [0, 1, 2, 3, 4, 5]
     return indices.map(d => ray(from, d, maxSteps))
   }
 
-  function leapTargets(from, range) {
+  function leapTargets(from, input) {
+    if (typeof input === 'string') {
+      const offsets = DIRECTION_CATEGORIES[input] || []
+      return leapByOffsets(from, offsets)
+    }
+    if (typeof input === 'number') {
+      return leapByRange(from, input)
+    }
+    return leapByOffsets(from, input)
+  }
+
+  function leapByOffsets(from, offsets) {
+    const a = typeof from === 'string' ? parse(from) : from
+    const targets = []
+    for (const d of offsets) {
+      const k = key(a.q + d.q, a.r + d.r)
+      if (cells.has(k)) targets.push(k)
+    }
+    return targets
+  }
+
+  function leapByRange(from, range) {
     const a = typeof from === 'string' ? parse(from) : from
     const targets = []
     for (let q = -range; q <= range; q++) {
@@ -266,8 +318,117 @@ export function createHexTopology(config) {
     }
   }
 
+  function serializePosition(cellStates, vocabulary) {
+    const symbolMap = buildHexSymbolMap(vocabulary)
+    if (shape === 'rhombus' && size) {
+      const rowStrings = []
+      for (let r = 0; r < size; r++) {
+        let rowStr = ''
+        let empty = 0
+        for (let q = 0; q < size; q++) {
+          const k = key(q, r)
+          const cell = cellStates[k] || (cellStates.get ? cellStates.get(k) : null)
+          if (cell === null || cell === undefined) {
+            empty++
+          } else {
+            if (empty > 0) { rowStr += String(empty); empty = 0 }
+            rowStr += symbolMap.toSymbol(cell)
+          }
+        }
+        if (empty > 0) rowStr += String(empty)
+        rowStrings.push(rowStr)
+      }
+      return rowStrings.join('/')
+    }
+    const allKeys = getAllCells().sort()
+    let result = ''
+    let empty = 0
+    for (const k of allKeys) {
+      const cell = cellStates[k] || (cellStates.get ? cellStates.get(k) : null)
+      if (cell === null || cell === undefined) {
+        empty++
+      } else {
+        if (empty > 0) { result += String(empty); empty = 0 }
+        result += symbolMap.toSymbol(cell)
+      }
+    }
+    if (empty > 0) result += String(empty)
+    return result
+  }
+
+  function parsePosition(notation, vocabulary) {
+    const symbolMap = buildHexSymbolMap(vocabulary)
+    const cellStates = {}
+
+    if (shape === 'rhombus' && size) {
+      const rowStrings = notation.split('/')
+      for (let r = 0; r < rowStrings.length && r < size; r++) {
+        let q = 0
+        for (const ch of rowStrings[r]) {
+          if (ch >= '0' && ch <= '9') {
+            q += parseInt(ch, 10)
+          } else {
+            const piece = symbolMap.fromSymbol(ch)
+            if (piece) cellStates[key(q, r)] = piece
+            q++
+          }
+        }
+      }
+    } else {
+      const allKeys = getAllCells().sort()
+      let idx = 0
+      for (const ch of notation) {
+        if (ch >= '0' && ch <= '9') {
+          idx += parseInt(ch, 10)
+        } else {
+          const piece = symbolMap.fromSymbol(ch)
+          if (piece && idx < allKeys.length) {
+            cellStates[allKeys[idx]] = piece
+          }
+          idx++
+        }
+      }
+    }
+    return cellStates
+  }
+
+  function buildHexSymbolMap(vocabulary) {
+    const toSym = new Map()
+    const fromSym = new Map()
+
+    if (!vocabulary) {
+      return {
+        toSymbol: (cell) => cell.symbol || '?',
+        fromSymbol: (ch) => ({ symbol: ch }),
+      }
+    }
+
+    for (const [type, def] of Object.entries(vocabulary)) {
+      if (def.symbols && !def.symbols.count) {
+        for (const [owner, symbol] of Object.entries(def.symbols)) {
+          const ownerKey = /^\d+$/.test(owner) ? parseInt(owner, 10) : owner
+          toSym.set(`${type}.${ownerKey}`, symbol)
+          fromSym.set(symbol, { type, owner: ownerKey })
+        }
+      }
+    }
+
+    return {
+      toSymbol(cell) {
+        if (typeof cell === 'string') return cell
+        return toSym.get(`${cell.type}.${cell.owner}`) || '?'
+      },
+      fromSymbol(ch) {
+        return fromSym.get(ch) || null
+      },
+    }
+  }
+
   return {
     radius,
+    size: cells.size,
+    shape,
+    boardSize: size || null,
     orientation,
     isValid,
     neighbours,
@@ -286,7 +447,12 @@ export function createHexTopology(config) {
     getAllCells,
     getCellCount,
     getRing,
+    getDirections(category) {
+      return DIRECTION_CATEGORIES[category] || []
+    },
     getLayout,
+    serializePosition,
+    parsePosition,
     DIRECTIONS,
   }
 }

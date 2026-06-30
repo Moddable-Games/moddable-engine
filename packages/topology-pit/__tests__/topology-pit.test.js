@@ -72,11 +72,12 @@ describe('topology-pit', () => {
       expect(seq).not.toContain(13)
     })
 
-    test('sowSequence from pit 0 visits pits in order', () => {
+    test('sowSequence from pit 0 visits pits then store then opponent pits', () => {
       const seq = pit.sowSequence(0, 0)
       expect(seq[0]).toBe(1)
       expect(seq[1]).toBe(2)
-      expect(seq[5]).toBe(6)
+      expect(seq[5]).toBe(12) // own store after pit 5
+      expect(seq[6]).toBe(6)  // opponent pits start after store
     })
 
     test('sowSequence length is totalPits + own store - 1 (skip start + opponent store)', () => {
@@ -105,9 +106,10 @@ describe('topology-pit', () => {
   describe('kalah variant (stores used for scoring)', () => {
     const pit = createPitTopology({ pitsPerSide: 6, players: 2, hasStores: true })
 
-    test('sowSequence includes own store after last own pit', () => {
+    test('sowSequence includes own store immediately after last own pit', () => {
       const seq = pit.sowSequence(5, 0)
-      expect(seq[0]).toBe(6)
+      expect(seq[0]).toBe(12) // store 0 is first stop after pit 5
+      expect(seq[1]).toBe(6)  // then opponent pits
       expect(seq).toContain(12)
     })
   })

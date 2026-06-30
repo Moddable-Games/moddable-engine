@@ -159,6 +159,64 @@ export function createGraphTopology(config) {
     }
   }
 
+  function serializePosition(cellStates, vocabulary) {
+    const symbolMap = buildGraphSymbolMap(vocabulary)
+    const parts = []
+    for (const node of getNodes()) {
+      const cell = cellStates[node] || (cellStates.get ? cellStates.get(node) : null)
+      if (cell !== null && cell !== undefined) {
+        parts.push(`${node}=${symbolMap.toSymbol(cell)}`)
+      }
+    }
+    return parts.join(',')
+  }
+
+  function parsePosition(notation, vocabulary) {
+    const symbolMap = buildGraphSymbolMap(vocabulary)
+    const cellStates = {}
+    if (!notation) return cellStates
+    for (const part of notation.split(',')) {
+      const [node, symbol] = part.split('=')
+      if (node && symbol) {
+        const piece = symbolMap.fromSymbol(symbol.trim())
+        if (piece) cellStates[node.trim()] = piece
+      }
+    }
+    return cellStates
+  }
+
+  function buildGraphSymbolMap(vocabulary) {
+    const toSym = new Map()
+    const fromSym = new Map()
+
+    if (!vocabulary) {
+      return {
+        toSymbol: (cell) => cell.symbol || '?',
+        fromSymbol: (ch) => ({ symbol: ch }),
+      }
+    }
+
+    for (const [type, def] of Object.entries(vocabulary)) {
+      if (def.symbols && !def.symbols.count) {
+        for (const [owner, symbol] of Object.entries(def.symbols)) {
+          const ownerKey = /^\d+$/.test(owner) ? parseInt(owner, 10) : owner
+          toSym.set(`${type}.${ownerKey}`, symbol)
+          fromSym.set(symbol, { type, owner: ownerKey })
+        }
+      }
+    }
+
+    return {
+      toSymbol(cell) {
+        if (typeof cell === 'string') return cell
+        return toSym.get(`${cell.type}.${cell.owner}`) || '?'
+      },
+      fromSymbol(ch) {
+        return fromSym.get(ch) || null
+      },
+    }
+  }
+
   return {
     size: nodeSet.size,
     directed,
@@ -175,6 +233,8 @@ export function createGraphTopology(config) {
     jumpPairs,
     adjacentPairs,
     getLayout,
+    serializePosition,
+    parsePosition,
   }
 }
 

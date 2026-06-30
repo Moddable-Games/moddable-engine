@@ -7,7 +7,7 @@ import { createPipeline } from '../../core/src/move-pipeline.js'
 import { createRng } from '../../core/src/rng.js'
 
 export function createGame(definition, opts = {}) {
-  const { plugins = [], topologyFactory, rngSeed } = opts
+  const { plugins = [], topologyFactory, rngSeed, boardTheme = null, pieceResolver = null, components = {} } = opts
 
   const registry = createRegistry()
 
@@ -20,6 +20,10 @@ export function createGame(definition, opts = {}) {
   if (definition.topology && topologyFactory) {
     topology = topologyFactory(definition.topology)
     registry.provide('core.topology', topology)
+  }
+
+  for (const [componentType, component] of Object.entries(components)) {
+    registry.provide(`component.${componentType}`, component)
   }
 
   for (const plugin of plugins) {
@@ -50,6 +54,9 @@ export function createGame(definition, opts = {}) {
     pipeline,
     registry,
     definition,
+    boardTheme,
+    pieceResolver,
+    components,
 
     execute(move) {
       return pipeline.execute(move)
