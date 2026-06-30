@@ -1,30 +1,49 @@
 /**
- * Board renderer — topology-agnostic SVG generation.
+ * Board renderer — layer-compositing SVG generation.
  *
- * The renderer does not know what topology it's drawing. It asks the
- * topology's layout adapter for pixel positions and SVG element data,
- * then composes SVG layers.
+ * Renders in layers (bottom → top):
+ *   1. Board (frame, surfaces, dividers, decorations)
+ *   2. Topology (lines, cells, annotations)
+ *   3. Pieces
+ *   4. Highlights / labels
  *
- * The contract: topology provides a layout adapter via getLayout().
- * Layout adapters implement:
- *   - getCells() → [{key, center, element: 'rect'|'polygon'|'circle'|'ellipse', attrs: {...}}]
+ * The renderer does not know what topology or board it's drawing.
+ * It asks each for their elements and composites them into SVG.
+ *
+ * Topology layout adapter contract:
+ *   - getCells() → [{key, center, element, attrs, cellType}]
  *   - getDimensions() → {width, height}
- *   - getLines() → [{x1,y1,x2,y2} | {from,to}] (optional, for connections)
- *   - getAnnotations() → [{type, ...}] (optional, for star points / markers)
+ *   - getLines() → [{x1,y1,x2,y2}] (optional)
+ *   - getAnnotations() → [{element, attrs, cellType}] (optional)
+ *   - getLabels() → [{x, y, text, anchor?, baseline?}] (optional)
  *
- * Each cell provides its own SVG element type and attributes. The renderer
- * never interprets or modifies these — it emits them verbatim.
+ * Board contract (optional):
+ *   - getDimensions() → {width, height}
+ *   - getSurfaceBounds() → {x, y, width, height}
+ *   - getElements() → [{layer, element, attrs}]
  */
 
 export function createBoardRenderer(opts = {}) {
   const { padding = 20 } = opts
 
   function render(layout, config = {}) {
-    const { theme = null, pieces = {}, highlights = [], labels = true, colors = {} } = config
+    const { theme = null, board = null, pieces = {}, highlights = [], labels = true, colors = {} } = config
     const defaults = layout.defaults || {}
-    const dims = layout.getDimensions()
-    const width = dims.width + padding * 2
-    const height = dims.height + padding * 2
+
+    const topologyDims = layout.getDimensions()
+    let width, height, topologyOffset
+
+    if (board) {
+      const boardDims = board.getDimensions()
+      const surface = board.getSurfaceBounds()
+      width = boardDims.width + padding * 2
+      height = boardDims.height + padding * 2
+      topologyOffset = { x: surface.x, y: surface.y }
+    } else {
+      width = topologyDims.width + padding * 2
+      height = topologyDims.height + padding * 2
+      topologyOffset = { x: 0, y: 0 }
+    }
 
     function resolveCell(cell) {
       const source = theme ? theme.cells : (defaults.cells || {})
@@ -44,12 +63,29 @@ export function createBoardRenderer(opts = {}) {
     const parts = []
     parts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">`)
 
-    if (colors.background || (theme && theme.background)) {
-      const bg = colors.background || (theme && theme.background.fill) || null
-      if (bg) parts.push(`<rect x="0" y="0" width="${width}" height="${height}" fill="${bg}" rx="4"/>`)
+    if (board && board.getFilters) {
+      const filters = board.getFilters()
+      if (filters.length > 0) {
+        parts.push('<defs>')
+        for (const f of filters) parts.push(f)
+        parts.push('</defs>')
+      }
+    }
+
+    if (!board) {
+      if (colors.background || (theme && theme.background)) {
+        const bg = colors.background || (theme && theme.background.fill) || null
+        if (bg) parts.push(`<rect x="0" y="0" width="${width}" height="${height}" fill="${bg}" rx="4"/>`)
+      }
     }
 
     parts.push(`<g transform="translate(${padding},${padding})">`)
+
+    if (board) {
+      parts.push(renderBoard(board))
+    }
+
+    parts.push(`<g transform="translate(${topologyOffset.x},${topologyOffset.y})">`)
 
     if (layout.getLines) {
       const lines = layout.getLines()
@@ -82,6 +118,7 @@ export function createBoardRenderer(opts = {}) {
       parts.push(renderLabels(layout.getLabels(), colors))
     }
 
+    parts.push('</g>')
     parts.push('</g>')
     parts.push('</svg>')
     return parts.join('\n')
@@ -138,6 +175,15 @@ export function createBoardRenderer(opts = {}) {
       parts.push(`<text x="${lbl.x}" y="${lbl.y}" text-anchor="${lbl.anchor || 'middle'}" dominant-baseline="${lbl.baseline || 'central'}">${lbl.text}</text>`)
     }
     parts.push('</g>')
+    return parts.join('\n')
+  }
+
+  function renderBoard(board) {
+    const parts = []
+    const elements = board.getElements()
+    for (const el of elements) {
+      parts.push(svgElement(el.element, el.attrs))
+    }
     return parts.join('\n')
   }
 

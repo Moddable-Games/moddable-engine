@@ -138,6 +138,9 @@ export function createTrackTopology(config) {
     const { cellSize = 40, style = 'linear' } = opts
     const all = getAll()
 
+    if (style === 'points') return pointsLayout(all, opts)
+    if (style === 'cross') return crossLayout(all, opts)
+
     return {
       getDimensions() {
         if (circuit && style === 'circuit') {
@@ -183,6 +186,135 @@ export function createTrackTopology(config) {
       defaults: {
         cells: { default: { fill: 'none', stroke: '#333', 'stroke-width': 1 } },
         lines: { stroke: '#333', 'stroke-width': 1.5 },
+      },
+    }
+  }
+
+  function pointsLayout(all, opts) {
+    const {
+      pointsPerSide = all.length / 2,
+      pointWidth = 32,
+      pointHeight = 120,
+      boardHeight = 288,
+      halves = true,
+      gapBetweenHalves = 0,
+    } = opts
+
+    const perHalf = halves ? Math.ceil(pointsPerSide / 2) : pointsPerSide
+    const totalW = halves
+      ? perHalf * pointWidth * 2 + gapBetweenHalves
+      : pointsPerSide * pointWidth
+
+    return {
+      getDimensions() {
+        return { width: totalW, height: boardHeight }
+      },
+      getCells() {
+        const cells = []
+        const halfCount = halves ? perHalf : pointsPerSide
+
+        for (let i = 0; i < all.length; i++) {
+          const isBottom = i < pointsPerSide
+          const sideIdx = isBottom ? (pointsPerSide - 1 - i) : (i - pointsPerSide)
+          let x
+          if (halves) {
+            const half = sideIdx < halfCount ? 1 : 0
+            const posInHalf = sideIdx < halfCount ? sideIdx : sideIdx - halfCount
+            x = half * (halfCount * pointWidth + gapBetweenHalves) + posInHalf * pointWidth
+          } else {
+            x = sideIdx * pointWidth
+          }
+          const cx = x + pointWidth / 2
+          const baseY = isBottom ? boardHeight : 0
+          const tipY = isBottom ? boardHeight - pointHeight : pointHeight
+          const cy = isBottom ? boardHeight - pointHeight / 3 : pointHeight / 3
+          const cellType = i % 2 === 0 ? 'point-light' : 'point-dark'
+
+          const x1 = x, x2 = x + pointWidth
+          const pts = isBottom
+            ? `${x1},${baseY} ${x2},${baseY} ${cx},${tipY}`
+            : `${x1},${baseY} ${x2},${baseY} ${cx},${tipY}`
+
+          cells.push({
+            key: all[i],
+            center: { x: cx, y: cy },
+            cellType,
+            element: 'polygon',
+            attrs: { points: pts },
+          })
+        }
+        return cells
+      },
+      defaults: {
+        cells: {
+          'point-light': { fill: '#c47e3b' },
+          'point-dark': { fill: '#8b2500' },
+        },
+      },
+    }
+  }
+
+  function crossLayout(all, opts) {
+    const {
+      cellSize = 20,
+      armWidth = 3,
+      armLength = 8,
+      castles = [],
+    } = opts
+
+    const totalCells = armWidth * armLength * 4 + armWidth * armWidth
+    const gridSize = armLength * 2 + armWidth
+    const dim = gridSize * cellSize
+    const armStart = armLength
+    const armEnd = armLength + armWidth
+
+    const castleSet = new Set(castles)
+
+    function isInCross(r, c) {
+      const inVertArm = c >= armStart && c < armEnd
+      const inHorizArm = r >= armStart && r < armEnd
+      return inVertArm || inHorizArm
+    }
+
+    function isCentre(r, c) {
+      return r >= armStart && r < armEnd && c >= armStart && c < armEnd
+    }
+
+    return {
+      getDimensions() {
+        return { width: dim, height: dim }
+      },
+      getCells() {
+        const cells = []
+        let idx = 0
+        for (let r = 0; r < gridSize; r++) {
+          for (let c = 0; c < gridSize; c++) {
+            if (!isInCross(r, c)) continue
+            const key = idx < all.length ? all[idx] : `cell-${idx}`
+            const x = c * cellSize
+            const y = r * cellSize
+            let cellType = 'default'
+            if (isCentre(r, c)) cellType = 'centre'
+            else if (castleSet.has(idx)) cellType = 'castle'
+
+            cells.push({
+              key,
+              center: { x: x + cellSize / 2, y: y + cellSize / 2 },
+              cellType,
+              element: 'rect',
+              attrs: { x, y, width: cellSize, height: cellSize },
+            })
+            idx++
+          }
+        }
+        return cells
+      },
+      defaults: {
+        cells: {
+          default: { fill: '#f0d5a0', stroke: '#8b6545', 'stroke-width': 1 },
+          castle: { fill: '#c0622f', stroke: '#8b6545', 'stroke-width': 1 },
+          centre: { fill: '#8b1a1a', stroke: '#8b6545', 'stroke-width': 1.5 },
+        },
       },
     }
   }

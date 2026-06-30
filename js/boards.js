@@ -4,41 +4,52 @@ import { createTrackTopology } from '../packages/topology-track/index.js'
 import { createPitTopology } from '../packages/topology-pit/index.js'
 import { createGraphTopology } from '../packages/topology-graph/index.js'
 import { createBoardRenderer } from '../packages/render/index.js'
+import { createBoard, builtinBoards } from '../packages/board-layout/index.js'
 import { createRng } from '../packages/core/src/rng.js'
 
 const renderer = createBoardRenderer({ padding: 24 })
 
+const GO_STARS_19 = [[3,3],[3,9],[3,15],[9,3],[9,9],[9,15],[15,3],[15,9],[15,15]]
+const GO_STARS_13 = [[3,3],[3,9],[6,6],[9,3],[9,9]]
+const GO_STARS_9 = [[2,2],[2,6],[4,4],[6,2],[6,6]]
+
 const PRESETS = {
   grid: [
-    { id: 'chess', label: 'Chess (8×8)', config: { rows: 8, cols: 8 } },
-    { id: 'go-19', label: 'Go (19×19)', config: { rows: 19, cols: 19 } },
-    { id: 'go-13', label: 'Go (13×13)', config: { rows: 13, cols: 13 } },
-    { id: 'go-9', label: 'Go (9×9)', config: { rows: 9, cols: 9 } },
-    { id: 'draughts', label: 'Draughts (10×10)', config: { rows: 10, cols: 10 } },
-    { id: 'reversi', label: 'Reversi (8×8)', config: { rows: 8, cols: 8 } },
-    { id: 'xiangqi', label: 'Xiangqi (10×9)', config: { rows: 10, cols: 9 } },
-    { id: 'shogi', label: 'Shogi (9×9)', config: { rows: 9, cols: 9 } },
+    { id: 'chess', label: 'Chess (8×8)', config: { rows: 8, cols: 8 }, board: 'rectangle', layoutMode: 'tiles' },
+    { id: 'go-19', label: 'Go (19×19)', config: { rows: 19, cols: 19 }, board: 'slab', layoutMode: 'intersections', starPoints: GO_STARS_19 },
+    { id: 'go-13', label: 'Go (13×13)', config: { rows: 13, cols: 13 }, board: 'slab', layoutMode: 'intersections', starPoints: GO_STARS_13 },
+    { id: 'go-9', label: 'Go (9×9)', config: { rows: 9, cols: 9 }, board: 'slab', layoutMode: 'intersections', starPoints: GO_STARS_9 },
+    { id: 'draughts', label: 'Draughts (10×10)', config: { rows: 10, cols: 10 }, board: 'rectangle', layoutMode: 'tiles' },
+    { id: 'reversi', label: 'Reversi (8×8)', config: { rows: 8, cols: 8 }, board: 'rectangle', layoutMode: 'tiles' },
+    { id: 'xiangqi', label: 'Xiangqi (10×9)', config: { rows: 10, cols: 9 }, board: 'river', layoutMode: 'intersections',
+      riverAfterRow: 4, riverHeight: 30,
+      palaces: [{ row: 0, col: 3, width: 2, height: 2 }, { row: 7, col: 3, width: 2, height: 2 }] },
+    { id: 'shogi', label: 'Shogi (9×9)', config: { rows: 9, cols: 9 }, board: 'rectangle', layoutMode: 'tiles', alternating: false },
+    { id: 'fanorona', label: 'Fanorona (5×9)', config: { rows: 5, cols: 9 }, board: 'none', layoutMode: 'intersections', diagonals: 'alternating' },
+    { id: 'alquerque', label: 'Alquerque (5×5)', config: { rows: 5, cols: 5 }, board: 'none', layoutMode: 'intersections', diagonals: 'full' },
   ],
   hex: [
-    { id: 'hex-11', label: 'Hex (11)', config: { size: 11, shape: 'rhombus' } },
-    { id: 'hex-7', label: 'Hex (7)', config: { size: 7, shape: 'rhombus' } },
-    { id: 'glinski', label: 'Glinski (radius 6)', config: { radius: 6, shape: 'hexagonal' } },
-    { id: 'nukes-3', label: 'Nukes (3 rings)', config: { radius: 3, shape: 'hexagonal' } },
-    { id: 'nukes-6', label: 'Nukes (6 rings)', config: { radius: 6, shape: 'hexagonal' } },
+    { id: 'hex-11', label: 'Hex (11)', config: { size: 11, shape: 'rhombus' }, board: 'none' },
+    { id: 'hex-7', label: 'Hex (7)', config: { size: 7, shape: 'rhombus' }, board: 'none' },
+    { id: 'glinski', label: 'Glinski (radius 6)', config: { radius: 6, shape: 'hexagonal' }, board: 'none' },
+    { id: 'nukes-3', label: 'Nukes (3 rings)', config: { radius: 3, shape: 'hexagonal' }, board: 'none' },
+    { id: 'nukes-6', label: 'Nukes (6 rings)', config: { radius: 6, shape: 'hexagonal' }, board: 'none' },
   ],
   track: [
-    { id: 'track-24', label: 'Backgammon (24)', config: { length: 24, circuit: false } },
-    { id: 'track-40', label: 'Pachisi (40)', config: { length: 40, circuit: true } },
-    { id: 'track-68', label: 'Chaupar (68)', config: { length: 68, circuit: true } },
+    { id: 'backgammon', label: 'Backgammon (24 points)', config: { length: 24, circuit: false }, board: 'split', layoutStyle: 'points' },
+    { id: 'pachisi', label: 'Pachisi (96 cells)', config: { length: 96, circuit: true }, board: 'none', layoutStyle: 'cross' },
+    { id: 'chaupar', label: 'Chaupar (68)', config: { length: 68, circuit: true }, board: 'none', layoutStyle: 'cross' },
+    { id: 'track-linear', label: 'Linear track (24)', config: { length: 24, circuit: false }, board: 'none', layoutStyle: 'linear' },
+    { id: 'track-circuit', label: 'Circuit (40)', config: { length: 40, circuit: true }, board: 'none', layoutStyle: 'circuit' },
   ],
   pit: [
-    { id: 'kalah-6', label: 'Kalah (6 pits)', config: { pits: 6 } },
-    { id: 'kalah-4', label: 'Kalah (4 pits)', config: { pits: 4 } },
-    { id: 'oware', label: 'Oware (6 pits)', config: { pits: 6 } },
+    { id: 'kalah-6', label: 'Kalah (6 pits)', config: { pits: 6 }, board: 'capsule' },
+    { id: 'kalah-4', label: 'Kalah (4 pits)', config: { pits: 4 }, board: 'capsule' },
+    { id: 'oware', label: 'Oware (6 pits)', config: { pits: 6 }, board: 'capsule' },
   ],
   graph: [
-    { id: 'morris-9', label: 'Nine Men\'s Morris', config: { variant: 'nine-mens' } },
-    { id: 'morris-6', label: 'Six Men\'s Morris', config: { variant: 'six-mens' } },
+    { id: 'morris-9', label: 'Nine Men\'s Morris', config: { variant: 'nine-mens' }, board: 'none' },
+    { id: 'morris-6', label: 'Six Men\'s Morris', config: { variant: 'six-mens' }, board: 'none' },
   ],
 }
 
@@ -120,7 +131,15 @@ let state = {
   preset: 'chess',
   config: { rows: 8, cols: 8 },
   theme: 'classic',
+  boardType: 'rectangle',
   labels: 'algebraic',
+  layoutMode: 'tiles',
+  starPoints: [],
+  riverAfterRow: null,
+  riverHeight: 30,
+  palaces: [],
+  diagonals: 'none',
+  layoutStyle: 'linear',
   seed: Date.now(),
   board: null,
   svg: '',
@@ -132,16 +151,36 @@ function init() {
   if (params.get('preset')) state.preset = params.get('preset')
   if (params.get('seed')) state.seed = parseInt(params.get('seed')) || Date.now()
   if (params.get('theme')) state.theme = params.get('theme')
+  if (params.get('board')) state.boardType = params.get('board')
 
+  applyPresetDefaults()
   bindControls()
   updatePresets()
   updateTopologyOptions()
+  document.getElementById('board-select').value = state.boardType
   generate()
+}
+
+function applyPresetDefaults() {
+  if (state.preset === 'custom') return
+  const presets = PRESETS[state.topology] || []
+  const preset = presets.find(p => p.id === state.preset)
+  if (!preset) return
+  state.config = { ...preset.config }
+  state.boardType = preset.board || 'none'
+  state.layoutMode = preset.layoutMode || 'tiles'
+  state.starPoints = preset.starPoints || []
+  state.riverAfterRow = preset.riverAfterRow ?? null
+  state.riverHeight = preset.riverHeight || 30
+  state.palaces = preset.palaces || []
+  state.diagonals = preset.diagonals || 'none'
+  state.layoutStyle = preset.layoutStyle || 'linear'
 }
 
 function bindControls() {
   document.getElementById('topology-select').addEventListener('change', onTopologyChange)
   document.getElementById('preset-select').addEventListener('change', onPresetChange)
+  document.getElementById('board-select').addEventListener('change', onBoardChange)
   document.getElementById('theme-select').addEventListener('change', onThemeChange)
   document.getElementById('labels-select').addEventListener('change', onLabelsChange)
   document.getElementById('generate-btn').addEventListener('click', onGenerate)
@@ -185,9 +224,28 @@ function onPresetChange(e) {
   state.preset = e.target.value
   if (state.preset !== 'custom') {
     const preset = PRESETS[state.topology].find(p => p.id === state.preset)
-    if (preset) state.config = { ...preset.config }
+    if (preset) {
+      state.config = { ...preset.config }
+      state.boardType = preset.board || 'none'
+      state.layoutMode = preset.layoutMode || 'tiles'
+      state.starPoints = preset.starPoints || []
+      state.riverAfterRow = preset.riverAfterRow ?? null
+      state.riverHeight = preset.riverHeight || 30
+      state.palaces = preset.palaces || []
+      state.diagonals = preset.diagonals || 'none'
+      state.layoutStyle = preset.layoutStyle || 'linear'
+      document.getElementById('board-select').value = state.boardType
+    }
     syncOptionsFromConfig()
   }
+  generate()
+  updateUrl()
+}
+
+function onBoardChange(e) {
+  state.boardType = e.target.value
+  state.preset = 'custom'
+  document.getElementById('preset-select').value = 'custom'
   generate()
   updateUrl()
 }
@@ -483,9 +541,47 @@ function isGoPreset() {
 
 function getLayoutOpts() {
   switch (state.topology) {
-    case 'grid': return { tileSize: 44, alternating: !isGoPreset() }
+    case 'grid': {
+      if (state.layoutMode === 'intersections') {
+        return {
+          mode: 'intersections',
+          spacing: 20,
+          starPoints: state.starPoints,
+          riverAfterRow: state.riverAfterRow,
+          riverHeight: state.riverHeight,
+          palaces: state.palaces,
+          diagonals: state.diagonals,
+        }
+      }
+      const preset = PRESETS.grid.find(p => p.id === state.preset)
+      const alt = preset?.alternating !== undefined ? preset.alternating : !isGoPreset()
+      return { tileSize: 44, alternating: alt }
+    }
     case 'hex': return { cellSize: 22 }
-    case 'track': return { cellSize: 36, style: state.config.circuit ? 'circuit' : 'linear' }
+    case 'track': {
+      const style = state.layoutStyle || (state.config.circuit ? 'circuit' : 'linear')
+      if (style === 'points') {
+        return {
+          style: 'points',
+          pointsPerSide: Math.floor((state.config.length || 24) / 2),
+          pointWidth: 32,
+          pointHeight: 120,
+          boardHeight: 288,
+          halves: true,
+          gapBetweenHalves: 24,
+        }
+      }
+      if (style === 'cross') {
+        return {
+          style: 'cross',
+          cellSize: 20,
+          armWidth: 3,
+          armLength: 8,
+          castles: [4, 12, 20, 28, 36, 44, 52, 60],
+        }
+      }
+      return { cellSize: 36, style }
+    }
     case 'pit': return { pitRadius: 28, storeRadius: 38, spacing: 16 }
     case 'graph': return { nodeRadius: 14, width: 440, height: 440, positions: getMorrisPositions() }
     default: return {}
@@ -500,9 +596,11 @@ function generate() {
   const layout = topology.getLayout(getLayoutOpts())
   const theme = THEMES[state.theme] || THEMES.classic
   const showLabels = state.labels !== 'none'
+  const boardObj = createBoardObject(layout)
 
   state.svg = renderer.render(layout, {
     theme,
+    board: boardObj,
     labels: showLabels,
     pieces: {},
     highlights: [],
@@ -515,10 +613,77 @@ function generate() {
   emptyState.style.display = 'none'
 
   const cells = layout.getCells()
+  const boardLabel = state.boardType !== 'none' ? ` · ${state.boardType} board` : ''
   document.getElementById('board-info').textContent =
-    `${capitalise(state.topology)} · ${cells.length} cells · seed ${state.seed}`
+    `${capitalise(state.topology)} · ${cells.length} cells${boardLabel} · seed ${state.seed}`
   document.getElementById('board-stats').textContent =
     `${cells.length} cells`
+}
+
+function createBoardObject(layout) {
+  if (state.boardType === 'none') return null
+
+  const dims = layout.getDimensions()
+  const padding = 24
+  const themeColors = THEMES[state.theme] || THEMES.classic
+
+  switch (state.boardType) {
+    case 'rectangle':
+      return createBoard(builtinBoards.rectangle({
+        width: dims.width + padding * 2,
+        height: dims.height + padding * 2,
+        frameWidth: padding,
+        frameColor: themeColors.background?.fill || '#5c3a1e',
+        surfaceColor: themeColors.cells?.light?.fill || '#f5e6c8',
+      }))
+    case 'slab':
+      return createBoard(builtinBoards.slab({
+        width: dims.width + padding * 2 + 10,
+        height: dims.height + padding * 2 + 10,
+        borderWidth: padding,
+        surfaceInset: 5,
+        slabColor: '#dcb35c',
+        surfaceColor: '#d4a843',
+      }))
+    case 'split': {
+      const barW = 24
+      return createBoard(builtinBoards.split({
+        width: dims.width + padding * 2 + barW,
+        height: dims.height + padding * 2,
+        frameWidth: padding / 2,
+        barWidth: barW,
+        frameColor: '#3d2b1f',
+        surfaceColor: '#1a5c3a',
+      }))
+    }
+    case 'capsule':
+      return createBoard(builtinBoards.capsule({
+        width: dims.width + 60,
+        height: dims.height + 40,
+        frameWidth: 6,
+        outerRadius: 22,
+        innerRadius: 18,
+        frameColor: '#7A5A32',
+        surfaceColor: '#9B7740',
+      }))
+    case 'felt':
+      return createBoard(builtinBoards.felt({
+        width: dims.width + padding * 2,
+        height: dims.height + padding * 2,
+        feltColor: '#1a5c3a',
+        edgeColor: '#0d3d1f',
+      }))
+    case 'river':
+      return createBoard(builtinBoards.river({
+        width: dims.width + padding * 2,
+        height: dims.height + padding * 2,
+        surfaceColor: '#f5e6c8',
+        riverY: dims.height / 2 - 5,
+        riverHeight: state.riverHeight || 20,
+      }))
+    default:
+      return null
+  }
 }
 
 function capitalise(s) {
@@ -531,6 +696,7 @@ function updateUrl() {
   if (state.preset !== 'custom') params.set('preset', state.preset)
   params.set('seed', state.seed)
   if (state.theme !== 'classic') params.set('theme', state.theme)
+  if (state.boardType !== 'none') params.set('board', state.boardType)
   Object.entries(state.config).forEach(([k, v]) => {
     if (v !== undefined && v !== null) params.set(k, v)
   })

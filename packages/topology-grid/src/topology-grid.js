@@ -173,7 +173,21 @@ export function createGridTopology(config) {
   }
 
   function getLayout(opts = {}) {
-    const { tileSize = 56, alternating = true } = opts
+    const {
+      tileSize = 56,
+      alternating = true,
+      mode = 'tiles',
+      spacing = 20,
+      starPoints = [],
+      diagonals = 'none',
+      riverAfterRow = null,
+      riverHeight = 20,
+      palaces = [],
+    } = opts
+
+    if (mode === 'intersections') {
+      return intersectionLayout({ spacing, starPoints, diagonals, riverAfterRow, riverHeight, palaces })
+    }
 
     return {
       getDimensions() {
@@ -210,6 +224,110 @@ export function createGridTopology(config) {
           labels.push({ x: -10, y: r * tileSize + tileSize / 2, text: String(rows - r), anchor: 'middle', baseline: 'central' })
         }
         return labels
+      },
+    }
+  }
+
+  function intersectionLayout({ spacing, starPoints, diagonals, riverAfterRow, riverHeight, palaces }) {
+    const gap = riverAfterRow !== null ? riverHeight : 0
+    const gridW = (cols - 1) * spacing
+    const gridH = (rows - 1) * spacing + gap
+
+    function posY(r) {
+      if (riverAfterRow !== null && r > riverAfterRow) {
+        return r * spacing + gap
+      }
+      return r * spacing
+    }
+
+    return {
+      getDimensions() {
+        return { width: gridW, height: gridH }
+      },
+      getCells() {
+        const cells = []
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const x = c * spacing
+            const y = posY(r)
+            cells.push({
+              key: toIndex(r, c),
+              center: { x, y },
+              cellType: 'intersection',
+              element: 'circle',
+              attrs: { cx: x, cy: y, r: 0 },
+            })
+          }
+        }
+        return cells
+      },
+      getLines() {
+        const lines = []
+        for (let r = 0; r < rows; r++) {
+          const y = posY(r)
+          lines.push({ x1: 0, y1: y, x2: gridW, y2: y })
+        }
+        for (let c = 0; c < cols; c++) {
+          const x = c * spacing
+          if (riverAfterRow !== null) {
+            lines.push({ x1: x, y1: 0, x2: x, y2: posY(riverAfterRow) })
+            lines.push({ x1: x, y1: posY(riverAfterRow + 1), x2: x, y2: gridH })
+          } else {
+            lines.push({ x1: x, y1: 0, x2: x, y2: gridH })
+          }
+        }
+        if (diagonals === 'full') {
+          for (let r = 0; r < rows - 1; r++) {
+            for (let c = 0; c < cols - 1; c++) {
+              lines.push({ x1: c * spacing, y1: posY(r), x2: (c + 1) * spacing, y2: posY(r + 1) })
+              lines.push({ x1: (c + 1) * spacing, y1: posY(r), x2: c * spacing, y2: posY(r + 1) })
+            }
+          }
+        } else if (diagonals === 'alternating') {
+          for (let r = 0; r < rows - 1; r++) {
+            for (let c = 0; c < cols - 1; c++) {
+              if ((r + c) % 2 === 0) {
+                lines.push({ x1: c * spacing, y1: posY(r), x2: (c + 1) * spacing, y2: posY(r + 1) })
+                lines.push({ x1: (c + 1) * spacing, y1: posY(r), x2: c * spacing, y2: posY(r + 1) })
+              }
+            }
+          }
+        }
+        for (const palace of palaces) {
+          const { row, col, width: pw, height: ph } = palace
+          const x1 = col * spacing, y1 = posY(row)
+          const x2 = (col + pw) * spacing, y2 = posY(row + ph)
+          lines.push({ x1, y1, x2, y2 })
+          lines.push({ x1: x2, y1, x2: x1, y2 })
+        }
+        return lines
+      },
+      getAnnotations() {
+        return starPoints.map(([r, c]) => ({
+          element: 'circle',
+          cellType: 'starpoint',
+          attrs: { cx: c * spacing, cy: posY(r), r: 3 },
+        }))
+      },
+      getLabels() {
+        const labels = []
+        const letterSkip = 'I'
+        let letterIdx = 0
+        for (let c = 0; c < cols; c++) {
+          let ch = String.fromCharCode(65 + letterIdx)
+          if (ch === letterSkip) { letterIdx++; ch = String.fromCharCode(65 + letterIdx) }
+          labels.push({ x: c * spacing, y: gridH + 14, text: ch, anchor: 'middle' })
+          letterIdx++
+        }
+        for (let r = 0; r < rows; r++) {
+          labels.push({ x: -14, y: posY(r), text: String(rows - r), anchor: 'middle', baseline: 'central' })
+        }
+        return labels
+      },
+      defaults: {
+        cells: { intersection: { fill: 'none', stroke: 'none', r: 0 } },
+        lines: { stroke: '#3d2b1a', 'stroke-width': 0.8 },
+        annotations: { starpoint: { fill: '#3d2b1a' } },
       },
     }
   }

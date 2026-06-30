@@ -174,4 +174,69 @@ describe('topology-track', () => {
       expect(track.next('fork')).toBe('home-a')
     })
   })
+
+  describe('points layout mode (backgammon-style)', () => {
+    const track = createTrackTopology({
+      positions: Array.from({ length: 24 }, (_, i) => `point-${i + 1}`),
+      circuit: false,
+    })
+
+    test('produces 24 triangular polygon cells', () => {
+      const layout = track.getLayout({ style: 'points', pointsPerSide: 12, pointWidth: 32, pointHeight: 120, boardHeight: 288 })
+      const cells = layout.getCells()
+      expect(cells).toHaveLength(24)
+      expect(cells[0].element).toBe('polygon')
+      expect(cells[0].attrs.points).toBeDefined()
+    })
+
+    test('alternates point-light and point-dark cell types', () => {
+      const layout = track.getLayout({ style: 'points', pointsPerSide: 12, pointWidth: 32, boardHeight: 288 })
+      const cells = layout.getCells()
+      expect(cells[0].cellType).toBe('point-light')
+      expect(cells[1].cellType).toBe('point-dark')
+    })
+
+    test('dimensions reflect point arrangement', () => {
+      const layout = track.getLayout({ style: 'points', pointsPerSide: 12, pointWidth: 32, boardHeight: 288, halves: true, gapBetweenHalves: 24 })
+      const dims = layout.getDimensions()
+      expect(dims.height).toBe(288)
+      expect(dims.width).toBe(6 * 32 * 2 + 24)
+    })
+  })
+
+  describe('cross layout mode (pachisi-style)', () => {
+    const track = createTrackTopology({
+      positions: Array.from({ length: 96 }, (_, i) => `cell-${i}`),
+      circuit: true,
+    })
+
+    test('produces cross-shaped grid of rect cells', () => {
+      const layout = track.getLayout({ style: 'cross', cellSize: 20, armWidth: 3, armLength: 8 })
+      const cells = layout.getCells()
+      expect(cells.length).toBeGreaterThan(0)
+      expect(cells[0].element).toBe('rect')
+    })
+
+    test('has centre cells and default cells', () => {
+      const layout = track.getLayout({ style: 'cross', cellSize: 20, armWidth: 3, armLength: 8 })
+      const cells = layout.getCells()
+      const types = new Set(cells.map(c => c.cellType))
+      expect(types.has('default')).toBe(true)
+      expect(types.has('centre')).toBe(true)
+    })
+
+    test('castle positions get castle cellType', () => {
+      const layout = track.getLayout({ style: 'cross', cellSize: 20, armWidth: 3, armLength: 8, castles: [5, 10, 20] })
+      const cells = layout.getCells()
+      expect(cells[5].cellType).toBe('castle')
+      expect(cells[10].cellType).toBe('castle')
+    })
+
+    test('dimensions are square based on grid size', () => {
+      const layout = track.getLayout({ style: 'cross', cellSize: 20, armWidth: 3, armLength: 8 })
+      const dims = layout.getDimensions()
+      expect(dims.width).toBe(dims.height)
+      expect(dims.width).toBe(19 * 20)
+    })
+  })
 })

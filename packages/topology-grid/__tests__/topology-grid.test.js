@@ -116,4 +116,79 @@ describe('topology-grid', () => {
     expect(n).toContain(wrapped.toIndex(7, 0))
     expect(n).toContain(wrapped.toIndex(0, 7))
   })
+
+  describe('intersection layout mode', () => {
+    const go = createGridTopology({ rows: 19, cols: 19 })
+
+    test('produces intersection cells at line crossings', () => {
+      const layout = go.getLayout({ mode: 'intersections', spacing: 20 })
+      const cells = layout.getCells()
+      expect(cells).toHaveLength(361)
+      expect(cells[0].cellType).toBe('intersection')
+      expect(cells[0].element).toBe('circle')
+      expect(cells[0].center).toEqual({ x: 0, y: 0 })
+    })
+
+    test('produces grid lines (rows + cols)', () => {
+      const layout = go.getLayout({ mode: 'intersections', spacing: 20 })
+      const lines = layout.getLines()
+      expect(lines).toHaveLength(38)
+    })
+
+    test('dimensions are (cols-1)*spacing x (rows-1)*spacing', () => {
+      const layout = go.getLayout({ mode: 'intersections', spacing: 20 })
+      expect(layout.getDimensions()).toEqual({ width: 360, height: 360 })
+    })
+
+    test('star points appear as annotations', () => {
+      const stars = [[3, 3], [3, 9], [3, 15], [9, 9]]
+      const layout = go.getLayout({ mode: 'intersections', spacing: 20, starPoints: stars })
+      const ann = layout.getAnnotations()
+      expect(ann).toHaveLength(4)
+      expect(ann[0].element).toBe('circle')
+      expect(ann[0].attrs.cx).toBe(60)
+      expect(ann[0].attrs.cy).toBe(60)
+    })
+
+    test('labels skip letter I (Go convention)', () => {
+      const layout = go.getLayout({ mode: 'intersections', spacing: 20 })
+      const labels = layout.getLabels()
+      const colLabels = labels.filter(l => l.y > 360)
+      expect(colLabels[0].text).toBe('A')
+      expect(colLabels[7].text).toBe('H')
+      expect(colLabels[8].text).toBe('J')
+    })
+
+    test('river mode adds gap between rows', () => {
+      const xiangqi = createGridTopology({ rows: 10, cols: 9 })
+      const layout = xiangqi.getLayout({ mode: 'intersections', spacing: 40, riverAfterRow: 4, riverHeight: 30 })
+      const dims = layout.getDimensions()
+      expect(dims.height).toBe(9 * 40 + 30)
+      const cells = layout.getCells()
+      const row4 = cells[4 * 9]
+      const row5 = cells[5 * 9]
+      expect(row5.center.y - row4.center.y).toBe(40 + 30)
+    })
+
+    test('palace diagonals add cross lines', () => {
+      const xiangqi = createGridTopology({ rows: 10, cols: 9 })
+      const layout = xiangqi.getLayout({
+        mode: 'intersections',
+        spacing: 40,
+        riverAfterRow: 4,
+        riverHeight: 30,
+        palaces: [{ row: 0, col: 3, width: 2, height: 2 }, { row: 7, col: 3, width: 2, height: 2 }],
+      })
+      const lines = layout.getLines()
+      // 10 horiz + 18 vert (9 cols split by river) + 4 palace diagonals
+      expect(lines.length).toBe(32)
+    })
+
+    test('alternating diagonals for alquerque/fanorona', () => {
+      const board = createGridTopology({ rows: 5, cols: 9 })
+      const layout = board.getLayout({ mode: 'intersections', spacing: 30, diagonals: 'alternating' })
+      const lines = layout.getLines()
+      expect(lines.length).toBeGreaterThan(5 + 9)
+    })
+  })
 })
