@@ -149,21 +149,25 @@ export function createTrackTopology(config) {
       },
       getCells() {
         const cells = []
+        const s = cellSize * 0.85
+        function makeCell(key, cx, cy) {
+          return { key, center: { x: cx, y: cy }, element: 'rect', attrs: { x: cx - s / 2, y: cy - s / 2, width: s, height: s, fill: 'none', stroke: '#333', 'stroke-width': 1 } }
+        }
         if (circuit && style === 'circuit') {
           const side = Math.ceil(all.length / 4)
           const dim = (side + 1) * cellSize
           let idx = 0
           for (let i = 0; i < Math.min(side, all.length - idx); i++)
-            cells.push({ key: all[idx++], center: { x: i * cellSize + cellSize / 2, y: cellSize / 2 }, shape: 'rect', size: cellSize * 0.85 })
+            cells.push(makeCell(all[idx++], i * cellSize + cellSize / 2, cellSize / 2))
           for (let i = 0; i < Math.min(side, all.length - idx); i++)
-            cells.push({ key: all[idx++], center: { x: dim - cellSize / 2, y: i * cellSize + cellSize / 2 }, shape: 'rect', size: cellSize * 0.85 })
+            cells.push(makeCell(all[idx++], dim - cellSize / 2, i * cellSize + cellSize / 2))
           for (let i = 0; i < Math.min(side, all.length - idx); i++)
-            cells.push({ key: all[idx++], center: { x: dim - i * cellSize - cellSize / 2, y: dim - cellSize / 2 }, shape: 'rect', size: cellSize * 0.85 })
+            cells.push(makeCell(all[idx++], dim - i * cellSize - cellSize / 2, dim - cellSize / 2))
           for (let i = 0; i < Math.min(side, all.length - idx); i++)
-            cells.push({ key: all[idx++], center: { x: cellSize / 2, y: dim - i * cellSize - cellSize / 2 }, shape: 'rect', size: cellSize * 0.85 })
+            cells.push(makeCell(all[idx++], cellSize / 2, dim - i * cellSize - cellSize / 2))
         } else {
           for (let i = 0; i < all.length; i++)
-            cells.push({ key: all[i], center: { x: i * cellSize + cellSize / 2, y: cellSize }, shape: 'rect', size: cellSize * 0.85 })
+            cells.push(makeCell(all[i], i * cellSize + cellSize / 2, cellSize))
         }
         return cells
       },

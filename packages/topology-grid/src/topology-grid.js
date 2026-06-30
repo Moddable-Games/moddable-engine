@@ -174,12 +174,13 @@ export function createGridTopology(config) {
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
             const fill = alternating ? ((r + c) % 2 === 0 ? lightFill : darkFill) : lightFill
+            const x = c * tileSize
+            const y = r * tileSize
             cells.push({
               key: toIndex(r, c),
-              center: { x: c * tileSize + tileSize / 2, y: r * tileSize + tileSize / 2 },
-              shape: 'rect',
-              size: tileSize,
-              fill,
+              center: { x: x + tileSize / 2, y: y + tileSize / 2 },
+              element: 'rect',
+              attrs: { x, y, width: tileSize, height: tileSize, fill, stroke: 'none', 'stroke-width': 0.5 },
             })
           }
         }

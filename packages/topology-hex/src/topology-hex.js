@@ -247,7 +247,9 @@ export function createHexTopology(config) {
         return getAllCells().map(k => {
           const px = toPixel(k, cellSize)
           const center = { x: px.x + dims.offsetX, y: px.y + dims.offsetY }
-          return { key: k, center, shape: 'hex', size: cellSize, corners: getCorners(center, cellSize) }
+          const corners = getCorners(center, cellSize)
+          const points = corners.map(c => `${c.x},${c.y}`).join(' ')
+          return { key: k, center, element: 'polygon', attrs: { points, fill: 'none', stroke: '#333', 'stroke-width': 1 } }
         })
       },
       getAnnotations() {

@@ -2,15 +2,18 @@
  * Board renderer — topology-agnostic SVG generation.
  *
  * The renderer does not know what topology it's drawing. It asks the
- * topology's layout adapter for pixel positions and cell shapes, then
- * composes SVG layers.
+ * topology's layout adapter for pixel positions and SVG element data,
+ * then composes SVG layers.
  *
- * The contract: topology provides a layout adapter via createLayout().
+ * The contract: topology provides a layout adapter via getLayout().
  * Layout adapters implement:
- *   - getCells() → [{key, center: {x,y}, shape: 'rect'|'hex'|'circle'|'node', ...}]
+ *   - getCells() → [{key, center, element: 'rect'|'polygon'|'circle'|'ellipse', attrs: {...}}]
  *   - getDimensions() → {width, height}
- *   - getLines() → [{x1,y1,x2,y2}] (optional, for grid lines / connections)
+ *   - getLines() → [{x1,y1,x2,y2} | {from,to}] (optional, for connections)
  *   - getAnnotations() → [{type, ...}] (optional, for star points / markers)
+ *
+ * Each cell provides its own SVG element type and attributes. The renderer
+ * never interprets or modifies these — it emits them verbatim.
  */
 
 export function createBoardRenderer(opts = {}) {
@@ -37,13 +40,17 @@ export function createBoardRenderer(opts = {}) {
       const lineWidth = colors.lineWidth || 1.5
       parts.push(`<g stroke="${lineColor}" stroke-width="${lineWidth}" stroke-linecap="round">`)
       for (const line of lines) {
-        parts.push(`<line x1="${line.x1}" y1="${line.y1}" x2="${line.x2}" y2="${line.y2}"/>`)
+        const x1 = line.x1 !== undefined ? line.x1 : line.from.x
+        const y1 = line.y1 !== undefined ? line.y1 : line.from.y
+        const x2 = line.x2 !== undefined ? line.x2 : line.to.x
+        const y2 = line.y2 !== undefined ? line.y2 : line.to.y
+        parts.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`)
       }
       parts.push('</g>')
     }
 
     const cells = layout.getCells()
-    parts.push(renderCells(cells, colors, highlights))
+    parts.push(renderCells(cells, highlights))
 
     if (layout.getAnnotations) {
       parts.push(renderAnnotations(layout.getAnnotations(), colors))
@@ -62,28 +69,17 @@ export function createBoardRenderer(opts = {}) {
     return parts.join('\n')
   }
 
-  function renderCells(cells, colors, highlights) {
+  function renderCells(cells, highlights) {
     const parts = []
     const highlightSet = new Set(highlights.map(h => h.key))
 
     for (const cell of cells) {
-      const fill = highlightSet.has(cell.key)
-        ? (highlights.find(h => h.key === cell.key).color || colors.highlight || '#ffff00')
-        : (cell.fill || colors.cellFill || 'none')
-
-      if (cell.shape === 'rect') {
-        parts.push(`<rect x="${cell.center.x - cell.size / 2}" y="${cell.center.y - cell.size / 2}" width="${cell.size}" height="${cell.size}" fill="${fill}" stroke="${colors.cellStroke || 'none'}" stroke-width="0.5"/>`)
-      } else if (cell.shape === 'hex') {
-        const corners = cell.corners || []
-        const points = corners.map(c => `${c.x},${c.y}`).join(' ')
-        parts.push(`<polygon points="${points}" fill="${fill}" stroke="${colors.cellStroke || '#333'}" stroke-width="1"/>`)
-      } else if (cell.shape === 'circle' || cell.shape === 'node') {
-        const r = cell.radius || 5
-        parts.push(`<circle cx="${cell.center.x}" cy="${cell.center.y}" r="${r}" fill="${fill || colors.point || '#333'}"/>`)
-      } else if (cell.shape === 'pit') {
-        const r = cell.radius || 20
-        parts.push(`<ellipse cx="${cell.center.x}" cy="${cell.center.y}" rx="${r}" ry="${r * 0.8}" fill="${fill || colors.pitFill || '#8B4513'}" stroke="${colors.pitStroke || '#5C3010'}" stroke-width="2"/>`)
+      const attrs = { ...cell.attrs }
+      if (highlightSet.has(cell.key)) {
+        const h = highlights.find(h => h.key === cell.key)
+        attrs.fill = h.color || '#ffff00'
       }
+      parts.push(svgElement(cell.element, attrs))
     }
     return parts.join('\n')
   }
@@ -108,7 +104,7 @@ export function createBoardRenderer(opts = {}) {
       if (!piece) continue
       const fill = piece.color === 'white' ? (colors.whitePiece || '#fff') : (colors.blackPiece || '#1c1c1c')
       const stroke = piece.color === 'white' ? (colors.whitePieceStroke || '#333') : (colors.blackPieceStroke || '#888')
-      const r = (cell.size || cell.radius || 20) * 0.35
+      const r = (cell.attrs.width || cell.attrs.r || cell.attrs.rx || 20) * 0.35
       parts.push(`<circle cx="${cell.center.x}" cy="${cell.center.y}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>`)
       if (piece.label) {
         parts.push(`<text x="${cell.center.x}" y="${cell.center.y}" text-anchor="middle" dominant-baseline="central" font-size="${r}" fill="${stroke}">${piece.label}</text>`)
@@ -129,4 +125,11 @@ export function createBoardRenderer(opts = {}) {
   }
 
   return { render }
+}
+
+function svgElement(element, attrs) {
+  const attrStr = Object.entries(attrs)
+    .map(([k, v]) => `${k}="${v}"`)
+    .join(' ')
+  return `<${element} ${attrStr}/>`
 }

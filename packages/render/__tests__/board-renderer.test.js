@@ -21,13 +21,13 @@ describe('board-renderer — topology-agnostic', () => {
       expect(layout.getCells()).toHaveLength(64)
     })
 
-    test('cells have rect shape', () => {
-      expect(layout.getCells()[0].shape).toBe('rect')
+    test('cells declare rect element', () => {
+      expect(layout.getCells()[0].element).toBe('rect')
     })
 
-    test('alternating fills', () => {
+    test('alternating fills via attrs', () => {
       const cells = layout.getCells()
-      expect(cells[0].fill).not.toBe(cells[1].fill)
+      expect(cells[0].attrs.fill).not.toBe(cells[1].attrs.fill)
     })
 
     test('renders with pieces', () => {
@@ -52,10 +52,11 @@ describe('board-renderer — topology-agnostic', () => {
       expect(layout.getCells()).toHaveLength(37)
     })
 
-    test('cells have hex shape with 6 corners', () => {
+    test('cells declare polygon element with points attr', () => {
       const cell = layout.getCells()[0]
-      expect(cell.shape).toBe('hex')
-      expect(cell.corners).toHaveLength(6)
+      expect(cell.element).toBe('polygon')
+      expect(cell.attrs.points).toBeDefined()
+      expect(cell.attrs.points.split(' ')).toHaveLength(6)
     })
 
     test('SVG contains polygon elements', () => {
@@ -112,13 +113,13 @@ describe('board-renderer — topology-agnostic', () => {
       expect(layout.getCells()).toHaveLength(14)
     })
 
-    test('cells have pit shape', () => {
-      expect(layout.getCells().every(c => c.shape === 'pit')).toBe(true)
+    test('cells declare ellipse element', () => {
+      expect(layout.getCells().every(c => c.element === 'ellipse')).toBe(true)
     })
 
-    test('stores are larger', () => {
+    test('stores have larger rx', () => {
       const cells = layout.getCells()
-      const stores = cells.filter(c => c.radius === 35)
+      const stores = cells.filter(c => c.attrs.rx === 35)
       expect(stores).toHaveLength(2)
     })
   })
@@ -134,6 +135,22 @@ describe('board-renderer — topology-agnostic', () => {
       expect(hexSvg).toContain('<svg')
       expect(trackSvg).toContain('<svg')
       expect(pitSvg).toContain('<svg')
+    })
+
+    test('all cells provide element + attrs (no shape strings)', () => {
+      const layouts = [
+        createGridTopology({ rows: 3, cols: 3 }).getLayout(),
+        createHexTopology({ radius: 2 }).getLayout(),
+        createTrackTopology({ positions: ['a', 'b'], circuit: false }).getLayout(),
+        createPitTopology({ pitsPerSide: 4, players: 2, hasStores: false }).getLayout(),
+      ]
+      for (const layout of layouts) {
+        for (const cell of layout.getCells()) {
+          expect(cell.element).toBeDefined()
+          expect(cell.attrs).toBeDefined()
+          expect(cell.center).toBeDefined()
+        }
+      }
     })
   })
 })
