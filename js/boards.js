@@ -45,21 +45,73 @@ const PRESETS = {
 const THEMES = {
   classic: {
     background: { fill: '#f5f0e8' },
-    cells: { default: { fill: '#e8dcc8', stroke: '#8b7355', 'stroke-width': '1' } },
+    cells: {
+      default: { fill: '#e8dcc8', stroke: '#8b7355', 'stroke-width': '1' },
+      light: { fill: '#f0d9b5', stroke: 'none' },
+      dark: { fill: '#b58863', stroke: 'none' },
+      uniform: { fill: '#dcb35c', stroke: '#b8952e', 'stroke-width': '0.5' },
+      pit: { fill: '#8B4513', stroke: '#5C3010', 'stroke-width': '2' },
+      store: { fill: '#6B3410', stroke: '#4a2008', 'stroke-width': '2' },
+      node: { fill: '#e8dcc8', stroke: '#8b7355', 'stroke-width': '1.5' },
+    },
     lines: { stroke: '#333', 'stroke-width': '1.5' },
     annotations: { default: { fill: '#333', r: '3' } },
   },
   midnight: {
     background: { fill: '#1a1a2e' },
-    cells: { default: { fill: '#16213e', stroke: '#4a6fa5', 'stroke-width': '1' } },
+    cells: {
+      default: { fill: '#16213e', stroke: '#4a6fa5', 'stroke-width': '1' },
+      light: { fill: '#1e2a4a', stroke: 'none' },
+      dark: { fill: '#0f1630', stroke: 'none' },
+      uniform: { fill: '#16213e', stroke: '#4a6fa5', 'stroke-width': '0.5' },
+      pit: { fill: '#1a1a4e', stroke: '#4a6fa5', 'stroke-width': '2' },
+      store: { fill: '#0d0d3a', stroke: '#4a6fa5', 'stroke-width': '2' },
+      node: { fill: '#1e2a4a', stroke: '#6fb5ff', 'stroke-width': '1.5' },
+    },
     lines: { stroke: '#6fb5ff', 'stroke-width': '1.5' },
     annotations: { default: { fill: '#6fb5ff', r: '3' } },
   },
   parchment: {
     background: { fill: '#faf3e0' },
-    cells: { default: { fill: '#f0e6c8', stroke: '#a0855b', 'stroke-width': '1' } },
+    cells: {
+      default: { fill: '#f0e6c8', stroke: '#a0855b', 'stroke-width': '1' },
+      light: { fill: '#faf3e0', stroke: 'none' },
+      dark: { fill: '#d4a56a', stroke: 'none' },
+      uniform: { fill: '#f0e6c8', stroke: '#a0855b', 'stroke-width': '0.5' },
+      pit: { fill: '#a0855b', stroke: '#7a5c3a', 'stroke-width': '2' },
+      store: { fill: '#7a5c3a', stroke: '#5c3d20', 'stroke-width': '2' },
+      node: { fill: '#faf3e0', stroke: '#5c4033', 'stroke-width': '1.5' },
+    },
     lines: { stroke: '#5c4033', 'stroke-width': '1.5' },
     annotations: { default: { fill: '#5c4033', r: '3' } },
+  },
+  wood: {
+    background: { fill: '#c8a46e' },
+    cells: {
+      default: { fill: '#deb887', stroke: '#a0794a', 'stroke-width': '1' },
+      light: { fill: '#deb887', stroke: 'none' },
+      dark: { fill: '#8b6914', stroke: 'none' },
+      uniform: { fill: '#c8a46e', stroke: '#8b6914', 'stroke-width': '0.5' },
+      pit: { fill: '#6b4e1e', stroke: '#4a3512', 'stroke-width': '2' },
+      store: { fill: '#4a3512', stroke: '#2d1f0a', 'stroke-width': '2' },
+      node: { fill: '#deb887', stroke: '#6b4e1e', 'stroke-width': '1.5' },
+    },
+    lines: { stroke: '#4a3512', 'stroke-width': '1.5' },
+    annotations: { default: { fill: '#4a3512', r: '3' } },
+  },
+  green: {
+    background: { fill: '#2d5a27' },
+    cells: {
+      default: { fill: '#3d7a37', stroke: '#1e4a18', 'stroke-width': '1' },
+      light: { fill: '#4a8a42', stroke: 'none' },
+      dark: { fill: '#2d5a27', stroke: 'none' },
+      uniform: { fill: '#3d7a37', stroke: '#1e4a18', 'stroke-width': '0.5' },
+      pit: { fill: '#1e4a18', stroke: '#0f2a0c', 'stroke-width': '2' },
+      store: { fill: '#0f2a0c', stroke: '#051505', 'stroke-width': '2' },
+      node: { fill: '#4a8a42', stroke: '#1e4a18', 'stroke-width': '1.5' },
+    },
+    lines: { stroke: '#0f2a0c', 'stroke-width': '1.5' },
+    annotations: { default: { fill: '#ddd', r: '3' } },
   },
 }
 
@@ -362,6 +414,34 @@ function createTopology() {
   }
 }
 
+function getMorrisPositions() {
+  const w = 440, h = 440
+  const pad = 40
+  const variant = state.config.variant || 'nine-mens'
+
+  if (variant === 'six-mens') {
+    // Six Men's: nodes encode grid position (a-g = col 1-7, number = row)
+    // Only uses columns a,b,c,e,f,g and rows 1-7 (no d column, no center)
+    return morrisGridPositions(getGraphConfig('six-mens').nodes, w, h, pad)
+  }
+
+  // Nine Men's: same grid-based positioning
+  return morrisGridPositions(getGraphConfig('nine-mens').nodes, w, h, pad)
+}
+
+function morrisGridPositions(nodes, w, h, pad) {
+  const cols = { a: 0, b: 1, c: 2, d: 3, e: 4, f: 5, g: 6 }
+  const positions = {}
+  const sx = (w - pad * 2) / 6
+  const sy = (h - pad * 2) / 6
+  for (const node of nodes) {
+    const col = cols[node[0]]
+    const row = parseInt(node.slice(1)) - 1
+    positions[node] = { x: pad + col * sx, y: pad + (6 - row) * sy }
+  }
+  return positions
+}
+
 function getGraphConfig(variant) {
   if (variant === 'six-mens') {
     return {
@@ -401,9 +481,9 @@ function getLayoutOpts() {
   switch (state.topology) {
     case 'grid': return { tileSize: 44 }
     case 'hex': return { cellSize: 22 }
-    case 'track': return { cellSize: 36 }
+    case 'track': return { cellSize: 36, style: state.config.circuit ? 'circuit' : 'linear' }
     case 'pit': return { pitRadius: 28, storeRadius: 38, spacing: 16 }
-    case 'graph': return { nodeRadius: 14, width: 440, height: 440 }
+    case 'graph': return { nodeRadius: 14, width: 440, height: 440, positions: getMorrisPositions() }
     default: return {}
   }
 }
