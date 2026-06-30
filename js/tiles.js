@@ -117,7 +117,8 @@ function render() {
     html += `<div class="piece-grid">`
     tileEntries.forEach(([key, file]) => {
       const src = `${SETS_BASE}/${set.id}/${file}`
-      html += `<div class="piece-cell bg-${bg} shape-${set.shape}">`
+      const clipClass = (set.shape === 'hex' && set.clipped) ? ' hex-clip' : ''
+      html += `<div class="piece-cell bg-${bg} shape-${set.shape}${clipClass}">`
       html += `<img src="${src}" alt="${key}" loading="lazy">`
       html += `<span class="piece-label">${key}</span>`
       html += `</div>`

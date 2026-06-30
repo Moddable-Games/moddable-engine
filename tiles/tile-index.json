@@ -485,6 +485,7 @@
     "orientation": "pointy",
     "license": "proprietary",
     "format": "png",
+    "clipped": true,
     "tiles": {
       "Acrux": "Acrux.png",
       "Alchernar": "Alchernar.png",
