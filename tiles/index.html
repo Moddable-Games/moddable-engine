@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tile Gallery — Moddable Engine</title>
+<meta name="description" content="Browseable tile gallery for hex, square, and rectangle game tiles. Terrain, mahjong, star systems, and more across 12 sets.">
+<meta name="theme-color" content="#0a0d2a">
+<meta name="base-path" content="..">
+<link rel="stylesheet" href="../css/home.css">
+<link rel="stylesheet" href="../css/gallery.css">
+<link rel="stylesheet" href="../css/tiles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../play/" class="nav-link nav-link--soon">Play</a>
+      <a href="../boards/" class="nav-link">Boards</a>
+      <a href="../pieces/" class="nav-link">Pieces</a>
+      <a href="./" class="nav-link nav-link--active">Tiles</a>
+      <a href="../docs/" class="nav-link nav-link--soon">Docs</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<section class="gallery-hero">
+  <div class="gallery-hero-content">
+    <div class="hero-eyebrow">Tile Gallery</div>
+    <h1 class="hero-title">Every tile. Every terrain.</h1>
+    <p class="hero-lede" id="gallery-intro">Loading...</p>
+  </div>
+</section>
+
+<section class="gallery-controls">
+  <div class="controls-inner">
+    <div class="control-row">
+      <label class="control-group">
+        <span class="control-label">Search</span>
+        <input type="text" id="search-input" placeholder="grass, mountain, man1...">
+      </label>
+      <label class="control-group">
+        <span class="control-label">Shape</span>
+        <select id="shape-filter">
+          <option value="all">All shapes</option>
+          <option value="hex">Hex</option>
+          <option value="rectangle">Rectangle</option>
+          <option value="square">Square</option>
+        </select>
+      </label>
+      <label class="control-group">
+        <span class="control-label">Family</span>
+        <select id="family-filter">
+          <option value="all">All families</option>
+        </select>
+      </label>
+      <label class="control-group">
+        <span class="control-label">Set</span>
+        <select id="set-filter">
+          <option value="all">All sets</option>
+        </select>
+      </label>
+      <label class="control-group">
+        <span class="control-label">Size</span>
+        <select id="size-select">
+          <option value="48">48px</option>
+          <option value="64">64px</option>
+          <option value="80" selected>80px</option>
+          <option value="100">100px</option>
+          <option value="128">128px</option>
+        </select>
+      </label>
+    </div>
+    <div class="gallery-stats" id="gallery-stats"></div>
+  </div>
+</section>
+
+<section class="gallery-body">
+  <div id="gallery-container"></div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="footer-brand">moddable.engine</p>
+    <p class="footer-sub">Part of <a href="https://moddable.games" target="_blank" rel="noopener">Moddable.Games</a></p>
+  </div>
+</footer>
+
+<script type="module" src="../js/tiles.js"></script>
+</body>
+</html>
