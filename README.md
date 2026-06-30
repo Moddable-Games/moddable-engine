@@ -8,9 +8,9 @@ Every game in the Moddable Games collection — from standard chess to Endless S
 
 ## Status
 
-**Engine foundation complete.** Five topologies, piece-behaviour, render layer, schema package, and game factory are implemented and proven (468 tests across 42 suites, all passing). All 7 proof games (Chess, Go, Backgammon, Mancala, Morris, Hex, Big 2) play moves from schema-driven definitions. All 154 moddable-rules variants have engine blocks and validate.
+**Plugin library complete.** All 7 game families implemented as reusable plugins with 11 universal hooks, component system (deck, dice), theming (board + piece), traversal algorithms, position notation, and cross-topology support. 771 tests across 65 suites, all passing. Same chess movement code works on both grid and hex boards without modification.
 
-Next milestone: **Plugin library** — extract proof game logic into reusable hook-based plugins with board and piece theming. See the approved plan in progress.
+Next milestone: **Production chess** — port moddable-chess's battle-tested variant system (75 variants, 18 fairy pieces, terrain layer) into plugin-chess. Its sophistication sets the quality bar for all game plugins.
 
 Read [`SPEC.md`](./SPEC.md) before contributing anything.
 
@@ -21,25 +21,30 @@ Read [`SPEC.md`](./SPEC.md) before contributing anything.
 ```
 moddable-engine/
   packages/
-    core/                ← @moddable/core (done)
-    topology-grid/       ← @moddable/topology-grid (done)
-    topology-hex/        ← @moddable/topology-hex (done)
-    topology-track/      ← @moddable/topology-track (done)
-    topology-pit/        ← @moddable/topology-pit (done)
-    topology-graph/      ← @moddable/topology-graph (done)
-    piece-behaviour/     ← @moddable/piece-behaviour (done)
-    render/              ← @moddable/render (done, theme-ready)
-    schema/              ← @moddable/schema (done)
-    game/                ← @moddable/game (done)
+    core/                ← state, moves, players, history, events, RNG, traversal
+    topology-grid/       ← rectangular grids + position notation
+    topology-hex/        ← hex (hexagonal + rhombus) + position notation
+    topology-track/      ← linear/circuit paths
+    topology-pit/        ← mancala pit-sow layouts
+    topology-graph/      ← arbitrary node-edge + position notation
+    piece-behaviour/     ← movement primitives (slide, leap, jump, custodian)
+    render/              ← topology-agnostic SVG board renderer
+    schema/              ← frontmatter → game definitions
+    game/                ← factory, topology registry, component registry
+    board-theme/         ← board visual treatment (resolver, builtins)
+    piece-theme/         ← piece visual treatment (resolver, recolour)
+    component-deck/      ← standard 52-card deck
+    component-dice/      ← standard dice (roll, doubles, movesFromRoll)
+    plugin-go/           ← Go + atari-go
+    plugin-hex/          ← Hex + swap rule
+    plugin-mancala/      ← Kalah + Oware
+    plugin-morris/       ← Nine Men's + Six Men's
+    plugin-backgammon/   ← Standard + nackgammon
+    plugin-big2/         ← Big 2 + President
+    plugin-chess/        ← Standard chess (production port in progress)
   SPEC.md                ← architecture spec — read this first
   package.json           ← workspace root
 ```
-
-### Planned packages (in design / Phase 1)
-
-- `@moddable/board-theme` — board visual treatment (manifests, palettes, patterns)
-- `@moddable/piece-theme` — piece visual treatment (manifests, resolver, recolour, composition)
-- `@moddable/plugin-*` — game family plugins (go, hex, mancala, morris, backgammon, cards, chess)
 
 ---
 
@@ -52,8 +57,9 @@ moddable-engine/
 | 2 | `@moddable/piece-behaviour` | Movement primitives (topology-agnostic) |
 | 3 | `@moddable/render` | Topology-agnostic SVG board renderer |
 | 4 | `@moddable/schema` | Frontmatter → game definitions (done) |
-| 5 | `@moddable/plugin-*` | Game families and utility systems (planned) |
-| 6 | Game configs | Frontmatter only — no code |
+| 5 | `@moddable/component-*` | Non-spatial structure: deck, dice, timer |
+| 6 | `@moddable/plugin-*` | Game families (go, hex, mancala, morris, backgammon, big2, chess) |
+| 7 | Game configs | Frontmatter only — no code |
 
 ---
 
@@ -88,11 +94,20 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-06-30
+- Implemented complete plugin library: 7 game families (go, hex, mancala, morris, backgammon, big2, chess)
+- Created component layer: deck (standard-52) and dice consumed via registry like topologies
+- Created theming layer: board-theme (3 builtins), piece-theme (resolver, recolour, composition)
+- Added traversal algorithms to core (floodFill, getGroup, hasPath, findPatterns)
+- Added position notation to grid/hex/graph topologies (serialize/parse with any vocabulary)
+- Added unified direction API: topology.rays(from, 'orthogonal') works on both grid and hex
+- Proved cross-topology: same movement functions work on grid AND hex without code changes
+- Plugin vocabulary system: each plugin declares piece type ↔ symbol mapping
+- Component registry in game factory: components provided via request() like topologies
+- Every plugin proven with unit tests, vertical proof, and complete-game proof (771 tests)
 - Implemented @moddable/game: factory, topology registry, definition wiring
 - Eliminated all hidden knowledge: DEFAULT_FAMILY_MAP, hardcoded topology imports, shape dispatch
-- Enriched all 154 moddable-rules variants with engine: blocks (morris graph data, nukes radius, pachisi positions)
+- Enriched all 154 moddable-rules variants with engine: blocks
 - Separated topology geometry from visual style (cellType + defaults + theme resolver pattern)
-- Designed plugin library architecture (11 universal hooks, board/piece theming, MCE variant pattern)
 
 #### 2026-06-29
 - Implemented @moddable/topology-graph: arbitrary node-edge structures (morris proof)
