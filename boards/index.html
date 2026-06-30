@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Board Studio — Moddable Engine</title>
+<meta name="description" content="Generate, edit and export game boards for any topology. Grid, hex, track, pit, and graph layouts with theming, piece placement, and multi-format export.">
+<meta name="theme-color" content="#0a0d2a">
+<meta name="base-path" content="..">
+<link rel="stylesheet" href="../css/home.css">
+<link rel="stylesheet" href="../css/boards.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../play/" class="nav-link nav-link--soon">Play</a>
+      <a href="./" class="nav-link nav-link--active">Boards</a>
+      <a href="../pieces/" class="nav-link">Pieces</a>
+      <a href="../docs/" class="nav-link nav-link--soon">Docs</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<section class="boards-hero">
+  <div class="boards-hero-content">
+    <div class="hero-eyebrow">Board Studio</div>
+    <h1 class="hero-title">Any board. Any topology.</h1>
+    <p class="hero-lede">Generate boards for all 13 game families across 5 topologies. Configure dimensions, apply themes, place pieces, and export as SVG, PNG, or JSON.</p>
+  </div>
+</section>
+
+<div class="boards-app">
+  <aside class="boards-sidebar">
+    <div class="sidebar-tabs">
+      <button class="sidebar-tab active" data-tab="generate">Generate</button>
+      <button class="sidebar-tab" data-tab="editor">Editor</button>
+      <button class="sidebar-tab" data-tab="export">Export</button>
+    </div>
+
+    <div class="sidebar-panel active" id="panel-generate">
+      <div class="control-group">
+        <label class="control-label">Topology</label>
+        <select id="topology-select">
+          <option value="grid">Grid (rectangular)</option>
+          <option value="hex">Hex (axial)</option>
+          <option value="track">Track (linear/circuit)</option>
+          <option value="pit">Pit (mancala)</option>
+          <option value="graph">Graph (arbitrary)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">Preset</label>
+        <select id="preset-select">
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+
+      <div id="topology-options"></div>
+
+      <div class="control-group">
+        <label class="control-label">Theme</label>
+        <select id="theme-select">
+          <option value="classic">Classic</option>
+          <option value="midnight">Midnight</option>
+          <option value="parchment">Parchment</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">Labels</label>
+        <select id="labels-select">
+          <option value="algebraic">Algebraic (a1, b2...)</option>
+          <option value="index">Index (0, 1, 2...)</option>
+          <option value="none">None</option>
+        </select>
+      </div>
+
+      <button class="btn btn-primary" id="generate-btn">Generate Board</button>
+    </div>
+
+    <div class="sidebar-panel" id="panel-editor">
+      <p class="editor-hint">Click cells to cycle through states. Use the palette below to paint terrain or place pieces.</p>
+      <div class="control-group">
+        <label class="control-label">Paint Mode</label>
+        <select id="paint-mode">
+          <option value="terrain">Terrain</option>
+          <option value="piece">Piece</option>
+          <option value="highlight">Highlight</option>
+        </select>
+      </div>
+      <div id="palette-container"></div>
+    </div>
+
+    <div class="sidebar-panel" id="panel-export">
+      <div class="control-group">
+        <label class="control-label">Format</label>
+        <div class="export-buttons">
+          <button class="btn btn-outline" id="export-svg-btn">SVG</button>
+          <button class="btn btn-outline" id="export-png-btn">PNG</button>
+          <button class="btn btn-outline" id="export-json-btn">JSON</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label">Import</label>
+        <textarea id="import-data" placeholder="Paste JSON board data..."></textarea>
+        <button class="btn btn-outline" id="import-btn">Import</button>
+      </div>
+      <div class="control-group">
+        <label class="control-label">Board Data</label>
+        <textarea id="export-data" readonly placeholder="Generate a board to see data..."></textarea>
+        <button class="btn btn-outline" id="copy-btn">Copy to Clipboard</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="boards-canvas">
+    <div class="canvas-toolbar">
+      <div class="toolbar-info" id="board-info">Select a topology and generate a board</div>
+      <div class="toolbar-actions">
+        <button class="toolbar-btn" id="zoom-in-btn" title="Zoom in">+</button>
+        <button class="toolbar-btn" id="zoom-out-btn" title="Zoom out">&minus;</button>
+        <button class="toolbar-btn" id="fit-btn" title="Fit to view">Fit</button>
+        <button class="toolbar-btn" id="fullscreen-btn" title="Fullscreen">&#x26F6;</button>
+      </div>
+    </div>
+    <div class="canvas-viewport" id="board-viewport">
+      <div class="canvas-empty" id="board-empty">
+        <div class="empty-icon">&#x2B22;</div>
+        <p>Choose a topology and click Generate</p>
+      </div>
+      <div class="canvas-svg" id="board-svg"></div>
+    </div>
+    <div class="canvas-footer">
+      <span id="cell-info">Hover over a cell</span>
+      <span id="board-stats"></span>
+    </div>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="footer-brand">moddable.engine</p>
+    <p class="footer-sub">Part of <a href="https://moddable.games" target="_blank" rel="noopener">Moddable.Games</a></p>
+  </div>
+</footer>
+
+<script type="module" src="../js/boards.js"></script>
+</body>
+</html>
