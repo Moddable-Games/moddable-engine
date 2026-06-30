@@ -199,16 +199,16 @@
   <div class="developer-inner">
     <h2 class="section-heading">For Developers</h2>
     <div class="dev-tabs">
-      <button class="dev-tab active" data-tab="embed">Embed</button>
-      <button class="dev-tab" data-tab="sdk">SDK</button>
+      <button class="dev-tab" data-tab="embed">Embed</button>
+      <button class="dev-tab active" data-tab="sdk">SDK</button>
       <button class="dev-tab" data-tab="mcp">MCP Tools</button>
     </div>
     <div class="dev-panels">
-      <div class="dev-panel active" id="dev-panel-embed">
+      <div class="dev-panel" id="dev-panel-embed">
         <pre class="dev-code"><code>&lt;iframe src="engine.moddable.games/play/?game=chess/standard&amp;embed=1"&gt;&lt;/iframe&gt;</code></pre>
         <p class="dev-note">Bidirectional postMessage bridge for state sync, move submission, and event handling. Embed any game in any page with a single line.</p>
       </div>
-      <div class="dev-panel" id="dev-panel-sdk">
+      <div class="dev-panel active" id="dev-panel-sdk">
         <pre class="dev-code"><code>import { createGame } from '@moddable/engine'
 
 const game = createGame('reversi/standard')
