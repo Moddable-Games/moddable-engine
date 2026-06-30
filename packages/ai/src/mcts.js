@@ -1,11 +1,30 @@
+const DIFFICULTIES = {
+  beginner: { iterations: 100, timeMs: 200, exploration: 2.0 },
+  easy: { iterations: 300, timeMs: 400, exploration: 1.8 },
+  medium: { iterations: 800, timeMs: 800, exploration: 1.41 },
+  hard: { iterations: 2000, timeMs: 1500, exploration: 1.2 },
+  expert: { iterations: 5000, timeMs: 3000, exploration: 1.0 },
+}
+
 export function createMCTS(simulator, opts = {}) {
-  const iterations = opts.iterations || 1000
-  const explorationConstant = opts.exploration || 1.41
+  const difficulty = opts.difficulty || null
+  const config = difficulty ? DIFFICULTIES[difficulty] : {}
+  const iterations = opts.iterations || config.iterations || 1000
+  const timeMs = opts.timeMs || config.timeMs || null
+  const explorationConstant = opts.exploration || config.exploration || 1.41
+  const maxRolloutDepth = opts.maxRolloutDepth || 100
+
+  const evaluate = opts.evaluate || null
 
   function search(state, playerIndex) {
     const root = createNode(null, null, state, playerIndex)
+    const deadline = timeMs ? Date.now() + timeMs : null
+    let completed = 0
 
     for (let i = 0; i < iterations; i++) {
+      if (deadline && Date.now() >= deadline) break
+      completed++
+
       let node = root
 
       while (node.untriedMoves.length === 0 && node.children.length > 0) {
@@ -16,7 +35,10 @@ export function createMCTS(simulator, opts = {}) {
         node = expand(node)
       }
 
-      const score = rollout(node.state, node.playerIndex, playerIndex)
+      const score = evaluate
+        ? evaluatedRollout(node.state, node.playerIndex, playerIndex)
+        : randomRollout(node.state, node.playerIndex, playerIndex)
+
       backpropagate(node, score)
     }
 
@@ -75,13 +97,12 @@ export function createMCTS(simulator, opts = {}) {
     return child
   }
 
-  function rollout(state, currentPlayer, rootPlayer) {
+  function randomRollout(state, currentPlayer, rootPlayer) {
     let current = simulator.cloneState(state)
     let player = currentPlayer
     let depth = 0
-    const maxDepth = 100
 
-    while (depth < maxDepth) {
+    while (depth < maxRolloutDepth) {
       const terminal = simulator.checkTerminal(current, player)
       if (terminal.over) {
         if (terminal.winner === 'draw') return 0.5
@@ -102,6 +123,18 @@ export function createMCTS(simulator, opts = {}) {
     return 0.5
   }
 
+  function evaluatedRollout(state, currentPlayer, rootPlayer) {
+    const terminal = simulator.checkTerminal(state, currentPlayer)
+    if (terminal.over) {
+      if (terminal.winner === 'draw') return 0.5
+      const winnerIdx = parseWinnerIndex(terminal.winner)
+      return winnerIdx === rootPlayer ? 1 : 0
+    }
+
+    const score = simulator.evaluatePosition(state, rootPlayer)
+    return (score + 1) / 2
+  }
+
   function backpropagate(node, score) {
     while (node !== null) {
       node.visits++
@@ -120,3 +153,5 @@ export function createMCTS(simulator, opts = {}) {
 
   return { search }
 }
+
+export { DIFFICULTIES as MCTS_DIFFICULTIES }

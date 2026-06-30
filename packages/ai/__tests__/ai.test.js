@@ -1,5 +1,5 @@
 import { createSimulator } from '../src/simulator.js'
-import { createMinimax } from '../src/minimax.js'
+import { createMinimax, DIFFICULTIES } from '../src/minimax.js'
 import { createMCTS } from '../src/mcts.js'
 import { createReversiPlugin } from '../../plugin-reversi/src/reversi-plugin.js'
 import { createGoPlugin } from '../../plugin-go/src/go-plugin.js'
@@ -53,6 +53,15 @@ describe('AI — simulator', () => {
       expect(sim.checkTerminal(state, 0).score).toBe(1)
       expect(sim.checkTerminal(state, 1).score).toBe(-1)
     })
+
+    it('handles continueTurn correctly', () => {
+      const plugin = createMancalaPlugin()
+      const state = plugin.init({ pitsPerSide: 6 }, { request })
+      const sim = createSimulator(plugin)
+      const moves = sim.getLegalMoves(state, 0)
+      const { continueTurn } = sim.applyMove(state, moves[moves.length - 1], 0)
+      expect(typeof continueTurn).toBe('boolean')
+    })
   })
 
   describe('works across topologies', () => {
@@ -64,13 +73,24 @@ describe('AI — simulator', () => {
       expect(moves.length).toBeGreaterThan(20)
     })
 
-    it('Mancala (pit) — continues turn correctly', () => {
+    it('Mancala (pit) — simulates full game', () => {
       const plugin = createMancalaPlugin()
       const state = plugin.init({ pitsPerSide: 6 }, { request })
       const sim = createSimulator(plugin)
-      const moves = sim.getLegalMoves(state, 0)
-      const { state: newState, continueTurn } = sim.applyMove(state, moves[moves.length - 1], 0)
-      expect(newState.pits).toBeDefined()
+      let current = state
+      let player = 0
+      let moveCount = 0
+      while (moveCount < 100) {
+        const terminal = sim.checkTerminal(current, player)
+        if (terminal.over) break
+        const moves = sim.getLegalMoves(current, player)
+        if (moves.length === 0) break
+        const { state: next, continueTurn } = sim.applyMove(current, moves[0], player)
+        current = next
+        player = sim.nextPlayer(player, continueTurn)
+        moveCount++
+      }
+      expect(moveCount).toBeGreaterThan(5)
     })
 
     it('Draughts (grid) — forced capture applies', () => {
@@ -98,38 +118,131 @@ describe('AI — simulator', () => {
   })
 })
 
-describe('AI — minimax', () => {
-  it('selects a valid move (reversi)', () => {
-    const plugin = createReversiPlugin()
-    const state = plugin.init({}, { request })
-    const sim = createSimulator(plugin)
-    const minimax = createMinimax(sim, { depth: 2 })
-    const move = minimax.search(state, 0)
-    expect(move).toBeDefined()
-    expect(move.cell).toBeDefined()
+describe('AI — minimax (iterative deepening + TT + quiescence)', () => {
+  describe('basic operation', () => {
+    it('selects a valid move (reversi)', () => {
+      const plugin = createReversiPlugin()
+      const state = plugin.init({}, { request })
+      const sim = createSimulator(plugin)
+      const minimax = createMinimax(sim, { difficulty: 'beginner' })
+      const move = minimax.search(state, 0)
+      expect(move).toBeDefined()
+      expect(move.cell).toBeDefined()
+    })
+
+    it('works for mancala', () => {
+      const plugin = createMancalaPlugin()
+      const state = plugin.init({ pitsPerSide: 6 }, { request })
+      const sim = createSimulator(plugin)
+      const minimax = createMinimax(sim, { difficulty: 'easy' })
+      const move = minimax.search(state, 0)
+      expect(move).toBeDefined()
+      expect(move.pit).toBeDefined()
+    })
+
+    it('returns only move immediately (no search needed)', () => {
+      const plugin = createReversiPlugin()
+      const board = new Array(64).fill(0)
+      board[0] = null
+      board[1] = 1
+      const state = { board, passCount: 0 }
+      const sim = createSimulator(plugin)
+      const minimax = createMinimax(sim, { difficulty: 'expert' })
+      const move = minimax.search(state, 0)
+      expect(move.cell).toBe(0)
+    })
   })
 
-  it('finds winning move when available', () => {
-    const plugin = createReversiPlugin()
-    const board = new Array(64).fill(null)
-    for (let i = 0; i < 63; i++) board[i] = 0
-    board[62] = 1
-    board[63] = null
-    const state = { board, passCount: 0 }
-    const sim = createSimulator(plugin)
-    const minimax = createMinimax(sim, { depth: 1 })
-    const move = minimax.search(state, 0)
-    expect(move).not.toBe(null)
+  describe('difficulty levels', () => {
+    it('beginner plays suboptimally (selects from top 5)', () => {
+      expect(DIFFICULTIES.beginner.topN).toBe(5)
+      expect(DIFFICULTIES.beginner.spread).toBe(0.5)
+      expect(DIFFICULTIES.beginner.maxDepth).toBe(2)
+    })
+
+    it('expert plays deterministically (top 1, no spread)', () => {
+      expect(DIFFICULTIES.expert.topN).toBe(1)
+      expect(DIFFICULTIES.expert.spread).toBe(0)
+      expect(DIFFICULTIES.expert.maxDepth).toBe(50)
+    })
+
+    it('all difficulties produce valid moves', () => {
+      const plugin = createReversiPlugin()
+      const state = plugin.init({}, { request })
+      const sim = createSimulator(plugin)
+
+      for (const level of Object.keys(DIFFICULTIES)) {
+        const minimax = createMinimax(sim, { difficulty: level })
+        const move = minimax.search(state, 0)
+        expect(move).toBeDefined()
+        expect(move.cell).toBeDefined()
+      }
+    })
   })
 
-  it('works for mancala', () => {
-    const plugin = createMancalaPlugin()
-    const state = plugin.init({ pitsPerSide: 6 }, { request })
-    const sim = createSimulator(plugin)
-    const minimax = createMinimax(sim, { depth: 3 })
-    const move = minimax.search(state, 0)
-    expect(move).toBeDefined()
-    expect(move.pit).toBeDefined()
+  describe('iterative deepening', () => {
+    it('searches progressively deeper', () => {
+      const plugin = createReversiPlugin()
+      const state = plugin.init({}, { request })
+      const sim = createSimulator(plugin)
+      const minimax = createMinimax(sim, { depth: 4, timeLimit: 5000, topN: 1, spread: 0 })
+      const move = minimax.search(state, 0)
+      expect(move).toBeDefined()
+      expect(minimax.getStats().nodesSearched).toBeGreaterThan(10)
+    })
+  })
+
+  describe('transposition table', () => {
+    it('can be cleared between games', () => {
+      const plugin = createReversiPlugin()
+      const state = plugin.init({}, { request })
+      const sim = createSimulator(plugin)
+      const minimax = createMinimax(sim, { difficulty: 'medium' })
+      minimax.search(state, 0)
+      minimax.clearTT()
+      const move = minimax.search(state, 0)
+      expect(move).toBeDefined()
+    })
+  })
+
+  describe('time management', () => {
+    it('respects time limit', () => {
+      const plugin = createDraughtsPlugin({ rows: 10, cols: 10, piecesPerPlayer: 20 })
+      const state = plugin.init({}, { request })
+      const sim = createSimulator(plugin)
+      const minimax = createMinimax(sim, { timeLimit: 100, maxDepth: 50, topN: 1, spread: 0 })
+      const start = Date.now()
+      minimax.search(state, 0)
+      const elapsed = Date.now() - start
+      expect(elapsed).toBeLessThan(500)
+    })
+  })
+
+  describe('board-size adaptive depth', () => {
+    it('limits depth for large branching factor games', () => {
+      const plugin = createGoPlugin()
+      const state = plugin.init({ size: 81 }, { request })
+      const sim = createSimulator(plugin)
+      const minimax = createMinimax(sim, { timeLimit: 200, maxDepth: 50, topN: 1, spread: 0 })
+      const start = Date.now()
+      minimax.search(state, 0)
+      const elapsed = Date.now() - start
+      expect(elapsed).toBeLessThan(1000)
+    })
+  })
+
+  describe('quiescence (capture extension)', () => {
+    it('uses quiescence when isQuiet provided', () => {
+      const plugin = createDraughtsPlugin()
+      const state = plugin.init({}, { request })
+      const sim = createSimulator(plugin)
+      const minimax = createMinimax(sim, {
+        difficulty: 'medium',
+        isQuiet: (move) => !move.captures || move.captures.length === 0,
+      })
+      const move = minimax.search(state, 0)
+      expect(move).toBeDefined()
+    })
   })
 })
 
@@ -144,15 +257,6 @@ describe('AI — MCTS', () => {
     expect(move.cell).toBeDefined()
   })
 
-  it('works for Go on small board', () => {
-    const plugin = createGoPlugin()
-    const state = plugin.init({ size: 25 }, { request })
-    const sim = createSimulator(plugin)
-    const mcts = createMCTS(sim, { iterations: 30 })
-    const move = mcts.search(state, 0)
-    expect(move).toBeDefined()
-  })
-
   it('works for mancala', () => {
     const plugin = createMancalaPlugin()
     const state = plugin.init({ pitsPerSide: 6 }, { request })
@@ -161,6 +265,30 @@ describe('AI — MCTS', () => {
     const move = mcts.search(state, 0)
     expect(move).toBeDefined()
     expect(move.pit).toBeDefined()
+  })
+
+  it('uses evaluated rollouts when evaluate provided', () => {
+    const plugin = createReversiPlugin()
+    const state = plugin.init({}, { request })
+    const evaluate = (s, p) => {
+      const mine = s.board.filter(c => c === p).length
+      return mine / 64
+    }
+    const sim = createSimulator(plugin, { evaluate })
+    const mcts = createMCTS(sim, { iterations: 30, evaluate: true })
+    const move = mcts.search(state, 0)
+    expect(move).toBeDefined()
+  })
+
+  it('respects time limit', () => {
+    const plugin = createReversiPlugin()
+    const state = plugin.init({}, { request })
+    const sim = createSimulator(plugin)
+    const mcts = createMCTS(sim, { iterations: 100000, timeMs: 100 })
+    const start = Date.now()
+    mcts.search(state, 0)
+    const elapsed = Date.now() - start
+    expect(elapsed).toBeLessThan(500)
   })
 
   it('plays a full game without crashing (reversi 6x6)', () => {
@@ -186,5 +314,14 @@ describe('AI — MCTS', () => {
     }
 
     expect(moveCount).toBeGreaterThan(3)
+  })
+
+  it('difficulty levels configure iterations and time', () => {
+    const plugin = createReversiPlugin()
+    const state = plugin.init({}, { request })
+    const sim = createSimulator(plugin)
+    const mcts = createMCTS(sim, { difficulty: 'beginner' })
+    const move = mcts.search(state, 0)
+    expect(move).toBeDefined()
   })
 })

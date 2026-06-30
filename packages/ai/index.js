@@ -1,3 +1,3 @@
 export { createSimulator } from './src/simulator.js'
-export { createMCTS } from './src/mcts.js'
-export { createMinimax } from './src/minimax.js'
+export { createMinimax, DIFFICULTIES } from './src/minimax.js'
+export { createMCTS, MCTS_DIFFICULTIES } from './src/mcts.js'
