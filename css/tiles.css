@@ -1,8 +1,12 @@
 .piece-cell.shape-hex img {
   object-fit: contain;
 }
-.piece-cell.shape-hex.hex-clip img {
+.piece-cell.shape-hex.hex-clip-pointy img {
   clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  object-fit: cover;
+}
+.piece-cell.shape-hex.hex-clip-flat img {
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
   object-fit: cover;
 }
 .piece-cell.shape-rectangle img {
