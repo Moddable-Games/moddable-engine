@@ -186,7 +186,8 @@
       "sand": "sand.png",
       "trees": "trees.png",
       "water": "water.png"
-    }
+    },
+    "clipped": true
   },
   {
     "id": "talisman",
@@ -390,7 +391,8 @@
       "vault": "vault.png",
       "village": "village.png",
       "woods": "woods.png"
-    }
+    },
+    "clipped": true
   },
   {
     "id": "colony",
@@ -442,7 +444,8 @@
       "hills": "hills.png",
       "mountains": "mountains.png",
       "pasture": "pasture.png"
-    }
+    },
+    "clipped": true
   },
   {
     "id": "mongo",
