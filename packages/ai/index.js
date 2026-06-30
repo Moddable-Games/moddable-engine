@@ -1,3 +1,5 @@
 export { createSimulator } from './src/simulator.js'
 export { createMinimax, DIFFICULTIES } from './src/minimax.js'
 export { createMCTS, MCTS_DIFFICULTIES } from './src/mcts.js'
+export { createOpeningBook } from './src/opening-book.js'
+export { EVALUATORS, chessEvaluate, reversiEvaluate, draughtsEvaluate, mancalaEvaluate, goEvaluate, halmaEvaluate, raceEvaluate, shogiEvaluate, xiangqiEvaluate } from './src/evaluators.js'

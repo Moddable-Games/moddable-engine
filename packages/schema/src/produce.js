@@ -18,6 +18,10 @@ export function produce(meta) {
     definition.pieces = engine.pieces.map(normalisePiece)
   }
 
+  if (engine.components) {
+    definition.components = { ...engine.components }
+  }
+
   if (engine.setup) {
     definition.setup = engine.setup
   }

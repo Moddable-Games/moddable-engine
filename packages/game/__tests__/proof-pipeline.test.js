@@ -16,6 +16,9 @@ import { createShogiPlugin } from '../../plugin-shogi/src/shogi-plugin.js'
 import { createXiangqiPlugin } from '../../plugin-xiangqi/src/xiangqi-plugin.js'
 import { createRacePlugin } from '../../plugin-race/src/race-plugin.js'
 import { createHexPlugin } from '../../plugin-hex/src/hex-plugin.js'
+import { createChessPlugin } from '../../plugin-chess/src/chess-plugin.js'
+import { createBig2Plugin } from '../../plugin-big2/src/big2-plugin.js'
+import { createStandard52Deck } from '../../component-deck/src/standard-52.js'
 
 const TOPOLOGIES = {
   grid: (config) => createGridTopology(config),
@@ -37,18 +40,30 @@ const PLUGIN_FACTORIES = {
   xiangqi: createXiangqiPlugin,
   race: createRacePlugin,
   hex: createHexPlugin,
+  chess: createChessPlugin,
+  big2: createBig2Plugin,
 }
 
-function instantiateFromMeta(meta, pluginKey) {
+const COMPONENTS = {
+  deck: () => createStandard52Deck(),
+}
+
+function instantiateFromMeta(meta, pluginKey, opts = {}) {
   const definition = produce(meta)
   const pluginFactory = PLUGIN_FACTORIES[pluginKey]
   if (!pluginFactory) throw new Error(`No factory for plugin: ${pluginKey}`)
 
-  return createGameFromDefinition(definition, {
+  const gameOpts = {
     topologies: TOPOLOGIES,
     pluginFactories: { [pluginKey]: pluginFactory },
     rngSeed: 42,
-  })
+  }
+
+  if (opts.components) {
+    gameOpts.components = opts.components
+  }
+
+  return createGameFromDefinition(definition, gameOpts)
 }
 
 describe('pipeline proof — frontmatter → definition → playable game', () => {
@@ -290,6 +305,63 @@ describe('pipeline proof — frontmatter → definition → playable game', () =
       const moves = game.getLegalMoves()
       expect(moves.length).toBe(1)
       expect(moves[0].action).toBe('roll')
+    })
+  })
+
+  describe('Chess (grid topology, rule-composed)', () => {
+    const meta = {
+      title: 'Standard Chess',
+      slug: 'standard',
+      parent: 'moddable-chess',
+      players: '2',
+      engine: {
+        topology: { type: 'grid', rows: 8, cols: 8 },
+        players: ['white', 'black'],
+        plugins: { chess: { setup: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' } },
+      },
+    }
+
+    it('instantiates with standard setup and generates 20 opening moves', () => {
+      const game = instantiateFromMeta(meta, 'chess')
+      const moves = game.getLegalMoves()
+      expect(moves.length).toBe(20)
+    })
+
+    it('executes opening move and advances turn', () => {
+      const game = instantiateFromMeta(meta, 'chess')
+      const moves = game.getLegalMoves()
+      const e2e4 = moves.find(m => m.from === 52 && m.to === 36)
+      expect(e2e4).toBeDefined()
+      game.execute(e2e4)
+      expect(game.currentPlayer()).toBe('black')
+    })
+  })
+
+  describe('Big 2 (no topology, deck component)', () => {
+    const meta = {
+      title: 'Big 2',
+      slug: 'standard',
+      parent: 'big2',
+      players: '4',
+      engine: {
+        players: ['player1', 'player2', 'player3', 'player4'],
+        components: { deck: { type: 'standard-52' } },
+        plugins: { big2: { playerCount: 4 } },
+      },
+    }
+
+    it('instantiates with deck component and deals cards', () => {
+      const game = instantiateFromMeta(meta, 'big2', { components: { 'deck.standard-52': () => createStandard52Deck() } })
+      expect(game.topology).toBe(null)
+      const state = game.getState('big2')
+      expect(state.hands.length).toBe(4)
+      expect(state.hands[0].length).toBe(13)
+    })
+
+    it('generates legal moves for first player', () => {
+      const game = instantiateFromMeta(meta, 'big2', { components: { 'deck.standard-52': () => createStandard52Deck() } })
+      const moves = game.getLegalMoves()
+      expect(moves.length).toBeGreaterThan(0)
     })
   })
 
