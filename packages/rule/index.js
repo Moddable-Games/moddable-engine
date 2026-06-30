@@ -1,3 +1,10 @@
 export { createRuleRegistry } from './src/rule-registry.js'
 export { composeRules } from './src/compose.js'
 export { resolveOrder, validateTopologyNeeds } from './src/resolve-dependencies.js'
+
+export { createCaptureReplacementRule } from './src/rules/capture-replacement.js'
+export { createTurnContinuationRule } from './src/rules/turn-continuation.js'
+export { createRepetitionRule } from './src/rules/repetition.js'
+export { createForcedCaptureRule } from './src/rules/forced-capture.js'
+export { createChainCaptureRule } from './src/rules/chain-capture.js'
+export { createPromotionRankReachRule } from './src/rules/promotion-rank-reach.js'

@@ -1,13 +1,21 @@
 export function createCaptureReplacementRule(config = {}) {
+  const skipFlags = config.skipFlags || []
+
   return {
     id: 'capture.replacement',
     category: 'capture',
     requires: [],
     topologyNeeds: [],
 
+    configSchema: {
+      skipFlags: { type: 'array', default: [] },
+    },
+
     hooks: {
       applyMove(move, state, ctx) {
-        if (move.castle || move.enPassant) return null
+        for (const flag of skipFlags) {
+          if (move[flag]) return null
+        }
 
         const board = cloneBoard(state.board)
         const piece = getCell(board, move.from)
