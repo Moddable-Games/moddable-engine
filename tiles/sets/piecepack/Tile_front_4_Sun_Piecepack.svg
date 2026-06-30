@@ -1,41 +1,92 @@
-<!DOCTYPE html>
-<html lang="en">
-<meta charset="utf-8">
-<title>Wikimedia Error</title>
-<style>
-* { margin: 0; padding: 0; }
-body { background: #fff; font: 15px/1.6 sans-serif; color: #333; }
-.content { margin: 7% auto 0; padding: 2em 1em 1em; max-width: 640px; display: flex; flex-direction: row; flex-wrap: wrap; }
-.footer { clear: both; margin-top: 14%; border-top: 1px solid #e5e5e5; background: #f9f9f9; padding: 2em 0; font-size: 0.8em; text-align: center; }
-img { margin: 0 2em 2em 0; }
-a img { border: 0; }
-h1 { margin-top: 1em; font-size: 1.2em; }
-.content-text { flex: 1; }
-p { margin: 0.7em 0 1em 0; }
-a { color: #0645ad; text-decoration: none; }
-a:hover { text-decoration: underline; }
-code { font-family: sans-serif; }
-summary { font-weight: bold; cursor: pointer; }
-details[open] { background: #970302; color: #dfdedd; }
-.text-muted { color: #777; }
-@media (prefers-color-scheme: dark) {
-  a { color: #9e9eff; }
-  body { background: transparent; color: #ddd; }
-  .footer { border-top: 1px solid #444; background: #060606; }
-  #logo { filter: invert(1) hue-rotate(180deg); }
-  .text-muted { color: #888; }
-}
-</style>
-<meta name="color-scheme" content="light dark">
-<div class="content" role="main">
-<a href="https://www.wikimedia.org"><img id="logo" src="https://www.wikimedia.org/static/images/wmf-logo.png" srcset="https://www.wikimedia.org/static/images/wmf-logo-2x.png 2x" alt="Wikimedia" width="135" height="101">
-</a>
-<div class="content-text">
-<h1>Error</h1>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
 
-<p>Please set a proper user-agent and respect our robot policy https://w.wiki/4wJS. See also https://phabricator.wikimedia.org/T400119</p>
-</div>
-</div>
-<div class="footer"><p>If you report this error to the Wikimedia System Administrators, please include the details below.</p><p class="text-muted"><code>Request served via cp3068 cp3068, Varnish XID 195527401<br>Upstream caches: cp3068 int<br>Error: 429, Please set a proper user-agent and respect our robot policy https://w.wiki/4wJS. See also https://phabricator.wikimedia.org/T400119 at Tue, 30 Jun 2026 13:55:51 GMT<br><details><summary>Sensitive client information</summary>IP address: 188.241.144.48</details></code></p>
-</div>
-</html>
+<svg
+   width="49.999996mm"
+   height="50mm"
+   viewBox="0 0 49.999996 50"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <title
+     id="title1">Tile front 4 Sun Piecepack</title>
+  <defs
+     id="defs1" />
+  <g
+     id="layer1"
+     transform="translate(-80.168752,-123.56041)">
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.999608;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none"
+       id="rect1924-93-7"
+       width="49.000389"
+       height="49.000393"
+       x="80.668556"
+       y="124.06022" />
+    <text
+       xml:space="preserve"
+       style="font-size:31.75px;line-height:1.25;font-family:Escolar4;-inkscape-font-specification:Escolar4;fill:#ce1d00;fill-opacity:1;stroke-width:0.264583"
+       x="95.18486"
+       y="160.13336"
+       id="text41806-7-0-9"><tspan
+         id="tspan41804-5-9-3"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:31.75px;font-family:sans-serif;-inkscape-font-specification:sans-serif;fill:#ce1d00;fill-opacity:1;stroke-width:0.264583"
+         x="95.18486"
+         y="160.13336">4</tspan></text>
+    <g
+       id="g221-2-27"
+       style="fill:#ce1d00;fill-opacity:1"
+       transform="matrix(0.08050736,0,0,0.08050736,58.293996,142.59198)">
+      <path
+         id="path220-9-2"
+         style="fill:#ce1d00;fill-opacity:1;stroke-width:3.77953;stroke-linecap:round;stroke-linejoin:round"
+         d="m 331.34201,124.42232 -5.67968,29.35156 a 37.446884,37.446884 0 0 1 6.75781,-0.6914 37.446884,37.446884 0 0 1 8.12695,0.90234 z m 33.10742,8.65039 -19.29882,22.24219 a 37.446884,37.446884 0 0 1 12.56836,7.61133 z m -66.10546,0.41211 9.84961,28.52344 a 37.446884,37.446884 0 0 1 13.21484,-7.23633 z m 90.45312,23.63281 -27.55078,9.51367 a 37.446884,37.446884 0 0 1 6.94141,12.81836 z m -114.5,0.71485 23.00781,19.96484 a 37.446884,37.446884 0 0 1 8,-12.97461 z m 21.87695,23.60351 -30.52734,9.50391 29.89844,5.78515 a 37.446884,37.446884 0 0 1 -0.57031,-6.19726 37.446884,37.446884 0 0 1 1.19921,-9.0918 z m 73.21485,3.17188 a 37.446884,37.446884 0 0 1 0.47851,5.91992 37.446884,37.446884 0 0 1 -1.10351,8.64844 l 29.09765,-9.06055 z m -73.0293,15.87304 -21.65039,23.45703 28.65625,-9.89453 a 37.446884,37.446884 0 0 1 -7.00586,-13.5625 z m 70.85156,3.6543 a 37.446884,37.446884 0 0 1 -7.91992,12.3457 l 29.91797,6.74414 z m -61.16211,12.84375 -6.99218,31.00586 19.6914,-22.69141 a 37.446884,37.446884 0 0 1 -12.69922,-8.31445 z m 49.54102,2.86328 a 37.446884,37.446884 0 0 1 -13.16992,6.73633 l 22.74414,20.99414 z m -32.75391,6.82617 9.33008,29.9668 5.6211,-29.04883 a 37.446884,37.446884 0 0 1 -5.36719,0.38867 37.446884,37.446884 0 0 1 -9.58399,-1.30664 z"
+         transform="translate(22.245878,-344.63521)" />
+      <circle
+         style="fill:#ce1d00;fill-opacity:1;stroke-width:3.77953;stroke-linecap:round;stroke-linejoin:round"
+         id="path219-1-26"
+         cx="354.66666"
+         cy="-154.10654"
+         r="32.576157" />
+    </g>
+  </g>
+  <metadata
+     id="metadata1">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>Tile front 4 Sun Piecepack</dc:title>
+        <dc:date>2024/03</dc:date>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Miguel de Dios Matias</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>CC0</dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>piecepack</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+        <cc:license
+           rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/" />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+</svg>

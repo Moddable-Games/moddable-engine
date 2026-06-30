@@ -1,41 +1,80 @@
-<!DOCTYPE html>
-<html lang="en">
-<meta charset="utf-8">
-<title>Wikimedia Error</title>
-<style>
-* { margin: 0; padding: 0; }
-body { background: #fff; font: 15px/1.6 sans-serif; color: #333; }
-.content { margin: 7% auto 0; padding: 2em 1em 1em; max-width: 640px; display: flex; flex-direction: row; flex-wrap: wrap; }
-.footer { clear: both; margin-top: 14%; border-top: 1px solid #e5e5e5; background: #f9f9f9; padding: 2em 0; font-size: 0.8em; text-align: center; }
-img { margin: 0 2em 2em 0; }
-a img { border: 0; }
-h1 { margin-top: 1em; font-size: 1.2em; }
-.content-text { flex: 1; }
-p { margin: 0.7em 0 1em 0; }
-a { color: #0645ad; text-decoration: none; }
-a:hover { text-decoration: underline; }
-code { font-family: sans-serif; }
-summary { font-weight: bold; cursor: pointer; }
-details[open] { background: #970302; color: #dfdedd; }
-.text-muted { color: #777; }
-@media (prefers-color-scheme: dark) {
-  a { color: #9e9eff; }
-  body { background: transparent; color: #ddd; }
-  .footer { border-top: 1px solid #444; background: #060606; }
-  #logo { filter: invert(1) hue-rotate(180deg); }
-  .text-muted { color: #888; }
-}
-</style>
-<meta name="color-scheme" content="light dark">
-<div class="content" role="main">
-<a href="https://www.wikimedia.org"><img id="logo" src="https://www.wikimedia.org/static/images/wmf-logo.png" srcset="https://www.wikimedia.org/static/images/wmf-logo-2x.png 2x" alt="Wikimedia" width="135" height="101">
-</a>
-<div class="content-text">
-<h1>Error</h1>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
 
-<p>Please set a proper user-agent and respect our robot policy https://w.wiki/4wJS. See also https://phabricator.wikimedia.org/T400119</p>
-</div>
-</div>
-<div class="footer"><p>If you report this error to the Wikimedia System Administrators, please include the details below.</p><p class="text-muted"><code>Request served via cp3068 cp3068, Varnish XID 186878955<br>Upstream caches: cp3068 int<br>Error: 429, Please set a proper user-agent and respect our robot policy https://w.wiki/4wJS. See also https://phabricator.wikimedia.org/T400119 at Tue, 30 Jun 2026 13:55:51 GMT<br><details><summary>Sensitive client information</summary>IP address: 188.241.144.48</details></code></p>
-</div>
-</html>
+<svg
+   width="49.999996mm"
+   height="50mm"
+   viewBox="0 0 49.999996 50"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <title
+     id="title1">Tile front 4 Crown Piecepack</title>
+  <defs
+     id="defs1" />
+  <g
+     id="layer1"
+     transform="translate(-80.168752,-123.56041)">
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.999608;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none"
+       id="rect1924-93-7"
+       width="49.000389"
+       height="49.000393"
+       x="80.668556"
+       y="124.06022" />
+    <path
+       d="m 86.793627,127.46639 -0.62826,0.72069 v 1.47329 l -0.35644,0.49138 -0.55229,-0.47159 v -1.40596 l -0.76223,-0.77282 -0.55634,0.97787 0.1702,1.41029 -0.24938,0.39505 -0.68235,-0.38989 -0.17871,-1.31438 -1.24426,-0.70591 0.64974,2.70013 c 0,0 -0.202,0.0767 -0.17802,0.28493 0.024,0.20822 0.28911,0.24367 0.28911,0.24367 l 0.2144,0.78104 c 0,0 -0.10353,0.0678 -0.0767,0.30835 0.0269,0.24058 0.23001,0.28144 0.23001,0.28144 0,0 0.883849,0.43019 3.91149,0.43019 3.027649,-1e-5 3.91136,-0.43019 3.91136,-0.43019 0,0 0.20314,-0.0409 0.230009,-0.28144 0.0269,-0.24058 -0.0767,-0.30835 -0.0767,-0.30835 l 0.21439,-0.78104 c 0,0 0.26513,-0.0354 0.28912,-0.24367 0.024,-0.20822 -0.17801,-0.28493 -0.17801,-0.28493 l 0.64987,-2.70013 -1.24441,0.70591 -0.1787,1.31438 -0.68236,0.38989 -0.24938,-0.39505 0.17021,-1.41029 -0.55634,-0.97787 -0.76223,0.77282 v 1.40596 l -0.55229,0.47159 -0.35644,-0.49138 v -1.47329 z"
+       style="fill:#fcc602;fill-opacity:1;stroke-width:0.0713715px"
+       id="path10-1-30" />
+    <text
+       xml:space="preserve"
+       style="font-size:31.75px;line-height:1.25;font-family:Escolar4;-inkscape-font-specification:Escolar4;fill:#fcc602;fill-opacity:1;stroke-width:0.264583"
+       x="95.18486"
+       y="160.13336"
+       id="text41806-7-0-9"><tspan
+         id="tspan41804-5-9-3"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:31.75px;font-family:sans-serif;-inkscape-font-specification:sans-serif;fill:#fcc602;fill-opacity:1;stroke-width:0.264583"
+         x="95.18486"
+         y="160.13336">4</tspan></text>
+  </g>
+  <metadata
+     id="metadata1">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>Tile front 4 Crown Piecepack</dc:title>
+        <dc:date>2024/03</dc:date>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Miguel de Dios Matias</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>CC0</dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>piecepack</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+        <cc:license
+           rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/" />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+</svg>

@@ -1,41 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
-<meta charset="utf-8">
-<title>Wikimedia Error</title>
-<style>
-* { margin: 0; padding: 0; }
-body { background: #fff; font: 15px/1.6 sans-serif; color: #333; }
-.content { margin: 7% auto 0; padding: 2em 1em 1em; max-width: 640px; display: flex; flex-direction: row; flex-wrap: wrap; }
-.footer { clear: both; margin-top: 14%; border-top: 1px solid #e5e5e5; background: #f9f9f9; padding: 2em 0; font-size: 0.8em; text-align: center; }
-img { margin: 0 2em 2em 0; }
-a img { border: 0; }
-h1 { margin-top: 1em; font-size: 1.2em; }
-.content-text { flex: 1; }
-p { margin: 0.7em 0 1em 0; }
-a { color: #0645ad; text-decoration: none; }
-a:hover { text-decoration: underline; }
-code { font-family: sans-serif; }
-summary { font-weight: bold; cursor: pointer; }
-details[open] { background: #970302; color: #dfdedd; }
-.text-muted { color: #777; }
-@media (prefers-color-scheme: dark) {
-  a { color: #9e9eff; }
-  body { background: transparent; color: #ddd; }
-  .footer { border-top: 1px solid #444; background: #060606; }
-  #logo { filter: invert(1) hue-rotate(180deg); }
-  .text-muted { color: #888; }
-}
-</style>
-<meta name="color-scheme" content="light dark">
-<div class="content" role="main">
-<a href="https://www.wikimedia.org"><img id="logo" src="https://www.wikimedia.org/static/images/wmf-logo.png" srcset="https://www.wikimedia.org/static/images/wmf-logo-2x.png 2x" alt="Wikimedia" width="135" height="101">
-</a>
-<div class="content-text">
-<h1>Error</h1>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
 
-<p>Please set a proper user-agent and respect our robot policy https://w.wiki/4wJS. See also https://phabricator.wikimedia.org/T400119</p>
-</div>
-</div>
-<div class="footer"><p>If you report this error to the Wikimedia System Administrators, please include the details below.</p><p class="text-muted"><code>Request served via cp3068 cp3068, Varnish XID 178529551<br>Upstream caches: cp3068 int<br>Error: 429, Please set a proper user-agent and respect our robot policy https://w.wiki/4wJS. See also https://phabricator.wikimedia.org/T400119 at Tue, 30 Jun 2026 13:55:52 GMT<br><details><summary>Sensitive client information</summary>IP address: 188.241.144.48</details></code></p>
-</div>
-</html>
+<svg
+   width="49.999996mm"
+   height="50mm"
+   viewBox="0 0 49.999996 50"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <title
+     id="title1">Tile front Ace Crown Piecepack</title>
+  <defs
+     id="defs1" />
+  <g
+     id="layer1"
+     transform="translate(-80.168752,-123.56041)">
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.999608;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none"
+       id="rect1924-93"
+       width="49.000389"
+       height="49.000393"
+       x="80.668556"
+       y="124.06022" />
+    <path
+       d="m 86.793626,127.46639 -0.62826,0.72068 v 1.4733 l -0.35644,0.49137 -0.55229,-0.47158 v -1.40596 l -0.76223,-0.77283 -0.55634,0.97788 0.1702,1.41029 -0.24938,0.39505 -0.68235,-0.3899 -0.17871,-1.31438 -1.24426,-0.70591 0.64974,2.70014 c 0,0 -0.202,0.0767 -0.17802,0.28492 0.024,0.20822 0.28911,0.24367 0.28911,0.24367 l 0.214399,0.78105 c 0,0 -0.10353,0.0678 -0.0767,0.30835 0.0269,0.24057 0.23001,0.28144 0.23001,0.28144 0,0 0.88385,0.43019 3.91149,0.43018 3.02765,0 3.91136,-0.43018 3.91136,-0.43018 0,0 0.20314,-0.0409 0.23001,-0.28144 0.0269,-0.24058 -0.0767,-0.30835 -0.0767,-0.30835 l 0.21439,-0.78105 c 0,0 0.26513,-0.0354 0.28912,-0.24367 0.024,-0.20821 -0.17801,-0.28492 -0.17801,-0.28492 l 0.64987,-2.70014 -1.24441,0.70591 -0.1787,1.31438 -0.68236,0.3899 -0.24938,-0.39505 0.17021,-1.41029 -0.55634,-0.97788 -0.76223,0.77283 v 1.40596 l -0.55229,0.47158 -0.35644,-0.49137 v -1.4733 z"
+       style="fill:#fcc602;fill-opacity:1;stroke-width:0.0713715px"
+       id="path10-1-3" />
+    <path
+       d="m 105.16875,138.48119 -2.32905,2.67167 v 5.46168 l -1.32137,1.82159 -2.047423,-1.74821 v -5.21208 l -2.82567,-2.86495 -2.06241,3.62511 0.63097,5.2281 -0.92449,1.46451 -2.52956,-1.44539 -0.66249,-4.87257 -4.61264,-2.61689 2.40864,10.00972 c 0,0 -0.74882,0.28437 -0.65991,1.05627 0.0889,0.77189 1.07177,0.9033 1.07177,0.9033 l 0.79478,2.89543 c 0,0 -0.38378,0.25124 -0.28422,1.14308 0.0996,0.89185 0.85266,1.04335 0.85266,1.04335 0,0 3.27656,1.59476 14.500413,1.59474 11.22385,-3e-5 14.49989,-1.59474 14.49989,-1.59474 0,0 0.75306,-0.1515 0.85266,-1.04335 0.0996,-0.89184 -0.28422,-1.14308 -0.28422,-1.14308 l 0.79479,-2.89543 c 0,0 0.98287,-0.13141 1.07177,-0.9033 0.0889,-0.7719 -0.65991,-1.05627 -0.65991,-1.05627 l 2.40914,-10.00972 -4.61314,2.61689 -0.66249,4.87257 -2.52957,1.44539 -0.92449,-1.46451 0.63097,-5.2281 -2.0624,-3.62511 -2.82567,2.86495 v 5.21208 l -2.04742,1.74821 -1.32137,-1.82159 v -5.46168 z"
+       style="fill:#fcc602;fill-opacity:1;stroke-width:0.264583px"
+       id="path10" />
+  </g>
+  <metadata
+     id="metadata1">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>Tile front Ace Crown Piecepack</dc:title>
+        <dc:date>2024/03</dc:date>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Miguel de Dios Matias</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>CC0</dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>piecepack</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+        <cc:license
+           rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/" />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+</svg>
