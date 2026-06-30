@@ -1,7 +1,5 @@
 .piece-cell.shape-hex img {
-  clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
-  object-fit: cover;
-  transform: scale(1.12);
+  object-fit: contain;
 }
 .piece-cell.shape-rectangle img {
   border-radius: 4px;
