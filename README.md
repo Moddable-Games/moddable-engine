@@ -8,9 +8,9 @@ Every game in the Moddable Games collection — from standard chess to Endless S
 
 ## Status
 
-**Plugin library complete.** All 7 game families implemented as reusable plugins with 11 universal hooks, component system (deck, dice), theming (board + piece), traversal algorithms, position notation, and cross-topology support. 771 tests across 65 suites, all passing. Same chess movement code works on both grid and hex boards without modification.
+**Rule registry + composable chess in progress.** Rules are now a first-class resource type alongside topologies, components, and themes. The engine has 5 resource types that compose independently: topology (spatial), component (operational), rule (behavioural), theme (visual), setup (initial state). 860 tests across 71 suites, all passing.
 
-Next milestone: **Production chess** — port moddable-chess's battle-tested variant system (75 variants, 18 fairy pieces, terrain layer) into plugin-chess. Its sophistication sets the quality bar for all game plugins.
+Current milestone: **Production chess via composable rules** — parametric rules that assume nothing (no hardcoded piece types, positions, directions). Every MCE variant (76 total) must work by config alone. Same rules work on any topology.
 
 Read [`SPEC.md`](./SPEC.md) before contributing anything.
 
@@ -27,10 +27,11 @@ moddable-engine/
     topology-track/      ← linear/circuit paths
     topology-pit/        ← mancala pit-sow layouts
     topology-graph/      ← arbitrary node-edge + position notation
-    piece-behaviour/     ← movement primitives (slide, leap, jump, custodian)
+    piece-behaviour/     ← movement primitives + composable definitions (rider, leaper, compose, divergent)
+    rule/                ← rule registry, composition engine, parametric rule implementations
     render/              ← topology-agnostic SVG board renderer
     schema/              ← frontmatter → game definitions
-    game/                ← factory, topology registry, component registry
+    game/                ← factory, topology registry, component registry, rule registry
     board-theme/         ← board visual treatment (resolver, builtins)
     piece-theme/         ← piece visual treatment (resolver, recolour)
     component-deck/      ← standard 52-card deck
@@ -54,7 +55,8 @@ moddable-engine/
 |---|---|---|
 | 0 | `@moddable/core` | State, moves, players, history, events, RNG, timer, plugin registry |
 | 1 | `@moddable/topology-*` | Coordinate systems: grid, hex, track, pit, graph |
-| 2 | `@moddable/piece-behaviour` | Movement primitives (topology-agnostic) |
+| 2 | `@moddable/piece-behaviour` | Movement primitives + composable piece definitions |
+| 2 | `@moddable/rule` | Rule registry, composition engine, parametric rules |
 | 3 | `@moddable/render` | Topology-agnostic SVG board renderer |
 | 4 | `@moddable/schema` | Frontmatter → game definitions (done) |
 | 5 | `@moddable/component-*` | Non-spatial structure: deck, dice, timer |
@@ -66,8 +68,10 @@ moddable-engine/
 ## Key principles
 
 - If you have to mention a game's name to explain what a piece of code does, that code is in the wrong layer.
-- Topologies are the universal adapter layer. Higher packages define contracts; topologies implement them.
+- Topologies are the universal adapter layer for geometry. Rules are the universal adapter layer for behaviour.
+- Rules must be parametric containers that assume nothing — never hardcode "standard" as baseline.
 - No if/else for topology type anywhere in the codebase.
+- Five independent axes compose freely: topology × pieces × rules × components × themes.
 
 See `SPEC.md` section 0 (Philosophy) for the full reasoning behind every architectural decision.
 
@@ -94,6 +98,16 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-06-30
+- Implemented rule registry: rules as first-class resource type with composition engine
+- Per-hook composition strategies: AND (validate), CHAIN (apply), PIPELINE (filter), UNION (moves)
+- Dependency resolution via topological sort with cycle detection
+- 8 parametric chess rules: attack-detection, capture-replacement, castling, check, checkmate, draw-50-move, en-passant, promotion
+- Composable piece definitions: rider(), leaper(), compose(), divergent(), fromConfig()
+- Rewrote plugin-chess: topology-agnostic via piece-behaviour, parametric config for all assumptions
+- Chess960-safe castling (dynamically scans rook positions from board state)
+- 11 variant proof tests (no-castling, custom promotion, 10x8, fairy pieces, wrap/toroidal, etc.)
+- Game factory gains rule resolution (backwards-compatible, opt-in)
+- Audited all 76 MCE variants to verify rule parametricity
 - Implemented complete plugin library: 7 game families (go, hex, mancala, morris, backgammon, big2, chess)
 - Created component layer: deck (standard-52) and dice consumed via registry like topologies
 - Created theming layer: board-theme (3 builtins), piece-theme (resolver, recolour, composition)
@@ -103,7 +117,7 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 - Proved cross-topology: same movement functions work on grid AND hex without code changes
 - Plugin vocabulary system: each plugin declares piece type ↔ symbol mapping
 - Component registry in game factory: components provided via request() like topologies
-- Every plugin proven with unit tests, vertical proof, and complete-game proof (771 tests)
+- Every plugin proven with unit tests, vertical proof, and complete-game proof
 - Implemented @moddable/game: factory, topology registry, definition wiring
 - Eliminated all hidden knowledge: DEFAULT_FAMILY_MAP, hardcoded topology imports, shape dispatch
 - Enriched all 154 moddable-rules variants with engine: blocks
