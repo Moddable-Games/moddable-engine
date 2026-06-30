@@ -3,9 +3,9 @@
 }
 .piece-cell.shape-rectangle img {
   border-radius: 4px;
-  aspect-ratio: 3 / 4;
-  width: auto;
+  object-fit: contain;
   height: var(--piece-size, 80px);
+  width: auto;
 }
 .piece-cell.shape-square img {
   border-radius: 2px;
