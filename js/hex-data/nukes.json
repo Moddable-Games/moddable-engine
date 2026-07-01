@@ -1,0 +1,25 @@
+{
+    "id": "nukes",
+    "name": "Nukes",
+    "description": "Nuclear war hex maps with terrain variety",
+    "flat": false,
+    "terrains": ["water", "trees", "mount", "grass", "water", "trees", "mount", "grass", "water", "trees", "mount", "grass", "sand"],
+    "editableTerrain": ["water", "grass", "trees", "mount", "sand", "base"],
+    "styles": ["classic", "artistic", "ascii"],
+    "sizes": {
+        "2": { "rings": 2, "players": [2, 3, 4, 6] },
+        "3": { "rings": 3, "players": [2, 3, 6] },
+        "4": { "rings": 4, "players": [2, 3, 4, 6] },
+        "5": { "rings": 5, "players": [2, 3, 5, 6] },
+        "6": { "rings": 6, "players": [2, 3, 4, 6] }
+    },
+    "defaultSize": 6,
+    "colors": {
+        "water": "#2196F3",
+        "trees": "#4CAF50",
+        "mount": "#795548",
+        "grass": "#8BC34A",
+        "sand": "#FFC107",
+        "base": "#F44336"
+    }
+}

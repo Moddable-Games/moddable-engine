@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Board Studio — Moddable Engine</title>
-<meta name="description" content="Generate, edit and export game boards for any topology. Grid, hex, track, pit, and graph layouts with theming, piece placement, and multi-format export.">
+<meta name="description" content="Browse and verify board diagrams for all published game variants from rules.moddable.games.">
 <meta name="theme-color" content="#0a0d2a">
 <meta name="base-path" content="..">
 <link rel="stylesheet" href="../css/home.css">
@@ -32,132 +32,74 @@
 <section class="boards-hero">
   <div class="boards-hero-content">
     <div class="hero-eyebrow">Board Studio</div>
-    <h1 class="hero-title">Any board. Any topology.</h1>
-    <p class="hero-lede">Generate boards for all 13 game families across 5 topologies. Configure dimensions, apply themes, place pieces, and export as SVG, PNG, or JSON.</p>
+    <h1 class="hero-title">Every published game</h1>
+    <p class="hero-lede">Select any game from the Moddable Rules collection. Verify the engine produces the same board diagram as the published rulebook.</p>
   </div>
 </section>
 
 <div class="boards-app">
   <aside class="boards-sidebar">
-    <div class="sidebar-tabs">
-      <button class="sidebar-tab active" data-tab="generate">Generate</button>
-      <button class="sidebar-tab" data-tab="editor">Editor</button>
-      <button class="sidebar-tab" data-tab="export">Export</button>
-    </div>
-
     <div class="sidebar-panel active" id="panel-generate">
       <div class="control-group">
-        <label class="control-label">Topology</label>
-        <select id="topology-select">
-          <option value="grid">Grid (rectangular)</option>
-          <option value="hex">Hex (axial)</option>
-          <option value="track">Track (linear/circuit)</option>
-          <option value="pit">Pit (mancala)</option>
-          <option value="graph">Graph (arbitrary)</option>
-        </select>
+        <label class="control-label">Game</label>
+        <select id="game-select"></select>
       </div>
 
       <div class="control-group">
-        <label class="control-label">Preset</label>
-        <select id="preset-select">
-          <option value="custom">Custom</option>
+        <label class="control-label">Variant <span id="coverage-info" class="coverage-badge"></span></label>
+        <select id="variant-select"></select>
+      </div>
+
+      <div class="control-group" id="handicap-group" style="display:none">
+        <label class="control-label">Handicap</label>
+        <select id="handicap-select">
+          <option value="0">None</option>
+          <option value="2">2 stones</option>
+          <option value="3">3 stones</option>
+          <option value="4">4 stones</option>
+          <option value="5">5 stones</option>
+          <option value="6">6 stones</option>
+          <option value="7">7 stones</option>
+          <option value="8">8 stones</option>
+          <option value="9">9 stones</option>
         </select>
       </div>
 
-      <div id="topology-options"></div>
-
-      <div class="control-group">
-        <label class="control-label">Board</label>
-        <select id="board-select">
-          <option value="none">None (flat background)</option>
-          <option value="rectangle">Rectangle frame</option>
-          <option value="slab">Slab (Go-style)</option>
-          <option value="split">Split with bar</option>
-          <option value="capsule">Capsule (rounded)</option>
-          <option value="felt">Felt surface</option>
-          <option value="river">River (split grid)</option>
+      <div class="control-group" id="hex-style-group" style="display:none">
+        <label class="control-label">Tile Style</label>
+        <select id="hex-style-select">
+          <option value="classic">Classic (flat colour)</option>
+          <option value="artistic">Artistic</option>
+          <option value="kenney">Kenney</option>
         </select>
       </div>
 
-      <div class="control-group">
-        <label class="control-label">Theme</label>
-        <select id="theme-select">
-          <option value="classic">Classic</option>
-          <option value="wood">Wood</option>
-          <option value="green">Green</option>
-          <option value="midnight">Midnight</option>
-          <option value="parchment">Parchment</option>
-        </select>
+      <div class="control-group" id="hex-players-group" style="display:none">
+        <label class="control-label">Players</label>
+        <select id="hex-players-select"></select>
       </div>
 
-      <div class="control-group">
-        <label class="control-label">Labels</label>
-        <select id="labels-select">
-          <option value="algebraic">Algebraic (a1, b2...)</option>
-          <option value="index">Index (0, 1, 2...)</option>
-          <option value="none">None</option>
-        </select>
-      </div>
-
-      <button class="btn btn-primary" id="generate-btn">Generate Board</button>
-    </div>
-
-    <div class="sidebar-panel" id="panel-editor">
-      <p class="editor-hint">Click cells to cycle through states. Use the palette below to paint terrain or place pieces.</p>
-      <div class="control-group">
-        <label class="control-label">Paint Mode</label>
-        <select id="paint-mode">
-          <option value="terrain">Terrain</option>
-          <option value="piece">Piece</option>
-          <option value="highlight">Highlight</option>
-        </select>
-      </div>
-      <div id="palette-container"></div>
-    </div>
-
-    <div class="sidebar-panel" id="panel-export">
-      <div class="control-group">
-        <label class="control-label">Format</label>
-        <div class="export-buttons">
-          <button class="btn btn-outline" id="export-svg-btn">SVG</button>
-          <button class="btn btn-outline" id="export-png-btn">PNG</button>
-          <button class="btn btn-outline" id="export-json-btn">JSON</button>
+      <div class="control-group" id="hex-seed-group" style="display:none">
+        <label class="control-label">Seed</label>
+        <div class="control-row">
+          <input type="text" id="hex-seed-input" placeholder="Random seed">
+          <button class="btn btn-outline" id="hex-reseed-btn" title="New seed">&#x21bb;</button>
         </div>
       </div>
-      <div class="control-group">
-        <label class="control-label">Import</label>
-        <textarea id="import-data" placeholder="Paste JSON board data..."></textarea>
-        <button class="btn btn-outline" id="import-btn">Import</button>
-      </div>
-      <div class="control-group">
-        <label class="control-label">Board Data</label>
-        <textarea id="export-data" readonly placeholder="Generate a board to see data..."></textarea>
-        <button class="btn btn-outline" id="copy-btn">Copy to Clipboard</button>
-      </div>
+
+      <div id="derived-info" class="derived-info"></div>
     </div>
   </aside>
 
   <main class="boards-canvas">
-    <div class="canvas-toolbar">
-      <div class="toolbar-info" id="board-info">Select a topology and generate a board</div>
-      <div class="toolbar-actions">
-        <button class="toolbar-btn" id="zoom-in-btn" title="Zoom in">+</button>
-        <button class="toolbar-btn" id="zoom-out-btn" title="Zoom out">&minus;</button>
-        <button class="toolbar-btn" id="fit-btn" title="Fit to view">Fit</button>
-        <button class="toolbar-btn" id="fullscreen-btn" title="Fullscreen">&#x26F6;</button>
-      </div>
-    </div>
     <div class="canvas-viewport" id="board-viewport">
       <div class="canvas-empty" id="board-empty">
         <div class="empty-icon">&#x2B22;</div>
-        <p>Choose a topology and click Generate</p>
+        <p>Select a game to render its board</p>
       </div>
       <div class="canvas-svg" id="board-svg"></div>
     </div>
-    <div class="canvas-footer">
-      <span id="cell-info">Hover over a cell</span>
-      <span id="board-stats"></span>
-    </div>
+    <div class="hex-info-bar" id="hex-info-bar">Hover over a hex</div>
   </main>
 </div>
 

@@ -1,5 +1,5 @@
 import { createBoardRenderer } from '../src/board-renderer.js'
-import { createBoard, builtinBoards } from '../../board-layout/index.js'
+import { createBoard, builtinBoards } from '../../surface/index.js'
 import { createGridTopology } from '../../topology-grid/src/topology-grid.js'
 import { createTrackTopology } from '../../topology-track/src/topology-track.js'
 import { createPitTopology } from '../../topology-pit/src/topology-pit.js'

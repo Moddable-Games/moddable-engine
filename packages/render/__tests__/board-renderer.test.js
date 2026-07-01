@@ -3,7 +3,7 @@ import { createGridTopology } from '../../topology-grid/src/topology-grid.js'
 import { createHexTopology } from '../../topology-hex/src/topology-hex.js'
 import { createTrackTopology } from '../../topology-track/src/topology-track.js'
 import { createPitTopology } from '../../topology-pit/src/topology-pit.js'
-import { createBoard, builtinBoards } from '../../board-layout/index.js'
+import { createBoard, builtinBoards } from '../../surface/index.js'
 
 describe('board-renderer — topology-agnostic', () => {
   const renderer = createBoardRenderer()

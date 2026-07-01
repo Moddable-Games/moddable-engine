@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 180" width="520" height="180">
+  <title>Pallanguzhi — 2x7 pits with 12 cowrie shells per pit</title>
+
+  <!-- Wooden board background (South Indian rosewood) -->
+  <rect x="10" y="15" width="500" height="150" rx="20" ry="20" fill="#5C2E1A"/>
+  <rect x="16" y="21" width="488" height="138" rx="16" ry="16" fill="#7A4030"/>
+
+  <!-- Decorative carved border -->
+  <rect x="22" y="27" width="476" height="126" rx="12" ry="12" fill="none" stroke="#4A2018" stroke-width="1.5" stroke-dasharray="8,4"/>
+
+  <!-- Top row pits (7, centred symmetrically) -->
+  <g id="top-row">
+    <circle cx="62" cy="60" r="22" fill="#3A1808" stroke="#2A1008" stroke-width="1.5"/>
+    <circle cx="128" cy="60" r="22" fill="#3A1808" stroke="#2A1008" stroke-width="1.5"/>
+    <circle cx="194" cy="60" r="22" fill="#3A1808" stroke="#2A1008" stroke-width="1.5"/>
+    <circle cx="260" cy="60" r="22" fill="#3A1808" stroke="#2A1008" stroke-width="1.5"/>
+    <circle cx="326" cy="60" r="22" fill="#3A1808" stroke="#2A1008" stroke-width="1.5"/>
+    <circle cx="392" cy="60" r="22" fill="#3A1808" stroke="#2A1008" stroke-width="1.5"/>
+    <circle cx="458" cy="60" r="22" fill="#3A1808" stroke="#2A1008" stroke-width="1.5"/>
+  </g>
+
+  <!-- Bottom row pits (7, centred symmetrically) -->
+  <g id="bottom-row">
+    <circle cx="62" cy="120" r="22" fill="#3A1808" stroke="#2A1008" stroke-width="1.5"/>
+    <circle cx="128" cy="120" r="22" fill="#3A1808" stroke="#2A1008" stroke-width="1.5"/>
+    <circle cx="194" cy="120" r="22" fill="#3A1808" stroke="#2A1008" stroke-width="1.5"/>
+    <circle cx="260" cy="120" r="22" fill="#3A1808" stroke="#2A1008" stroke-width="1.5"/>
+    <circle cx="326" cy="120" r="22" fill="#3A1808" stroke="#2A1008" stroke-width="1.5"/>
+    <circle cx="392" cy="120" r="22" fill="#3A1808" stroke="#2A1008" stroke-width="1.5"/>
+    <circle cx="458" cy="120" r="22" fill="#3A1808" stroke="#2A1008" stroke-width="1.5"/>
+  </g>
+
+  <!-- Seeds (12 per pit, 4x3 grid of tamarind seeds) -->
+  <g fill="#D4A060" stroke="#A07030" stroke-width="0.4">
+    <!-- Top row pits -->
+    <circle cx="52" cy="51" r="2.8"/><circle cx="59" cy="51" r="2.8"/><circle cx="66" cy="51" r="2.8"/><circle cx="73" cy="51" r="2.8"/>
+    <circle cx="52" cy="59" r="2.8"/><circle cx="59" cy="59" r="2.8"/><circle cx="66" cy="59" r="2.8"/><circle cx="73" cy="59" r="2.8"/>
+    <circle cx="52" cy="67" r="2.8"/><circle cx="59" cy="67" r="2.8"/><circle cx="66" cy="67" r="2.8"/><circle cx="73" cy="67" r="2.8"/>
+
+    <circle cx="118" cy="51" r="2.8"/><circle cx="125" cy="51" r="2.8"/><circle cx="132" cy="51" r="2.8"/><circle cx="139" cy="51" r="2.8"/>
+    <circle cx="118" cy="59" r="2.8"/><circle cx="125" cy="59" r="2.8"/><circle cx="132" cy="59" r="2.8"/><circle cx="139" cy="59" r="2.8"/>
+    <circle cx="118" cy="67" r="2.8"/><circle cx="125" cy="67" r="2.8"/><circle cx="132" cy="67" r="2.8"/><circle cx="139" cy="67" r="2.8"/>
+
+    <circle cx="184" cy="51" r="2.8"/><circle cx="191" cy="51" r="2.8"/><circle cx="198" cy="51" r="2.8"/><circle cx="205" cy="51" r="2.8"/>
+    <circle cx="184" cy="59" r="2.8"/><circle cx="191" cy="59" r="2.8"/><circle cx="198" cy="59" r="2.8"/><circle cx="205" cy="59" r="2.8"/>
+    <circle cx="184" cy="67" r="2.8"/><circle cx="191" cy="67" r="2.8"/><circle cx="198" cy="67" r="2.8"/><circle cx="205" cy="67" r="2.8"/>
+
+    <circle cx="250" cy="51" r="2.8"/><circle cx="257" cy="51" r="2.8"/><circle cx="264" cy="51" r="2.8"/><circle cx="271" cy="51" r="2.8"/>
+    <circle cx="250" cy="59" r="2.8"/><circle cx="257" cy="59" r="2.8"/><circle cx="264" cy="59" r="2.8"/><circle cx="271" cy="59" r="2.8"/>
+    <circle cx="250" cy="67" r="2.8"/><circle cx="257" cy="67" r="2.8"/><circle cx="264" cy="67" r="2.8"/><circle cx="271" cy="67" r="2.8"/>
+
+    <circle cx="316" cy="51" r="2.8"/><circle cx="323" cy="51" r="2.8"/><circle cx="330" cy="51" r="2.8"/><circle cx="337" cy="51" r="2.8"/>
+    <circle cx="316" cy="59" r="2.8"/><circle cx="323" cy="59" r="2.8"/><circle cx="330" cy="59" r="2.8"/><circle cx="337" cy="59" r="2.8"/>
+    <circle cx="316" cy="67" r="2.8"/><circle cx="323" cy="67" r="2.8"/><circle cx="330" cy="67" r="2.8"/><circle cx="337" cy="67" r="2.8"/>
+
+    <circle cx="382" cy="51" r="2.8"/><circle cx="389" cy="51" r="2.8"/><circle cx="396" cy="51" r="2.8"/><circle cx="403" cy="51" r="2.8"/>
+    <circle cx="382" cy="59" r="2.8"/><circle cx="389" cy="59" r="2.8"/><circle cx="396" cy="59" r="2.8"/><circle cx="403" cy="59" r="2.8"/>
+    <circle cx="382" cy="67" r="2.8"/><circle cx="389" cy="67" r="2.8"/><circle cx="396" cy="67" r="2.8"/><circle cx="403" cy="67" r="2.8"/>
+
+    <circle cx="448" cy="51" r="2.8"/><circle cx="455" cy="51" r="2.8"/><circle cx="462" cy="51" r="2.8"/><circle cx="469" cy="51" r="2.8"/>
+    <circle cx="448" cy="59" r="2.8"/><circle cx="455" cy="59" r="2.8"/><circle cx="462" cy="59" r="2.8"/><circle cx="469" cy="59" r="2.8"/>
+    <circle cx="448" cy="67" r="2.8"/><circle cx="455" cy="67" r="2.8"/><circle cx="462" cy="67" r="2.8"/><circle cx="469" cy="67" r="2.8"/>
+
+    <!-- Bottom row pits -->
+    <circle cx="52" cy="111" r="2.8"/><circle cx="59" cy="111" r="2.8"/><circle cx="66" cy="111" r="2.8"/><circle cx="73" cy="111" r="2.8"/>
+    <circle cx="52" cy="119" r="2.8"/><circle cx="59" cy="119" r="2.8"/><circle cx="66" cy="119" r="2.8"/><circle cx="73" cy="119" r="2.8"/>
+    <circle cx="52" cy="127" r="2.8"/><circle cx="59" cy="127" r="2.8"/><circle cx="66" cy="127" r="2.8"/><circle cx="73" cy="127" r="2.8"/>
+
+    <circle cx="118" cy="111" r="2.8"/><circle cx="125" cy="111" r="2.8"/><circle cx="132" cy="111" r="2.8"/><circle cx="139" cy="111" r="2.8"/>
+    <circle cx="118" cy="119" r="2.8"/><circle cx="125" cy="119" r="2.8"/><circle cx="132" cy="119" r="2.8"/><circle cx="139" cy="119" r="2.8"/>
+    <circle cx="118" cy="127" r="2.8"/><circle cx="125" cy="127" r="2.8"/><circle cx="132" cy="127" r="2.8"/><circle cx="139" cy="127" r="2.8"/>
+
+    <circle cx="184" cy="111" r="2.8"/><circle cx="191" cy="111" r="2.8"/><circle cx="198" cy="111" r="2.8"/><circle cx="205" cy="111" r="2.8"/>
+    <circle cx="184" cy="119" r="2.8"/><circle cx="191" cy="119" r="2.8"/><circle cx="198" cy="119" r="2.8"/><circle cx="205" cy="119" r="2.8"/>
+    <circle cx="184" cy="127" r="2.8"/><circle cx="191" cy="127" r="2.8"/><circle cx="198" cy="127" r="2.8"/><circle cx="205" cy="127" r="2.8"/>
+
+    <circle cx="250" cy="111" r="2.8"/><circle cx="257" cy="111" r="2.8"/><circle cx="264" cy="111" r="2.8"/><circle cx="271" cy="111" r="2.8"/>
+    <circle cx="250" cy="119" r="2.8"/><circle cx="257" cy="119" r="2.8"/><circle cx="264" cy="119" r="2.8"/><circle cx="271" cy="119" r="2.8"/>
+    <circle cx="250" cy="127" r="2.8"/><circle cx="257" cy="127" r="2.8"/><circle cx="264" cy="127" r="2.8"/><circle cx="271" cy="127" r="2.8"/>
+
+    <circle cx="316" cy="111" r="2.8"/><circle cx="323" cy="111" r="2.8"/><circle cx="330" cy="111" r="2.8"/><circle cx="337" cy="111" r="2.8"/>
+    <circle cx="316" cy="119" r="2.8"/><circle cx="323" cy="119" r="2.8"/><circle cx="330" cy="119" r="2.8"/><circle cx="337" cy="119" r="2.8"/>
+    <circle cx="316" cy="127" r="2.8"/><circle cx="323" cy="127" r="2.8"/><circle cx="330" cy="127" r="2.8"/><circle cx="337" cy="127" r="2.8"/>
+
+    <circle cx="382" cy="111" r="2.8"/><circle cx="389" cy="111" r="2.8"/><circle cx="396" cy="111" r="2.8"/><circle cx="403" cy="111" r="2.8"/>
+    <circle cx="382" cy="119" r="2.8"/><circle cx="389" cy="119" r="2.8"/><circle cx="396" cy="119" r="2.8"/><circle cx="403" cy="119" r="2.8"/>
+    <circle cx="382" cy="127" r="2.8"/><circle cx="389" cy="127" r="2.8"/><circle cx="396" cy="127" r="2.8"/><circle cx="403" cy="127" r="2.8"/>
+
+    <circle cx="448" cy="111" r="2.8"/><circle cx="455" cy="111" r="2.8"/><circle cx="462" cy="111" r="2.8"/><circle cx="469" cy="111" r="2.8"/>
+    <circle cx="448" cy="119" r="2.8"/><circle cx="455" cy="119" r="2.8"/><circle cx="462" cy="119" r="2.8"/><circle cx="469" cy="119" r="2.8"/>
+    <circle cx="448" cy="127" r="2.8"/><circle cx="455" cy="127" r="2.8"/><circle cx="462" cy="127" r="2.8"/><circle cx="469" cy="127" r="2.8"/>
+  </g>
+</svg>

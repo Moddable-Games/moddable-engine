@@ -1,0 +1,344 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 660" width="660" height="660">
+  <title>The Landlord's Game — 1904 Patent board layout</title>
+
+  <defs>
+    <style>
+      .board-bg { fill: #f5efe6; }
+      .border { fill: none; stroke: #2c2c2c; stroke-width: 2; }
+      .cell-border { fill: none; stroke: #555; stroke-width: 0.75; }
+      .corner-bg { fill: #d4c5a9; }
+      .lot-bg { fill: #c8e6c0; }
+      .rr-bg { fill: #f2c4d0; }
+      .necessity-bg { fill: #b8d4f0; }
+      .franchise-bg { fill: #f5e6a0; }
+      .special-bg { fill: #e8ddd0; }
+      .luxury-bg { fill: #dcc8e8; }
+      .label { font-family: 'Georgia', serif; font-size: 8.5px; fill: #2c2c2c; text-anchor: middle; }
+      .label-sm { font-family: 'Georgia', serif; font-size: 7px; fill: #555; text-anchor: middle; }
+      .corner-label { font-family: 'Georgia', serif; font-size: 10px; fill: #2c2c2c; text-anchor: middle; font-weight: bold; }
+      .price { font-family: 'Courier New', monospace; font-size: 7px; fill: #555; text-anchor: middle; }
+      .title-text { font-family: 'Georgia', serif; font-size: 14px; fill: #2c2c2c; text-anchor: middle; font-weight: bold; }
+      .subtitle { font-family: 'Georgia', serif; font-size: 9.5px; fill: #555; text-anchor: middle; }
+      .legend-label { font-family: 'Georgia', serif; font-size: 10px; fill: #2c2c2c; text-anchor: start; }
+      .legend-heading { font-family: 'Georgia', serif; font-size: 10px; fill: #555; text-anchor: middle; font-style: italic; }
+    </style>
+  </defs>
+
+  <!-- Board background -->
+  <rect x="0" y="0" width="660" height="660" rx="8" class="board-bg"/>
+  <rect x="20" y="20" width="620" height="620" rx="4" class="border"/>
+
+  <!-- Corner cells (80x80) -->
+  <!-- Bottom-left: MOTHER EARTH (position 1) -->
+  <rect x="20" y="560" width="80" height="80" class="corner-bg"/>
+  <rect x="20" y="560" width="80" height="80" class="cell-border"/>
+  <text x="60" y="593" class="corner-label">MOTHER</text>
+  <text x="60" y="605" class="corner-label">EARTH</text>
+  <text x="60" y="620" class="label-sm">"Labor upon</text>
+  <text x="60" y="629" class="label-sm">Mother Earth</text>
+  <text x="60" y="638" class="label-sm">produces wages"</text>
+
+  <!-- Bottom-right: JAIL (position 11) -->
+  <rect x="560" y="560" width="80" height="80" class="corner-bg"/>
+  <rect x="560" y="560" width="80" height="80" class="cell-border"/>
+  <text x="600" y="598" class="corner-label">JAIL</text>
+  <text x="600" y="614" class="label-sm">Just Visiting</text>
+  <text x="600" y="626" class="label-sm">or detained</text>
+
+  <!-- Top-right: PUBLIC PARK (position 21) -->
+  <rect x="560" y="20" width="80" height="80" class="corner-bg"/>
+  <rect x="560" y="20" width="80" height="80" class="cell-border"/>
+  <text x="600" y="55" class="corner-label">PUBLIC</text>
+  <text x="600" y="68" class="corner-label">PARK</text>
+  <text x="600" y="84" class="label-sm">Free space</text>
+
+  <!-- Top-left: NO TRESPASSING (position 31) -->
+  <rect x="20" y="20" width="80" height="80" class="corner-bg"/>
+  <rect x="20" y="20" width="80" height="80" class="cell-border"/>
+  <text x="60" y="50" class="corner-label">NO</text>
+  <text x="60" y="63" class="corner-label">TRESPASS</text>
+  <text x="60" y="80" class="label-sm">Go to Jail</text>
+
+  <!-- Bottom row (positions 2-10, left to right) -->
+
+  <!-- Pos 2: Lot ($25) -->
+  <rect x="100" y="560" width="51" height="80" class="lot-bg"/>
+  <rect x="100" y="560" width="51" height="80" class="cell-border"/>
+  <text x="125.5" y="600" class="label">Lot</text>
+  <text x="125.5" y="614" class="price">$25</text>
+
+  <!-- Pos 3: Legacy -->
+  <rect x="151" y="560" width="51" height="80" class="special-bg"/>
+  <rect x="151" y="560" width="51" height="80" class="cell-border"/>
+  <text x="176.5" y="600" class="label">Legacy</text>
+  <text x="176.5" y="614" class="price">$100</text>
+
+  <!-- Pos 4: Lot ($50) -->
+  <rect x="202" y="560" width="51" height="80" class="lot-bg"/>
+  <rect x="202" y="560" width="51" height="80" class="cell-border"/>
+  <text x="227.5" y="600" class="label">Lot</text>
+  <text x="227.5" y="614" class="price">$50</text>
+
+  <!-- Pos 5: Food (Necessity) -->
+  <rect x="253" y="560" width="51" height="80" class="necessity-bg"/>
+  <rect x="253" y="560" width="51" height="80" class="cell-border"/>
+  <text x="278.5" y="600" class="label">Food</text>
+  <text x="278.5" y="614" class="label-sm">(Necessity)</text>
+  <text x="278.5" y="626" class="price">$5</text>
+
+  <!-- Pos 6: Railroad -->
+  <rect x="304" y="560" width="51" height="80" class="rr-bg"/>
+  <rect x="304" y="560" width="51" height="80" class="cell-border"/>
+  <text x="329.5" y="600" class="label">Railroad</text>
+  <text x="329.5" y="614" class="price">$5 fare</text>
+
+  <!-- Pos 7: Lot ($25) -->
+  <rect x="355" y="560" width="51" height="80" class="lot-bg"/>
+  <rect x="355" y="560" width="51" height="80" class="cell-border"/>
+  <text x="380.5" y="600" class="label">Lot</text>
+  <text x="380.5" y="614" class="price">$25</text>
+
+  <!-- Pos 8: Lot ($50) -->
+  <rect x="406" y="560" width="51" height="80" class="lot-bg"/>
+  <rect x="406" y="560" width="51" height="80" class="cell-border"/>
+  <text x="431.5" y="600" class="label">Lot</text>
+  <text x="431.5" y="614" class="price">$50</text>
+
+  <!-- Pos 9: Franchise -->
+  <rect x="457" y="560" width="51" height="80" class="franchise-bg"/>
+  <rect x="457" y="560" width="51" height="80" class="cell-border"/>
+  <text x="482.5" y="596" class="label">Fran-</text>
+  <text x="482.5" y="607" class="label">chise</text>
+  <text x="482.5" y="622" class="price">$5</text>
+
+  <!-- Pos 10: Lot ($75) -->
+  <rect x="508" y="560" width="52" height="80" class="lot-bg"/>
+  <rect x="508" y="560" width="52" height="80" class="cell-border"/>
+  <text x="534" y="600" class="label">Lot</text>
+  <text x="534" y="614" class="price">$75</text>
+
+  <!-- Right column (positions 12-20, bottom to top) -->
+
+  <!-- Pos 12: Lot ($50) -->
+  <rect x="560" y="509" width="80" height="51" class="lot-bg"/>
+  <rect x="560" y="509" width="80" height="51" class="cell-border"/>
+  <text x="600" y="537" class="label">Lot</text>
+  <text x="600" y="550" class="price">$50</text>
+
+  <!-- Pos 13: Fuel (Necessity) -->
+  <rect x="560" y="458" width="80" height="51" class="necessity-bg"/>
+  <rect x="560" y="458" width="80" height="51" class="cell-border"/>
+  <text x="600" y="483" class="label">Fuel</text>
+  <text x="600" y="496" class="label-sm">(Necessity)</text>
+  <text x="600" y="507" class="price">$5</text>
+
+  <!-- Pos 14: Lot ($75) -->
+  <rect x="560" y="407" width="80" height="51" class="lot-bg"/>
+  <rect x="560" y="407" width="80" height="51" class="cell-border"/>
+  <text x="600" y="435" class="label">Lot</text>
+  <text x="600" y="448" class="price">$75</text>
+
+  <!-- Pos 15: Luxury -->
+  <rect x="560" y="356" width="80" height="51" class="luxury-bg"/>
+  <rect x="560" y="356" width="80" height="51" class="cell-border"/>
+  <text x="600" y="381" class="label">Luxury</text>
+  <text x="600" y="394" class="price">$50</text>
+
+  <!-- Pos 16: Railroad -->
+  <rect x="560" y="305" width="80" height="51" class="rr-bg"/>
+  <rect x="560" y="305" width="80" height="51" class="cell-border"/>
+  <text x="600" y="333" class="label">Railroad</text>
+  <text x="600" y="346" class="price">$5 fare</text>
+
+  <!-- Pos 17: Lot ($75) -->
+  <rect x="560" y="254" width="80" height="51" class="lot-bg"/>
+  <rect x="560" y="254" width="80" height="51" class="cell-border"/>
+  <text x="600" y="282" class="label">Lot</text>
+  <text x="600" y="295" class="price">$75</text>
+
+  <!-- Pos 18: No Trespassing (sends to Jail) -->
+  <rect x="560" y="203" width="80" height="51" class="special-bg"/>
+  <rect x="560" y="203" width="80" height="51" class="cell-border"/>
+  <text x="600" y="225" class="label">No</text>
+  <text x="600" y="236" class="label">Trespass</text>
+  <text x="600" y="249" class="label-sm">(Go to Jail)</text>
+
+  <!-- Pos 19: Lot ($75) -->
+  <rect x="560" y="152" width="80" height="51" class="lot-bg"/>
+  <rect x="560" y="152" width="80" height="51" class="cell-border"/>
+  <text x="600" y="180" class="label">Lot</text>
+  <text x="600" y="193" class="price">$75</text>
+
+  <!-- Pos 20: Legacy -->
+  <rect x="560" y="100" width="80" height="52" class="special-bg"/>
+  <rect x="560" y="100" width="80" height="52" class="cell-border"/>
+  <text x="600" y="127" class="label">Legacy</text>
+  <text x="600" y="140" class="price">$100</text>
+
+  <!-- Top row (positions 22-30, right to left) -->
+
+  <!-- Pos 22: Lot ($50) -->
+  <rect x="509" y="20" width="51" height="80" class="lot-bg"/>
+  <rect x="509" y="20" width="51" height="80" class="cell-border"/>
+  <text x="534.5" y="58" class="label">Lot</text>
+  <text x="534.5" y="72" class="price">$50</text>
+
+  <!-- Pos 23: Franchise -->
+  <rect x="458" y="20" width="51" height="80" class="franchise-bg"/>
+  <rect x="458" y="20" width="51" height="80" class="cell-border"/>
+  <text x="483.5" y="54" class="label">Fran-</text>
+  <text x="483.5" y="65" class="label">chise</text>
+  <text x="483.5" y="80" class="price">$5</text>
+
+  <!-- Pos 24: Lot ($50) -->
+  <rect x="407" y="20" width="51" height="80" class="lot-bg"/>
+  <rect x="407" y="20" width="51" height="80" class="cell-border"/>
+  <text x="432.5" y="58" class="label">Lot</text>
+  <text x="432.5" y="72" class="price">$50</text>
+
+  <!-- Pos 25: Shelter (Necessity) -->
+  <rect x="356" y="20" width="51" height="80" class="necessity-bg"/>
+  <rect x="356" y="20" width="51" height="80" class="cell-border"/>
+  <text x="381.5" y="54" class="label">Shelter</text>
+  <text x="381.5" y="67" class="label-sm">(Necessity)</text>
+  <text x="381.5" y="80" class="price">$5</text>
+
+  <!-- Pos 26: Railroad -->
+  <rect x="305" y="20" width="51" height="80" class="rr-bg"/>
+  <rect x="305" y="20" width="51" height="80" class="cell-border"/>
+  <text x="330.5" y="58" class="label">Railroad</text>
+  <text x="330.5" y="72" class="price">$5 fare</text>
+
+  <!-- Pos 27: Lot ($100) -->
+  <rect x="254" y="20" width="51" height="80" class="lot-bg"/>
+  <rect x="254" y="20" width="51" height="80" class="cell-border"/>
+  <text x="279.5" y="58" class="label">Lot</text>
+  <text x="279.5" y="72" class="price">$100</text>
+
+  <!-- Pos 28: Luxury -->
+  <rect x="203" y="20" width="51" height="80" class="luxury-bg"/>
+  <rect x="203" y="20" width="51" height="80" class="cell-border"/>
+  <text x="228.5" y="58" class="label">Luxury</text>
+  <text x="228.5" y="72" class="price">$50</text>
+
+  <!-- Pos 29: Lot ($100) -->
+  <rect x="152" y="20" width="51" height="80" class="lot-bg"/>
+  <rect x="152" y="20" width="51" height="80" class="cell-border"/>
+  <text x="177.5" y="58" class="label">Lot</text>
+  <text x="177.5" y="72" class="price">$100</text>
+
+  <!-- Pos 30: Poor House -->
+  <rect x="100" y="20" width="52" height="80" class="special-bg"/>
+  <rect x="100" y="20" width="52" height="80" class="cell-border"/>
+  <text x="126" y="56" class="label">Poor</text>
+  <text x="126" y="68" class="label">House</text>
+
+  <!-- Left column (positions 32-40, top to bottom) -->
+
+  <!-- Pos 32: Lot ($100) -->
+  <rect x="20" y="100" width="80" height="51" class="lot-bg"/>
+  <rect x="20" y="100" width="80" height="51" class="cell-border"/>
+  <text x="60" y="128" class="label">Lot</text>
+  <text x="60" y="141" class="price">$100</text>
+
+  <!-- Pos 33: Clothing (Necessity) -->
+  <rect x="20" y="151" width="80" height="51" class="necessity-bg"/>
+  <rect x="20" y="151" width="80" height="51" class="cell-border"/>
+  <text x="60" y="176" class="label">Clothing</text>
+  <text x="60" y="189" class="label-sm">(Necessity)</text>
+  <text x="60" y="200" class="price">$5</text>
+
+  <!-- Pos 34: Lot ($100) -->
+  <rect x="20" y="202" width="80" height="51" class="lot-bg"/>
+  <rect x="20" y="202" width="80" height="51" class="cell-border"/>
+  <text x="60" y="230" class="label">Lot</text>
+  <text x="60" y="243" class="price">$100</text>
+
+  <!-- Pos 35: Luxury -->
+  <rect x="20" y="253" width="80" height="51" class="luxury-bg"/>
+  <rect x="20" y="253" width="80" height="51" class="cell-border"/>
+  <text x="60" y="280" class="label">Luxury</text>
+  <text x="60" y="293" class="price">$50</text>
+
+  <!-- Pos 36: Railroad -->
+  <rect x="20" y="304" width="80" height="51" class="rr-bg"/>
+  <rect x="20" y="304" width="80" height="51" class="cell-border"/>
+  <text x="60" y="332" class="label">Railroad</text>
+  <text x="60" y="345" class="price">$5 fare</text>
+
+  <!-- Pos 37: No Trespassing (sends to Jail) -->
+  <rect x="20" y="355" width="80" height="51" class="special-bg"/>
+  <rect x="20" y="355" width="80" height="51" class="cell-border"/>
+  <text x="60" y="377" class="label">No</text>
+  <text x="60" y="388" class="label">Trespass</text>
+  <text x="60" y="401" class="label-sm">(Go to Jail)</text>
+
+  <!-- Pos 38: Lot ($100) -->
+  <rect x="20" y="406" width="80" height="51" class="lot-bg"/>
+  <rect x="20" y="406" width="80" height="51" class="cell-border"/>
+  <text x="60" y="434" class="label">Lot</text>
+  <text x="60" y="447" class="price">$100</text>
+
+  <!-- Pos 39: Legacy -->
+  <rect x="20" y="457" width="80" height="51" class="special-bg"/>
+  <rect x="20" y="457" width="80" height="51" class="cell-border"/>
+  <text x="60" y="484" class="label">Legacy</text>
+  <text x="60" y="497" class="price">$100</text>
+
+  <!-- Pos 40: Franchise -->
+  <rect x="20" y="508" width="80" height="52" class="franchise-bg"/>
+  <rect x="20" y="508" width="80" height="52" class="cell-border"/>
+  <text x="60" y="533" class="label">Franchise</text>
+  <text x="60" y="546" class="price">$5</text>
+
+  <!-- Centre area -->
+  <rect x="110" y="110" width="440" height="440" fill="#f9f5ee" stroke="#999" stroke-width="0.5" rx="4"/>
+
+  <!-- Title -->
+  <text x="330" y="190" class="title-text">THE LANDLORD'S GAME</text>
+  <text x="330" y="210" class="subtitle">US Patent 748,626 — January 5, 1904</text>
+  <text x="330" y="228" class="subtitle">Elizabeth J. Magie</text>
+
+  <!-- Centre fund boxes (2x2 grid) -->
+  <rect x="200" y="260" width="120" height="50" rx="6" fill="#e8e0d0" stroke="#777" stroke-width="1"/>
+  <text x="260" y="290" class="label" style="font-size:11px;font-weight:bold">BANK</text>
+
+  <rect x="340" y="260" width="120" height="50" rx="6" fill="#e8e0d0" stroke="#777" stroke-width="1"/>
+  <text x="400" y="290" class="label" style="font-size:11px;font-weight:bold">WAGES</text>
+
+  <rect x="200" y="325" width="120" height="50" rx="6" fill="#e8e0d0" stroke="#777" stroke-width="1"/>
+  <text x="260" y="348" class="label" style="font-size:11px;font-weight:bold">PUBLIC</text>
+  <text x="260" y="363" class="label" style="font-size:11px;font-weight:bold">TREASURY</text>
+
+  <rect x="340" y="325" width="120" height="50" rx="6" fill="#e8e0d0" stroke="#777" stroke-width="1"/>
+  <text x="400" y="355" class="label" style="font-size:11px;font-weight:bold">RAILROAD</text>
+
+  <!-- Legend (larger swatches, readable text) -->
+  <text x="330" y="415" class="legend-heading">Space types</text>
+
+  <!-- Row 1 -->
+  <rect x="155" y="430" width="18" height="18" rx="2" fill="#c8e6c0" stroke="#555" stroke-width="0.75"/>
+  <text x="181" y="444" class="legend-label">Lot (22)</text>
+
+  <rect x="275" y="430" width="18" height="18" rx="2" fill="#f2c4d0" stroke="#555" stroke-width="0.75"/>
+  <text x="301" y="444" class="legend-label">Railroad (4)</text>
+
+  <rect x="410" y="430" width="18" height="18" rx="2" fill="#b8d4f0" stroke="#555" stroke-width="0.75"/>
+  <text x="436" y="444" class="legend-label">Necessity (4)</text>
+
+  <!-- Row 2 -->
+  <rect x="155" y="460" width="18" height="18" rx="2" fill="#f5e6a0" stroke="#555" stroke-width="0.75"/>
+  <text x="181" y="474" class="legend-label">Franchise (2)</text>
+
+  <rect x="275" y="460" width="18" height="18" rx="2" fill="#dcc8e8" stroke="#555" stroke-width="0.75"/>
+  <text x="301" y="474" class="legend-label">Luxury (3)</text>
+
+  <rect x="410" y="460" width="18" height="18" rx="2" fill="#e8ddd0" stroke="#555" stroke-width="0.75"/>
+  <text x="436" y="474" class="legend-label">Special</text>
+
+  <!-- Direction and note -->
+  <text x="330" y="510" class="subtitle">↻ Clockwise movement from MOTHER EARTH</text>
+  <text x="330" y="530" class="label-sm">1904 patent uses generic lot values;</text>
+  <text x="330" y="542" class="label-sm">named properties added in 1906 edition</text>
+
+</svg>

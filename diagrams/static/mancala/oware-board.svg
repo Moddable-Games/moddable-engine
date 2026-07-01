@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470 180" width="470" height="180">
+  <title>Oware — starting position (2x6, 4 seeds per pit)</title>
+
+  <!-- Wooden board background -->
+  <rect x="10" y="15" width="450" height="150" rx="22" ry="22" fill="#7A5A32"/>
+  <rect x="16" y="21" width="438" height="138" rx="18" ry="18" fill="#9B7740"/>
+
+  <!-- Top row pits (Player 2, right to left in play) -->
+  <g id="top-row">
+    <circle cx="70" cy="60" r="24" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+    <circle cx="136" cy="60" r="24" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+    <circle cx="202" cy="60" r="24" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+    <circle cx="268" cy="60" r="24" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+    <circle cx="334" cy="60" r="24" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+    <circle cx="400" cy="60" r="24" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+  </g>
+
+  <!-- Bottom row pits (Player 1, left to right in play) -->
+  <g id="bottom-row">
+    <circle cx="70" cy="120" r="24" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+    <circle cx="136" cy="120" r="24" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+    <circle cx="202" cy="120" r="24" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+    <circle cx="268" cy="120" r="24" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+    <circle cx="334" cy="120" r="24" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+    <circle cx="400" cy="120" r="24" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+  </g>
+
+  <!-- Seeds (4 per pit, dark polished stones) -->
+  <g fill="#C8B898" stroke="#8A7A5A" stroke-width="0.5">
+    <!-- Top row -->
+    <circle cx="63" cy="54" r="5"/><circle cx="77" cy="54" r="5"/>
+    <circle cx="63" cy="66" r="5"/><circle cx="77" cy="66" r="5"/>
+    <circle cx="129" cy="54" r="5"/><circle cx="143" cy="54" r="5"/>
+    <circle cx="129" cy="66" r="5"/><circle cx="143" cy="66" r="5"/>
+    <circle cx="195" cy="54" r="5"/><circle cx="209" cy="54" r="5"/>
+    <circle cx="195" cy="66" r="5"/><circle cx="209" cy="66" r="5"/>
+    <circle cx="261" cy="54" r="5"/><circle cx="275" cy="54" r="5"/>
+    <circle cx="261" cy="66" r="5"/><circle cx="275" cy="66" r="5"/>
+    <circle cx="327" cy="54" r="5"/><circle cx="341" cy="54" r="5"/>
+    <circle cx="327" cy="66" r="5"/><circle cx="341" cy="66" r="5"/>
+    <circle cx="393" cy="54" r="5"/><circle cx="407" cy="54" r="5"/>
+    <circle cx="393" cy="66" r="5"/><circle cx="407" cy="66" r="5"/>
+    <!-- Bottom row -->
+    <circle cx="63" cy="114" r="5"/><circle cx="77" cy="114" r="5"/>
+    <circle cx="63" cy="126" r="5"/><circle cx="77" cy="126" r="5"/>
+    <circle cx="129" cy="114" r="5"/><circle cx="143" cy="114" r="5"/>
+    <circle cx="129" cy="126" r="5"/><circle cx="143" cy="126" r="5"/>
+    <circle cx="195" cy="114" r="5"/><circle cx="209" cy="114" r="5"/>
+    <circle cx="195" cy="126" r="5"/><circle cx="209" cy="126" r="5"/>
+    <circle cx="261" cy="114" r="5"/><circle cx="275" cy="114" r="5"/>
+    <circle cx="261" cy="126" r="5"/><circle cx="275" cy="126" r="5"/>
+    <circle cx="327" cy="114" r="5"/><circle cx="341" cy="114" r="5"/>
+    <circle cx="327" cy="126" r="5"/><circle cx="341" cy="126" r="5"/>
+    <circle cx="393" cy="114" r="5"/><circle cx="407" cy="114" r="5"/>
+    <circle cx="393" cy="126" r="5"/><circle cx="407" cy="126" r="5"/>
+  </g>
+</svg>

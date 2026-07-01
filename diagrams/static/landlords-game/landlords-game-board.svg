@@ -1,0 +1,356 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 660" width="660" height="660">
+  <title>The Landlord's Game — 1906 Commercial Edition board layout</title>
+
+  <defs>
+    <style>
+      .board-bg { fill: #f5efe6; }
+      .border { fill: none; stroke: #2c2c2c; stroke-width: 2; }
+      .cell-border { fill: none; stroke: #555; stroke-width: 0.75; }
+      .corner-bg { fill: #d4c5a9; }
+      .lot-bg { fill: #c8e6c0; }
+      .rr-bg { fill: #f2c4d0; }
+      .necessity-bg { fill: #b8d4f0; }
+      .franchise-bg { fill: #f5e6a0; }
+      .special-bg { fill: #e8ddd0; }
+      .chance-bg { fill: #f0d0a0; }
+      .label { font-family: 'Georgia', serif; font-size: 8.5px; fill: #2c2c2c; text-anchor: middle; }
+      .label-sm { font-family: 'Georgia', serif; font-size: 7px; fill: #555; text-anchor: middle; }
+      .corner-label { font-family: 'Georgia', serif; font-size: 10px; fill: #2c2c2c; text-anchor: middle; font-weight: bold; }
+      .price { font-family: 'Courier New', monospace; font-size: 7px; fill: #555; text-anchor: middle; }
+      .title-text { font-family: 'Georgia', serif; font-size: 14px; fill: #2c2c2c; text-anchor: middle; font-weight: bold; }
+      .subtitle { font-family: 'Georgia', serif; font-size: 9.5px; fill: #555; text-anchor: middle; }
+      .legend-label { font-family: 'Georgia', serif; font-size: 10px; fill: #2c2c2c; text-anchor: start; }
+      .legend-heading { font-family: 'Georgia', serif; font-size: 10px; fill: #555; text-anchor: middle; font-style: italic; }
+    </style>
+  </defs>
+
+  <!-- Board background -->
+  <rect x="0" y="0" width="660" height="660" rx="8" class="board-bg"/>
+  <rect x="20" y="20" width="620" height="620" rx="4" class="border"/>
+
+  <!-- Corner cells (80x80) -->
+  <!-- Bottom-left: MOTHER EARTH (position 1) -->
+  <rect x="20" y="560" width="80" height="80" class="corner-bg"/>
+  <rect x="20" y="560" width="80" height="80" class="cell-border"/>
+  <text x="60" y="593" class="corner-label">MOTHER</text>
+  <text x="60" y="605" class="corner-label">EARTH</text>
+  <text x="60" y="620" class="label-sm">"Labor upon</text>
+  <text x="60" y="629" class="label-sm">Mother Earth</text>
+  <text x="60" y="638" class="label-sm">produces wages"</text>
+
+  <!-- Bottom-right: JAIL (position 11) -->
+  <rect x="560" y="560" width="80" height="80" class="corner-bg"/>
+  <rect x="560" y="560" width="80" height="80" class="cell-border"/>
+  <text x="600" y="598" class="corner-label">JAIL</text>
+  <text x="600" y="614" class="label-sm">Just Visiting</text>
+  <text x="600" y="626" class="label-sm">or detained</text>
+
+  <!-- Top-right: CENTRAL PARK (position 21) -->
+  <rect x="560" y="20" width="80" height="80" class="corner-bg"/>
+  <rect x="560" y="20" width="80" height="80" class="cell-border"/>
+  <text x="600" y="55" class="corner-label">CENTRAL</text>
+  <text x="600" y="68" class="corner-label">PARK</text>
+  <text x="600" y="84" class="label-sm">Free space</text>
+
+  <!-- Top-left: NO TRESPASSING (position 31) -->
+  <rect x="20" y="20" width="80" height="80" class="corner-bg"/>
+  <rect x="20" y="20" width="80" height="80" class="cell-border"/>
+  <text x="60" y="50" class="corner-label">NO</text>
+  <text x="60" y="63" class="corner-label">TRESPASS</text>
+  <text x="60" y="80" class="label-sm">Go to Jail</text>
+
+  <!-- Bottom row (positions 2-10, left to right) -->
+  <!-- Each cell is ~53.3px wide x 80px tall -->
+
+  <!-- Pos 2: The Pike ($25) -->
+  <rect x="100" y="560" width="51" height="80" class="lot-bg"/>
+  <rect x="100" y="560" width="51" height="80" class="cell-border"/>
+  <text x="125.5" y="596" class="label">The</text>
+  <text x="125.5" y="607" class="label">Pike</text>
+  <text x="125.5" y="622" class="price">$25</text>
+
+  <!-- Pos 3: Chance -->
+  <rect x="151" y="560" width="51" height="80" class="chance-bg"/>
+  <rect x="151" y="560" width="51" height="80" class="cell-border"/>
+  <text x="176.5" y="604" class="label">Chance</text>
+
+  <!-- Pos 4: Goat Alley ($50) -->
+  <rect x="202" y="560" width="51" height="80" class="lot-bg"/>
+  <rect x="202" y="560" width="51" height="80" class="cell-border"/>
+  <text x="227.5" y="596" class="label">Goat</text>
+  <text x="227.5" y="607" class="label">Alley</text>
+  <text x="227.5" y="622" class="price">$50</text>
+
+  <!-- Pos 5: Food (Necessity) -->
+  <rect x="253" y="560" width="51" height="80" class="necessity-bg"/>
+  <rect x="253" y="560" width="51" height="80" class="cell-border"/>
+  <text x="278.5" y="600" class="label">Food</text>
+  <text x="278.5" y="614" class="label-sm">(Necessity)</text>
+
+  <!-- Pos 6: Royal Rusher R.R. -->
+  <rect x="304" y="560" width="51" height="80" class="rr-bg"/>
+  <rect x="304" y="560" width="51" height="80" class="cell-border"/>
+  <text x="329.5" y="593" class="label">Royal</text>
+  <text x="329.5" y="604" class="label">Rusher</text>
+  <text x="329.5" y="615" class="label">R.R.</text>
+  <text x="329.5" y="629" class="price">$5 fare</text>
+
+  <!-- Pos 7: Lonely Lane ($25) -->
+  <rect x="355" y="560" width="51" height="80" class="lot-bg"/>
+  <rect x="355" y="560" width="51" height="80" class="cell-border"/>
+  <text x="380.5" y="596" class="label">Lonely</text>
+  <text x="380.5" y="607" class="label">Lane</text>
+  <text x="380.5" y="622" class="price">$25</text>
+
+  <!-- Pos 8: Beggarman's Court ($50) -->
+  <rect x="406" y="560" width="51" height="80" class="lot-bg"/>
+  <rect x="406" y="560" width="51" height="80" class="cell-border"/>
+  <text x="431.5" y="590" class="label">Beggar-</text>
+  <text x="431.5" y="601" class="label">man's</text>
+  <text x="431.5" y="612" class="label">Court</text>
+  <text x="431.5" y="626" class="price">$50</text>
+
+  <!-- Pos 9: Soakum Lighting (Franchise) -->
+  <rect x="457" y="560" width="51" height="80" class="franchise-bg"/>
+  <rect x="457" y="560" width="51" height="80" class="cell-border"/>
+  <text x="482.5" y="590" class="label">Soakum</text>
+  <text x="482.5" y="601" class="label">Lighting</text>
+  <text x="482.5" y="612" class="label">System</text>
+  <text x="482.5" y="626" class="price">$5</text>
+
+  <!-- Pos 10: The Bowery ($75) -->
+  <rect x="508" y="560" width="52" height="80" class="lot-bg"/>
+  <rect x="508" y="560" width="52" height="80" class="cell-border"/>
+  <text x="534" y="596" class="label">The</text>
+  <text x="534" y="607" class="label">Bowery</text>
+  <text x="534" y="622" class="price">$75</text>
+
+  <!-- Right column (positions 12-20, bottom to top) -->
+  <!-- Each cell is 80px wide x ~51px tall -->
+
+  <!-- Pos 12: Boomtown ($50) -->
+  <rect x="560" y="509" width="80" height="51" class="lot-bg"/>
+  <rect x="560" y="509" width="80" height="51" class="cell-border"/>
+  <text x="600" y="535" class="label">Boomtown</text>
+  <text x="600" y="548" class="price">$50</text>
+
+  <!-- Pos 13: Fuel (Necessity) -->
+  <rect x="560" y="458" width="80" height="51" class="necessity-bg"/>
+  <rect x="560" y="458" width="80" height="51" class="cell-border"/>
+  <text x="600" y="485" class="label">Fuel</text>
+  <text x="600" y="498" class="label-sm">(Necessity)</text>
+
+  <!-- Pos 14: Fairhope Avenue ($75) -->
+  <rect x="560" y="407" width="80" height="51" class="lot-bg"/>
+  <rect x="560" y="407" width="80" height="51" class="cell-border"/>
+  <text x="600" y="430" class="label">Fairhope</text>
+  <text x="600" y="441" class="label">Avenue</text>
+  <text x="600" y="454" class="price">$75</text>
+
+  <!-- Pos 15: Chance -->
+  <rect x="560" y="356" width="80" height="51" class="chance-bg"/>
+  <rect x="560" y="356" width="80" height="51" class="cell-border"/>
+  <text x="600" y="385" class="label">Chance</text>
+
+  <!-- Pos 16: Gee Whiz R.R. -->
+  <rect x="560" y="305" width="80" height="51" class="rr-bg"/>
+  <rect x="560" y="305" width="80" height="51" class="cell-border"/>
+  <text x="600" y="327" class="label">Gee Whiz</text>
+  <text x="600" y="339" class="label">R.R.</text>
+  <text x="600" y="352" class="price">$5 fare</text>
+
+  <!-- Pos 17: George Street ($75) -->
+  <rect x="560" y="254" width="80" height="51" class="lot-bg"/>
+  <rect x="560" y="254" width="80" height="51" class="cell-border"/>
+  <text x="600" y="277" class="label">George</text>
+  <text x="600" y="289" class="label">Street</text>
+  <text x="600" y="302" class="price">$75</text>
+
+  <!-- Pos 18: D.F. Hogg's Game Preserves -->
+  <rect x="560" y="203" width="80" height="51" class="special-bg"/>
+  <rect x="560" y="203" width="80" height="51" class="cell-border"/>
+  <text x="600" y="221" class="label">D.F. Hogg's</text>
+  <text x="600" y="232" class="label">Game</text>
+  <text x="600" y="243" class="label">Preserves</text>
+  <text x="600" y="253" class="label-sm">(Go to Jail)</text>
+
+  <!-- Pos 19: Easy Street ($75) -->
+  <rect x="560" y="152" width="80" height="51" class="lot-bg"/>
+  <rect x="560" y="152" width="80" height="51" class="cell-border"/>
+  <text x="600" y="175" class="label">Easy</text>
+  <text x="600" y="187" class="label">Street</text>
+  <text x="600" y="200" class="price">$75</text>
+
+  <!-- Pos 20: Speculation -->
+  <rect x="560" y="100" width="80" height="52" class="special-bg"/>
+  <rect x="560" y="100" width="80" height="52" class="cell-border"/>
+  <text x="600" y="126" class="label">Specu-</text>
+  <text x="600" y="138" class="label">lation</text>
+
+  <!-- Top row (positions 22-30, right to left) -->
+
+  <!-- Pos 22: Cottage Terrace ($50) -->
+  <rect x="509" y="20" width="51" height="80" class="lot-bg"/>
+  <rect x="509" y="20" width="51" height="80" class="cell-border"/>
+  <text x="534.5" y="52" class="label">Cottage</text>
+  <text x="534.5" y="63" class="label">Terrace</text>
+  <text x="534.5" y="78" class="price">$50</text>
+
+  <!-- Pos 23: Slambang Trolley (Franchise) -->
+  <rect x="458" y="20" width="51" height="80" class="franchise-bg"/>
+  <rect x="458" y="20" width="51" height="80" class="cell-border"/>
+  <text x="483.5" y="48" class="label">Slambang</text>
+  <text x="483.5" y="60" class="label">Trolley</text>
+  <text x="483.5" y="76" class="price">$5</text>
+
+  <!-- Pos 24: Market Place ($50) -->
+  <rect x="407" y="20" width="51" height="80" class="lot-bg"/>
+  <rect x="407" y="20" width="51" height="80" class="cell-border"/>
+  <text x="432.5" y="52" class="label">Market</text>
+  <text x="432.5" y="63" class="label">Place</text>
+  <text x="432.5" y="78" class="price">$50</text>
+
+  <!-- Pos 25: Shelter (Necessity) -->
+  <rect x="356" y="20" width="51" height="80" class="necessity-bg"/>
+  <rect x="356" y="20" width="51" height="80" class="cell-border"/>
+  <text x="381.5" y="56" class="label">Shelter</text>
+  <text x="381.5" y="70" class="label-sm">(Necessity)</text>
+
+  <!-- Pos 26: Shooting Star R.R. -->
+  <rect x="305" y="20" width="51" height="80" class="rr-bg"/>
+  <rect x="305" y="20" width="51" height="80" class="cell-border"/>
+  <text x="330.5" y="48" class="label">Shooting</text>
+  <text x="330.5" y="60" class="label">Star R.R.</text>
+  <text x="330.5" y="76" class="price">$5 fare</text>
+
+  <!-- Pos 27: Grand Boulevard ($100) -->
+  <rect x="254" y="20" width="51" height="80" class="lot-bg"/>
+  <rect x="254" y="20" width="51" height="80" class="cell-border"/>
+  <text x="279.5" y="48" class="label">Grand</text>
+  <text x="279.5" y="60" class="label">Blvd</text>
+  <text x="279.5" y="76" class="price">$100</text>
+
+  <!-- Pos 28: Chance -->
+  <rect x="203" y="20" width="51" height="80" class="chance-bg"/>
+  <rect x="203" y="20" width="51" height="80" class="cell-border"/>
+  <text x="228.5" y="64" class="label">Chance</text>
+
+  <!-- Pos 29: Wall Street ($100) -->
+  <rect x="152" y="20" width="51" height="80" class="lot-bg"/>
+  <rect x="152" y="20" width="51" height="80" class="cell-border"/>
+  <text x="177.5" y="52" class="label">Wall</text>
+  <text x="177.5" y="63" class="label">Street</text>
+  <text x="177.5" y="78" class="price">$100</text>
+
+  <!-- Pos 30: Poor House -->
+  <rect x="100" y="20" width="52" height="80" class="special-bg"/>
+  <rect x="100" y="20" width="52" height="80" class="cell-border"/>
+  <text x="126" y="56" class="label">Poor</text>
+  <text x="126" y="68" class="label">House</text>
+
+  <!-- Left column (positions 32-40, top to bottom) -->
+
+  <!-- Pos 32: Broadway ($100) -->
+  <rect x="20" y="100" width="80" height="51" class="lot-bg"/>
+  <rect x="20" y="100" width="80" height="51" class="cell-border"/>
+  <text x="60" y="126" class="label">Broadway</text>
+  <text x="60" y="140" class="price">$100</text>
+
+  <!-- Pos 33: Clothing (Necessity) -->
+  <rect x="20" y="151" width="80" height="51" class="necessity-bg"/>
+  <rect x="20" y="151" width="80" height="51" class="cell-border"/>
+  <text x="60" y="178" class="label">Clothing</text>
+  <text x="60" y="191" class="label-sm">(Necessity)</text>
+
+  <!-- Pos 34: Fifth Avenue ($100) -->
+  <rect x="20" y="202" width="80" height="51" class="lot-bg"/>
+  <rect x="20" y="202" width="80" height="51" class="cell-border"/>
+  <text x="60" y="225" class="label">Fifth</text>
+  <text x="60" y="237" class="label">Avenue</text>
+  <text x="60" y="250" class="price">$100</text>
+
+  <!-- Pos 35: Chance -->
+  <rect x="20" y="253" width="80" height="51" class="chance-bg"/>
+  <rect x="20" y="253" width="80" height="51" class="cell-border"/>
+  <text x="60" y="282" class="label">Chance</text>
+
+  <!-- Pos 36: P.D.Q. R.R. -->
+  <rect x="20" y="304" width="80" height="51" class="rr-bg"/>
+  <rect x="20" y="304" width="80" height="51" class="cell-border"/>
+  <text x="60" y="326" class="label">P.D.Q.</text>
+  <text x="60" y="338" class="label">R.R.</text>
+  <text x="60" y="352" class="price">$5 fare</text>
+
+  <!-- Pos 37: Lord Blueblood's Estate -->
+  <rect x="20" y="355" width="80" height="51" class="special-bg"/>
+  <rect x="20" y="355" width="80" height="51" class="cell-border"/>
+  <text x="60" y="373" class="label">Lord</text>
+  <text x="60" y="384" class="label">Blueblood's</text>
+  <text x="60" y="395" class="label">Estate</text>
+  <text x="60" y="405" class="label-sm">(Go to Jail)</text>
+
+  <!-- Pos 38: Legacy -->
+  <rect x="20" y="406" width="80" height="51" class="special-bg"/>
+  <rect x="20" y="406" width="80" height="51" class="cell-border"/>
+  <text x="60" y="432" class="label">Legacy</text>
+  <text x="60" y="445" class="price">$100</text>
+
+  <!-- Pos 39: Chance -->
+  <rect x="20" y="457" width="80" height="51" class="chance-bg"/>
+  <rect x="20" y="457" width="80" height="51" class="cell-border"/>
+  <text x="60" y="486" class="label">Chance</text>
+
+  <!-- Pos 40: Luxury -->
+  <rect x="20" y="508" width="80" height="52" class="special-bg"/>
+  <rect x="20" y="508" width="80" height="52" class="cell-border"/>
+  <text x="60" y="533" class="label">Luxury</text>
+  <text x="60" y="546" class="price">$50</text>
+
+  <!-- Centre area -->
+  <rect x="110" y="110" width="440" height="440" fill="#f9f5ee" stroke="#999" stroke-width="0.5" rx="4"/>
+
+  <!-- Title -->
+  <text x="330" y="200" class="title-text">THE LANDLORD'S GAME</text>
+  <text x="330" y="220" class="subtitle">Economic Game Company, 1906</text>
+
+  <!-- Centre fund boxes (2x2 grid) -->
+  <rect x="200" y="260" width="120" height="50" rx="6" fill="#e8e0d0" stroke="#777" stroke-width="1"/>
+  <text x="260" y="290" class="label" style="font-size:11px;font-weight:bold">BANK</text>
+
+  <rect x="340" y="260" width="120" height="50" rx="6" fill="#e8e0d0" stroke="#777" stroke-width="1"/>
+  <text x="400" y="290" class="label" style="font-size:11px;font-weight:bold">WAGES</text>
+
+  <rect x="200" y="325" width="120" height="50" rx="6" fill="#e8e0d0" stroke="#777" stroke-width="1"/>
+  <text x="260" y="348" class="label" style="font-size:11px;font-weight:bold">PUBLIC</text>
+  <text x="260" y="363" class="label" style="font-size:11px;font-weight:bold">TREASURY</text>
+
+  <rect x="340" y="325" width="120" height="50" rx="6" fill="#e8e0d0" stroke="#777" stroke-width="1"/>
+  <text x="400" y="355" class="label" style="font-size:11px;font-weight:bold">RAILROAD</text>
+
+  <!-- Legend (larger swatches, readable text) -->
+  <text x="330" y="415" class="legend-heading">Space types</text>
+
+  <!-- Row 1 -->
+  <rect x="170" y="430" width="18" height="18" rx="2" fill="#c8e6c0" stroke="#555" stroke-width="0.75"/>
+  <text x="196" y="444" class="legend-label">Lot (22)</text>
+
+  <rect x="280" y="430" width="18" height="18" rx="2" fill="#f2c4d0" stroke="#555" stroke-width="0.75"/>
+  <text x="306" y="444" class="legend-label">Railroad (4)</text>
+
+  <rect x="410" y="430" width="18" height="18" rx="2" fill="#b8d4f0" stroke="#555" stroke-width="0.75"/>
+  <text x="436" y="444" class="legend-label">Necessity (4)</text>
+
+  <!-- Row 2 -->
+  <rect x="170" y="460" width="18" height="18" rx="2" fill="#f5e6a0" stroke="#555" stroke-width="0.75"/>
+  <text x="196" y="474" class="legend-label">Franchise (2)</text>
+
+  <rect x="280" y="460" width="18" height="18" rx="2" fill="#f0d0a0" stroke="#555" stroke-width="0.75"/>
+  <text x="306" y="474" class="legend-label">Chance (4)</text>
+
+  <rect x="410" y="460" width="18" height="18" rx="2" fill="#e8ddd0" stroke="#555" stroke-width="0.75"/>
+  <text x="436" y="474" class="legend-label">Special</text>
+
+  <!-- Direction -->
+  <text x="330" y="520" class="subtitle">↻ Clockwise movement from MOTHER EARTH</text>
+
+</svg>

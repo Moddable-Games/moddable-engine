@@ -1,793 +1,1042 @@
-import { createGridTopology } from '../packages/topology-grid/index.js'
-import { createHexTopology } from '../packages/topology-hex/index.js'
-import { createTrackTopology } from '../packages/topology-track/index.js'
-import { createPitTopology } from '../packages/topology-pit/index.js'
-import { createGraphTopology } from '../packages/topology-graph/index.js'
-import { createBoardRenderer } from '../packages/render/index.js'
-import { createBoard, builtinBoards } from '../packages/board-layout/index.js'
-import { createRng } from '../packages/core/src/rng.js'
+import { renderBoard, fenToPosition } from './board-diagrams.js'
+import { getGameConfig, getAllGames, HexSvg, createSeededRng } from './hex-games/index.js'
 
-const renderer = createBoardRenderer({ padding: 24 })
+// ─── DUNGEON CHESS CELL MAPS ───────────────────────────────────────────────
+// null = void, 'floor' = standard, 'p1'/'p2' = deploy zones, 'water' = obstacle
 
-const GO_STARS_19 = [[3,3],[3,9],[3,15],[9,3],[9,9],[9,15],[15,3],[15,9],[15,15]]
-const GO_STARS_13 = [[3,3],[3,9],[6,6],[9,3],[9,9]]
-const GO_STARS_9 = [[2,2],[2,6],[4,4],[6,2],[6,6]]
-
-const PRESETS = {
-  grid: [
-    { id: 'chess', label: 'Chess (8×8)', config: { rows: 8, cols: 8 }, board: 'rectangle', layoutMode: 'tiles' },
-    { id: 'go-19', label: 'Go (19×19)', config: { rows: 19, cols: 19 }, board: 'slab', layoutMode: 'intersections', starPoints: GO_STARS_19 },
-    { id: 'go-13', label: 'Go (13×13)', config: { rows: 13, cols: 13 }, board: 'slab', layoutMode: 'intersections', starPoints: GO_STARS_13 },
-    { id: 'go-9', label: 'Go (9×9)', config: { rows: 9, cols: 9 }, board: 'slab', layoutMode: 'intersections', starPoints: GO_STARS_9 },
-    { id: 'draughts', label: 'Draughts (10×10)', config: { rows: 10, cols: 10 }, board: 'rectangle', layoutMode: 'tiles' },
-    { id: 'reversi', label: 'Reversi (8×8)', config: { rows: 8, cols: 8 }, board: 'rectangle', layoutMode: 'tiles' },
-    { id: 'xiangqi', label: 'Xiangqi (10×9)', config: { rows: 10, cols: 9 }, board: 'river', layoutMode: 'intersections',
-      riverAfterRow: 4, riverHeight: 30,
-      palaces: [{ row: 0, col: 3, width: 2, height: 2 }, { row: 7, col: 3, width: 2, height: 2 }] },
-    { id: 'shogi', label: 'Shogi (9×9)', config: { rows: 9, cols: 9 }, board: 'rectangle', layoutMode: 'tiles', alternating: false },
-    { id: 'fanorona', label: 'Fanorona (5×9)', config: { rows: 5, cols: 9 }, board: 'none', layoutMode: 'intersections', diagonals: 'alternating' },
-    { id: 'alquerque', label: 'Alquerque (5×5)', config: { rows: 5, cols: 5 }, board: 'none', layoutMode: 'intersections', diagonals: 'full' },
-  ],
-  hex: [
-    { id: 'hex-11', label: 'Hex (11)', config: { size: 11, shape: 'rhombus' }, board: 'none' },
-    { id: 'hex-7', label: 'Hex (7)', config: { size: 7, shape: 'rhombus' }, board: 'none' },
-    { id: 'glinski', label: 'Glinski (radius 6)', config: { radius: 6, shape: 'hexagonal' }, board: 'none' },
-    { id: 'nukes-3', label: 'Nukes (3 rings)', config: { radius: 3, shape: 'hexagonal' }, board: 'none' },
-    { id: 'nukes-6', label: 'Nukes (6 rings)', config: { radius: 6, shape: 'hexagonal' }, board: 'none' },
-  ],
-  track: [
-    { id: 'backgammon', label: 'Backgammon (24 points)', config: { length: 24, circuit: false }, board: 'split', layoutStyle: 'points' },
-    { id: 'pachisi', label: 'Pachisi (96 cells)', config: { length: 96, circuit: true }, board: 'none', layoutStyle: 'cross' },
-    { id: 'chaupar', label: 'Chaupar (68)', config: { length: 68, circuit: true }, board: 'none', layoutStyle: 'cross' },
-    { id: 'track-linear', label: 'Linear track (24)', config: { length: 24, circuit: false }, board: 'none', layoutStyle: 'linear' },
-    { id: 'track-circuit', label: 'Circuit (40)', config: { length: 40, circuit: true }, board: 'none', layoutStyle: 'circuit' },
-  ],
-  pit: [
-    { id: 'kalah-6', label: 'Kalah (6 pits)', config: { pits: 6 }, board: 'capsule' },
-    { id: 'kalah-4', label: 'Kalah (4 pits)', config: { pits: 4 }, board: 'capsule' },
-    { id: 'oware', label: 'Oware (6 pits)', config: { pits: 6 }, board: 'capsule' },
-  ],
-  graph: [
-    { id: 'morris-9', label: 'Nine Men\'s Morris', config: { variant: 'nine-mens' }, board: 'none' },
-    { id: 'morris-6', label: 'Six Men\'s Morris', config: { variant: 'six-mens' }, board: 'none' },
-  ],
+function parseCellMap(template) {
+  return template.trim().split('\n').map(row =>
+    [...row].map(c => c === '.' ? null : c === 'f' ? 'floor' : c === 'w' ? 'water' : c === '1' ? 'p1' : c === '2' ? 'p2' : null)
+  )
 }
 
-const THEMES = {
-  classic: {
-    background: { fill: '#f5e6c8' },
-    cells: {
-      default: { fill: '#e8dcc8', stroke: '#8b7355', 'stroke-width': '1' },
-      light: { fill: '#f0d9b5', stroke: 'none' },
-      dark: { fill: '#b58863', stroke: 'none' },
-      uniform: { fill: '#dcb35c', stroke: '#b8952e', 'stroke-width': '0.5' },
-      pit: { fill: '#4E3320', stroke: '#3A2515', 'stroke-width': '1.5' },
-      store: { fill: '#4E3320', stroke: '#3A2515', 'stroke-width': '1.5' },
-      node: { fill: '#4a3520', stroke: 'none' },
+const DUNGEON_2P = parseCellMap(`
+22222222
+22222222
+ffffffff
+...ff...
+...ff...
+...ff...
+ffffffff
+ffffffff
+ffwwwwff
+ffwwwwff
+ffwwwwff
+ffwwwwff
+ffffffff
+ffffffff
+...ff...
+...ff...
+...ff...
+ffffffff
+11111111
+11111111
+`)
+
+const DUNGEON_4P = parseCellMap(`
+......11111111......
+......11111111......
+......ffffffff......
+.........ff.........
+.........ff.........
+.........ff.........
+11f...ffffffff...f11
+11f...ffffffff...f11
+11f...ffwwwwff...f11
+11ffffffwwwwffffff11
+11ffffffwwwwffffff11
+11f...ffwwwwff...f11
+11f...ffffffff...f11
+11f...ffffffff...f11
+.........ff.........
+.........ff.........
+.........ff.........
+......ffffffff......
+......11111111......
+......11111111......
+`)
+
+const DUNGEON_COMPACT = parseCellMap(`
+2222222222
+2222222222
+ffffffffff
+fffwwwwfff
+fffwwwwfff
+fffwwwwfff
+fffwwwwfff
+ffffffffff
+1111111111
+1111111111
+`)
+
+const DUNGEON_COLORS = {
+  floor: '#d4c4a8', floorStroke: '#2a2a2a',
+  p1: '#f0d080', p1Stroke: '#c08820',
+  p2: '#f0b0b0', p2Stroke: '#c05050',
+  water: '#4a90c8', waterStroke: '#2a2a2a',
+  voidFill: '#1a1a2e',
+}
+
+// ─── HEX GAME COLOR PALETTES ───────────────────────────────────────────────
+
+const NUKES_COLORS = {
+  lightHex: '#7cb342', darkHex: '#558b2f', midHex: '#8bc34a',
+  stroke: 'rgba(0,0,0,0.3)', background: '#1a2e1a',
+}
+
+const HEX_SPACE_COLORS = {
+  lightHex: '#1a237e', darkHex: '#0d1442', midHex: '#283593',
+  stroke: 'rgba(100,150,255,0.3)', background: '#070b1e',
+}
+
+const HEX_TERRAIN_COLORS = {
+  lightHex: '#a5d6a7', darkHex: '#66bb6a', midHex: '#81c784',
+  stroke: 'rgba(0,0,0,0.2)', background: '#1b2e1b',
+}
+
+// ─── GLINSKI HEX CHESS COLOUR FUNCTION ──────────────────────────────────────
+
+function glinskiColor(hex, colors) {
+  const mod = (((hex.q - hex.r) % 3) + 3) % 3
+  return mod === 0 ? colors.lightHex : mod === 1 ? colors.midHex : colors.darkHex
+}
+
+function glinskiAlgToAxial(alg) {
+  const q = alg.charCodeAt(0) - 97 - 5
+  const rank = parseInt(alg.slice(1))
+  const maxR = Math.min(5, 5 - q)
+  const minRank = q <= 0 ? 1 : q + 1
+  const r = maxR - (rank - minRank)
+  return `${q},${r}`
+}
+
+const GLINSKI_POSITION = (() => {
+  const pos = {}
+  const white = { K:'f1', Q:'e1', B1:'d1', B2:'f2', B3:'g2', N1:'c1', N2:'g1', R1:'b1', R2:'h1' }
+  const wPawns = ['b2','c2','d2','e2','f3','g3','h3','i2','j2']
+  const black = { k:'f11', q:'g11', b1:'h11', b2:'f10', b3:'e10', n1:'i11', n2:'e11', r1:'j11', r2:'d11' }
+  const bPawns = ['j10','i10','h10','g10','f9','e9','d9','c10','b10']
+
+  pos[glinskiAlgToAxial(white.K)] = 'K'
+  pos[glinskiAlgToAxial(white.Q)] = 'Q'
+  pos[glinskiAlgToAxial(white.B1)] = 'B'
+  pos[glinskiAlgToAxial(white.B2)] = 'B'
+  pos[glinskiAlgToAxial(white.B3)] = 'B'
+  pos[glinskiAlgToAxial(white.N1)] = 'N'
+  pos[glinskiAlgToAxial(white.N2)] = 'N'
+  pos[glinskiAlgToAxial(white.R1)] = 'R'
+  pos[glinskiAlgToAxial(white.R2)] = 'R'
+  for (const sq of wPawns) pos[glinskiAlgToAxial(sq)] = 'P'
+
+  pos[glinskiAlgToAxial(black.k)] = 'k'
+  pos[glinskiAlgToAxial(black.q)] = 'q'
+  pos[glinskiAlgToAxial(black.b1)] = 'b'
+  pos[glinskiAlgToAxial(black.b2)] = 'b'
+  pos[glinskiAlgToAxial(black.b3)] = 'b'
+  pos[glinskiAlgToAxial(black.n1)] = 'n'
+  pos[glinskiAlgToAxial(black.n2)] = 'n'
+  pos[glinskiAlgToAxial(black.r1)] = 'r'
+  pos[glinskiAlgToAxial(black.r2)] = 'r'
+  for (const sq of bPawns) pos[glinskiAlgToAxial(sq)] = 'p'
+
+  return pos
+})()
+
+// ─── GAME DEFINITIONS ───────────────────────────────────────────────────────
+// Each variant specifies: boardStyle, dimensions, pieceSet, fen/position
+
+const GAMES = {
+  'moddable-chess': {
+    label: 'Chess',
+    pieceSet: 'mce-chess',
+    variants: {
+      standard: { label: 'Standard', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      absorption: { label: 'Absorption', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'almost-chess': { label: 'Almost Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBCKBNR' },
+      'amazon-chess': { label: 'Amazon Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbmkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBMKBNR' },
+      andernach: { label: 'Andernach', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      antichess: { label: 'Antichess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      atomic: { label: 'Atomic', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      benedict: { label: 'Benedict', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'berolina-chess': { label: 'Berolina', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      berserk: { label: 'Berserk', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      breakthrough: { label: 'Breakthrough', boardStyle: 'checkered', rows: 7, cols: 7, tileSize: 40, fen: 'ppppppp/ppppppp/7/7/7/PPPPPPP/PPPPPPP' },
+      capablanca: { label: 'Capablanca', boardStyle: 'checkered', rows: 8, cols: 10, tileSize: 36, fen: 'rnabqkbcnr/pppppppppp/10/10/10/10/PPPPPPPPPP/RNABQKBCNR' },
+      chaturanga: { label: 'Chaturanga', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnefkenr/pppppppp/8/8/8/8/PPPPPPPP/RNEFKENR' },
+      checkless: { label: 'Checkless', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      chigorin: { label: 'Chigorin', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNNQKNNR' },
+      codrus: { label: 'Codrus', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      courier: { label: 'Courier Chess', boardStyle: 'checkered', rows: 8, cols: 12, tileSize: 32, fen: 'rnebfsksbenr/pppppppppppp/12/12/12/12/PPPPPPPPPPPP/RNEBFSKSBENR' },
+      crazyhouse: { label: 'Crazyhouse', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'cylinder-chess': { label: 'Cylinder Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'dark-chess': { label: 'Dark Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      diana: { label: 'Diana', boardStyle: 'checkered', rows: 6, cols: 6, tileSize: 40, fen: 'rbbkr1/pppppp/6/6/PPPPPP/RBBKR1' },
+      'dice-chess': { label: 'Dice Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'displacement-chess': { label: 'Displacement', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'duck-chess': { label: 'Duck Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'einstein-chess': { label: 'Einstein Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'endgame-chess': { label: 'Endgame Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: '4k3/pppppppp/8/8/8/8/PPPPPPPP/4K3' },
+      extinction: { label: 'Extinction', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'fischer-random': { label: 'Fischer Random', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'five-check': { label: 'Five-Check', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'fog-of-war': { label: 'Fog of War', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      giveaway: { label: 'Giveaway', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      glinski: { label: 'Glinski (Hex)', boardStyle: 'hex', hexRadius: 5, hexSize: 22, flat: true, hexColorFn: glinskiColor, hexPosition: GLINSKI_POSITION, colors: { lightHex: '#f0d9b5', darkHex: '#b58863', midHex: '#d4a96a', stroke: 'rgba(0,0,0,0.2)', background: '#2c2c2c' } },
+      grand: { label: 'Grand Chess', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, fen: 'r8r/1nbqkcbn1/pppppppppp/10/10/10/10/PPPPPPPPPP/1NBQKCBN1/R8R' },
+      'grid-chess': { label: 'Grid Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'half-chess': { label: 'Half Chess', boardStyle: 'checkered', rows: 4, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/PPPPPPPP/RNBQKBNR' },
+      'hoppel-poppel': { label: 'Hoppel-Poppel', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      horde: { label: 'Horde', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/1PP2PP1/PPPPPPPP/PPPPPPPP/PPPPPPPP/PPPPPPPP' },
+      'immunization-chess': { label: 'Immunization', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'king-of-the-hill': { label: 'King of the Hill', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      knightmate: { label: 'Knightmate', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rkbqnbkr/pppppppp/8/8/8/8/PPPPPPPP/RKBQNBKR' },
+      'legan-chess': { label: 'Legan Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbkqbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBKQBNR' },
+      'los-alamos': { label: 'Los Alamos', boardStyle: 'checkered', rows: 6, cols: 6, tileSize: 40, fen: 'rnqknr/pppppp/6/6/PPPPPP/RNQKNR' },
+      madrasi: { label: 'Madrasi', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      maharaja: { label: 'Maharaja', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/8/4M3' },
+      makpong: { label: 'Makpong', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      makruk: { label: 'Makruk', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rngfkgnr/8/pppppppp/8/8/PPPPPPPP/8/RNGFKGNR' },
+      marseillais: { label: 'Marseillais', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'medusa-chess': { label: 'Medusa Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      minichess: { label: 'Minichess', boardStyle: 'checkered', rows: 5, cols: 5, tileSize: 40, fen: 'kqbnr/ppppp/5/PPPPP/RNBQK' },
+      'monster-chess': { label: 'Monster Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/R3K2R' },
+      'no-castling': { label: 'No Castling', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'no-retreat': { label: 'No Retreat', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      omnicide: { label: 'Omnicide', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'orda-chess': { label: 'Orda Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'lhaykahl/8/pppppppp/8/8/PPPPPPPP/8/RNBQKBNR' },
+      patrol: { label: 'Patrol', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'pawns-only': { label: 'Pawns Only', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: '4k3/pppppppp/8/8/8/8/PPPPPPPP/4K3' },
+      'peasants-revolt': { label: "Peasants' Revolt", boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: '2n1k1n1/pppppppp/8/8/8/8/PPPPPPPP/4K3' },
+      petty: { label: 'Petty Chess', boardStyle: 'checkered', rows: 6, cols: 5, tileSize: 40, fen: 'rnbqk/ppppp/5/5/PPPPP/RNBQK' },
+      'poison-chess': { label: 'Poison Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      progressive: { label: 'Progressive', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'racing-kings': { label: 'Racing Kings', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: '8/8/8/8/8/8/krbnNBRK/qrbnNBRQ' },
+      'recruitment-chess': { label: 'Recruitment', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      rifle: { label: 'Rifle Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      shatar: { label: 'Shatar', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      shatranj: { label: 'Shatranj', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnekfenr/pppppppp/8/8/8/8/PPPPPPPP/RNEKFENR' },
+      'single-check': { label: 'Single-Check', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      sittuyin: { label: 'Sittuyin', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'stalemate-wins': { label: 'Stalemate Wins', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'suicide-chess': { label: 'Suicide Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'teleport-chess': { label: 'Teleport Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'three-check': { label: 'Three-Check', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'toroidal-chess': { label: 'Toroidal Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      torpedo: { label: 'Torpedo', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
+      'upside-down': { label: 'Upside-Down', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr' },
+      weak: { label: 'Weak!', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' },
     },
-    lines: { stroke: '#4a3520', 'stroke-width': '2.5' },
-    annotations: { default: { fill: '#4a3520', r: '3' } },
   },
-  midnight: {
-    background: { fill: '#1a1a2e' },
-    cells: {
-      default: { fill: '#16213e', stroke: '#4a6fa5', 'stroke-width': '1' },
-      light: { fill: '#1e2a4a', stroke: 'none' },
-      dark: { fill: '#0f1630', stroke: 'none' },
-      uniform: { fill: '#16213e', stroke: '#4a6fa5', 'stroke-width': '0.5' },
-      pit: { fill: '#0d0d3a', stroke: '#4a6fa5', 'stroke-width': '1.5' },
-      store: { fill: '#0d0d3a', stroke: '#4a6fa5', 'stroke-width': '1.5' },
-      node: { fill: '#6fb5ff', stroke: 'none' },
+  go: {
+    label: 'Go',
+    pieceSet: 'playstrategy-go-classic',
+    hasHandicap: true,
+    variants: {
+      standard: { label: 'Standard (19×19)', boardStyle: 'go', rows: 19, cols: 19, tileSize: 20 },
+      '13x13': { label: '13×13', boardStyle: 'go', rows: 13, cols: 13, tileSize: 20 },
+      '9x9': { label: '9×9', boardStyle: 'go', rows: 9, cols: 9, tileSize: 20 },
+      'capture-go': { label: 'Capture Go (9×9)', boardStyle: 'go', rows: 9, cols: 9, tileSize: 20 },
+      gomoku: { label: 'Gomoku (15×15)', boardStyle: 'go', rows: 15, cols: 15, tileSize: 20 },
+      'ninuki-renju': { label: 'Ninuki-Renju (15×15)', boardStyle: 'go', rows: 15, cols: 15, tileSize: 20 },
+      'one-colour': { label: 'One-Colour (19×19)', boardStyle: 'go', rows: 19, cols: 19, tileSize: 20 },
+      'phantom-go': { label: 'Phantom Go (9×9)', boardStyle: 'go', rows: 9, cols: 9, tileSize: 20 },
+      rengo: { label: 'Rengo (19×19)', boardStyle: 'go', rows: 19, cols: 19, tileSize: 20 },
+      renju: { label: 'Renju (15×15)', boardStyle: 'go', rows: 15, cols: 15, tileSize: 20 },
+      stoical: { label: 'Stoical Go (19×19)', boardStyle: 'go', rows: 19, cols: 19, tileSize: 20 },
+      sunjang: { label: 'Sunjang Baduk (19×19)', boardStyle: 'go', rows: 19, cols: 19, tileSize: 20 },
+      tibetan: { label: 'Tibetan Go (17×17)', boardStyle: 'go', rows: 17, cols: 17, tileSize: 20 },
+      'toroidal-go': { label: 'Toroidal Go (11×11)', boardStyle: 'go', rows: 11, cols: 11, tileSize: 20 },
     },
-    lines: { stroke: '#6fb5ff', 'stroke-width': '2.5' },
-    annotations: { default: { fill: '#6fb5ff', r: '3' } },
   },
-  parchment: {
-    background: { fill: '#faf3e0' },
-    cells: {
-      default: { fill: '#f0e6c8', stroke: '#a0855b', 'stroke-width': '1' },
-      light: { fill: '#faf3e0', stroke: 'none' },
-      dark: { fill: '#d4a56a', stroke: 'none' },
-      uniform: { fill: '#f0e6c8', stroke: '#a0855b', 'stroke-width': '0.5' },
-      pit: { fill: '#5c3d20', stroke: '#3a2815', 'stroke-width': '1.5' },
-      store: { fill: '#5c3d20', stroke: '#3a2815', 'stroke-width': '1.5' },
-      node: { fill: '#5c4033', stroke: 'none' },
+  xiangqi: {
+    label: 'Xiangqi',
+    pieceSet: 'mce-xiangqi-trad',
+    variants: {
+      standard: { label: 'Standard', boardStyle: 'xiangqi', rows: 10, cols: 9, tileSize: 36, river: true, fen: 'rheakaehr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RHEAKAEHR' },
+      janggi: { label: 'Janggi', boardStyle: 'xiangqi', rows: 10, cols: 9, tileSize: 36, river: false, fen: 'rhea1aehr/4k4/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/4K4/RHEA1AEHR' },
     },
-    lines: { stroke: '#5c4033', 'stroke-width': '2.5' },
-    annotations: { default: { fill: '#5c4033', r: '3' } },
   },
-  wood: {
-    background: { fill: '#c8a46e' },
-    cells: {
-      default: { fill: '#deb887', stroke: '#a0794a', 'stroke-width': '1' },
-      light: { fill: '#deb887', stroke: 'none' },
-      dark: { fill: '#8b6914', stroke: 'none' },
-      uniform: { fill: '#c8a46e', stroke: '#8b6914', 'stroke-width': '0.5' },
-      pit: { fill: '#3a2510', stroke: '#2d1f0a', 'stroke-width': '1.5' },
-      store: { fill: '#3a2510', stroke: '#2d1f0a', 'stroke-width': '1.5' },
-      node: { fill: '#4a3512', stroke: 'none' },
+  draughts: {
+    label: 'Draughts',
+    pieceSet: 'playstrategy-dameo-fabirovsky',
+    variants: {
+      english: { label: 'English (8×8)', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, draughtsSetup: { rows: 3, dark: true } },
+      brazilian: { label: 'Brazilian (8×8)', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, draughtsSetup: { rows: 3, dark: true } },
+      czech: { label: 'Czech (8×8)', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, draughtsSetup: { rows: 3, dark: true } },
+      german: { label: 'German (8×8)', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, draughtsSetup: { rows: 3, dark: true } },
+      italian: { label: 'Italian (8×8)', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, draughtsSetup: { rows: 3, dark: true } },
+      pool: { label: 'Pool (8×8)', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, draughtsSetup: { rows: 3, dark: true } },
+      russian: { label: 'Russian (8×8)', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, draughtsSetup: { rows: 3, dark: true } },
+      spanish: { label: 'Spanish (8×8)', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, draughtsSetup: { rows: 3, dark: true } },
+      bashni: { label: 'Bashni (8×8)', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, draughtsSetup: { rows: 3, dark: true } },
+      thai: { label: 'Thai (8×8)', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, draughtsSetup: { rows: 2, dark: true } },
+      international: { label: 'International (10×10)', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, draughtsSetup: { rows: 4, dark: true } },
+      frisian: { label: 'Frisian (10×10)', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, draughtsSetup: { rows: 4, dark: true } },
+      ghanaian: { label: 'Ghanaian (10×10)', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, draughtsSetup: { rows: 4, dark: true } },
+      canadian: { label: 'Canadian (12×12)', boardStyle: 'checkered', rows: 12, cols: 12, tileSize: 28, draughtsSetup: { rows: 5, dark: true } },
+      spantsiretti: { label: 'Spantsiretti (10×8)', boardStyle: 'checkered', rows: 8, cols: 10, tileSize: 36, draughtsSetup: { rows: 4, dark: true } },
+      'turkish-draughts': { label: 'Turkish', boardStyle: 'mono-grid', rows: 8, cols: 8, tileSize: 40, draughtsSetup: { rows: 2, dark: false } },
+      lasca: { label: 'Lasca (7×7)', boardStyle: 'checkered', rows: 7, cols: 7, tileSize: 40, draughtsSetup: { rows: 3, dark: true } },
+      alquerque: { label: 'Alquerque (5×5)', boardStyle: 'alquerque', rows: 5, cols: 5, tileSize: 48, fanoronaSetup: true },
+      dameo: { label: 'Dameo (8×8)', static: true },
+      diagonal: { label: 'Diagonal (10×10)', static: true },
     },
-    lines: { stroke: '#4a3512', 'stroke-width': '2.5' },
-    annotations: { default: { fill: '#4a3512', r: '3' } },
   },
-  green: {
-    background: { fill: '#2d5a27' },
-    cells: {
-      default: { fill: '#3d7a37', stroke: '#1e4a18', 'stroke-width': '1' },
-      light: { fill: '#4a8a42', stroke: 'none' },
-      dark: { fill: '#2d5a27', stroke: 'none' },
-      uniform: { fill: '#3d7a37', stroke: '#1e4a18', 'stroke-width': '0.5' },
-      pit: { fill: '#0f2a0c', stroke: '#051505', 'stroke-width': '1.5' },
-      store: { fill: '#0f2a0c', stroke: '#051505', 'stroke-width': '1.5' },
-      node: { fill: '#c8e6c0', stroke: 'none' },
+  reversi: {
+    label: 'Reversi',
+    pieceSet: null,
+    variants: {
+      standard: { label: 'Standard (8×8)', boardStyle: 'mono-grid', rows: 8, cols: 8, tileSize: 40 },
+      'six-by-six': { label: '6×6', boardStyle: 'mono-grid', rows: 6, cols: 6, tileSize: 40 },
+      'anti-reversi': { label: 'Anti-Reversi (8×8)', boardStyle: 'mono-grid', rows: 8, cols: 8, tileSize: 40 },
     },
-    lines: { stroke: '#143d10', 'stroke-width': '2.5' },
-    annotations: { default: { fill: '#c8e6c0', r: '3' } },
+  },
+  shogi: {
+    label: 'Shogi',
+    pieceSet: 'kahu-shogi-kanji-red-wood',
+    variants: {
+      standard: { label: 'Standard (9×9)', boardStyle: 'shogi', rows: 9, cols: 9, tileSize: 36, fen: 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL' },
+      minishogi: { label: 'Minishogi (5×5)', boardStyle: 'shogi', rows: 5, cols: 5, tileSize: 40, fen: 'rbsgk/4p/5/P4/KGSBR' },
+      'kyoto-shogi': { label: 'Kyoto Shogi (5×5)', boardStyle: 'shogi', rows: 5, cols: 5, tileSize: 40, fen: 'pgskl/5/5/5/LKSGP' },
+      'hasami-shogi': { label: 'Hasami Shogi (9×9)', boardStyle: 'shogi', rows: 9, cols: 9, tileSize: 36, fen: 'ppppppppp/9/9/9/9/9/9/9/PPPPPPPPP' },
+    },
+  },
+  morris: {
+    label: 'Morris',
+    pieceSet: null,
+    variants: {
+      'nine-mens-morris': { label: "Nine Men's Morris", boardStyle: 'morris', boardSize: 320, rings: 3 },
+      'six-mens-morris': { label: "Six Men's Morris", boardStyle: 'morris', boardSize: 260, rings: 2 },
+      'twelve-mens-morris': { label: "Twelve Men's Morris", boardStyle: 'morris', boardSize: 320, rings: 3, diagonals: true },
+      'three-mens-morris': { label: "Three Men's Morris", boardStyle: 'morris', boardSize: 200, rings: 1 },
+      'lasker-morris': { label: 'Lasker Morris', boardStyle: 'morris', boardSize: 320, rings: 3 },
+      morabaraba: { label: 'Morabaraba', boardStyle: 'morris', boardSize: 320, rings: 3, diagonals: true },
+      shax: { label: 'Shax', boardStyle: 'morris', boardSize: 320, rings: 3 },
+    },
+  },
+  fanorona: {
+    label: 'Fanorona',
+    pieceSet: 'playstrategy-dameo-fabirovsky',
+    variants: {
+      standard: { label: 'Standard (5×9)', boardStyle: 'alquerque', rows: 5, cols: 9, tileSize: 40, colors: { monoSquare: '#d4a96a', gridLine: '#7a4510', whitePieceFill: '#f0e8d0', whitePieceStroke: '#7a4510', blackPieceFill: '#1e1000', blackPieceStroke: '#c8963c' }, fanoronaSetup: true },
+    },
+  },
+  backgammon: {
+    label: 'Backgammon',
+    pieceSet: null,
+    variants: {
+      standard: { label: 'Standard', static: true },
+      nackgammon: { label: 'Nackgammon', static: true },
+      'acey-deucey': { label: 'Acey-Deucey', static: true },
+      hypergammon: { label: 'Hypergammon', static: true },
+      plakoto: { label: 'Plakoto', static: true },
+      fevga: { label: 'Fevga', static: true },
+      nardi: { label: 'Nardi', static: true },
+      chouette: { label: 'Chouette', static: true },
+    },
+  },
+  mancala: {
+    label: 'Mancala',
+    pieceSet: null,
+    variants: {
+      kalah: { label: 'Kalah', static: true },
+      oware: { label: 'Oware', static: true },
+      bao: { label: 'Bao', static: true },
+      congkak: { label: 'Congkak', static: true },
+      ayo: { label: 'Ayo', static: true },
+      pallanguzhi: { label: 'Pallanguzhi', static: true },
+      sungka: { label: 'Sungka', static: true },
+      'toguz-korgool': { label: 'Toguz Korgool', static: true },
+    },
+  },
+  halma: {
+    label: 'Halma',
+    pieceSet: null,
+    variants: {
+      'standard-2p': { label: '2-Player (16×16)', boardStyle: 'checkered', rows: 16, cols: 16, tileSize: 20, showLabels: false, colors: { lightSquare: '#f5e6c8', darkSquare: '#e8d4a8' } },
+      'standard-4p': { label: '4-Player (16×16)', boardStyle: 'checkered', rows: 16, cols: 16, tileSize: 20, showLabels: false, colors: { lightSquare: '#f5e6c8', darkSquare: '#e8d4a8' } },
+    },
+  },
+  'stern-halma': {
+    label: 'Stern-Halma',
+    pieceSet: null,
+    variants: {
+      standard: { label: 'Chinese Checkers', static: true },
+    },
+  },
+  hex: {
+    label: 'Hex',
+    pieceSet: null,
+    variants: {
+      standard: { label: 'Standard (11×11)', boardStyle: 'hex', hexRows: 11, hexCols: 11, hexSize: 20, flat: false, colors: { lightHex: '#e8e8e8', darkHex: '#c0c0c0', midHex: '#d8d8d8', stroke: 'rgba(0,0,0,0.3)', background: '#f5f5f5' } },
+    },
+  },
+  'royal-ur': {
+    label: 'Royal Ur',
+    pieceSet: null,
+    variants: {
+      standard: { label: 'Standard', static: true },
+    },
+  },
+  surakarta: {
+    label: 'Surakarta',
+    pieceSet: null,
+    variants: {
+      standard: { label: 'Standard', static: true },
+    },
+  },
+  pachisi: {
+    label: 'Pachisi',
+    pieceSet: null,
+    variants: {
+      standard: { label: 'Standard', static: true },
+    },
+  },
+  chaupar: {
+    label: 'Chaupar',
+    pieceSet: null,
+    variants: {
+      standard: { label: 'Standard', static: true },
+    },
+  },
+  'landlords-game': {
+    label: 'Landlords Game',
+    pieceSet: null,
+    variants: {
+      standard: { label: 'Standard', static: true },
+      '1904-original': { label: '1904 Original', static: true },
+      '1906-commercial': { label: '1906 Commercial', static: true },
+    },
+  },
+  'dungeon-chess': {
+    label: 'Dungeon Chess',
+    pieceSet: 'mce-chess',
+    variants: {
+      'two-player': { label: 'Two Player (20×8)', boardStyle: 'checkered', rows: 20, cols: 8, tileSize: 21, showLabels: false, cellMap: DUNGEON_2P, colors: DUNGEON_COLORS },
+      'four-player': { label: 'Four Player (20×20)', boardStyle: 'checkered', rows: 20, cols: 20, tileSize: 18, showLabels: false, cellMap: DUNGEON_4P, colors: DUNGEON_COLORS },
+      compact: { label: 'Compact Skirmish (10×10)', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 24, showLabels: false, cellMap: DUNGEON_COMPACT, colors: DUNGEON_COLORS },
+    },
+  },
+  nukes: {
+    label: 'Nukes',
+    pieceSet: null,
+    hexGame: 'nukes',
+    variants: {
+      '2-rings': { label: '2 Rings (12 hexes)', hexSize: 2 },
+      '3-rings': { label: '3 Rings (18 hexes)', hexSize: 3 },
+      '4-rings': { label: '4 Rings (24 hexes)', hexSize: 4 },
+      '5-rings': { label: '5 Rings (30 hexes)', hexSize: 5 },
+      '6-rings': { label: '6 Rings (36 hexes)', hexSize: 6 },
+    },
+  },
+  'talisman-worlds': {
+    label: 'Talisman Worlds',
+    pieceSet: null,
+    hexGame: 'talisman',
+    variants: {
+      standard: { label: 'Standard (4 rings)', hexSize: 4 },
+      expansion: { label: 'Dungeon Expansion (5 rings)', hexSize: 5 },
+    },
+  },
+  'planet-mongo': {
+    label: 'Planet Mongo',
+    pieceSet: null,
+    hexGame: 'mongo',
+    variants: {
+      standard: { label: 'Standard (6 rings)', hexSize: 6 },
+    },
+  },
+  twilight: {
+    label: 'Twilight Imperium',
+    pieceSet: null,
+    hexGame: 'twilight',
+    variants: {
+      '6p': { label: '6 Players (Standard)', hexSize: 3, hexLayout: '6p' },
+      '5p': { label: '5 Players', hexSize: 3, hexLayout: '5p' },
+      '4p': { label: '4 Players', hexSize: 3, hexLayout: '4p' },
+      '3p': { label: '3 Players', hexSize: 3, hexLayout: '3p' },
+      '7p': { label: '7 Players (PoK)', hexSize: 3, hexLayout: '7p' },
+      '8p': { label: '8 Players (PoK)', hexSize: 3, hexLayout: '8p' },
+      hyper: { label: 'Hyper Imperium', hexSize: 3, hexLayout: 'hyper' },
+    },
+  },
+  'endless-skies': {
+    label: 'Endless Skies',
+    pieceSet: null,
+    hexGame: 'endless',
+    variants: {
+      standard: { label: 'Standard (5 rings)', hexSize: 5 },
+    },
+  },
+  harvesters: {
+    label: 'Harvesters',
+    pieceSet: null,
+    hexGame: 'colony',
+    variants: {
+      standard: { label: 'Standard (3-4 Players)', hexSize: 2, hexLayout: 'standard' },
+      expanded: { label: 'Expanded (5-6 Players)', hexSize: 2, hexLayout: 'expanded' },
+      'new-world': { label: 'Seafarers: New World', hexSize: 2, hexLayout: 'newWorld' },
+      'new-shores': { label: 'Seafarers: New Shores', hexSize: 2, hexLayout: 'newShores' },
+      'four-islands': { label: 'Seafarers: Four Islands', hexSize: 2, hexLayout: 'fourIslands' },
+      desert: { label: 'Seafarers: Through the Desert', hexSize: 2, hexLayout: 'desert' },
+      'fog-islands': { label: 'Seafarers: Fog Islands', hexSize: 2, hexLayout: 'fogIslands' },
+    },
   },
 }
 
-let state = {
-  topology: 'grid',
-  preset: 'chess',
-  config: { rows: 8, cols: 8 },
-  theme: 'classic',
-  boardType: 'rectangle',
-  labels: 'algebraic',
-  layoutMode: 'tiles',
-  starPoints: [],
-  riverAfterRow: null,
-  riverHeight: 30,
-  palaces: [],
-  diagonals: 'none',
-  layoutStyle: 'linear',
-  seed: Date.now(),
-  board: null,
-  svg: '',
+// ─── FEN → pieceImages mapping ──────────────────────────────────────────────
+
+const FEN_TO_PIECE_ID = {
+  K: 'wK', Q: 'wQ', R: 'wR', B: 'wB', N: 'wN', P: 'wP',
+  k: 'bK', q: 'bQ', r: 'bR', b: 'bB', n: 'bN', p: 'bP',
+  A: 'wA', a: 'bA', C: 'wC', c: 'bC', E: 'wE', e: 'bE',
+  F: 'wF', f: 'bF', S: 'wS', s: 'bS', G: 'wG', g: 'bG',
+  H: 'wH', h: 'bH', I: 'wI', i: 'bI', L: 'wL', l: 'bL',
+  M: 'wM', m: 'bM', W: 'wW', w: 'bW', Y: 'wY', y: 'bY',
 }
 
-function init() {
+const GAME_FEN_OVERRIDES = {
+  xiangqi: { H: 'wN', h: 'bN', R: 'wR', r: 'bR', E: 'wE', e: 'bE', A: 'wA', a: 'bA', K: 'wK', k: 'bK', C: 'wC', c: 'bC', P: 'wP', p: 'bP' },
+}
+
+function buildPieceImages(pieceSetId, galleryIndex, gameId) {
+  if (!pieceSetId || !galleryIndex) return {}
+  const setDef = galleryIndex.find(s => s.id === pieceSetId)
+  if (!setDef) return {}
+  const basePath = `../pieces/sets/${pieceSetId}/`
+  const images = {}
+  // Map all gallery piece IDs directly (covers bS, wS, bM, wM, bK, wK etc.)
+  for (const [pieceId, filename] of Object.entries(setDef.pieces)) {
+    images[pieceId] = basePath + filename
+  }
+  // Also map FEN characters for chess-style games
+  const fenMap = GAME_FEN_OVERRIDES[gameId] || FEN_TO_PIECE_ID
+  for (const [fenChar, pieceId] of Object.entries(fenMap)) {
+    if (setDef.pieces[pieceId]) {
+      images[fenChar] = basePath + setDef.pieces[pieceId]
+    }
+  }
+  return images
+}
+
+function buildDraughtsPosition(rows, cols, setup) {
+  const position = {}
+  const setupRows = setup.rows
+  const darkOnly = setup.dark !== false
+  for (let r = 0; r < setupRows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (darkOnly && (r + c) % 2 === 0) continue
+      const file = String.fromCharCode(97 + c)
+      const rank = rows - r
+      position[`${file}${rank}`] = { type: 'man', color: 'black' }
+    }
+  }
+  for (let r = rows - setupRows; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (darkOnly && (r + c) % 2 === 0) continue
+      const file = String.fromCharCode(97 + c)
+      const rank = rows - r
+      position[`${file}${rank}`] = { type: 'man', color: 'white' }
+    }
+  }
+  return position
+}
+
+function getHandicapPoints(rows) {
+  const off = rows <= 9 ? 2 : 3
+  const mid = Math.floor((rows - 1) / 2)
+  const far = rows - 1 - off
+  // Standard placement order: opposing corners, remaining corners, sides, tengen
+  return [
+    [off, far], [far, off],
+    [off, off], [far, far],
+    [mid, off], [mid, far],
+    [off, mid], [far, mid],
+    [mid, mid],
+  ]
+}
+
+function buildGoHandicap(count, rows) {
+  const points = getHandicapPoints(rows).slice(0, count)
+  const position = {}
+  const GO_LETTERS = 'abcdefghjklmnopqrst'
+  for (const [r, c] of points) {
+    const file = GO_LETTERS[c]
+    const rank = rows - r
+    position[`${file}${rank}`] = { type: 'stone', color: 'black' }
+  }
+  return position
+}
+
+function buildFanoronaPosition(rows, cols) {
+  const position = {}
+  const midRow = Math.floor(rows / 2)
+  const midCol = Math.floor(cols / 2)
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const file = String.fromCharCode(97 + c)
+      const rank = rows - r
+      const sq = `${file}${rank}`
+      if (r < midRow) {
+        position[sq] = { type: 'stone', color: 'white' }
+      } else if (r > midRow) {
+        position[sq] = { type: 'stone', color: 'black' }
+      } else if (c < midCol) {
+        position[sq] = { type: 'stone', color: 'white' }
+      } else if (c > midCol) {
+        position[sq] = { type: 'stone', color: 'black' }
+      }
+    }
+  }
+  return position
+}
+
+// ─── APP STATE ──────────────────────────────────────────────────────────────
+
+let state = readStateFromURL()
+let galleryIndex = null
+
+function readStateFromURL() {
   const params = new URLSearchParams(window.location.search)
-  if (params.get('topology')) state.topology = params.get('topology')
-  if (params.get('preset')) state.preset = params.get('preset')
-  if (params.get('seed')) state.seed = parseInt(params.get('seed')) || Date.now()
-  if (params.get('theme')) state.theme = params.get('theme')
-  if (params.get('board')) state.boardType = params.get('board')
-
-  applyPresetDefaults()
-  bindControls()
-  updatePresets()
-  updateTopologyOptions()
-  document.getElementById('board-select').value = state.boardType
-  generate()
+  return {
+    game: params.get('game') || 'moddable-chess',
+    variant: params.get('variant') || 'standard',
+    handicap: parseInt(params.get('handicap')) || 0,
+    seed: params.get('seed') || String(Math.floor(Math.random() * 9999999999)),
+    style: params.get('style') || 'classic',
+    players: parseInt(params.get('players')) || 0,
+  }
 }
 
-function applyPresetDefaults() {
-  if (state.preset === 'custom') return
-  const presets = PRESETS[state.topology] || []
-  const preset = presets.find(p => p.id === state.preset)
-  if (!preset) return
-  state.config = { ...preset.config }
-  state.boardType = preset.board || 'none'
-  state.layoutMode = preset.layoutMode || 'tiles'
-  state.starPoints = preset.starPoints || []
-  state.riverAfterRow = preset.riverAfterRow ?? null
-  state.riverHeight = preset.riverHeight || 30
-  state.palaces = preset.palaces || []
-  state.diagonals = preset.diagonals || 'none'
-  state.layoutStyle = preset.layoutStyle || 'linear'
+function pushState() {
+  const params = new URLSearchParams({ game: state.game, variant: state.variant })
+  if (state.handicap) params.set('handicap', state.handicap)
+  if (state.seed) params.set('seed', state.seed)
+  if (state.style && state.style !== 'classic') params.set('style', state.style)
+  if (state.players) params.set('players', state.players)
+  history.replaceState(null, '', '?' + params.toString())
+}
+
+async function init() {
+  galleryIndex = await fetch('../pieces/gallery-index.json').then(r => r.json()).catch(() => null)
+  populateGames()
+  populateVariants()
+  bindControls()
+  render()
+}
+
+function populateGames() {
+  const select = document.getElementById('game-select')
+  select.innerHTML = ''
+  const sorted = Object.entries(GAMES).sort((a, b) => a[1].label.localeCompare(b[1].label))
+  for (const [id, game] of sorted) {
+    const opt = document.createElement('option')
+    opt.value = id
+    opt.textContent = game.label
+    select.appendChild(opt)
+  }
+  select.value = state.game
+}
+
+function populateVariants() {
+  const select = document.getElementById('variant-select')
+  select.innerHTML = ''
+  const game = GAMES[state.game]
+  if (!game) return
+  for (const [id, v] of Object.entries(game.variants)) {
+    const opt = document.createElement('option')
+    opt.value = id
+    opt.textContent = v.static ? `${v.label} [static]` : v.label
+    select.appendChild(opt)
+  }
+  select.value = state.variant
+  updateCoverage()
+}
+
+function updateCoverage() {
+  const game = GAMES[state.game]
+  if (!game) return
+  const variants = Object.values(game.variants)
+  const dynamic = variants.filter(v => !v.static).length
+  const total = variants.length
+  const el = document.getElementById('coverage-info')
+  if (el) el.textContent = `${dynamic}/${total} dynamic`
 }
 
 function bindControls() {
-  document.getElementById('topology-select').addEventListener('change', onTopologyChange)
-  document.getElementById('preset-select').addEventListener('change', onPresetChange)
-  document.getElementById('board-select').addEventListener('change', onBoardChange)
-  document.getElementById('theme-select').addEventListener('change', onThemeChange)
-  document.getElementById('labels-select').addEventListener('change', onLabelsChange)
-  document.getElementById('generate-btn').addEventListener('click', onGenerate)
-
-  document.getElementById('export-svg-btn').addEventListener('click', exportSvg)
-  document.getElementById('export-png-btn').addEventListener('click', exportPng)
-  document.getElementById('export-json-btn').addEventListener('click', exportJson)
-  document.getElementById('import-btn').addEventListener('click', importBoard)
-  document.getElementById('copy-btn').addEventListener('click', copyToClipboard)
-
-  document.getElementById('zoom-in-btn').addEventListener('click', () => zoom(1.2))
-  document.getElementById('zoom-out-btn').addEventListener('click', () => zoom(0.8))
-  document.getElementById('fit-btn').addEventListener('click', fitToView)
-
-  setupSidebarTabs()
-}
-
-function setupSidebarTabs() {
-  const tabs = document.querySelectorAll('.sidebar-tab')
-  const panels = document.querySelectorAll('.sidebar-panel')
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'))
-      panels.forEach(p => p.classList.remove('active'))
-      tab.classList.add('active')
-      document.getElementById('panel-' + tab.dataset.tab).classList.add('active')
-    })
+  document.getElementById('game-select').addEventListener('change', e => {
+    state.game = e.target.value
+    const game = GAMES[state.game]
+    state.variant = Object.keys(game.variants)[0]
+    populateVariants()
+    pushState()
+    render()
   })
+  document.getElementById('variant-select').addEventListener('change', e => {
+    state.variant = e.target.value
+    pushState()
+    render()
+  })
+  document.getElementById('handicap-select').addEventListener('change', e => {
+    state.handicap = parseInt(e.target.value) || 0
+    pushState()
+    render()
+  })
+  document.getElementById('hex-style-select').addEventListener('change', e => {
+    state.style = e.target.value
+    pushState()
+    render()
+  })
+  document.getElementById('hex-players-select').addEventListener('change', e => {
+    state.players = parseInt(e.target.value) || 0
+    pushState()
+    render()
+  })
+  let seedTimer = null
+  document.getElementById('hex-seed-input').addEventListener('input', e => {
+    clearTimeout(seedTimer)
+    seedTimer = setTimeout(() => {
+      state.seed = e.target.value || String(Math.floor(Math.random() * 9999999999))
+      pushState()
+      render()
+    }, 300)
+  })
+  document.getElementById('hex-reseed-btn').addEventListener('click', () => {
+    state.seed = String(Math.floor(Math.random() * 9999999999))
+    document.getElementById('hex-seed-input').value = state.seed
+    pushState()
+    render()
+  })
+  window.addEventListener('resize', () => requestAnimationFrame(fitToView))
 }
 
-function onTopologyChange(e) {
-  state.topology = e.target.value
-  state.preset = 'custom'
-  updatePresets()
-  updateTopologyOptions()
-  generate()
-  updateUrl()
-}
-
-function onPresetChange(e) {
-  state.preset = e.target.value
-  if (state.preset !== 'custom') {
-    const preset = PRESETS[state.topology].find(p => p.id === state.preset)
-    if (preset) {
-      state.config = { ...preset.config }
-      state.boardType = preset.board || 'none'
-      state.layoutMode = preset.layoutMode || 'tiles'
-      state.starPoints = preset.starPoints || []
-      state.riverAfterRow = preset.riverAfterRow ?? null
-      state.riverHeight = preset.riverHeight || 30
-      state.palaces = preset.palaces || []
-      state.diagonals = preset.diagonals || 'none'
-      state.layoutStyle = preset.layoutStyle || 'linear'
-      document.getElementById('board-select').value = state.boardType
-    }
-    syncOptionsFromConfig()
+function getStaticSvgPath(gameId, variantId) {
+  const STATIC_PATH_OVERRIDES = {
+    'landlords-game/standard': 'landlords-game-board.svg',
+    'halma/standard-2p': 'halma-2p-board.svg',
+    'halma/standard-4p': 'halma-4p-board.svg',
+    'stern-halma/standard': 'stern-halma-board.svg',
+    'royal-ur/standard': 'royal-ur-board.svg',
+    'surakarta/standard': 'surakarta-board.svg',
+    'pachisi/standard': 'pachisi-board.svg',
+    'chaupar/standard': 'chaupar-board.svg',
+    'hex/standard': 'hex-board.svg',
+    'landlords-game/1904-original': '1904-original-board.svg',
+    'landlords-game/1906-commercial': '1906-commercial-board.svg',
   }
-  generate()
-  updateUrl()
+  const key = `${gameId}/${variantId}`
+  const filename = STATIC_PATH_OVERRIDES[key] || `${variantId}-board.svg`
+  return `../diagrams/static/${gameId}/${filename}`
 }
 
-function onBoardChange(e) {
-  state.boardType = e.target.value
-  state.preset = 'custom'
-  document.getElementById('preset-select').value = 'custom'
-  generate()
-  updateUrl()
-}
+function render() {
+  const game = GAMES[state.game]
+  if (!game) return
+  const variantDef = game.variants[state.variant]
+  if (!variantDef) return
 
-function onThemeChange(e) {
-  state.theme = e.target.value
-  generate()
-  updateUrl()
-}
+  const handicapGroup = document.getElementById('handicap-group')
+  const hexStyleGroup = document.getElementById('hex-style-group')
+  const hexSeedGroup = document.getElementById('hex-seed-group')
 
-function onLabelsChange(e) {
-  state.labels = e.target.value
-  generate()
-}
-
-function onGenerate() {
-  state.seed = Date.now()
-  const seedInput = document.querySelector('#topology-options input[data-field="seed"]')
-  if (seedInput) seedInput.value = state.seed
-  generate()
-  updateUrl()
-}
-
-function updatePresets() {
-  const select = document.getElementById('preset-select')
-  select.innerHTML = '<option value="custom">Custom</option>'
-  const presets = PRESETS[state.topology] || []
-  presets.forEach(p => {
-    const opt = document.createElement('option')
-    opt.value = p.id
-    opt.textContent = p.label
-    select.appendChild(opt)
-  })
-  select.value = state.preset
-}
-
-function updateTopologyOptions() {
-  const container = document.getElementById('topology-options')
-  container.innerHTML = ''
-
-  switch (state.topology) {
-    case 'grid':
-      container.innerHTML = gridOptions()
-      state.config = state.config.rows ? state.config : { rows: 8, cols: 8 }
-      break
-    case 'hex':
-      container.innerHTML = hexOptions()
-      if (!state.config.radius && !state.config.size) state.config = { radius: 6, shape: 'hexagonal' }
-      break
-    case 'track':
-      container.innerHTML = trackOptions()
-      state.config = state.config.length ? state.config : { length: 24, circuit: false }
-      break
-    case 'pit':
-      container.innerHTML = pitOptions()
-      state.config = state.config.pits ? state.config : { pits: 6 }
-      break
-    case 'graph':
-      container.innerHTML = graphOptions()
-      state.config = state.config.variant ? state.config : { variant: 'nine-mens' }
-      break
-  }
-
-  container.querySelectorAll('input, select').forEach(el => {
-    el.addEventListener('change', onConfigChange)
-  })
-}
-
-function gridOptions() {
-  const { rows = 8, cols = 8 } = state.config
-  return `
-    <div class="control-row">
-      <div class="control-group">
-        <label class="control-label">Rows</label>
-        <input type="number" min="1" max="26" value="${rows}" data-field="rows">
-      </div>
-      <div class="control-group">
-        <label class="control-label">Cols</label>
-        <input type="number" min="1" max="26" value="${cols}" data-field="cols">
-      </div>
-    </div>
-    <div class="control-group">
-      <label class="control-label">Seed</label>
-      <input type="number" value="${state.seed}" data-field="seed">
-    </div>`
-}
-
-function hexOptions() {
-  const { radius = 6, size = 7, shape = 'hexagonal' } = state.config
-  const sizeVal = shape === 'rhombus' ? size : radius
-  const sizeField = shape === 'rhombus' ? 'size' : 'radius'
-  const sizeLabel = shape === 'rhombus' ? 'Size' : 'Radius'
-  return `
-    <div class="control-row">
-      <div class="control-group">
-        <label class="control-label">${sizeLabel}</label>
-        <input type="number" min="1" max="20" value="${sizeVal}" data-field="${sizeField}">
-      </div>
-      <div class="control-group">
-        <label class="control-label">Shape</label>
-        <select data-field="shape">
-          <option value="hexagonal" ${shape === 'hexagonal' ? 'selected' : ''}>Hexagonal</option>
-          <option value="rhombus" ${shape === 'rhombus' ? 'selected' : ''}>Rhombus</option>
-        </select>
-      </div>
-    </div>
-    <div class="control-group">
-      <label class="control-label">Seed</label>
-      <input type="number" value="${state.seed}" data-field="seed">
-    </div>`
-}
-
-function trackOptions() {
-  const { length = 24, circuit = false } = state.config
-  return `
-    <div class="control-row">
-      <div class="control-group">
-        <label class="control-label">Length</label>
-        <input type="number" min="4" max="100" value="${length}" data-field="length">
-      </div>
-      <div class="control-group">
-        <label class="control-label">Circuit</label>
-        <select data-field="circuit">
-          <option value="false" ${!circuit ? 'selected' : ''}>Linear</option>
-          <option value="true" ${circuit ? 'selected' : ''}>Circuit</option>
-        </select>
-      </div>
-    </div>
-    <div class="control-group">
-      <label class="control-label">Seed</label>
-      <input type="number" value="${state.seed}" data-field="seed">
-    </div>`
-}
-
-function pitOptions() {
-  const { pits = 6 } = state.config
-  return `
-    <div class="control-group">
-      <label class="control-label">Pits per side</label>
-      <input type="number" min="3" max="12" value="${pits}" data-field="pits">
-    </div>
-    <div class="control-group">
-      <label class="control-label">Seed</label>
-      <input type="number" value="${state.seed}" data-field="seed">
-    </div>`
-}
-
-function graphOptions() {
-  const { variant = 'nine-mens' } = state.config
-  return `
-    <div class="control-group">
-      <label class="control-label">Variant</label>
-      <select data-field="variant">
-        <option value="nine-mens" ${variant === 'nine-mens' ? 'selected' : ''}>Nine Men's Morris</option>
-        <option value="six-mens" ${variant === 'six-mens' ? 'selected' : ''}>Six Men's Morris</option>
-      </select>
-    </div>
-    <div class="control-group">
-      <label class="control-label">Seed</label>
-      <input type="number" value="${state.seed}" data-field="seed">
-    </div>`
-}
-
-function onConfigChange(e) {
-  const field = e.target.dataset.field
-  let value = e.target.value
-  if (e.target.type === 'number') value = parseInt(value) || 0
-  if (value === 'true') value = true
-  if (value === 'false') value = false
-
-  if (field === 'seed') {
-    state.seed = value
+  if (game.hasHandicap) {
+    handicapGroup.style.display = ''
+    document.getElementById('handicap-select').value = state.handicap || 0
   } else {
-    state.config[field] = value
-    state.preset = 'custom'
-    document.getElementById('preset-select').value = 'custom'
+    handicapGroup.style.display = 'none'
   }
 
-  if (field === 'shape') updateTopologyOptions()
-  generate()
-  updateUrl()
-}
+  const hexPlayersGroup = document.getElementById('hex-players-group')
 
-function syncOptionsFromConfig() {
-  const container = document.getElementById('topology-options')
-  Object.entries(state.config).forEach(([key, val]) => {
-    const el = container.querySelector(`[data-field="${key}"]`)
-    if (el) el.value = val
-  })
-}
-
-function createTopology() {
-  switch (state.topology) {
-    case 'grid':
-      return createGridTopology({
-        rows: state.config.rows || 8,
-        cols: state.config.cols || 8,
-      })
-    case 'hex': {
-      const hexConfig = { shape: state.config.shape || 'hexagonal' }
-      if (hexConfig.shape === 'rhombus') {
-        hexConfig.size = state.config.size || state.config.radius || 7
+  if (game.hexGame) {
+    hexStyleGroup.style.display = ''
+    hexSeedGroup.style.display = ''
+    document.getElementById('hex-style-select').value = state.style || 'classic'
+    document.getElementById('hex-seed-input').value = state.seed || ''
+    const gameConfig = getGameConfig(game.hexGame)
+    if (gameConfig && gameConfig.styles) {
+      const styleSelect = document.getElementById('hex-style-select')
+      const needed = gameConfig.styles.filter(s => s !== 'realistic')
+      const currentOpts = [...styleSelect.options].map(o => o.value)
+      if (currentOpts.join() !== needed.join()) {
+        styleSelect.innerHTML = ''
+        for (const s of needed) {
+          const opt = document.createElement('option')
+          opt.value = s
+          opt.textContent = s === 'classic' ? 'Classic (flat colour)' : s.charAt(0).toUpperCase() + s.slice(1)
+          styleSelect.appendChild(opt)
+        }
+        if (!needed.includes(state.style)) state.style = 'classic'
+        styleSelect.value = state.style || 'classic'
+      }
+    }
+    if (gameConfig && gameConfig.playerCounts) {
+      const variantDef = game.variants[state.variant]
+      const size = variantDef.hexSize || gameConfig.defaultSize
+      const counts = gameConfig.playerCounts(size)
+      if (counts && counts.length > 1) {
+        hexPlayersGroup.style.display = ''
+        const playersSelect = document.getElementById('hex-players-select')
+        playersSelect.innerHTML = ''
+        for (const c of counts) {
+          const opt = document.createElement('option')
+          opt.value = c
+          opt.textContent = c === 0 ? 'None (empty map)' : `${c} players`
+          playersSelect.appendChild(opt)
+        }
+        playersSelect.value = state.players || 0
       } else {
-        hexConfig.radius = state.config.radius || 6
+        hexPlayersGroup.style.display = 'none'
       }
-      return createHexTopology(hexConfig)
+    } else {
+      hexPlayersGroup.style.display = 'none'
     }
-    case 'track': {
-      const len = state.config.length || 24
-      const positions = Array.from({ length: len }, (_, i) => `p${i}`)
-      return createTrackTopology({
-        positions,
-        circuit: state.config.circuit || false,
-      })
-    }
-    case 'pit':
-      return createPitTopology({
-        pitsPerSide: state.config.pits || 6,
-      })
-    case 'graph':
-      return createGraphTopology(getGraphConfig(state.config.variant))
-    default:
-      return null
-  }
-}
-
-function getMorrisPositions() {
-  const w = 440, h = 440
-  const pad = 40
-  const variant = state.config.variant || 'nine-mens'
-
-  if (variant === 'six-mens') {
-    // Six Men's: nodes encode grid position (a-g = col 1-7, number = row)
-    // Only uses columns a,b,c,e,f,g and rows 1-7 (no d column, no center)
-    return morrisGridPositions(getGraphConfig('six-mens').nodes, w, h, pad)
+  } else {
+    hexStyleGroup.style.display = 'none'
+    hexSeedGroup.style.display = 'none'
+    hexPlayersGroup.style.display = 'none'
   }
 
-  // Nine Men's: same grid-based positioning
-  return morrisGridPositions(getGraphConfig('nine-mens').nodes, w, h, pad)
-}
-
-function morrisGridPositions(nodes, w, h, pad) {
-  const cols = { a: 0, b: 1, c: 2, d: 3, e: 4, f: 5, g: 6 }
-  const positions = {}
-  const sx = (w - pad * 2) / 6
-  const sy = (h - pad * 2) / 6
-  for (const node of nodes) {
-    const col = cols[node[0]]
-    const row = parseInt(node.slice(1)) - 1
-    positions[node] = { x: pad + col * sx, y: pad + (6 - row) * sy }
+  if (variantDef.static) {
+    loadStaticSvg(state.game, state.variant, variantDef)
+    return
   }
-  return positions
-}
 
-function getGraphConfig(variant) {
-  if (variant === 'six-mens') {
-    return {
-      nodes: [
-        'a1','a4','a7','b2','b4','b6','c3','c4','c5',
-        'e3','e4','e5','f2','f4','f6','g1','g4','g7',
-      ],
-      edges: [
-        ['a1','a4'],['a4','a7'],['b2','b4'],['b4','b6'],
-        ['c3','c4'],['c4','c5'],['e3','e4'],['e4','e5'],
-        ['f2','f4'],['f4','f6'],['g1','g4'],['g4','g7'],
-        ['a1','g1'],['b2','f2'],['c3','e3'],
-        ['a7','g7'],['b6','f6'],['c5','e5'],
-        ['a4','b4'],['b4','c4'],['e4','f4'],['f4','g4'],
-      ],
-    }
+  if (game.hexGame) {
+    renderHexGame(game, variantDef)
+    return
   }
-  return {
-    nodes: [
-      'a1','a4','a7','b2','b4','b6','c3','c4','c5',
-      'd1','d2','d3','d5','d6','d7',
-      'e3','e4','e5','f2','f4','f6','g1','g4','g7',
-    ],
-    edges: [
-      ['a1','a4'],['a4','a7'],['b2','b4'],['b4','b6'],
-      ['c3','c4'],['c4','c5'],['e3','e4'],['e4','e5'],
-      ['f2','f4'],['f4','f6'],['g1','g4'],['g4','g7'],
-      ['a1','d1'],['d1','g1'],['a7','d7'],['d7','g7'],
-      ['b2','d2'],['d2','f2'],['b6','d6'],['d6','f6'],
-      ['c3','d3'],['d3','e3'],['c5','d5'],['d5','e5'],
-      ['a4','b4'],['b4','c4'],['e4','f4'],['f4','g4'],
-    ],
+
+  const config = { ...variantDef }
+
+  // Build position from FEN
+  if (config.fen) {
+    config.position = fenToPosition(config.fen, config.rows, config.cols)
   }
-}
 
-function isGoPreset() {
-  return state.preset && state.preset.startsWith('go-')
-}
-
-function getLayoutOpts() {
-  switch (state.topology) {
-    case 'grid': {
-      if (state.layoutMode === 'intersections') {
-        return {
-          mode: 'intersections',
-          spacing: 20,
-          starPoints: state.starPoints,
-          riverAfterRow: state.riverAfterRow,
-          riverHeight: state.riverHeight,
-          palaces: state.palaces,
-          diagonals: state.diagonals,
-        }
-      }
-      const preset = PRESETS.grid.find(p => p.id === state.preset)
-      const alt = preset?.alternating !== undefined ? preset.alternating : !isGoPreset()
-      return { tileSize: 44, alternating: alt }
-    }
-    case 'hex': return { cellSize: 22 }
-    case 'track': {
-      const style = state.layoutStyle || (state.config.circuit ? 'circuit' : 'linear')
-      if (style === 'points') {
-        return {
-          style: 'points',
-          pointsPerSide: Math.floor((state.config.length || 24) / 2),
-          pointWidth: 32,
-          pointHeight: 120,
-          boardHeight: 288,
-          halves: true,
-          gapBetweenHalves: 24,
-        }
-      }
-      if (style === 'cross') {
-        return {
-          style: 'cross',
-          cellSize: 20,
-          armWidth: 3,
-          armLength: 8,
-          castles: [4, 12, 20, 28, 36, 44, 52, 60],
-        }
-      }
-      return { cellSize: 36, style }
-    }
-    case 'pit': return { pitRadius: 28, storeRadius: 38, spacing: 16 }
-    case 'graph': return { nodeRadius: 14, width: 440, height: 440, positions: getMorrisPositions() }
-    default: return {}
+  // Build draughts position
+  if (config.draughtsSetup) {
+    config.position = buildDraughtsPosition(config.rows, config.cols, config.draughtsSetup)
   }
+
+  // Build Go handicap position
+  if (game.hasHandicap && state.handicap > 0) {
+    config.position = buildGoHandicap(state.handicap, config.rows)
+    config.goHandicap = state.handicap
+  }
+
+  // Build fanorona position
+  if (config.fanoronaSetup) {
+    config.position = buildFanoronaPosition(config.rows, config.cols)
+  }
+
+  // Build piece image paths
+  if (game.pieceSet && (config.position || config.hexPosition)) {
+    config.pieceImages = buildPieceImages(game.pieceSet, galleryIndex, state.game)
+  }
+
+  const svg = renderBoard(config)
+  showSvg(svg)
+  showInfo(config)
+  bindBoardHover(config)
+  requestAnimationFrame(fitToView)
 }
 
-function generate() {
-  const topology = createTopology()
-  if (!topology) return
+function renderHexGame(game, variantDef) {
+  const gameConfig = getGameConfig(game.hexGame)
+  if (!gameConfig) {
+    showSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="60"><text x="100" y="35" text-anchor="middle" font-size="12" fill="#888">No generator: "${game.hexGame}"</text></svg>`)
+    return
+  }
 
-  state.board = topology
-  const layout = topology.getLayout(getLayoutOpts())
-  const theme = THEMES[state.theme] || THEMES.classic
-  const showLabels = state.labels !== 'none'
-  const boardObj = createBoardObject(layout)
+  const size = variantDef.hexSize || gameConfig.defaultSize
+  const players = state.players || gameConfig.defaultPlayers || 0
+  const seed = state.seed
+  const style = state.style || 'classic'
+  const layout = variantDef.hexLayout || null
 
-  state.svg = renderer.render(layout, {
-    theme,
-    board: boardObj,
-    labels: showLabels,
-    pieces: {},
-    highlights: [],
+  const hexes = gameConfig.generate(size, players, seed, layout)
+  if (!hexes || hexes.length === 0) {
+    showSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="60"><text x="100" y="35" text-anchor="middle" font-size="12" fill="#888">Empty map</text></svg>`)
+    return
+  }
+
+  const colors = gameConfig.getColors ? gameConfig.getColors() : {}
+  const images = gameConfig.getImages ? gameConfig.getImages(style) : null
+  const rendererOpts = gameConfig.rendererOptions ? gameConfig.rendererOptions() : {}
+
+  const hasPerHexImages = images && images._perHex
+  const hasTypeImages = images && !images._perHex
+
+  const svgOpts = {
+    hexSize: rendererOpts.hexSize || 40,
+    flat: rendererOpts.flat || gameConfig.orientation === 'flat',
+    colors,
+    images: (style !== 'classic' && hasTypeImages) ? images : null,
+    imageMode: (style !== 'classic' && (hasTypeImages || hasPerHexImages)) ? 'href' : 'none',
+    strokeColor: 'rgba(0,0,0,0.3)',
+    strokeWidth: 1,
+    padding: 15,
+    scaleFactor: 0.95,
+    labels: gameConfig.labels !== false,
+    bgColor: null,
+  }
+
+  const svg = HexSvg.toSVG(hexes, svgOpts)
+  showSvg(svg)
+  showInfo({
+    hexGame: game.hexGame,
+    hexSize: size,
+    hexCount: hexes.length,
+    seed,
+    style,
+    label: variantDef.label,
   })
-
-  const svgContainer = document.getElementById('board-svg')
-  const emptyState = document.getElementById('board-empty')
-  svgContainer.innerHTML = state.svg
-  svgContainer.classList.add('active')
-  emptyState.style.display = 'none'
-
-  const cells = layout.getCells()
-  const boardLabel = state.boardType !== 'none' ? ` · ${state.boardType} board` : ''
-  document.getElementById('board-info').textContent =
-    `${capitalise(state.topology)} · ${cells.length} cells${boardLabel} · seed ${state.seed}`
-  document.getElementById('board-stats').textContent =
-    `${cells.length} cells`
+  bindHexHover(gameConfig)
+  requestAnimationFrame(fitToView)
 }
 
-function createBoardObject(layout) {
-  if (state.boardType === 'none') return null
-
-  const dims = layout.getDimensions()
-  const padding = 24
-  const themeColors = THEMES[state.theme] || THEMES.classic
-
-  switch (state.boardType) {
-    case 'rectangle':
-      return createBoard(builtinBoards.rectangle({
-        width: dims.width + padding * 2,
-        height: dims.height + padding * 2,
-        frameWidth: padding,
-        frameColor: themeColors.background?.fill || '#5c3a1e',
-        surfaceColor: themeColors.cells?.light?.fill || '#f5e6c8',
-      }))
-    case 'slab':
-      return createBoard(builtinBoards.slab({
-        width: dims.width + padding * 2 + 10,
-        height: dims.height + padding * 2 + 10,
-        borderWidth: padding,
-        surfaceInset: 5,
-        slabColor: '#dcb35c',
-        surfaceColor: '#d4a843',
-      }))
-    case 'split': {
-      const barW = 24
-      return createBoard(builtinBoards.split({
-        width: dims.width + padding * 2 + barW,
-        height: dims.height + padding * 2,
-        frameWidth: padding / 2,
-        barWidth: barW,
-        frameColor: '#3d2b1f',
-        surfaceColor: '#1a5c3a',
-      }))
-    }
-    case 'capsule':
-      return createBoard(builtinBoards.capsule({
-        width: dims.width + 60,
-        height: dims.height + 40,
-        frameWidth: 6,
-        outerRadius: 22,
-        innerRadius: 18,
-        frameColor: '#7A5A32',
-        surfaceColor: '#9B7740',
-      }))
-    case 'felt':
-      return createBoard(builtinBoards.felt({
-        width: dims.width + padding * 2,
-        height: dims.height + padding * 2,
-        feltColor: '#1a5c3a',
-        edgeColor: '#0d3d1f',
-      }))
-    case 'river':
-      return createBoard(builtinBoards.river({
-        width: dims.width + padding * 2,
-        height: dims.height + padding * 2,
-        surfaceColor: '#f5e6c8',
-        riverY: dims.height / 2 - 5,
-        riverHeight: state.riverHeight || 20,
-      }))
-    default:
-      return null
-  }
-}
-
-function capitalise(s) {
-  return s.charAt(0).toUpperCase() + s.slice(1)
-}
-
-function updateUrl() {
-  const params = new URLSearchParams()
-  params.set('topology', state.topology)
-  if (state.preset !== 'custom') params.set('preset', state.preset)
-  params.set('seed', state.seed)
-  if (state.theme !== 'classic') params.set('theme', state.theme)
-  if (state.boardType !== 'none') params.set('board', state.boardType)
-  Object.entries(state.config).forEach(([k, v]) => {
-    if (v !== undefined && v !== null) params.set(k, v)
-  })
-  history.replaceState({}, '', location.pathname + '?' + params.toString())
-}
-
-function exportSvg() {
-  if (!state.svg) return
-  const blob = new Blob([state.svg], { type: 'image/svg+xml' })
-  download(blob, `board-${state.topology}-${state.seed}.svg`)
-}
-
-function exportPng() {
-  if (!state.svg) return
-  const svgBlob = new Blob([state.svg], { type: 'image/svg+xml' })
-  const url = URL.createObjectURL(svgBlob)
-  const img = new Image()
-  img.onload = () => {
-    const scale = 2
-    const canvas = document.createElement('canvas')
-    canvas.width = img.naturalWidth * scale
-    canvas.height = img.naturalHeight * scale
-    const ctx = canvas.getContext('2d')
-    ctx.scale(scale, scale)
-    ctx.drawImage(img, 0, 0)
-    URL.revokeObjectURL(url)
-    canvas.toBlob(blob => {
-      download(blob, `board-${state.topology}-${state.seed}.png`)
-    }, 'image/png')
-  }
-  img.src = url
-}
-
-function exportJson() {
-  const data = {
-    topology: state.topology,
-    config: state.config,
-    seed: state.seed,
-    theme: state.theme,
-  }
-  const json = JSON.stringify(data, null, 2)
-  document.getElementById('export-data').value = json
-  const blob = new Blob([json], { type: 'application/json' })
-  download(blob, `board-${state.topology}-${state.seed}.json`)
-}
-
-function importBoard() {
-  const textarea = document.getElementById('import-data')
-  const json = textarea.value.trim()
-  if (!json) return
+async function loadStaticSvg(gameId, variantId, variantDef) {
+  const path = getStaticSvgPath(gameId, variantId)
   try {
-    const data = JSON.parse(json)
-    if (data.topology) state.topology = data.topology
-    if (data.config) state.config = data.config
-    if (data.seed) state.seed = data.seed
-    if (data.theme) state.theme = data.theme
-    document.getElementById('topology-select').value = state.topology
-    document.getElementById('theme-select').value = state.theme
-    updatePresets()
-    updateTopologyOptions()
-    generate()
-  } catch (e) {
-    textarea.style.borderColor = '#c62828'
-    setTimeout(() => { textarea.style.borderColor = '' }, 1500)
+    const resp = await fetch(path)
+    if (resp.ok) {
+      const svg = await resp.text()
+      showSvg(svg)
+      showInfo({ ...variantDef, renderMode: 'static', svgPath: path })
+    } else {
+      showStaticPlaceholder(variantDef, path)
+    }
+  } catch {
+    showStaticPlaceholder(variantDef, path)
   }
+  requestAnimationFrame(fitToView)
 }
 
-function copyToClipboard() {
-  const textarea = document.getElementById('export-data')
-  if (textarea.value) navigator.clipboard.writeText(textarea.value)
+function showStaticPlaceholder(variantDef, path) {
+  const container = document.getElementById('board-svg')
+  const empty = document.getElementById('board-empty')
+  container.innerHTML = `<div class="static-placeholder"><div class="static-icon">&#x1F4CB;</div><p class="static-label">${variantDef.label}</p><p class="static-note">Static SVG — not yet imported</p><p class="static-path">${path}</p></div>`
+  container.classList.add('active')
+  empty.style.display = 'none'
 }
 
-function download(blob, filename) {
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  a.click()
-  URL.revokeObjectURL(url)
+function showSvg(svg) {
+  const container = document.getElementById('board-svg')
+  const empty = document.getElementById('board-empty')
+  container.innerHTML = svg
+  container.classList.add('active')
+  empty.style.display = 'none'
 }
 
-let currentScale = 1
-function zoom(factor) {
-  currentScale *= factor
-  const svg = document.querySelector('#board-svg svg')
-  if (svg) svg.style.transform = `scale(${currentScale})`
+function bindBoardHover(config) {
+  const infoBar = document.getElementById('hex-info-bar')
+  const svgContainer = document.getElementById('board-svg')
+  infoBar.classList.add('active')
+  infoBar.textContent = 'Hover over a square'
+
+  const position = config.position || {}
+  const PIECE_NAMES = {
+    K: 'King', Q: 'Queen', R: 'Rook', B: 'Bishop', N: 'Knight', P: 'Pawn',
+    k: 'King', q: 'Queen', r: 'Rook', b: 'Bishop', n: 'Knight', p: 'Pawn',
+    A: 'Archbishop', a: 'Archbishop', C: 'Chancellor', c: 'Chancellor',
+    M: 'Amazon', m: 'Amazon', E: 'Elephant', e: 'Elephant',
+    F: 'Ferz', f: 'Ferz', S: 'Silver', s: 'Silver', G: 'Gold', g: 'Gold',
+    L: 'Lance', l: 'Lance', H: 'Horse', h: 'Horse',
+  }
+
+  svgContainer.addEventListener('mouseover', e => {
+    const cell = e.target.closest('.board-cell')
+    if (!cell) return
+    const sq = cell.dataset.sq
+    const type = cell.dataset.type || ''
+    let text = sq
+    if (type && type !== 'floor') text += ` [${type}]`
+    const piece = position[sq]
+    if (piece) {
+      const p = typeof piece === 'object' ? piece : { type: String(piece) }
+      const color = p.color ? p.color : (p.type === p.type.toUpperCase() ? 'White' : 'Black')
+      const name = PIECE_NAMES[p.type] || p.type
+      text += ` — ${color} ${name}`
+    }
+    infoBar.textContent = text
+  })
+
+  svgContainer.addEventListener('mouseleave', () => {
+    infoBar.textContent = 'Hover over a square'
+  })
 }
+
+function bindHexHover(gameConfig) {
+  const infoBar = document.getElementById('hex-info-bar')
+  const svgContainer = document.getElementById('board-svg')
+  infoBar.classList.add('active')
+  infoBar.textContent = 'Hover over a hex'
+
+  const descs = gameConfig.getDescriptions ? gameConfig.getDescriptions() : null
+
+  svgContainer.addEventListener('mouseover', e => {
+    const poly = e.target.closest('.hex-cell')
+    if (!poly) return
+    const id = poly.dataset.id || ''
+    const type = poly.dataset.type || ''
+    const name = poly.dataset.name || ''
+    const q = poly.dataset.q
+    const r = poly.dataset.r
+
+    let text = id ? `${id} (${q},${r})` : `(${q},${r})`
+    if (name) {
+      text += ` — ${name}`
+    } else if (descs && descs[type]) {
+      text += ` — ${descs[type].name}`
+      if (descs[type].desc) text += `: ${descs[type].desc}`
+    } else if (type) {
+      text += ` — ${type}`
+    }
+    infoBar.textContent = text
+  })
+
+  svgContainer.addEventListener('mouseleave', () => {
+    infoBar.textContent = 'Hover over a hex'
+  })
+}
+
+function showInfo(cfg) {
+  const info = document.getElementById('derived-info')
+  const game = GAMES[state.game]
+  const rows = []
+  const mode = cfg.static ? 'static' : 'dynamic'
+  rows.push(`<div class="info-row"><span class="info-label">Render</span><span class="info-value info-badge info-badge--${mode}">${mode}</span></div>`)
+  if (cfg.hexGame) {
+    rows.push(`<div class="info-row"><span class="info-label">Generator</span><span class="info-value">${cfg.hexGame}</span></div>`)
+    rows.push(`<div class="info-row"><span class="info-label">Hexes</span><span class="info-value">${cfg.hexCount}</span></div>`)
+  } else {
+    if (cfg.boardStyle) rows.push(`<div class="info-row"><span class="info-label">Board</span><span class="info-value">${cfg.boardStyle}</span></div>`)
+    if (cfg.rows) rows.push(`<div class="info-row"><span class="info-label">Size</span><span class="info-value">${cfg.rows}×${cfg.cols}</span></div>`)
+    if (cfg.rings) rows.push(`<div class="info-row"><span class="info-label">Rings</span><span class="info-value">${cfg.rings}</span></div>`)
+    if (game && game.pieceSet) rows.push(`<div class="info-row"><span class="info-label">Pieces</span><span class="info-value">${game.pieceSet}</span></div>`)
+    if (cfg.fen) rows.push(`<div class="info-row info-row--block"><span class="info-label">Setup</span><span class="info-value info-value--fen">${cfg.fen}</span></div>`)
+    else if (cfg.draughtsSetup) rows.push(`<div class="info-row"><span class="info-label">Setup</span><span class="info-value">${cfg.draughtsSetup.rows} rows each side</span></div>`)
+    else if (cfg.fanoronaSetup) rows.push(`<div class="info-row"><span class="info-label">Setup</span><span class="info-value">Standard (22 each)</span></div>`)
+    else if (cfg.goHandicap) rows.push(`<div class="info-row"><span class="info-label">Setup</span><span class="info-value">${cfg.goHandicap} handicap stones</span></div>`)
+    else if (cfg.svgPath) rows.push(`<div class="info-row info-row--block"><span class="info-label">Source</span><span class="info-value info-value--fen">${cfg.svgPath}</span></div>`)
+    else if (!cfg.position && !cfg.static) rows.push(`<div class="info-row"><span class="info-label">Setup</span><span class="info-value">Empty board</span></div>`)
+    if (cfg.fen) rows.push(`<div class="info-row"><span class="info-label">Notation</span><span class="info-value">FEN</span></div>`)
+  }
+  info.innerHTML = rows.join('')
+}
+
 function fitToView() {
-  currentScale = 1
   const svg = document.querySelector('#board-svg svg')
-  if (svg) svg.style.transform = ''
+  const container = document.querySelector('.canvas-svg.active')
+  if (!svg || !container) return
+  const sw = parseFloat(svg.getAttribute('width'))
+  const sh = parseFloat(svg.getAttribute('height'))
+  const cw = container.clientWidth - 48
+  const ch = container.clientHeight - 48
+  if (!sw || !sh || !cw || !ch) return
+  const scale = Math.min(cw / sw, ch / sh)
+  svg.style.transform = `scale(${scale})`
 }
 
 document.addEventListener('DOMContentLoaded', init)

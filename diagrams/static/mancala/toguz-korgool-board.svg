@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 200" width="640" height="200">
+  <title>Toguz Korgool — starting position (2x9 pits + 2 kazans, 9 seeds per pit)</title>
+
+  <!-- Wooden board background -->
+  <rect x="10" y="15" width="620" height="170" rx="20" ry="20" fill="#6B4C28"/>
+  <rect x="16" y="21" width="608" height="158" rx="16" ry="16" fill="#8A6538"/>
+
+  <!-- Left kazan (Player 2) -->
+  <ellipse cx="50" cy="100" rx="22" ry="48" fill="#3E2410" stroke="#2A1808" stroke-width="1.5"/>
+
+  <!-- Right kazan (Player 1) -->
+  <ellipse cx="590" cy="100" rx="22" ry="48" fill="#3E2410" stroke="#2A1808" stroke-width="1.5"/>
+
+  <!-- Top row pits (Player 2, 9 pits) -->
+  <g id="top-row">
+    <circle cx="100" cy="62" r="20" fill="#3E2410" stroke="#2A1808" stroke-width="1.5"/>
+    <circle cx="155" cy="62" r="20" fill="#3E2410" stroke="#2A1808" stroke-width="1.5"/>
+    <circle cx="210" cy="62" r="20" fill="#3E2410" stroke="#2A1808" stroke-width="1.5"/>
+    <circle cx="265" cy="62" r="20" fill="#3E2410" stroke="#2A1808" stroke-width="1.5"/>
+    <circle cx="320" cy="62" r="20" fill="#3E2410" stroke="#2A1808" stroke-width="1.5"/>
+    <circle cx="375" cy="62" r="20" fill="#3E2410" stroke="#2A1808" stroke-width="1.5"/>
+    <circle cx="430" cy="62" r="20" fill="#3E2410" stroke="#2A1808" stroke-width="1.5"/>
+    <circle cx="485" cy="62" r="20" fill="#3E2410" stroke="#2A1808" stroke-width="1.5"/>
+    <circle cx="540" cy="62" r="20" fill="#3E2410" stroke="#2A1808" stroke-width="1.5"/>
+  </g>
+
+  <!-- Bottom row pits (Player 1, 9 pits) -->
+  <g id="bottom-row">
+    <circle cx="100" cy="138" r="20" fill="#3E2410" stroke="#2A1808" stroke-width="1.5"/>
+    <circle cx="155" cy="138" r="20" fill="#3E2410" stroke="#2A1808" stroke-width="1.5"/>
+    <circle cx="210" cy="138" r="20" fill="#3E2410" stroke="#2A1808" stroke-width="1.5"/>
+    <circle cx="265" cy="138" r="20" fill="#3E2410" stroke="#2A1808" stroke-width="1.5"/>
+    <circle cx="320" cy="138" r="20" fill="#3E2410" stroke="#2A1808" stroke-width="1.5"/>
+    <circle cx="375" cy="138" r="20" fill="#3E2410" stroke="#2A1808" stroke-width="1.5"/>
+    <circle cx="430" cy="138" r="20" fill="#3E2410" stroke="#2A1808" stroke-width="1.5"/>
+    <circle cx="485" cy="138" r="20" fill="#3E2410" stroke="#2A1808" stroke-width="1.5"/>
+    <circle cx="540" cy="138" r="20" fill="#3E2410" stroke="#2A1808" stroke-width="1.5"/>
+  </g>
+
+  <!-- Seeds (9 per pit, 3x3 grid) -->
+  <g fill="#C8B898" stroke="#8A7A5A" stroke-width="0.4">
+    <!-- Top row: pits at 100, 155, 210, 265, 320, 375, 430, 485, 540 -->
+    <circle cx="93" cy="55" r="3"/><circle cx="100" cy="55" r="3"/><circle cx="107" cy="55" r="3"/>
+    <circle cx="93" cy="62" r="3"/><circle cx="100" cy="62" r="3"/><circle cx="107" cy="62" r="3"/>
+    <circle cx="93" cy="69" r="3"/><circle cx="100" cy="69" r="3"/><circle cx="107" cy="69" r="3"/>
+
+    <circle cx="148" cy="55" r="3"/><circle cx="155" cy="55" r="3"/><circle cx="162" cy="55" r="3"/>
+    <circle cx="148" cy="62" r="3"/><circle cx="155" cy="62" r="3"/><circle cx="162" cy="62" r="3"/>
+    <circle cx="148" cy="69" r="3"/><circle cx="155" cy="69" r="3"/><circle cx="162" cy="69" r="3"/>
+
+    <circle cx="203" cy="55" r="3"/><circle cx="210" cy="55" r="3"/><circle cx="217" cy="55" r="3"/>
+    <circle cx="203" cy="62" r="3"/><circle cx="210" cy="62" r="3"/><circle cx="217" cy="62" r="3"/>
+    <circle cx="203" cy="69" r="3"/><circle cx="210" cy="69" r="3"/><circle cx="217" cy="69" r="3"/>
+
+    <circle cx="258" cy="55" r="3"/><circle cx="265" cy="55" r="3"/><circle cx="272" cy="55" r="3"/>
+    <circle cx="258" cy="62" r="3"/><circle cx="265" cy="62" r="3"/><circle cx="272" cy="62" r="3"/>
+    <circle cx="258" cy="69" r="3"/><circle cx="265" cy="69" r="3"/><circle cx="272" cy="69" r="3"/>
+
+    <circle cx="313" cy="55" r="3"/><circle cx="320" cy="55" r="3"/><circle cx="327" cy="55" r="3"/>
+    <circle cx="313" cy="62" r="3"/><circle cx="320" cy="62" r="3"/><circle cx="327" cy="62" r="3"/>
+    <circle cx="313" cy="69" r="3"/><circle cx="320" cy="69" r="3"/><circle cx="327" cy="69" r="3"/>
+
+    <circle cx="368" cy="55" r="3"/><circle cx="375" cy="55" r="3"/><circle cx="382" cy="55" r="3"/>
+    <circle cx="368" cy="62" r="3"/><circle cx="375" cy="62" r="3"/><circle cx="382" cy="62" r="3"/>
+    <circle cx="368" cy="69" r="3"/><circle cx="375" cy="69" r="3"/><circle cx="382" cy="69" r="3"/>
+
+    <circle cx="423" cy="55" r="3"/><circle cx="430" cy="55" r="3"/><circle cx="437" cy="55" r="3"/>
+    <circle cx="423" cy="62" r="3"/><circle cx="430" cy="62" r="3"/><circle cx="437" cy="62" r="3"/>
+    <circle cx="423" cy="69" r="3"/><circle cx="430" cy="69" r="3"/><circle cx="437" cy="69" r="3"/>
+
+    <circle cx="478" cy="55" r="3"/><circle cx="485" cy="55" r="3"/><circle cx="492" cy="55" r="3"/>
+    <circle cx="478" cy="62" r="3"/><circle cx="485" cy="62" r="3"/><circle cx="492" cy="62" r="3"/>
+    <circle cx="478" cy="69" r="3"/><circle cx="485" cy="69" r="3"/><circle cx="492" cy="69" r="3"/>
+
+    <circle cx="533" cy="55" r="3"/><circle cx="540" cy="55" r="3"/><circle cx="547" cy="55" r="3"/>
+    <circle cx="533" cy="62" r="3"/><circle cx="540" cy="62" r="3"/><circle cx="547" cy="62" r="3"/>
+    <circle cx="533" cy="69" r="3"/><circle cx="540" cy="69" r="3"/><circle cx="547" cy="69" r="3"/>
+
+    <!-- Bottom row: same x positions, cy=138 -->
+    <circle cx="93" cy="131" r="3"/><circle cx="100" cy="131" r="3"/><circle cx="107" cy="131" r="3"/>
+    <circle cx="93" cy="138" r="3"/><circle cx="100" cy="138" r="3"/><circle cx="107" cy="138" r="3"/>
+    <circle cx="93" cy="145" r="3"/><circle cx="100" cy="145" r="3"/><circle cx="107" cy="145" r="3"/>
+
+    <circle cx="148" cy="131" r="3"/><circle cx="155" cy="131" r="3"/><circle cx="162" cy="131" r="3"/>
+    <circle cx="148" cy="138" r="3"/><circle cx="155" cy="138" r="3"/><circle cx="162" cy="138" r="3"/>
+    <circle cx="148" cy="145" r="3"/><circle cx="155" cy="145" r="3"/><circle cx="162" cy="145" r="3"/>
+
+    <circle cx="203" cy="131" r="3"/><circle cx="210" cy="131" r="3"/><circle cx="217" cy="131" r="3"/>
+    <circle cx="203" cy="138" r="3"/><circle cx="210" cy="138" r="3"/><circle cx="217" cy="138" r="3"/>
+    <circle cx="203" cy="145" r="3"/><circle cx="210" cy="145" r="3"/><circle cx="217" cy="145" r="3"/>
+
+    <circle cx="258" cy="131" r="3"/><circle cx="265" cy="131" r="3"/><circle cx="272" cy="131" r="3"/>
+    <circle cx="258" cy="138" r="3"/><circle cx="265" cy="138" r="3"/><circle cx="272" cy="138" r="3"/>
+    <circle cx="258" cy="145" r="3"/><circle cx="265" cy="145" r="3"/><circle cx="272" cy="145" r="3"/>
+
+    <circle cx="313" cy="131" r="3"/><circle cx="320" cy="131" r="3"/><circle cx="327" cy="131" r="3"/>
+    <circle cx="313" cy="138" r="3"/><circle cx="320" cy="138" r="3"/><circle cx="327" cy="138" r="3"/>
+    <circle cx="313" cy="145" r="3"/><circle cx="320" cy="145" r="3"/><circle cx="327" cy="145" r="3"/>
+
+    <circle cx="368" cy="131" r="3"/><circle cx="375" cy="131" r="3"/><circle cx="382" cy="131" r="3"/>
+    <circle cx="368" cy="138" r="3"/><circle cx="375" cy="138" r="3"/><circle cx="382" cy="138" r="3"/>
+    <circle cx="368" cy="145" r="3"/><circle cx="375" cy="145" r="3"/><circle cx="382" cy="145" r="3"/>
+
+    <circle cx="423" cy="131" r="3"/><circle cx="430" cy="131" r="3"/><circle cx="437" cy="131" r="3"/>
+    <circle cx="423" cy="138" r="3"/><circle cx="430" cy="138" r="3"/><circle cx="437" cy="138" r="3"/>
+    <circle cx="423" cy="145" r="3"/><circle cx="430" cy="145" r="3"/><circle cx="437" cy="145" r="3"/>
+
+    <circle cx="478" cy="131" r="3"/><circle cx="485" cy="131" r="3"/><circle cx="492" cy="131" r="3"/>
+    <circle cx="478" cy="138" r="3"/><circle cx="485" cy="138" r="3"/><circle cx="492" cy="138" r="3"/>
+    <circle cx="478" cy="145" r="3"/><circle cx="485" cy="145" r="3"/><circle cx="492" cy="145" r="3"/>
+
+    <circle cx="533" cy="131" r="3"/><circle cx="540" cy="131" r="3"/><circle cx="547" cy="131" r="3"/>
+    <circle cx="533" cy="138" r="3"/><circle cx="540" cy="138" r="3"/><circle cx="547" cy="138" r="3"/>
+    <circle cx="533" cy="145" r="3"/><circle cx="540" cy="145" r="3"/><circle cx="547" cy="145" r="3"/>
+  </g>
+</svg>

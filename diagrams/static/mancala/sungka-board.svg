@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 180" width="560" height="180">
+  <title>Sungka — starting position (2x7 pits + 2 stores, 7 shells per pit)</title>
+
+  <!-- Boat-shaped board (Filipino sungka — lighter, polished wood) -->
+  <ellipse cx="280" cy="90" rx="268" ry="76" fill="#A08050"/>
+  <ellipse cx="280" cy="90" rx="260" ry="68" fill="#C4A060"/>
+
+  <!-- Left store (ulo) -->
+  <ellipse cx="80" cy="90" rx="20" ry="38" fill="#6B4C28" stroke="#4A3518" stroke-width="1.5"/>
+
+  <!-- Right store (ulo) -->
+  <ellipse cx="480" cy="90" rx="20" ry="38" fill="#6B4C28" stroke="#4A3518" stroke-width="1.5"/>
+
+  <!-- Top row pits (7, symmetrically centred) -->
+  <g id="top-row">
+    <circle cx="120" cy="58" r="18" fill="#6B4C28" stroke="#4A3518" stroke-width="1.5"/>
+    <circle cx="173" cy="56" r="18" fill="#6B4C28" stroke="#4A3518" stroke-width="1.5"/>
+    <circle cx="227" cy="55" r="18" fill="#6B4C28" stroke="#4A3518" stroke-width="1.5"/>
+    <circle cx="280" cy="54" r="18" fill="#6B4C28" stroke="#4A3518" stroke-width="1.5"/>
+    <circle cx="333" cy="55" r="18" fill="#6B4C28" stroke="#4A3518" stroke-width="1.5"/>
+    <circle cx="387" cy="56" r="18" fill="#6B4C28" stroke="#4A3518" stroke-width="1.5"/>
+    <circle cx="440" cy="58" r="18" fill="#6B4C28" stroke="#4A3518" stroke-width="1.5"/>
+  </g>
+
+  <!-- Bottom row pits (7, symmetrically centred) -->
+  <g id="bottom-row">
+    <circle cx="120" cy="122" r="18" fill="#6B4C28" stroke="#4A3518" stroke-width="1.5"/>
+    <circle cx="173" cy="124" r="18" fill="#6B4C28" stroke="#4A3518" stroke-width="1.5"/>
+    <circle cx="227" cy="125" r="18" fill="#6B4C28" stroke="#4A3518" stroke-width="1.5"/>
+    <circle cx="280" cy="126" r="18" fill="#6B4C28" stroke="#4A3518" stroke-width="1.5"/>
+    <circle cx="333" cy="125" r="18" fill="#6B4C28" stroke="#4A3518" stroke-width="1.5"/>
+    <circle cx="387" cy="124" r="18" fill="#6B4C28" stroke="#4A3518" stroke-width="1.5"/>
+    <circle cx="440" cy="122" r="18" fill="#6B4C28" stroke="#4A3518" stroke-width="1.5"/>
+  </g>
+
+  <!-- Shells (7 per pit, white/cream cowrie shells, 3-2-2 arrangement) -->
+  <g fill="#F0E8D8" stroke="#C0B090" stroke-width="0.5">
+    <!-- Top row -->
+    <circle cx="113" cy="52" r="3.5"/><circle cx="120" cy="50" r="3.5"/><circle cx="127" cy="52" r="3.5"/>
+    <circle cx="116" cy="59" r="3.5"/><circle cx="124" cy="59" r="3.5"/>
+    <circle cx="116" cy="66" r="3.5"/><circle cx="124" cy="66" r="3.5"/>
+
+    <circle cx="166" cy="50" r="3.5"/><circle cx="173" cy="48" r="3.5"/><circle cx="180" cy="50" r="3.5"/>
+    <circle cx="169" cy="57" r="3.5"/><circle cx="177" cy="57" r="3.5"/>
+    <circle cx="169" cy="64" r="3.5"/><circle cx="177" cy="64" r="3.5"/>
+
+    <circle cx="220" cy="49" r="3.5"/><circle cx="227" cy="47" r="3.5"/><circle cx="234" cy="49" r="3.5"/>
+    <circle cx="223" cy="56" r="3.5"/><circle cx="231" cy="56" r="3.5"/>
+    <circle cx="223" cy="63" r="3.5"/><circle cx="231" cy="63" r="3.5"/>
+
+    <circle cx="273" cy="48" r="3.5"/><circle cx="280" cy="46" r="3.5"/><circle cx="287" cy="48" r="3.5"/>
+    <circle cx="276" cy="55" r="3.5"/><circle cx="284" cy="55" r="3.5"/>
+    <circle cx="276" cy="62" r="3.5"/><circle cx="284" cy="62" r="3.5"/>
+
+    <circle cx="326" cy="49" r="3.5"/><circle cx="333" cy="47" r="3.5"/><circle cx="340" cy="49" r="3.5"/>
+    <circle cx="329" cy="56" r="3.5"/><circle cx="337" cy="56" r="3.5"/>
+    <circle cx="329" cy="63" r="3.5"/><circle cx="337" cy="63" r="3.5"/>
+
+    <circle cx="380" cy="50" r="3.5"/><circle cx="387" cy="48" r="3.5"/><circle cx="394" cy="50" r="3.5"/>
+    <circle cx="383" cy="57" r="3.5"/><circle cx="391" cy="57" r="3.5"/>
+    <circle cx="383" cy="64" r="3.5"/><circle cx="391" cy="64" r="3.5"/>
+
+    <circle cx="433" cy="52" r="3.5"/><circle cx="440" cy="50" r="3.5"/><circle cx="447" cy="52" r="3.5"/>
+    <circle cx="436" cy="59" r="3.5"/><circle cx="444" cy="59" r="3.5"/>
+    <circle cx="436" cy="66" r="3.5"/><circle cx="444" cy="66" r="3.5"/>
+
+    <!-- Bottom row -->
+    <circle cx="113" cy="116" r="3.5"/><circle cx="120" cy="114" r="3.5"/><circle cx="127" cy="116" r="3.5"/>
+    <circle cx="116" cy="123" r="3.5"/><circle cx="124" cy="123" r="3.5"/>
+    <circle cx="116" cy="130" r="3.5"/><circle cx="124" cy="130" r="3.5"/>
+
+    <circle cx="166" cy="118" r="3.5"/><circle cx="173" cy="116" r="3.5"/><circle cx="180" cy="118" r="3.5"/>
+    <circle cx="169" cy="125" r="3.5"/><circle cx="177" cy="125" r="3.5"/>
+    <circle cx="169" cy="132" r="3.5"/><circle cx="177" cy="132" r="3.5"/>
+
+    <circle cx="220" cy="119" r="3.5"/><circle cx="227" cy="117" r="3.5"/><circle cx="234" cy="119" r="3.5"/>
+    <circle cx="223" cy="126" r="3.5"/><circle cx="231" cy="126" r="3.5"/>
+    <circle cx="223" cy="133" r="3.5"/><circle cx="231" cy="133" r="3.5"/>
+
+    <circle cx="273" cy="120" r="3.5"/><circle cx="280" cy="118" r="3.5"/><circle cx="287" cy="120" r="3.5"/>
+    <circle cx="276" cy="127" r="3.5"/><circle cx="284" cy="127" r="3.5"/>
+    <circle cx="276" cy="134" r="3.5"/><circle cx="284" cy="134" r="3.5"/>
+
+    <circle cx="326" cy="119" r="3.5"/><circle cx="333" cy="117" r="3.5"/><circle cx="340" cy="119" r="3.5"/>
+    <circle cx="329" cy="126" r="3.5"/><circle cx="337" cy="126" r="3.5"/>
+    <circle cx="329" cy="133" r="3.5"/><circle cx="337" cy="133" r="3.5"/>
+
+    <circle cx="380" cy="118" r="3.5"/><circle cx="387" cy="116" r="3.5"/><circle cx="394" cy="118" r="3.5"/>
+    <circle cx="383" cy="125" r="3.5"/><circle cx="391" cy="125" r="3.5"/>
+    <circle cx="383" cy="132" r="3.5"/><circle cx="391" cy="132" r="3.5"/>
+
+    <circle cx="433" cy="116" r="3.5"/><circle cx="440" cy="114" r="3.5"/><circle cx="447" cy="116" r="3.5"/>
+    <circle cx="436" cy="123" r="3.5"/><circle cx="444" cy="123" r="3.5"/>
+    <circle cx="436" cy="130" r="3.5"/><circle cx="444" cy="130" r="3.5"/>
+  </g>
+</svg>

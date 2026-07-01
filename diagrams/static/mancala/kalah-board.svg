@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 180" width="520" height="180">
+  <title>Kalah — starting position (2x6 pits + 2 stores, 4 seeds per pit)</title>
+
+  <!-- Wooden board background -->
+  <rect x="10" y="15" width="500" height="150" rx="22" ry="22" fill="#7A5A32"/>
+  <rect x="16" y="21" width="488" height="138" rx="18" ry="18" fill="#9B7740"/>
+
+  <!-- Left store (Player 2's mancala) -->
+  <ellipse cx="52" cy="90" rx="24" ry="50" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+
+  <!-- Right store (Player 1's mancala) -->
+  <ellipse cx="468" cy="90" rx="24" ry="50" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+
+  <!-- Top row pits (Player 2) — centred between stores -->
+  <g id="top-row">
+    <circle cx="115" cy="60" r="22" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+    <circle cx="173" cy="60" r="22" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+    <circle cx="231" cy="60" r="22" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+    <circle cx="289" cy="60" r="22" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+    <circle cx="347" cy="60" r="22" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+    <circle cx="405" cy="60" r="22" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+  </g>
+
+  <!-- Bottom row pits (Player 1) -->
+  <g id="bottom-row">
+    <circle cx="115" cy="120" r="22" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+    <circle cx="173" cy="120" r="22" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+    <circle cx="231" cy="120" r="22" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+    <circle cx="289" cy="120" r="22" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+    <circle cx="347" cy="120" r="22" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+    <circle cx="405" cy="120" r="22" fill="#4E3320" stroke="#3A2515" stroke-width="1.5"/>
+  </g>
+
+  <!-- Seeds (4 per pit) -->
+  <g fill="#C8B898" stroke="#8A7A5A" stroke-width="0.5">
+    <!-- Top row -->
+    <circle cx="108" cy="54" r="4.5"/><circle cx="122" cy="54" r="4.5"/>
+    <circle cx="108" cy="66" r="4.5"/><circle cx="122" cy="66" r="4.5"/>
+    <circle cx="166" cy="54" r="4.5"/><circle cx="180" cy="54" r="4.5"/>
+    <circle cx="166" cy="66" r="4.5"/><circle cx="180" cy="66" r="4.5"/>
+    <circle cx="224" cy="54" r="4.5"/><circle cx="238" cy="54" r="4.5"/>
+    <circle cx="224" cy="66" r="4.5"/><circle cx="238" cy="66" r="4.5"/>
+    <circle cx="282" cy="54" r="4.5"/><circle cx="296" cy="54" r="4.5"/>
+    <circle cx="282" cy="66" r="4.5"/><circle cx="296" cy="66" r="4.5"/>
+    <circle cx="340" cy="54" r="4.5"/><circle cx="354" cy="54" r="4.5"/>
+    <circle cx="340" cy="66" r="4.5"/><circle cx="354" cy="66" r="4.5"/>
+    <circle cx="398" cy="54" r="4.5"/><circle cx="412" cy="54" r="4.5"/>
+    <circle cx="398" cy="66" r="4.5"/><circle cx="412" cy="66" r="4.5"/>
+    <!-- Bottom row -->
+    <circle cx="108" cy="114" r="4.5"/><circle cx="122" cy="114" r="4.5"/>
+    <circle cx="108" cy="126" r="4.5"/><circle cx="122" cy="126" r="4.5"/>
+    <circle cx="166" cy="114" r="4.5"/><circle cx="180" cy="114" r="4.5"/>
+    <circle cx="166" cy="126" r="4.5"/><circle cx="180" cy="126" r="4.5"/>
+    <circle cx="224" cy="114" r="4.5"/><circle cx="238" cy="114" r="4.5"/>
+    <circle cx="224" cy="126" r="4.5"/><circle cx="238" cy="126" r="4.5"/>
+    <circle cx="282" cy="114" r="4.5"/><circle cx="296" cy="114" r="4.5"/>
+    <circle cx="282" cy="126" r="4.5"/><circle cx="296" cy="126" r="4.5"/>
+    <circle cx="340" cy="114" r="4.5"/><circle cx="354" cy="114" r="4.5"/>
+    <circle cx="340" cy="126" r="4.5"/><circle cx="354" cy="126" r="4.5"/>
+    <circle cx="398" cy="114" r="4.5"/><circle cx="412" cy="114" r="4.5"/>
+    <circle cx="398" cy="126" r="4.5"/><circle cx="412" cy="126" r="4.5"/>
+  </g>
+</svg>

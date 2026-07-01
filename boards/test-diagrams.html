@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagram Test — Board Generation</title>
+<style>
+body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #e0e0e0; margin: 0; padding: 24px; }
+h1 { font-size: 20px; margin-bottom: 24px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 24px; }
+.card { background: #16213e; border-radius: 8px; padding: 16px; }
+.card h3 { margin: 0 0 12px; font-size: 14px; color: #6fb5ff; }
+.card .svg-output { background: #fff; border-radius: 4px; padding: 12px; display: flex; align-items: center; justify-content: center; min-height: 200px; }
+.card .svg-output svg { max-width: 100%; height: auto; }
+.card .meta { margin-top: 8px; font-size: 11px; color: #888; font-family: monospace; white-space: pre-wrap; word-break: break-all; }
+</style>
+</head>
+<body>
+<h1>Board Diagram Generator — Visual Test (ported from moddable-chess providers)</h1>
+<div class="grid" id="output"></div>
+
+<script type="module">
+import { renderBoard, fenToPosition } from '../js/board-diagrams.js';
+
+const STANDARD_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+
+const tests = [
+  // Chess boards
+  { title: 'Chess 8×8 (empty)', config: { boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40 } },
+  { title: 'Chess standard (with FEN position)', config: {
+    boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40,
+    position: fenToPosition(STANDARD_FEN, 8, 8),
+    title: 'Standard Chess — starting position',
+  } },
+  { title: 'Capablanca 10×8', config: { boardStyle: 'checkered', rows: 8, cols: 10, tileSize: 36 } },
+
+  // Mono-grid (reversi/othello style)
+  { title: 'Reversi 8×8 (mono-grid)', config: { boardStyle: 'mono-grid', rows: 8, cols: 8, tileSize: 40 } },
+
+  // Go boards
+  { title: 'Go 9×9', config: { boardStyle: 'go', rows: 9, cols: 9, tileSize: 20 } },
+  { title: 'Go 19×19', config: { boardStyle: 'go', rows: 19, cols: 19, tileSize: 20 } },
+  { title: 'Go 9×9 with stones', config: {
+    boardStyle: 'go', rows: 9, cols: 9, tileSize: 20,
+    position: {
+      c7: { type: 'stone', color: 'black' },
+      g7: { type: 'stone', color: 'black' },
+      e5: { type: 'stone', color: 'black' },
+      c3: { type: 'stone', color: 'white' },
+      g3: { type: 'stone', color: 'white' },
+      d6: { type: 'stone', color: 'white' },
+    },
+  } },
+
+  // Xiangqi
+  { title: 'Xiangqi 10×9 (river + palaces)', config: {
+    boardStyle: 'xiangqi', rows: 10, cols: 9, tileSize: 36, river: true,
+  } },
+
+  // Shogi
+  { title: 'Shogi 9×9', config: { boardStyle: 'shogi', rows: 9, cols: 9, tileSize: 36 } },
+
+  // Morris
+  { title: "Nine Men's Morris (3 rings)", config: { boardStyle: 'morris', boardSize: 320, rings: 3 } },
+  { title: "Twelve Men's Morris (diagonals)", config: { boardStyle: 'morris', boardSize: 320, rings: 3, diagonals: true } },
+  { title: "Six Men's Morris (2 rings)", config: { boardStyle: 'morris', boardSize: 260, rings: 2 } },
+
+  // Alquerque / Fanorona
+  { title: 'Alquerque 5×5', config: { boardStyle: 'alquerque', rows: 5, cols: 5, tileSize: 48 } },
+  { title: 'Fanorona 5×9', config: { boardStyle: 'alquerque', rows: 5, cols: 9, tileSize: 48 } },
+
+  // Draughts with pieces
+  { title: 'Draughts 8×8 with men', config: {
+    boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40,
+    position: {
+      b8: { type: 'man', color: 'black' }, d8: { type: 'man', color: 'black' },
+      f8: { type: 'man', color: 'black' }, h8: { type: 'man', color: 'black' },
+      a7: { type: 'man', color: 'black' }, c7: { type: 'man', color: 'black' },
+      a1: { type: 'man', color: 'white' }, c1: { type: 'man', color: 'white' },
+      e1: { type: 'man', color: 'white' }, g1: { type: 'man', color: 'white' },
+      b2: { type: 'man', color: 'white' }, d2: { type: 'man', color: 'white' },
+      d4: { type: 'king', color: 'white' },
+    },
+  } },
+];
+
+const container = document.getElementById('output');
+for (const test of tests) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  const svg = renderBoard(test.config);
+  const meta = JSON.stringify(test.config, null, 0).slice(0, 120);
+  card.innerHTML = `<h3>${test.title}</h3><div class="svg-output">${svg}</div><div class="meta">${meta}...</div>`;
+  container.appendChild(card);
+}
+</script>
+</body>
+</html>

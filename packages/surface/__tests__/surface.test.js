@@ -1,6 +1,6 @@
 import { createBoard, builtinBoards, createBoardRegistry } from '../index.js'
 
-describe('board-layout', () => {
+describe('surface', () => {
   describe('createBoard', () => {
     it('returns dimensions from definition', () => {
       const board = createBoard({ width: 400, height: 300 })

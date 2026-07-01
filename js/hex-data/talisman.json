@@ -1,0 +1,45 @@
+{
+    "id": "talisman",
+    "name": "Talisman Worlds",
+    "description": "Hex adaptation of the Talisman board game",
+    "flat": false,
+    "ringTypes": {
+        "1": "inner",
+        "2": "middle",
+        "3": "river",
+        "4": "outer",
+        "5": "dungeon"
+    },
+    "terrains": {
+        "inner": ["plains", "desert", "ruins", "temple", "glade", "castle"],
+        "middle": ["plains", "desert", "ruins", "oasis", "fields", "runes"],
+        "river": ["river"],
+        "outer": ["plains", "forest", "desert", "ruins", "fields", "treasure"],
+        "dungeon": ["dungeon"],
+        "ending": ["ending"]
+    },
+    "sizes": {
+        "4": { "rings": 4, "players": [2, 3, 4, 5, 6] },
+        "5": { "rings": 5, "players": [2, 3, 4, 5, 6] }
+    },
+    "defaultSize": 4,
+    "colors": {
+        "inner": "#CE93D8",
+        "middle": "#90CAF9",
+        "river": "#42A5F5",
+        "outer": "#A5D6A7",
+        "dungeon": "#616161",
+        "ending": "#FFD700",
+        "plains": "#C8E6C9",
+        "desert": "#FFE0B2",
+        "ruins": "#BCAAA4",
+        "temple": "#E1BEE7",
+        "glade": "#C8E6C9",
+        "castle": "#B0BEC5",
+        "oasis": "#80DEEA",
+        "fields": "#DCEDC8",
+        "runes": "#D1C4E9",
+        "forest": "#388E3C",
+        "treasure": "#FFC107"
+    }
+}
