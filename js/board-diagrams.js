@@ -116,6 +116,15 @@ const go = {
       }
       parts.push('</g>')
     }
+    const GO_LETTERS = 'abcdefghjklmnopqrst'
+    parts.push('<g fill="transparent">')
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const sq = `${GO_LETTERS[c]}${rows - r}`
+        parts.push(`<circle cx="${gx + c * tileSize}" cy="${gy + r * tileSize}" r="${tileSize * 0.45}" class="board-cell" data-sq="${sq}"/>`)
+      }
+    }
+    parts.push('</g>')
     return parts.join('')
   },
 }
@@ -177,9 +186,18 @@ const xiangqi = {
     if (river) {
       const ry1 = gy + 4 * tileSize, ry2 = gy + 5 * tileSize
       const mid = (ry1 + ry2) / 2
-      parts.push(`<text x="${gx + gridW * 0.25}" y="${mid + 5}" text-anchor="middle" font-size="14" font-family="serif" fill="${colors.riverText}">楚 河</text>`)
-      parts.push(`<text x="${gx + gridW * 0.75}" y="${mid + 5}" text-anchor="middle" font-size="14" font-family="serif" fill="${colors.riverText}">漢 界</text>`)
+      parts.push(`<text x="${gx + gridW * 0.25}" y="${mid + 5}" text-anchor="middle" font-size="14" font-family="serif" pointer-events="none" fill="${colors.riverText}">楚 河</text>`)
+      parts.push(`<text x="${gx + gridW * 0.75}" y="${mid + 5}" text-anchor="middle" font-size="14" font-family="serif" pointer-events="none" fill="${colors.riverText}">漢 界</text>`)
     }
+    parts.push('<g fill="transparent">')
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const sq = `${String.fromCharCode(97 + c)}${rows - r}`
+        const ix = gx + c * tileSize, iy = gy + r * tileSize
+        parts.push(`<circle cx="${ix}" cy="${iy}" r="${tileSize * 0.4}" class="board-cell" data-sq="${sq}"/>`)
+      }
+    }
+    parts.push('</g>')
     return parts.join('')
   },
 }
@@ -221,6 +239,14 @@ const shogi = {
       for (const [r, c] of HOSHI_9) parts.push(`<circle cx="${gx + c * tileSize}" cy="${gy + r * tileSize}" r="3"/>`)
       parts.push('</g>')
     }
+    parts.push('<g fill="transparent">')
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const sq = `${String.fromCharCode(97 + c)}${rows - r}`
+        parts.push(`<circle cx="${gx + c * tileSize}" cy="${gy + r * tileSize}" r="${tileSize * 0.4}" class="board-cell" data-sq="${sq}"/>`)
+      }
+    }
+    parts.push('</g>')
     return parts.join('')
   },
 }

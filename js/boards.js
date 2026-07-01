@@ -101,44 +101,46 @@ function glinskiColor(hex, colors) {
   return mod === 0 ? colors.lightHex : mod === 1 ? colors.midHex : colors.darkHex
 }
 
-function glinskiAlgToAxial(alg) {
-  const q = alg.charCodeAt(0) - 97 - 5
-  const rank = parseInt(alg.slice(1))
-  const maxR = Math.min(5, 5 - q)
-  const minRank = q <= 0 ? 1 : q + 1
-  const r = maxR - (rank - minRank)
-  return `${q},${r}`
-}
-
 const GLINSKI_POSITION = (() => {
   const pos = {}
-  const white = { K:'f1', Q:'e1', B1:'d1', B2:'f2', B3:'g2', N1:'c1', N2:'g1', R1:'b1', R2:'h1' }
-  const wPawns = ['b2','c2','d2','e2','f3','g3','h3','i2','j2']
-  const black = { k:'f11', q:'g11', b1:'h11', b2:'f10', b3:'e10', n1:'i11', n2:'e11', r1:'j11', r2:'d11' }
-  const bPawns = ['j10','i10','h10','g10','f9','e9','d9','c10','b10']
-
-  pos[glinskiAlgToAxial(white.K)] = 'K'
-  pos[glinskiAlgToAxial(white.Q)] = 'Q'
-  pos[glinskiAlgToAxial(white.B1)] = 'B'
-  pos[glinskiAlgToAxial(white.B2)] = 'B'
-  pos[glinskiAlgToAxial(white.B3)] = 'B'
-  pos[glinskiAlgToAxial(white.N1)] = 'N'
-  pos[glinskiAlgToAxial(white.N2)] = 'N'
-  pos[glinskiAlgToAxial(white.R1)] = 'R'
-  pos[glinskiAlgToAxial(white.R2)] = 'R'
-  for (const sq of wPawns) pos[glinskiAlgToAxial(sq)] = 'P'
-
-  pos[glinskiAlgToAxial(black.k)] = 'k'
-  pos[glinskiAlgToAxial(black.q)] = 'q'
-  pos[glinskiAlgToAxial(black.b1)] = 'b'
-  pos[glinskiAlgToAxial(black.b2)] = 'b'
-  pos[glinskiAlgToAxial(black.b3)] = 'b'
-  pos[glinskiAlgToAxial(black.n1)] = 'n'
-  pos[glinskiAlgToAxial(black.n2)] = 'n'
-  pos[glinskiAlgToAxial(black.r1)] = 'r'
-  pos[glinskiAlgToAxial(black.r2)] = 'r'
-  for (const sq of bPawns) pos[glinskiAlgToAxial(sq)] = 'p'
-
+  // White pieces (bottom, positive r region)
+  pos['0,5'] = 'K'       // f1 — King
+  pos['-1,5'] = 'Q'      // e1 — Queen
+  pos['-2,5'] = 'B'      // d1 — Bishop
+  pos['0,4'] = 'B'       // f2 — Bishop
+  pos['1,3'] = 'B'       // g2 — Bishop
+  pos['-3,5'] = 'N'      // c1 — Knight
+  pos['1,4'] = 'N'       // g1 — Knight
+  pos['-4,5'] = 'R'      // b1 — Rook
+  pos['2,3'] = 'R'       // h1 — Rook
+  pos['-4,4'] = 'P'      // b2
+  pos['-3,4'] = 'P'      // c2
+  pos['-2,4'] = 'P'      // d2
+  pos['-1,4'] = 'P'      // e2
+  pos['0,3'] = 'P'       // f3
+  pos['1,2'] = 'P'       // g3
+  pos['2,1'] = 'P'       // h3
+  pos['3,1'] = 'P'       // i2
+  pos['4,0'] = 'P'       // j2
+  // Black pieces (top, mirrored: negate both q and r)
+  pos['0,-5'] = 'k'      // King
+  pos['1,-5'] = 'q'      // Queen
+  pos['2,-5'] = 'b'      // Bishop
+  pos['0,-4'] = 'b'      // Bishop
+  pos['-1,-3'] = 'b'     // Bishop
+  pos['3,-5'] = 'n'      // Knight
+  pos['-1,-4'] = 'n'     // Knight
+  pos['4,-5'] = 'r'      // Rook
+  pos['-2,-3'] = 'r'     // Rook
+  pos['4,-4'] = 'p'
+  pos['3,-4'] = 'p'
+  pos['2,-4'] = 'p'
+  pos['1,-4'] = 'p'
+  pos['0,-3'] = 'p'
+  pos['-1,-2'] = 'p'
+  pos['-2,-1'] = 'p'
+  pos['-3,-1'] = 'p'
+  pos['-4,0'] = 'p'
   return pos
 })()
 
@@ -933,7 +935,7 @@ function bindBoardHover(config) {
   const infoBar = document.getElementById('hex-info-bar')
   const svgContainer = document.getElementById('board-svg')
   infoBar.classList.add('active')
-  infoBar.textContent = 'Hover over a square'
+  infoBar.textContent = 'Hover over a cell'
 
   const position = config.position || {}
   const PIECE_NAMES = {
@@ -963,7 +965,7 @@ function bindBoardHover(config) {
   })
 
   svgContainer.addEventListener('mouseleave', () => {
-    infoBar.textContent = 'Hover over a square'
+    infoBar.textContent = 'Hover over a cell'
   })
 }
 
