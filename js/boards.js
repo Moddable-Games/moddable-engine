@@ -103,44 +103,19 @@ function glinskiColor(hex, colors) {
 
 const GLINSKI_POSITION = (() => {
   const pos = {}
-  // White pieces (bottom, positive r region)
-  pos['0,5'] = 'K'       // f1 — King
-  pos['-1,5'] = 'Q'      // e1 — Queen
-  pos['-2,5'] = 'B'      // d1 — Bishop
-  pos['0,4'] = 'B'       // f2 — Bishop
-  pos['1,3'] = 'B'       // g2 — Bishop
-  pos['-3,5'] = 'N'      // c1 — Knight
-  pos['1,4'] = 'N'       // g1 — Knight
-  pos['-4,5'] = 'R'      // b1 — Rook
-  pos['2,3'] = 'R'       // h1 — Rook
-  pos['-4,4'] = 'P'      // b2
-  pos['-3,4'] = 'P'      // c2
-  pos['-2,4'] = 'P'      // d2
-  pos['-1,4'] = 'P'      // e2
-  pos['0,3'] = 'P'       // f3
-  pos['1,2'] = 'P'       // g3
-  pos['2,1'] = 'P'       // h3
-  pos['3,1'] = 'P'       // i2
-  pos['4,0'] = 'P'       // j2
-  // Black pieces (top, mirrored: negate both q and r)
-  pos['0,-5'] = 'k'      // King
-  pos['1,-5'] = 'q'      // Queen
-  pos['2,-5'] = 'b'      // Bishop
-  pos['0,-4'] = 'b'      // Bishop
-  pos['-1,-3'] = 'b'     // Bishop
-  pos['3,-5'] = 'n'      // Knight
-  pos['-1,-4'] = 'n'     // Knight
-  pos['4,-5'] = 'r'      // Rook
-  pos['-2,-3'] = 'r'     // Rook
-  pos['4,-4'] = 'p'
-  pos['3,-4'] = 'p'
-  pos['2,-4'] = 'p'
-  pos['1,-4'] = 'p'
-  pos['0,-3'] = 'p'
-  pos['-1,-2'] = 'p'
-  pos['-2,-1'] = 'p'
-  pos['-3,-1'] = 'p'
-  pos['-4,0'] = 'p'
+  // White pieces — axial coords, flat-top, radius 5. Bottom = positive r.
+  const white = [
+    ['K', 0, 5], ['Q', -1, 5],
+    ['B', -2, 5], ['B', 0, 4], ['B', 1, 3],
+    ['N', -3, 5], ['N', 1, 4],
+    ['R', -4, 5], ['R', 2, 3],
+    ['P', -4, 4], ['P', -3, 4], ['P', -2, 4], ['P', -1, 4],
+    ['P', 0, 3], ['P', 1, 2], ['P', 2, 1], ['P', 3, 1], ['P', 4, 0],
+  ]
+  // Black pieces — exact mirror of white (negate q and r)
+  const black = white.map(([p, q, r]) => [p.toLowerCase(), -q, -r])
+  for (const [p, q, r] of white) pos[`${q},${r}`] = p
+  for (const [p, q, r] of black) pos[`${q},${r}`] = p
   return pos
 })()
 
