@@ -529,28 +529,31 @@ const mancala = {
     const storeRy = opts.storeRy || 50
     const boardShape = opts.boardShape || 'rect'
     const rx = opts.cornerRadius || 22
-    const padEdge = opts.padEdge || pitRadius * 1.5
+    const pad = opts.padEdge || pitRadius * 1.65
+
+    const frameInset = 16
+    const interRow = pitRadius * 2.4
+    const divGap = boardRows === 4 ? pitRadius * 2.7 : 0
+
+    const contentH = boardRows === 4
+      ? interRow * 2 + divGap
+      : interRow * (boardRows - 1)
+    const boardH = contentH + pad * 2 + frameInset * 2
 
     const storeWidth = hasStores ? storeRx * 2 + 16 : 0
     const pitsAreaWidth = pitsPerSide * (pitRadius * 2 + 10)
-    const boardW = storeWidth * 2 + pitsAreaWidth + padEdge * 2
-    const interRow = pitRadius * 2.4
-    const divGap = boardRows === 4 ? pitRadius * 2.7 : 0
-    const rowsHeight = boardRows === 4
-      ? interRow * 2 + divGap + padEdge * 2
-      : interRow * (boardRows - 1) + padEdge * 2
-    const boardH = rowsHeight + 50
+    const boardW = storeWidth * 2 + pitsAreaWidth + pad * 2 + frameInset * 2
 
-    return { boardW, boardH, pitsPerSide, hasStores, boardRows, pitRadius, storeRx, storeRy, boardShape, storeWidth, rx, padEdge }
+    return { boardW, boardH, pitsPerSide, hasStores, boardRows, pitRadius, storeRx, storeRy, boardShape, storeWidth, rx, pad, frameInset, interRow, divGap }
   },
   render(ctx) {
     const { colors, opts } = ctx
     const layout = this.computeLayout(opts)
-    const { pitsPerSide, hasStores, boardRows, pitRadius, storeRx, storeRy, boardShape, boardW, boardH, storeWidth, rx, padEdge } = layout
+    const { pitsPerSide, hasStores, boardRows, pitRadius, storeRx, storeRy, boardShape, boardW, boardH, storeWidth, rx, pad, frameInset, interRow, divGap } = layout
     const parts = []
 
-    const bx = 10, by = 15
-    const bw = boardW - 20, bh = boardH - 30
+    const bx = frameInset / 2, by = frameInset / 2
+    const bw = boardW - frameInset, bh = boardH - frameInset
 
     if (boardShape === 'ellipse') {
       parts.push(`<ellipse cx="${boardW / 2}" cy="${boardH / 2}" rx="${bw / 2}" ry="${bh / 2}" fill="${colors.boardOuter}"/>`)
@@ -566,14 +569,14 @@ const mancala = {
 
     if (hasStores) {
       const storeCy = boardH / 2
-      const leftX = bx + storeWidth / 2 + 4
-      const rightX = boardW - bx - storeWidth / 2 - 4
+      const leftX = frameInset + storeWidth / 2
+      const rightX = boardW - frameInset - storeWidth / 2
       parts.push(`<ellipse cx="${leftX}" cy="${storeCy}" rx="${storeRx}" ry="${storeRy}" fill="${colors.pit}" stroke="${colors.pitStroke}" stroke-width="1.5" class="board-cell" data-sq="store-1"/>`)
       parts.push(`<ellipse cx="${rightX}" cy="${storeCy}" rx="${storeRx}" ry="${storeRy}" fill="${colors.pit}" stroke="${colors.pitStroke}" stroke-width="1.5" class="board-cell" data-sq="store-0"/>`)
     }
 
-    const pitsLeftEdge = bx + (hasStores ? storeWidth : 0) + padEdge
-    const pitsRightEdge = boardW - bx - (hasStores ? storeWidth : 0) - padEdge
+    const pitsLeftEdge = frameInset + (hasStores ? storeWidth : 0) + pad
+    const pitsRightEdge = boardW - frameInset - (hasStores ? storeWidth : 0) - pad
     const pitsAvailWidth = pitsRightEdge - pitsLeftEdge
     const pitSpacing = pitsPerSide > 1 ? pitsAvailWidth / (pitsPerSide - 1) : 0
 
@@ -583,22 +586,17 @@ const mancala = {
     const markerSet = new Set(markers)
     const pitCurve = opts.pitCurve || 0
 
+    const topPitCenter = frameInset + pad
+    const botPitCenter = boardH - frameInset - pad
     const rowCenters = []
-    const innerTop = by + 6 + padEdge
-    const innerBot = boardH - by - 6 - padEdge
     if (boardRows === 2) {
-      rowCenters.push(innerTop, innerBot)
+      rowCenters.push(topPitCenter, botPitCenter)
     } else if (boardRows === 4) {
-      const totalInner = innerBot - innerTop
-      const interRow = pitRadius * 2.4
-      const divGap = pitRadius * 2.7
-      const usedHeight = interRow * 2 + divGap
-      const offset = (totalInner - usedHeight) / 2
       rowCenters.push(
-        innerTop + offset,
-        innerTop + offset + interRow,
-        innerTop + offset + interRow + divGap,
-        innerTop + offset + interRow * 2 + divGap
+        topPitCenter,
+        topPitCenter + interRow,
+        botPitCenter - interRow,
+        botPitCenter
       )
     }
 
