@@ -97,8 +97,7 @@ function buildCrossMap(castles) {
 const PACHISI_CASTLES = [[0, 9], [3, 8], [3, 10], [8, 3], [8, 15], [9, 0], [9, 18], [10, 3], [10, 15], [15, 8], [15, 10], [18, 9]]
 const PACHISI_MAP = buildCrossMap(PACHISI_CASTLES)
 
-const CHAUPAR_CASTLES = [[0, 9], [3, 8], [3, 10], [8, 3], [8, 15], [9, 0], [9, 18], [10, 3], [10, 15], [15, 8], [15, 10], [18, 9]]
-const CHAUPAR_MAP = buildCrossMap(CHAUPAR_CASTLES)
+const CHAUPAR_MAP = buildCrossMap([])
 
 const PACHISI_COLORS = {
   floor: '#f0d5a0', floorStroke: '#8b6545',
@@ -109,7 +108,6 @@ const PACHISI_COLORS = {
 
 const CHAUPAR_COLORS = {
   floor: '#d4d8f0', floorStroke: '#2d3a8c',
-  castle: '#4a5ab8', castleStroke: '#2d3a8c', castleX: '#e8ecff',
   home: '#1a1a6b', homeStroke: '#12124a',
   voidFill: 'transparent',
 }
@@ -1071,6 +1069,7 @@ function bindBoardHover(config) {
   infoBar.textContent = 'Hover over a cell'
 
   const position = config.position || config.hexPosition || {}
+  const parsedSetup = config.parsedSetup || null
   const PIECE_NAMES = {
     K: 'King', Q: 'Queen', R: 'Rook', B: 'Bishop', N: 'Knight', P: 'Pawn',
     k: 'King', q: 'Queen', r: 'Rook', b: 'Bishop', n: 'Knight', p: 'Pawn',
@@ -1078,6 +1077,7 @@ function bindBoardHover(config) {
     M: 'Amazon', m: 'Amazon', E: 'Elephant', e: 'Elephant',
     F: 'Ferz', f: 'Ferz', S: 'Silver', s: 'Silver', G: 'Gold', g: 'Gold',
     L: 'Lance', l: 'Lance', H: 'Horse', h: 'Horse',
+    man: 'Man', king: 'King', stone: 'Stone', piece: 'Disc',
   }
 
   svgContainer.addEventListener('mouseover', e => {
@@ -1093,6 +1093,23 @@ function bindBoardHover(config) {
       const color = p.color ? p.color : (p.type === p.type.toUpperCase() ? 'White' : 'Black')
       const name = PIECE_NAMES[p.type] || p.type
       text += ` — ${color} ${name}`
+    }
+    if (parsedSetup && sq.startsWith('pit-')) {
+      const idx = parseInt(sq.slice(4), 10)
+      const count = parsedSetup.pits ? (parsedSetup.pits[idx] || 0) : 0
+      text = `Pit ${idx + 1} — ${count} seed${count !== 1 ? 's' : ''}`
+    } else if (parsedSetup && sq.startsWith('store-')) {
+      const idx = parseInt(sq.slice(6), 10)
+      const count = parsedSetup.stores ? (parsedSetup.stores[idx] || 0) : 0
+      text = `Store ${idx + 1} — ${count} seed${count !== 1 ? 's' : ''}`
+    } else if (parsedSetup && sq.startsWith('point-')) {
+      const idx = parseInt(sq.slice(6), 10) - 1
+      const dark = parsedSetup.dark ? (parsedSetup.dark[idx] || 0) : 0
+      const light = parsedSetup.light ? (parsedSetup.light[idx] || 0) : 0
+      text = `Point ${idx + 1}`
+      if (dark > 0) text += ` — ${dark} dark`
+      if (light > 0) text += ` — ${light} light`
+      if (!dark && !light) text += ' — empty'
     }
     infoBar.textContent = text
   })

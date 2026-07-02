@@ -85,6 +85,12 @@ const monoGrid = {
       const y = oy + r * tileSize
       parts.push(`<line x1="${ox}" y1="${y}" x2="${ox + bw}" y2="${y}" stroke="${colors.gridLine}" stroke-width="1.5"/>`)
     }
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const sq = String.fromCharCode(97 + c) + (rows - r)
+        parts.push(`<rect x="${ox + c * tileSize}" y="${oy + r * tileSize}" width="${tileSize}" height="${tileSize}" fill="transparent" data-sq="${sq}" class="board-cell"/>`)
+      }
+    }
     return parts.join('')
   },
 }
@@ -401,7 +407,12 @@ const morris = {
     parts.push('</g>')
     const points = computePoints(ringRects, midpoints, cx, cy, rings)
     parts.push(`<g fill="${colors.point}">`)
-    for (const p of points) parts.push(`<circle cx="${p.x}" cy="${p.y}" r="${pointRadius}"/>`)
+    for (let i = 0; i < points.length; i++) {
+      const p = points[i]
+      const sq = `n${i + 1}`
+      parts.push(`<circle cx="${p.x}" cy="${p.y}" r="${pointRadius}"/>`)
+      parts.push(`<circle cx="${p.x}" cy="${p.y}" r="${pointRadius * 2}" fill="transparent" class="board-cell" data-sq="${sq}" data-type="node"/>`)
+    }
     parts.push('</g>')
     return parts.join('')
   },
@@ -466,7 +477,9 @@ const alquerque = {
     }
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
+        const sq = String.fromCharCode(97 + c) + (rows - r)
         parts.push(`<circle cx="${gx + c * tileSize}" cy="${gy + r * tileSize}" r="3" fill="${colors.gridLine}"/>`)
+        parts.push(`<circle cx="${gx + c * tileSize}" cy="${gy + r * tileSize}" r="${tileSize * 0.4}" fill="transparent" class="board-cell" data-sq="${sq}"/>`)
       }
     }
     return parts.join('')
