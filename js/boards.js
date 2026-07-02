@@ -319,14 +319,14 @@ const GAMES = {
     label: 'Mancala',
     pieceSet: null,
     variants: {
-      kalah: { label: 'Kalah', static: true },
-      oware: { label: 'Oware', static: true },
-      bao: { label: 'Bao', static: true },
-      congkak: { label: 'Congkak', static: true },
-      ayo: { label: 'Ayo', static: true },
-      pallanguzhi: { label: 'Pallanguzhi', static: true },
-      sungka: { label: 'Sungka', static: true },
-      'toguz-korgool': { label: 'Toguz Korgool', static: true },
+      kalah: { label: 'Kalah', boardStyle: 'mancala', pitsPerSide: 6, seedsPerPit: 4, hasStores: true, pitRadius: 22, storeRx: 24, storeRy: 50, pitSpacing: 58, colors: { boardOuter: '#7A5A32', boardInner: '#9B7740', pit: '#4E3320', pitStroke: '#3A2515', seed: '#C8B898', seedStroke: '#8A7A5A' }, setupDesc: '6 pits per side, 4 seeds each, 2 stores', variantDesc: 'Landing in own store grants extra turn. Capture opposite pit when landing in own empty pit.', setup: '4,4,4,4,4,4;0;4,4,4,4,4,4;0' },
+      oware: { label: 'Oware', boardStyle: 'mancala', pitsPerSide: 6, seedsPerPit: 4, hasStores: false, pitRadius: 24, pitSpacing: 66, colors: { boardOuter: '#7A5A32', boardInner: '#9B7740', pit: '#4E3320', pitStroke: '#3A2515', seed: '#C8B898', seedStroke: '#8A7A5A' }, setupDesc: '6 pits per side, 4 seeds each, no stores', variantDesc: 'Capture seeds from opponent side when sowing ends in pit with 2 or 3 seeds. No extra turns.', setup: '4,4,4,4,4,4;0;4,4,4,4,4,4;0' },
+      bao: { label: 'Bao', boardStyle: 'mancala', pitsPerSide: 8, seedsPerPit: 2, hasStores: false, boardRows: 4, pitRadius: 20, pitSpacing: 66, markers: [3, 19], colors: { boardOuter: '#6B4C28', boardInner: '#8A6538', pit: '#3E2410', pitStroke: '#2A1808', seed: '#C8B898', seedStroke: '#8A7A5A', marker: '#C49040' }, cornerRadius: 18, setupDesc: '4×8 board, 2 seeds in front rows only, nyumba pits marked', variantDesc: 'Multi-phase: placement then sowing. Capture by landing in occupied front-row pit. Nyumba is special reserve.', setup: '0,0,0,0,0,0,0,0;0;2,2,2,2,2,2,2,2;0' },
+      congkak: { label: 'Congkak', boardStyle: 'mancala', pitsPerSide: 7, seedsPerPit: 7, hasStores: true, boardShape: 'ellipse', pitRadius: 18, storeRx: 20, storeRy: 38, pitSpacing: 53, pitCurve: 4, colors: { boardOuter: '#7A5A32', boardInner: '#9B7740', pit: '#4E3320', pitStroke: '#3A2515', seed: '#C8B898', seedStroke: '#8A7A5A' }, setupDesc: '7 pits per side, 7 seeds each, 2 stores, boat-shaped board', variantDesc: 'Sow counter-clockwise. Capture when last seed lands in empty own pit with seeds opposite.', setup: '7,7,7,7,7,7,7;0;7,7,7,7,7,7,7;0' },
+      ayo: { label: 'Ayo', boardStyle: 'mancala', pitsPerSide: 6, seedsPerPit: 4, hasStores: false, pitRadius: 24, pitSpacing: 66, colors: { boardOuter: '#5C3D1E', boardInner: '#7B5530', pit: '#3A2210', pitStroke: '#2A1808', seed: '#D4A060', seedStroke: '#A07030', border: '#4A3018' }, setupDesc: '6 pits per side, 4 seeds each, no stores', variantDesc: 'Yoruba variant. Relay sowing: if last seed makes pit 2+, pick up and continue. Capture at 1.', setup: '4,4,4,4,4,4;0;4,4,4,4,4,4;0' },
+      pallanguzhi: { label: 'Pallanguzhi', boardStyle: 'mancala', pitsPerSide: 7, seedsPerPit: 12, hasStores: false, pitRadius: 22, pitSpacing: 66, cornerRadius: 20, colors: { boardOuter: '#5C2E1A', boardInner: '#7A4030', pit: '#3A1808', pitStroke: '#2A1008', seed: '#D4A060', seedStroke: '#A07030', border: '#4A2018', borderDash: '8,4' }, setupDesc: '7 pits per side, 12 cowrie shells each, no stores', variantDesc: 'Tamil variant. Relay sowing with 12 shells per pit. Multiple rounds with pit elimination.', setup: '12,12,12,12,12,12,12;0;12,12,12,12,12,12,12;0' },
+      sungka: { label: 'Sungka', boardStyle: 'mancala', pitsPerSide: 7, seedsPerPit: 7, hasStores: true, boardShape: 'ellipse', pitRadius: 18, storeRx: 20, storeRy: 38, pitSpacing: 53, pitCurve: 4, colors: { boardOuter: '#A08050', boardInner: '#C4A060', pit: '#6B4C28', pitStroke: '#4A3518', seed: '#F0E8D8', seedStroke: '#C0B090' }, setupDesc: '7 pits per side, 7 shells each, 2 stores, boat-shaped board', variantDesc: 'Filipino variant. Simultaneous first move. Relay sowing. Skip opponent store.', setup: '7,7,7,7,7,7,7;0;7,7,7,7,7,7,7;0' },
+      'toguz-korgool': { label: 'Toguz Korgool', boardStyle: 'mancala', pitsPerSide: 9, seedsPerPit: 9, hasStores: true, storeRx: 22, storeRy: 48, pitRadius: 20, pitSpacing: 55, cornerRadius: 20, colors: { boardOuter: '#6B4C28', boardInner: '#8A6538', pit: '#3E2410', pitStroke: '#2A1808', seed: '#C8B898', seedStroke: '#8A7A5A' }, setupDesc: '9 pits per side, 9 seeds each, 2 kazans', variantDesc: 'Kazakh variant. Capture pit with 3 seeds (becomes your tuzdyk). Only one tuzdyk allowed.', setup: '9,9,9,9,9,9,9,9,9;0;9,9,9,9,9,9,9,9,9;0' },
     },
   },
   halma: {
@@ -504,6 +504,29 @@ const DRAUGHTS_VOCABULARY = {
   b: { type: 'man', color: 'black' },
   W: { type: 'king', color: 'white' },
   B: { type: 'king', color: 'black' },
+}
+
+function parseMancalaSetup(notation, pitsPerSide, boardRows) {
+  const sections = notation.split(';')
+  const players = boardRows === 4 ? 2 : 2
+  const pitsPerPlayer = pitsPerSide * (boardRows / 2)
+  const pits = new Array(pitsPerPlayer * players).fill(0)
+  const stores = [0, 0]
+  let sectionIdx = 0
+  for (let p = 0; p < players; p++) {
+    if (sectionIdx < sections.length) {
+      const vals = sections[sectionIdx].split(',').map(s => parseInt(s.trim(), 10) || 0)
+      for (let i = 0; i < vals.length && i < pitsPerPlayer; i++) {
+        pits[p * pitsPerPlayer + i] = vals[i]
+      }
+      sectionIdx++
+    }
+    if (sectionIdx < sections.length) {
+      stores[p] = parseInt(sections[sectionIdx].trim(), 10) || 0
+      sectionIdx++
+    }
+  }
+  return { pits, stores }
 }
 
 function buildDraughtsFenFromSetup(rows, cols, setup) {
@@ -832,8 +855,14 @@ function render() {
   }
 
   // Build position from draughts-vocabulary FEN (setup notation spec)
-  if (config.setup) {
+  // Mancala handles seeds internally via its provider
+  if (config.setup && config.boardStyle !== 'mancala') {
     config.position = parseDraughtsFen(config.setup, config.rows, config.cols)
+  }
+
+  // Parse mancala setup into pit seed counts for the provider
+  if (config.setup && config.boardStyle === 'mancala') {
+    config.parsedSetup = parseMancalaSetup(config.setup, config.pitsPerSide, config.boardRows || 2)
   }
 
   // Build draughts position (legacy — will be replaced by setup FEN)
