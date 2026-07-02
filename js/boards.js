@@ -103,17 +103,20 @@ function glinskiColor(hex, colors) {
 
 const GLINSKI_POSITION = (() => {
   const pos = {}
-  // White pieces — axial coords, flat-top, radius 5. Bottom = positive r.
+  // Axial coords (q, r) for flat-top radius-5 hex board.
+  // Formula: r = 6 - rank - max(0, q). Center f6 = (0,0).
+  // Rooks c1/i1, Knights d1/h1, Bishops f1/f2/f3 (one per hex colour).
+  // Pawns arc: ranks 1,2,3,4,5,4,3,2,1 on files b-k.
   const white = [
-    ['K', 0, 5], ['Q', -1, 5],
-    ['B', -2, 5], ['B', 0, 4], ['B', 1, 3],
-    ['N', -3, 5], ['N', 1, 4],
-    ['R', -4, 5], ['R', 2, 3],
-    ['P', -4, 4], ['P', -3, 4], ['P', -2, 4], ['P', -1, 4],
-    ['P', 0, 3], ['P', 1, 2], ['P', 2, 1], ['P', 3, 1], ['P', 4, 0],
+    ['K', 1, 4], ['Q', -1, 5],
+    ['B', 0, 5], ['B', 0, 4], ['B', 0, 3],
+    ['N', -2, 5], ['N', 2, 3],
+    ['R', -3, 5], ['R', 3, 2],
+    ['P', -4, 5], ['P', -3, 4], ['P', -2, 3], ['P', -1, 2],
+    ['P', 0, 1], ['P', 1, 1], ['P', 2, 1], ['P', 3, 1], ['P', 4, 1],
   ]
-  // Black pieces — exact mirror of white (negate q and r)
-  const black = white.map(([p, q, r]) => [p.toLowerCase(), -q, -r])
+  // Black mirror: same file, opposite back rank. Transform: (q, r) → (q, -r-q)
+  const black = white.map(([p, q, r]) => [p.toLowerCase(), q, -r - q])
   for (const [p, q, r] of white) pos[`${q},${r}`] = p
   for (const [p, q, r] of black) pos[`${q},${r}`] = p
   return pos
@@ -912,7 +915,7 @@ function bindBoardHover(config) {
   infoBar.classList.add('active')
   infoBar.textContent = 'Hover over a cell'
 
-  const position = config.position || {}
+  const position = config.position || config.hexPosition || {}
   const PIECE_NAMES = {
     K: 'King', Q: 'Queen', R: 'Rook', B: 'Bishop', N: 'Knight', P: 'Pawn',
     k: 'King', q: 'Queen', r: 'Rook', b: 'Bishop', n: 'Knight', p: 'Pawn',
