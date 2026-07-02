@@ -538,11 +538,13 @@ const mancala = {
     const contentH = boardRows === 4
       ? interRow * 2 + divGap
       : interRow * (boardRows - 1)
-    const boardH = contentH + pad * 2 + frameInset * 2
+    const ellipseExtraV = boardShape === 'ellipse' ? pitRadius * 1.5 : 0
+    const boardH = contentH + pad * 2 + frameInset * 2 + ellipseExtraV
 
     const storeWidth = hasStores ? storeRx * 2 + 16 : 0
     const pitsAreaWidth = pitsPerSide * (pitRadius * 2 + 10)
-    const boardW = storeWidth * 2 + pitsAreaWidth + pad * 2 + frameInset * 2
+    const ellipseExtra = boardShape === 'ellipse' ? pitRadius * 3 : 0
+    const boardW = storeWidth * 2 + pitsAreaWidth + pad * 2 + frameInset * 2 + ellipseExtra
 
     return { boardW, boardH, pitsPerSide, hasStores, boardRows, pitRadius, storeRx, storeRy, boardShape, storeWidth, rx, pad, frameInset, interRow, divGap }
   },
