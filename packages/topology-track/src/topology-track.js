@@ -319,6 +319,112 @@ export function createTrackTopology(config) {
     }
   }
 
+  function serializePosition(cellStates, vocabulary) {
+    const symbolMap = buildTrackSymbolMap(vocabulary)
+    const parts = []
+
+    for (const name of getAll()) {
+      const cell = cellStates[name] || (cellStates.get ? cellStates.get(name) : null)
+      if (cell === null || cell === undefined) continue
+      const idx = getIndex(name)
+      if (Array.isArray(cell)) {
+        for (const piece of cell) {
+          const existing = parts.find(p => p.idx === idx && p.symbol === symbolMap.toSymbol(piece))
+          if (existing) existing.count++
+          else parts.push({ idx, symbol: symbolMap.toSymbol(piece), count: 1 })
+        }
+      } else if (cell.count !== undefined) {
+        parts.push({ idx, symbol: symbolMap.toSymbol(cell), count: cell.count })
+      } else {
+        parts.push({ idx, symbol: symbolMap.toSymbol(cell), count: 1 })
+      }
+    }
+
+    const specials = cellStates.bar || cellStates.home || null
+    if (cellStates.bar) {
+      for (const piece of (Array.isArray(cellStates.bar) ? cellStates.bar : [cellStates.bar])) {
+        const sym = symbolMap.toSymbol(piece)
+        const existing = parts.find(p => p.idx === 'bar' && p.symbol === sym)
+        if (existing) existing.count++
+        else parts.push({ idx: 'bar', symbol: sym, count: 1 })
+      }
+    }
+    if (cellStates.home) {
+      for (const piece of (Array.isArray(cellStates.home) ? cellStates.home : [cellStates.home])) {
+        const sym = symbolMap.toSymbol(piece)
+        const existing = parts.find(p => p.idx === 'home' && p.symbol === sym)
+        if (existing) existing.count++
+        else parts.push({ idx: 'home', symbol: sym, count: 1 })
+      }
+    }
+
+    return parts.map(p => `${p.idx}:${p.count}${p.symbol}`).join(',')
+  }
+
+  function parsePosition(notation, vocabulary) {
+    const symbolMap = buildTrackSymbolMap(vocabulary)
+    const cellStates = {}
+
+    if (!notation || notation === 'empty') return cellStates
+
+    for (const part of notation.split(',')) {
+      const match = part.trim().match(/^([^:]+):(\d+)([A-Za-z]+)$/)
+      if (!match) continue
+      const [, posKey, countStr, symbol] = match
+      const count = parseInt(countStr, 10)
+      const piece = symbolMap.fromSymbol(symbol)
+      if (!piece) continue
+
+      const key = (posKey === 'bar' || posKey === 'home') ? posKey : parseInt(posKey, 10)
+
+      if (typeof key === 'number') {
+        const name = getName(key)
+        if (!name) continue
+        if (!cellStates[name]) cellStates[name] = []
+        for (let i = 0; i < count; i++) cellStates[name].push({ ...piece })
+      } else {
+        if (!cellStates[key]) cellStates[key] = []
+        for (let i = 0; i < count; i++) cellStates[key].push({ ...piece })
+      }
+    }
+
+    return cellStates
+  }
+
+  function buildTrackSymbolMap(vocabulary) {
+    const toSym = new Map()
+    const fromSym = new Map()
+
+    if (!vocabulary) {
+      return {
+        toSymbol: (cell) => cell.symbol || '?',
+        fromSymbol: (ch) => ({ symbol: ch }),
+      }
+    }
+
+    for (const [type, def] of Object.entries(vocabulary)) {
+      if (def.symbols) {
+        for (const [owner, symbol] of Object.entries(def.symbols)) {
+          if (owner === 'count') continue
+          const ownerKey = /^\d+$/.test(owner) ? parseInt(owner, 10) : owner
+          toSym.set(`${type}.${ownerKey}`, symbol)
+          fromSym.set(symbol, { type, owner: ownerKey })
+        }
+      }
+    }
+
+    return {
+      toSymbol(cell) {
+        if (typeof cell === 'string') return cell
+        const key = `${cell.type}.${cell.owner}`
+        return toSym.get(key) || '?'
+      },
+      fromSymbol(ch) {
+        return fromSym.get(ch) || null
+      },
+    }
+  }
+
   return {
     isValid,
     getIndex,
@@ -336,5 +442,7 @@ export function createTrackTopology(config) {
     fromJSON,
     isCircuit,
     getLayout,
+    serializePosition,
+    parsePosition,
   }
 }

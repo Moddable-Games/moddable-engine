@@ -142,4 +142,67 @@ describe('topology-pit', () => {
       expect(pit.getPlayerPits(1)).toEqual([8, 9, 10, 11, 12, 13, 14, 15])
     })
   })
+
+  describe('position notation', () => {
+    const pit = createPitTopology({ pitsPerSide: 6 })
+
+    describe('parsePosition()', () => {
+      it('parses standard Kalah setup (4 seeds per pit)', () => {
+        const result = pit.parsePosition('4,4,4,4,4,4;0;4,4,4,4,4,4;0')
+        expect(result.pits).toEqual([4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4])
+        expect(result.stores).toEqual([0, 0])
+      })
+
+      it('parses mid-game position', () => {
+        const result = pit.parsePosition('0,5,5,5,5,1;10;0,4,4,4,4,0;5')
+        expect(result.pits).toEqual([0, 5, 5, 5, 5, 1, 0, 4, 4, 4, 4, 0])
+        expect(result.stores).toEqual([10, 5])
+      })
+
+      it('parses empty notation', () => {
+        const result = pit.parsePosition('empty')
+        expect(result.pits).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+        expect(result.stores).toEqual([0, 0])
+      })
+
+      it('parses null notation', () => {
+        const result = pit.parsePosition(null)
+        expect(result.pits).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+        expect(result.stores).toEqual([0, 0])
+      })
+
+      it('handles Toguz Korgool (9 pits)', () => {
+        const big = createPitTopology({ pitsPerSide: 9 })
+        const result = big.parsePosition('9,9,9,9,9,9,9,9,9;0;9,9,9,9,9,9,9,9,9;0')
+        expect(result.pits).toHaveLength(18)
+        expect(result.pits.every(s => s === 9)).toBe(true)
+        expect(result.stores).toEqual([0, 0])
+      })
+    })
+
+    describe('serializePosition()', () => {
+      it('serializes standard Kalah opening', () => {
+        const state = new Array(14).fill(0)
+        for (let i = 0; i < 6; i++) { state[i] = 4; state[i + 6] = 4 }
+        // stores at indices 12, 13
+        const result = pit.serializePosition(state)
+        expect(result).toBe('4,4,4,4,4,4;0;4,4,4,4,4,4;0')
+      })
+
+      it('serializes mid-game with stores', () => {
+        const state = [0, 5, 5, 5, 5, 1, 0, 4, 4, 4, 4, 0, 10, 5]
+        const result = pit.serializePosition(state)
+        expect(result).toBe('0,5,5,5,5,1;10;0,4,4,4,4,0;5')
+      })
+
+      it('round-trips: parse → serialize', () => {
+        const notation = '4,4,4,4,4,4;0;4,4,4,4,4,4;0'
+        const parsed = pit.parsePosition(notation)
+        const flat = [...parsed.pits]
+        flat.push(...parsed.stores)
+        const result = pit.serializePosition(flat)
+        expect(result).toBe(notation)
+      })
+    })
+  })
 })

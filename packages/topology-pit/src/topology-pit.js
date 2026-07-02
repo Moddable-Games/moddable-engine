@@ -160,6 +160,52 @@ export function createPitTopology(config) {
     }
   }
 
+  function serializePosition(cellStates) {
+    const parts = []
+    for (let p = 0; p < players; p++) {
+      const pitCounts = []
+      for (let i = 0; i < pitsPerSide; i++) {
+        const idx = pitIndex(p, i)
+        const val = Array.isArray(cellStates) ? cellStates[idx] : (cellStates[idx] ?? 0)
+        pitCounts.push(String(val))
+      }
+      parts.push(pitCounts.join(','))
+      if (hasStores) {
+        const sIdx = storeIndex(p)
+        const storeVal = Array.isArray(cellStates) ? cellStates[sIdx] : (cellStates[sIdx] ?? 0)
+        parts.push(String(storeVal))
+      }
+    }
+    return parts.join(';')
+  }
+
+  function parsePosition(notation) {
+    if (!notation || notation === 'empty') {
+      return { pits: new Array(totalPits).fill(0), stores: new Array(players).fill(0) }
+    }
+
+    const sections = notation.split(';')
+    const pits = new Array(totalPits).fill(0)
+    const storesArr = new Array(players).fill(0)
+
+    let sectionIdx = 0
+    for (let p = 0; p < players; p++) {
+      if (sectionIdx < sections.length) {
+        const pitValues = sections[sectionIdx].split(',').map(s => parseInt(s.trim(), 10) || 0)
+        for (let i = 0; i < pitsPerSide && i < pitValues.length; i++) {
+          pits[pitIndex(p, i)] = pitValues[i]
+        }
+        sectionIdx++
+      }
+      if (hasStores && sectionIdx < sections.length) {
+        storesArr[p] = parseInt(sections[sectionIdx].trim(), 10) || 0
+        sectionIdx++
+      }
+    }
+
+    return { pits, stores: storesArr }
+  }
+
   return {
     pitIndex,
     storeIndex,
@@ -178,6 +224,8 @@ export function createPitTopology(config) {
     getPitsPerSide,
     getTotalPits,
     getLayout,
+    serializePosition,
+    parsePosition,
     pitsPerSide,
     totalPits,
     stores,

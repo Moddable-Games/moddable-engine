@@ -239,4 +239,78 @@ describe('topology-track', () => {
       expect(dims.width).toBe(19 * 20)
     })
   })
+
+  describe('position notation', () => {
+    const track = createTrackTopology({
+      positions: Array.from({ length: 24 }, (_, i) => `point-${i}`),
+      circuit: false,
+    })
+
+    const bgVocabulary = {
+      checker: { symbols: { 0: 'W', 1: 'B', count: true } },
+    }
+
+    describe('parsePosition()', () => {
+      it('parses standard backgammon setup', () => {
+        const notation = '0:2W,5:5B,7:3B,11:5W,12:5B,16:3W,18:5W,23:2B'
+        const state = track.parsePosition(notation, bgVocabulary)
+
+        expect(state['point-0']).toHaveLength(2)
+        expect(state['point-0'][0]).toEqual({ type: 'checker', owner: 0 })
+        expect(state['point-5']).toHaveLength(5)
+        expect(state['point-5'][0]).toEqual({ type: 'checker', owner: 1 })
+        expect(state['point-23']).toHaveLength(2)
+        expect(state['point-23'][0]).toEqual({ type: 'checker', owner: 1 })
+      })
+
+      it('parses empty notation', () => {
+        const state = track.parsePosition('empty', bgVocabulary)
+        expect(Object.keys(state)).toHaveLength(0)
+      })
+
+      it('parses null notation', () => {
+        const state = track.parsePosition(null, bgVocabulary)
+        expect(Object.keys(state)).toHaveLength(0)
+      })
+
+      it('parses home and bar positions', () => {
+        const notation = 'home:15W,home:15B'
+        const state = track.parsePosition(notation, bgVocabulary)
+        expect(state.home).toHaveLength(30)
+        expect(state.home.filter(p => p.owner === 0)).toHaveLength(15)
+        expect(state.home.filter(p => p.owner === 1)).toHaveLength(15)
+      })
+
+      it('parses bar position', () => {
+        const notation = '0:1W,bar:2B,23:1B'
+        const state = track.parsePosition(notation, bgVocabulary)
+        expect(state.bar).toHaveLength(2)
+        expect(state.bar[0]).toEqual({ type: 'checker', owner: 1 })
+        expect(state['point-0']).toHaveLength(1)
+      })
+    })
+
+    describe('serializePosition()', () => {
+      it('serializes a simple position', () => {
+        const state = {
+          'point-0': [{ type: 'checker', owner: 0 }, { type: 'checker', owner: 0 }],
+          'point-23': [{ type: 'checker', owner: 1 }, { type: 'checker', owner: 1 }],
+        }
+        const result = track.serializePosition(state, bgVocabulary)
+        expect(result).toBe('0:2W,23:2B')
+      })
+
+      it('serializes empty state as empty string', () => {
+        const result = track.serializePosition({}, bgVocabulary)
+        expect(result).toBe('')
+      })
+
+      it('round-trips: parse → serialize', () => {
+        const notation = '0:2W,5:5B,7:3B,11:5W,12:5B,16:3W,18:5W,23:2B'
+        const state = track.parsePosition(notation, bgVocabulary)
+        const result = track.serializePosition(state, bgVocabulary)
+        expect(result).toBe(notation)
+      })
+    })
+  })
 })

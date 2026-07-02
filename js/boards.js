@@ -258,8 +258,8 @@ const GAMES = {
       'turkish-draughts': { label: 'Turkish', boardStyle: 'mono-grid', rows: 8, cols: 8, tileSize: 40, draughtsSetup: { rows: 2, dark: false } },
       lasca: { label: 'Lasca (7×7)', boardStyle: 'checkered', rows: 7, cols: 7, tileSize: 40, draughtsSetup: { rows: 3, dark: true } },
       alquerque: { label: 'Alquerque (5×5)', boardStyle: 'alquerque', rows: 5, cols: 5, tileSize: 48, fanoronaSetup: true },
-      dameo: { label: 'Dameo (8×8)', static: true },
-      diagonal: { label: 'Diagonal (10×10)', static: true },
+      dameo: { label: 'Dameo (8×8)', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, setup: 'bbbbbbbb/1bbbbbb1/2bbbb2/8/8/2wwww2/1wwwwww1/wwwwwwww' },
+      diagonal: { label: 'Diagonal (10×10)', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, setup: '2b1b1b1b1/3b1b1b1b/w3b1b1b1/1w3b1b1b/w1w3b1b1/1w1w3b1b/w1w1w3b1/1w1w1w3b/w1w1w1w3/1w1w1w1w2' },
     },
   },
   reversi: {
@@ -499,24 +499,61 @@ function buildPieceImages(pieceSetId, galleryIndex, gameId) {
   return images
 }
 
-function buildDraughtsPosition(rows, cols, setup) {
-  const position = {}
+const DRAUGHTS_VOCABULARY = {
+  w: { type: 'man', color: 'white' },
+  b: { type: 'man', color: 'black' },
+  W: { type: 'king', color: 'white' },
+  B: { type: 'king', color: 'black' },
+}
+
+function buildDraughtsFenFromSetup(rows, cols, setup) {
   const setupRows = setup.rows
   const darkOnly = setup.dark !== false
-  for (let r = 0; r < setupRows; r++) {
+  const fenRows = []
+  for (let r = 0; r < rows; r++) {
+    let row = ''
+    let empty = 0
     for (let c = 0; c < cols; c++) {
-      if (darkOnly && (r + c) % 2 === 0) continue
-      const file = String.fromCharCode(97 + c)
-      const rank = rows - r
-      position[`${file}${rank}`] = { type: 'man', color: 'black' }
+      const isDark = (r + c) % 2 === 1
+      const isBlackZone = r < setupRows
+      const isWhiteZone = r >= rows - setupRows
+      const playable = !darkOnly || isDark
+      if (playable && isBlackZone) {
+        if (empty > 0) { row += empty > 9 ? String(empty) : String(empty); empty = 0 }
+        row += 'b'
+      } else if (playable && isWhiteZone) {
+        if (empty > 0) { row += String(empty); empty = 0 }
+        row += 'w'
+      } else {
+        empty++
+      }
     }
+    if (empty > 0) row += String(empty)
+    fenRows.push(row)
   }
-  for (let r = rows - setupRows; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      if (darkOnly && (r + c) % 2 === 0) continue
-      const file = String.fromCharCode(97 + c)
-      const rank = rows - r
-      position[`${file}${rank}`] = { type: 'man', color: 'white' }
+  return fenRows.join('/')
+}
+
+function parseDraughtsFen(fen, rows, cols) {
+  const position = {}
+  const ranks = fen.split('/')
+  for (let r = 0; r < ranks.length; r++) {
+    let c = 0, i = 0
+    const rank = ranks[r]
+    while (i < rank.length) {
+      const ch = rank[i]
+      if (ch >= '0' && ch <= '9') {
+        const next = rank[i + 1]
+        if (next >= '0' && next <= '9') { c += parseInt(ch + next, 10); i += 2 }
+        else { c += parseInt(ch, 10); i++ }
+      } else {
+        if (DRAUGHTS_VOCABULARY[ch]) {
+          const file = String.fromCharCode(97 + c)
+          const rankNum = rows - r
+          position[`${file}${rankNum}`] = { ...DRAUGHTS_VOCABULARY[ch] }
+        }
+        c++; i++
+      }
     }
   }
   return position
@@ -794,9 +831,17 @@ function render() {
     config.position = fenToPosition(config.fen, config.rows, config.cols)
   }
 
-  // Build draughts position
+  // Build position from draughts-vocabulary FEN (setup notation spec)
+  if (config.setup) {
+    config.position = parseDraughtsFen(config.setup, config.rows, config.cols)
+  }
+
+  // Build draughts position (legacy — will be replaced by setup FEN)
   if (config.draughtsSetup) {
-    config.position = buildDraughtsPosition(config.rows, config.cols, config.draughtsSetup)
+    config.position = parseDraughtsFen(
+      buildDraughtsFenFromSetup(config.rows, config.cols, config.draughtsSetup),
+      config.rows, config.cols
+    )
   }
 
   // Build Go handicap position
@@ -996,12 +1041,13 @@ function showInfo(cfg) {
     if (cfg.rings) rows.push(`<div class="info-row"><span class="info-label">Rings</span><span class="info-value">${cfg.rings}</span></div>`)
     if (game && game.pieceSet) rows.push(`<div class="info-row"><span class="info-label">Pieces</span><span class="info-value">${game.pieceSet}</span></div>`)
     if (cfg.fen) rows.push(`<div class="info-row info-row--block"><span class="info-label">Setup</span><span class="info-value info-value--fen">${cfg.fen}</span></div>`)
+    else if (cfg.setup) rows.push(`<div class="info-row info-row--block"><span class="info-label">Setup</span><span class="info-value info-value--fen">${cfg.setup}</span></div>`)
     else if (cfg.draughtsSetup) rows.push(`<div class="info-row"><span class="info-label">Setup</span><span class="info-value">${cfg.draughtsSetup.rows} rows each side</span></div>`)
     else if (cfg.fanoronaSetup) rows.push(`<div class="info-row"><span class="info-label">Setup</span><span class="info-value">Standard (22 each)</span></div>`)
     else if (cfg.goHandicap) rows.push(`<div class="info-row"><span class="info-label">Setup</span><span class="info-value">${cfg.goHandicap} handicap stones</span></div>`)
     else if (cfg.svgPath) rows.push(`<div class="info-row info-row--block"><span class="info-label">Source</span><span class="info-value info-value--fen">${cfg.svgPath}</span></div>`)
     else if (!cfg.position && !cfg.static) rows.push(`<div class="info-row"><span class="info-label">Setup</span><span class="info-value">Empty board</span></div>`)
-    if (cfg.fen) rows.push(`<div class="info-row"><span class="info-label">Notation</span><span class="info-value">FEN</span></div>`)
+    if (cfg.fen || cfg.setup) rows.push(`<div class="info-row"><span class="info-label">Notation</span><span class="info-value">FEN</span></div>`)
   }
   info.innerHTML = rows.join('')
 }
