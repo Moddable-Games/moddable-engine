@@ -580,13 +580,14 @@ const mancala = {
     const pitCurve = opts.pitCurve || 0
 
     const rowCenters = []
+    const innerTop = by + 6 + padEdge
+    const innerBot = boardH - by - 6 - padEdge
     if (boardRows === 2) {
-      rowCenters.push(boardH * 0.33, boardH * 0.67)
+      rowCenters.push(innerTop, innerBot)
     } else if (boardRows === 4) {
-      const innerTop = by + 20
-      const innerBot = boardH - by - 20
-      const rowH = (innerBot - innerTop) / 4
-      for (let r = 0; r < 4; r++) rowCenters.push(innerTop + rowH * r + rowH / 2)
+      const totalInner = innerBot - innerTop
+      const slot = totalInner / 5
+      rowCenters.push(innerTop + slot * 0.5, innerTop + slot * 1.5, innerTop + slot * 3.5, innerTop + slot * 4.5)
     }
 
     for (let row = 0; row < boardRows; row++) {
