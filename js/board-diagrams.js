@@ -527,22 +527,22 @@ const mancala = {
     const pitRadius = opts.pitRadius || 22
     const storeRx = opts.storeRx || 24
     const storeRy = opts.storeRy || 50
-    const spacing = opts.pitSpacing || 66
     const boardShape = opts.boardShape || 'rect'
     const rx = opts.cornerRadius || 22
+    const padEdge = opts.padEdge || pitRadius * 1.5
 
-    const pitsWidth = pitsPerSide * spacing
-    const storeWidth = hasStores ? storeRx * 2 + 28 : 20
-    const boardW = pitsWidth + storeWidth * 2
+    const storeWidth = hasStores ? storeRx * 2 + 16 : 0
+    const pitsAreaWidth = pitsPerSide * (pitRadius * 2 + 10)
+    const boardW = storeWidth * 2 + pitsAreaWidth + padEdge * 2
     const rowHeight = pitRadius * 2 + 16
     const boardH = boardRows * rowHeight + 40
 
-    return { boardW, boardH, pitsPerSide, hasStores, boardRows, pitRadius, storeRx, storeRy, spacing, boardShape, storeWidth, pitsWidth, rx }
+    return { boardW, boardH, pitsPerSide, hasStores, boardRows, pitRadius, storeRx, storeRy, boardShape, storeWidth, rx, padEdge }
   },
   render(ctx) {
     const { colors, opts } = ctx
     const layout = this.computeLayout(opts)
-    const { pitsPerSide, hasStores, boardRows, pitRadius, storeRx, storeRy, spacing, boardShape, boardW, boardH, storeWidth, rx } = layout
+    const { pitsPerSide, hasStores, boardRows, pitRadius, storeRx, storeRy, boardShape, boardW, boardH, storeWidth, rx, padEdge } = layout
     const parts = []
 
     const bx = 10, by = 15
@@ -562,13 +562,17 @@ const mancala = {
 
     if (hasStores) {
       const storeCy = boardH / 2
-      const leftX = bx + storeWidth / 2
-      const rightX = boardW - bx - storeWidth / 2
+      const leftX = bx + storeWidth / 2 + 4
+      const rightX = boardW - bx - storeWidth / 2 - 4
       parts.push(`<ellipse cx="${leftX}" cy="${storeCy}" rx="${storeRx}" ry="${storeRy}" fill="${colors.pit}" stroke="${colors.pitStroke}" stroke-width="1.5" class="board-cell" data-sq="store-1"/>`)
       parts.push(`<ellipse cx="${rightX}" cy="${storeCy}" rx="${storeRx}" ry="${storeRy}" fill="${colors.pit}" stroke="${colors.pitStroke}" stroke-width="1.5" class="board-cell" data-sq="store-0"/>`)
     }
 
-    const pitsStartX = (hasStores ? storeWidth : 20) + spacing / 2 + bx
+    const pitsLeftEdge = bx + (hasStores ? storeWidth : 0) + padEdge
+    const pitsRightEdge = boardW - bx - (hasStores ? storeWidth : 0) - padEdge
+    const pitsAvailWidth = pitsRightEdge - pitsLeftEdge
+    const pitSpacing = pitsPerSide > 1 ? pitsAvailWidth / (pitsPerSide - 1) : 0
+
     const seedsPerPit = opts.seedsPerPit || 4
     const seedRadius = Math.min(4.5, pitRadius * 0.2)
     const markers = opts.markers || []
@@ -579,8 +583,10 @@ const mancala = {
     if (boardRows === 2) {
       rowCenters.push(boardH * 0.33, boardH * 0.67)
     } else if (boardRows === 4) {
-      const rowH = (boardH - 20) / 4
-      for (let r = 0; r < 4; r++) rowCenters.push(20 + rowH * r + rowH / 2)
+      const innerTop = by + 20
+      const innerBot = boardH - by - 20
+      const rowH = (innerBot - innerTop) / 4
+      for (let r = 0; r < 4; r++) rowCenters.push(innerTop + rowH * r + rowH / 2)
     }
 
     for (let row = 0; row < boardRows; row++) {
@@ -590,7 +596,7 @@ const mancala = {
       for (let i = 0; i < pitsPerSide; i++) {
         const displayIdx = isTopHalf ? (pitsPerSide - 1 - i) : i
         const pitIdx = row * pitsPerSide + displayIdx
-        const cx = pitsStartX + i * spacing
+        const cx = pitsLeftEdge + i * pitSpacing
 
         let cy = baseCy
         if (pitCurve) {
@@ -614,9 +620,7 @@ const mancala = {
 
     if (boardRows === 4) {
       const divY = boardH / 2
-      const lx = pitsStartX - spacing / 3
-      const rx2 = pitsStartX + (pitsPerSide - 1) * spacing + spacing / 3
-      parts.push(`<line x1="${lx}" y1="${divY}" x2="${rx2}" y2="${divY}" stroke="${colors.boardOuter}" stroke-width="2.5" stroke-dasharray="6,4"/>`)
+      parts.push(`<line x1="${pitsLeftEdge - pitRadius}" y1="${divY}" x2="${pitsLeftEdge + (pitsPerSide - 1) * pitSpacing + pitRadius}" y2="${divY}" stroke="${colors.boardOuter}" stroke-width="2.5" stroke-dasharray="6,4"/>`)
     }
 
     return parts.join('')
