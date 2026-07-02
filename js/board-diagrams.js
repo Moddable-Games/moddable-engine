@@ -529,7 +529,7 @@ const mancala = {
     const storeRy = opts.storeRy || 50
     const boardShape = opts.boardShape || 'rect'
     const rx = opts.cornerRadius || 22
-    const pad = opts.padEdge || pitRadius * 1.65
+    const pad = opts.padEdge || (boardShape === 'ellipse' ? pitRadius * 1.1 : pitRadius * 1.65)
 
     const frameInset = 16
     const interRow = pitRadius * 2.4
@@ -613,7 +613,7 @@ const mancala = {
         if (pitCurve) {
           const t = (i - (pitsPerSide - 1) / 2) / ((pitsPerSide - 1) / 2)
           const curveOffset = pitCurve * t * t
-          cy += isTopHalf ? -curveOffset : curveOffset
+          cy += isTopHalf ? curveOffset : -curveOffset
         }
 
         parts.push(`<circle cx="${cx}" cy="${cy}" r="${pitRadius}" fill="${colors.pit}" stroke="${colors.pitStroke}" stroke-width="1.5" class="board-cell" data-sq="pit-${pitIdx}"/>`)
