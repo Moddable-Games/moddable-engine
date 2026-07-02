@@ -534,8 +534,12 @@ const mancala = {
     const storeWidth = hasStores ? storeRx * 2 + 16 : 0
     const pitsAreaWidth = pitsPerSide * (pitRadius * 2 + 10)
     const boardW = storeWidth * 2 + pitsAreaWidth + padEdge * 2
-    const rowHeight = pitRadius * 2 + 16
-    const boardH = boardRows * rowHeight + 40
+    const interRow = pitRadius * 2.4
+    const divGap = boardRows === 4 ? pitRadius * 2.7 : 0
+    const rowsHeight = boardRows === 4
+      ? interRow * 2 + divGap + padEdge * 2
+      : interRow * (boardRows - 1) + padEdge * 2
+    const boardH = rowsHeight + 50
 
     return { boardW, boardH, pitsPerSide, hasStores, boardRows, pitRadius, storeRx, storeRy, boardShape, storeWidth, rx, padEdge }
   },
@@ -586,8 +590,16 @@ const mancala = {
       rowCenters.push(innerTop, innerBot)
     } else if (boardRows === 4) {
       const totalInner = innerBot - innerTop
-      const slot = totalInner / 5
-      rowCenters.push(innerTop + slot * 0.5, innerTop + slot * 1.5, innerTop + slot * 3.5, innerTop + slot * 4.5)
+      const interRow = pitRadius * 2.4
+      const divGap = pitRadius * 2.7
+      const usedHeight = interRow * 2 + divGap
+      const offset = (totalInner - usedHeight) / 2
+      rowCenters.push(
+        innerTop + offset,
+        innerTop + offset + interRow,
+        innerTop + offset + interRow + divGap,
+        innerTop + offset + interRow * 2 + divGap
+      )
     }
 
     for (let row = 0; row < boardRows; row++) {
