@@ -575,19 +575,8 @@ const mancala = {
       parts.push(`<ellipse cx="${rightX}" cy="${storeCy}" rx="${storeRx}" ry="${storeRy}" fill="${colors.pit}" stroke="${colors.pitStroke}" stroke-width="1.5" class="board-cell" data-sq="store-0"/>`)
     }
 
-    let pitsLeftEdge, pitsRightEdge
-    if (boardShape === 'ellipse') {
-      const innerRx = (bw - 16) / 2
-      const innerRy = (bh - 16) / 2
-      const rowY = pad
-      const xAtRow = innerRx * Math.sqrt(Math.max(0, 1 - (rowY / innerRy) ** 2))
-      const safeX = xAtRow - pitRadius - pad * 0.3
-      pitsLeftEdge = boardW / 2 - safeX + (hasStores ? storeWidth : 0)
-      pitsRightEdge = boardW / 2 + safeX - (hasStores ? storeWidth : 0)
-    } else {
-      pitsLeftEdge = frameInset + (hasStores ? storeWidth : 0) + pad
-      pitsRightEdge = boardW - frameInset - (hasStores ? storeWidth : 0) - pad
-    }
+    const pitsLeftEdge = frameInset + (hasStores ? storeWidth : 0) + pad
+    const pitsRightEdge = boardW - frameInset - (hasStores ? storeWidth : 0) - pad
     const pitsAvailWidth = pitsRightEdge - pitsLeftEdge
     const pitSpacing = pitsPerSide > 1 ? pitsAvailWidth / (pitsPerSide - 1) : 0
 
