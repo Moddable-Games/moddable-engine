@@ -32,6 +32,28 @@ const checkered = {
           else attrs += ` stroke="rgba(0,0,0,0.15)" stroke-width="1"`
           attrs += ` data-sq="${sq}" data-type="${cell}" class="board-cell"`
           parts.push(`<rect ${attrs}/>`)
+          if (cell === 'rosette') {
+            const rcx = ox + c * tileSize + tileSize / 2
+            const rcy = oy + r * tileSize + tileSize / 2
+            const s = tileSize * 0.25
+            parts.push(`<circle cx="${rcx}" cy="${rcy}" r="${s * 0.42}" fill="#8b3a3a"/>`)
+            parts.push(`<circle cx="${rcx}" cy="${rcy - s}" r="${s * 0.25}" fill="#8b3a3a"/>`)
+            parts.push(`<circle cx="${rcx}" cy="${rcy + s}" r="${s * 0.25}" fill="#8b3a3a"/>`)
+            parts.push(`<circle cx="${rcx - s}" cy="${rcy}" r="${s * 0.25}" fill="#8b3a3a"/>`)
+            parts.push(`<circle cx="${rcx + s}" cy="${rcy}" r="${s * 0.25}" fill="#8b3a3a"/>`)
+            parts.push(`<circle cx="${rcx - s * 0.7}" cy="${rcy - s * 0.7}" r="${s * 0.17}" fill="#a04848"/>`)
+            parts.push(`<circle cx="${rcx + s * 0.7}" cy="${rcy - s * 0.7}" r="${s * 0.17}" fill="#a04848"/>`)
+            parts.push(`<circle cx="${rcx - s * 0.7}" cy="${rcy + s * 0.7}" r="${s * 0.17}" fill="#a04848"/>`)
+            parts.push(`<circle cx="${rcx + s * 0.7}" cy="${rcy + s * 0.7}" r="${s * 0.17}" fill="#a04848"/>`)
+          }
+          if (cell === 'castle') {
+            const ccx = ox + c * tileSize + tileSize / 2
+            const ccy = oy + r * tileSize + tileSize / 2
+            const d = tileSize * 0.3
+            const xStroke = colors.castleX || '#fff8f0'
+            parts.push(`<line x1="${ccx - d}" y1="${ccy - d}" x2="${ccx + d}" y2="${ccy + d}" stroke="${xStroke}" stroke-width="1.5" stroke-linecap="round"/>`)
+            parts.push(`<line x1="${ccx + d}" y1="${ccy - d}" x2="${ccx - d}" y2="${ccy + d}" stroke="${xStroke}" stroke-width="1.5" stroke-linecap="round"/>`)
+          }
         } else {
           const fill = (r + c) % 2 === 0 ? colors.lightSquare : colors.darkSquare
           parts.push(`<rect x="${ox + c * tileSize}" y="${oy + r * tileSize}" width="${tileSize}" height="${tileSize}" fill="${fill}" data-sq="${sq}" class="board-cell"/>`)
@@ -116,6 +138,83 @@ const go = {
       }
       parts.push('</g>')
     }
+    const GO_LETTERS = 'abcdefghjklmnopqrst'
+    parts.push('<g fill="transparent">')
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const sq = `${GO_LETTERS[c]}${rows - r}`
+        parts.push(`<circle cx="${gx + c * tileSize}" cy="${gy + r * tileSize}" r="${tileSize * 0.45}" class="board-cell" data-sq="${sq}"/>`)
+      }
+    }
+    parts.push('</g>')
+    return parts.join('')
+  },
+}
+
+const surakarta = {
+  name: 'surakarta',
+  positionType: 'intersection',
+  labelStyle: 'algebraic',
+  defaultColors: {
+    frame: '#5a3e28', board: '#c8a872', boardInner: '#d4b896',
+    gridLine: '#6b4a30', dotFill: '#4a3320',
+    innerArc: '#6b4a30', outerArc: '#6b4a30',
+  },
+  computeLayout(opts) {
+    const ts = opts.tileSize || 50
+    const arcPad = ts * 2.3
+    return { boardW: (opts.cols - 1) * ts + arcPad * 2, boardH: (opts.rows - 1) * ts + arcPad * 2 }
+  },
+  getIntersection(r, c, ctx) {
+    const arcPad = ctx.tileSize * 2.3
+    return { x: ctx.ox + arcPad + c * ctx.tileSize, y: ctx.oy + arcPad + r * ctx.tileSize }
+  },
+  render(ctx) {
+    const { rows, cols, tileSize, ox, oy, colors } = ctx
+    const arcPad = tileSize * 2.3
+    const gridW = (cols - 1) * tileSize, gridH = (rows - 1) * tileSize
+    const boardW = gridW + arcPad * 2, boardH = gridH + arcPad * 2
+    const gx = ox + arcPad, gy = oy + arcPad
+    const parts = []
+
+    parts.push(`<rect x="${ox}" y="${oy}" width="${boardW}" height="${boardH}" rx="8" fill="${colors.frame}"/>`)
+    parts.push(`<rect x="${ox + 6}" y="${oy + 6}" width="${boardW - 12}" height="${boardH - 12}" rx="5" fill="${colors.board}"/>`)
+    parts.push(`<rect x="${ox + 10}" y="${oy + 10}" width="${boardW - 20}" height="${boardH - 20}" rx="3" fill="${colors.boardInner}"/>`)
+
+    parts.push(`<g stroke="${colors.gridLine}" stroke-width="1.5">`)
+    for (let r = 0; r < rows; r++) {
+      const y = gy + r * tileSize
+      parts.push(`<line x1="${gx}" y1="${y}" x2="${gx + gridW}" y2="${y}"/>`)
+    }
+    for (let c = 0; c < cols; c++) {
+      const x = gx + c * tileSize
+      parts.push(`<line x1="${x}" y1="${gy}" x2="${x}" y2="${gy + gridH}"/>`)
+    }
+    parts.push('</g>')
+
+    const innerR = tileSize
+    const outerR = tileSize * 2
+    parts.push(`<g fill="none" stroke-width="2.5" stroke-linecap="round">`)
+    const ix = (i) => gx + i * tileSize
+    const iy = (i) => gy + i * tileSize
+    parts.push(`<path d="M ${ix(1)},${iy(0)} A ${innerR},${innerR} 0 1,0 ${ix(0)},${iy(1)}" stroke="${colors.innerArc}"/>`)
+    parts.push(`<path d="M ${ix(cols - 2)},${iy(0)} A ${innerR},${innerR} 0 1,1 ${ix(cols - 1)},${iy(1)}" stroke="${colors.innerArc}"/>`)
+    parts.push(`<path d="M ${ix(0)},${iy(rows - 2)} A ${innerR},${innerR} 0 1,0 ${ix(1)},${iy(rows - 1)}" stroke="${colors.innerArc}"/>`)
+    parts.push(`<path d="M ${ix(cols - 1)},${iy(rows - 2)} A ${innerR},${innerR} 0 1,1 ${ix(cols - 2)},${iy(rows - 1)}" stroke="${colors.innerArc}"/>`)
+    parts.push(`<path d="M ${ix(2)},${iy(0)} A ${outerR},${outerR} 0 1,0 ${ix(0)},${iy(2)}" stroke="${colors.outerArc}"/>`)
+    parts.push(`<path d="M ${ix(cols - 3)},${iy(0)} A ${outerR},${outerR} 0 1,1 ${ix(cols - 1)},${iy(2)}" stroke="${colors.outerArc}"/>`)
+    parts.push(`<path d="M ${ix(0)},${iy(rows - 3)} A ${outerR},${outerR} 0 1,0 ${ix(2)},${iy(rows - 1)}" stroke="${colors.outerArc}"/>`)
+    parts.push(`<path d="M ${ix(cols - 1)},${iy(rows - 3)} A ${outerR},${outerR} 0 1,1 ${ix(cols - 3)},${iy(rows - 1)}" stroke="${colors.outerArc}"/>`)
+    parts.push('</g>')
+
+    parts.push(`<g fill="${colors.dotFill}">`)
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        parts.push(`<circle cx="${gx + c * tileSize}" cy="${gy + r * tileSize}" r="3.5"/>`)
+      }
+    }
+    parts.push('</g>')
+
     const GO_LETTERS = 'abcdefghjklmnopqrst'
     parts.push('<g fill="transparent">')
     for (let r = 0; r < rows; r++) {
@@ -529,8 +628,21 @@ const mancala = {
     const storeRy = opts.storeRy || 50
     const boardShape = opts.boardShape || 'rect'
     const rx = opts.cornerRadius || 22
-    const pad = opts.padEdge || (boardShape === 'ellipse' ? pitRadius * 1.1 : pitRadius * 1.65)
 
+    if (boardShape === 'ellipse') {
+      const pitSpacing = pitRadius * 2.96
+      const pitSpan = (pitsPerSide - 1) * pitSpacing
+      const rowOffset = pitRadius * 2
+      const storeGap = 2
+      const storeCenterOffset = hasStores ? pitSpan / 2 + pitRadius + storeGap + storeRx : 0
+      const outerRx = (hasStores ? storeCenterOffset + storeRx : pitSpan / 2 + pitRadius) + pitRadius * 2.67
+      const outerRy = rowOffset + pitRadius * 2.22
+      const boardW = Math.round(2 * (outerRx + pitRadius * 0.67))
+      const boardH = Math.round(2 * (outerRy + pitRadius * 0.78))
+      return { boardW, boardH, pitsPerSide, hasStores, boardRows, pitRadius, storeRx, storeRy, boardShape, pitSpacing, pitSpan, rowOffset, storeCenterOffset, outerRx, outerRy }
+    }
+
+    const pad = opts.padEdge || pitRadius * 1.65
     const frameInset = 16
     const interRow = pitRadius * 2.4
     const divGap = boardRows === 4 ? pitRadius * 2.7 : 0
@@ -549,22 +661,23 @@ const mancala = {
   render(ctx) {
     const { colors, opts } = ctx
     const layout = this.computeLayout(opts)
-    const { pitsPerSide, hasStores, boardRows, pitRadius, storeRx, storeRy, boardShape, boardW, boardH, storeWidth, rx, pad, frameInset, interRow, divGap } = layout
+    const { pitsPerSide, hasStores, boardRows, pitRadius, storeRx, storeRy, boardShape, boardW, boardH } = layout
     const parts = []
+
+    if (boardShape === 'ellipse') {
+      return this.renderEllipse(layout, colors, opts)
+    }
+
+    const { storeWidth, rx, pad, frameInset, interRow, divGap } = layout
 
     const bx = frameInset / 2, by = frameInset / 2
     const bw = boardW - frameInset, bh = boardH - frameInset
 
-    if (boardShape === 'ellipse') {
-      parts.push(`<ellipse cx="${boardW / 2}" cy="${boardH / 2}" rx="${bw / 2}" ry="${bh / 2}" fill="${colors.boardOuter}"/>`)
-      parts.push(`<ellipse cx="${boardW / 2}" cy="${boardH / 2}" rx="${bw / 2 - 8}" ry="${bh / 2 - 8}" fill="${colors.boardInner}"/>`)
-    } else {
-      parts.push(`<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="${rx}" ry="${rx}" fill="${colors.boardOuter}"/>`)
-      parts.push(`<rect x="${bx + 6}" y="${by + 6}" width="${bw - 12}" height="${bh - 12}" rx="${rx - 4}" ry="${rx - 4}" fill="${colors.boardInner}"/>`)
-      if (colors.border) {
-        const dashAttr = colors.borderDash ? ` stroke-dasharray="${colors.borderDash}"` : ''
-        parts.push(`<rect x="${bx + 12}" y="${by + 12}" width="${bw - 24}" height="${bh - 24}" rx="${rx - 8}" ry="${rx - 8}" fill="none" stroke="${colors.border}" stroke-width="1.5"${dashAttr}/>`)
-      }
+    parts.push(`<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="${rx}" ry="${rx}" fill="${colors.boardOuter}"/>`)
+    parts.push(`<rect x="${bx + 6}" y="${by + 6}" width="${bw - 12}" height="${bh - 12}" rx="${rx - 4}" ry="${rx - 4}" fill="${colors.boardInner}"/>`)
+    if (colors.border) {
+      const dashAttr = colors.borderDash ? ` stroke-dasharray="${colors.borderDash}"` : ''
+      parts.push(`<rect x="${bx + 12}" y="${by + 12}" width="${bw - 24}" height="${bh - 24}" rx="${rx - 8}" ry="${rx - 8}" fill="none" stroke="${colors.border}" stroke-width="1.5"${dashAttr}/>`)
     }
 
     if (hasStores) {
@@ -624,7 +737,7 @@ const mancala = {
 
         const seedCount = (opts.parsedSetup && opts.parsedSetup.pits) ? opts.parsedSetup.pits[pitIdx] : seedsPerPit
         if (seedCount > 0) {
-          parts.push(renderSeeds(cx, cy, seedCount, seedRadius, colors))
+          parts.push(renderMancalaPieces(cx, cy, seedCount, pitRadius, seedRadius, colors, opts.pieceImages))
         }
       }
     }
@@ -636,6 +749,68 @@ const mancala = {
 
     return parts.join('')
   },
+  renderEllipse(layout, colors, opts) {
+    const { boardW, boardH, pitsPerSide, hasStores, pitRadius, storeRx, storeRy, pitSpacing, rowOffset, storeCenterOffset, outerRx, outerRy } = layout
+    const parts = []
+    const cx = boardW / 2, cy = boardH / 2
+
+    parts.push(`<ellipse cx="${cx}" cy="${cy}" rx="${outerRx}" ry="${outerRy}" fill="${colors.boardOuter}"/>`)
+    parts.push(`<ellipse cx="${cx}" cy="${cy}" rx="${outerRx - 8}" ry="${outerRy - 8}" fill="${colors.boardInner}"/>`)
+
+    if (hasStores) {
+      const leftX = cx - storeCenterOffset
+      const rightX = cx + storeCenterOffset
+      parts.push(`<ellipse cx="${leftX}" cy="${cy}" rx="${storeRx}" ry="${storeRy}" fill="${colors.pit}" stroke="${colors.pitStroke}" stroke-width="1.5" class="board-cell" data-sq="store-1"/>`)
+      parts.push(`<ellipse cx="${rightX}" cy="${cy}" rx="${storeRx}" ry="${storeRy}" fill="${colors.pit}" stroke="${colors.pitStroke}" stroke-width="1.5" class="board-cell" data-sq="store-0"/>`)
+    }
+
+    const seedsPerPit = opts.seedsPerPit || 4
+    const seedRadius = Math.min(4.5, pitRadius * 0.2)
+    const markers = opts.markers || []
+    const markerSet = new Set(markers)
+    const pitCurve = opts.pitCurve || 0
+    const topCy = cy - rowOffset
+    const botCy = cy + rowOffset
+
+    for (let i = 0; i < pitsPerSide; i++) {
+      const px = cx + (i - (pitsPerSide - 1) / 2) * pitSpacing
+
+      let topY = topCy, botY = botCy
+      if (pitCurve) {
+        const t = (i - (pitsPerSide - 1) / 2) / ((pitsPerSide - 1) / 2)
+        const curveOffset = pitCurve * t * t
+        topY += curveOffset
+        botY -= curveOffset
+      }
+
+      const topIdx = pitsPerSide - 1 - i
+      const botIdx = i
+      parts.push(`<circle cx="${px}" cy="${topY}" r="${pitRadius}" fill="${colors.pit}" stroke="${colors.pitStroke}" stroke-width="1.5" class="board-cell" data-sq="pit-${topIdx}"/>`)
+      parts.push(`<circle cx="${px}" cy="${botY}" r="${pitRadius}" fill="${colors.pit}" stroke="${colors.pitStroke}" stroke-width="1.5" class="board-cell" data-sq="pit-${pitsPerSide + botIdx}"/>`)
+
+      if (markerSet.has(topIdx)) {
+        parts.push(`<circle cx="${px}" cy="${topY}" r="${pitRadius - 8}" fill="none" stroke="${colors.marker}" stroke-width="2" stroke-dasharray="4,3"/>`)
+      }
+      if (markerSet.has(pitsPerSide + botIdx)) {
+        parts.push(`<circle cx="${px}" cy="${botY}" r="${pitRadius - 8}" fill="none" stroke="${colors.marker}" stroke-width="2" stroke-dasharray="4,3"/>`)
+      }
+
+      const topSeedCount = (opts.parsedSetup && opts.parsedSetup.pits) ? opts.parsedSetup.pits[topIdx] : seedsPerPit
+      const botSeedCount = (opts.parsedSetup && opts.parsedSetup.pits) ? opts.parsedSetup.pits[pitsPerSide + botIdx] : seedsPerPit
+      if (topSeedCount > 0) parts.push(renderMancalaPieces(px, topY, topSeedCount, pitRadius, seedRadius, colors, opts.pieceImages))
+      if (botSeedCount > 0) parts.push(renderMancalaPieces(px, botY, botSeedCount, pitRadius, seedRadius, colors, opts.pieceImages))
+    }
+
+    return parts.join('')
+  },
+}
+
+function renderMancalaPieces(cx, cy, count, pitRadius, seedRadius, colors, pieceImages) {
+  if (pieceImages && pieceImages[String(count)]) {
+    const size = pitRadius * 1.6
+    return `<image href="${pieceImages[String(count)]}" x="${cx - size / 2}" y="${cy - size / 2}" width="${size}" height="${size}" pointer-events="none"/>`
+  }
+  return renderSeeds(cx, cy, count, seedRadius, colors)
 }
 
 function renderSeeds(cx, cy, count, r, colors) {
@@ -682,9 +857,153 @@ function seedLayout(count, r) {
   return result
 }
 
+// ─── BACKGAMMON PROVIDER ────────────────────────────────────────────────────
+
+const backgammon = {
+  name: 'backgammon',
+  positionType: 'point',
+  labelStyle: 'none',
+  defaultColors: {
+    frame: '#3d2b1f', felt: '#1a5c3a',
+    pointA: '#c47e3b', pointB: '#8b2500',
+    dark: '#333', darkStroke: '#111', darkRing: '#555',
+    light: '#eee', lightStroke: '#999', lightRing: '#ccc',
+  },
+  computeLayout(opts) {
+    const frameW = 16
+    const barW = 24
+    const pointW = 32
+    const panelW = pointW * 6
+    const boardW = frameW * 2 + panelW * 2 + barW
+    const boardH = 320
+    const panelH = boardH - frameW * 2
+    const pointH = Math.round(panelH * 0.417)
+    return { boardW, boardH, frameW, barW, pointW, panelW, panelH, pointH }
+  },
+  render(ctx) {
+    const { colors, opts } = ctx
+    const layout = this.computeLayout(opts)
+    const { boardW, boardH, frameW, barW, pointW, panelW, panelH, pointH } = layout
+    const parts = []
+
+    parts.push(`<rect x="0" y="0" width="${boardW}" height="${boardH}" rx="6" ry="6" fill="${colors.frame}"/>`)
+    parts.push(`<rect x="${frameW}" y="${frameW}" width="${panelW}" height="${panelH}" fill="${colors.felt}"/>`)
+    parts.push(`<rect x="${frameW + panelW + barW}" y="${frameW}" width="${panelW}" height="${panelH}" fill="${colors.felt}"/>`)
+    parts.push(`<rect x="${frameW + panelW}" y="0" width="${barW}" height="${boardH}" fill="${colors.frame}"/>`)
+
+    const bottomBase = boardH - frameW
+    const topBase = frameW
+
+    for (let i = 0; i < 24; i++) {
+      const quadrant = Math.floor(i / 6)
+      const posInQuad = i % 6
+      const isBottom = quadrant === 0 || quadrant === 1
+      const isRight = quadrant === 0 || quadrant === 3
+      const panelX = isRight ? frameW + panelW + barW : frameW
+      const ptColor = ((posInQuad % 2 === 0) === isBottom) ? colors.pointA : colors.pointB
+
+      let lx
+      if (isBottom) {
+        lx = isRight
+          ? panelX + panelW - (posInQuad + 1) * pointW
+          : panelX + panelW - (posInQuad + 1) * pointW
+      } else {
+        lx = isRight
+          ? panelX + posInQuad * pointW
+          : panelX + posInQuad * pointW
+      }
+
+      const x1 = lx, x2 = lx + pointW, tipX = lx + pointW / 2
+
+      if (isBottom) {
+        const baseY = bottomBase
+        const tipY = bottomBase - pointH
+        parts.push(`<polygon points="${x1},${baseY} ${x2},${baseY} ${tipX},${tipY}" fill="${ptColor}" class="board-cell" data-sq="point-${i + 1}"/>`)
+      } else {
+        const baseY = topBase
+        const tipY = topBase + pointH
+        parts.push(`<polygon points="${x1},${baseY} ${x2},${baseY} ${tipX},${tipY}" fill="${ptColor}" class="board-cell" data-sq="point-${i + 1}"/>`)
+      }
+    }
+
+    const setup = opts.parsedSetup || opts.setup
+    if (setup) {
+      parts.push(this.renderCheckers(setup, layout, opts))
+    }
+
+    return parts.join('')
+  },
+  renderCheckers(setup, layout, opts) {
+    const { boardW, boardH, frameW, barW, pointW, panelW, pointH } = layout
+    const parts = []
+    const pieceSize = 22
+    const pieceSpacing = 22
+    const bottomBase = boardH - frameW
+    const topBase = frameW
+    const pieceImages = opts.pieceImages || {}
+    const darkImg = pieceImages.bM || pieceImages.b || null
+    const lightImg = pieceImages.wM || pieceImages.w || null
+
+    for (let i = 0; i < 24; i++) {
+      const dark = setup.dark ? (setup.dark[i] || 0) : 0
+      const light = setup.light ? (setup.light[i] || 0) : 0
+      if (!dark && !light) continue
+
+      const quadrant = Math.floor(i / 6)
+      const posInQuad = i % 6
+      const isBottom = quadrant === 0 || quadrant === 1
+      const isRight = quadrant === 0 || quadrant === 3
+      const panelX = isRight ? frameW + panelW + barW : frameW
+
+      let lx
+      if (isBottom) {
+        lx = isRight
+          ? panelX + panelW - (posInQuad + 1) * pointW
+          : panelX + panelW - (posInQuad + 1) * pointW
+      } else {
+        lx = isRight
+          ? panelX + posInQuad * pointW
+          : panelX + posInQuad * pointW
+      }
+      const cx = lx + pointW / 2
+
+      const renderStack = (count, img, isDarkPiece, startY, dir) => {
+        const maxShow = 5
+        const show = Math.min(count, maxShow)
+        const overflow = count > maxShow ? count - (maxShow - 1) : 0
+        for (let j = 0; j < show; j++) {
+          const cy = startY + dir * j * pieceSpacing
+          if (img) {
+            parts.push(`<image href="${img}" x="${cx - pieceSize / 2}" y="${cy - pieceSize / 2}" width="${pieceSize}" height="${pieceSize}"/>`)
+          } else {
+            parts.push(`<circle cx="${cx}" cy="${cy}" r="${pieceSize / 2 - 1}" fill="${isDarkPiece ? '#191716' : '#F8F6F2'}" stroke="${isDarkPiece ? '#4d433a' : '#5E5854'}" stroke-width="1.5"/>`)
+          }
+          if (j === 0 && overflow > 0) {
+            const textFill = isDarkPiece ? '#fff' : '#333'
+            parts.push(`<text x="${cx}" y="${cy + 4}" font-family="sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="${textFill}">${overflow}</text>`)
+          }
+        }
+      }
+
+      if (dark > 0) {
+        const startY = isBottom ? bottomBase - pieceSize / 2 - 2 : topBase + pieceSize / 2 + 2
+        const dir = isBottom ? -1 : 1
+        renderStack(dark, darkImg, true, startY, dir)
+      }
+      if (light > 0) {
+        const startY = isBottom ? bottomBase - pieceSize / 2 - 2 : topBase + pieceSize / 2 + 2
+        const dir = isBottom ? -1 : 1
+        renderStack(light, lightImg, false, startY, dir)
+      }
+    }
+
+    return parts.join('')
+  },
+}
+
 // ─── PROVIDER REGISTRY ──────────────────────────────────────────────────────
 
-const PROVIDERS = { checkered, 'mono-grid': monoGrid, go, xiangqi, shogi, morris, alquerque, hex, mancala }
+const PROVIDERS = { checkered, 'mono-grid': monoGrid, go, surakarta, xiangqi, shogi, morris, alquerque, hex, mancala, backgammon }
 
 // ─── RENDERER (ported from moddable-chess/js/svg-renderer.js) ───────────────
 
@@ -787,11 +1106,12 @@ function renderPieces(position, provider, ctx, colors) {
     const piece = typeof raw === 'object' ? raw : { type: String(raw) }
     const pos = getPixelPos(r, c, provider, ctx)
 
-    // Build lookup key: for typed pieces (stone/man/king) use color prefix
+    // Build lookup key: for typed pieces (stone/man/king/piece) use color prefix
     const colorPrefix = piece.color === 'white' ? 'w' : 'b'
     const imageKey = (piece.type === 'stone') ? colorPrefix + 'S'
       : (piece.type === 'man') ? colorPrefix + 'M'
       : (piece.type === 'king') ? colorPrefix + 'K'
+      : (piece.type === 'piece') ? colorPrefix + 'P'
       : piece.type
 
     if (pieceImages[imageKey]) {

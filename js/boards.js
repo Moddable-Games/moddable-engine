@@ -6,7 +6,7 @@ import { getGameConfig, getAllGames, HexSvg, createSeededRng } from './hex-games
 
 function parseCellMap(template) {
   return template.trim().split('\n').map(row =>
-    [...row].map(c => c === '.' ? null : c === 'f' ? 'floor' : c === 'w' ? 'water' : c === '1' ? 'p1' : c === '2' ? 'p2' : null)
+    [...row].map(c => c === '.' ? null : c === 'f' ? 'floor' : c === 'w' ? 'water' : c === '1' ? 'p1' : c === '2' ? 'p2' : c === 'r' ? 'rosette' : c === 'c' ? 'castle' : c === 'h' ? 'home' : null)
   )
 }
 
@@ -75,6 +75,49 @@ const DUNGEON_COLORS = {
   p2: '#f0b0b0', p2Stroke: '#c05050',
   water: '#4a90c8', waterStroke: '#2a2a2a',
   voidFill: '#1a1a2e',
+}
+
+const ROYAL_UR_MAP = parseCellMap(`
+rfff..rf
+ffffrfff
+rfff..rf
+`)
+
+function buildCrossMap(castles) {
+  const grid = Array.from({ length: 19 }, () => Array(19).fill(null))
+  for (let r = 0; r < 8; r++) for (let c = 8; c <= 10; c++) grid[r][c] = 'floor'
+  for (let r = 11; r < 19; r++) for (let c = 8; c <= 10; c++) grid[r][c] = 'floor'
+  for (let c = 0; c < 8; c++) for (let r = 8; r <= 10; r++) grid[r][c] = 'floor'
+  for (let c = 11; c < 19; c++) for (let r = 8; r <= 10; r++) grid[r][c] = 'floor'
+  for (let r = 8; r <= 10; r++) for (let c = 8; c <= 10; c++) grid[r][c] = 'home'
+  for (const [r, c] of castles) grid[r][c] = 'castle'
+  return grid
+}
+
+const PACHISI_CASTLES = [[0, 9], [3, 8], [3, 10], [8, 3], [8, 15], [9, 0], [9, 18], [10, 3], [10, 15], [15, 8], [15, 10], [18, 9]]
+const PACHISI_MAP = buildCrossMap(PACHISI_CASTLES)
+
+const CHAUPAR_CASTLES = [[0, 9], [3, 8], [3, 10], [8, 3], [8, 15], [9, 0], [9, 18], [10, 3], [10, 15], [15, 8], [15, 10], [18, 9]]
+const CHAUPAR_MAP = buildCrossMap(CHAUPAR_CASTLES)
+
+const PACHISI_COLORS = {
+  floor: '#f0d5a0', floorStroke: '#8b6545',
+  castle: '#c0622f', castleStroke: '#8b6545', castleX: '#fff8f0',
+  home: '#8b1a1a', homeStroke: '#6a1212',
+  voidFill: 'transparent',
+}
+
+const CHAUPAR_COLORS = {
+  floor: '#d4d8f0', floorStroke: '#2d3a8c',
+  castle: '#4a5ab8', castleStroke: '#2d3a8c', castleX: '#e8ecff',
+  home: '#1a1a6b', homeStroke: '#12124a',
+  voidFill: 'transparent',
+}
+
+const ROYAL_UR_COLORS = {
+  floor: '#d4b896', floorStroke: '#8b7355',
+  rosette: '#c4956a', rosetteStroke: '#8b5a3a',
+  voidFill: 'transparent',
 }
 
 // ─── HEX GAME COLOR PALETTES ───────────────────────────────────────────────
@@ -264,11 +307,11 @@ const GAMES = {
   },
   reversi: {
     label: 'Reversi',
-    pieceSet: null,
+    pieceSet: 'playstrategy-flipello-classic',
     variants: {
-      standard: { label: 'Standard (8×8)', boardStyle: 'mono-grid', rows: 8, cols: 8, tileSize: 40 },
-      'six-by-six': { label: '6×6', boardStyle: 'mono-grid', rows: 6, cols: 6, tileSize: 40 },
-      'anti-reversi': { label: 'Anti-Reversi (8×8)', boardStyle: 'mono-grid', rows: 8, cols: 8, tileSize: 40 },
+      standard: { label: 'Standard (8×8)', boardStyle: 'mono-grid', rows: 8, cols: 8, tileSize: 40, setup: '8/8/8/3bw3/3wb3/8/8/8', colors: { monoSquare: '#2e7d32', gridLine: '#1b5e20' } },
+      'six-by-six': { label: '6×6', boardStyle: 'mono-grid', rows: 6, cols: 6, tileSize: 40, setup: '6/6/2bw2/2wb2/6/6', colors: { monoSquare: '#2e7d32', gridLine: '#1b5e20' } },
+      'anti-reversi': { label: 'Anti-Reversi (8×8)', boardStyle: 'mono-grid', rows: 8, cols: 8, tileSize: 40, setup: '8/8/8/3bw3/3wb3/8/8/8', colors: { monoSquare: '#2e7d32', gridLine: '#1b5e20' } },
     },
   },
   shogi: {
@@ -283,7 +326,7 @@ const GAMES = {
   },
   morris: {
     label: 'Morris',
-    pieceSet: null,
+    pieceSet: 'playstrategy-go-classic',
     variants: {
       'nine-mens-morris': { label: "Nine Men's Morris", boardStyle: 'morris', boardSize: 320, rings: 3 },
       'six-mens-morris': { label: "Six Men's Morris", boardStyle: 'morris', boardSize: 260, rings: 2 },
@@ -303,21 +346,21 @@ const GAMES = {
   },
   backgammon: {
     label: 'Backgammon',
-    pieceSet: null,
+    pieceSet: 'playstrategy-draughts-plain',
     variants: {
-      standard: { label: 'Standard', static: true },
-      nackgammon: { label: 'Nackgammon', static: true },
-      'acey-deucey': { label: 'Acey-Deucey', static: true },
-      hypergammon: { label: 'Hypergammon', static: true },
-      plakoto: { label: 'Plakoto', static: true },
-      fevga: { label: 'Fevga', static: true },
-      nardi: { label: 'Nardi', static: true },
-      chouette: { label: 'Chouette', static: true },
+      standard: { label: 'Standard', boardStyle: 'backgammon', setupDesc: '15 checkers each: 2 on point 24/1, 5 on 13/12, 3 on 8/17, 5 on 6/19', variantDesc: 'Standard backgammon. Move all checkers to home board and bear off. Doubling cube in use.', setup: '0:2W,5:5B,7:3B,11:5W,12:5B,16:3W,18:5W,23:2B' },
+      nackgammon: { label: 'Nackgammon', boardStyle: 'backgammon', setupDesc: '15 checkers each: 2 on 24/1, 2 on 23/2, 5 on 13/12, 3 on 8/17, 3 on 6/19', variantDesc: 'Nack Ballard variant. Two extra back checkers make priming harder and increase contact.', setup: '0:2W,1:2W,5:3B,7:3B,11:5W,12:5B,16:3W,18:3W,22:2B,23:2B' },
+      'acey-deucey': { label: 'Acey-Deucey', boardStyle: 'backgammon', setupDesc: 'All 15 checkers off-board. Enter from opponent home board.', variantDesc: 'Military variant. All pieces start off-board. Roll acey-deucey (1-2) for bonus turn.', setup: 'home:15W,home:15B' },
+      hypergammon: { label: 'Hypergammon', boardStyle: 'backgammon', setupDesc: '3 checkers each on points 24-22/1-3', variantDesc: 'Speed variant with only 3 pieces per player. High luck factor, quick games.', setup: '0:1W,1:1W,2:1W,21:1B,22:1B,23:1B' },
+      plakoto: { label: 'Plakoto', boardStyle: 'backgammon', setupDesc: 'All 15 checkers on own point 1', variantDesc: 'Greek variant. Pin opponent by landing on their single checker. No hitting, only trapping.', setup: '0:15B,23:15W' },
+      fevga: { label: 'Fevga', boardStyle: 'backgammon', setupDesc: 'All 15 checkers on own point 1', variantDesc: 'Greek variant. No hitting. Cannot block all 6 points in a row unless opponent has passed.', setup: '0:15B,12:15W' },
+      nardi: { label: 'Nardi', boardStyle: 'backgammon', setupDesc: 'All 15 checkers on point 24/1', variantDesc: 'Russian long backgammon. No hitting. Both move same direction. Cannot block 6 consecutive.', setup: '0:15W,23:15B' },
+      chouette: { label: 'Chouette', boardStyle: 'backgammon', setupDesc: 'Standard position. 1 player (Box) vs team (2+).', variantDesc: 'Multi-player format. Box plays alone against a team who share decisions. Losers rotate in.', setup: '0:2W,5:5B,7:3B,11:5W,12:5B,16:3W,18:5W,23:2B' },
     },
   },
   mancala: {
     label: 'Mancala',
-    pieceSet: null,
+    pieceSet: 'playstrategy-oware',
     variants: {
       kalah: { label: 'Kalah', boardStyle: 'mancala', pitsPerSide: 6, seedsPerPit: 4, hasStores: true, pitRadius: 22, storeRx: 24, storeRy: 50, colors: { boardOuter: '#7A5A32', boardInner: '#9B7740', pit: '#4E3320', pitStroke: '#3A2515', seed: '#C8B898', seedStroke: '#8A7A5A' }, setupDesc: '6 pits per side, 4 seeds each, 2 stores', variantDesc: 'Landing in own store grants extra turn. Capture opposite pit when landing in own empty pit.', setup: '4,4,4,4,4,4;0;4,4,4,4,4,4;0' },
       oware: { label: 'Oware', boardStyle: 'mancala', pitsPerSide: 6, seedsPerPit: 4, hasStores: false, pitRadius: 24, colors: { boardOuter: '#7A5A32', boardInner: '#9B7740', pit: '#4E3320', pitStroke: '#3A2515', seed: '#C8B898', seedStroke: '#8A7A5A' }, setupDesc: '6 pits per side, 4 seeds each, no stores', variantDesc: 'Capture seeds from opponent side when sowing ends in pit with 2 or 3 seeds. No extra turns.', setup: '4,4,4,4,4,4;0;4,4,4,4,4,4;0' },
@@ -331,52 +374,52 @@ const GAMES = {
   },
   halma: {
     label: 'Halma',
-    pieceSet: null,
+    pieceSet: 'playstrategy-draughts-plain',
     variants: {
-      'standard-2p': { label: '2-Player (16×16)', boardStyle: 'checkered', rows: 16, cols: 16, tileSize: 20, showLabels: false, colors: { lightSquare: '#f5e6c8', darkSquare: '#e8d4a8' } },
-      'standard-4p': { label: '4-Player (16×16)', boardStyle: 'checkered', rows: 16, cols: 16, tileSize: 20, showLabels: false, colors: { lightSquare: '#f5e6c8', darkSquare: '#e8d4a8' } },
+      'standard-2p': { label: '2-Player (16×16)', boardStyle: 'checkered', rows: 16, cols: 16, tileSize: 20, showLabels: false, colors: { lightSquare: '#f5e6c8', darkSquare: '#e8d4a8' }, setup: 'bbbbb11/bbbbb11/bbbbb11/bbb13/b15/16/16/16/16/16/16/15w/13www/11wwwww/11wwwww/11wwwww', setupDesc: '19 pieces each in opposite corner camps (5-col staircase triangle)', variantDesc: 'Move all pieces from own camp to opponent camp by stepping or jumping.' },
+      'standard-4p': { label: '4-Player (16×16)', boardStyle: 'checkered', rows: 16, cols: 16, tileSize: 20, showLabels: false, colors: { lightSquare: '#f5e6c8', darkSquare: '#e8d4a8' }, setup: 'bbbb8bbbb/bbbb8bbbb/bbb10bbb/bb12bb/16/16/16/16/16/16/16/16/ww12ww/www10www/wwww8wwww/wwww8wwww', setupDesc: '13 pieces each in all 4 corner camps (4-col staircase triangle)', variantDesc: '4-player variant. Move all pieces from own camp to opposite corner camp.' },
     },
   },
   'stern-halma': {
     label: 'Stern-Halma',
-    pieceSet: null,
+    pieceSet: 'playstrategy-draughts-plain',
     variants: {
       standard: { label: 'Chinese Checkers', static: true },
     },
   },
   hex: {
     label: 'Hex',
-    pieceSet: null,
+    pieceSet: 'playstrategy-go-classic',
     variants: {
       standard: { label: 'Standard (11×11)', boardStyle: 'hex', hexRows: 11, hexCols: 11, hexSize: 20, flat: false, colors: { lightHex: '#e8e8e8', darkHex: '#c0c0c0', midHex: '#d8d8d8', stroke: 'rgba(0,0,0,0.3)', background: '#f5f5f5' } },
     },
   },
   'royal-ur': {
     label: 'Royal Ur',
-    pieceSet: null,
+    pieceSet: 'playstrategy-draughts-plain',
     variants: {
-      standard: { label: 'Standard', static: true },
+      standard: { label: 'Standard', boardStyle: 'checkered', rows: 3, cols: 8, tileSize: 40, showLabels: false, cellMap: ROYAL_UR_MAP, colors: ROYAL_UR_COLORS, setupDesc: '7 pieces each, race along a shared middle track', variantDesc: 'Ancient Mesopotamian race game. Roll 4 binary dice. Rosettes grant extra turns and safety.' },
     },
   },
   surakarta: {
     label: 'Surakarta',
-    pieceSet: null,
+    pieceSet: 'playstrategy-go-classic',
     variants: {
-      standard: { label: 'Standard', static: true },
+      standard: { label: 'Standard (6×6)', boardStyle: 'surakarta', rows: 6, cols: 6, tileSize: 50, setup: 'bbbbbb/bbbbbb/6/6/wwwwww/wwwwww', setupDesc: '12 pieces each on nearest two rows', variantDesc: 'Javanese capture game. Pieces move one step orthogonally. Capture by travelling along loop arcs.' },
     },
   },
   pachisi: {
     label: 'Pachisi',
-    pieceSet: null,
+    pieceSet: 'playstrategy-draughts-plain',
     variants: {
-      standard: { label: 'Standard', static: true },
+      standard: { label: 'Standard', boardStyle: 'checkered', rows: 19, cols: 19, tileSize: 20, showLabels: false, cellMap: PACHISI_MAP, colors: PACHISI_COLORS, setupDesc: '4 players, 4 pieces each start at Charkoni (centre)', variantDesc: 'Indian cross-track race game for 4 players. Roll cowrie shells. Castle squares grant safety. First to return all pieces home wins.' },
     },
   },
   chaupar: {
     label: 'Chaupar',
-    pieceSet: null,
+    pieceSet: 'playstrategy-draughts-plain',
     variants: {
-      standard: { label: 'Standard', static: true },
+      standard: { label: 'Standard', boardStyle: 'checkered', rows: 19, cols: 19, tileSize: 20, showLabels: false, cellMap: CHAUPAR_MAP, colors: CHAUPAR_COLORS, setupDesc: '4 players, 4 pieces each start at centre', variantDesc: 'Indian cross-track race game. Similar to Pachisi but with long dice (pase) and different safe squares. More aggressive captures.' },
     },
   },
   'landlords-game': {
@@ -506,6 +549,16 @@ const DRAUGHTS_VOCABULARY = {
   B: { type: 'king', color: 'black' },
 }
 
+const REVERSI_VOCABULARY = {
+  w: { type: 'piece', color: 'white' },
+  b: { type: 'piece', color: 'black' },
+}
+
+const STONE_VOCABULARY = {
+  w: { type: 'stone', color: 'white' },
+  b: { type: 'stone', color: 'black' },
+}
+
 function parseMancalaSetup(notation, pitsPerSide, boardRows) {
   const sections = notation.split(';')
   const players = boardRows === 4 ? 2 : 2
@@ -527,6 +580,25 @@ function parseMancalaSetup(notation, pitsPerSide, boardRows) {
     }
   }
   return { pits, stores }
+}
+
+function parseBackgammonSetup(notation) {
+  const dark = new Array(24).fill(0)
+  const light = new Array(24).fill(0)
+  if (!notation || notation === 'empty') return { dark, light }
+  const pairs = notation.split(',')
+  for (const pair of pairs) {
+    const [posStr, countSymbol] = pair.split(':')
+    if (!countSymbol || posStr === 'home' || posStr === 'bar') continue
+    const pos = parseInt(posStr, 10)
+    const match = countSymbol.match(/^(\d+)([WB])$/)
+    if (!match) continue
+    const count = parseInt(match[1], 10)
+    const owner = match[2]
+    if (owner === 'W') light[pos] = count
+    else dark[pos] = count
+  }
+  return { dark, light }
 }
 
 function buildDraughtsFenFromSetup(rows, cols, setup) {
@@ -557,7 +629,8 @@ function buildDraughtsFenFromSetup(rows, cols, setup) {
   return fenRows.join('/')
 }
 
-function parseDraughtsFen(fen, rows, cols) {
+function parseDraughtsFen(fen, rows, cols, vocabulary) {
+  const vocab = vocabulary || DRAUGHTS_VOCABULARY
   const position = {}
   const ranks = fen.split('/')
   for (let r = 0; r < ranks.length; r++) {
@@ -570,10 +643,10 @@ function parseDraughtsFen(fen, rows, cols) {
         if (next >= '0' && next <= '9') { c += parseInt(ch + next, 10); i += 2 }
         else { c += parseInt(ch, 10); i++ }
       } else {
-        if (DRAUGHTS_VOCABULARY[ch]) {
+        if (vocab[ch]) {
           const file = String.fromCharCode(97 + c)
           const rankNum = rows - r
-          position[`${file}${rankNum}`] = { ...DRAUGHTS_VOCABULARY[ch] }
+          position[`${file}${rankNum}`] = { ...vocab[ch] }
         }
         c++; i++
       }
@@ -855,14 +928,22 @@ function render() {
   }
 
   // Build position from draughts-vocabulary FEN (setup notation spec)
-  // Mancala handles seeds internally via its provider
-  if (config.setup && config.boardStyle !== 'mancala') {
-    config.position = parseDraughtsFen(config.setup, config.rows, config.cols)
+  // Mancala and backgammon handle pieces internally via their providers
+  if (config.setup && config.boardStyle !== 'mancala' && config.boardStyle !== 'backgammon') {
+    const vocab = (state.game === 'reversi') ? REVERSI_VOCABULARY
+      : (state.game === 'surakarta') ? STONE_VOCABULARY
+      : DRAUGHTS_VOCABULARY
+    config.position = parseDraughtsFen(config.setup, config.rows, config.cols, vocab)
   }
 
   // Parse mancala setup into pit seed counts for the provider
   if (config.setup && config.boardStyle === 'mancala') {
     config.parsedSetup = parseMancalaSetup(config.setup, config.pitsPerSide, config.boardRows || 2)
+  }
+
+  // Parse backgammon setup into point counts for the provider
+  if (config.setup && config.boardStyle === 'backgammon') {
+    config.parsedSetup = parseBackgammonSetup(config.setup)
   }
 
   // Build draughts position (legacy — will be replaced by setup FEN)
@@ -885,7 +966,7 @@ function render() {
   }
 
   // Build piece image paths
-  if (game.pieceSet && (config.position || config.hexPosition)) {
+  if (game.pieceSet && (config.position || config.hexPosition || config.parsedSetup)) {
     config.pieceImages = buildPieceImages(game.pieceSet, galleryIndex, state.game)
   }
 
