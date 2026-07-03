@@ -1078,21 +1078,19 @@ const sternHalma = {
     const s = spacing / 24
     const midY = topY + 8 * rowH
     const pieceR = spacing * 0.35
-    // The hex edges are closer to arm holes than tips are to their holes.
-    // Hex needs more expansion than tips. Compute each independently.
-    // Nearest arm hole to hex edge: row 3/13 holes, distance = 5*rowH - 93*s = ~10.9
-    // Need at least pieceR+2 clearance from hole centre to polygon edge.
-    const hexExpand = (pieceR + 2 - (5 * rowH - 93 * s)) / (93 * s)
-    // Tips have plenty of room (8*rowH - 180.3*s ≈ -14 → hole is well inside)
-    const tipExpand = (pieceR + 2) / (180.3 * s)
-
-    const hexScale = 1 + Math.max(0, hexExpand)
-    const tipScale = 1 + tipExpand
+    // Arm holes nearest to polygon edges: row 4 holes are ~9.9px from the
+    // horizontal hex edges (y = ±93*s). Need pieceR+3 clearance everywhere.
+    // Use a single scale factor based on the tightest constraint.
+    const needed = pieceR + 3
+    const available = 5 * rowH - 93 * s  // ~10.9px (distance from row 3 holes to hex edge)
+    const sideAvailable = 93 * s - (8 - 4) * rowH  // distance from horizontal edge to row 4 = 93 - 83.1 = 9.9
+    const worstCase = Math.min(available, sideAvailable)
+    const scale = needed / worstCase
 
     const hex = [[-50.5, -93], [50.5, -93], [104.3, 0], [50.5, 92.9], [-50.5, 92.9], [-104.3, 0]]
-      .map(([dx, dy]) => ({ x: cx + dx * s * hexScale, y: midY + dy * s * hexScale }))
+      .map(([dx, dy]) => ({ x: cx + dx * s * scale, y: midY + dy * s * scale }))
     const tips = [[0, -180.3], [158, -93], [158, 92.9], [0, 180.3], [-158, 92.9], [-158, -93]]
-      .map(([dx, dy]) => ({ x: cx + dx * s * tipScale, y: midY + dy * s * tipScale }))
+      .map(([dx, dy]) => ({ x: cx + dx * s * scale, y: midY + dy * s * scale }))
 
     // Centre hexagon fill
     parts.push(`<polygon points="${hex.map(v => `${v.x},${v.y}`).join(' ')}" fill="${colors.centre}"/>`)
