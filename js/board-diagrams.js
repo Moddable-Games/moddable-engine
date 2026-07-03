@@ -1072,33 +1072,42 @@ const sternHalma = {
 
     parts.push(`<rect x="${ox}" y="${oy}" width="${boardW}" height="${boardH}" fill="${colors.background}" rx="6"/>`)
 
-    // Polygon geometry from the static SVG (diagrams/static/stern-halma/).
-    // Original centre (194, 216.3), spacing 24. Scale by s = spacing/24.
-    // All vertices expanded uniformly outward by pieceR so outermost pieces fit.
+    // Polygon geometry from the static SVG. Arm fills clipped to star outline
+    // so they never exceed the boundary regardless of hex vertex adjustments.
     const s = spacing / 24
     const midY = topY + 8 * rowH
     const pieceR = spacing * 0.19
-    // Hex vertices adjusted so polygon edges are equidistant from holes on both sides.
-    // Horizontal edges (top/bottom) are already centred. Diagonal edges need middle
-    // vertices pushed outward by ~4px to centre them between arm and body holes.
-    const diagAdj = 4 * (24 / spacing)
-    const hex = [[-50.5, -93], [50.5, -93], [104.3 + diagAdj, 0], [50.5, 92.9], [-50.5, 92.9], [-104.3 - diagAdj, 0]]
+
+    const hex = [[-50.5, -93], [50.5, -93], [104.3, 0], [50.5, 92.9], [-50.5, 92.9], [-104.3, 0]]
       .map(([dx, dy]) => ({ x: cx + dx * s, y: midY + dy * s }))
     const tips = [[0, -180.3], [158, -93], [158, 92.9], [0, 180.3], [-158, 92.9], [-158, -93]]
       .map(([dx, dy]) => ({ x: cx + dx * s, y: midY + dy * s }))
 
+    // Star outline as clipPath — arm fills are clipped to this
+    const tri1pts = `${tips[0].x},${tips[0].y} ${tips[4].x},${tips[4].y} ${tips[2].x},${tips[2].y}`
+    const tri2pts = `${tips[3].x},${tips[3].y} ${tips[5].x},${tips[5].y} ${tips[1].x},${tips[1].y}`
+    const clipId = 'star-clip'
+    parts.push(`<defs><clipPath id="${clipId}"><polygon points="${tri1pts}"/><polygon points="${tri2pts}"/></clipPath></defs>`)
+
     // Centre hexagon fill
     parts.push(`<polygon points="${hex.map(v => `${v.x},${v.y}`).join(' ')}" fill="${colors.centre}"/>`)
 
-    // Arm triangle fills
+    // Arm fills: slightly oversized, clipped to star outline
     const armFills = [colors.armN, colors.armNE, colors.armSE, colors.armS, colors.armSW, colors.armNW]
+    parts.push(`<g clip-path="url(#${clipId})">`)
     for (let i = 0; i < 6; i++) {
-      parts.push(`<polygon points="${tips[i].x},${tips[i].y} ${hex[i].x},${hex[i].y} ${hex[(i + 1) % 6].x},${hex[(i + 1) % 6].y}" fill="${armFills[i]}"/>`)
+      const tip = tips[i]
+      const hL = hex[i]
+      const hR = hex[(i + 1) % 6]
+      const extL = { x: hL.x + (hL.x - cx) * 0.2, y: hL.y + (hL.y - midY) * 0.2 }
+      const extR = { x: hR.x + (hR.x - cx) * 0.2, y: hR.y + (hR.y - midY) * 0.2 }
+      parts.push(`<polygon points="${tip.x},${tip.y} ${extL.x},${extL.y} ${extR.x},${extR.y}" fill="${armFills[i]}"/>`)
     }
+    parts.push('</g>')
 
-    // Two overlapping triangle outlines (same expanded vertices = perfect alignment)
-    parts.push(`<polygon points="${tips[0].x},${tips[0].y} ${tips[4].x},${tips[4].y} ${tips[2].x},${tips[2].y}" fill="none" stroke="${colors.outline}" stroke-width="1"/>`)
-    parts.push(`<polygon points="${tips[3].x},${tips[3].y} ${tips[5].x},${tips[5].y} ${tips[1].x},${tips[1].y}" fill="none" stroke="${colors.outline}" stroke-width="1"/>`)
+    // Two overlapping triangle outlines
+    parts.push(`<polygon points="${tri1pts}" fill="none" stroke="${colors.outline}" stroke-width="1"/>`)
+    parts.push(`<polygon points="${tri2pts}" fill="none" stroke="${colors.outline}" stroke-width="1"/>`)
 
     const filledArms = opts.filledArms || []
     const pieceImages = opts.pieceImages || {}
