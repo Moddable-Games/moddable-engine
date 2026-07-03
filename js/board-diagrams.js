@@ -1014,9 +1014,115 @@ const backgammon = {
   },
 }
 
+const sternHalma = {
+  name: 'stern-halma',
+  positionType: 'node',
+  labelStyle: 'none',
+  defaultColors: {
+    background: '#f8f9fc', centre: '#eef1f8',
+    armN: '#f0e0c8', armNE: '#c8e8d0', armSE: '#c8d8f0',
+    armS: '#f0e0c8', armSW: '#c8e8d0', armNW: '#c8d8f0',
+    outline: '#8898b8', hole: '#2a3a5c',
+  },
+  computeLayout(opts) {
+    const spacing = opts.holeSpacing || 24
+    const boardW = spacing * 16 + 4
+    const boardH = Math.round(spacing * Math.sqrt(3) / 2 * 16) + 20
+    return { boardW, boardH }
+  },
+  render(ctx) {
+    const { colors, opts, ox, oy } = ctx
+    const spacing = opts.holeSpacing || 24
+    const rowH = spacing * Math.sqrt(3) / 2
+    const parts = []
+
+    const rowWidths = [1, 2, 3, 4, 13, 12, 11, 10, 9, 10, 11, 12, 13, 4, 3, 2, 1]
+    const cx = ox + spacing * 8
+    const topY = oy + 14
+
+    const holePositions = []
+    const armHoles = { N: [], NE: [], SE: [], S: [], SW: [], NW: [] }
+
+    for (let row = 0; row < 17; row++) {
+      const w = rowWidths[row]
+      const y = topY + row * rowH
+      const startX = cx - (w - 1) * spacing / 2
+      for (let i = 0; i < w; i++) {
+        const x = startX + i * spacing
+        const idx = holePositions.length
+        holePositions.push({ x, y, row, col: i })
+
+        if (row < 4) armHoles.N.push(idx)
+        else if (row >= 13) armHoles.S.push(idx)
+        else if (row >= 4 && row <= 7) {
+          if (i < 4 - (row - 4)) armHoles.NW.push(idx)
+          else if (i >= w - (4 - (row - 4))) armHoles.NE.push(idx)
+        } else if (row >= 9 && row <= 12) {
+          if (i < row - 8) armHoles.SW.push(idx)
+          else if (i >= w - (row - 8)) armHoles.SE.push(idx)
+        }
+      }
+    }
+
+    const { boardW, boardH } = this.computeLayout(opts)
+    parts.push(`<rect x="${ox}" y="${oy}" width="${boardW}" height="${boardH}" fill="${colors.background}" rx="6"/>`)
+
+    const armVertices = (arm) => {
+      const holes = armHoles[arm]
+      if (!holes.length) return ''
+      const pts = holes.map(i => holePositions[i])
+      const minX = Math.min(...pts.map(p => p.x)) - spacing * 0.4
+      const maxX = Math.max(...pts.map(p => p.x)) + spacing * 0.4
+      const minY = Math.min(...pts.map(p => p.y)) - rowH * 0.4
+      const maxY = Math.max(...pts.map(p => p.y)) + rowH * 0.4
+      return `${minX},${minY} ${maxX},${minY} ${maxX},${maxY} ${minX},${maxY}`
+    }
+
+    const tipN = holePositions[armHoles.N[0]]
+    const baseNL = holePositions[armHoles.N[armHoles.N.length - 4]]
+    const baseNR = holePositions[armHoles.N[armHoles.N.length - 1]]
+    parts.push(`<polygon points="${tipN.x},${tipN.y - spacing * 0.5} ${baseNL.x - spacing * 0.5},${baseNR.y + rowH * 0.5} ${baseNR.x + spacing * 0.5},${baseNR.y + rowH * 0.5}" fill="${colors.armN}"/>`)
+
+    const tipS = holePositions[armHoles.S[armHoles.S.length - 1]]
+    const baseSL = holePositions[armHoles.S[0]]
+    const baseSR = holePositions[armHoles.S[3]]
+    parts.push(`<polygon points="${baseSL.x - spacing * 0.5},${baseSL.y - rowH * 0.5} ${baseSR.x + spacing * 0.5},${baseSR.y - rowH * 0.5} ${tipS.x},${tipS.y + spacing * 0.5}" fill="${colors.armS}"/>`)
+
+    const centreY1 = topY + 4 * rowH
+    const centreY2 = topY + 12 * rowH
+    const centreXL = cx - 4.5 * spacing
+    const centreXR = cx + 4.5 * spacing
+    const midOffL = spacing * 2.25
+    const midOffR = spacing * 2.25
+    parts.push(`<polygon points="${cx},${centreY1 - rowH * 0.5} ${centreXR + midOffR},${(centreY1 + centreY2) / 2 - rowH * 2} ${centreXR + midOffR},${(centreY1 + centreY2) / 2 + rowH * 2} ${cx},${centreY2 + rowH * 0.5} ${centreXL - midOffL},${(centreY1 + centreY2) / 2 + rowH * 2} ${centreXL - midOffL},${(centreY1 + centreY2) / 2 - rowH * 2}" fill="${colors.centre}"/>`)
+
+    parts.push(`<g fill="${colors.hole}" opacity="0.8">`)
+    for (let i = 0; i < holePositions.length; i++) {
+      const p = holePositions[i]
+      parts.push(`<circle cx="${p.x}" cy="${p.y}" r="5"/>`)
+      parts.push(`<circle cx="${p.x}" cy="${p.y}" r="${spacing * 0.4}" fill="transparent" class="board-cell" data-sq="h${i + 1}" data-type="hole"/>`)
+    }
+    parts.push('</g>')
+
+    const labels = [
+      { text: 'N', x: cx, y: oy + 6 },
+      { text: 'S', x: cx, y: oy + boardH - 4 },
+      { text: 'NE', x: ox + boardW - 12, y: topY + 4.5 * rowH },
+      { text: 'NW', x: ox + 12, y: topY + 4.5 * rowH },
+      { text: 'SE', x: ox + boardW - 12, y: topY + 11.5 * rowH },
+      { text: 'SW', x: ox + 12, y: topY + 11.5 * rowH },
+    ]
+    parts.push(`<g font-family="sans-serif" font-size="11" fill="#1c2d4a" font-weight="600" text-anchor="middle">`)
+    for (const l of labels) parts.push(`<text x="${l.x}" y="${l.y}">${l.text}</text>`)
+    parts.push('</g>')
+
+    return parts.join('')
+  },
+}
+
 // ─── PROVIDER REGISTRY ──────────────────────────────────────────────────────
 
-const PROVIDERS = { checkered, 'mono-grid': monoGrid, go, surakarta, xiangqi, shogi, morris, alquerque, hex, mancala, backgammon }
+const PROVIDERS = { checkered, 'mono-grid': monoGrid, go, surakarta, xiangqi, shogi, morris, alquerque, hex, mancala, backgammon, 'stern-halma': sternHalma }
 
 // ─── RENDERER (ported from moddable-chess/js/svg-renderer.js) ───────────────
 
