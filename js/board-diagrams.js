@@ -1071,63 +1071,30 @@ const sternHalma = {
     parts.push(`<rect x="${ox}" y="${oy}" width="${boardW}" height="${boardH}" fill="${colors.background}" rx="6"/>`)
 
     const midY = topY + 8 * rowH
-    const halfH = 8 * rowH
-    const halfW = 6.5 * spacing
-
-    const hexPts = [
-      `${cx},${midY - halfH}`,
-      `${cx + halfW},${midY - halfH / 2}`,
-      `${cx + halfW},${midY + halfH / 2}`,
-      `${cx},${midY + halfH}`,
-      `${cx - halfW},${midY + halfH / 2}`,
-      `${cx - halfW},${midY - halfH / 2}`,
-    ]
-    parts.push(`<polygon points="${hexPts.join(' ')}" fill="${colors.centre}"/>`)
-
-    const armTri = (tip, baseL, baseR, fill) => {
-      parts.push(`<polygon points="${tip} ${baseL} ${baseR}" fill="${fill}"/>`)
+    const r = 8.5 * rowH
+    const hexV = []
+    const starV = []
+    for (let i = 0; i < 6; i++) {
+      const ang = Math.PI / 2 + i * Math.PI / 3
+      hexV.push({ x: cx + r * 0.58 * Math.cos(ang), y: midY - r * 0.58 * Math.sin(ang) })
+      starV.push({ x: cx + r * Math.cos(ang), y: midY - r * Math.sin(ang) })
     }
-    const pad = spacing * 0.6
-    const tipN = positions[arms.N[0]]
-    const baseNL = positions[arms.N[6]]
-    const baseNR = positions[arms.N[9]]
-    armTri(`${tipN.x},${tipN.y - pad}`, `${baseNL.x - pad},${baseNR.y + pad}`, `${baseNR.x + pad},${baseNR.y + pad}`, colors.armN)
 
-    const tipS = positions[arms.S[9]]
-    const baseSL = positions[arms.S[0]]
-    const baseSR = positions[arms.S[3]]
-    armTri(`${tipS.x},${tipS.y + pad}`, `${baseSL.x - pad},${baseSL.y - pad}`, `${baseSR.x + pad},${baseSR.y - pad}`, colors.armS)
+    parts.push(`<polygon points="${hexV.map(p => `${p.x},${p.y}`).join(' ')}" fill="${colors.centre}"/>`)
 
-    const neHoles = arms.NE
-    const tipNE = positions[neHoles[0]]
-    const baseNE1 = positions[neHoles[neHoles.length - 1]]
-    const baseNE2 = positions[neHoles[neHoles.length - 4]]
-    armTri(`${tipNE.x + pad},${tipNE.y - pad * 0.5}`, `${baseNE2.x - pad * 0.3},${baseNE2.y + pad}`, `${baseNE1.x + pad},${baseNE1.y + pad}`, colors.armNE)
+    const armFills = [colors.armN, colors.armNE, colors.armSE, colors.armS, colors.armSW, colors.armNW]
+    for (let i = 0; i < 6; i++) {
+      const tip = starV[i]
+      const baseL = hexV[i]
+      const baseR = hexV[(i + 5) % 6]
+      parts.push(`<polygon points="${tip.x},${tip.y} ${baseL.x},${baseL.y} ${baseR.x},${baseR.y}" fill="${armFills[i]}"/>`)
+    }
 
-    const nwHoles = arms.NW
-    const tipNW = positions[nwHoles[0]]
-    const baseNW1 = positions[nwHoles[nwHoles.length - 1]]
-    const baseNW2 = positions[nwHoles[nwHoles.length - 4]]
-    armTri(`${tipNW.x - pad},${tipNW.y - pad * 0.5}`, `${baseNW1.x - pad},${baseNW1.y + pad}`, `${baseNW2.x + pad * 0.3},${baseNW2.y + pad}`, colors.armNW)
+    const tri1 = [starV[0], starV[2], starV[4]]
+    const tri2 = [starV[1], starV[3], starV[5]]
+    parts.push(`<polygon points="${tri1.map(p => `${p.x},${p.y}`).join(' ')}" fill="none" stroke="${colors.outline}" stroke-width="1"/>`)
+    parts.push(`<polygon points="${tri2.map(p => `${p.x},${p.y}`).join(' ')}" fill="none" stroke="${colors.outline}" stroke-width="1"/>`)
 
-    const seHoles = arms.SE
-    const tipSE = positions[seHoles[seHoles.length - 1]]
-    const baseSE1 = positions[seHoles[0]]
-    const baseSE2 = positions[seHoles[3]]
-    armTri(`${tipSE.x + pad},${tipSE.y + pad * 0.5}`, `${baseSE1.x - pad * 0.3},${baseSE1.y - pad}`, `${baseSE2.x + pad},${baseSE2.y - pad}`, colors.armSE)
-
-    const swHoles = arms.SW
-    const tipSW = positions[swHoles[swHoles.length - 1]]
-    const baseSW1 = positions[swHoles[0]]
-    const baseSW2 = positions[swHoles[3]]
-    armTri(`${tipSW.x - pad},${tipSW.y + pad * 0.5}`, `${baseSW1.x - pad},${baseSW1.y - pad}`, `${baseSW2.x + pad * 0.3},${baseSW2.y - pad}`, colors.armSW)
-
-    const triUp = `${cx},${midY - halfH - pad} ${cx - halfW - pad},${midY + halfH / 2 + pad} ${cx + halfW + pad},${midY + halfH / 2 + pad}`
-    const triDn = `${cx},${midY + halfH + pad} ${cx - halfW - pad},${midY - halfH / 2 - pad} ${cx + halfW + pad},${midY - halfH / 2 - pad}`
-    parts.push(`<polygon points="${triUp}" fill="none" stroke="${colors.outline}" stroke-width="1"/>`)
-    parts.push(`<polygon points="${triDn}" fill="none" stroke="${colors.outline}" stroke-width="1"/>`)
-
-    const pieceImages = opts.pieceImages || {}
     const filledArms = opts.filledArms || []
     const armColors = ['#d32f2f', '#1976d2', '#388e3c', '#f9a825', '#7b1fa2', '#e64a19']
 
@@ -1140,19 +1107,14 @@ const sternHalma = {
     parts.push('</g>')
 
     const armOrder = ['N', 'NE', 'SE', 'S', 'SW', 'NW']
+    const pieceR = spacing * 0.28
     for (let a = 0; a < filledArms.length; a++) {
       const armName = filledArms[a]
       const holeIdxs = arms[armName]
       const color = armColors[armOrder.indexOf(armName)] || armColors[a]
-      const img = pieceImages.bM || null
       for (const idx of holeIdxs) {
         const p = positions[idx]
-        if (img) {
-          const sz = spacing * 0.8
-          parts.push(`<image href="${img}" x="${p.x - sz / 2}" y="${p.y - sz / 2}" width="${sz}" height="${sz}"/>`)
-        } else {
-          parts.push(`<circle cx="${p.x}" cy="${p.y}" r="${spacing * 0.35}" fill="${color}" stroke="#fff" stroke-width="1.5"/>`)
-        }
+        parts.push(`<circle cx="${p.x}" cy="${p.y}" r="${pieceR}" fill="${color}" stroke="#fff" stroke-width="1"/>`)
       }
     }
 
