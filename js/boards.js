@@ -1097,6 +1097,15 @@ function bindBoardHover(config) {
       const name = PIECE_NAMES[p.type] || p.type
       text += ` — ${color} ${name}`
     }
+    if (sq.startsWith('h') && type.startsWith('arm-')) {
+      const arm = cell.dataset.arm || type.slice(4)
+      const armNames = { N: 'North', NE: 'North-East', SE: 'South-East', S: 'South', SW: 'South-West', NW: 'North-West' }
+      text = `${sq} — ${armNames[arm] || arm} arm`
+      const filledArms = config.filledArms || []
+      if (filledArms.includes(arm)) text += ' (occupied)'
+    } else if (sq.startsWith('h') && type === 'centre') {
+      text = `${sq} — centre`
+    }
     if (parsedSetup && sq.startsWith('pit-')) {
       const idx = parseInt(sq.slice(4), 10)
       const count = parsedSetup.pits ? (parsedSetup.pits[idx] || 0) : 0
