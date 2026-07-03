@@ -1078,18 +1078,19 @@ const sternHalma = {
     const s = spacing / 24
     const midY = topY + 8 * rowH
     const pieceR = spacing * 0.35
-    const pad = pieceR + 2
+    const pad = pieceR
 
-    const expandFromCentre = (dx, dy) => {
-      const px = dx * s, py = dy * s
-      const dist = Math.sqrt(px * px + py * py)
-      if (dist === 0) return { x: cx, y: midY }
-      return { x: cx + px + px / dist * pad, y: midY + py + py / dist * pad }
+    // Scale factor: expand everything proportionally from centre (multiplicative, not additive)
+    // This preserves the shape exactly while growing it uniformly
+    const scaleFactor = 1 + pad / (158 * s)
+
+    const scaleFromCentre = (dx, dy) => {
+      return { x: cx + dx * s * scaleFactor, y: midY + dy * s * scaleFactor }
     }
 
-    // Hexagon and star vertices, all expanded uniformly
-    const hex = [[-50.5, -93], [50.5, -93], [104.3, 0], [50.5, 92.9], [-50.5, 92.9], [-104.3, 0]].map(([dx, dy]) => expandFromCentre(dx, dy))
-    const tips = [[0, -180.3], [158, -93], [158, 92.9], [0, 180.3], [-158, 92.9], [-158, -93]].map(([dx, dy]) => expandFromCentre(dx, dy))
+    // Hexagon and star vertices, scaled proportionally
+    const hex = [[-50.5, -93], [50.5, -93], [104.3, 0], [50.5, 92.9], [-50.5, 92.9], [-104.3, 0]].map(([dx, dy]) => scaleFromCentre(dx, dy))
+    const tips = [[0, -180.3], [158, -93], [158, 92.9], [0, 180.3], [-158, 92.9], [-158, -93]].map(([dx, dy]) => scaleFromCentre(dx, dy))
 
     // Centre hexagon fill
     parts.push(`<polygon points="${hex.map(v => `${v.x},${v.y}`).join(' ')}" fill="${colors.centre}"/>`)
@@ -1144,10 +1145,10 @@ const sternHalma = {
       }
     }
 
-    const labelPad = spacing * 0.8
+    const labelPad = spacing * 1.2
     const labels = [
       { text: 'N', x: cx, y: tips[0].y - labelPad },
-      { text: 'S', x: cx, y: tips[3].y + labelPad + 10 },
+      { text: 'S', x: cx, y: tips[3].y + labelPad + 4 },
       { text: 'NE', x: tips[1].x + labelPad, y: tips[1].y + 4 },
       { text: 'NW', x: tips[5].x - labelPad, y: tips[5].y + 4 },
       { text: 'SE', x: tips[2].x + labelPad, y: tips[2].y + 4 },
