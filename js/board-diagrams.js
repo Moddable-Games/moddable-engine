@@ -1078,8 +1078,11 @@ const sternHalma = {
     const s = spacing / 24
     const midY = topY + 8 * rowH
     const pieceR = spacing * 0.19
-    // Use original geometry unscaled. Pieces sized to fit the tightest gap (9.9px).
-    const hex = [[-50.5, -93], [50.5, -93], [104.3, 0], [50.5, 92.9], [-50.5, 92.9], [-104.3, 0]]
+    // Hex vertices adjusted so polygon edges are equidistant from holes on both sides.
+    // Horizontal edges (top/bottom) are already centred. Diagonal edges need middle
+    // vertices pushed outward by ~4px to centre them between arm and body holes.
+    const diagAdj = 4 * (24 / spacing)
+    const hex = [[-50.5, -93], [50.5, -93], [104.3 + diagAdj, 0], [50.5, 92.9], [-50.5, 92.9], [-104.3 - diagAdj, 0]]
       .map(([dx, dy]) => ({ x: cx + dx * s, y: midY + dy * s }))
     const tips = [[0, -180.3], [158, -93], [158, 92.9], [0, 180.3], [-158, 92.9], [-158, -93]]
       .map(([dx, dy]) => ({ x: cx + dx * s, y: midY + dy * s }))
