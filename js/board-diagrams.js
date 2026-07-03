@@ -1026,15 +1026,17 @@ const sternHalma = {
   },
   computeLayout(opts) {
     const spacing = opts.holeSpacing || 24
-    const boardW = spacing * 16 + 4
-    const boardH = Math.round(spacing * Math.sqrt(3) / 2 * 16) + 28
+    const margin = spacing * 2
+    const boardW = spacing * 16 + margin * 2
+    const boardH = Math.round(spacing * Math.sqrt(3) / 2 * 16) + margin * 2 + 10
     return { boardW, boardH }
   },
   getHolePositions(opts, ox, oy) {
     const spacing = opts.holeSpacing || 24
     const rowH = spacing * Math.sqrt(3) / 2
-    const cx = ox + spacing * 8
-    const topY = oy + 18
+    const margin = spacing * 2
+    const cx = ox + spacing * 8 + margin
+    const topY = oy + margin + 5
     const rowWidths = [1, 2, 3, 4, 13, 12, 11, 10, 9, 10, 11, 12, 13, 4, 3, 2, 1]
     const positions = []
     const arms = { N: [], NE: [], SE: [], S: [], SW: [], NW: [] }
@@ -1096,12 +1098,12 @@ const sternHalma = {
       { x: cx + (-158) * s, y: midY + (-93) * s },
     ]
 
-    // Arm triangles: tip → adjacent hex vertices
+    // Arm triangles: tip → hex[i] → hex[i+1] (matching original static SVG winding)
     const armFills = [colors.armN, colors.armNE, colors.armSE, colors.armS, colors.armSW, colors.armNW]
     for (let i = 0; i < 6; i++) {
       const tip = tips[i]
       const hL = hex[i]
-      const hR = hex[(i + 5) % 6]
+      const hR = hex[(i + 1) % 6]
       parts.push(`<polygon points="${tip.x},${tip.y} ${hL.x},${hL.y} ${hR.x},${hR.y}" fill="${armFills[i]}"/>`)
     }
 
@@ -1149,13 +1151,14 @@ const sternHalma = {
       }
     }
 
+    const labelPad = spacing * 0.8
     const labels = [
-      { text: 'N', x: cx, y: oy + 8 },
-      { text: 'S', x: cx, y: oy + boardH - 2 },
-      { text: 'NE', x: ox + boardW - 14, y: topY + 4.5 * rowH },
-      { text: 'NW', x: ox + 14, y: topY + 4.5 * rowH },
-      { text: 'SE', x: ox + boardW - 14, y: topY + 11.5 * rowH },
-      { text: 'SW', x: ox + 14, y: topY + 11.5 * rowH },
+      { text: 'N', x: cx, y: tips[0].y - labelPad },
+      { text: 'S', x: cx, y: tips[3].y + labelPad + 10 },
+      { text: 'NE', x: tips[1].x + labelPad, y: tips[1].y + 4 },
+      { text: 'NW', x: tips[5].x - labelPad, y: tips[5].y + 4 },
+      { text: 'SE', x: tips[2].x + labelPad, y: tips[2].y + 4 },
+      { text: 'SW', x: tips[4].x - labelPad, y: tips[4].y + 4 },
     ]
     parts.push(`<g font-family="sans-serif" font-size="11" fill="#1c2d4a" font-weight="600" text-anchor="middle">`)
     for (const l of labels) parts.push(`<text x="${l.x}" y="${l.y}">${l.text}</text>`)
