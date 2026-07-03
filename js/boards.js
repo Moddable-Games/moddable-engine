@@ -380,7 +380,7 @@ const GAMES = {
   },
   'stern-halma': {
     label: 'Stern-Halma',
-    pieceSet: 'playstrategy-draughts-plain',
+    pieceSet: 'fluent-emoji',
     variants: {
       '2-player': { label: '2 Player (N vs S)', boardStyle: 'stern-halma', holeSpacing: 24, filledArms: ['N', 'S'], setupDesc: '10 pieces each in opposite arms (N and S)', variantDesc: 'Race across the star board. Hop chains in any direction. No captures.' },
       '3-player': { label: '3 Player', boardStyle: 'stern-halma', holeSpacing: 24, filledArms: ['N', 'SE', 'SW'], setupDesc: '10 pieces each in alternating arms (N, SE, SW)', variantDesc: '3 players on alternating arms. Each races to the diagonally opposite arm.' },
@@ -967,7 +967,7 @@ function render() {
   }
 
   // Build piece image paths
-  if (game.pieceSet && (config.position || config.hexPosition || config.parsedSetup)) {
+  if (game.pieceSet && (config.position || config.hexPosition || config.parsedSetup || config.filledArms)) {
     config.pieceImages = buildPieceImages(game.pieceSet, galleryIndex, state.game)
   }
 
