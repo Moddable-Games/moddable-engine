@@ -1073,32 +1073,32 @@ const sternHalma = {
     parts.push(`<rect x="${ox}" y="${oy}" width="${boardW}" height="${boardH}" fill="${colors.background}" rx="6"/>`)
 
     // Polygon geometry derived from the working static SVG (diagrams/static/stern-halma/)
-    // Original: centre (194, 216.3), spacing 24. We scale offsets by (spacing/24).
+    // Original: centre (194, 216.3), spacing 24. Scale by (spacing/24).
+    // All polygons expanded outward by pieceR so pieces at edges fit inside.
     const s = spacing / 24
     const midY = topY + 8 * rowH
+    const pieceR = spacing * 0.35
+    const expand = pieceR + 1
+
+    // Expand a point outward from centre by a fixed amount
+    const expandPt = (bx, by) => {
+      const px = bx * s, py = by * s
+      const dist = Math.sqrt(px * px + py * py)
+      if (dist === 0) return { x: cx, y: midY }
+      const factor = (dist + expand) / dist
+      return { x: cx + px * factor, y: midY + py * factor }
+    }
 
     // Hexagon vertices (centre body)
-    const hex = [
-      { x: cx + (-50.5) * s, y: midY + (-93) * s },
-      { x: cx + (50.5) * s, y: midY + (-93) * s },
-      { x: cx + (104.3) * s, y: midY + (0) * s },
-      { x: cx + (50.5) * s, y: midY + (92.9) * s },
-      { x: cx + (-50.5) * s, y: midY + (92.9) * s },
-      { x: cx + (-104.3) * s, y: midY + (0) * s },
-    ]
+    const hexBase = [[-50.5, -93], [50.5, -93], [104.3, 0], [50.5, 92.9], [-50.5, 92.9], [-104.3, 0]]
+    const hex = hexBase.map(([bx, by]) => expandPt(bx, by))
     parts.push(`<polygon points="${hex.map(v => `${v.x},${v.y}`).join(' ')}" fill="${colors.centre}"/>`)
 
     // Star tips
-    const tips = [
-      { x: cx, y: midY + (-180.3) * s },
-      { x: cx + (158) * s, y: midY + (-93) * s },
-      { x: cx + (158) * s, y: midY + (92.9) * s },
-      { x: cx, y: midY + (180.3) * s },
-      { x: cx + (-158) * s, y: midY + (92.9) * s },
-      { x: cx + (-158) * s, y: midY + (-93) * s },
-    ]
+    const tipsBase = [[0, -180.3], [158, -93], [158, 92.9], [0, 180.3], [-158, 92.9], [-158, -93]]
+    const tips = tipsBase.map(([bx, by]) => expandPt(bx, by))
 
-    // Arm triangles: tip → hex[i] → hex[i+1] (matching original static SVG winding)
+    // Arm triangles: tip → hex[i] → hex[i+1]
     const armFills = [colors.armN, colors.armNE, colors.armSE, colors.armS, colors.armSW, colors.armNW]
     for (let i = 0; i < 6; i++) {
       const tip = tips[i]
@@ -1126,15 +1126,14 @@ const sternHalma = {
       const hp = positions[i]
       const arm = holeArm[i]
       const armAttr = arm ? ` data-arm="${arm}"` : ''
-      parts.push(`<circle cx="${hp.x}" cy="${hp.y}" r="5"/>`)
-      parts.push(`<circle cx="${hp.x}" cy="${hp.y}" r="${spacing * 0.4}" fill="transparent" class="board-cell" data-sq="h${i + 1}" data-type="${arm ? 'arm-' + arm : 'centre'}"${armAttr}/>`)
+      parts.push(`<circle cx="${hp.x}" cy="${hp.y}" r="3"/>`)
+      parts.push(`<circle cx="${hp.x}" cy="${hp.y}" r="${pieceR}" fill="transparent" class="board-cell" data-sq="h${i + 1}" data-type="${arm ? 'arm-' + arm : 'centre'}"${armAttr}/>`)
     }
     parts.push('</g>')
 
     const armOrder = ['N', 'NE', 'SE', 'S', 'SW', 'NW']
     const armLabels = ['Red', 'Blue', 'Green', 'Yellow', 'Purple', 'Orange']
-    const pieceR = spacing * 0.2
-    const pieceSz = spacing * 0.45
+    const pieceSz = pieceR * 2
     for (let a = 0; a < filledArms.length; a++) {
       const armName = filledArms[a]
       const holeIdxs = arms[armName]
@@ -1147,7 +1146,7 @@ const sternHalma = {
         if (img) {
           parts.push(`<image href="${img}" x="${hp.x - pieceSz / 2}" y="${hp.y - pieceSz / 2}" width="${pieceSz}" height="${pieceSz}"/>`)
         } else {
-          parts.push(`<circle cx="${hp.x}" cy="${hp.y}" r="${pieceR}" fill="${color}" stroke="#fff" stroke-width="0.8"/>`)
+          parts.push(`<circle cx="${hp.x}" cy="${hp.y}" r="${pieceR - 1}" fill="${color}" stroke="#fff" stroke-width="1.5"/>`)
         }
       }
     }
