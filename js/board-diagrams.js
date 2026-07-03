@@ -1083,16 +1083,34 @@ const sternHalma = {
     const tips = [[0, -180.3], [158, -93], [158, 92.9], [0, 180.3], [-158, 92.9], [-158, -93]]
       .map(([dx, dy]) => ({ x: cx + dx * s, y: midY + dy * s }))
 
-    // Centre hexagon fill
-    parts.push(`<polygon points="${hex.map(v => `${v.x},${v.y}`).join(' ')}" fill="${colors.centre}"/>`)
+    // Centre hexagon fill (slightly smaller so arm-adjacent body holes have room)
+    const hexInset = 0.92
+    const hexFill = hex.map(v => ({ x: cx + (v.x - cx) * hexInset, y: midY + (v.y - midY) * hexInset }))
+    parts.push(`<polygon points="${hexFill.map(v => `${v.x},${v.y}`).join(' ')}" fill="${colors.centre}"/>`)
 
-    // Arm fills: exact original geometry (tip → hex[i] → hex[i+1])
+    // Arm fills: inset from outlines so pieces don't touch edges
+    // Shrink each arm triangle uniformly toward its centroid by pieceR
     const armFills = [colors.armN, colors.armNE, colors.armSE, colors.armS, colors.armSW, colors.armNW]
+    const inset = pieceR + 1
     for (let i = 0; i < 6; i++) {
-      parts.push(`<polygon points="${tips[i].x},${tips[i].y} ${hex[i].x},${hex[i].y} ${hex[(i + 1) % 6].x},${hex[(i + 1) % 6].y}" fill="${armFills[i]}"/>`)
+      const tip = tips[i]
+      const hL = hex[i]
+      const hR = hex[(i + 1) % 6]
+      // Compute centroid of the arm triangle
+      const centX = (tip.x + hL.x + hR.x) / 3
+      const centY = (tip.y + hL.y + hR.y) / 3
+      // Move each vertex toward centroid by a fixed pixel amount
+      const shrink = (v) => {
+        const dx = v.x - centX, dy = v.y - centY
+        const dist = Math.sqrt(dx * dx + dy * dy)
+        const factor = (dist - inset) / dist
+        return { x: centX + dx * factor, y: centY + dy * factor }
+      }
+      const iT = shrink(tip), iL = shrink(hL), iR = shrink(hR)
+      parts.push(`<polygon points="${iT.x},${iT.y} ${iL.x},${iL.y} ${iR.x},${iR.y}" fill="${armFills[i]}"/>`)
     }
 
-    // Two overlapping triangle outlines
+    // Two overlapping triangle outlines (at original positions)
     parts.push(`<polygon points="${tips[0].x},${tips[0].y} ${tips[4].x},${tips[4].y} ${tips[2].x},${tips[2].y}" fill="none" stroke="${colors.outline}" stroke-width="1"/>`)
     parts.push(`<polygon points="${tips[3].x},${tips[3].y} ${tips[5].x},${tips[5].y} ${tips[1].x},${tips[1].y}" fill="none" stroke="${colors.outline}" stroke-width="1"/>`)
 
