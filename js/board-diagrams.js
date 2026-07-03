@@ -1019,24 +1019,29 @@ const sternHalma = {
   positionType: 'node',
   labelStyle: 'none',
   defaultColors: {
-    background: '#f8f9fc', centre: '#eef1f8',
-    armN: '#f0e0c8', armNE: '#c8e8d0', armSE: '#c8d8f0',
-    armS: '#f0e0c8', armSW: '#c8e8d0', armNW: '#c8d8f0',
-    outline: '#8898b8', hole: '#2a3a5c',
+    boardBody: '#4a3728', boardRim: '#5c4636', boardFelt: '#2d5c3d',
+    centre: '#e8dcc8', outline: '#6b5a40',
+    armN: '#f2e8d4', armNE: '#d4e4f0', armSE: '#e8d8ec',
+    armS: '#f2e8d4', armSW: '#d4e4f0', armNW: '#e8d8ec',
+    hole: '#3a2c1c',
   },
   computeLayout(opts) {
     const spacing = opts.holeSpacing || 24
-    const margin = spacing * 2
-    const boardW = spacing * 16 + margin * 2
-    const boardH = Math.round(spacing * Math.sqrt(3) / 2 * 16) + margin * 2 + spacing
-    return { boardW, boardH }
+    const rim = spacing * 1.2
+    const margin = spacing * 2.5
+    const innerW = spacing * 16 + margin * 2
+    const innerH = Math.round(spacing * Math.sqrt(3) / 2 * 16) + margin * 2 + spacing
+    const boardW = innerW + rim * 2
+    const boardH = innerH + rim * 2
+    return { boardW, boardH, innerW, innerH, rim }
   },
   getHolePositions(opts, ox, oy) {
     const spacing = opts.holeSpacing || 24
     const rowH = spacing * Math.sqrt(3) / 2
-    const margin = spacing * 2
-    const cx = ox + spacing * 8 + margin
-    const topY = oy + margin + spacing * 0.5
+    const rim = spacing * 1.2
+    const margin = spacing * 2.5
+    const cx = ox + rim + spacing * 8 + margin
+    const topY = oy + rim + margin + spacing * 0.5
     const rowWidths = [1, 2, 3, 4, 13, 12, 11, 10, 9, 10, 11, 12, 13, 4, 3, 2, 1]
     const positions = []
     const arms = { N: [], NE: [], SE: [], S: [], SW: [], NW: [] }
@@ -1066,47 +1071,52 @@ const sternHalma = {
   },
   render(ctx) {
     const { colors, opts, ox, oy } = ctx
-    const { boardW, boardH } = this.computeLayout(opts)
+    const layout = this.computeLayout(opts)
+    const { boardW, boardH, innerW, innerH, rim } = layout
     const { positions, arms, cx, topY, rowH, spacing } = this.getHolePositions(opts, ox, oy)
     const parts = []
 
-    parts.push(`<rect x="${ox}" y="${oy}" width="${boardW}" height="${boardH}" fill="${colors.background}" rx="6"/>`)
+    parts.push(`<defs>`)
+    parts.push(`<filter id="board-shadow" x="-5%" y="-3%" width="110%" height="110%">`)
+    parts.push(`<feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="rgba(0,0,0,0.35)"/>`)
+    parts.push(`</filter>`)
+    parts.push(`</defs>`)
 
-    // Polygon geometry from the static SVG. Arm fills clipped to star outline
-    // so they never exceed the boundary regardless of hex vertex adjustments.
+    parts.push(`<rect x="${ox}" y="${oy}" width="${boardW}" height="${boardH}" fill="${colors.boardBody}" rx="18" filter="url(#board-shadow)"/>`)
+    parts.push(`<rect x="${ox + 3}" y="${oy + 3}" width="${boardW - 6}" height="${boardH - 6}" fill="${colors.boardRim}" rx="15"/>`)
+    parts.push(`<rect x="${ox + rim}" y="${oy + rim}" width="${innerW}" height="${innerH}" fill="${colors.boardFelt}" rx="6"/>`)
+
     const s = spacing / 24
     const midY = topY + 8 * rowH
     const pieceR = spacing * 0.19
+    const polyScale = 1.04
 
     const hex = [[-50.5, -93], [50.5, -93], [104.3, 0], [50.5, 92.9], [-50.5, 92.9], [-104.3, 0]]
-      .map(([dx, dy]) => ({ x: cx + dx * s, y: midY + dy * s }))
+      .map(([dx, dy]) => ({ x: cx + dx * s * polyScale, y: midY + dy * s * polyScale }))
     const tips = [[0, -180.3], [158, -93], [158, 92.9], [0, 180.3], [-158, 92.9], [-158, -93]]
-      .map(([dx, dy]) => ({ x: cx + dx * s, y: midY + dy * s }))
+      .map(([dx, dy]) => ({ x: cx + dx * s * polyScale, y: midY + dy * s * polyScale }))
 
-    // Centre hexagon fill
     parts.push(`<polygon points="${hex.map(v => `${v.x},${v.y}`).join(' ')}" fill="${colors.centre}"/>`)
 
-    // Arm fills: exact original geometry (tip → hex[i] → hex[i+1])
     const armFills = [colors.armN, colors.armNE, colors.armSE, colors.armS, colors.armSW, colors.armNW]
     for (let i = 0; i < 6; i++) {
       parts.push(`<polygon points="${tips[i].x},${tips[i].y} ${hex[i].x},${hex[i].y} ${hex[(i + 1) % 6].x},${hex[(i + 1) % 6].y}" fill="${armFills[i]}"/>`)
     }
 
-    // Two overlapping triangle outlines
-    parts.push(`<polygon points="${tips[0].x},${tips[0].y} ${tips[4].x},${tips[4].y} ${tips[2].x},${tips[2].y}" fill="none" stroke="${colors.outline}" stroke-width="1"/>`)
-    parts.push(`<polygon points="${tips[3].x},${tips[3].y} ${tips[5].x},${tips[5].y} ${tips[1].x},${tips[1].y}" fill="none" stroke="${colors.outline}" stroke-width="1"/>`)
+    parts.push(`<polygon points="${tips[0].x},${tips[0].y} ${tips[4].x},${tips[4].y} ${tips[2].x},${tips[2].y}" fill="none" stroke="${colors.outline}" stroke-width="1.5"/>`)
+    parts.push(`<polygon points="${tips[3].x},${tips[3].y} ${tips[5].x},${tips[5].y} ${tips[1].x},${tips[1].y}" fill="none" stroke="${colors.outline}" stroke-width="1.5"/>`)
 
     const filledArms = opts.filledArms || []
     const pieceImages = opts.pieceImages || {}
-    const armPieceKeys = ['red-circle', 'blue-circle', 'green-circle', 'yellow-circle', 'purple-circle', 'orange-circle']
-    const armColors = ['#d32f2f', '#1976d2', '#388e3c', '#f9a825', '#7b1fa2', '#e64a19']
+    const armPieceKeys = ['red-circle', 'blue-circle', 'green-circle', 'black-circle', 'purple-circle', 'brown-circle']
+    const armColors = ['#d32f2f', '#1565c0', '#2e7d32', '#1a1a1a', '#6a1b9a', '#5d4037']
 
     const holeArm = new Array(positions.length).fill('')
     for (const [armName, idxs] of Object.entries(arms)) {
       for (const idx of idxs) holeArm[idx] = armName
     }
 
-    parts.push(`<g fill="${colors.hole}" opacity="0.8">`)
+    parts.push(`<g fill="${colors.hole}" opacity="0.7">`)
     for (let i = 0; i < positions.length; i++) {
       const hp = positions[i]
       const arm = holeArm[i]
@@ -1117,7 +1127,6 @@ const sternHalma = {
     parts.push('</g>')
 
     const armOrder = ['N', 'NE', 'SE', 'S', 'SW', 'NW']
-    const armLabels = ['Red', 'Blue', 'Green', 'Yellow', 'Purple', 'Orange']
     const pieceSz = pieceR * 1.6
     for (let a = 0; a < filledArms.length; a++) {
       const armName = filledArms[a]
@@ -1131,26 +1140,21 @@ const sternHalma = {
         if (img) {
           parts.push(`<image href="${img}" x="${hp.x - pieceSz / 2}" y="${hp.y - pieceSz / 2}" width="${pieceSz}" height="${pieceSz}"/>`)
         } else {
-          parts.push(`<circle cx="${hp.x}" cy="${hp.y}" r="${pieceR - 1}" fill="${color}" stroke="#fff" stroke-width="1.5"/>`)
+          parts.push(`<circle cx="${hp.x}" cy="${hp.y}" r="${pieceR - 1}" fill="${color}" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>`)
         }
       }
     }
 
-    // Debug: test piece at h57 (row 8, leftmost — inner hex edge)
-    const testHole = positions[56]
-    parts.push(`<image href="${pieceImages['blue-circle']}" x="${testHole.x - pieceSz / 2}" y="${testHole.y - pieceSz / 2}" width="${pieceSz}" height="${pieceSz}"/>`)
-
-
-    const labelPad = spacing * 1.2
+    const labelPad = spacing * 1.0
     const labels = [
       { text: 'N', x: cx, y: tips[0].y - labelPad },
-      { text: 'S', x: cx, y: tips[3].y + labelPad + 4 },
+      { text: 'S', x: cx, y: tips[3].y + labelPad + 5 },
       { text: 'NE', x: tips[1].x + labelPad, y: tips[1].y + 4 },
       { text: 'NW', x: tips[5].x - labelPad, y: tips[5].y + 4 },
       { text: 'SE', x: tips[2].x + labelPad, y: tips[2].y + 4 },
       { text: 'SW', x: tips[4].x - labelPad, y: tips[4].y + 4 },
     ]
-    parts.push(`<g font-family="sans-serif" font-size="11" fill="#1c2d4a" font-weight="600" text-anchor="middle">`)
+    parts.push(`<g font-family="sans-serif" font-size="10" fill="rgba(255,255,255,0.7)" font-weight="600" text-anchor="middle">`)
     for (const l of labels) parts.push(`<text x="${l.x}" y="${l.y}">${l.text}</text>`)
     parts.push('</g>')
 
