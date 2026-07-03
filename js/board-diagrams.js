@@ -1078,19 +1078,21 @@ const sternHalma = {
     const s = spacing / 24
     const midY = topY + 8 * rowH
     const pieceR = spacing * 0.35
-    const pad = pieceR
+    // The hex edges are closer to arm holes than tips are to their holes.
+    // Hex needs more expansion than tips. Compute each independently.
+    // Nearest arm hole to hex edge: row 3/13 holes, distance = 5*rowH - 93*s = ~10.9
+    // Need at least pieceR+2 clearance from hole centre to polygon edge.
+    const hexExpand = (pieceR + 2 - (5 * rowH - 93 * s)) / (93 * s)
+    // Tips have plenty of room (8*rowH - 180.3*s ≈ -14 → hole is well inside)
+    const tipExpand = (pieceR + 2) / (180.3 * s)
 
-    // Scale factor: expand everything proportionally from centre (multiplicative, not additive)
-    // This preserves the shape exactly while growing it uniformly
-    const scaleFactor = 1 + pad / (158 * s)
+    const hexScale = 1 + Math.max(0, hexExpand)
+    const tipScale = 1 + tipExpand
 
-    const scaleFromCentre = (dx, dy) => {
-      return { x: cx + dx * s * scaleFactor, y: midY + dy * s * scaleFactor }
-    }
-
-    // Hexagon and star vertices, scaled proportionally
-    const hex = [[-50.5, -93], [50.5, -93], [104.3, 0], [50.5, 92.9], [-50.5, 92.9], [-104.3, 0]].map(([dx, dy]) => scaleFromCentre(dx, dy))
-    const tips = [[0, -180.3], [158, -93], [158, 92.9], [0, 180.3], [-158, 92.9], [-158, -93]].map(([dx, dy]) => scaleFromCentre(dx, dy))
+    const hex = [[-50.5, -93], [50.5, -93], [104.3, 0], [50.5, 92.9], [-50.5, 92.9], [-104.3, 0]]
+      .map(([dx, dy]) => ({ x: cx + dx * s * hexScale, y: midY + dy * s * hexScale }))
+    const tips = [[0, -180.3], [158, -93], [158, 92.9], [0, 180.3], [-158, 92.9], [-158, -93]]
+      .map(([dx, dy]) => ({ x: cx + dx * s * tipScale, y: midY + dy * s * tipScale }))
 
     // Centre hexagon fill
     parts.push(`<polygon points="${hex.map(v => `${v.x},${v.y}`).join(' ')}" fill="${colors.centre}"/>`)
