@@ -1077,7 +1077,7 @@ const sternHalma = {
     // All vertices expanded uniformly outward by pieceR so outermost pieces fit.
     const s = spacing / 24
     const midY = topY + 8 * rowH
-    const pieceR = spacing * 0.28
+    const pieceR = spacing * 0.19
     // Use original geometry unscaled. Pieces sized to fit the tightest gap (9.9px).
     const hex = [[-50.5, -93], [50.5, -93], [104.3, 0], [50.5, 92.9], [-50.5, 92.9], [-104.3, 0]]
       .map(([dx, dy]) => ({ x: cx + dx * s, y: midY + dy * s }))
@@ -1112,7 +1112,7 @@ const sternHalma = {
       const hp = positions[i]
       const arm = holeArm[i]
       const armAttr = arm ? ` data-arm="${arm}"` : ''
-      parts.push(`<circle cx="${hp.x}" cy="${hp.y}" r="3"/>`)
+      parts.push(`<circle cx="${hp.x}" cy="${hp.y}" r="2.5"/>`)
       parts.push(`<circle cx="${hp.x}" cy="${hp.y}" r="${pieceR}" fill="transparent" class="board-cell" data-sq="h${i + 1}" data-type="${arm ? 'arm-' + arm : 'centre'}"${armAttr}/>`)
     }
     parts.push('</g>')
