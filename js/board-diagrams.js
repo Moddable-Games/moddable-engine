@@ -1027,21 +1027,17 @@ const sternHalma = {
   computeLayout(opts) {
     const spacing = opts.holeSpacing || 24
     const boardW = spacing * 16 + 4
-    const boardH = Math.round(spacing * Math.sqrt(3) / 2 * 16) + 20
+    const boardH = Math.round(spacing * Math.sqrt(3) / 2 * 16) + 28
     return { boardW, boardH }
   },
-  render(ctx) {
-    const { colors, opts, ox, oy } = ctx
+  getHolePositions(opts, ox, oy) {
     const spacing = opts.holeSpacing || 24
     const rowH = spacing * Math.sqrt(3) / 2
-    const parts = []
-
-    const rowWidths = [1, 2, 3, 4, 13, 12, 11, 10, 9, 10, 11, 12, 13, 4, 3, 2, 1]
     const cx = ox + spacing * 8
-    const topY = oy + 14
-
-    const holePositions = []
-    const armHoles = { N: [], NE: [], SE: [], S: [], SW: [], NW: [] }
+    const topY = oy + 18
+    const rowWidths = [1, 2, 3, 4, 13, 12, 11, 10, 9, 10, 11, 12, 13, 4, 3, 2, 1]
+    const positions = []
+    const arms = { N: [], NE: [], SE: [], S: [], SW: [], NW: [] }
 
     for (let row = 0; row < 17; row++) {
       const w = rowWidths[row]
@@ -1049,68 +1045,124 @@ const sternHalma = {
       const startX = cx - (w - 1) * spacing / 2
       for (let i = 0; i < w; i++) {
         const x = startX + i * spacing
-        const idx = holePositions.length
-        holePositions.push({ x, y, row, col: i })
-
-        if (row < 4) armHoles.N.push(idx)
-        else if (row >= 13) armHoles.S.push(idx)
+        const idx = positions.length
+        positions.push({ x, y, row, col: i })
+        if (row < 4) arms.N.push(idx)
+        else if (row >= 13) arms.S.push(idx)
         else if (row >= 4 && row <= 7) {
-          if (i < 4 - (row - 4)) armHoles.NW.push(idx)
-          else if (i >= w - (4 - (row - 4))) armHoles.NE.push(idx)
+          const armWidth = 4 - (row - 4)
+          if (i < armWidth) arms.NW.push(idx)
+          else if (i >= w - armWidth) arms.NE.push(idx)
         } else if (row >= 9 && row <= 12) {
-          if (i < row - 8) armHoles.SW.push(idx)
-          else if (i >= w - (row - 8)) armHoles.SE.push(idx)
+          const armWidth = row - 8
+          if (i < armWidth) arms.SW.push(idx)
+          else if (i >= w - armWidth) arms.SE.push(idx)
         }
       }
     }
-
+    return { positions, arms, cx, topY, rowH, spacing }
+  },
+  render(ctx) {
+    const { colors, opts, ox, oy } = ctx
     const { boardW, boardH } = this.computeLayout(opts)
+    const { positions, arms, cx, topY, rowH, spacing } = this.getHolePositions(opts, ox, oy)
+    const parts = []
+
     parts.push(`<rect x="${ox}" y="${oy}" width="${boardW}" height="${boardH}" fill="${colors.background}" rx="6"/>`)
 
-    const armVertices = (arm) => {
-      const holes = armHoles[arm]
-      if (!holes.length) return ''
-      const pts = holes.map(i => holePositions[i])
-      const minX = Math.min(...pts.map(p => p.x)) - spacing * 0.4
-      const maxX = Math.max(...pts.map(p => p.x)) + spacing * 0.4
-      const minY = Math.min(...pts.map(p => p.y)) - rowH * 0.4
-      const maxY = Math.max(...pts.map(p => p.y)) + rowH * 0.4
-      return `${minX},${minY} ${maxX},${minY} ${maxX},${maxY} ${minX},${maxY}`
+    const midY = topY + 8 * rowH
+    const halfH = 8 * rowH
+    const halfW = 6.5 * spacing
+
+    const hexPts = [
+      `${cx},${midY - halfH}`,
+      `${cx + halfW},${midY - halfH / 2}`,
+      `${cx + halfW},${midY + halfH / 2}`,
+      `${cx},${midY + halfH}`,
+      `${cx - halfW},${midY + halfH / 2}`,
+      `${cx - halfW},${midY - halfH / 2}`,
+    ]
+    parts.push(`<polygon points="${hexPts.join(' ')}" fill="${colors.centre}"/>`)
+
+    const armTri = (tip, baseL, baseR, fill) => {
+      parts.push(`<polygon points="${tip} ${baseL} ${baseR}" fill="${fill}"/>`)
     }
+    const pad = spacing * 0.6
+    const tipN = positions[arms.N[0]]
+    const baseNL = positions[arms.N[6]]
+    const baseNR = positions[arms.N[9]]
+    armTri(`${tipN.x},${tipN.y - pad}`, `${baseNL.x - pad},${baseNR.y + pad}`, `${baseNR.x + pad},${baseNR.y + pad}`, colors.armN)
 
-    const tipN = holePositions[armHoles.N[0]]
-    const baseNL = holePositions[armHoles.N[armHoles.N.length - 4]]
-    const baseNR = holePositions[armHoles.N[armHoles.N.length - 1]]
-    parts.push(`<polygon points="${tipN.x},${tipN.y - spacing * 0.5} ${baseNL.x - spacing * 0.5},${baseNR.y + rowH * 0.5} ${baseNR.x + spacing * 0.5},${baseNR.y + rowH * 0.5}" fill="${colors.armN}"/>`)
+    const tipS = positions[arms.S[9]]
+    const baseSL = positions[arms.S[0]]
+    const baseSR = positions[arms.S[3]]
+    armTri(`${tipS.x},${tipS.y + pad}`, `${baseSL.x - pad},${baseSL.y - pad}`, `${baseSR.x + pad},${baseSR.y - pad}`, colors.armS)
 
-    const tipS = holePositions[armHoles.S[armHoles.S.length - 1]]
-    const baseSL = holePositions[armHoles.S[0]]
-    const baseSR = holePositions[armHoles.S[3]]
-    parts.push(`<polygon points="${baseSL.x - spacing * 0.5},${baseSL.y - rowH * 0.5} ${baseSR.x + spacing * 0.5},${baseSR.y - rowH * 0.5} ${tipS.x},${tipS.y + spacing * 0.5}" fill="${colors.armS}"/>`)
+    const neHoles = arms.NE
+    const tipNE = positions[neHoles[0]]
+    const baseNE1 = positions[neHoles[neHoles.length - 1]]
+    const baseNE2 = positions[neHoles[neHoles.length - 4]]
+    armTri(`${tipNE.x + pad},${tipNE.y - pad * 0.5}`, `${baseNE2.x - pad * 0.3},${baseNE2.y + pad}`, `${baseNE1.x + pad},${baseNE1.y + pad}`, colors.armNE)
 
-    const centreY1 = topY + 4 * rowH
-    const centreY2 = topY + 12 * rowH
-    const centreXL = cx - 4.5 * spacing
-    const centreXR = cx + 4.5 * spacing
-    const midOffL = spacing * 2.25
-    const midOffR = spacing * 2.25
-    parts.push(`<polygon points="${cx},${centreY1 - rowH * 0.5} ${centreXR + midOffR},${(centreY1 + centreY2) / 2 - rowH * 2} ${centreXR + midOffR},${(centreY1 + centreY2) / 2 + rowH * 2} ${cx},${centreY2 + rowH * 0.5} ${centreXL - midOffL},${(centreY1 + centreY2) / 2 + rowH * 2} ${centreXL - midOffL},${(centreY1 + centreY2) / 2 - rowH * 2}" fill="${colors.centre}"/>`)
+    const nwHoles = arms.NW
+    const tipNW = positions[nwHoles[0]]
+    const baseNW1 = positions[nwHoles[nwHoles.length - 1]]
+    const baseNW2 = positions[nwHoles[nwHoles.length - 4]]
+    armTri(`${tipNW.x - pad},${tipNW.y - pad * 0.5}`, `${baseNW1.x - pad},${baseNW1.y + pad}`, `${baseNW2.x + pad * 0.3},${baseNW2.y + pad}`, colors.armNW)
+
+    const seHoles = arms.SE
+    const tipSE = positions[seHoles[seHoles.length - 1]]
+    const baseSE1 = positions[seHoles[0]]
+    const baseSE2 = positions[seHoles[3]]
+    armTri(`${tipSE.x + pad},${tipSE.y + pad * 0.5}`, `${baseSE1.x - pad * 0.3},${baseSE1.y - pad}`, `${baseSE2.x + pad},${baseSE2.y - pad}`, colors.armSE)
+
+    const swHoles = arms.SW
+    const tipSW = positions[swHoles[swHoles.length - 1]]
+    const baseSW1 = positions[swHoles[0]]
+    const baseSW2 = positions[swHoles[3]]
+    armTri(`${tipSW.x - pad},${tipSW.y + pad * 0.5}`, `${baseSW1.x - pad},${baseSW1.y - pad}`, `${baseSW2.x + pad * 0.3},${baseSW2.y - pad}`, colors.armSW)
+
+    const triUp = `${cx},${midY - halfH - pad} ${cx - halfW - pad},${midY + halfH / 2 + pad} ${cx + halfW + pad},${midY + halfH / 2 + pad}`
+    const triDn = `${cx},${midY + halfH + pad} ${cx - halfW - pad},${midY - halfH / 2 - pad} ${cx + halfW + pad},${midY - halfH / 2 - pad}`
+    parts.push(`<polygon points="${triUp}" fill="none" stroke="${colors.outline}" stroke-width="1"/>`)
+    parts.push(`<polygon points="${triDn}" fill="none" stroke="${colors.outline}" stroke-width="1"/>`)
+
+    const pieceImages = opts.pieceImages || {}
+    const filledArms = opts.filledArms || []
+    const armColors = ['#d32f2f', '#1976d2', '#388e3c', '#f9a825', '#7b1fa2', '#e64a19']
 
     parts.push(`<g fill="${colors.hole}" opacity="0.8">`)
-    for (let i = 0; i < holePositions.length; i++) {
-      const p = holePositions[i]
+    for (let i = 0; i < positions.length; i++) {
+      const p = positions[i]
       parts.push(`<circle cx="${p.x}" cy="${p.y}" r="5"/>`)
       parts.push(`<circle cx="${p.x}" cy="${p.y}" r="${spacing * 0.4}" fill="transparent" class="board-cell" data-sq="h${i + 1}" data-type="hole"/>`)
     }
     parts.push('</g>')
 
+    const armOrder = ['N', 'NE', 'SE', 'S', 'SW', 'NW']
+    for (let a = 0; a < filledArms.length; a++) {
+      const armName = filledArms[a]
+      const holeIdxs = arms[armName]
+      const color = armColors[armOrder.indexOf(armName)] || armColors[a]
+      const img = pieceImages.bM || null
+      for (const idx of holeIdxs) {
+        const p = positions[idx]
+        if (img) {
+          const sz = spacing * 0.8
+          parts.push(`<image href="${img}" x="${p.x - sz / 2}" y="${p.y - sz / 2}" width="${sz}" height="${sz}"/>`)
+        } else {
+          parts.push(`<circle cx="${p.x}" cy="${p.y}" r="${spacing * 0.35}" fill="${color}" stroke="#fff" stroke-width="1.5"/>`)
+        }
+      }
+    }
+
     const labels = [
-      { text: 'N', x: cx, y: oy + 6 },
-      { text: 'S', x: cx, y: oy + boardH - 4 },
-      { text: 'NE', x: ox + boardW - 12, y: topY + 4.5 * rowH },
-      { text: 'NW', x: ox + 12, y: topY + 4.5 * rowH },
-      { text: 'SE', x: ox + boardW - 12, y: topY + 11.5 * rowH },
-      { text: 'SW', x: ox + 12, y: topY + 11.5 * rowH },
+      { text: 'N', x: cx, y: oy + 8 },
+      { text: 'S', x: cx, y: oy + boardH - 2 },
+      { text: 'NE', x: ox + boardW - 14, y: topY + 4.5 * rowH },
+      { text: 'NW', x: ox + 14, y: topY + 4.5 * rowH },
+      { text: 'SE', x: ox + boardW - 14, y: topY + 11.5 * rowH },
+      { text: 'SW', x: ox + 14, y: topY + 11.5 * rowH },
     ]
     parts.push(`<g font-family="sans-serif" font-size="11" fill="#1c2d4a" font-weight="600" text-anchor="middle">`)
     for (const l of labels) parts.push(`<text x="${l.x}" y="${l.y}">${l.text}</text>`)

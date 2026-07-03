@@ -382,10 +382,10 @@ const GAMES = {
     label: 'Stern-Halma',
     pieceSet: 'playstrategy-draughts-plain',
     variants: {
-      '2-player': { label: '2 Player (N vs S)', boardStyle: 'stern-halma', holeSpacing: 24, setupDesc: '10 pieces each in opposite arms (N and S)', variantDesc: 'Race across the star board. Hop chains in any direction. No captures.' },
-      '3-player': { label: '3 Player', boardStyle: 'stern-halma', holeSpacing: 24, setupDesc: '10 pieces each in alternating arms (N, SE, SW)', variantDesc: '3 players on alternating arms. Each races to the diagonally opposite arm.' },
-      '4-player': { label: '4 Player', boardStyle: 'stern-halma', holeSpacing: 24, setupDesc: '10 pieces each in side arms (NE, SE, SW, NW)', variantDesc: '4 players skip N/S arms. Each races to the diagonally opposite arm.' },
-      '6-player': { label: '6 Player', boardStyle: 'stern-halma', holeSpacing: 24, setupDesc: '10 pieces each, all 6 arms filled', variantDesc: 'Full game. All 6 arms occupied. Each player races to the opposite arm.' },
+      '2-player': { label: '2 Player (N vs S)', boardStyle: 'stern-halma', holeSpacing: 24, filledArms: ['N', 'S'], setupDesc: '10 pieces each in opposite arms (N and S)', variantDesc: 'Race across the star board. Hop chains in any direction. No captures.' },
+      '3-player': { label: '3 Player', boardStyle: 'stern-halma', holeSpacing: 24, filledArms: ['N', 'SE', 'SW'], setupDesc: '10 pieces each in alternating arms (N, SE, SW)', variantDesc: '3 players on alternating arms. Each races to the diagonally opposite arm.' },
+      '4-player': { label: '4 Player', boardStyle: 'stern-halma', holeSpacing: 24, filledArms: ['NE', 'SE', 'SW', 'NW'], setupDesc: '10 pieces each in side arms (NE, SE, SW, NW)', variantDesc: '4 players skip N/S arms. Each races to the diagonally opposite arm.' },
+      '6-player': { label: '6 Player', boardStyle: 'stern-halma', holeSpacing: 24, filledArms: ['N', 'NE', 'SE', 'S', 'SW', 'NW'], setupDesc: '10 pieces each, all 6 arms filled', variantDesc: 'Full game. All 6 arms occupied. Each player races to the opposite arm.' },
     },
   },
   hex: {
