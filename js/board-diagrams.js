@@ -1119,7 +1119,7 @@ const sternHalma = {
 
     const armOrder = ['N', 'NE', 'SE', 'S', 'SW', 'NW']
     const armLabels = ['Red', 'Blue', 'Green', 'Yellow', 'Purple', 'Orange']
-    const pieceSz = pieceR * 2
+    const pieceSz = pieceR * 1.6
     for (let a = 0; a < filledArms.length; a++) {
       const armName = filledArms[a]
       const holeIdxs = arms[armName]
@@ -1139,12 +1139,8 @@ const sternHalma = {
 
     // Debug: test piece at h57 (row 8, leftmost — inner hex edge)
     const testHole = positions[56]
-    const testImg = pieceImages['blue-circle'] || null
-    if (testImg) {
-      parts.push(`<image href="${testImg}" x="${testHole.x - pieceSz / 2}" y="${testHole.y - pieceSz / 2}" width="${pieceSz}" height="${pieceSz}"/>`)
-    } else {
-      parts.push(`<circle cx="${testHole.x}" cy="${testHole.y}" r="${pieceR - 1}" fill="#1565c0" stroke="#fff" stroke-width="1.5"/>`)
-    }
+    parts.push(`<image href="${pieceImages['blue-circle']}" x="${testHole.x - pieceSz / 2}" y="${testHole.y - pieceSz / 2}" width="${pieceSz}" height="${pieceSz}"/>`)
+
 
     const labelPad = spacing * 1.2
     const labels = [
