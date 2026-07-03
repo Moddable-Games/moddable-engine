@@ -1099,8 +1099,9 @@ const sternHalma = {
       const tip = tips[i]
       const hL = hex[i]
       const hR = hex[(i + 1) % 6]
-      const extL = { x: hL.x + (hL.x - cx) * 0.2, y: hL.y + (hL.y - midY) * 0.2 }
-      const extR = { x: hR.x + (hR.x - cx) * 0.2, y: hR.y + (hR.y - midY) * 0.2 }
+      // Extend base vertices TOWARD centre so fill covers the full arm area
+      const extL = { x: hL.x - (hL.x - cx) * 0.3, y: hL.y - (hL.y - midY) * 0.3 }
+      const extR = { x: hR.x - (hR.x - cx) * 0.3, y: hR.y - (hR.y - midY) * 0.3 }
       parts.push(`<polygon points="${tip.x},${tip.y} ${extL.x},${extL.y} ${extR.x},${extR.y}" fill="${armFills[i]}"/>`)
     }
     parts.push('</g>')
