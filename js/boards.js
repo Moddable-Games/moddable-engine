@@ -1100,11 +1100,16 @@ function bindBoardHover(config) {
     if (sq.startsWith('h') && type.startsWith('arm-')) {
       const arm = cell.dataset.arm || type.slice(4)
       const armNames = { N: 'North', NE: 'North-East', SE: 'South-East', S: 'South', SW: 'South-West', NW: 'North-West' }
+      const armOrder = ['N', 'NE', 'SE', 'S', 'SW', 'NW']
+      const armPlayerColors = ['Red', 'Blue', 'Green', 'Yellow', 'Purple', 'Orange']
       text = `${sq} — ${armNames[arm] || arm} arm`
       const filledArms = config.filledArms || []
-      if (filledArms.includes(arm)) text += ' (occupied)'
+      if (filledArms.includes(arm)) {
+        const playerIdx = armOrder.indexOf(arm)
+        text += ` — ${armPlayerColors[playerIdx]} player`
+      }
     } else if (sq.startsWith('h') && type === 'centre') {
-      text = `${sq} — centre`
+      text = `${sq} — centre (empty)`
     }
     if (parsedSetup && sq.startsWith('pit-')) {
       const idx = parseInt(sq.slice(4), 10)

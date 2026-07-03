@@ -1132,8 +1132,9 @@ const sternHalma = {
     parts.push('</g>')
 
     const armOrder = ['N', 'NE', 'SE', 'S', 'SW', 'NW']
-    const pieceR = spacing * 0.28
-    const pieceSz = spacing * 0.7
+    const armLabels = ['Red', 'Blue', 'Green', 'Yellow', 'Purple', 'Orange']
+    const pieceR = spacing * 0.2
+    const pieceSz = spacing * 0.45
     for (let a = 0; a < filledArms.length; a++) {
       const armName = filledArms[a]
       const holeIdxs = arms[armName]
@@ -1146,7 +1147,7 @@ const sternHalma = {
         if (img) {
           parts.push(`<image href="${img}" x="${hp.x - pieceSz / 2}" y="${hp.y - pieceSz / 2}" width="${pieceSz}" height="${pieceSz}"/>`)
         } else {
-          parts.push(`<circle cx="${hp.x}" cy="${hp.y}" r="${pieceR}" fill="${color}" stroke="#fff" stroke-width="1"/>`)
+          parts.push(`<circle cx="${hp.x}" cy="${hp.y}" r="${pieceR}" fill="${color}" stroke="#fff" stroke-width="0.8"/>`)
         }
       }
     }
