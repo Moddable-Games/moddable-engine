@@ -1070,43 +1070,44 @@ const sternHalma = {
 
     parts.push(`<rect x="${ox}" y="${oy}" width="${boardW}" height="${boardH}" fill="${colors.background}" rx="6"/>`)
 
+    // Polygon geometry derived from the working static SVG (diagrams/static/stern-halma/)
+    // Original: centre (194, 216.3), spacing 24. We scale offsets by (spacing/24).
+    const s = spacing / 24
     const midY = topY + 8 * rowH
-    const p = spacing * 0.5
 
-    // Star vertices: 6 tips computed from the outermost hole in each arm
-    const tipN = { x: positions[arms.N[0]].x, y: positions[arms.N[0]].y - p }
-    const tipS = { x: positions[arms.S[arms.S.length - 1]].x, y: positions[arms.S[arms.S.length - 1]].y + p }
-    // NW tip = first hole in NW arm (row 4, col 0) — leftmost of row 4
-    const tipNW = { x: positions[arms.NW[0]].x - p, y: positions[arms.NW[0]].y }
-    // NE tip = first hole in NE arm (row 4, rightmost)
-    const tipNE = { x: positions[arms.NE[0]].x + p, y: positions[arms.NE[0]].y }
-    // SW tip = last hole in SW arm (row 12, col 0)
-    const tipSW = { x: positions[arms.SW[arms.SW.length - 1]].x - p, y: positions[arms.SW[arms.SW.length - 1]].y }
-    // SE tip = last hole in SE arm (row 12, rightmost)
-    const tipSE = { x: positions[arms.SE[arms.SE.length - 1]].x + p, y: positions[arms.SE[arms.SE.length - 1]].y }
+    // Hexagon vertices (centre body)
+    const hex = [
+      { x: cx + (-50.5) * s, y: midY + (-93) * s },
+      { x: cx + (50.5) * s, y: midY + (-93) * s },
+      { x: cx + (104.3) * s, y: midY + (0) * s },
+      { x: cx + (50.5) * s, y: midY + (92.9) * s },
+      { x: cx + (-50.5) * s, y: midY + (92.9) * s },
+      { x: cx + (-104.3) * s, y: midY + (0) * s },
+    ]
+    parts.push(`<polygon points="${hex.map(v => `${v.x},${v.y}`).join(' ')}" fill="${colors.centre}"/>`)
 
-    // Hexagon vertices: midpoints between adjacent arm tips (where arms meet body)
-    // These are the 6 corners where two arm bases share an edge
-    const hN = { x: cx, y: topY + 4 * rowH - p }
-    const hNE = { x: cx + 4.5 * spacing + p, y: midY - 4 * rowH + p }
-    const hSE = { x: cx + 4.5 * spacing + p, y: midY + 4 * rowH - p }
-    const hS = { x: cx, y: topY + 12 * rowH + p }
-    const hSW = { x: cx - 4.5 * spacing - p, y: midY + 4 * rowH - p }
-    const hNW = { x: cx - 4.5 * spacing - p, y: midY - 4 * rowH + p }
+    // Star tips
+    const tips = [
+      { x: cx, y: midY + (-180.3) * s },
+      { x: cx + (158) * s, y: midY + (-93) * s },
+      { x: cx + (158) * s, y: midY + (92.9) * s },
+      { x: cx, y: midY + (180.3) * s },
+      { x: cx + (-158) * s, y: midY + (92.9) * s },
+      { x: cx + (-158) * s, y: midY + (-93) * s },
+    ]
 
-    parts.push(`<polygon points="${[hN, hNE, hSE, hS, hSW, hNW].map(v => `${v.x},${v.y}`).join(' ')}" fill="${colors.centre}"/>`)
+    // Arm triangles: tip → adjacent hex vertices
+    const armFills = [colors.armN, colors.armNE, colors.armSE, colors.armS, colors.armSW, colors.armNW]
+    for (let i = 0; i < 6; i++) {
+      const tip = tips[i]
+      const hL = hex[i]
+      const hR = hex[(i + 5) % 6]
+      parts.push(`<polygon points="${tip.x},${tip.y} ${hL.x},${hL.y} ${hR.x},${hR.y}" fill="${armFills[i]}"/>`)
+    }
 
-    const tri = (a, b, c, fill) => parts.push(`<polygon points="${a.x},${a.y} ${b.x},${b.y} ${c.x},${c.y}" fill="${fill}"/>`)
-    tri(tipN, hNW, hNE, colors.armN)
-    tri(tipNE, hNE, hSE, colors.armNE)
-    tri(tipSE, hSE, hS, colors.armSE)
-    tri(tipS, hS, hSW, colors.armS)
-    tri(tipSW, hSW, hNW, colors.armSW)
-    tri(tipNW, hNW, hN, colors.armNW)
-
-    // Two overlapping equilateral triangles forming the star outline
-    parts.push(`<polygon points="${tipN.x},${tipN.y} ${tipSW.x},${tipSW.y} ${tipSE.x},${tipSE.y}" fill="none" stroke="${colors.outline}" stroke-width="1"/>`)
-    parts.push(`<polygon points="${tipS.x},${tipS.y} ${tipNE.x},${tipNE.y} ${tipNW.x},${tipNW.y}" fill="none" stroke="${colors.outline}" stroke-width="1"/>`)
+    // Two overlapping triangle outlines
+    parts.push(`<polygon points="${tips[0].x},${tips[0].y} ${tips[4].x},${tips[4].y} ${tips[2].x},${tips[2].y}" fill="none" stroke="${colors.outline}" stroke-width="1"/>`)
+    parts.push(`<polygon points="${tips[3].x},${tips[3].y} ${tips[5].x},${tips[5].y} ${tips[1].x},${tips[1].y}" fill="none" stroke="${colors.outline}" stroke-width="1"/>`)
 
     const filledArms = opts.filledArms || []
     const pieceImages = opts.pieceImages || {}
