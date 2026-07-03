@@ -1026,17 +1026,17 @@ const sternHalma = {
   },
   computeLayout(opts) {
     const spacing = opts.holeSpacing || 24
-    const margin = spacing * 2
+    const margin = spacing * 2.5
     const boardW = spacing * 16 + margin * 2
-    const boardH = Math.round(spacing * Math.sqrt(3) / 2 * 16) + margin * 2 + 10
+    const boardH = Math.round(spacing * Math.sqrt(3) / 2 * 16) + margin * 2
     return { boardW, boardH }
   },
   getHolePositions(opts, ox, oy) {
     const spacing = opts.holeSpacing || 24
     const rowH = spacing * Math.sqrt(3) / 2
-    const margin = spacing * 2
+    const margin = spacing * 2.5
     const cx = ox + spacing * 8 + margin
-    const topY = oy + margin + 5
+    const topY = oy + margin
     const rowWidths = [1, 2, 3, 4, 13, 12, 11, 10, 9, 10, 11, 12, 13, 4, 3, 2, 1]
     const positions = []
     const arms = { N: [], NE: [], SE: [], S: [], SW: [], NW: [] }
@@ -1072,39 +1072,38 @@ const sternHalma = {
 
     parts.push(`<rect x="${ox}" y="${oy}" width="${boardW}" height="${boardH}" fill="${colors.background}" rx="6"/>`)
 
-    // Polygon geometry derived from the working static SVG (diagrams/static/stern-halma/)
-    // Original: centre (194, 216.3), spacing 24. Scale by (spacing/24).
-    // All polygons expanded outward by pieceR so pieces at edges fit inside.
+    // Polygon geometry from the static SVG (diagrams/static/stern-halma/).
+    // Original centre (194, 216.3), spacing 24. Scale by s = spacing/24.
+    // Single set of vertices used for both fills and outlines (no misalignment).
     const s = spacing / 24
     const midY = topY + 8 * rowH
     const pieceR = spacing * 0.35
-    const expand = pieceR + 1
 
-    // Expand a point outward from centre by a fixed amount
-    const expandPt = (bx, by) => {
-      const px = bx * s, py = by * s
-      const dist = Math.sqrt(px * px + py * py)
-      if (dist === 0) return { x: cx, y: midY }
-      const factor = (dist + expand) / dist
-      return { x: cx + px * factor, y: midY + py * factor }
-    }
+    // Hexagon and star tip vertices (exact from static SVG, scaled)
+    const hex = [
+      { x: cx + (-50.5) * s, y: midY + (-93) * s },
+      { x: cx + (50.5) * s, y: midY + (-93) * s },
+      { x: cx + (104.3) * s, y: midY + (0) * s },
+      { x: cx + (50.5) * s, y: midY + (92.9) * s },
+      { x: cx + (-50.5) * s, y: midY + (92.9) * s },
+      { x: cx + (-104.3) * s, y: midY + (0) * s },
+    ]
+    const tips = [
+      { x: cx, y: midY + (-180.3) * s },
+      { x: cx + (158) * s, y: midY + (-93) * s },
+      { x: cx + (158) * s, y: midY + (92.9) * s },
+      { x: cx, y: midY + (180.3) * s },
+      { x: cx + (-158) * s, y: midY + (92.9) * s },
+      { x: cx + (-158) * s, y: midY + (-93) * s },
+    ]
 
-    // Hexagon vertices (centre body)
-    const hexBase = [[-50.5, -93], [50.5, -93], [104.3, 0], [50.5, 92.9], [-50.5, 92.9], [-104.3, 0]]
-    const hex = hexBase.map(([bx, by]) => expandPt(bx, by))
+    // Centre hexagon fill
     parts.push(`<polygon points="${hex.map(v => `${v.x},${v.y}`).join(' ')}" fill="${colors.centre}"/>`)
 
-    // Star tips
-    const tipsBase = [[0, -180.3], [158, -93], [158, 92.9], [0, 180.3], [-158, 92.9], [-158, -93]]
-    const tips = tipsBase.map(([bx, by]) => expandPt(bx, by))
-
-    // Arm triangles: tip → hex[i] → hex[i+1]
+    // Arm triangle fills (same vertices as outlines)
     const armFills = [colors.armN, colors.armNE, colors.armSE, colors.armS, colors.armSW, colors.armNW]
     for (let i = 0; i < 6; i++) {
-      const tip = tips[i]
-      const hL = hex[i]
-      const hR = hex[(i + 1) % 6]
-      parts.push(`<polygon points="${tip.x},${tip.y} ${hL.x},${hL.y} ${hR.x},${hR.y}" fill="${armFills[i]}"/>`)
+      parts.push(`<polygon points="${tips[i].x},${tips[i].y} ${hex[i].x},${hex[i].y} ${hex[(i + 1) % 6].x},${hex[(i + 1) % 6].y}" fill="${armFills[i]}"/>`)
     }
 
     // Two overlapping triangle outlines
