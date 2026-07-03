@@ -1072,72 +1072,21 @@ const sternHalma = {
 
     parts.push(`<rect x="${ox}" y="${oy}" width="${boardW}" height="${boardH}" fill="${colors.background}" rx="6"/>`)
 
-    // Compute polygon vertices FROM hole positions (not from static SVG offsets).
-    // Each tip = outermost hole in that arm, pushed outward by pieceR.
-    // Hex boundary = midpoint between innermost arm holes and outermost body holes.
+    // Polygon geometry from the static SVG. Arm fills clipped to star outline
+    // so they never exceed the boundary regardless of hex vertex adjustments.
+    const s = spacing / 24
     const midY = topY + 8 * rowH
     const pieceR = spacing * 0.19
-    const pad = pieceR + 2
 
-    // Star tips: computed from actual tip holes + padding outward
-    const tipHoles = [
-      positions[arms.N[0]],                     // N tip (row 0)
-      positions[arms.NE[0]],                    // NE tip (row 4, rightmost)
-      positions[arms.SE[arms.SE.length - 1]],   // SE tip (row 12, rightmost)
-      positions[arms.S[arms.S.length - 1]],     // S tip (row 16)
-      positions[arms.SW[arms.SW.length - 1]],   // SW tip (row 12, leftmost)
-      positions[arms.NW[0]],                    // NW tip (row 4, leftmost)
-    ]
-    const tips = tipHoles.map(h => {
-      const dx = h.x - cx, dy = h.y - midY
-      const dist = Math.sqrt(dx * dx + dy * dy)
-      return { x: h.x + dx / dist * pad, y: h.y + dy / dist * pad }
-    })
-
-    // Hex vertices: midpoint between innermost arm hole and nearest body hole on each edge
-    // For N/S arms: between row 3 and row 4 (and row 12 and row 13)
-    // For side arms: between the innermost side-arm hole and adjacent body hole
-    const row3y = topY + 3 * rowH
-    const row4y = topY + 4 * rowH
-    const hexTopY = (row3y + row4y) / 2
-    const row12y = topY + 12 * rowH
-    const row13y = topY + 13 * rowH
-    const hexBotY = (row12y + row13y) / 2
-
-    // Side hex vertices: NE arm innermost is row 7 col (last), body row 8 col 0-adjacent
-    // Midpoint x between these two positions
-    const row7Width = 10, row8Width = 9
-    const nwInner = positions[arms.NW[arms.NW.length - 1]]  // row 7, leftmost
-    const bodyLeftRow8 = positions[56]  // row 8, col 0 (h57)
-    const hexLeftX = (nwInner.x + bodyLeftRow8.x) / 2
-    const hexLeftY = (nwInner.y + bodyLeftRow8.y) / 2
-
-    const neInner = positions[arms.NE[arms.NE.length - 1]]  // row 7, rightmost
-    const bodyRightRow8Idx = 56 + row8Width - 1  // row 8, last col
-    const bodyRightRow8 = positions[bodyRightRow8Idx]
-    const hexRightX = (neInner.x + bodyRightRow8.x) / 2
-    const hexRightY = (neInner.y + bodyRightRow8.y) / 2
-
-    // Row 4 leftmost and rightmost (arm boundaries)
-    const row4Start = 10  // first 10 holes are rows 0-3 (1+2+3+4=10)
-    const row4LeftHole = positions[row4Start]  // row 4 col 0 (NW arm)
-    const row4RightHole = positions[row4Start + 12]  // row 4 col 12 (NE arm)
-    const row4BodyLeft = positions[row4Start + 4]  // row 4 col 4 (first body hole)
-    const row4BodyRight = positions[row4Start + 8]  // row 4 col 8 (last body hole)
-
-    const hex = [
-      { x: (row4BodyLeft.x + positions[row4Start + 3].x) / 2, y: hexTopY },   // top-left
-      { x: (row4BodyRight.x + positions[row4Start + 9].x) / 2, y: hexTopY },  // top-right
-      { x: hexRightX, y: hexRightY },                                          // right
-      { x: (row4BodyRight.x + positions[row4Start + 9].x) / 2, y: hexBotY },  // bottom-right
-      { x: (row4BodyLeft.x + positions[row4Start + 3].x) / 2, y: hexBotY },   // bottom-left
-      { x: hexLeftX, y: hexLeftY },                                            // left
-    ]
+    const hex = [[-50.5, -93], [50.5, -93], [104.3, 0], [50.5, 92.9], [-50.5, 92.9], [-104.3, 0]]
+      .map(([dx, dy]) => ({ x: cx + dx * s, y: midY + dy * s }))
+    const tips = [[0, -180.3], [158, -93], [158, 92.9], [0, 180.3], [-158, 92.9], [-158, -93]]
+      .map(([dx, dy]) => ({ x: cx + dx * s, y: midY + dy * s }))
 
     // Centre hexagon fill
     parts.push(`<polygon points="${hex.map(v => `${v.x},${v.y}`).join(' ')}" fill="${colors.centre}"/>`)
 
-    // Arm fills: tip → hex[i] → hex[i+1]
+    // Arm fills: exact original geometry (tip → hex[i] → hex[i+1])
     const armFills = [colors.armN, colors.armNE, colors.armSE, colors.armS, colors.armSW, colors.armNW]
     for (let i = 0; i < 6; i++) {
       parts.push(`<polygon points="${tips[i].x},${tips[i].y} ${hex[i].x},${hex[i].y} ${hex[(i + 1) % 6].x},${hex[(i + 1) % 6].y}" fill="${armFills[i]}"/>`)
