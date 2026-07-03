@@ -1137,6 +1137,10 @@ const sternHalma = {
       }
     }
 
+    // Debug: test piece at h57 (row 8, leftmost — inner hex edge)
+    const testHole = positions[56]
+    parts.push(`<circle cx="${testHole.x}" cy="${testHole.y}" r="${pieceR - 1}" fill="#1565c0" stroke="#fff" stroke-width="1.5"/>`)
+
     const labelPad = spacing * 1.2
     const labels = [
       { text: 'N', x: cx, y: tips[0].y - labelPad },
