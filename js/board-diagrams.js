@@ -1074,39 +1074,33 @@ const sternHalma = {
 
     // Polygon geometry from the static SVG (diagrams/static/stern-halma/).
     // Original centre (194, 216.3), spacing 24. Scale by s = spacing/24.
-    // Single set of vertices used for both fills and outlines (no misalignment).
+    // All vertices expanded uniformly outward by pieceR so outermost pieces fit.
     const s = spacing / 24
     const midY = topY + 8 * rowH
     const pieceR = spacing * 0.35
+    const pad = pieceR + 2
 
-    // Hexagon and star tip vertices (exact from static SVG, scaled)
-    const hex = [
-      { x: cx + (-50.5) * s, y: midY + (-93) * s },
-      { x: cx + (50.5) * s, y: midY + (-93) * s },
-      { x: cx + (104.3) * s, y: midY + (0) * s },
-      { x: cx + (50.5) * s, y: midY + (92.9) * s },
-      { x: cx + (-50.5) * s, y: midY + (92.9) * s },
-      { x: cx + (-104.3) * s, y: midY + (0) * s },
-    ]
-    const tips = [
-      { x: cx, y: midY + (-180.3) * s },
-      { x: cx + (158) * s, y: midY + (-93) * s },
-      { x: cx + (158) * s, y: midY + (92.9) * s },
-      { x: cx, y: midY + (180.3) * s },
-      { x: cx + (-158) * s, y: midY + (92.9) * s },
-      { x: cx + (-158) * s, y: midY + (-93) * s },
-    ]
+    const expandFromCentre = (dx, dy) => {
+      const px = dx * s, py = dy * s
+      const dist = Math.sqrt(px * px + py * py)
+      if (dist === 0) return { x: cx, y: midY }
+      return { x: cx + px + px / dist * pad, y: midY + py + py / dist * pad }
+    }
+
+    // Hexagon and star vertices, all expanded uniformly
+    const hex = [[-50.5, -93], [50.5, -93], [104.3, 0], [50.5, 92.9], [-50.5, 92.9], [-104.3, 0]].map(([dx, dy]) => expandFromCentre(dx, dy))
+    const tips = [[0, -180.3], [158, -93], [158, 92.9], [0, 180.3], [-158, 92.9], [-158, -93]].map(([dx, dy]) => expandFromCentre(dx, dy))
 
     // Centre hexagon fill
     parts.push(`<polygon points="${hex.map(v => `${v.x},${v.y}`).join(' ')}" fill="${colors.centre}"/>`)
 
-    // Arm triangle fills (same vertices as outlines)
+    // Arm triangle fills
     const armFills = [colors.armN, colors.armNE, colors.armSE, colors.armS, colors.armSW, colors.armNW]
     for (let i = 0; i < 6; i++) {
       parts.push(`<polygon points="${tips[i].x},${tips[i].y} ${hex[i].x},${hex[i].y} ${hex[(i + 1) % 6].x},${hex[(i + 1) % 6].y}" fill="${armFills[i]}"/>`)
     }
 
-    // Two overlapping triangle outlines
+    // Two overlapping triangle outlines (same expanded vertices = perfect alignment)
     parts.push(`<polygon points="${tips[0].x},${tips[0].y} ${tips[4].x},${tips[4].y} ${tips[2].x},${tips[2].y}" fill="none" stroke="${colors.outline}" stroke-width="1"/>`)
     parts.push(`<polygon points="${tips[3].x},${tips[3].y} ${tips[5].x},${tips[5].y} ${tips[1].x},${tips[1].y}" fill="none" stroke="${colors.outline}" stroke-width="1"/>`)
 
