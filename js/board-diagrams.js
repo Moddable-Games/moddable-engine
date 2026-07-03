@@ -1026,17 +1026,17 @@ const sternHalma = {
   },
   computeLayout(opts) {
     const spacing = opts.holeSpacing || 24
-    const margin = spacing * 2.5
+    const margin = spacing * 2
     const boardW = spacing * 16 + margin * 2
-    const boardH = Math.round(spacing * Math.sqrt(3) / 2 * 16) + margin * 2
+    const boardH = Math.round(spacing * Math.sqrt(3) / 2 * 16) + margin * 2 + spacing
     return { boardW, boardH }
   },
   getHolePositions(opts, ox, oy) {
     const spacing = opts.holeSpacing || 24
     const rowH = spacing * Math.sqrt(3) / 2
-    const margin = spacing * 2.5
+    const margin = spacing * 2
     const cx = ox + spacing * 8 + margin
-    const topY = oy + margin
+    const topY = oy + margin + spacing * 0.5
     const rowWidths = [1, 2, 3, 4, 13, 12, 11, 10, 9, 10, 11, 12, 13, 4, 3, 2, 1]
     const positions = []
     const arms = { N: [], NE: [], SE: [], S: [], SW: [], NW: [] }
@@ -1077,20 +1077,12 @@ const sternHalma = {
     // All vertices expanded uniformly outward by pieceR so outermost pieces fit.
     const s = spacing / 24
     const midY = topY + 8 * rowH
-    const pieceR = spacing * 0.35
-    // Arm holes nearest to polygon edges: row 4 holes are ~9.9px from the
-    // horizontal hex edges (y = ±93*s). Need pieceR+3 clearance everywhere.
-    // Use a single scale factor based on the tightest constraint.
-    const needed = pieceR + 3
-    const available = 5 * rowH - 93 * s  // ~10.9px (distance from row 3 holes to hex edge)
-    const sideAvailable = 93 * s - (8 - 4) * rowH  // distance from horizontal edge to row 4 = 93 - 83.1 = 9.9
-    const worstCase = Math.min(available, sideAvailable)
-    const scale = needed / worstCase
-
+    const pieceR = spacing * 0.28
+    // Use original geometry unscaled. Pieces sized to fit the tightest gap (9.9px).
     const hex = [[-50.5, -93], [50.5, -93], [104.3, 0], [50.5, 92.9], [-50.5, 92.9], [-104.3, 0]]
-      .map(([dx, dy]) => ({ x: cx + dx * s * scale, y: midY + dy * s * scale }))
+      .map(([dx, dy]) => ({ x: cx + dx * s, y: midY + dy * s }))
     const tips = [[0, -180.3], [158, -93], [158, 92.9], [0, 180.3], [-158, 92.9], [-158, -93]]
-      .map(([dx, dy]) => ({ x: cx + dx * s * scale, y: midY + dy * s * scale }))
+      .map(([dx, dy]) => ({ x: cx + dx * s, y: midY + dy * s }))
 
     // Centre hexagon fill
     parts.push(`<polygon points="${hex.map(v => `${v.x},${v.y}`).join(' ')}" fill="${colors.centre}"/>`)
