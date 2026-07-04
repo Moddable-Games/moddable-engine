@@ -103,6 +103,17 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Changelog
 
+#### 2026-07-04
+- Built Landlord's Game board renderer — all 3 editions (1904, 1906, 1932) from JSON data
+- 1932: type-driven stripe bands, 16-point star, inner track boxes with hover
+- 1906: L-shaped Natural Opportunity corners with doorway connectors, split diagonal corners
+- 1904: oversized medallion circles (SVG overflow visible), 4-quadrant inner track
+- Added inner track data and hover info for all editions (multi-track notation groundwork)
+
+#### 2026-07-03
+- Transcribed all 3 Landlord's Game boards to structured JSON (1904, 1906, 1932)
+- Added board data loading infrastructure to board studio
+
 #### 2026-06-30
 - Refactored plugin-chess to be fully topology-agnostic (board via getCell/setCell, pawn via topology.step + pawnConfig)
 - Added topology.step(from, direction) to grid and hex — universal single-step advancement
