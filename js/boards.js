@@ -426,10 +426,11 @@ const GAMES = {
   'landlords-game': {
     label: 'Landlords Game',
     pieceSet: null,
+    needsBoardData: 'landlords-game-boards.json',
     variants: {
-      standard: { label: 'Standard', static: true },
-      '1904-original': { label: '1904 Original', static: true },
-      '1906-commercial': { label: '1906 Commercial', static: true },
+      '1904-patent': { label: '1904 Patent', boardStyle: 'landlords', variant: '1904-patent', setupDesc: '40 spaces, 4 corners, 22 numbered lots', variantDesc: 'Elizabeth Magie\'s original 1904 patent. Linear rent progression (rent = lot number).' },
+      '1906-egc': { label: '1906 EGC', boardStyle: 'landlords', variant: '1906-egc', setupDesc: '40 spaces, 4 corners, 4 inner Natural Opportunity spaces', variantDesc: 'First commercial edition by Economic Game Company. Named lots in price tiers. Dual-mode: standard + single tax.' },
+      '1932-prosperity': { label: '1932 Prosperity', boardStyle: 'landlords', variant: '1932-prosperity', setupDesc: '36 spaces, 4 corners (3 railroads + Wages), 8 per side', variantDesc: 'Adgame Company dual-game board. Clockwise direction. Chance cube on doubles.' },
     },
   },
   'dungeon-chess': {
@@ -709,6 +710,7 @@ function buildFanoronaPosition(rows, cols) {
 
 let state = readStateFromURL()
 let galleryIndex = null
+const boardDataCache = {}
 
 function readStateFromURL() {
   const params = new URLSearchParams(window.location.search)
@@ -916,6 +918,11 @@ function render() {
     return
   }
 
+  if (game.needsBoardData) {
+    loadBoardDataAndRender(game, variantDef)
+    return
+  }
+
   if (game.hexGame) {
     renderHexGame(game, variantDef)
     return
@@ -1032,6 +1039,22 @@ function renderHexGame(game, variantDef) {
   requestAnimationFrame(fitToView)
 }
 
+async function loadBoardDataAndRender(game, variantDef) {
+  const dataFile = game.needsBoardData
+  if (!boardDataCache[dataFile]) {
+    try {
+      const resp = await fetch(`../data/${dataFile}`)
+      if (resp.ok) boardDataCache[dataFile] = await resp.json()
+    } catch { /* falls through to error display */ }
+  }
+  const config = { ...variantDef, boardData: boardDataCache[dataFile] || null }
+  const svg = renderBoard(config)
+  showSvg(svg)
+  showInfo(config)
+  bindBoardHover(config)
+  requestAnimationFrame(fitToView)
+}
+
 async function loadStaticSvg(gameId, variantId, variantDef) {
   const path = getStaticSvgPath(gameId, variantId)
   try {
@@ -1127,7 +1150,48 @@ function bindBoardHover(config) {
       if (dark > 0) text += ` — ${dark} dark`
       if (light > 0) text += ` — ${light} light`
       if (!dark && !light) text += ' — empty'
+    } else if (sq.startsWith('pos-') && config.boardData) {
+      const posStr = sq.slice(4)
+      const suffix = posStr.match(/[ab]$/)
+      const posNum = parseInt(posStr, 10)
+      const variant = config.variant || '1904-patent'
+      const board = config.boardData.boards[variant]
+      if (board) {
+        const space = board.spaces.find(s => s.pos === posNum)
+        if (space && suffix && suffix[0] === 'b' && space.split) {
+          const sp = space.split
+          text = `#${space.pos}b ${sp.name} [${sp.type}]`
+          if (sp.tax) text += ` — Tax $${sp.tax}`
+          if (sp.rent) text += ` — Rent $${sp.rent}`
+          if (sp.price) text += ` — Price $${sp.price}`
+          if (sp.notes) text += ` — ${sp.notes}`
+        } else if (space) {
+          const id = suffix ? `${space.pos}${suffix[0]}` : `${space.pos}`
+          text = `#${id} ${space.name} [${space.type}]`
+          if (space.rent) text += ` — Rent $${space.rent}`
+          if (space.price) text += ` — Price $${space.price}`
+          if (space.tax) text += ` — Tax $${space.tax}`
+          if (space.fare) text += ` — Fare $${space.fare}`
+          if (space.fee) text += ` — Fee $${space.fee}`
+          if (space.receive) text += ` — Receive $${space.receive}`
+          if (space.notes) text += ` — ${space.notes}`
+        }
+      }
+    } else if (sq.startsWith('inner-') && config.boardData) {
+      const idx = parseInt(sq.slice(6), 10) - 1
+      const variant = config.variant || '1904-patent'
+      const board = config.boardData.boards[variant]
+      if (board && board.naturalOpportunities && board.naturalOpportunities[idx]) {
+        const no = board.naturalOpportunities[idx]
+        text = `${no.name} — Wages $${no.wages}, Rent $${no.rent}, Re-entry: ${no.reentryName} (#${no.reentry})`
+      } else if (board && board.innerSpaces && board.innerSpaces[idx]) {
+        const is = board.innerSpaces[idx]
+        text = `Inner: ${is.name} [${is.type}]`
+        if (is.fare) text += ` — Fare $${is.fare}`
+        if (is.notes) text += ` — ${is.notes}`
+      }
     }
+    if (text.length > 90) text = text.slice(0, 87) + '...'
     infoBar.textContent = text
   })
 
