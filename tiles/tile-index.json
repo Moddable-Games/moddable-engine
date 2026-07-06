@@ -780,5 +780,29 @@
       "y": "y.png",
       "z": "z.png"
     }
+  },
+  {
+    "id": "hanafuda-traditional",
+    "name": "Hanafuda (Traditional Black Border)",
+    "family": "hanafuda",
+    "shape": "rectangle",
+    "author": "Wikimedia Contributors",
+    "license": "CC0-1.0",
+    "source": "https://commons.wikimedia.org/wiki/Category:SVG_Hanafuda_with_traditional_colors_(black_border)",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "format": "svg",
+    "incomplete": true,
+    "tiles": {
+      "August-Kasu-1": "Hanafuda_August_Kasu_1_Alt.svg",
+      "August-Kasu-2": "Hanafuda_August_Kasu_2_Alt.svg",
+      "October-Kasu-1": "Hanafuda_October_Kasu_1_Alt.svg",
+      "October-Kasu-2": "Hanafuda_October_Kasu_2_Alt.svg",
+      "October-Tane": "Hanafuda_October_Tane_Alt.svg",
+      "October-Tanzaku": "Hanafuda_October_Tanzaku_Alt.svg",
+      "September-Kasu-1": "Hanafuda_September_Kasu_1_Alt.svg",
+      "September-Kasu-2": "Hanafuda_September_Kasu_2_Alt.svg",
+      "September-Tane": "Hanafuda_September_Tane_Alt.svg",
+      "September-Tanzaku": "Hanafuda_September_Tanzaku_Alt.svg"
+    }
   }
 ]
