@@ -399,6 +399,63 @@ const BRUSKY_POSITION = buildHexPositionExplicit(
   ]
 )
 
+// ─── GO PRESET POSITIONS ───────────────────────────────────────────────────
+
+function buildGoPreset(name, rows) {
+  const GO_LETTERS = 'abcdefghjklmnopqrst'
+  const position = {}
+  const place = (r, c, color) => {
+    position[`${GO_LETTERS[c]}${rows - r}`] = { type: 'stone', color }
+  }
+  if (name === 'sunjang') {
+    // 8 black + 8 white on 4-4 star points and diagonal approach points
+    // Standard sunjang pattern: alternating B/W on all 9 star points + 7 extra
+    const stars = [[3,3],[3,9],[3,15],[9,3],[9,9],[9,15],[15,3],[15,9],[15,15]]
+    // Black: d4, d16, p4, p16, d10, j4, j16, p10
+    place(3, 3, 'black'); place(3, 15, 'black'); place(15, 3, 'black'); place(15, 15, 'black')
+    place(3, 9, 'black'); place(9, 3, 'black'); place(9, 15, 'black'); place(15, 9, 'black')
+    // White: j10 (tengen), plus 4-10 approach points
+    place(9, 9, 'white'); place(5, 5, 'white'); place(5, 13, 'white'); place(13, 5, 'white')
+    place(13, 13, 'white'); place(5, 9, 'white'); place(9, 5, 'white'); place(13, 9, 'white')
+  } else if (name === 'tibetan') {
+    // 6 black + 6 white on 4th-line star points of 17x17
+    // Black on top half star points, White on bottom half
+    place(3, 3, 'black'); place(3, 8, 'black'); place(3, 13, 'black')
+    place(7, 5, 'black'); place(7, 8, 'black'); place(7, 11, 'black')
+    place(13, 3, 'white'); place(13, 8, 'white'); place(13, 13, 'white')
+    place(9, 5, 'white'); place(9, 8, 'white'); place(9, 11, 'white')
+  }
+  return position
+}
+
+// ─── AGON POSITION (Queen + 6 Guards per side on outer ring) ────────────────
+
+function buildAgonPosition() {
+  const pos = {}
+  // Outer ring of radius-5 hex: cells where |q|+|r|+|q+r| involves max(|q|,|r|,|-q-r|)=5
+  // White Queen at bottom (0,5), Guards spread on adjacent outer ring cells
+  pos['0,5'] = 'Q'
+  pos['-1,5'] = 'P'; pos['1,4'] = 'P'; pos['-2,5'] = 'P'
+  pos['2,3'] = 'P'; pos['-3,5'] = 'P'; pos['3,2'] = 'P'
+  // Black Queen at top (0,-5), Guards mirrored
+  pos['0,-5'] = 'q'
+  pos['1,-5'] = 'p'; pos['-1,-4'] = 'p'; pos['2,-5'] = 'p'
+  pos['-2,-3'] = 'p'; pos['3,-5'] = 'p'; pos['-3,-2'] = 'p'
+  return pos
+}
+
+// ─── DOU SHOU QI SETUP (draughts pieces — men as animals) ──────────────────
+// White (bottom): a1=Lion, g1=Tiger, b2=Rat, f2=Elephant, a3=Dog, c3=Leopard, e3=Wolf, g3=Cat
+// Black (top): mirrors White on rows 7-9
+
+const JUNGLE_SETUP = 'b5b/1b3b1/b1b1b1b/7/7/7/w1w1w1w/1w3w1/w5w'
+
+// ─── ASALTO SETUP (Officers in fortress, Soldiers on plain) ────────────────
+// Officers (W = white kings/crowned) in fortress rows 0-2 centre
+// Soldiers (b = black men) fill the plain rows 4-8
+
+const ASALTO_SETUP = '9/9/9/3W1W3/3b1b3/2bbbbb2/2bbbbb2/2bbbbb2/2bbbbb2'
+
 // ─── GAME DEFINITIONS ───────────────────────────────────────────────────────
 // Each variant specifies: boardStyle, dimensions, pieceSet, fen/position
 
@@ -527,8 +584,8 @@ const GAMES = {
       rengo: { label: 'Rengo (19×19)', boardStyle: 'go', rows: 19, cols: 19, tileSize: 20, setupDesc: 'Empty board, teams of 2 or 3', variantDesc: 'Team Go. Partners alternate turns. No consultation. 2v2 or 3v3.' },
       renju: { label: 'Renju (15×15)', boardStyle: 'go', rows: 15, cols: 15, tileSize: 20, setupDesc: 'Empty board, 225 intersections', variantDesc: 'Competitive Gomoku with forbidden moves for Black. Governed by the Renju International Federation.' },
       stoical: { label: 'Stoical Go (19×19)', boardStyle: 'go', rows: 19, cols: 19, tileSize: 20, setupDesc: 'Empty board, 361 intersections', variantDesc: 'Cannot capture if opponent captured last turn. Forces restraint and patience.' },
-      sunjang: { label: 'Sunjang Baduk (19×19)', boardStyle: 'go', rows: 19, cols: 19, tileSize: 20, setupDesc: '16 pre-placed stones on star points', variantDesc: 'Korean historical Go. Prisoners ignored. No komi.' },
-      tibetan: { label: 'Tibetan Go (17×17)', boardStyle: 'go', rows: 17, cols: 17, tileSize: 20, setupDesc: '12 pre-placed stones, 289 intersections', variantDesc: '17x17 board. Delayed captures. Unique scoring system.' },
+      sunjang: { label: 'Sunjang Baduk (19×19)', boardStyle: 'go', rows: 19, cols: 19, tileSize: 20, goPreset: 'sunjang', setupDesc: '16 pre-placed stones on star points', variantDesc: 'Korean historical Go. Prisoners ignored. No komi.' },
+      tibetan: { label: 'Tibetan Go (17×17)', boardStyle: 'go', rows: 17, cols: 17, tileSize: 20, goPreset: 'tibetan', setupDesc: '12 pre-placed stones, 289 intersections', variantDesc: '17x17 board. Delayed captures. Unique scoring system.' },
       'toroidal-go': { label: 'Toroidal Go (11×11)', boardStyle: 'go', rows: 11, cols: 11, tileSize: 20, setupDesc: 'Empty board, edges wrap', variantDesc: 'Edges wrap horizontally and vertically. No corners, no edges, no joseki.' },
     },
   },
@@ -876,17 +933,17 @@ const GAMES = {
   },
   agon: {
     label: 'Agon',
-    pieceSet: 'playstrategy-go-classic',
+    pieceSet: 'mce-chess',
     variants: {
-      standard: { label: 'Standard (91 hexes)', boardStyle: 'hex', hexRadius: 5, hexSize: 22, flat: false, colors: { lightHex: '#f5e6c8', darkHex: '#e8d4a8', midHex: '#f0ddb8', stroke: 'rgba(0,0,0,0.2)', background: '#3a2a1a' }, setupDesc: 'Queen + 6 Guards per player on concentric hex rings', variantDesc: 'Guide your Queen to the centre hex while blocking opponent. Concentric 91-hex board. France, 1842.' },
+      standard: { label: 'Standard (91 hexes)', boardStyle: 'hex', hexRadius: 5, hexSize: 22, flat: false, colors: { lightHex: '#f5e6c8', darkHex: '#e8d4a8', midHex: '#f0ddb8', stroke: 'rgba(0,0,0,0.2)', background: '#3a2a1a' }, hexPosition: buildAgonPosition(), setupDesc: 'Queen + 6 Guards per player on outer ring', variantDesc: 'Guide your Queen to the centre hex while blocking opponent. Concentric 91-hex board. France, 1842.' },
     },
   },
   asalto: {
     label: 'Asalto',
     pieceSet: 'playstrategy-draughts-plain',
     variants: {
-      standard: { label: 'Standard', boardStyle: 'checkered', rows: 9, cols: 9, tileSize: 36, showLabels: false, cellMap: ASALTO_MAP, colors: ASALTO_COLORS, setupDesc: '2 Officers in fortress vs 24 Soldiers on plain', variantDesc: 'Asymmetric siege. Officers jump-capture like draughts; Soldiers advance forward/sideways. Immobilize to win.' },
-      'royal-garrison': { label: 'Royal Garrison', boardStyle: 'checkered', rows: 9, cols: 9, tileSize: 36, showLabels: false, cellMap: ASALTO_MAP, colors: ASALTO_COLORS, setupDesc: '3 Officers in larger fortress vs 50 Soldiers', variantDesc: 'Extended Asalto. Three Officers defend a larger fortress against 50 Soldiers.' },
+      standard: { label: 'Standard', boardStyle: 'checkered', rows: 9, cols: 9, tileSize: 36, showLabels: false, cellMap: ASALTO_MAP, colors: ASALTO_COLORS, setup: ASALTO_SETUP, setupDesc: '2 Officers in fortress vs 24 Soldiers on plain', variantDesc: 'Asymmetric siege. Officers jump-capture like draughts; Soldiers advance forward/sideways. Immobilize to win.' },
+      'royal-garrison': { label: 'Royal Garrison', boardStyle: 'checkered', rows: 9, cols: 9, tileSize: 36, showLabels: false, cellMap: ASALTO_MAP, colors: ASALTO_COLORS, setup: ASALTO_SETUP, setupDesc: '3 Officers in larger fortress vs 50 Soldiers', variantDesc: 'Extended Asalto. Three Officers defend a larger fortress against 50 Soldiers.' },
     },
   },
   'bavarian-32': {
@@ -899,9 +956,9 @@ const GAMES = {
   },
   'dou-shou-qi': {
     label: 'Jungle',
-    pieceSet: null,
+    pieceSet: 'playstrategy-draughts-plain',
     variants: {
-      standard: { label: 'Standard (7×9)', boardStyle: 'checkered', rows: 9, cols: 7, tileSize: 40, showLabels: false, cellMap: JUNGLE_MAP, colors: JUNGLE_COLORS, setupDesc: '8 animals per player on 7x9 grid with river, dens, and traps', variantDesc: 'Animals battle across rivers and traps to reach the enemy den. Rank hierarchy: Elephant > Lion > ... > Rat (but Rat defeats Elephant).' },
+      standard: { label: 'Standard (7×9)', boardStyle: 'checkered', rows: 9, cols: 7, tileSize: 40, showLabels: false, cellMap: JUNGLE_MAP, colors: JUNGLE_COLORS, setup: JUNGLE_SETUP, setupDesc: '8 animals per player on 7x9 grid with river, dens, and traps', variantDesc: 'Animals battle across rivers and traps to reach the enemy den. Rank hierarchy: Elephant > Lion > ... > Rat (but Rat defeats Elephant).' },
     },
   },
   lattaque: {
@@ -1466,6 +1523,11 @@ function render() {
   if (game.hasHandicap && state.handicap > 0) {
     config.position = buildGoHandicap(state.handicap, config.rows)
     config.goHandicap = state.handicap
+  }
+
+  // Build Go preset positions (sunjang, tibetan)
+  if (config.goPreset) {
+    config.position = buildGoPreset(config.goPreset, config.rows)
   }
 
   // Build fanorona position
