@@ -444,11 +444,12 @@ function buildAgonPosition() {
   return pos
 }
 
-// ─── DOU SHOU QI SETUP (draughts pieces — men as animals) ──────────────────
+// ─── DOU SHOU QI SETUP (distinct animals per FEN letter) ───────────────────
+// E=Elephant(8) L=Lion(7) T=Tiger(6) P=Leopard(5) D=Dog(4) W=Wolf(3) C=Cat(2) R=Rat(1)
 // White (bottom): a1=Lion, g1=Tiger, b2=Rat, f2=Elephant, a3=Dog, c3=Leopard, e3=Wolf, g3=Cat
-// Black (top): mirrors White on rows 7-9
+// Black (top): mirrors on rows 7-9
 
-const JUNGLE_SETUP = 'b5b/1b3b1/b1b1b1b/7/7/7/w1w1w1w/1w3w1/w5w'
+const JUNGLE_SETUP = 't5l/1e3r1/c1w1d1p/7/7/7/P1D1W1C/1R3E1/L5T'
 
 // ─── ASALTO SETUP (Officers in fortress, Soldiers on plain) ────────────────
 // Officers (W = white kings/crowned) in fortress rows 0-2 centre
@@ -956,9 +957,9 @@ const GAMES = {
   },
   'dou-shou-qi': {
     label: 'Jungle',
-    pieceSet: 'playstrategy-draughts-plain',
+    pieceSet: 'fluent-emoji',
     variants: {
-      standard: { label: 'Standard (7×9)', boardStyle: 'checkered', rows: 9, cols: 7, tileSize: 40, showLabels: false, cellMap: JUNGLE_MAP, colors: JUNGLE_COLORS, setup: JUNGLE_SETUP, setupDesc: '8 animals per player on 7x9 grid with river, dens, and traps', variantDesc: 'Animals battle across rivers and traps to reach the enemy den. Rank hierarchy: Elephant > Lion > ... > Rat (but Rat defeats Elephant).' },
+      standard: { label: 'Standard (7×9)', boardStyle: 'checkered', rows: 9, cols: 7, tileSize: 40, showLabels: false, cellMap: JUNGLE_MAP, colors: JUNGLE_COLORS, fen: JUNGLE_SETUP, setupDesc: '8 animals per player on 7x9 grid with river, dens, and traps', variantDesc: 'Animals battle across rivers and traps to reach the enemy den. Rank hierarchy: Elephant > Lion > ... > Rat (but Rat defeats Elephant).' },
     },
   },
   lattaque: {
@@ -992,6 +993,12 @@ const FEN_TO_PIECE_ID = {
 
 const GAME_FEN_OVERRIDES = {
   xiangqi: { H: 'wN', h: 'bN', R: 'wR', r: 'bR', E: 'wE', e: 'bE', A: 'wA', a: 'bA', K: 'wK', k: 'bK', C: 'wC', c: 'bC', P: 'wP', p: 'bP' },
+  'dou-shou-qi': {
+    E: 'elephant', e: 'elephant', L: 'lion', l: 'lion',
+    T: 'tiger', t: 'tiger', P: 'leopard', p: 'leopard',
+    D: 'dog', d: 'dog', W: 'wolf', w: 'wolf',
+    C: 'cat', c: 'cat', R: 'rat', r: 'rat',
+  },
 }
 
 function buildPieceImages(pieceSetId, galleryIndex, gameId) {
