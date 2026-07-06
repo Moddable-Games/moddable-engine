@@ -118,6 +118,140 @@ const ROYAL_UR_COLORS = {
   voidFill: 'transparent',
 }
 
+// ─── TAFL BOARD MAPS ────────────────────────────────────────────────────────
+
+function buildTaflMap(size, { corners = true } = {}) {
+  const grid = Array.from({ length: size }, () => Array(size).fill('floor'))
+  const mid = Math.floor(size / 2)
+  grid[mid][mid] = 'throne'
+  if (corners) {
+    grid[0][0] = 'corner'
+    grid[0][size - 1] = 'corner'
+    grid[size - 1][0] = 'corner'
+    grid[size - 1][size - 1] = 'corner'
+  }
+  return grid
+}
+
+const TAFL_COLORS = {
+  floor: '#d9c5a0', floorStroke: '#8b7355',
+  throne: '#8b4513', throneStroke: '#5c2d0e',
+  corner: '#4a6741', cornerStroke: '#2d4028',
+  voidFill: 'transparent',
+}
+
+// ─── L'ATTAQUE / STRATEGO BOARD MAP ────────────────────────────────────────
+
+function buildLatttaqueMap(rows, cols) {
+  const grid = Array.from({ length: rows }, () => Array(cols).fill('floor'))
+  // Two 2x2 lakes in the centre (rows 4-5, cols 2-3 and cols 6-7)
+  grid[4][2] = 'lake'; grid[4][3] = 'lake'
+  grid[5][2] = 'lake'; grid[5][3] = 'lake'
+  grid[4][6] = 'lake'; grid[4][7] = 'lake'
+  grid[5][6] = 'lake'; grid[5][7] = 'lake'
+  return grid
+}
+
+const LATTAQUE_MAP = buildLatttaqueMap(10, 10)
+
+const LATTAQUE_COLORS = {
+  floor: '#c8b896', floorStroke: '#7a6545',
+  lake: '#4a7ab5', lakeStroke: '#2a5a8a',
+  voidFill: 'transparent',
+}
+
+// ─── DOU SHOU QI (JUNGLE) BOARD MAP ───────────────────────────────────────
+
+function buildJungleMap() {
+  const grid = Array.from({ length: 9 }, () => Array(7).fill('floor'))
+  // River: rows 3-5, cols 1-2 and 4-5
+  for (let r = 3; r <= 5; r++) {
+    grid[r][1] = 'river'; grid[r][2] = 'river'
+    grid[r][4] = 'river'; grid[r][5] = 'river'
+  }
+  // Dens: centre of back row for each player
+  grid[0][3] = 'den'
+  grid[8][3] = 'den'
+  // Traps: adjacent to dens
+  grid[0][2] = 'trap'; grid[0][4] = 'trap'; grid[1][3] = 'trap'
+  grid[8][2] = 'trap'; grid[8][4] = 'trap'; grid[7][3] = 'trap'
+  return grid
+}
+
+const JUNGLE_MAP = buildJungleMap()
+
+const JUNGLE_COLORS = {
+  floor: '#7cb342', floorStroke: '#558b2f',
+  river: '#4a90c8', riverStroke: '#2a6a9a',
+  den: '#4a3520', denStroke: '#2a1a10',
+  trap: '#c8963c', trapStroke: '#8b6520',
+  voidFill: 'transparent',
+}
+
+// ─── ASALTO BOARD MAP ─────────────────────────────────────────────────────
+
+function buildAsaltoMap() {
+  // 9 rows x 9 cols: fortress (top 3x3 centred) connected to plain (bottom 5x5 centred)
+  // Full 9x9 grid but only fortress+plain cells are playable
+  const grid = Array.from({ length: 9 }, () => Array(9).fill(null))
+  // Fortress: rows 0-2, cols 3-5 (3x3 centred)
+  for (let r = 0; r <= 2; r++) for (let c = 3; c <= 5; c++) grid[r][c] = 'fortress'
+  // Plain: rows 4-8, cols 2-6 (5x5)
+  for (let r = 4; r <= 8; r++) for (let c = 2; c <= 6; c++) grid[r][c] = 'plain'
+  // Connection row between fortress and plain
+  grid[3][3] = 'plain'; grid[3][4] = 'plain'; grid[3][5] = 'plain'
+  return grid
+}
+
+const ASALTO_MAP = buildAsaltoMap()
+
+const ASALTO_COLORS = {
+  fortress: '#8b4513', fortressStroke: '#5c2d0e',
+  plain: '#d4b896', plainStroke: '#8b7355',
+  voidFill: 'transparent',
+}
+
+// ─── NYOUT CIRCULAR TRACK ─────────────────────────────────────────────────
+
+function buildNyoutMap() {
+  // Nyout: 29 positions in a cross pattern with diagonal shortcuts
+  // Rendered as a 9x9 grid with specific positions marked
+  const grid = Array.from({ length: 9 }, () => Array(9).fill(null))
+  // Outer ring: top edge
+  grid[0][0] = 'corner'; grid[0][2] = 'track'; grid[0][4] = 'corner'; grid[0][6] = 'track'; grid[0][8] = 'corner'
+  // Right edge
+  grid[2][8] = 'track'; grid[4][8] = 'corner'; grid[6][8] = 'track'; grid[8][8] = 'corner'
+  // Bottom edge
+  grid[8][6] = 'track'; grid[8][4] = 'corner'; grid[8][2] = 'track'; grid[8][0] = 'corner'
+  // Left edge
+  grid[6][0] = 'track'; grid[4][0] = 'corner'; grid[2][0] = 'track'
+  // Diagonal shortcuts (NW-SE and NE-SW through centre)
+  grid[2][2] = 'track'; grid[4][4] = 'home'
+  grid[6][6] = 'track'; grid[2][6] = 'track'; grid[6][2] = 'track'
+  return grid
+}
+
+const NYOUT_MAP = buildNyoutMap()
+
+const NYOUT_COLORS = {
+  track: '#d4b896', trackStroke: '#8b7355',
+  corner: '#c0622f', cornerStroke: '#8b4520',
+  home: '#8b1a1a', homeStroke: '#6a1212',
+  voidFill: 'transparent',
+}
+
+// ─── Y GAME (TRIANGULAR HEX) ───────────────────────────────────────────────
+
+function generateTriangularHexGrid(sideLength) {
+  const hexes = []
+  for (let r = 0; r < sideLength; r++) {
+    for (let q = 0; q <= r; q++) {
+      hexes.push({ q, r })
+    }
+  }
+  return hexes
+}
+
 // ─── HEX GAME COLOR PALETTES ───────────────────────────────────────────────
 
 const NUKES_COLORS = {
@@ -142,26 +276,128 @@ function glinskiColor(hex, colors) {
   return mod === 0 ? colors.lightHex : mod === 1 ? colors.midHex : colors.darkHex
 }
 
-const GLINSKI_POSITION = (() => {
+function buildHexPosition(white) {
   const pos = {}
-  // Axial coords (q, r) for flat-top radius-5 hex board.
-  // Formula: r = 6 - rank - max(0, q). Center f6 = (0,0).
-  // Rooks c1/i1, Knights d1/h1, Bishops f1/f2/f3 (one per hex colour).
-  // Pawns arc: ranks 1,2,3,4,5,4,3,2,1 on files b-k.
-  const white = [
-    ['K', 1, 4], ['Q', -1, 5],
-    ['B', 0, 5], ['B', 0, 4], ['B', 0, 3],
-    ['N', -2, 5], ['N', 2, 3],
-    ['R', -3, 5], ['R', 3, 2],
-    ['P', -4, 5], ['P', -3, 4], ['P', -2, 3], ['P', -1, 2],
-    ['P', 0, 1], ['P', 1, 1], ['P', 2, 1], ['P', 3, 1], ['P', 4, 1],
-  ]
-  // Black mirror: same file, opposite back rank. Transform: (q, r) → (q, -r-q)
   const black = white.map(([p, q, r]) => [p.toLowerCase(), q, -r - q])
   for (const [p, q, r] of white) pos[`${q},${r}`] = p
   for (const [p, q, r] of black) pos[`${q},${r}`] = p
   return pos
-})()
+}
+
+const GLINSKI_POSITION = buildHexPosition([
+  ['K', 1, 4], ['Q', -1, 5],
+  ['B', 0, 5], ['B', 0, 4], ['B', 0, 3],
+  ['N', -2, 5], ['N', 2, 3],
+  ['R', -3, 5], ['R', 3, 2],
+  ['P', -4, 5], ['P', -3, 4], ['P', -2, 3], ['P', -1, 2],
+  ['P', 0, 1], ['P', 1, 1], ['P', 2, 1], ['P', 3, 1], ['P', 4, 1],
+])
+
+const MCCOOEY_POSITION = buildHexPosition([
+  ['K', 1, 4], ['Q', -1, 5],
+  ['B', 0, 5], ['B', 0, 4], ['B', 0, 3],
+  ['N', -2, 5], ['N', 2, 3],
+  ['R', -3, 5], ['R', 3, 2],
+  ['P', -3, 4], ['P', -2, 3], ['P', -1, 2],
+  ['P', 0, 1], ['P', 1, 1], ['P', 2, 1], ['P', 3, 1],
+])
+
+const MINI_HEXCHESS_POSITION = buildHexPosition([
+  ['K', 0, 3],
+  ['B', 0, 2], ['B', 0, 1],
+  ['N', -1, 3], ['N', 1, 2],
+  ['R', -2, 3], ['R', 2, 1],
+  ['P', -2, 2], ['P', -1, 1], ['P', 0, 0], ['P', 1, 0], ['P', 2, 0],
+])
+
+function buildHexPositionExplicit(white, black) {
+  const pos = {}
+  for (const [p, q, r] of white) pos[`${q},${r}`] = p
+  for (const [p, q, r] of black) pos[`${q},${r}`] = p
+  return pos
+}
+
+// Shafran: 70-hex irregular hexagon, 9 files (a-i), file lengths 6,7,8,9,10,9,8,7,6
+// Flat-top, centred on origin. File e = q=0, files go a(q=-4) to i(q=4)
+function generateShafranGrid() {
+  const fileLengths = [6, 7, 8, 9, 10, 9, 8, 7, 6]
+  const hexes = []
+  for (let f = 0; f < 9; f++) {
+    const q = f - 4
+    const len = fileLengths[f]
+    const rStart = -Math.floor(len / 2)
+    for (let i = 0; i < len; i++) {
+      hexes.push({ q, r: rStart + i })
+    }
+  }
+  return hexes
+}
+
+const SHAFRAN_GRID = generateShafranGrid()
+
+// White back rank = bottom edge of each file; Black back rank = top edge (180° rotational symmetry)
+const SHAFRAN_POSITION = buildHexPositionExplicit(
+  [
+    ['R', -4, -3], ['N', -3, -3], ['B', -2, -4], ['Q', -1, -4], ['K', 0, -5],
+    ['B', 1, -4], ['B', 2, -4], ['N', 3, -3], ['R', 4, -3],
+    ['P', -4, -2], ['P', -3, -2], ['P', -2, -3], ['P', -1, -3],
+    ['P', 0, -4], ['P', 1, -3], ['P', 2, -3], ['P', 3, -2], ['P', 4, -2],
+  ],
+  [
+    ['r', -4, 2], ['n', -3, 3], ['b', -2, 3], ['q', -1, 4], ['k', 0, 4],
+    ['b', 1, 4], ['b', 2, 3], ['n', 3, 3], ['r', 4, 2],
+    ['p', -4, 1], ['p', -3, 2], ['p', -2, 2], ['p', -1, 3],
+    ['p', 0, 3], ['p', 1, 3], ['p', 2, 2], ['p', 3, 2], ['p', 4, 1],
+  ]
+)
+
+// De Vasa: 81-hex rhombus 9x9, horizontal orientation
+// Uses generateHexRhombus(9, 9) — q=0..8, r=0..8
+const DE_VASA_POSITION = buildHexPositionExplicit(
+  [
+    ['R', 0, 0], ['N', 1, 0], ['B', 2, 0], ['Q', 3, 0], ['B', 4, 0],
+    ['K', 5, 0], ['B', 6, 0], ['N', 7, 0], ['R', 8, 0],
+    ['P', 0, 2], ['P', 1, 2], ['P', 2, 2], ['P', 3, 2], ['P', 4, 2],
+    ['P', 5, 2], ['P', 6, 2], ['P', 7, 2], ['P', 8, 2],
+  ],
+  [
+    ['r', 0, 8], ['n', 1, 8], ['b', 2, 8], ['k', 3, 8], ['b', 4, 8],
+    ['q', 5, 8], ['b', 6, 8], ['n', 7, 8], ['r', 8, 8],
+    ['p', 0, 6], ['p', 1, 6], ['p', 2, 6], ['p', 3, 6], ['p', 4, 6],
+    ['p', 5, 6], ['p', 6, 6], ['p', 7, 6], ['p', 8, 6],
+  ]
+)
+
+// Brusky: 84-hex irregular hexagon, horizontal, 8 ranks of width 9,10,11,12,12,11,10,9
+function generateBruskyGrid() {
+  const rankWidths = [9, 10, 11, 12, 12, 11, 10, 9]
+  const hexes = []
+  for (let rank = 0; rank < 8; rank++) {
+    const w = rankWidths[rank]
+    const qStart = -Math.floor(w / 2)
+    for (let i = 0; i < w; i++) {
+      hexes.push({ q: qStart + i, r: rank })
+    }
+  }
+  return hexes
+}
+
+const BRUSKY_GRID = generateBruskyGrid()
+
+const BRUSKY_POSITION = buildHexPositionExplicit(
+  [
+    ['R', -4, 0], ['N', -3, 0], ['B', -2, 0], ['Q', -1, 0], ['B', 0, 0],
+    ['K', 1, 0], ['B', 2, 0], ['N', 3, 0], ['R', 4, 0],
+    ['P', -5, 1], ['P', -4, 1], ['P', -3, 1], ['P', -2, 1], ['P', -1, 1],
+    ['P', 0, 1], ['P', 1, 1], ['P', 2, 1], ['P', 3, 1], ['P', 4, 1],
+  ],
+  [
+    ['r', -4, 7], ['n', -3, 7], ['b', -2, 7], ['k', -1, 7], ['b', 0, 7],
+    ['q', 1, 7], ['b', 2, 7], ['n', 3, 7], ['r', 4, 7],
+    ['p', -5, 6], ['p', -4, 6], ['p', -3, 6], ['p', -2, 6], ['p', -1, 6],
+    ['p', 0, 6], ['p', 1, 6], ['p', 2, 6], ['p', 3, 6], ['p', 4, 6],
+  ]
+)
 
 // ─── GAME DEFINITIONS ───────────────────────────────────────────────────────
 // Each variant specifies: boardStyle, dimensions, pieceSet, fen/position
@@ -173,29 +409,36 @@ const GAMES = {
     variants: {
       standard: { label: 'Standard', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Standard FIDE rules.'},
       absorption: { label: 'Absorption', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Capturing piece permanently gains the victim\'s movement abilities.'},
+      alice: { label: 'Alice Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Two 8x8 boards. After every move, the piece transfers to the other board.'},
       'almost-chess': { label: 'Almost Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBCKBNR', variantDesc: 'White Queen replaced by a Chancellor (Rook + Knight compound).'},
       'amazon-chess': { label: 'Amazon Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbmkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBMKBNR', variantDesc: 'Queens replaced by Amazons (Queen + Knight). The most powerful piece possible.'},
       andernach: { label: 'Andernach', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Capturing piece changes colour (becomes opponent\'s). Kings exempt.'},
       antichess: { label: 'Antichess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Captures are mandatory. First to lose all pieces wins.'},
+      asean: { label: 'ASEAN Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Standardized Southeast Asian chess. Makruk-family: Bishop moves 1 diagonally, Pawns promote on rank 6 to Ferz.'},
       atomic: { label: 'Atomic', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Captures cause explosions destroying all pieces on adjacent squares.'},
       benedict: { label: 'Benedict', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'No captures. Attacked enemies convert to your colour instead.'},
       'berolina-chess': { label: 'Berolina', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Pawns move diagonally forward and capture straight forward.'},
       berserk: { label: 'Berserk', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Delivering check grants one bonus move with a different piece.'},
       breakthrough: { label: 'Breakthrough', boardStyle: 'checkered', rows: 7, cols: 7, tileSize: 40, fen: 'ppppppp/ppppppp/7/7/7/PPPPPPP/PPPPPPP', variantDesc: 'Pawns only. First to reach the far side wins.'},
+      brusky: { label: 'Brusky (Hex)', boardStyle: 'hex', hexGrid: BRUSKY_GRID, hexSize: 20, flat: true, hexColorFn: glinskiColor, hexPosition: BRUSKY_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, variantDesc: 'Irregular 84-hex board. 10 pawns per side. Unmoved pawns may capture straight forward. Blockage rule. Yakov Brusky, 1966.'},
       capablanca: { label: 'Capablanca', boardStyle: 'checkered', rows: 8, cols: 10, tileSize: 36, fen: 'rnabqkbcnr/pppppppppp/10/10/10/10/PPPPPPPPPP/RNABQKBCNR', variantDesc: 'Two extra pieces: Archbishop (B+N) and Chancellor (R+N) on 10x8 board.'},
+      chak: { label: 'Chak', boardStyle: 'checkered', rows: 9, cols: 9, tileSize: 38, fen: 'sjvdaxdvs/9/1ppppppp1/9/9/9/1PPPPPPP1/9/SJVDAXDVS', variantDesc: 'Mesoamerican 9x9 chess. Win by mating Ajaw or landing promoted Ajaw on opponent temple. Pieces promote crossing the river. Corey Clark, 2020.'},
       chaturanga: { label: 'Chaturanga', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnefkenr/pppppppp/8/8/8/8/PPPPPPPP/RNEFKENR', variantDesc: 'Ancient Indian ancestor of chess, c. 600 CE. Weak counsellor and leaping elephant.'},
       checkless: { label: 'Checkless', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Cannot give check unless it is checkmate.'},
+      chennis: { label: 'Chennis', boardStyle: 'checkered', rows: 7, cols: 7, tileSize: 40, fen: 'rnbkqbn/ppppppp/7/7/7/PPPPPPP/RNBKQBN', variantDesc: 'Tennis-themed 7x7 chess. Win by advancing a Pawn to the far rank. Net across rank 4 blocks most pieces. Corey Clark.'},
       chigorin: { label: 'Chigorin', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNNQKNNR', variantDesc: 'White\'s Bishops replaced by Knights. Four Knights vs standard army.'},
       codrus: { label: 'Codrus', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'No check exists. Win by getting your own King captured.'},
       courier: { label: 'Courier Chess', boardStyle: 'checkered', rows: 8, cols: 12, tileSize: 32, fen: 'rnebfsksbenr/pppppppppppp/12/12/12/12/PPPPPPPPPPPP/RNEBFSKSBENR', variantDesc: 'Medieval German variant (1200s). Extra bishops and sage pieces on 12x8 board.'},
       crazyhouse: { label: 'Crazyhouse', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Captured pieces switch sides and can be dropped back onto the board.'},
       'cylinder-chess': { label: 'Cylinder Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Files wrap. The a-file connects to the h-file.'},
       'dark-chess': { label: 'Dark Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Total fog. Only see squares occupied by your own pieces.'},
+      'de-vasa': { label: 'De Vasa (Hex)', boardStyle: 'hex', hexRows: 9, hexCols: 9, hexSize: 20, flat: true, hexColorFn: glinskiColor, hexPosition: DE_VASA_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, variantDesc: '81-hex rhombus board. Pawns start rank 3. Kings on opposite wings. Castling permitted. Helge E. de Vasa, 1953.'},
       diana: { label: 'Diana', boardStyle: 'checkered', rows: 6, cols: 6, tileSize: 40, fen: 'rbbkr1/pppppp/6/6/PPPPPP/RBBKR1', variantDesc: '6x6 board. No queens or knights.'},
       'dice-chess': { label: 'Dice Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Die roll constrains which piece type must move.'},
       'displacement-chess': { label: 'Displacement', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Pieces can swap positions with adjacent friendly pieces.'},
       'duck-chess': { label: 'Duck Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'After each move, place the duck (blocker) on any empty square.'},
       'einstein-chess': { label: 'Einstein Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Non-capturing moves demote pieces; captures promote them.'},
+      empire: { label: 'Empire Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'scdtedcs/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Asymmetric: FIDE Kingdom vs Empire. Empire pieces slide like Queens but capture differently. Faceoff rule. Corey Clark, 2019.'},
       'endgame-chess': { label: 'Endgame Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: '4k3/pppppppp/8/8/8/8/PPPPPPPP/4K3', variantDesc: 'Only Kings and pawns. Pure endgame technique from move one.'},
       extinction: { label: 'Extinction', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Lose all of any one piece type and you lose the game.'},
       'fischer-random': { label: 'Fischer Random', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Back rank pieces randomised (960 positions). Castling adapted.'},
@@ -204,12 +447,15 @@ const GAMES = {
       giveaway: { label: 'Giveaway', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Forced captures. King is not royal. Stalemate is a loss.'},
       glinski: { label: 'Glinski (Hex)', boardStyle: 'hex', hexRadius: 5, hexSize: 22, flat: true, hexColorFn: glinskiColor, hexPosition: GLINSKI_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' } , variantDesc: 'Chess on a 91-cell hexagonal board. Three bishops per side.'},
       grand: { label: 'Grand Chess', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, fen: 'r8r/1nbqkcbn1/pppppppppp/10/10/10/10/PPPPPPPPPP/1NBQKCBN1/R8R', variantDesc: 'Archbishop and Chancellor on 10x10 board. Pawns start on rank 3.'},
+      grasshopper: { label: 'Grasshopper Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbgkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBGKBNR', variantDesc: 'Queens replaced by Grasshoppers (hop over any piece, land immediately beyond).'},
       'grid-chess': { label: 'Grid Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Moves must cross at least one 2x2 grid line.'},
+      gygax: { label: 'Gygax Chess (Level 2)', boardStyle: 'checkered', rows: 8, cols: 12, tileSize: 28, fen: 'rnbhqkchbnr1/pppppppppppp/12/12/12/12/PPPPPPPPPPPP/RNBHQKCHBNR1', variantDesc: 'D&D-inspired three-level chess by Gary Gygax. 12x8 boards. Hero, Cleric, and fantasy pieces.'},
       'half-chess': { label: 'Half Chess', boardStyle: 'checkered', rows: 4, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/PPPPPPPP/RNBQKBNR', variantDesc: '4-rank board. Armies start adjacent. Immediate contact.'},
       'hoppel-poppel': { label: 'Hoppel-Poppel', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Knights capture like bishops; bishops capture like knights.'},
       horde: { label: 'Horde', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/1PP2PP1/PPPPPPPP/PPPPPPPP/PPPPPPPP/PPPPPPPP', variantDesc: 'White has full army. Black has 36 pawns. Asymmetric survival.'},
       'immunization-chess': { label: 'Immunization', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Adjacent enemy pieces become immune to capture for 2 turns after a capture.'},
       'king-of-the-hill': { label: 'King of the Hill', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Moving your king to d4/d5/e4/e5 is an instant win.'},
+      'khans-chess': { label: "Khan's Chess", boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'lhakahls/ssssssss/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Asymmetric: FIDE Kingdom vs Mongol Horde cavalry. All Horde pieces move as Knights, capture as FIDE counterparts. Couch Tomato, 2023.'},
       knightmate: { label: 'Knightmate', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rkbqnbkr/pppppppp/8/8/8/8/PPPPPPPP/RKBQNBKR', variantDesc: 'Knight and King swap roles. The Knight is royal.'},
       'legan-chess': { label: 'Legan Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbkqbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBKQBNR', variantDesc: 'Berolina pawns. King and Queen swap starting squares.'},
       'los-alamos': { label: 'Los Alamos', boardStyle: 'checkered', rows: 6, cols: 6, tileSize: 40, fen: 'rnqknr/pppppp/6/6/PPPPPP/RNQKNR', variantDesc: 'First computer chess (1956). 6x6 board, no Bishops, no castling.'},
@@ -217,35 +463,52 @@ const GAMES = {
       maharaja: { label: 'Maharaja', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/8/4M3', variantDesc: 'One full army vs one piece that moves as Queen + Knight.'},
       makpong: { label: 'Makpong', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'King cannot move out of check. Must block or capture.'},
       makruk: { label: 'Makruk', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rngfkgnr/8/pppppppp/8/8/PPPPPPPP/8/RNGFKGNR', variantDesc: 'Thai chess. Pawns promote on rank 6. No castling or en passant.'},
+      mansindam: { label: 'Mansindam', boardStyle: 'checkered', rows: 9, cols: 8, tileSize: 38, fen: 'rncakqbm/pppppppp/9/9/9/9/9/PPPPPPPP/RNCAKQBM', variantDesc: 'Shogi-style drops with compound pieces on 8x9 board. No draws. Win by checkmate, campmate, or stalemate. Couch Tomato.'},
       marseillais: { label: 'Marseillais', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Each player makes two moves per turn (except White\'s first).'},
+      mccooey: { label: 'McCooey (Hex)', boardStyle: 'hex', hexRadius: 5, hexSize: 22, flat: true, hexColorFn: glinskiColor, hexPosition: MCCOOEY_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, variantDesc: 'McCooey hex chess. 7 pawns, diagonal pawn capture. Same 91-hex board as Glinski.'},
       'medusa-chess': { label: 'Medusa Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'After queen moves, attacked enemy pieces are petrified for 2 turns.'},
+      'mini-hexchess': { label: 'Mini Hexchess', boardStyle: 'hex', hexRadius: 3, hexSize: 28, flat: true, hexColorFn: glinskiColor, hexPosition: MINI_HEXCHESS_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, variantDesc: 'Compact 37-hex board. No Queen. McCooey 1997.'},
       minichess: { label: 'Minichess', boardStyle: 'checkered', rows: 5, cols: 5, tileSize: 40, fen: 'kqbnr/ppppp/5/PPPPP/RNBQK', variantDesc: 'Gardner\'s 5x5 board. All piece types, fast tactical games.'},
       'monster-chess': { label: 'Monster Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/R3K2R', variantDesc: 'White moves twice per turn but starts with only King, Rooks, and pawns.'},
       'no-castling': { label: 'No Castling', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Standard chess with castling removed. Kings must develop naturally.'},
+      nightrider: { label: 'Nightrider Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Knights replaced by Nightriders (repeat knight leap in same direction).'},
       'no-retreat': { label: 'No Retreat', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Pieces cannot move backward toward their own starting rank.'},
       omnicide: { label: 'Omnicide', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Lose all your pieces to win. Captures NOT forced.'},
       'orda-chess': { label: 'Orda Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'lhaykahl/8/pppppppp/8/8/PPPPPPPP/8/RNBQKBNR', variantDesc: 'Asymmetric: White standard vs Black Horde (divergent movers).'},
+      'orda-mirror': { label: 'Orda Mirror', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'lkfyxfkl/pppppppp/8/8/8/8/PPPPPPPP/LKFYXFKL', variantDesc: 'Both players command the Horde. Pieces move as Knights, capture as FIDE counterparts. Corey Clark, 2020.'},
+      'ouk-chaktrang': { label: 'Ouk Chaktrang', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/8/pppppppp/8/8/PPPPPPPP/8/RNBQKBNR', variantDesc: 'Cambodian chess. Koul leaps diagonally; King has first-move Knight jump. Pawns promote on rank 6.'},
       patrol: { label: 'Patrol', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Pieces can only capture or give check when defended by a friendly piece.'},
       'pawns-only': { label: 'Pawns Only', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: '4k3/pppppppp/8/8/8/8/PPPPPPPP/4K3', variantDesc: 'Kings and pawns only. First to promote wins instantly.'},
       'peasants-revolt': { label: "Peasants' Revolt", boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: '2n1k1n1/pppppppp/8/8/8/8/PPPPPPPP/4K3', variantDesc: 'White: King + 8 pawns vs Black: King + 2 Knights + 8 pawns.'},
       petty: { label: 'Petty Chess', boardStyle: 'checkered', rows: 6, cols: 5, tileSize: 40, fen: 'rnbqk/ppppp/5/5/PPPPP/RNBQK', variantDesc: 'All piece types on a compact 5x6 board. Single copies of each.'},
       'poison-chess': { label: 'Poison Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Capture squares become poisoned for 3 turns.'},
+      'placement-chess': { label: 'Placement Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: '8/pppppppp/8/8/8/8/PPPPPPPP/8', variantDesc: 'Players place back-rank pieces before play begins. Bishops must be on opposite colours. David Bronstein.'},
       progressive: { label: 'Progressive', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Moves per turn escalate: 1, 2, 3, 4... Check ends turn early.'},
       'racing-kings': { label: 'Racing Kings', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: '8/8/8/8/8/8/krbnNBRK/qrbnNBRQ', variantDesc: 'No checks allowed. Both kings start on 1st rank. Race to the top.'},
       'recruitment-chess': { label: 'Recruitment', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Captured pieces defect to the captor on the vacated square.'},
       rifle: { label: 'Rifle Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Capturing pieces stay on their square. They shoot the target.'},
+      's-chess': { label: 'S-Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Hawk and Elephant enter via gating when back-rank pieces vacate. Yasser Seirawan and Jonathan Tisdall, 2007.'},
+      shako: { label: 'Shako', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, fen: 'rcebqkbecr/pppppppppp/10/10/10/10/10/10/PPPPPPPPPP/RCEBQKBECR', variantDesc: '10x10 with Cannon (screen-jump capture) and Elephant (2-diagonal leap). Jean-Louis Cazaux, 2000.'},
       shatar: { label: 'Shatar', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Mongolian chess. No check. Win by leaving opponent with only their King.'},
       shatranj: { label: 'Shatranj', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnekfenr/pppppppp/8/8/8/8/PPPPPPPP/RNEKFENR', variantDesc: 'Medieval Islamic chess. Bare king and stalemate are wins.'},
+      shafran: { label: 'Shafran (Hex)', boardStyle: 'hex', hexGrid: SHAFRAN_GRID, hexSize: 20, flat: true, hexColorFn: glinskiColor, hexPosition: SHAFRAN_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, variantDesc: 'Irregular 70-hex board, 9 files. Castling permitted. Pawn initial step varies by file. Isaak Shafran, 1939.'},
       'single-check': { label: 'Single-Check', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'One check wins. No checkmate needed.'},
+      shinobi: { label: 'Shinobi Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'cmujtmuc/2pppp2/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Asymmetric: FIDE vs Shinobi Clan. Clan drops ninja pieces from hand, promotes in zone. Corey Clark, 2021.'},
+      shogun: { label: 'Shogun Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Zone-triggered promotion and Shogi-style drops from captured pieces. Corey Clark, 2020.'},
       sittuyin: { label: 'Sittuyin', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Burmese chess. Placement opening phase. Pawns promote on diagonal.'},
+      spartan: { label: 'Spartan Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'lwgkkgwl/hhhhhhhh/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Asymmetric: Persian (FIDE) vs Spartan army with two Kings and unique pieces. Steven Streetman, 2010.'},
       'stalemate-wins': { label: 'Stalemate Wins', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Standard chess but stalemate is a win, not a draw.'},
       'suicide-chess': { label: 'Suicide Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Forced captures. Stalemate is a draw, not a loss.'},
+      synochess: { label: 'Synochess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rheachhr/2n2n2/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Asymmetric: Western FIDE vs Eastern dynasty (Xiangqi pieces, Cannon, Soldier drops). Faceoff rule. Corey Clark, 2020.'},
+      tamerlane: { label: 'Tamerlane Chess', boardStyle: 'checkered', rows: 10, cols: 11, tileSize: 30, fen: '11/rntzfkwztnr/ppppppppppp/e1j1d1d1j1e/11/11/E1J1D1D1J1E/PPPPPPPPPPP/RNTZFKWZTNR/11', variantDesc: 'Medieval 11x10 board with citadels. 12 piece types including Giraffe, Camel, War Engine.'},
       'teleport-chess': { label: 'Teleport Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Each side has 3 teleports per game.'},
       'three-check': { label: 'Three-Check', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'First to check the opponent three times wins.'},
       'toroidal-chess': { label: 'Toroidal Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Board wraps in both directions (files and ranks). No edges exist.'},
       torpedo: { label: 'Torpedo', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Pawns can move two squares forward from any rank.'},
+      ultima: { label: 'Ultima', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'cilwklhc/pppppppp/8/8/8/8/PPPPPPPP/CIHLKLIC', variantDesc: 'All 7 piece types use different capture mechanics. No check: win by capturing the King. Robert Abbott, 1962.'},
       'upside-down': { label: 'Upside-Down', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr', variantDesc: 'Pieces start on the opponent\'s back rank. Instant tactical chaos.'},
       weak: { label: 'Weak!', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Weakest piece type with a legal move must move first.'},
+      wildebeest: { label: 'Wildebeest Chess', boardStyle: 'checkered', rows: 10, cols: 11, tileSize: 30, fen: 'rncwqkwcnr1/ppppppppppp/11/11/11/11/11/11/PPPPPPPPPPP/RNCWQKWCNR1', variantDesc: 'Camel + Wildebeest (GNU) pieces on 11x10 board. R. Wayne Schmittberger, 1987.'},
     },
   },
   go: {
@@ -386,6 +649,7 @@ const GAMES = {
       '3-player': { label: '3 Player', boardStyle: 'stern-halma', holeSpacing: 30, filledArms: ['N', 'SE', 'SW'], setupDesc: '10 pieces each in alternating arms (N, SE, SW)', variantDesc: '3 players on alternating arms. Each races to the diagonally opposite arm.' },
       '4-player': { label: '4 Player', boardStyle: 'stern-halma', holeSpacing: 30, filledArms: ['NE', 'SE', 'SW', 'NW'], setupDesc: '10 pieces each in side arms (NE, SE, SW, NW)', variantDesc: '4 players skip N/S arms. Each races to the diagonally opposite arm.' },
       '6-player': { label: '6 Player', boardStyle: 'stern-halma', holeSpacing: 30, filledArms: ['N', 'NE', 'SE', 'S', 'SW', 'NW'], setupDesc: '10 pieces each, all 6 arms filled', variantDesc: 'Full game. All 6 arms occupied. Each player races to the opposite arm.' },
+      'super-chinese-checkers': { label: 'Super Chinese Checkers', boardStyle: 'stern-halma', holeSpacing: 30, filledArms: ['N', 'S'], setupDesc: '10 pieces each in opposite arms', variantDesc: 'Extended hop: pieces may jump multiple empty spaces in a line before and after clearing a hurdle.' },
     },
   },
   hex: {
@@ -393,6 +657,7 @@ const GAMES = {
     pieceSet: 'playstrategy-go-classic',
     variants: {
       standard: { label: 'Standard (11×11)', boardStyle: 'hex', hexRows: 11, hexCols: 11, hexSize: 20, flat: false, colors: { lightHex: '#e8e8e8', darkHex: '#c0c0c0', midHex: '#d8d8d8', stroke: 'rgba(0,0,0,0.3)', background: '#f5f5f5' }, setupDesc: 'Empty 11x11 rhombus board', variantDesc: 'Connection game. Place stones to connect your two opposite edges. No captures.' },
+      'y-game': { label: 'Y (side 12)', boardStyle: 'hex', hexGrid: generateTriangularHexGrid(12), hexSize: 18, flat: false, colors: { lightHex: '#e8e8e8', darkHex: '#c0c0c0', midHex: '#d8d8d8', stroke: 'rgba(0,0,0,0.3)', background: '#f5f5f5' }, setupDesc: 'Empty triangular board, 78 cells', variantDesc: 'Triangular hex board. Connect all 3 edges with a single chain. Generalises Hex. Shannon & Schensted, 1950s.' },
     },
   },
   'royal-ur': {
@@ -409,11 +674,23 @@ const GAMES = {
       standard: { label: 'Standard (6×6)', boardStyle: 'surakarta', rows: 6, cols: 6, tileSize: 50, setup: 'bbbbbb/bbbbbb/6/6/wwwwww/wwwwww', setupDesc: '12 pieces each on nearest two rows', variantDesc: 'Javanese capture game. Pieces move one step orthogonally. Capture by travelling along loop arcs.' },
     },
   },
+  tafl: {
+    label: 'Tafl',
+    pieceSet: 'playstrategy-go-classic',
+    variants: {
+      standard: { label: 'Tablut (9×9)', boardStyle: 'checkered', rows: 9, cols: 9, tileSize: 40, showLabels: false, cellMap: buildTaflMap(9), colors: TAFL_COLORS, setup: '3bbb3/4b4/4w4/b3w3b/bbwwKwwbb/b3w3b/4w4/4b4/3bbb3', setupDesc: 'King + 8 defenders vs 16 attackers', variantDesc: 'Sami tafl recorded by Linnaeus (1732). King escapes to any edge. Only tafl variant documented from living practice.' },
+      brandubh: { label: 'Brandubh (7×7)', boardStyle: 'checkered', rows: 7, cols: 7, tileSize: 40, showLabels: false, cellMap: buildTaflMap(7), colors: TAFL_COLORS, setup: '3b3/3b3/3w3/bbwKwbb/3w3/3b3/3b3', setupDesc: 'King + 4 defenders vs 8 attackers', variantDesc: 'Irish tafl. King escapes to corners. Smallest standard tafl board.' },
+      hnefatafl: { label: 'Hnefatafl (11×11)', boardStyle: 'checkered', rows: 11, cols: 11, tileSize: 34, showLabels: false, cellMap: buildTaflMap(11), colors: TAFL_COLORS, setup: '3bbbbb3/5b5/11/b4w4b/b3www3b/bb1wwKww1bb/b3www3b/b4w4b/11/5b5/3bbbbb3', setupDesc: 'King + 12 defenders vs 24 attackers', variantDesc: 'Norse king\'s table. King escapes to corners. The primary form of the tafl family.' },
+      tawlbwrdd: { label: 'Tawlbwrdd (11×11)', boardStyle: 'checkered', rows: 11, cols: 11, tileSize: 34, showLabels: false, cellMap: buildTaflMap(11, { corners: false }), colors: TAFL_COLORS, setup: '3bbbbb3/5b5/11/b4w4b/b3www3b/bb1wwKww1bb/b3www3b/b4w4b/11/5b5/3bbbbb3', setupDesc: 'King + 12 defenders vs 24 attackers', variantDesc: 'Welsh tafl. King escapes to any edge square (not just corners). Peniarth MS 158 (1587).' },
+    },
+  },
   pachisi: {
     label: 'Pachisi',
     pieceSet: 'playstrategy-draughts-plain',
     variants: {
       standard: { label: 'Standard', boardStyle: 'checkered', rows: 19, cols: 19, tileSize: 20, showLabels: false, cellMap: PACHISI_MAP, colors: PACHISI_COLORS, setupDesc: '4 players, 4 pieces each start at Charkoni (centre)', variantDesc: 'Indian cross-track race game for 4 players. Roll cowrie shells. Castle squares grant safety. First to return all pieces home wins.' },
+      'two-player': { label: '2-Player', boardStyle: 'checkered', rows: 19, cols: 19, tileSize: 20, showLabels: false, cellMap: PACHISI_MAP, colors: PACHISI_COLORS, setupDesc: '2 players, 8 pieces each (2 colours per player)', variantDesc: 'Each player controls two opposite arms. 8 pieces total. Same board and rules as standard.' },
+      'seven-shell': { label: 'Seven-Shell', boardStyle: 'checkered', rows: 19, cols: 19, tileSize: 20, showLabels: false, cellMap: PACHISI_MAP, colors: PACHISI_COLORS, setupDesc: '4 players, 7 cowrie shells', variantDesc: 'Seven shells instead of six. Different throw table with higher max (Paintees = 35). More grace throws.' },
     },
   },
   chaupar: {
@@ -463,7 +740,7 @@ const GAMES = {
       expansion: { label: 'Dungeon Expansion (5 rings)', hexSize: 5 },
     },
   },
-  'planet-mongo': {
+  mongo: {
     label: 'Planet Mongo',
     pieceSet: null,
     hexGame: 'mongo',
@@ -505,6 +782,142 @@ const GAMES = {
       'four-islands': { label: 'Seafarers: Four Islands', hexSize: 2, hexLayout: 'fourIslands' },
       desert: { label: 'Seafarers: Through the Desert', hexSize: 2, hexLayout: 'desert' },
       'fog-islands': { label: 'Seafarers: Fog Islands', hexSize: 2, hexLayout: 'fogIslands' },
+    },
+  },
+  'standard-52': {
+    label: '52 Cards',
+    pieceSet: null,
+    noRenderer: true,
+    variants: {
+      big2: { label: 'Big 2', noRenderer: true, setupDesc: '13 cards each, 4 players', variantDesc: 'Climbing card game where 2 is the highest rank. Play singles, pairs, triples, or five-card poker hands.' },
+      president: { label: 'President', noRenderer: true, setupDesc: 'Full deck dealt evenly, 4-8 players', variantDesc: 'Role-based climbing game with card trading between rounds. Positions persist. Tests multi-round state and asymmetric deals.' },
+    },
+  },
+  'flower-48': {
+    label: '48 Flowers',
+    pieceSet: null,
+    noRenderer: true,
+    variants: {
+      'koi-koi': { label: 'Koi-Koi', noRenderer: true, setupDesc: '8 cards each + 8 field, 2 players', variantDesc: 'The most popular Hanafuda game. Complete a yaku and declare win, or say Koi-Koi to keep playing for more — at the risk of losing the bonus.' },
+      'hana-awase': { label: 'Hana-Awase', noRenderer: true, setupDesc: '48-card deck, 2-4 players', variantDesc: 'The base Hanafuda matching game. No yaku — card values only. Simplest entry point to the deck.' },
+      'oicho-kabu': { label: 'Oicho-Kabu', noRenderer: true, setupDesc: '48-card deck, 2-8 players', variantDesc: 'A betting game using Hanafuda month numbers, not suit imagery. Closest to 9 wins. Similar to Baccarat.' },
+    },
+  },
+  'standard-dice': {
+    label: 'Standard Dice',
+    pieceSet: null,
+    noRenderer: true,
+    variants: {
+      farkle: { label: 'Farkle', noRenderer: true, setupDesc: '6 dice, 2-6 players', variantDesc: 'Roll 6 dice, bank scoring combinations, press your luck. Roll nothing that scores and lose your entire turn\'s points.' },
+      'liars-dice': { label: 'Liar\'s Dice', noRenderer: true, setupDesc: '5 dice each under cups, 2-6 players', variantDesc: 'Hidden dice under cups. Bid on what the combined dice show. Call liar to challenge — and risk a die of your own.' },
+      yahtzee: { label: 'Yahtzee', noRenderer: true, setupDesc: '5 dice, 13 categories, 1-4 players', variantDesc: 'Five dice, 13 scoring categories, one shot at a Yahtzee. Fill every box across three rolls per turn.' },
+    },
+  },
+  mahjong: {
+    label: 'Mahjong',
+    pieceSet: null,
+    noRenderer: true,
+    variants: {
+      'hong-kong': { label: 'Hong Kong', noRenderer: true, setupDesc: '144 tiles, 4 players, 13-tile hand', variantDesc: 'The canonical Cantonese ruleset. Faan scoring with minimum 3 faan to win. Discarder pays on ron; wall win doubles from all.' },
+      riichi: { label: 'Riichi (Japanese)', noRenderer: true, setupDesc: '136 tiles, 4 players, 13-tile hand', variantDesc: 'Japanese Mahjong. Yaku requirement to win. Riichi declaration locks the hand. Furiten prevents discarded-tile wins.' },
+      taiwanese: { label: 'Taiwanese', noRenderer: true, setupDesc: '144 tiles, 4 players, 16-tile hand', variantDesc: '16-tile hands requiring five melds and one pair. Multiple players can win from a single discard.' },
+      'zung-jung': { label: 'Zung Jung', noRenderer: true, setupDesc: '136 tiles, 4 players, 13-tile hand', variantDesc: 'Alan Kwan\'s competition system. 44 named patterns, additive scoring, 320-point limit.' },
+    },
+  },
+  'double-six-dominoes': {
+    label: 'D6 Dominoes',
+    pieceSet: null,
+    noRenderer: true,
+    variants: {
+      block: { label: 'Block', noRenderer: true, setupDesc: '7 tiles each, 2-4 players', variantDesc: 'The foundational domino game — match ends, no boneyard draws. If no one can play, lowest pip count wins.' },
+      'all-fives': { label: 'All Fives', noRenderer: true, setupDesc: '7 tiles each, 2-4 players', variantDesc: 'Score points as you play — whenever open ends total a multiple of 5, score that many. Doubles branch in four directions.' },
+      'mexican-train': { label: 'Mexican Train', noRenderer: true, setupDesc: 'Double-12 set, 2-8 players', variantDesc: 'Hub-and-spokes layout. Each player builds their own train from the central double. The shared Mexican Train is always available.' },
+    },
+  },
+  baristasaurus: {
+    label: 'Baristasaurus',
+    pieceSet: null,
+    noRenderer: true,
+    variants: {
+      standard: { label: 'Standard', noRenderer: true, setupDesc: 'Card game, 2-4 players', variantDesc: 'A prehistoric card game about fulfilling coffeeshop orders. Original Moddable game.' },
+    },
+  },
+  econopoly: {
+    label: 'Econopoly',
+    pieceSet: null,
+    noRenderer: true,
+    variants: {
+      standard: { label: 'Standard', noRenderer: true, setupDesc: 'Board game, 2-6 players', variantDesc: 'Euro-style resource management meets Monopoly. Original Moddable mod.' },
+    },
+  },
+  'hyper-imperium': {
+    label: 'Hyper Imperium',
+    pieceSet: null,
+    noRenderer: true,
+    variants: {
+      standard: { label: 'Standard', noRenderer: true, setupDesc: 'Hex map, 3-6 players', variantDesc: '3D exploration and mercenary factions for Twilight Imperium. Original Moddable mod.' },
+    },
+  },
+  'dnd-5e': {
+    label: 'D&D 5e SRD',
+    pieceSet: null,
+    noRenderer: true,
+    variants: {
+      standard: { label: 'Core Rules', noRenderer: true, setupDesc: 'Tabletop RPG, 3-6 players', variantDesc: 'The open core rules for the world\'s most popular roleplaying game.' },
+    },
+  },
+  ironsworn: {
+    label: 'Ironsworn',
+    pieceSet: null,
+    noRenderer: true,
+    variants: {
+      standard: { label: 'Standard', noRenderer: true, setupDesc: 'Solo/co-op RPG, 1-4 players', variantDesc: 'A perilous quest through the Ironlands, guided by vows and oracle tables.' },
+    },
+  },
+  agon: {
+    label: 'Agon',
+    pieceSet: 'playstrategy-go-classic',
+    variants: {
+      standard: { label: 'Standard (91 hexes)', boardStyle: 'hex', hexRadius: 5, hexSize: 22, flat: false, colors: { lightHex: '#f5e6c8', darkHex: '#e8d4a8', midHex: '#f0ddb8', stroke: 'rgba(0,0,0,0.2)', background: '#3a2a1a' }, setupDesc: 'Queen + 6 Guards per player on concentric hex rings', variantDesc: 'Guide your Queen to the centre hex while blocking opponent. Concentric 91-hex board. France, 1842.' },
+    },
+  },
+  asalto: {
+    label: 'Asalto',
+    pieceSet: 'playstrategy-draughts-plain',
+    variants: {
+      standard: { label: 'Standard', boardStyle: 'checkered', rows: 9, cols: 9, tileSize: 36, showLabels: false, cellMap: ASALTO_MAP, colors: ASALTO_COLORS, setupDesc: '2 Officers in fortress vs 24 Soldiers on plain', variantDesc: 'Asymmetric siege. Officers jump-capture like draughts; Soldiers advance forward/sideways. Immobilize to win.' },
+      'royal-garrison': { label: 'Royal Garrison', boardStyle: 'checkered', rows: 9, cols: 9, tileSize: 36, showLabels: false, cellMap: ASALTO_MAP, colors: ASALTO_COLORS, setupDesc: '3 Officers in larger fortress vs 50 Soldiers', variantDesc: 'Extended Asalto. Three Officers defend a larger fortress against 50 Soldiers.' },
+    },
+  },
+  'bavarian-32': {
+    label: 'Bavarian 32',
+    pieceSet: null,
+    noRenderer: true,
+    variants: {
+      skat: { label: 'Skat', noRenderer: true, setupDesc: '32-card deck, 3 players, 10-card hands', variantDesc: 'Germany\'s national card game. Auction bidding, solo declarer vs two defenders. Trump suit or Grand/Null contracts.' },
+    },
+  },
+  'dou-shou-qi': {
+    label: 'Jungle',
+    pieceSet: null,
+    variants: {
+      standard: { label: 'Standard (7×9)', boardStyle: 'checkered', rows: 9, cols: 7, tileSize: 40, showLabels: false, cellMap: JUNGLE_MAP, colors: JUNGLE_COLORS, setupDesc: '8 animals per player on 7x9 grid with river, dens, and traps', variantDesc: 'Animals battle across rivers and traps to reach the enemy den. Rank hierarchy: Elephant > Lion > ... > Rat (but Rat defeats Elephant).' },
+    },
+  },
+  lattaque: {
+    label: "L'Attaque",
+    pieceSet: null,
+    variants: {
+      standard: { label: 'Standard', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, showLabels: false, cellMap: LATTAQUE_MAP, colors: LATTAQUE_COLORS, setupDesc: '30 pieces per player, 10x10 grid with lakes', variantDesc: 'Hidden-rank warfare. Higher rank defeats lower. Bombs immovable, Scouts slide unlimited. Precursor to Stratego.' },
+      'dover-patrol': { label: 'Dover Patrol', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, showLabels: false, cellMap: LATTAQUE_MAP, colors: LATTAQUE_COLORS, setupDesc: 'Naval grid with minefields', variantDesc: 'Naval warfare variant. Ships replace soldiers; Mine Sweepers defuse Mines; Submarines defeat Battleships on attack.' },
+      'tri-tactics': { label: 'Tri-Tactics', boardStyle: 'checkered', rows: 12, cols: 12, tileSize: 30, showLabels: false, colors: LATTAQUE_COLORS, setupDesc: 'Larger board, Army/Navy/Air Force units', variantDesc: 'Three-service variant: Army, Navy, Air Force with unique movement. Air units overfly impassable squares.' },
+    },
+  },
+  nyout: {
+    label: 'Nyout',
+    pieceSet: 'playstrategy-draughts-plain',
+    variants: {
+      standard: { label: 'Standard', boardStyle: 'checkered', rows: 9, cols: 9, tileSize: 36, showLabels: false, cellMap: NYOUT_MAP, colors: NYOUT_COLORS, setupDesc: '4 tokens per player, 29-position circular track', variantDesc: 'Korean stick-throwing race. Circular track with shortcut branches. Throw 4 sticks for movement. Capture by landing on opponent.' },
     },
   },
 }
@@ -557,6 +970,12 @@ const REVERSI_VOCABULARY = {
 }
 
 const STONE_VOCABULARY = {
+  w: { type: 'stone', color: 'white' },
+  b: { type: 'stone', color: 'black' },
+}
+
+const TAFL_VOCABULARY = {
+  K: { type: 'king', color: 'white' },
   w: { type: 'stone', color: 'white' },
   b: { type: 'stone', color: 'black' },
 }
@@ -918,6 +1337,12 @@ function render() {
     return
   }
 
+  if (variantDef.noRenderer || game.noRenderer) {
+    showSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="400" height="200" fill="#1a1a2e" rx="8"/><text x="200" y="85" text-anchor="middle" font-size="16" fill="#888" font-family="system-ui">No renderer yet</text><text x="200" y="115" text-anchor="middle" font-size="12" fill="#555" font-family="system-ui">Needs table topology (issue #8)</text></svg>`)
+    showInfo(variantDef)
+    return
+  }
+
   if (game.needsBoardData) {
     loadBoardDataAndRender(game, variantDef)
     return
@@ -940,6 +1365,7 @@ function render() {
   if (config.setup && config.boardStyle !== 'mancala' && config.boardStyle !== 'backgammon') {
     const vocab = (state.game === 'reversi') ? REVERSI_VOCABULARY
       : (state.game === 'surakarta') ? STONE_VOCABULARY
+      : (state.game === 'tafl') ? TAFL_VOCABULARY
       : DRAUGHTS_VOCABULARY
     config.position = parseDraughtsFen(config.setup, config.rows, config.cols, vocab)
   }
