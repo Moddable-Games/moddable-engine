@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 976 1600">
+<style type="text/css">
+	.st0{fill:#FFFFFF;}
+	.st1{fill:none;stroke:#333333;stroke-width:2;stroke-linecap:square;stroke-miterlimit:3;}
+	.st2{fill:#000000;}
+</style>
+<g id="Paper_Backing">
+	<path class="st0" d="M960,22v1556c0,3.3-2.7,6-6,6H22c-3.3,0-6-2.7-6-6V22c0-3.3,2.7-6,6-6h932C957.3,16,960,18.7,960,22z"/>
+</g>
+<g>
+	<g id="Layer_1_2_">
+		<g transform="matrix( 1, 0, 0, 1, 0,0) ">
+			<g>
+				<g id="Layer0_0_FILL_1_">
+					<path class="st2" d="M52,1548v15l-37,37h946l-37-37v-15H52 M52,52V37.7L14.3,0H0v1600h15l37-37v-15V52 M924,52V37.7L961.7,0H14.3L52,37.7
+						V52H924 M976,0h-14.3L924,37.7V52v1496v15l37,37h15V0z"/>
+				</g>
+			</g>
+			<g>
+				<path id="Layer0_0_1_STROKES_1_" class="st1" d="M961,1600h15V0h-14.3L924,37.7V52v1496v15L961,1600H15H0V0h14.3h947.4 M52,52
+					V37.7L14.3,0 M15,1600l37-37v-15V52h872 M924,1548H52"/>
+			</g>
+		</g>
+	</g>
+</g>
+</svg>
