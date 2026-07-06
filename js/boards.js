@@ -409,7 +409,7 @@ const GAMES = {
     variants: {
       standard: { label: 'Standard', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Standard FIDE rules.'},
       absorption: { label: 'Absorption', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Capturing piece permanently gains the victim\'s movement abilities.'},
-      alice: { label: 'Alice Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Two 8x8 boards. After every move, the piece transfers to the other board.'},
+      alice: { label: 'Alice Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 34, layers: { count: 2, layout: 'horizontal', labels: ['Board A', 'Board B'], fens: ['rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', '8/8/8/8/8/8/8/8'] }, variantDesc: 'Two 8x8 boards. After every move, the piece transfers to the other board.'},
       'almost-chess': { label: 'Almost Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBCKBNR', variantDesc: 'White Queen replaced by a Chancellor (Rook + Knight compound).'},
       'amazon-chess': { label: 'Amazon Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbmkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBMKBNR', variantDesc: 'Queens replaced by Amazons (Queen + Knight). The most powerful piece possible.'},
       andernach: { label: 'Andernach', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Capturing piece changes colour (becomes opponent\'s). Kings exempt.'},
@@ -449,7 +449,7 @@ const GAMES = {
       grand: { label: 'Grand Chess', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, fen: 'r8r/1nbqkcbn1/pppppppppp/10/10/10/10/PPPPPPPPPP/1NBQKCBN1/R8R', variantDesc: 'Archbishop and Chancellor on 10x10 board. Pawns start on rank 3.'},
       grasshopper: { label: 'Grasshopper Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbgkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBGKBNR', variantDesc: 'Queens replaced by Grasshoppers (hop over any piece, land immediately beyond).'},
       'grid-chess': { label: 'Grid Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Moves must cross at least one 2x2 grid line.'},
-      gygax: { label: 'Gygax Chess (Level 2)', boardStyle: 'checkered', rows: 8, cols: 12, tileSize: 28, fen: 'rnbhqkchbnr1/pppppppppppp/12/12/12/12/PPPPPPPPPPPP/RNBHQKCHBNR1', variantDesc: 'D&D-inspired three-level chess by Gary Gygax. 12x8 boards. Hero, Cleric, and fantasy pieces.'},
+      gygax: { label: 'Gygax Chess', boardStyle: 'checkered', rows: 8, cols: 12, tileSize: 24, layers: { count: 3, layout: 'vertical', labels: ['Level 3 — Air', 'Level 2 — Land', 'Level 1 — Subterranean'], fens: ['2G3R3G1/S1S1S1S1S1S1/12/12/12/12/s1s1s1s1s1s1/2g3r3g1', 'OUHTCMKPTHUO/WWWWWWWWWWWW/12/12/12/12/wwwwwwwwwwww/ouhtcmkpthuo', '2B3E3B1/1D1D1D1D1D1D/12/12/12/12/1d1d1d1d1d1d/2b3e3b1'], colors: [{ lightSquare: '#a0c8e8', darkSquare: '#6a9ec8' }, { lightSquare: '#a8c890', darkSquare: '#6d9450' }, { lightSquare: '#d4a080', darkSquare: '#a06848' }] }, variantDesc: 'D&D-inspired three-level chess by Gary Gygax. 12x8 boards. Hero, Cleric, and fantasy pieces.'},
       'half-chess': { label: 'Half Chess', boardStyle: 'checkered', rows: 4, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/PPPPPPPP/RNBQKBNR', variantDesc: '4-rank board. Armies start adjacent. Immediate contact.'},
       'hoppel-poppel': { label: 'Hoppel-Poppel', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Knights capture like bishops; bishops capture like knights.'},
       horde: { label: 'Horde', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/1PP2PP1/PPPPPPPP/PPPPPPPP/PPPPPPPP/PPPPPPPP', variantDesc: 'White has full army. Black has 36 pawns. Asymmetric survival.'},
@@ -1264,6 +1264,80 @@ function getStaticSvgPath(gameId, variantId) {
   return `../diagrams/static/${gameId}/${filename}`
 }
 
+function renderMultiBoard(config, game) {
+  const { layers } = config
+  const { count, layout, labels, fens, colors: layerColors } = layers
+  const gap = layout === 'horizontal' ? 20 : 12
+  const labelH = 18
+
+  // Compute individual board dimensions
+  const ts = config.tileSize || 34
+  const boardW = config.cols * ts
+  const boardH = config.rows * ts
+  const pad = 24
+
+  let totalW, totalH
+  if (layout === 'horizontal') {
+    totalW = count * boardW + (count - 1) * gap + pad * 2
+    totalH = boardH + pad * 2 + labelH
+  } else {
+    totalW = boardW + pad * 2
+    totalH = count * (boardH + labelH) + (count - 1) * gap + pad * 2
+  }
+
+  const parts = []
+  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalW} ${totalH}" width="${totalW}" height="${totalH}">`)
+  parts.push(`<rect width="${totalW}" height="${totalH}" fill="#1a1a2e" rx="6"/>`)
+
+  for (let i = 0; i < count; i++) {
+    let ox, oy
+    if (layout === 'horizontal') {
+      ox = pad + i * (boardW + gap)
+      oy = pad + labelH
+    } else {
+      ox = pad
+      oy = pad + i * (boardH + labelH + gap)
+    }
+
+    // Layer label
+    const labelX = ox + boardW / 2
+    const labelY = oy - 4
+    parts.push(`<text x="${labelX}" y="${labelY}" text-anchor="middle" font-size="11" fill="#aaa" font-family="system-ui">${labels[i] || 'Board ' + (i + 1)}</text>`)
+
+    // Render board squares
+    const boardColors = layerColors && layerColors[i]
+      ? { lightSquare: layerColors[i].lightSquare || '#f0d9b5', darkSquare: layerColors[i].darkSquare || '#b58863' }
+      : { lightSquare: '#f0d9b5', darkSquare: '#b58863' }
+
+    for (let r = 0; r < config.rows; r++) {
+      for (let c = 0; c < config.cols; c++) {
+        const fill = (r + c) % 2 === 0 ? boardColors.lightSquare : boardColors.darkSquare
+        parts.push(`<rect x="${ox + c * ts}" y="${oy + r * ts}" width="${ts}" height="${ts}" fill="${fill}"/>`)
+      }
+    }
+
+    // Render pieces from layer FEN
+    const fen = fens && fens[i]
+    if (fen && fen !== '8/8/8/8/8/8/8/8') {
+      const position = fenToPosition(fen, config.rows, config.cols)
+      for (const [sq, piece] of Object.entries(position)) {
+        const file = sq.charCodeAt(0) - 97
+        const rank = config.rows - parseInt(sq.slice(1))
+        const cx = ox + file * ts + ts / 2
+        const cy = oy + rank * ts + ts / 2
+        const fontSize = ts * 0.55
+        const isWhite = piece === piece.toUpperCase()
+        const fill = isWhite ? '#fff' : '#111'
+        const stroke = isWhite ? '#333' : '#888'
+        parts.push(`<text x="${cx}" y="${cy + fontSize * 0.35}" text-anchor="middle" font-size="${fontSize}" font-family="system-ui" font-weight="bold" fill="${fill}" stroke="${stroke}" stroke-width="0.5">${piece}</text>`)
+      }
+    }
+  }
+
+  parts.push('</svg>')
+  return parts.join('\n')
+}
+
 function render() {
   const game = GAMES[state.game]
   if (!game) return
@@ -1402,6 +1476,15 @@ function render() {
   // Build piece image paths
   if (game.pieceSet && (config.position || config.hexPosition || config.parsedSetup || config.filledArms)) {
     config.pieceImages = buildPieceImages(game.pieceSet, galleryIndex, state.game)
+  }
+
+  // Multi-board rendering (Alice Chess, Gygax Chess)
+  if (config.layers) {
+    const svg = renderMultiBoard(config, game)
+    showSvg(svg)
+    showInfo(config)
+    requestAnimationFrame(fitToView)
+    return
   }
 
   const svg = renderBoard(config)
