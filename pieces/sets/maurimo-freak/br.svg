@@ -9,8 +9,6 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://inkscape.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-
-
    id="svg36220"
    sodipodi:version="0.32"
    inkscape:version="0.43"
@@ -19,7 +17,7 @@
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90"
    sodipodi:docbase="/home/monge/chess_pieces/chess_set"
-   sodipodi:docname="wr.svg">
+   sodipodi:docname="br.svg">
   <defs
      id="defs36222">
     <linearGradient
@@ -27,31 +25,31 @@
       <stop
          id="stop3406"
          offset="0"
-         style="stop-color:#ffffff;stop-opacity:1;" />
+         style="stop-color:#808080;stop-opacity:1;" />
       <stop
          id="stop3408"
          offset="1"
-         style="stop-color:#80ff00;stop-opacity:1;" />
+         style="stop-color:#408000;stop-opacity:1;" />
     </linearGradient>
     <linearGradient
        id="linearGradient3392">
       <stop
-         style="stop-color:#ff4040;stop-opacity:1;"
+         style="stop-color:#c00000;stop-opacity:1;"
          offset="0"
          id="stop3394" />
       <stop
-         style="stop-color:#4040ff;stop-opacity:1;"
+         style="stop-color:#0000c0;stop-opacity:1;"
          offset="1"
          id="stop3396" />
     </linearGradient>
     <linearGradient
        id="linearGradient3037">
       <stop
-         style="stop-color:#ffffff;stop-opacity:1;"
+         style="stop-color:black;stop-opacity:1;"
          offset="0"
          id="stop3039" />
       <stop
-         style="stop-color:#d0b090;stop-opacity:1"
+         style="stop-color:#907050;stop-opacity:1;"
          offset="1"
          id="stop3041" />
     </linearGradient>
@@ -232,8 +230,8 @@
      inkscape:document-units="px"
      inkscape:window-width="979"
      inkscape:window-height="831"
-     inkscape:window-x="183"
-     inkscape:window-y="105"
+     inkscape:window-x="49"
+     inkscape:window-y="53"
      showguides="true"
      inkscape:guide-bbox="true" />
   <metadata
