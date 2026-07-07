@@ -557,6 +557,17 @@ function computePoints(ringRects, midpoints, cx, cy, rings) {
 
 // ─── ASALTO PROVIDER ───────────────────────────────────────────────────────
 
+function convexHull(pts) {
+  pts = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1])
+  if (pts.length <= 2) return pts
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+  const lower = []
+  for (const p of pts) { while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop(); lower.push(p) }
+  const upper = []
+  for (let i = pts.length - 1; i >= 0; i--) { const p = pts[i]; while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop(); upper.push(p) }
+  return lower.slice(0, -1).concat(upper.slice(0, -1))
+}
+
 const asalto = {
   name: 'asalto',
   positionType: 'node',
@@ -659,24 +670,13 @@ const asalto = {
 
     parts.push(`<rect x="${ox}" y="${oy}" width="${size}" height="${size}" fill="${colors.background}" rx="4"/>`)
 
-    // Fortress highlight — convex hull of fortress nodes, extended one row down
+    // Fortress highlight — convex hull of fortress nodes only (follows node lines exactly)
     const fNodes = [...fortressNodes].map(i => nodes[i])
     if (fNodes.length > 0) {
-      const gridDef = opts.asaltoGrid || { rows: [[2,3,4],[2,3,4],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[2,3,4],[2,3,4]], fortressRows: 2 }
-      const maxCol = Math.max(...gridDef.rows.flat())
-      const maxRow = gridDef.rows.length - 1
-      const usable = size - size * 0.16
-      const sp = usable / Math.max(maxCol, maxRow)
-      // Build points: fortress nodes + projected bottom edge (one spacing below lowest fortress nodes)
-      const topY = Math.min(...fNodes.map(n => n.y))
-      const botY = Math.max(...fNodes.map(n => n.y)) + sp
-      const topNodes = fNodes.filter(n => n.y === topY)
-      const botFortress = fNodes.filter(n => n.y === Math.max(...fNodes.map(nn => nn.y)))
-      const topL = Math.min(...topNodes.map(n => n.x))
-      const topR = Math.max(...topNodes.map(n => n.x))
-      const botL = Math.min(...botFortress.map(n => n.x))
-      const botR = Math.max(...botFortress.map(n => n.x))
-      const points = `${topL},${topY} ${topR},${topY} ${botR},${botY} ${botL},${botY}`
+      // Compute convex hull
+      const pts = fNodes.map(n => [n.x, n.y])
+      const hull = convexHull(pts)
+      const points = hull.map(p => `${p[0]},${p[1]}`).join(' ')
       parts.push(`<polygon points="${points}" fill="${colors.fortress}" stroke="${colors.fortressBorder}" stroke-width="2"/>`)
     }
 
