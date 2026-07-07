@@ -542,7 +542,6 @@ const hex = {
     const hexes = this._getHexes(opts)
     const size = opts.hexSize || opts.tileSize || 30
     const flat = opts.flat || false
-    const scale = (opts.hexScale || 0.95)
     const pad = size + 10
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
     for (const h of hexes) {

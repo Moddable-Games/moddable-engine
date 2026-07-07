@@ -324,15 +324,17 @@ function buildHexPositionExplicit(white, black) {
   return pos
 }
 
-// Shafran: 70-hex irregular hexagon, 9 files (a-i), file lengths 6,7,8,9,10,9,8,7,6
-// Flat-top, centred on origin. File e = q=0, files go a(q=-4) to i(q=4)
+// Shafran: 70-hex irregular hexagon, flat-top, 9 files (a-i), file lengths 6,7,8,9,10,9,8,7,6
+// For visual symmetry with axialToPixelFlat, each file's r-midpoint must equal -q/2.
+// rMid = -q/2, rStart = ceil(rMid - (len-1)/2), rEnd = rStart + len - 1.
 function generateShafranGrid() {
   const fileLengths = [6, 7, 8, 9, 10, 9, 8, 7, 6]
   const hexes = []
   for (let f = 0; f < 9; f++) {
     const q = f - 4
     const len = fileLengths[f]
-    const rStart = -Math.floor(len / 2)
+    const rMid = -q / 2
+    const rStart = Math.round(rMid - (len - 1) / 2)
     for (let i = 0; i < len; i++) {
       hexes.push({ q, r: rStart + i })
     }
@@ -342,19 +344,21 @@ function generateShafranGrid() {
 
 const SHAFRAN_GRID = generateShafranGrid()
 
-// White back rank = bottom edge of each file; Black back rank = top edge (180° rotational symmetry)
+// White back rank = bottom of each file (max r); Black = top of each file (min r)
+// Bottoms: a=5, b=5, c=5, d=5, e=5, f=4, g=3, h=2, i=1
+// Tops:    a=0, b=-1, c=-2, d=-3, e=-4, f=-4, g=-4, h=-4, i=-4
 const SHAFRAN_POSITION = buildHexPositionExplicit(
   [
-    ['R', -4, -3], ['N', -3, -3], ['B', -2, -4], ['Q', -1, -4], ['K', 0, -5],
-    ['B', 1, -4], ['B', 2, -4], ['N', 3, -3], ['R', 4, -3],
-    ['P', -4, -2], ['P', -3, -2], ['P', -2, -3], ['P', -1, -3],
-    ['P', 0, -4], ['P', 1, -3], ['P', 2, -3], ['P', 3, -2], ['P', 4, -2],
+    ['R', -4, 5], ['N', -3, 5], ['B', -2, 5], ['Q', -1, 5], ['K', 0, 5],
+    ['B', 1, 4], ['B', 2, 3], ['N', 3, 2], ['R', 4, 1],
+    ['P', -4, 4], ['P', -3, 4], ['P', -2, 4], ['P', -1, 4],
+    ['P', 0, 4], ['P', 1, 3], ['P', 2, 2], ['P', 3, 1], ['P', 4, 0],
   ],
   [
-    ['r', -4, 2], ['n', -3, 3], ['b', -2, 3], ['q', -1, 4], ['k', 0, 4],
-    ['b', 1, 4], ['b', 2, 3], ['n', 3, 3], ['r', 4, 2],
-    ['p', -4, 1], ['p', -3, 2], ['p', -2, 2], ['p', -1, 3],
-    ['p', 0, 3], ['p', 1, 3], ['p', 2, 2], ['p', 3, 2], ['p', 4, 1],
+    ['r', -4, 0], ['n', -3, -1], ['b', -2, -2], ['q', -1, -3], ['k', 0, -4],
+    ['b', 1, -4], ['b', 2, -4], ['n', 3, -4], ['r', 4, -4],
+    ['p', -4, 1], ['p', -3, 0], ['p', -2, -1], ['p', -1, -2],
+    ['p', 0, -3], ['p', 1, -3], ['p', 2, -3], ['p', 3, -3], ['p', 4, -3],
   ]
 )
 
@@ -362,26 +366,29 @@ const SHAFRAN_POSITION = buildHexPositionExplicit(
 // Uses generateHexRhombus(9, 9) — q=0..8, r=0..8
 const DE_VASA_POSITION = buildHexPositionExplicit(
   [
-    ['R', 0, 0], ['N', 1, 0], ['B', 2, 0], ['Q', 3, 0], ['B', 4, 0],
-    ['K', 5, 0], ['B', 6, 0], ['N', 7, 0], ['R', 8, 0],
-    ['P', 0, 2], ['P', 1, 2], ['P', 2, 2], ['P', 3, 2], ['P', 4, 2],
-    ['P', 5, 2], ['P', 6, 2], ['P', 7, 2], ['P', 8, 2],
+    ['R', 0, 8], ['N', 1, 8], ['B', 2, 8], ['Q', 3, 8], ['B', 4, 8],
+    ['K', 5, 8], ['B', 6, 8], ['N', 7, 8], ['R', 8, 8],
+    ['P', 0, 6], ['P', 1, 6], ['P', 2, 6], ['P', 3, 6], ['P', 4, 6],
+    ['P', 5, 6], ['P', 6, 6], ['P', 7, 6], ['P', 8, 6],
   ],
   [
-    ['r', 0, 8], ['n', 1, 8], ['b', 2, 8], ['k', 3, 8], ['b', 4, 8],
-    ['q', 5, 8], ['b', 6, 8], ['n', 7, 8], ['r', 8, 8],
-    ['p', 0, 6], ['p', 1, 6], ['p', 2, 6], ['p', 3, 6], ['p', 4, 6],
-    ['p', 5, 6], ['p', 6, 6], ['p', 7, 6], ['p', 8, 6],
+    ['r', 0, 0], ['n', 1, 0], ['b', 2, 0], ['k', 3, 0], ['b', 4, 0],
+    ['q', 5, 0], ['b', 6, 0], ['n', 7, 0], ['r', 8, 0],
+    ['p', 0, 2], ['p', 1, 2], ['p', 2, 2], ['p', 3, 2], ['p', 4, 2],
+    ['p', 5, 2], ['p', 6, 2], ['p', 7, 2], ['p', 8, 2],
   ]
 )
 
-// Brusky: 84-hex irregular hexagon, horizontal, 8 ranks of width 9,10,11,12,12,11,10,9
+// Brusky: 84-hex irregular hexagon, pointy-top, 8 ranks of width 9,10,11,12,12,11,10,9
+// With pointy-top axial, visual x = sqrt(3) * (q + r/2).
+// For symmetric outline, each rank's visual midpoint must be at x≈0.
+// qStart = -floor((w + r - 1) / 2) achieves this (half-cell alternation is natural).
 function generateBruskyGrid() {
   const rankWidths = [9, 10, 11, 12, 12, 11, 10, 9]
   const hexes = []
   for (let rank = 0; rank < 8; rank++) {
     const w = rankWidths[rank]
-    const qStart = -Math.floor(w / 2)
+    const qStart = -Math.floor((w + rank - 1) / 2)
     for (let i = 0; i < w; i++) {
       hexes.push({ q: qStart + i, r: rank })
     }
@@ -393,16 +400,16 @@ const BRUSKY_GRID = generateBruskyGrid()
 
 const BRUSKY_POSITION = buildHexPositionExplicit(
   [
-    ['R', -4, 0], ['N', -3, 0], ['B', -2, 0], ['Q', -1, 0], ['B', 0, 0],
-    ['K', 1, 0], ['B', 2, 0], ['N', 3, 0], ['R', 4, 0],
-    ['P', -5, 1], ['P', -4, 1], ['P', -3, 1], ['P', -2, 1], ['P', -1, 1],
-    ['P', 0, 1], ['P', 1, 1], ['P', 2, 1], ['P', 3, 1], ['P', 4, 1],
+    ['R', -7, 7], ['N', -6, 7], ['B', -5, 7], ['Q', -4, 7], ['K', -3, 7],
+    ['B', -2, 7], ['B', -1, 7], ['N', 0, 7], ['R', 1, 7],
+    ['P', -7, 6], ['P', -6, 6], ['P', -5, 6], ['P', -4, 6], ['P', -3, 6],
+    ['P', -2, 6], ['P', -1, 6], ['P', 0, 6], ['P', 1, 6], ['P', 2, 6],
   ],
   [
-    ['r', -4, 7], ['n', -3, 7], ['b', -2, 7], ['k', -1, 7], ['b', 0, 7],
-    ['q', 1, 7], ['b', 2, 7], ['n', 3, 7], ['r', 4, 7],
-    ['p', -5, 6], ['p', -4, 6], ['p', -3, 6], ['p', -2, 6], ['p', -1, 6],
-    ['p', 0, 6], ['p', 1, 6], ['p', 2, 6], ['p', 3, 6], ['p', 4, 6],
+    ['r', -4, 0], ['n', -3, 0], ['b', -2, 0], ['q', -1, 0], ['k', 0, 0],
+    ['b', 1, 0], ['b', 2, 0], ['n', 3, 0], ['r', 4, 0],
+    ['p', -5, 1], ['p', -4, 1], ['p', -3, 1], ['p', -2, 1], ['p', -1, 1],
+    ['p', 0, 1], ['p', 1, 1], ['p', 2, 1], ['p', 3, 1], ['p', 4, 1],
   ]
 )
 
@@ -488,7 +495,7 @@ const GAMES = {
       'berolina-chess': { label: 'Berolina', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Pawns move diagonally forward and capture straight forward.'},
       berserk: { label: 'Berserk', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Delivering check grants one bonus move with a different piece.'},
       breakthrough: { label: 'Breakthrough', boardStyle: 'checkered', rows: 7, cols: 7, tileSize: 40, fen: 'ppppppp/ppppppp/7/7/7/PPPPPPP/PPPPPPP', variantDesc: 'Pawns only. First to reach the far side wins.'},
-      brusky: { label: 'Brusky (Hex)', boardStyle: 'hex', hexGrid: BRUSKY_GRID, hexSize: 20, flat: true, hexColorFn: glinskiColor, hexPosition: BRUSKY_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, variantDesc: 'Irregular 84-hex board. 10 pawns per side. Unmoved pawns may capture straight forward. Blockage rule. Yakov Brusky, 1966.'},
+      brusky: { label: 'Brusky (Hex)', boardStyle: 'hex', hexGrid: BRUSKY_GRID, hexSize: 20, flat: false, hexColorFn: glinskiColor, hexPosition: BRUSKY_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, variantDesc: 'Irregular 84-hex board. 10 pawns per side. Unmoved pawns may capture straight forward. Blockage rule. Yakov Brusky, 1966.'},
       capablanca: { label: 'Capablanca', boardStyle: 'checkered', rows: 8, cols: 10, tileSize: 36, fen: 'rnabqkbcnr/pppppppppp/10/10/10/10/PPPPPPPPPP/RNABQKBCNR', variantDesc: 'Two extra pieces: Archbishop (B+N) and Chancellor (R+N) on 10x8 board.'},
       chak: { label: 'Chak', boardStyle: 'checkered', rows: 9, cols: 9, tileSize: 38, fen: 'sjvdaxdvs/9/1ppppppp1/9/9/9/1PPPPPPP1/9/SJVDAXDVS', variantDesc: 'Mesoamerican 9x9 chess. Win by mating Ajaw or landing promoted Ajaw on opponent temple. Pieces promote crossing the river. Corey Clark, 2020.'},
       chaturanga: { label: 'Chaturanga', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnefkenr/pppppppp/8/8/8/8/PPPPPPPP/RNEFKENR', variantDesc: 'Ancient Indian ancestor of chess, c. 600 CE. Weak counsellor and leaping elephant.'},
@@ -500,7 +507,7 @@ const GAMES = {
       crazyhouse: { label: 'Crazyhouse', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Captured pieces switch sides and can be dropped back onto the board.'},
       'cylinder-chess': { label: 'Cylinder Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Files wrap. The a-file connects to the h-file.'},
       'dark-chess': { label: 'Dark Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Total fog. Only see squares occupied by your own pieces.'},
-      'de-vasa': { label: 'De Vasa (Hex)', boardStyle: 'hex', hexRows: 9, hexCols: 9, hexSize: 20, flat: true, hexColorFn: glinskiColor, hexPosition: DE_VASA_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, variantDesc: '81-hex rhombus board. Pawns start rank 3. Kings on opposite wings. Castling permitted. Helge E. de Vasa, 1953.'},
+      'de-vasa': { label: 'De Vasa (Hex)', boardStyle: 'hex', hexRows: 9, hexCols: 9, hexSize: 20, flat: false, hexColorFn: glinskiColor, hexPosition: DE_VASA_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, variantDesc: '81-hex rhombus board. Pawns start rank 3. Kings on opposite wings. Castling permitted. Helge E. de Vasa, 1953.'},
       diana: { label: 'Diana', boardStyle: 'checkered', rows: 6, cols: 6, tileSize: 40, fen: 'rbbkr1/pppppp/6/6/PPPPPP/RBBKR1', variantDesc: '6x6 board. No queens or knights.'},
       'dice-chess': { label: 'Dice Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Die roll constrains which piece type must move.'},
       'displacement-chess': { label: 'Displacement', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Pieces can swap positions with adjacent friendly pieces.'},
@@ -559,7 +566,7 @@ const GAMES = {
       shako: { label: 'Shako', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, fen: 'rcebqkbecr/pppppppppp/10/10/10/10/10/10/PPPPPPPPPP/RCEBQKBECR', variantDesc: '10x10 with Cannon (screen-jump capture) and Elephant (2-diagonal leap). Jean-Louis Cazaux, 2000.'},
       shatar: { label: 'Shatar', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Mongolian chess. No check. Win by leaving opponent with only their King.'},
       shatranj: { label: 'Shatranj', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnekfenr/pppppppp/8/8/8/8/PPPPPPPP/RNEKFENR', variantDesc: 'Medieval Islamic chess. Bare king and stalemate are wins.'},
-      shafran: { label: 'Shafran (Hex)', boardStyle: 'hex', hexGrid: SHAFRAN_GRID, hexSize: 20, flat: true, hexColorFn: glinskiColor, hexPosition: SHAFRAN_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, variantDesc: 'Irregular 70-hex board, 9 files. Castling permitted. Pawn initial step varies by file. Isaak Shafran, 1939.'},
+      shafran: { label: 'Shafran (Hex)', boardStyle: 'hex', hexGrid: SHAFRAN_GRID, hexSize: 22, flat: true, hexColorFn: glinskiColor, hexPosition: SHAFRAN_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, variantDesc: 'Irregular 70-hex board, 9 files. Castling permitted. Pawn initial step varies by file. Isaak Shafran, 1939.'},
       'single-check': { label: 'Single-Check', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'One check wins. No checkmate needed.'},
       shinobi: { label: 'Shinobi Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'cmujtmuc/2pppp2/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Asymmetric: FIDE vs Shinobi Clan. Clan drops ninja pieces from hand, promotes in zone. Corey Clark, 2021.'},
       shogun: { label: 'Shogun Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Zone-triggered promotion and Shogi-style drops from captured pieces. Corey Clark, 2020.'},
