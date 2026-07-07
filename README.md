@@ -104,6 +104,10 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-07-07
+- Fixed Y game board — renders as centred equilateral triangle (was skewed parallelogram)
+- Added Hex size variants: 9x9, 13x13, 14x14, 19x19 alongside standard 11x11
+- Added Y size variants: side-9 (small), side-12 (standard), side-15 (large)
+- Hex/Y boards get shaped frames (outer hex-edge border) instead of square backgrounds
 - Added Korean station names to Nyout board hover (all 29 nodes from reference SVG)
 - Generic `nodeNames` support in hover system for any node-based game
 - Asalto/Royal Garrison fortress rendering fixes (ear nodes, hull stroke cleanup)
