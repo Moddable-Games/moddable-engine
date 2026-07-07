@@ -659,7 +659,7 @@ const asalto = {
 
     parts.push(`<rect x="${ox}" y="${oy}" width="${size}" height="${size}" fill="${colors.background}" rx="4"/>`)
 
-    // Fortress highlight — aligned to grid lines, extends one row below fortress nodes
+    // Fortress highlight — convex hull of fortress nodes, extended one row down
     const fNodes = [...fortressNodes].map(i => nodes[i])
     if (fNodes.length > 0) {
       const gridDef = opts.asaltoGrid || { rows: [[2,3,4],[2,3,4],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[2,3,4],[2,3,4]], fortressRows: 2 }
@@ -667,11 +667,17 @@ const asalto = {
       const maxRow = gridDef.rows.length - 1
       const usable = size - size * 0.16
       const sp = usable / Math.max(maxCol, maxRow)
-      const fx = Math.min(...fNodes.map(n => n.x))
-      const fy = Math.min(...fNodes.map(n => n.y))
-      const fw = Math.max(...fNodes.map(n => n.x)) - fx
-      const fh = Math.max(...fNodes.map(n => n.y)) + sp - fy
-      parts.push(`<rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" fill="${colors.fortress}" stroke="${colors.fortressBorder}" stroke-width="2"/>`)
+      // Build points: fortress nodes + projected bottom edge (one spacing below lowest fortress nodes)
+      const topY = Math.min(...fNodes.map(n => n.y))
+      const botY = Math.max(...fNodes.map(n => n.y)) + sp
+      const topNodes = fNodes.filter(n => n.y === topY)
+      const botFortress = fNodes.filter(n => n.y === Math.max(...fNodes.map(nn => nn.y)))
+      const topL = Math.min(...topNodes.map(n => n.x))
+      const topR = Math.max(...topNodes.map(n => n.x))
+      const botL = Math.min(...botFortress.map(n => n.x))
+      const botR = Math.max(...botFortress.map(n => n.x))
+      const points = `${topL},${topY} ${topR},${topY} ${botR},${botY} ${botL},${botY}`
+      parts.push(`<polygon points="${points}" fill="${colors.fortress}" stroke="${colors.fortressBorder}" stroke-width="2"/>`)
     }
 
     // Draw edges
