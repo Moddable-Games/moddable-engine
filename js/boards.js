@@ -190,57 +190,7 @@ const JUNGLE_COLORS = {
   voidFill: 'transparent',
 }
 
-// ─── ASALTO BOARD MAP ─────────────────────────────────────────────────────
-
-function buildAsaltoMap() {
-  // 9 rows x 9 cols: fortress (top 3x3 centred) connected to plain (bottom 5x5 centred)
-  // Full 9x9 grid but only fortress+plain cells are playable
-  const grid = Array.from({ length: 9 }, () => Array(9).fill(null))
-  // Fortress: rows 0-2, cols 3-5 (3x3 centred)
-  for (let r = 0; r <= 2; r++) for (let c = 3; c <= 5; c++) grid[r][c] = 'fortress'
-  // Plain: rows 4-8, cols 2-6 (5x5)
-  for (let r = 4; r <= 8; r++) for (let c = 2; c <= 6; c++) grid[r][c] = 'plain'
-  // Connection row between fortress and plain
-  grid[3][3] = 'plain'; grid[3][4] = 'plain'; grid[3][5] = 'plain'
-  return grid
-}
-
-const ASALTO_MAP = buildAsaltoMap()
-
-const ASALTO_COLORS = {
-  fortress: '#8b4513', fortressStroke: '#5c2d0e',
-  plain: '#d4b896', plainStroke: '#8b7355',
-  voidFill: 'transparent',
-}
-
-// ─── NYOUT CIRCULAR TRACK ─────────────────────────────────────────────────
-
-function buildNyoutMap() {
-  // Nyout: 29 positions in a cross pattern with diagonal shortcuts
-  // Rendered as a 9x9 grid with specific positions marked
-  const grid = Array.from({ length: 9 }, () => Array(9).fill(null))
-  // Outer ring: top edge
-  grid[0][0] = 'corner'; grid[0][2] = 'track'; grid[0][4] = 'corner'; grid[0][6] = 'track'; grid[0][8] = 'corner'
-  // Right edge
-  grid[2][8] = 'track'; grid[4][8] = 'corner'; grid[6][8] = 'track'; grid[8][8] = 'corner'
-  // Bottom edge
-  grid[8][6] = 'track'; grid[8][4] = 'corner'; grid[8][2] = 'track'; grid[8][0] = 'corner'
-  // Left edge
-  grid[6][0] = 'track'; grid[4][0] = 'corner'; grid[2][0] = 'track'
-  // Diagonal shortcuts (NW-SE and NE-SW through centre)
-  grid[2][2] = 'track'; grid[4][4] = 'home'
-  grid[6][6] = 'track'; grid[2][6] = 'track'; grid[6][2] = 'track'
-  return grid
-}
-
-const NYOUT_MAP = buildNyoutMap()
-
-const NYOUT_COLORS = {
-  track: '#d4b896', trackStroke: '#8b7355',
-  corner: '#c0622f', cornerStroke: '#8b4520',
-  home: '#8b1a1a', homeStroke: '#6a1212',
-  voidFill: 'transparent',
-}
+// ─── (Asalto + Nyout now use dedicated providers in board-diagrams.js) ────
 
 // ─── Y GAME (TRIANGULAR HEX) ───────────────────────────────────────────────
 
@@ -467,12 +417,6 @@ function buildAgonPosition() {
 // Black (top): mirrors on rows 7-9
 
 const JUNGLE_SETUP = 'l5t/1d3c1/r1p1w1e/7/7/7/E1W1P1R/1C3D1/T5L'
-
-// ─── ASALTO SETUP (Officers in fortress, Soldiers on plain) ────────────────
-// Officers (W = white kings/crowned) in fortress rows 0-2 centre
-// Soldiers (b = black men) fill the plain rows 4-8
-
-const ASALTO_SETUP = '9/9/9/3W1W3/3b1b3/2bbbbb2/2bbbbb2/2bbbbb2/2bbbbb2'
 
 // ─── GAME DEFINITIONS ───────────────────────────────────────────────────────
 // Each variant specifies: boardStyle, dimensions, pieceSet, fen/position
@@ -968,10 +912,10 @@ const GAMES = {
   },
   asalto: {
     label: 'Asalto',
-    pieceSet: 'playstrategy-draughts-plain',
+    pieceSet: null,
     variants: {
-      standard: { label: 'Standard', boardStyle: 'checkered', rows: 9, cols: 9, tileSize: 36, showLabels: false, cellMap: ASALTO_MAP, colors: ASALTO_COLORS, setup: ASALTO_SETUP, setupDesc: '2 Officers in fortress vs 24 Soldiers on plain', variantDesc: 'Asymmetric siege. Officers jump-capture like draughts; Soldiers advance forward/sideways. Immobilize to win.' },
-      'royal-garrison': { label: 'Royal Garrison', boardStyle: 'checkered', rows: 9, cols: 9, tileSize: 36, showLabels: false, cellMap: ASALTO_MAP, colors: ASALTO_COLORS, setup: ASALTO_SETUP, setupDesc: '3 Officers in larger fortress vs 50 Soldiers', variantDesc: 'Extended Asalto. Three Officers defend a larger fortress against 50 Soldiers.' },
+      standard: { label: 'Standard', boardStyle: 'asalto', boardSize: 320, asaltoSetup: { officers: [3, 5], soldiers: Array.from({ length: 34 }, (_, i) => i + 9) }, setupDesc: '2 Officers in fortress vs 34 Soldiers on plain', variantDesc: 'Asymmetric siege. Officers jump-capture like draughts; Soldiers advance forward/sideways. Immobilize to win.' },
+      'royal-garrison': { label: 'Royal Garrison', boardStyle: 'asalto', boardSize: 320, asaltoSetup: { officers: [3, 4, 5], soldiers: Array.from({ length: 34 }, (_, i) => i + 9) }, setupDesc: '3 Officers in larger fortress vs 50 Soldiers', variantDesc: 'Extended Asalto. Three Officers defend a larger fortress against 50 Soldiers.' },
     },
   },
   'bavarian-32': {
@@ -1000,9 +944,9 @@ const GAMES = {
   },
   nyout: {
     label: 'Nyout',
-    pieceSet: 'playstrategy-draughts-plain',
+    pieceSet: null,
     variants: {
-      standard: { label: 'Standard', boardStyle: 'checkered', rows: 9, cols: 9, tileSize: 36, showLabels: false, cellMap: NYOUT_MAP, colors: NYOUT_COLORS, setupDesc: '4 tokens per player, 29-position circular track', variantDesc: 'Korean stick-throwing race. Circular track with shortcut branches. Throw 4 sticks for movement. Capture by landing on opponent.' },
+      standard: { label: 'Standard', boardStyle: 'nyout', boardSize: 320, setupDesc: '4 tokens per player, 29-position circular track', variantDesc: 'Korean stick-throwing race. Circular track with shortcut branches. Throw 4 sticks for movement. Capture by landing on opponent.' },
     },
   },
 }

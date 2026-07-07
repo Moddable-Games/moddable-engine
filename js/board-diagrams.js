@@ -358,6 +358,116 @@ const shogi = {
   },
 }
 
+// ─── NYOUT (YUT NORI) PROVIDER ─────────────────────────────────────────────
+
+const nyout = {
+  name: 'nyout',
+  positionType: 'node',
+  labelStyle: 'none',
+  defaultColors: { background: '#f5e6c8', line: '#4a3520', point: '#4a3520', junction: '#c0622f', centre: '#8b1a1a' },
+  computeLayout(opts) {
+    const size = opts.boardSize || 320
+    return { boardW: size, boardH: size }
+  },
+  getNodes(size, ox, oy) {
+    // 29 stations: 20 outer (square perimeter) + 1 centre + 8 diagonal intermediates
+    const margin = size * 0.08
+    const inner = size - margin * 2
+    const nodes = []
+    const edges = []
+
+    const x0 = ox + margin, x1 = ox + size - margin
+    const y0 = oy + margin, y1 = oy + size - margin
+    const cx = ox + size / 2, cy = oy + size / 2
+
+    const corners = [
+      { x: x1, y: y1 },  // SE (chammeoki - start)
+      { x: x0, y: y1 },  // SW (chi-mo)
+      { x: x0, y: y0 },  // NW (duet-mo/busan)
+      { x: x1, y: y0 },  // NE (mo)
+    ]
+
+    // Outer ring: 4 sides × 5 nodes (corner + 4 intermediates) = 20 total
+    const outerNodes = []
+    for (let side = 0; side < 4; side++) {
+      const from = corners[side]
+      const to = corners[(side + 1) % 4]
+      outerNodes.push(from)
+      for (let i = 1; i <= 4; i++) {
+        outerNodes.push({
+          x: from.x + (to.x - from.x) * i / 5,
+          y: from.y + (to.y - from.y) * i / 5,
+        })
+      }
+    }
+    for (let i = 0; i < 20; i++) edges.push([i, (i + 1) % 20])
+    for (const n of outerNodes) nodes.push(n)
+
+    // Centre node (index 20)
+    nodes.push({ x: cx, y: cy })
+
+    // Diagonal shortcuts: NW↔SE and NE↔SW through centre
+    // NW corner = index 10, SE corner = index 0
+    // NE corner = index 15, SW corner = index 5
+    // Each diagonal has 2 intermediate nodes between corner and centre
+
+    // NW→SE diagonal intermediates (indices 21, 22 between NW and centre; 23, 24 between centre and SE)
+    const nw = corners[2], se = corners[0]
+    nodes.push({ x: nw.x + (cx - nw.x) * 1 / 3, y: nw.y + (cy - nw.y) * 1 / 3 }) // 21
+    nodes.push({ x: nw.x + (cx - nw.x) * 2 / 3, y: nw.y + (cy - nw.y) * 2 / 3 }) // 22
+    nodes.push({ x: cx + (se.x - cx) * 1 / 3, y: cy + (se.y - cy) * 1 / 3 })       // 23
+    nodes.push({ x: cx + (se.x - cx) * 2 / 3, y: cy + (se.y - cy) * 2 / 3 })       // 24
+
+    // NE→SW diagonal intermediates (indices 25, 26 between NE and centre; 27, 28 between centre and SW)
+    const ne = corners[3], sw = corners[1]
+    nodes.push({ x: ne.x + (cx - ne.x) * 1 / 3, y: ne.y + (cy - ne.y) * 1 / 3 }) // 25
+    nodes.push({ x: ne.x + (cx - ne.x) * 2 / 3, y: ne.y + (cy - ne.y) * 2 / 3 }) // 26
+    nodes.push({ x: cx + (sw.x - cx) * 1 / 3, y: cy + (sw.y - cy) * 1 / 3 })       // 27
+    nodes.push({ x: cx + (sw.x - cx) * 2 / 3, y: cy + (sw.y - cy) * 2 / 3 })       // 28
+
+    // Diagonal edges: NW(10)→21→22→centre(20)→23→24→SE(0)
+    edges.push([10, 21], [21, 22], [22, 20], [20, 23], [23, 24], [24, 0])
+    // NE(15)→25→26→centre(20)→27→28→SW(5)
+    edges.push([15, 25], [25, 26], [26, 20], [20, 27], [27, 28], [28, 5])
+
+    // Junction nodes: corners 0 (SE), 5 (SW), 10 (NW), 15 (NE) and centre 20
+    const junctions = new Set([0, 5, 10, 15, 20])
+
+    return { nodes, edges, junctions }
+  },
+  render(ctx) {
+    const { colors, opts, ox, oy } = ctx
+    const size = opts.boardSize || 320
+    const pointRadius = opts.pointRadius || 7
+    const { nodes, edges, junctions } = this.getNodes(size, ox, oy)
+    const parts = []
+
+    parts.push(`<rect x="${ox}" y="${oy}" width="${size}" height="${size}" fill="${colors.background}" rx="4"/>`)
+
+    // Draw edges
+    parts.push(`<g fill="none" stroke="${colors.line}" stroke-width="2.5" stroke-linecap="round">`)
+    for (const [a, b] of edges) {
+      parts.push(`<line x1="${nodes[a].x}" y1="${nodes[a].y}" x2="${nodes[b].x}" y2="${nodes[b].y}"/>`)
+    }
+    parts.push('</g>')
+
+    // Draw nodes
+    parts.push(`<g>`)
+    for (let i = 0; i < nodes.length; i++) {
+      const p = nodes[i]
+      const isJunction = junctions.has(i)
+      const isCentre = i === 20
+      const fill = isCentre ? colors.centre : isJunction ? colors.junction : colors.point
+      const r = isCentre ? pointRadius * 1.4 : isJunction ? pointRadius * 1.2 : pointRadius
+      parts.push(`<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${fill}"/>`)
+      parts.push(`<circle cx="${p.x}" cy="${p.y}" r="${r * 2}" fill="transparent" class="board-cell" data-sq="n${i + 1}" data-type="node"/>`)
+    }
+    parts.push('</g>')
+
+    return parts.join('')
+  },
+}
+
 const morris = {
   name: 'morris',
   positionType: 'node',
@@ -443,6 +553,144 @@ function computePoints(ringRects, midpoints, cx, cy, rings) {
   }
   if (rings === 1 && midpoints) points.push({ x: cx, y: cy })
   return points
+}
+
+// ─── ASALTO PROVIDER ───────────────────────────────────────────────────────
+
+const asalto = {
+  name: 'asalto',
+  positionType: 'node',
+  labelStyle: 'none',
+  defaultColors: { background: '#f5e6c8', line: '#2a2a2a', point: '#2a2a2a', fortress: 'rgba(40,80,180,0.15)', fortressBorder: '#3355aa' },
+  computeLayout(opts) {
+    const size = opts.boardSize || 320
+    return { boardW: size, boardH: size }
+  },
+  getNodes(size, ox, oy) {
+    // Cross-shaped board: fortress (3×3 top) + plain (7-wide middle + 3-wide bottom arm)
+    // 43 total positions matching reference images
+    const nodes = []
+    const edges = []
+    const fortressNodes = new Set()
+
+    const spacing = size / 10
+    const topMargin = spacing * 0.8
+    const leftMargin = (size - 6 * spacing) / 2
+
+    // Define which columns exist per row
+    const rowDefs = [
+      { cols: [2, 3, 4], y: 0 },          // fortress row 0
+      { cols: [2, 3, 4], y: 1 },          // fortress row 1
+      { cols: [2, 3, 4], y: 2 },          // fortress row 2 / junction
+      { cols: [0, 1, 2, 3, 4, 5, 6], y: 3 }, // plain wide
+      { cols: [0, 1, 2, 3, 4, 5, 6], y: 4 },
+      { cols: [0, 1, 2, 3, 4, 5, 6], y: 5 },
+      { cols: [0, 1, 2, 3, 4, 5, 6], y: 6 },
+      { cols: [2, 3, 4], y: 7 },          // plain bottom arm
+      { cols: [2, 3, 4], y: 8 },
+    ]
+
+    // Build node positions
+    const nodeMap = {} // "row,col" → index
+    for (const row of rowDefs) {
+      for (const col of row.cols) {
+        const x = ox + leftMargin + col * spacing
+        const y = oy + topMargin + row.y * spacing
+        const idx = nodes.length
+        nodeMap[`${row.y},${col}`] = idx
+        nodes.push({ x, y })
+        if (row.y <= 2) fortressNodes.add(idx)
+      }
+    }
+
+    // Build edges: orthogonal connections between adjacent nodes in same row or column
+    for (const row of rowDefs) {
+      for (let i = 0; i < row.cols.length - 1; i++) {
+        const c1 = row.cols[i], c2 = row.cols[i + 1]
+        if (c2 - c1 === 1) {
+          edges.push([nodeMap[`${row.y},${c1}`], nodeMap[`${row.y},${c2}`]])
+        }
+      }
+    }
+    // Vertical connections
+    for (let ri = 0; ri < rowDefs.length - 1; ri++) {
+      const r1 = rowDefs[ri], r2 = rowDefs[ri + 1]
+      for (const col of r1.cols) {
+        if (r2.cols.includes(col)) {
+          edges.push([nodeMap[`${r1.y},${col}`], nodeMap[`${r2.y},${col}`]])
+        }
+      }
+    }
+    // Diagonal connections (both diagonals within each 2×2 cell)
+    for (let ri = 0; ri < rowDefs.length - 1; ri++) {
+      const r1 = rowDefs[ri], r2 = rowDefs[ri + 1]
+      for (const col of r1.cols) {
+        // Down-right diagonal
+        if (r2.cols.includes(col + 1)) {
+          edges.push([nodeMap[`${r1.y},${col}`], nodeMap[`${r2.y},${col + 1}`]])
+        }
+        // Down-left diagonal
+        if (r2.cols.includes(col - 1)) {
+          edges.push([nodeMap[`${r1.y},${col}`], nodeMap[`${r2.y},${col - 1}`]])
+        }
+      }
+    }
+
+    return { nodes, edges, fortressNodes, nodeMap }
+  },
+  render(ctx) {
+    const { colors, opts, ox, oy } = ctx
+    const size = opts.boardSize || 320
+    const pointRadius = opts.pointRadius || 6
+    const { nodes, edges, fortressNodes, nodeMap } = this.getNodes(size, ox, oy)
+    const parts = []
+
+    parts.push(`<rect x="${ox}" y="${oy}" width="${size}" height="${size}" fill="${colors.background}" rx="4"/>`)
+
+    // Draw fortress background
+    const fNodes = [...fortressNodes].map(i => nodes[i])
+    if (fNodes.length > 0) {
+      const fx = Math.min(...fNodes.map(n => n.x)) - pointRadius * 2
+      const fy = Math.min(...fNodes.map(n => n.y)) - pointRadius * 2
+      const fw = Math.max(...fNodes.map(n => n.x)) - fx + pointRadius * 4
+      const fh = Math.max(...fNodes.map(n => n.y)) - fy + pointRadius * 4
+      parts.push(`<rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" fill="${colors.fortress}" stroke="${colors.fortressBorder}" stroke-width="1.5" rx="3"/>`)
+    }
+
+    // Draw edges
+    parts.push(`<g fill="none" stroke="${colors.line}" stroke-width="2" stroke-linecap="round">`)
+    for (const [a, b] of edges) {
+      parts.push(`<line x1="${nodes[a].x}" y1="${nodes[a].y}" x2="${nodes[b].x}" y2="${nodes[b].y}"/>`)
+    }
+    parts.push('</g>')
+
+    // Draw nodes
+    parts.push(`<g fill="${colors.point}">`)
+    for (let i = 0; i < nodes.length; i++) {
+      const p = nodes[i]
+      parts.push(`<circle cx="${p.x}" cy="${p.y}" r="${pointRadius}" fill="${colors.point}"/>`)
+      parts.push(`<circle cx="${p.x}" cy="${p.y}" r="${pointRadius * 2}" fill="transparent" class="board-cell" data-sq="n${i + 1}" data-type="node"/>`)
+    }
+    parts.push('</g>')
+
+    // Draw setup pieces if configured
+    const setup = opts.asaltoSetup
+    if (setup) {
+      const pieceR = pointRadius * 1.5
+      if (setup.officers) {
+        for (const idx of setup.officers) {
+          parts.push(`<circle cx="${nodes[idx].x}" cy="${nodes[idx].y}" r="${pieceR}" fill="#cc2222" stroke="#881111" stroke-width="1.5"/>`)
+        }
+      }
+      if (setup.soldiers) {
+        for (const idx of setup.soldiers) {
+          parts.push(`<circle cx="${nodes[idx].x}" cy="${nodes[idx].y}" r="${pieceR}" fill="#44aa44" stroke="#227722" stroke-width="1.5"/>`)
+        }
+      }
+    }
+
+    return parts.join('')
+  },
 }
 
 const alquerque = {
@@ -1777,7 +2025,7 @@ const landlords = {
 
 // ─── PROVIDER REGISTRY ──────────────────────────────────────────────────────
 
-const PROVIDERS = { checkered, 'mono-grid': monoGrid, go, surakarta, xiangqi, shogi, morris, alquerque, hex, mancala, backgammon, 'stern-halma': sternHalma, landlords }
+const PROVIDERS = { checkered, 'mono-grid': monoGrid, go, surakarta, xiangqi, shogi, nyout, morris, asalto, alquerque, hex, mancala, backgammon, 'stern-halma': sternHalma, landlords }
 
 // ─── RENDERER (ported from moddable-chess/js/svg-renderer.js) ───────────────
 
