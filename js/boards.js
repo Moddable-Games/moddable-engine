@@ -915,7 +915,7 @@ const GAMES = {
     pieceSet: 'fluent-emoji',
     variants: {
       standard: { label: 'Standard', boardStyle: 'asalto', boardSize: 320, asaltoSetup: { officers: [3, 5], soldiers: Array.from({ length: 27 }, (_, i) => i + 6) }, pieceNames: { officer: 'Officer', soldier: 'Soldier' }, setupDesc: '2 Officers in fortress vs 27 Soldiers on plain', variantDesc: 'Asymmetric siege. Officers jump-capture like draughts; Soldiers advance forward/sideways. Immobilize to win.' },
-      'royal-garrison': { label: 'Royal Garrison', boardStyle: 'asalto', boardSize: 320, asaltoSetup: { officers: [3, 4, 5], soldiers: Array.from({ length: 27 }, (_, i) => i + 6) }, pieceNames: { officer: 'Officer', soldier: 'Soldier' }, setupDesc: '3 Officers in fortress vs 27 Soldiers on plain', variantDesc: 'Extended Asalto. Three Officers defend a larger fortress against Soldiers.' },
+      'royal-garrison': { label: 'Royal Garrison', boardStyle: 'asalto', boardSize: 380, asaltoGrid: { rows: [[0,1,2,3,4,5,6,7,8],[0,1,2,3,4,5,6,7,8],[0,1,2,3,4,5,6,7,8],[0,1,2,3,4,5,6,7,8],[0,1,2,3,4,5,6,7,8],[0,1,2,3,4,5,6,7,8],[0,1,2,3,4,5,6,7,8],[2,3,4,5,6]], fortressRows: 2 }, asaltoSetup: { officers: [9, 13, 17], soldiers: Array.from({ length: 50 }, (_, i) => i + 18) }, pieceNames: { officer: 'Officer', soldier: 'Soldier' }, setupDesc: '3 Officers in fortress vs 50 Soldiers on plain', variantDesc: 'Extended Asalto. Three Officers defend a wider 9-column fortress against 50 Soldiers.' },
     },
   },
   'bavarian-32': {
@@ -1607,12 +1607,12 @@ function render() {
     if (setup.soldiers) for (const idx of setup.soldiers) pos[`n${idx + 1}`] = { type: 'soldier' }
     config.position = pos
     // Generate setup notation: node-per-row, O=officer S=soldier .=empty
-    const rowSizes = [3, 3, 7, 7, 7, 3, 3]
+    const gridDef = config.asaltoGrid || { rows: [[2,3,4],[2,3,4],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[2,3,4],[2,3,4]] }
     const rowStrs = []
     let nodeIdx = 0
-    for (const count of rowSizes) {
+    for (const rowCols of gridDef.rows) {
       let row = ''
-      for (let c = 0; c < count; c++) {
+      for (let c = 0; c < rowCols.length; c++) {
         const p = pos[`n${nodeIdx + 1}`]
         row += p ? (p.type === 'officer' ? 'O' : 'S') : '.'
         nodeIdx++

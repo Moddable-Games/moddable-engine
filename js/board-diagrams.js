@@ -566,28 +566,36 @@ const asalto = {
     const size = opts.boardSize || 320
     return { boardW: size, boardH: size }
   },
-  getNodes(size, ox, oy) {
-    // Standard Asalto cross: 33 positions on a 7×7 grid
-    // Rows 0-1: 3 cols (fortress), rows 2-4: 7 cols (plain wide), rows 5-6: 3 cols (bottom arm)
+  getNodes(size, ox, oy, opts) {
     const nodes = []
     const edges = []
     const fortressNodes = new Set()
 
+    // Grid layout from variant config, or default Asalto cross (7×7)
+    const gridDef = opts.asaltoGrid || {
+      rows: [
+        [2, 3, 4],
+        [2, 3, 4],
+        [0, 1, 2, 3, 4, 5, 6],
+        [0, 1, 2, 3, 4, 5, 6],
+        [0, 1, 2, 3, 4, 5, 6],
+        [2, 3, 4],
+        [2, 3, 4],
+      ],
+      fortressRows: 2,
+    }
+    const rowDefs = gridDef.rows.map((cols, y) => ({ cols, y }))
+    const fortressRowCount = gridDef.fortressRows || 2
+
+    const maxCol = Math.max(...rowDefs.flatMap(r => r.cols))
+    const maxRow = rowDefs.length - 1
     const margin = size * 0.08
     const usable = size - margin * 2
-    const spacing = usable / 6  // 6 gaps for 7 rows/cols
-    const xOffset = ox + margin
-    const yOffset = oy + margin
-
-    const rowDefs = [
-      { cols: [2, 3, 4], y: 0 },
-      { cols: [2, 3, 4], y: 1 },
-      { cols: [0, 1, 2, 3, 4, 5, 6], y: 2 },
-      { cols: [0, 1, 2, 3, 4, 5, 6], y: 3 },
-      { cols: [0, 1, 2, 3, 4, 5, 6], y: 4 },
-      { cols: [2, 3, 4], y: 5 },
-      { cols: [2, 3, 4], y: 6 },
-    ]
+    const hGaps = maxCol
+    const vGaps = maxRow
+    const spacing = usable / Math.max(hGaps, vGaps)
+    const xOffset = ox + (size - hGaps * spacing) / 2
+    const yOffset = oy + (size - vGaps * spacing) / 2
 
     const nodeMap = {}
     for (const row of rowDefs) {
@@ -595,7 +603,7 @@ const asalto = {
         const idx = nodes.length
         nodeMap[`${row.y},${col}`] = idx
         nodes.push({ x: xOffset + col * spacing, y: yOffset + row.y * spacing })
-        if (row.y <= 1) fortressNodes.add(idx)
+        if (row.y < fortressRowCount) fortressNodes.add(idx)
       }
     }
 
@@ -633,15 +641,19 @@ const asalto = {
     const { colors, opts, ox, oy } = ctx
     const size = opts.boardSize || 320
     const pointRadius = opts.pointRadius || 6
-    const { nodes, edges, fortressNodes, nodeMap } = this.getNodes(size, ox, oy)
+    const { nodes, edges, fortressNodes, nodeMap } = this.getNodes(size, ox, oy, opts)
     const parts = []
 
     parts.push(`<rect x="${ox}" y="${oy}" width="${size}" height="${size}" fill="${colors.background}" rx="4"/>`)
 
-    // Fortress highlight — aligned to grid lines (node centres), covering rows 0-2
+    // Fortress highlight — aligned to grid lines, extends one row below fortress nodes
     const fNodes = [...fortressNodes].map(i => nodes[i])
     if (fNodes.length > 0) {
-      const sp = (size - size * 0.16) / 6
+      const gridDef = opts.asaltoGrid || { rows: [[2,3,4],[2,3,4],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[2,3,4],[2,3,4]], fortressRows: 2 }
+      const maxCol = Math.max(...gridDef.rows.flat())
+      const maxRow = gridDef.rows.length - 1
+      const usable = size - size * 0.16
+      const sp = usable / Math.max(maxCol, maxRow)
       const fx = Math.min(...fNodes.map(n => n.x))
       const fy = Math.min(...fNodes.map(n => n.y))
       const fw = Math.max(...fNodes.map(n => n.x)) - fx
