@@ -796,6 +796,31 @@ const alquerque = {
   },
 }
 
+// ─── HEX FRAME HELPERS ──────────────────────────────────────────────────────
+
+function computeConvexHull(points) {
+  const pts = points.slice().sort((a, b) => a.x - b.x || a.y - b.y)
+  if (pts.length <= 2) return pts
+  const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x)
+  const lower = []
+  for (const p of pts) { while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop(); lower.push(p) }
+  const upper = []
+  for (let i = pts.length - 1; i >= 0; i--) { const p = pts[i]; while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop(); upper.push(p) }
+  return lower.slice(0, -1).concat(upper.slice(0, -1))
+}
+
+function expandPolygon(hull, padding) {
+  const n = hull.length
+  if (n < 3) return hull
+  const cx = hull.reduce((s, p) => s + p.x, 0) / n
+  const cy = hull.reduce((s, p) => s + p.y, 0) / n
+  return hull.map(p => {
+    const dx = p.x - cx, dy = p.y - cy
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1
+    return { x: p.x + dx / dist * padding, y: p.y + dy / dist * padding }
+  })
+}
+
 // ─── HEX PROVIDER (ported from moddable-hexmaps/js/hex-math.js + hex-svg.js) ─
 
 function axialToPixelPointy(q, r, size) {
@@ -850,7 +875,7 @@ const hex = {
     const hexes = this._getHexes(opts)
     const size = opts.hexSize || opts.tileSize || 30
     const flat = opts.flat || false
-    const pad = size + 10
+    const pad = opts.hexFrame ? size * 1.4 : size + 10
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
     for (const h of hexes) {
       const p = flat ? axialToPixelFlat(h.q, h.r, size) : axialToPixelPointy(h.q, h.r, size)
@@ -879,7 +904,20 @@ const hex = {
     const hexColorFn = opts.hexColorFn || null
     const hexTypes = opts.hexTypes || null
 
-    parts.push(`<rect x="${ox}" y="${oy}" width="${layout.boardW}" height="${layout.boardH}" fill="${colors.background}" rx="6"/>`)
+    const frame = opts.hexFrame || null
+    if (frame === 'triangle' || frame === 'rhombus') {
+      const framePad = size * 1.1
+      const centers = hexes.map(h => {
+        const p = flat ? axialToPixelFlat(h.q, h.r, size) : axialToPixelPointy(h.q, h.r, size)
+        return { x: oX + p.x, y: oY + p.y }
+      })
+      const hull = computeConvexHull(centers)
+      const expanded = expandPolygon(hull, framePad)
+      const framePts = expanded.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')
+      parts.push(`<polygon points="${framePts}" fill="${colors.background}" stroke="${colors.stroke}" stroke-width="2"/>`)
+    } else {
+      parts.push(`<rect x="${ox}" y="${oy}" width="${layout.boardW}" height="${layout.boardH}" fill="${colors.background}" rx="6"/>`)
+    }
 
     for (const h of hexes) {
       const p = flat ? axialToPixelFlat(h.q, h.r, size) : axialToPixelPointy(h.q, h.r, size)
