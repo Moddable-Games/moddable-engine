@@ -948,7 +948,7 @@ const hex = {
     }
 
     if (frame) {
-      const borderEdges = computeHexBorderEdges(hexes, size, flat, oX, oY, 1.0)
+      const borderEdges = computeHexBorderEdges(hexes, size, flat, oX, oY, 1.05)
       parts.push(`<g fill="none" stroke="${colors.stroke}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">`)
       for (const [a, b] of borderEdges) {
         parts.push(`<line x1="${a.x.toFixed(2)}" y1="${a.y.toFixed(2)}" x2="${b.x.toFixed(2)}" y2="${b.y.toFixed(2)}"/>`)
