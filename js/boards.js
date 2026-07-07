@@ -1,5 +1,6 @@
 import { renderBoard, fenToPosition } from './board-diagrams.js'
 import { getGameConfig, getAllGames, HexSvg, createSeededRng } from './hex-games/index.js'
+import { getDeckConfig, getRegisteredDecks, createDeck, shuffle, deal, layoutTable } from './deck-manager/index.js'
 
 // ─── DUNGEON CHESS CELL MAPS ───────────────────────────────────────────────
 // null = void, 'floor' = standard, 'p1'/'p2' = deploy zones, 'water' = obstacle
@@ -845,51 +846,61 @@ const GAMES = {
   'standard-52': {
     label: '52 Cards',
     pieceSet: null,
-    noRenderer: true,
+    deckGame: 'standard-52',
     variants: {
-      big2: { label: 'Big 2', noRenderer: true, setupDesc: '13 cards each, 4 players', variantDesc: 'Climbing card game where 2 is the highest rank. Play singles, pairs, triples, or five-card poker hands.' },
-      president: { label: 'President', noRenderer: true, setupDesc: 'Full deck dealt evenly, 4-8 players', variantDesc: 'Role-based climbing game with card trading between rounds. Positions persist. Tests multi-round state and asymmetric deals.' },
+      big2: { label: 'Big 2', deckVariant: 'big2', setupDesc: '13 cards each, 4 players', variantDesc: 'Climbing card game where 2 is the highest rank. Play singles, pairs, triples, or five-card poker hands.' },
+      president: { label: 'President', deckVariant: 'president', setupDesc: 'Full deck dealt evenly, 4-8 players', variantDesc: 'Role-based climbing game with card trading between rounds. Positions persist. Tests multi-round state and asymmetric deals.' },
+      poker: { label: 'Texas Hold\'em', deckVariant: 'poker', setupDesc: '2 hole cards + 5 community, 6 players', variantDesc: 'Community card poker. Two private cards, five shared. Four betting rounds: preflop, flop, turn, river.' },
+      blackjack: { label: 'Blackjack', deckVariant: 'blackjack', setupDesc: '2 cards each, 4 players vs dealer', variantDesc: 'Beat the dealer to 21 without busting. Aces count 1 or 11. Face cards are 10.' },
+      bridge: { label: 'Rubber Bridge', deckVariant: 'bridge', setupDesc: '13 cards each, 4 players', variantDesc: 'Partnership trick-taking with bidding and contract. A rubber is best of three games.' },
+      hearts: { label: 'Hearts', deckVariant: 'hearts', setupDesc: '13 cards each, 4 players', variantDesc: 'Avoid hearts and the Queen of Spades. Shoot the Moon to reverse scoring.' },
+      spades: { label: 'Spades', deckVariant: 'spades', setupDesc: '13 cards each, 4 players', variantDesc: 'Partnership trick-taking. Spades always trump. Bid your tricks and make your contract.' },
+      'gin-rummy': { label: 'Gin Rummy', deckVariant: 'gin-rummy', setupDesc: '10 cards each, 2 players', variantDesc: 'Form melds of sets and runs. Knock when deadwood is 10 or less, or go gin for a bonus.' },
+      cribbage: { label: 'Cribbage', deckVariant: 'cribbage', setupDesc: '6 cards each, 2 players', variantDesc: 'Discard to the crib, peg during play, score hands. First to 121 points wins.' },
+      euchre: { label: 'Euchre', deckVariant: 'euchre', setupDesc: '5 cards each, 4 players', variantDesc: 'Partnership trick-taking with a 24-card deck. Name trump or pass. Take 3 of 5 tricks to score.' },
+      canasta: { label: 'Canasta', deckVariant: 'canasta', setupDesc: '11 cards each, 4 players', variantDesc: 'Rummy-style with melds of 7 (canastas). Wild cards, frozen piles, and partnership strategy.' },
+      klondike: { label: 'Klondike', deckVariant: 'klondike', setupDesc: 'Tableau of 28 cards, 1 player', variantDesc: 'The classic solitaire. Build foundations up by suit, tableau down by alternating colour.' },
     },
   },
   'flower-48': {
     label: '48 Flowers',
     pieceSet: null,
-    noRenderer: true,
+    deckGame: 'hanafuda-48',
     variants: {
-      'koi-koi': { label: 'Koi-Koi', noRenderer: true, setupDesc: '8 cards each + 8 field, 2 players', variantDesc: 'The most popular Hanafuda game. Complete a yaku and declare win, or say Koi-Koi to keep playing for more — at the risk of losing the bonus.' },
-      'hana-awase': { label: 'Hana-Awase', noRenderer: true, setupDesc: '48-card deck, 2-4 players', variantDesc: 'The base Hanafuda matching game. No yaku — card values only. Simplest entry point to the deck.' },
-      'oicho-kabu': { label: 'Oicho-Kabu', noRenderer: true, setupDesc: '48-card deck, 2-8 players', variantDesc: 'A betting game using Hanafuda month numbers, not suit imagery. Closest to 9 wins. Similar to Baccarat.' },
+      'koi-koi': { label: 'Koi-Koi', deckVariant: 'koi-koi', setupDesc: '8 cards each + 8 field, 2 players', variantDesc: 'The most popular Hanafuda game. Complete a yaku and declare win, or say Koi-Koi to keep playing for more — at the risk of losing the bonus.' },
+      'hana-awase': { label: 'Hana-Awase', deckVariant: 'hana-awase', setupDesc: '48-card deck, 2-4 players', variantDesc: 'The base Hanafuda matching game. No yaku — card values only. Simplest entry point to the deck.' },
+      'oicho-kabu': { label: 'Oicho-Kabu', deckVariant: 'oicho-kabu', setupDesc: '48-card deck, 2-8 players', variantDesc: 'A betting game using Hanafuda month numbers, not suit imagery. Closest to 9 wins. Similar to Baccarat.' },
     },
   },
   'standard-dice': {
     label: 'Standard Dice',
     pieceSet: null,
-    noRenderer: true,
+    deckGame: 'standard-dice',
     variants: {
-      farkle: { label: 'Farkle', noRenderer: true, setupDesc: '6 dice, 2-6 players', variantDesc: 'Roll 6 dice, bank scoring combinations, press your luck. Roll nothing that scores and lose your entire turn\'s points.' },
-      'liars-dice': { label: 'Liar\'s Dice', noRenderer: true, setupDesc: '5 dice each under cups, 2-6 players', variantDesc: 'Hidden dice under cups. Bid on what the combined dice show. Call liar to challenge — and risk a die of your own.' },
-      yahtzee: { label: 'Yahtzee', noRenderer: true, setupDesc: '5 dice, 13 categories, 1-4 players', variantDesc: 'Five dice, 13 scoring categories, one shot at a Yahtzee. Fill every box across three rolls per turn.' },
+      farkle: { label: 'Farkle', deckVariant: 'farkle', setupDesc: '6 dice, 2-6 players', variantDesc: 'Roll 6 dice, bank scoring combinations, press your luck. Roll nothing that scores and lose your entire turn\'s points.' },
+      'liars-dice': { label: 'Liar\'s Dice', deckVariant: 'liars-dice', setupDesc: '5 dice each under cups, 2-6 players', variantDesc: 'Hidden dice under cups. Bid on what the combined dice show. Call liar to challenge — and risk a die of your own.' },
+      yahtzee: { label: 'Yahtzee', deckVariant: 'yahtzee', setupDesc: '5 dice, 13 categories, 1-4 players', variantDesc: 'Five dice, 13 scoring categories, one shot at a Yahtzee. Fill every box across three rolls per turn.' },
     },
   },
   mahjong: {
     label: 'Mahjong',
     pieceSet: null,
-    noRenderer: true,
+    deckGame: 'mahjong-136',
     variants: {
-      'hong-kong': { label: 'Hong Kong', noRenderer: true, setupDesc: '144 tiles, 4 players, 13-tile hand', variantDesc: 'The canonical Cantonese ruleset. Faan scoring with minimum 3 faan to win. Discarder pays on ron; wall win doubles from all.' },
-      riichi: { label: 'Riichi (Japanese)', noRenderer: true, setupDesc: '136 tiles, 4 players, 13-tile hand', variantDesc: 'Japanese Mahjong. Yaku requirement to win. Riichi declaration locks the hand. Furiten prevents discarded-tile wins.' },
-      taiwanese: { label: 'Taiwanese', noRenderer: true, setupDesc: '144 tiles, 4 players, 16-tile hand', variantDesc: '16-tile hands requiring five melds and one pair. Multiple players can win from a single discard.' },
-      'zung-jung': { label: 'Zung Jung', noRenderer: true, setupDesc: '136 tiles, 4 players, 13-tile hand', variantDesc: 'Alan Kwan\'s competition system. 44 named patterns, additive scoring, 320-point limit.' },
+      'hong-kong': { label: 'Hong Kong', deckVariant: 'hong-kong', setupDesc: '144 tiles, 4 players, 13-tile hand', variantDesc: 'The canonical Cantonese ruleset. Faan scoring with minimum 3 faan to win. Discarder pays on ron; wall win doubles from all.' },
+      riichi: { label: 'Riichi (Japanese)', deckVariant: 'riichi', setupDesc: '136 tiles, 4 players, 13-tile hand', variantDesc: 'Japanese Mahjong. Yaku requirement to win. Riichi declaration locks the hand. Furiten prevents discarded-tile wins.' },
+      taiwanese: { label: 'Taiwanese', deckVariant: 'taiwanese', setupDesc: '144 tiles, 4 players, 16-tile hand', variantDesc: '16-tile hands requiring five melds and one pair. Multiple players can win from a single discard.' },
+      'zung-jung': { label: 'Zung Jung', deckVariant: 'zung-jung', setupDesc: '136 tiles, 4 players, 13-tile hand', variantDesc: 'Alan Kwan\'s competition system. 44 named patterns, additive scoring, 320-point limit.' },
     },
   },
   'double-six-dominoes': {
     label: 'D6 Dominoes',
     pieceSet: null,
-    noRenderer: true,
+    deckGame: 'dominoes-28',
     variants: {
-      block: { label: 'Block', noRenderer: true, setupDesc: '7 tiles each, 2-4 players', variantDesc: 'The foundational domino game — match ends, no boneyard draws. If no one can play, lowest pip count wins.' },
-      'all-fives': { label: 'All Fives', noRenderer: true, setupDesc: '7 tiles each, 2-4 players', variantDesc: 'Score points as you play — whenever open ends total a multiple of 5, score that many. Doubles branch in four directions.' },
-      'mexican-train': { label: 'Mexican Train', noRenderer: true, setupDesc: 'Double-12 set, 2-8 players', variantDesc: 'Hub-and-spokes layout. Each player builds their own train from the central double. The shared Mexican Train is always available.' },
+      block: { label: 'Block', deckVariant: 'block', setupDesc: '7 tiles each, 2-4 players', variantDesc: 'The foundational domino game — match ends, no boneyard draws. If no one can play, lowest pip count wins.' },
+      'all-fives': { label: 'All Fives', deckVariant: 'all-fives', setupDesc: '7 tiles each, 2-4 players', variantDesc: 'Score points as you play — whenever open ends total a multiple of 5, score that many. Doubles branch in four directions.' },
+      'mexican-train': { label: 'Mexican Train', deckVariant: 'mexican-train', setupDesc: 'Double-12 set, 2-8 players', variantDesc: 'Hub-and-spokes layout. Each player builds their own train from the central double. The shared Mexican Train is always available.' },
     },
   },
   baristasaurus: {
@@ -950,9 +961,9 @@ const GAMES = {
   'bavarian-32': {
     label: 'Bavarian 32',
     pieceSet: null,
-    noRenderer: true,
+    deckGame: 'bavarian-32',
     variants: {
-      skat: { label: 'Skat', noRenderer: true, setupDesc: '32-card deck, 3 players, 10-card hands', variantDesc: 'Germany\'s national card game. Auction bidding, solo declarer vs two defenders. Trump suit or Grand/Null contracts.' },
+      skat: { label: 'Skat', deckVariant: 'skat', setupDesc: '32-card deck, 3 players, 10-card hands', variantDesc: 'Germany\'s national card game. Auction bidding, solo declarer vs two defenders. Trump suit or Grand/Null contracts.' },
     },
   },
   'dou-shou-qi': {
@@ -1464,6 +1475,36 @@ function render() {
     } else {
       hexPlayersGroup.style.display = 'none'
     }
+  } else if (game.deckGame) {
+    hexStyleGroup.style.display = 'none'
+    hexSeedGroup.style.display = ''
+    document.getElementById('hex-seed-input').value = state.seed || ''
+    const deckConfig = getDeckConfig(game.deckGame)
+    const deckVariantKey = variantDef.deckVariant
+    const dealSpec = deckConfig?.games[deckVariantKey]
+    if (dealSpec && dealSpec.minPlayers < dealSpec.maxPlayers) {
+      hexPlayersGroup.style.display = ''
+      const playersSelect = document.getElementById('hex-players-select')
+      const needed = []
+      for (let p = dealSpec.minPlayers; p <= dealSpec.maxPlayers; p++) needed.push(p)
+      const currentOpts = [...playersSelect.options].map(o => parseInt(o.value))
+      if (currentOpts.join() !== needed.join()) {
+        playersSelect.innerHTML = ''
+        for (const p of needed) {
+          const opt = document.createElement('option')
+          opt.value = p
+          opt.textContent = `${p} players`
+          playersSelect.appendChild(opt)
+        }
+      }
+      if (!state.players || state.players < dealSpec.minPlayers || state.players > dealSpec.maxPlayers) {
+        state.players = dealSpec.defaultPlayers
+      }
+      playersSelect.value = state.players
+    } else {
+      hexPlayersGroup.style.display = 'none'
+      if (dealSpec) state.players = dealSpec.defaultPlayers
+    }
   } else {
     hexStyleGroup.style.display = 'none'
     hexSeedGroup.style.display = 'none'
@@ -1483,6 +1524,11 @@ function render() {
 
   if (game.needsBoardData) {
     loadBoardDataAndRender(game, variantDef)
+    return
+  }
+
+  if (game.deckGame) {
+    renderDeckGame(game, variantDef)
     return
   }
 
@@ -1615,6 +1661,238 @@ function renderHexGame(game, variantDef) {
   })
   bindHexHover(gameConfig)
   requestAnimationFrame(fitToView)
+}
+
+function renderDeckGame(game, variantDef) {
+  const deckType = game.deckGame
+  const deckConfig = getDeckConfig(deckType)
+  if (!deckConfig) {
+    showSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="400" height="200" fill="#1a1a2e" rx="8"/><text x="200" y="100" text-anchor="middle" font-size="14" fill="#888" font-family="system-ui">Unknown deck: "${deckType}"</text></svg>`)
+    return
+  }
+
+  const gameKey = variantDef.deckVariant
+  const dealSpec = deckConfig.games[gameKey]
+  if (!dealSpec) {
+    showSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="400" height="200" fill="#1a1a2e" rx="8"/><text x="200" y="100" text-anchor="middle" font-size="14" fill="#888" font-family="system-ui">No deal spec: "${gameKey}"</text></svg>`)
+    return
+  }
+
+  const seed = state.seed
+  const players = state.players || dealSpec.defaultPlayers
+  const activeDealSpec = { ...dealSpec, players }
+  const cards = createDeck(deckType, dealSpec)
+  const shuffled = shuffle(cards, seed)
+  const dealResult = deal(shuffled, activeDealSpec)
+
+  const cardW = deckType === 'dominoes-28' ? 40 : 44
+  const cardH = deckType === 'dominoes-28' ? 20 : 64
+  const maxHand = Math.max(...dealResult.hands.map(h => h.length), dealResult.community.length)
+  const handWidth = maxHand * (cardW + 4)
+  const handHalfW = handWidth / 2
+  const handHalfH = cardH / 2
+  const separationNeeded = handWidth + 20
+  const minRingFromSeparation = separationNeeded / (2 * Math.sin(Math.PI / players))
+  const minRing = Math.max(minRingFromSeparation, 150)
+
+  const tableW = (minRing + handHalfW) * 2 + 40
+  const tableH = (minRing + handHalfH) * 2 + 60
+
+  const tableLayout = layoutTable(dealResult, {
+    players,
+    tableWidth: tableW,
+    tableHeight: tableH,
+    cardW,
+    cardH,
+    handStyle: 'spread',
+  })
+
+  const svg = renderDeckSvg(tableLayout, {
+    tableW, tableH, cardW, cardH,
+    deckLabel: deckConfig.label,
+    gameLabel: variantDef.label,
+    deckType,
+  })
+
+  const notation = encodeDeckState(dealResult, deckType, seed, players)
+
+  showSvg(svg)
+  showInfo({
+    deckType,
+    gameKey,
+    seed,
+    players,
+    cardsPerHand: dealResult.hands[0]?.length || 0,
+    community: dealResult.community.length,
+    drawPile: dealResult.drawPile.length,
+    label: variantDef.label,
+    setupDesc: variantDef.setupDesc,
+    variantDesc: variantDef.variantDesc,
+    deckNotation: notation,
+  })
+  bindDeckHover()
+  requestAnimationFrame(fitToView)
+}
+
+function encodeDeckState(dealResult, deckType, seed, players) {
+  const parts = [`${deckType}:${seed}:${players}`]
+  for (let i = 0; i < dealResult.hands.length; i++) {
+    const ids = dealResult.hands[i].map(c => c.id)
+    parts.push(`h${i}=${ids.join(',')}`)
+  }
+  if (dealResult.community.length > 0) {
+    parts.push(`f=${dealResult.community.map(c => c.id).join(',')}`)
+  }
+  parts.push(`d=${dealResult.drawPile.length}`)
+  return parts.join('|')
+}
+
+function bindDeckHover() {
+  const infoBar = document.getElementById('hex-info-bar')
+  const svgContainer = document.getElementById('board-svg')
+  infoBar.classList.add('active')
+  infoBar.textContent = 'Hover over a card or zone'
+
+  svgContainer.addEventListener('mouseover', e => {
+    const card = e.target.closest('[data-card]')
+    const zone = e.target.closest('[data-zone]')
+    if (card && zone) {
+      infoBar.textContent = `${card.dataset.card} · ${zone.dataset.zone}`
+    } else if (card) {
+      infoBar.textContent = card.dataset.card
+    } else if (zone) {
+      infoBar.textContent = zone.dataset.zone
+    }
+  })
+
+  svgContainer.addEventListener('mouseleave', () => {
+    infoBar.textContent = 'Hover over a card or zone'
+  })
+}
+
+function renderDeckSvg(layout, opts) {
+  const { tableW, tableH, cardW, cardH, deckLabel, gameLabel, deckType } = opts
+  const pad = 20
+  const w = tableW + pad * 2
+  const h = tableH + pad * 2
+  const parts = []
+
+  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">`)
+  parts.push(`<style>svg text{pointer-events:none;cursor:default}[data-card],[data-zone]{cursor:pointer}</style>`)
+  parts.push(`<rect width="${w}" height="${h}" fill="#1b5e3a" rx="16"/>`)
+  parts.push(`<rect x="${pad}" y="${pad}" width="${tableW}" height="${tableH}" fill="#2d7a4f" rx="12" stroke="#1a4a2e" stroke-width="2"/>`)
+
+  for (const hand of layout.hands) {
+    const zoneDesc = hand.cards[0]?.faceUp ? `${hand.label} — ${hand.cards.length} cards (visible)` : `${hand.label} — ${hand.cards.length} cards (hidden)`
+    parts.push(`<g class="hand" data-zone="${zoneDesc}">`)
+    for (const pos of hand.cards) {
+      parts.push(renderCard(pos, cardW, cardH, pad, deckType))
+    }
+    const midIdx = Math.floor(hand.cards.length / 2)
+    const labelX = hand.cards.length > 0 ? (hand.cards[0].x + hand.cards[hand.cards.length - 1].x) / 2 + pad : tableW / 2 + pad
+    const labelY = hand.cards.length > 0 ? hand.cards[0].y + pad : tableH / 2 + pad
+    const isBottom = labelY > tableH / 2 + pad
+    const labelOffset = isBottom ? cardH / 2 + 14 : -cardH / 2 - 6
+    parts.push(`<text x="${labelX}" y="${labelY + labelOffset}" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.6)" font-family="system-ui">${hand.label} (${hand.cards.length})</text>`)
+    parts.push('</g>')
+  }
+
+  if (layout.community && layout.community.length > 0) {
+    parts.push(`<g class="community" data-zone="Community / Field — ${layout.community.length} cards (face up)">`)
+    for (const pos of layout.community) {
+      parts.push(renderCard(pos, cardW, cardH, pad, deckType))
+    }
+    const cy = layout.community[0].y + pad + cardH / 2 + 14
+    parts.push(`<text x="${tableW / 2 + pad}" y="${cy}" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.5)" font-family="system-ui">Field (${layout.community.length})</text>`)
+    parts.push('</g>')
+  }
+
+  if (layout.drawPile && layout.drawPile.length > 0) {
+    const dp = layout.drawPile[0]
+    const dx = dp.x + pad
+    const dy = dp.y + pad
+    const count = dp.count || layout.drawPile.length
+    const backPath = getCardBackPath(deckType)
+    parts.push(`<g data-zone="Draw pile — ${count} cards remaining (face down)">`)
+    const stackDepth = Math.min(4, count)
+    for (let s = stackDepth - 1; s >= 0; s--) {
+      const sx = dx - s * 1.5
+      const sy = dy - s * 1.5
+      if (backPath) {
+        parts.push(`<image href="${backPath}" x="${sx - cardW / 2}" y="${sy - cardH / 2}" width="${cardW}" height="${cardH}" preserveAspectRatio="xMidYMid meet"/>`)
+      } else {
+        parts.push(`<rect x="${sx - cardW / 2}" y="${sy - cardH / 2}" width="${cardW}" height="${cardH}" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1"/>`)
+      }
+    }
+    parts.push(`<text x="${dx}" y="${dy + 3}" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.85)" font-family="system-ui" font-weight="bold">${count}</text>`)
+    parts.push('</g>')
+  }
+
+  parts.push(`<text x="${w / 2}" y="${h - 6}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.3)" font-family="system-ui">${deckLabel} · ${gameLabel} · seed: ${state.seed}</text>`)
+  parts.push('</svg>')
+  return parts.join('\n')
+}
+
+function getCardImagePath(card, deckType) {
+  if (deckType === 'standard-52') {
+    if (card.suit === 'joker') return `../pieces/sets/letele-cards/J-1.svg`
+    const suitLetter = { spades: 'S', hearts: 'H', clubs: 'C', diamonds: 'D' }[card.suit]
+    const rank = card.rank === '10' ? '10' : card.rank
+    return `../pieces/sets/letele-cards/${suitLetter}-${rank}.svg`
+  }
+  if (deckType === 'hanafuda-48') {
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    const month = monthNames[card.monthIndex]
+    const type = card.type.charAt(0).toUpperCase() + card.type.slice(1)
+    const name = card.name
+    if (name.match(/Plain \d/)) {
+      return `../pieces/sets/hanafuda-traditional/Hanafuda_${month}_${type}_${name.slice(-1)}_Alt.svg`
+    }
+    return `../pieces/sets/hanafuda-traditional/Hanafuda_${month}_${type}_Alt.svg`
+  }
+  if (deckType === 'bavarian-32') {
+    const suitMap = { acorns: 'eichel', leaves: 'gras', hearts: 'herz', bells: 'schell' }
+    const rankMap = { '7': '07', '8': '08', '9': '09', '10': '10', 'U': '11_jack', 'O': '12_queen', 'K': '13_king', 'A': '01_daus' }
+    const suit = suitMap[card.suit]
+    const rank = rankMap[card.rank]
+    return `../pieces/sets/mfrasca-skat/Playing_card-german-${suit}-${rank}.svg`
+  }
+  return null
+}
+
+function getCardBackPath(deckType) {
+  if (deckType === 'standard-52') return `../pieces/sets/letele-cards/B-1.svg`
+  return null
+}
+
+function renderCard(pos, cardW, cardH, pad, deckType) {
+  const x = pos.x + pad - cardW / 2
+  const y = pos.y + pad - cardH / 2
+  const rot = pos.rot ? ` transform="rotate(${pos.rot.toFixed(1)} ${pos.x + pad} ${pos.y + pad})"` : ''
+  const cardLabel = pos.card?.display || pos.card?.id || '?'
+
+  if (!pos.faceUp) {
+    const backPath = getCardBackPath(deckType)
+    if (backPath) {
+      return `<g${rot} data-card="Face down"><image href="${backPath}" x="${x}" y="${y}" width="${cardW}" height="${cardH}" preserveAspectRatio="xMidYMid meet"/></g>`
+    }
+    return `<rect x="${x}" y="${y}" width="${cardW}" height="${cardH}" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1"${rot} data-card="Face down"/>`
+  }
+
+  const card = pos.card
+  const imgPath = getCardImagePath(card, deckType)
+
+  if (imgPath) {
+    return `<g${rot} data-card="${cardLabel}"><image href="${imgPath}" x="${x}" y="${y}" width="${cardW}" height="${cardH}" preserveAspectRatio="xMidYMid meet"/></g>`
+  }
+
+  const parts = []
+  parts.push(`<g${rot} data-card="${cardLabel}">`)
+  parts.push(`<rect x="${x}" y="${y}" width="${cardW}" height="${cardH}" fill="#fff" rx="3" stroke="#ccc" stroke-width="0.5"/>`)
+  const fs = Math.min(cardW * 0.3, 10)
+  parts.push(`<text x="${x + cardW / 2}" y="${y + cardH / 2 + fs * 0.35}" text-anchor="middle" font-size="${fs}" fill="#333" font-family="system-ui">${card.display || '?'}</text>`)
+  parts.push('</g>')
+  return parts.join('')
 }
 
 async function loadBoardDataAndRender(game, variantDef) {
@@ -1834,6 +2112,15 @@ function showInfo(cfg) {
     else if (cfg.svgPath) rows.push(`<div class="info-row info-row--block"><span class="info-label">Source</span><span class="info-value info-value--fen">${cfg.svgPath}</span></div>`)
     else if (!cfg.position && !cfg.static) rows.push(`<div class="info-row"><span class="info-label">Setup</span><span class="info-value">Empty board</span></div>`)
     if (cfg.fen || cfg.setup) rows.push(`<div class="info-row"><span class="info-label">Notation</span><span class="info-value">FEN</span></div>`)
+  }
+  if (cfg.deckType) {
+    rows.push(`<div class="info-row"><span class="info-label">Deck</span><span class="info-value">${cfg.deckType}</span></div>`)
+    rows.push(`<div class="info-row"><span class="info-label">Players</span><span class="info-value">${cfg.players}</span></div>`)
+    rows.push(`<div class="info-row"><span class="info-label">Per hand</span><span class="info-value">${cfg.cardsPerHand}</span></div>`)
+    if (cfg.community) rows.push(`<div class="info-row"><span class="info-label">Community</span><span class="info-value">${cfg.community}</span></div>`)
+    if (cfg.drawPile) rows.push(`<div class="info-row"><span class="info-label">Draw pile</span><span class="info-value">${cfg.drawPile}</span></div>`)
+    rows.push(`<div class="info-row"><span class="info-label">Seed</span><span class="info-value">${cfg.seed}</span></div>`)
+    if (cfg.deckNotation) rows.push(`<div class="info-row info-row--block"><span class="info-label">State</span><span class="info-value info-value--fen">${cfg.deckNotation}</span></div>`)
   }
   if (cfg.setupDesc) rows.push(`<div class="info-row info-row--block"><span class="info-label">Position</span><span class="info-value">${cfg.setupDesc}</span></div>`)
   if (cfg.variantDesc) rows.push(`<div class="info-row info-row--block"><span class="info-label">Variant</span><span class="info-value">${cfg.variantDesc}</span></div>`)
