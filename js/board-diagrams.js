@@ -708,11 +708,8 @@ const asalto = {
           }
         }
       }
-      // Stroke the outer boundary
-      const pts = fNodes.map(n => [n.x, n.y])
-      const hull = convexHull(pts)
-      const outline = hull.map(p => `${p[0]},${p[1]}`).join(' ')
-      parts.push(`<polygon points="${outline}" fill="none" stroke="${colors.fortressBorder}" stroke-width="2"/>`)
+      // Stroke the main body rect border (no diagonal strokes from ear triangles)
+      parts.push(`<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="none" stroke="${colors.fortressBorder}" stroke-width="2"/>`)
     }
 
     // Draw edges
