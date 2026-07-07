@@ -608,6 +608,8 @@ const asalto = {
     const xOffset = ox + (size - hGaps * spacing) / 2
     const yOffset = oy + (size - vGaps * spacing) / 2
 
+    const fortressExtraRow = gridDef.fortressExtraRow
+    const fortressCols = gridDef.fortressCols || null
     const nodeMap = {}
     for (const row of rowDefs) {
       for (const col of row.cols) {
@@ -615,6 +617,7 @@ const asalto = {
         nodeMap[`${row.y},${col}`] = idx
         nodes.push({ x: xOffset + col * spacing, y: yOffset + row.y * spacing })
         if (row.y < fortressRowCount) fortressNodes.add(idx)
+        else if (row.y === fortressExtraRow && fortressCols && fortressCols.includes(col)) fortressNodes.add(idx)
       }
     }
 
