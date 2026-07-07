@@ -80,11 +80,17 @@ function renderBySet(opts) {
   if (opts.setId !== 'all') filtered = filtered.filter(s => s.id === opts.setId)
 
   for (const set of filtered) {
+    const setMatches = opts.search && (
+      set.id.toLowerCase().includes(opts.search) ||
+      set.name.toLowerCase().includes(opts.search) ||
+      (set.author || '').toLowerCase().includes(opts.search) ||
+      set.family.toLowerCase().includes(opts.search)
+    )
     let files = set._svgFiles
-    if (opts.search) {
+    if (opts.search && !setMatches) {
       files = files.filter(f => f.toLowerCase().includes(opts.search))
     }
-    if (files.length === 0 && opts.search) continue
+    if (files.length === 0 && opts.search && !setMatches) continue
 
     const section = document.createElement('div')
     section.className = 'set-section'
@@ -130,9 +136,15 @@ function renderByPieceType(opts) {
 
   const pieceMap = {}
   for (const set of filtered) {
+    const setMatches = opts.search && (
+      set.id.toLowerCase().includes(opts.search) ||
+      set.name.toLowerCase().includes(opts.search) ||
+      (set.author || '').toLowerCase().includes(opts.search) ||
+      set.family.toLowerCase().includes(opts.search)
+    )
     for (const file of set._svgFiles) {
       const name = file.replace('.svg', '')
-      if (opts.search && !name.toLowerCase().includes(opts.search)) continue
+      if (opts.search && !setMatches && !name.toLowerCase().includes(opts.search)) continue
       if (!pieceMap[name]) pieceMap[name] = []
       pieceMap[name].push({ set, file })
     }

@@ -51,14 +51,26 @@ registerDeck('mahjong-136', {
       }
     }
 
-    for (let f = 0; f < flowers; f++) {
+    const flowerNames = ['Plum', 'Orchid', 'Chrysanthemum', 'Bamboo']
+    const seasonNames = ['Spring', 'Summer', 'Autumn', 'Winter']
+    for (let f = 0; f < Math.min(flowers, 4); f++) {
       tiles.push({
-        id: `flower_${f}`,
+        id: `flower_${f + 1}`,
         category: 'bonus',
         suit: 'flower',
         rank: f + 1,
         copy: 0,
-        display: `Flower ${f + 1}`,
+        display: flowerNames[f],
+      })
+    }
+    for (let s = 0; s < Math.min(flowers - 4, 4); s++) {
+      tiles.push({
+        id: `season_${s + 1}`,
+        category: 'bonus',
+        suit: 'season',
+        rank: s + 1,
+        copy: 0,
+        display: seasonNames[s],
       })
     }
 
@@ -66,9 +78,9 @@ registerDeck('mahjong-136', {
   },
 
   games: {
-    'hong-kong': { minPlayers: 4, maxPlayers: 4, defaultPlayers: 4, perPlayer: 13, community: 0, remainder: 'wall', flowers: 8 },
-    'riichi': { minPlayers: 4, maxPlayers: 4, defaultPlayers: 4, perPlayer: 13, community: 0, remainder: 'wall' },
-    'taiwanese': { minPlayers: 4, maxPlayers: 4, defaultPlayers: 4, perPlayer: 16, community: 0, remainder: 'wall', flowers: 8 },
-    'zung-jung': { minPlayers: 4, maxPlayers: 4, defaultPlayers: 4, perPlayer: 13, community: 0, remainder: 'wall' },
+    'hong-kong': { minPlayers: 4, maxPlayers: 4, defaultPlayers: 4, perPlayer: 13, community: 0, remainder: 'wall', flowers: 8, layout: 'mahjong-wall', tileSet: 'mahjong-planar' },
+    'riichi': { minPlayers: 4, maxPlayers: 4, defaultPlayers: 4, perPlayer: 13, community: 0, remainder: 'wall', layout: 'mahjong-wall', tileSet: 'mahjong-regular' },
+    'taiwanese': { minPlayers: 4, maxPlayers: 4, defaultPlayers: 4, perPlayer: 16, community: 0, remainder: 'wall', flowers: 8, layout: 'mahjong-wall', tileSet: 'mahjong-planar' },
+    'zung-jung': { minPlayers: 4, maxPlayers: 4, defaultPlayers: 4, perPlayer: 13, community: 0, remainder: 'wall', layout: 'mahjong-wall', tileSet: 'mahjong-regular' },
   },
 })

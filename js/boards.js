@@ -270,11 +270,16 @@ const HEX_TERRAIN_COLORS = {
   stroke: 'rgba(0,0,0,0.2)', background: '#1b2e1b',
 }
 
-// ─── GLINSKI HEX CHESS COLOUR FUNCTION ──────────────────────────────────────
+// ─── HEX COLOUR FUNCTIONS ────────────────────────────────────────────────────
 
 function glinskiColor(hex, colors) {
   const mod = (((hex.q - hex.r) % 3) + 3) % 3
   return mod === 0 ? colors.lightHex : mod === 1 ? colors.midHex : colors.darkHex
+}
+
+function agonRingColor(hex, colors) {
+  const ring = Math.max(Math.abs(hex.q), Math.abs(hex.r), Math.abs(hex.q + hex.r))
+  return ring % 2 === 0 ? colors.darkHex : colors.lightHex
 }
 
 function buildHexPosition(white) {
@@ -432,16 +437,19 @@ function buildGoPreset(name, rows) {
 // ─── AGON POSITION (Queen + 6 Guards per side on outer ring) ────────────────
 
 function buildAgonPosition() {
+  // Exact positions from Wikipedia "Agon_board_1.svg"
+  // All pieces on ring 5. Queens at 3/9 o'clock, guards alternating around.
   const pos = {}
-  // Outer ring of radius-5 hex: cells where |q|+|r|+|q+r| involves max(|q|,|r|,|-q-r|)=5
-  // White Queen at bottom (0,5), Guards spread on adjacent outer ring cells
-  pos['0,5'] = 'Q'
-  pos['-1,5'] = 'P'; pos['1,4'] = 'P'; pos['-2,5'] = 'P'
-  pos['2,3'] = 'P'; pos['-3,5'] = 'P'; pos['3,2'] = 'P'
-  // Black Queen at top (0,-5), Guards mirrored
-  pos['0,-5'] = 'q'
-  pos['1,-5'] = 'p'; pos['-1,-4'] = 'p'; pos['2,-5'] = 'p'
-  pos['-2,-3'] = 'p'; pos['3,-5'] = 'p'; pos['-3,-2'] = 'p'
+  // White queen (left, 9 o'clock)
+  pos['-5,0'] = 'Q'
+  // Black queen (right, 3 o'clock)
+  pos['5,0'] = 'q'
+  // White guards
+  pos['4,-5'] = 'P'; pos['5,-2'] = 'P'; pos['3,2'] = 'P'
+  pos['-1,5'] = 'P'; pos['-5,4'] = 'P'; pos['-1,-4'] = 'P'
+  // Black guards
+  pos['1,-5'] = 'p'; pos['5,-4'] = 'p'; pos['1,4'] = 'p'
+  pos['-4,5'] = 'p'; pos['-5,2'] = 'p'; pos['-3,-2'] = 'p'
   return pos
 }
 
@@ -450,7 +458,7 @@ function buildAgonPosition() {
 // White (bottom): a1=Lion, g1=Tiger, b2=Rat, f2=Elephant, a3=Dog, c3=Leopard, e3=Wolf, g3=Cat
 // Black (top): mirrors on rows 7-9
 
-const JUNGLE_SETUP = 't5l/1e3r1/c1w1d1p/7/7/7/P1D1W1C/1R3E1/L5T'
+const JUNGLE_SETUP = 'l5t/1d3c1/r1p1w1e/7/7/7/E1W1P1R/1C3D1/T5L'
 
 // ─── ASALTO SETUP (Officers in fortress, Soldiers on plain) ────────────────
 // Officers (W = white kings/crowned) in fortress rows 0-2 centre
@@ -947,7 +955,7 @@ const GAMES = {
     label: 'Agon',
     pieceSet: 'mce-chess',
     variants: {
-      standard: { label: 'Standard (91 hexes)', boardStyle: 'hex', hexRadius: 5, hexSize: 22, flat: false, colors: { lightHex: '#f5e6c8', darkHex: '#e8d4a8', midHex: '#f0ddb8', stroke: 'rgba(0,0,0,0.2)', background: '#3a2a1a' }, hexPosition: buildAgonPosition(), setupDesc: 'Queen + 6 Guards per player on outer ring', variantDesc: 'Guide your Queen to the centre hex while blocking opponent. Concentric 91-hex board. France, 1842.' },
+      standard: { label: 'Standard (91 hexes)', boardStyle: 'hex', hexRadius: 5, hexSize: 22, flat: false, hexColorFn: agonRingColor, colors: { lightHex: '#e6a817', darkHex: '#8b2240', stroke: 'rgba(0,0,0,0.25)', background: '#2a1a0a' }, hexPosition: buildAgonPosition(), centreMarker: '★', pieceNames: { P: 'Guard', p: 'Guard' }, setupDesc: 'Queen + 6 Guards per player on outer ring', variantDesc: 'Guide your Queen to the centre hex while blocking opponent. Concentric 91-hex board. France, 1842.' },
     },
   },
   asalto: {
@@ -970,7 +978,7 @@ const GAMES = {
     label: 'Jungle',
     pieceSet: 'fluent-emoji',
     variants: {
-      standard: { label: 'Standard (7×9)', boardStyle: 'checkered', rows: 9, cols: 7, tileSize: 40, showLabels: false, cellMap: JUNGLE_MAP, colors: JUNGLE_COLORS, fen: JUNGLE_SETUP, setupDesc: '8 animals per player on 7x9 grid with river, dens, and traps', variantDesc: 'Animals battle across rivers and traps to reach the enemy den. Rank hierarchy: Elephant > Lion > ... > Rat (but Rat defeats Elephant).' },
+      standard: { label: 'Standard (7×9)', boardStyle: 'checkered', rows: 9, cols: 7, tileSize: 40, showLabels: false, cellMap: JUNGLE_MAP, colors: JUNGLE_COLORS, fen: JUNGLE_SETUP, pieceNames: { E: 'Elephant', e: 'Elephant', L: 'Lion', l: 'Lion', T: 'Tiger', t: 'Tiger', P: 'Leopard', p: 'Leopard', D: 'Dog', d: 'Dog', W: 'Wolf', w: 'Wolf', C: 'Cat', c: 'Cat', R: 'Rat', r: 'Rat' }, pieceBorders: { white: '#1565c0', black: '#c62828' }, setupDesc: '8 animals per player on 7x9 grid with river, dens, and traps', variantDesc: 'Animals battle across rivers and traps to reach the enemy den. Rank hierarchy: Elephant > Lion > ... > Rat (but Rat defeats Elephant).' },
     },
   },
   lattaque: {
@@ -1010,6 +1018,7 @@ const GAME_FEN_OVERRIDES = {
     D: 'dog', d: 'dog', W: 'wolf', w: 'wolf',
     C: 'cat', c: 'cat', R: 'rat', r: 'rat',
   },
+  asalto: { W: 'wK', b: 'bM' },
 }
 
 function buildPieceImages(pieceSetId, galleryIndex, gameId) {
@@ -1681,19 +1690,46 @@ function renderDeckGame(game, variantDef) {
   const seed = state.seed
   const players = state.players || dealSpec.defaultPlayers
   const activeDealSpec = { ...dealSpec, players }
-  const cards = createDeck(deckType, dealSpec)
+  const createOpts = deckType === 'standard-dice'
+    ? { count: (dealSpec.perPlayer || 0) * players + (dealSpec.community || 0) }
+    : dealSpec
+  const cards = createDeck(deckType, createOpts)
   const shuffled = shuffle(cards, seed)
   const dealResult = deal(shuffled, activeDealSpec)
 
-  const cardW = deckType === 'dominoes-28' ? 40 : 44
-  const cardH = deckType === 'dominoes-28' ? 20 : 64
+  if (deckType === 'standard-dice' && deckConfig.roll) {
+    for (let i = 0; i < dealResult.hands.length; i++) {
+      dealResult.hands[i] = deckConfig.roll(dealResult.hands[i], seed + i)
+    }
+    if (dealResult.community.length > 0) {
+      dealResult.community = deckConfig.roll(dealResult.community, seed + 99)
+    }
+  }
+
+  if (dealResult.layout === 'tableau') {
+    renderTableauSvg(dealResult, { deckType, deckConfig, variantDef, seed })
+    return
+  }
+
+  if (activeDealSpec.layout === 'mahjong-wall') {
+    renderMahjongSvg(dealResult, { deckType, deckConfig, variantDef, seed, tileSet: activeDealSpec.tileSet || 'mahjong-regular' })
+    return
+  }
+
+  const cardW = deckType === 'dominoes-28' ? 32 : deckType === 'standard-dice' ? 48 : 44
+  const cardH = deckType === 'dominoes-28' ? 60 : deckType === 'standard-dice' ? 48 : 64
   const maxHand = Math.max(...dealResult.hands.map(h => h.length), dealResult.community.length)
   const handWidth = maxHand * (cardW + 4)
   const handHalfW = handWidth / 2
   const handHalfH = cardH / 2
   const separationNeeded = handWidth + 20
   const minRingFromSeparation = separationNeeded / (2 * Math.sin(Math.PI / players))
-  const minRing = Math.max(minRingFromSeparation, 150)
+  const communityWidth = dealResult.community.length * (cardW + 4)
+  const hasDrawPile = dealResult.drawPile.length > 0
+  const drawPileWidth = hasDrawPile ? cardW + 8 : 0
+  const centreZoneHalfW = (communityWidth + drawPileWidth) / 2
+  const minRingFromCommunity = centreZoneHalfW + handHalfW + 20
+  const minRing = Math.max(minRingFromSeparation, minRingFromCommunity, 150)
 
   const tableW = (minRing + handHalfW) * 2 + 40
   const tableH = (minRing + handHalfH) * 2 + 60
@@ -1833,7 +1869,7 @@ function renderDeckSvg(layout, opts) {
   return parts.join('\n')
 }
 
-function getCardImagePath(card, deckType) {
+function getCardImagePath(card, deckType, opts) {
   if (deckType === 'standard-52') {
     if (card.suit === 'joker') return `../pieces/sets/letele-cards/J-1.svg`
     const suitLetter = { spades: 'S', hearts: 'H', clubs: 'C', diamonds: 'D' }[card.suit]
@@ -1851,17 +1887,58 @@ function getCardImagePath(card, deckType) {
     return `../pieces/sets/hanafuda-traditional/Hanafuda_${month}_${type}_Alt.svg`
   }
   if (deckType === 'bavarian-32') {
-    const suitMap = { acorns: 'eichel', leaves: 'gras', hearts: 'herz', bells: 'schell' }
-    const rankMap = { '7': '07', '8': '08', '9': '09', '10': '10', 'U': '11_jack', 'O': '12_queen', 'K': '13_king', 'A': '01_daus' }
+    const suitMap = { acorns: 'eichel', leaves: 'blatt', hearts: 'hart', bells: 'schellen' }
     const suit = suitMap[card.suit]
-    const rank = rankMap[card.rank]
+    const faceMap = {
+      eichel: { 'U': '11_unter', 'O': '12_ober', 'K': '13_konig', 'A': '01_daus' },
+      hart:   { 'U': '11_unter', 'O': '12_ober', 'K': '13_konig', 'A': '01_daus' },
+      blatt:  { 'U': '11_jack', 'O': '12_queen', 'K': '13_king', 'A': '01_daus' },
+      schellen: { 'U': '11_jack', 'O': '12_queen', 'K': '13_king', 'A': '01' },
+    }
+    const numericMap = { '7': '07', '8': '08', '9': '09', '10': '10' }
+    const rank = faceMap[suit]?.[card.rank] || numericMap[card.rank] || card.rank
     return `../pieces/sets/mfrasca-skat/Playing_card-german-${suit}-${rank}.svg`
+  }
+  if (deckType === 'mahjong-136') {
+    if (opts?.tileSet === 'mahjong-planar') {
+      const suitFileMap = { bamboo: 'tiao', circles: 'bing', characters: 'wan' }
+      const windFileMap = { east: 'Eastwind', south: 'Southwind', west: 'Westwind', north: 'Northwind' }
+      const dragonFileMap = { red: 'Reddragon', green: 'Greendragon', white: 'Whitedragon' }
+      const flowerFileMap = { 1: 'mei', 2: 'lan', 3: 'ju', 4: 'zhu' }
+      const seasonFileMap = { 1: 'spring', 2: 'summer', 3: 'autumn', 4: 'winter' }
+      if (card.suit === 'wind') return `../pieces/sets/mahjong-planar/MJ${windFileMap[card.rank]}.svg`
+      if (card.suit === 'dragon') return `../pieces/sets/mahjong-planar/MJ${dragonFileMap[card.rank]}.svg`
+      if (card.suit === 'flower') return `../pieces/sets/mahjong-planar/MJ${flowerFileMap[card.rank]}.svg`
+      if (card.suit === 'season') return `../pieces/sets/mahjong-planar/MJ${seasonFileMap[card.rank]}.svg`
+      if (suitFileMap[card.suit]) return `../pieces/sets/mahjong-planar/MJ${card.rank}${suitFileMap[card.suit]}.svg`
+      return null
+    }
+    const suitFileMap = { bamboo: 'Sou', circles: 'Pin', characters: 'Man' }
+    const windFileMap = { east: 'Ton', south: 'Nan', west: 'Shaa', north: 'Pei' }
+    const dragonFileMap = { red: 'Chun', green: 'Hatsu', white: 'Haku' }
+    if (card.suit === 'wind') return `../pieces/sets/mahjong-regular/${windFileMap[card.rank]}.svg`
+    if (card.suit === 'dragon') return `../pieces/sets/mahjong-regular/${dragonFileMap[card.rank]}.svg`
+    if (suitFileMap[card.suit]) return `../pieces/sets/mahjong-regular/${suitFileMap[card.suit]}${card.rank}.svg`
+    return null
+  }
+  if (deckType === 'standard-dice') {
+    const valueNames = { 1: 'one', 2: 'two', 3: 'three', 4: 'four', 5: 'five', 6: 'six' }
+    const name = valueNames[card.value]
+    if (name) return `../pieces/sets/playstrategy-backgammon/wdice${name}.svg`
+    return `../pieces/sets/playstrategy-backgammon/wdicerandom.svg`
+  }
+  if (deckType === 'dominoes-28') {
+    const a = String(card.low).padStart(2, '0')
+    const b = String(card.high).padStart(2, '0')
+    return `../pieces/sets/dominoes-classic/domino-${a}-${b}.svg`
   }
   return null
 }
 
 function getCardBackPath(deckType) {
   if (deckType === 'standard-52') return `../pieces/sets/letele-cards/B-1.svg`
+  if (deckType === 'mahjong-136') return `../pieces/sets/mahjong-regular/Back.svg`
+  if (deckType === 'dominoes-28') return `../pieces/sets/dominoes-classic/domino-back.svg`
   return null
 }
 
@@ -1871,8 +1948,15 @@ function renderCard(pos, cardW, cardH, pad, deckType) {
   const rot = pos.rot ? ` transform="rotate(${pos.rot.toFixed(1)} ${pos.x + pad} ${pos.y + pad})"` : ''
   const cardLabel = pos.card?.display || pos.card?.id || '?'
 
+  const tileBgDecks = new Set(['mahjong-136', 'dominoes-28'])
+  const needsTileBg = tileBgDecks.has(deckType)
+
   if (!pos.faceUp) {
     const backPath = getCardBackPath(deckType)
+    if (backPath && needsTileBg) {
+      const inset = 3
+      return `<g${rot} data-card="Face down"><rect x="${x}" y="${y}" width="${cardW}" height="${cardH}" fill="#f0ede6" rx="4" stroke="#bbb" stroke-width="0.8"/><image href="${backPath}" x="${x + inset}" y="${y + inset}" width="${cardW - inset * 2}" height="${cardH - inset * 2}" preserveAspectRatio="xMidYMid meet"/></g>`
+    }
     if (backPath) {
       return `<g${rot} data-card="Face down"><image href="${backPath}" x="${x}" y="${y}" width="${cardW}" height="${cardH}" preserveAspectRatio="xMidYMid meet"/></g>`
     }
@@ -1883,6 +1967,10 @@ function renderCard(pos, cardW, cardH, pad, deckType) {
   const imgPath = getCardImagePath(card, deckType)
 
   if (imgPath) {
+    if (needsTileBg) {
+      const inset = 3
+      return `<g${rot} data-card="${cardLabel}"><rect x="${x}" y="${y}" width="${cardW}" height="${cardH}" fill="#f0ede6" rx="4" stroke="#bbb" stroke-width="0.8"/><image href="${imgPath}" x="${x + inset}" y="${y + inset}" width="${cardW - inset * 2}" height="${cardH - inset * 2}" preserveAspectRatio="xMidYMid meet"/></g>`
+    }
     return `<g${rot} data-card="${cardLabel}"><image href="${imgPath}" x="${x}" y="${y}" width="${cardW}" height="${cardH}" preserveAspectRatio="xMidYMid meet"/></g>`
   }
 
@@ -1893,6 +1981,270 @@ function renderCard(pos, cardW, cardH, pad, deckType) {
   parts.push(`<text x="${x + cardW / 2}" y="${y + cardH / 2 + fs * 0.35}" text-anchor="middle" font-size="${fs}" fill="#333" font-family="system-ui">${card.display || '?'}</text>`)
   parts.push('</g>')
   return parts.join('')
+}
+
+function renderMahjongSvg(dealResult, opts) {
+  const { deckType, deckConfig, variantDef, seed, tileSet } = opts
+  const tileW = 30
+  const tileH = 40
+  const tileGap = 2
+  const stackOffset = 3
+  const pad = 20
+  const outerPad = 20
+
+  const wallTiles = dealResult.drawPile.length
+  const totalStacks = Math.ceil(wallTiles / 2)
+  const stacksPerSide = Math.ceil(totalStacks / 4)
+  const step = tileW + tileGap
+  const wallLen = stacksPerSide * step
+  const wallSquare = wallLen + 2 * tileH
+
+  const handSize = Math.max(...dealResult.hands.map(h => h.length))
+  const handLen = handSize * step
+  const totalSize = Math.max(wallSquare + 140, handLen + 2 * (pad + tileH) + 40)
+
+  const w = totalSize + outerPad * 2
+  const h = w
+
+  const parts = []
+  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">`)
+  parts.push(`<style>svg text{pointer-events:none;cursor:default}[data-card],[data-zone]{cursor:pointer}</style>`)
+  parts.push(`<rect width="${w}" height="${h}" fill="#1b5e3a" rx="16"/>`)
+  parts.push(`<rect x="${outerPad}" y="${outerPad}" width="${totalSize}" height="${totalSize}" fill="#2d7a4f" rx="12" stroke="#1a4a2e" stroke-width="2"/>`)
+  parts.push(`<g transform="translate(${outerPad},${outerPad})">`)
+
+  const cx = totalSize / 2
+  const cy = totalSize / 2
+  const halfSquare = wallSquare / 2
+
+  const breakPoint = (seed % totalStacks)
+  const windNames = ['South', 'East', 'North', 'West']
+
+  let stackCount = 0
+  for (let side = 0; side < 4; side++) {
+    const sideStacks = Math.min(stacksPerSide, totalStacks - stackCount)
+    const tilesOnSide = Math.min(sideStacks * 2, wallTiles - stackCount * 2)
+    const isLiveEnd = breakPoint >= stackCount && breakPoint < stackCount + sideStacks
+    const startIdx = stackCount
+    const zoneLabel = `Wall — ${windNames[side]} side · ${tilesOnSide} tiles (${sideStacks} stacks of 2)${isLiveEnd ? ' · draw from here' : ''}`
+    parts.push(`<g data-zone="${zoneLabel}">`)
+
+    for (let i = 0; i < sideStacks; i++) {
+      const globalIdx = startIdx + i
+      const remaining = wallTiles - globalIdx * 2
+      const height = Math.min(2, remaining)
+      let tx, ty, rw, rh
+
+      // Four equal-length walls, each centred on its side, small corner gaps
+      const half = wallLen / 2
+      const inset = half + tileH
+      if (side === 0) {
+        tx = cx - half + i * step
+        ty = cy + inset - tileH
+        rw = tileW; rh = tileH
+      } else if (side === 1) {
+        tx = cx + inset - tileH
+        ty = cy + half - (i + 1) * step
+        rw = tileH; rh = tileW
+      } else if (side === 2) {
+        tx = cx + half - (i + 1) * step
+        ty = cy - inset
+        rw = tileW; rh = tileH
+      } else {
+        tx = cx - inset
+        ty = cy - half + i * step
+        rw = tileH; rh = tileW
+      }
+
+      const soX = side === 1 ? -stackOffset : side === 3 ? stackOffset : 0
+      const soY = side === 0 ? -stackOffset : side === 2 ? stackOffset : 0
+      parts.push(`<g data-card="Stack ${globalIdx + 1} · ${height} tile${height > 1 ? 's' : ''} high${globalIdx === breakPoint ? ' · BREAK' : ''}">`)
+      if (height === 2) {
+        parts.push(`<rect x="${tx + soX}" y="${ty + soY}" width="${rw}" height="${rh}" fill="#d4c9a8" rx="3" stroke="#a89060" stroke-width="0.5"/>`)
+      }
+      parts.push(`<rect x="${tx}" y="${ty}" width="${rw}" height="${rh}" fill="#f0ede6" rx="3" stroke="#bbb" stroke-width="0.6"/>`)
+      if (globalIdx === breakPoint) {
+        parts.push(`<rect x="${tx}" y="${ty}" width="${rw}" height="${rh}" fill="none" rx="3" stroke="#ffcc00" stroke-width="1.5"/>`)
+      }
+      parts.push('</g>')
+    }
+    parts.push('</g>')
+    stackCount += sideStacks
+  }
+
+  const playerLabels = ['South (you)', 'East', 'North', 'West']
+  for (let p = 0; p < 4; p++) {
+    const hand = dealResult.hands[p]
+    const faceUp = p === 0
+    const label = playerLabels[p]
+    const zoneDesc = faceUp ? `${label} — ${hand.length} tiles (visible)` : `${label} — ${hand.length} tiles (hidden)`
+    parts.push(`<g data-zone="${zoneDesc}">`)
+
+    for (let i = 0; i < hand.length; i++) {
+      const card = hand[i]
+      const cardLabel = faceUp ? (card.display || card.id) : 'Face down'
+      let tx, ty
+
+      if (p === 0) {
+        tx = cx - (hand.length * (tileW + tileGap)) / 2 + i * (tileW + tileGap)
+        ty = totalSize - pad - tileH
+      } else if (p === 1) {
+        tx = totalSize - pad - tileH
+        ty = cy + (hand.length * (tileW + tileGap)) / 2 - (i + 1) * (tileW + tileGap)
+      } else if (p === 2) {
+        tx = cx + (hand.length * (tileW + tileGap)) / 2 - (i + 1) * (tileW + tileGap)
+        ty = pad
+      } else {
+        tx = pad
+        ty = cy - (hand.length * (tileW + tileGap)) / 2 + i * (tileW + tileGap)
+      }
+
+      const isVertical = p === 1 || p === 3
+      const rw = isVertical ? tileH : tileW
+      const rh = isVertical ? tileW : tileH
+
+      if (faceUp) {
+        const imgPath = getCardImagePath(card, deckType, { tileSet })
+        const inset = 2
+        parts.push(`<g data-card="${cardLabel}"><rect x="${tx}" y="${ty}" width="${rw}" height="${rh}" fill="#f0ede6" rx="4" stroke="#bbb" stroke-width="0.8"/><image href="${imgPath}" x="${tx + inset}" y="${ty + inset}" width="${rw - inset * 2}" height="${rh - inset * 2}" preserveAspectRatio="xMidYMid meet"/></g>`)
+      } else {
+        parts.push(`<g data-card="${cardLabel}"><rect x="${tx}" y="${ty}" width="${rw}" height="${rh}" fill="#f0ede6" rx="4" stroke="#bbb" stroke-width="0.8"/><rect x="${tx + 2}" y="${ty + 2}" width="${rw - 4}" height="${rh - 4}" fill="#c8a96e" rx="2" opacity="0.4"/></g>`)
+      }
+    }
+
+    const labelPositions = [
+      { x: cx, y: totalSize - 4, anchor: 'middle' },
+      { x: totalSize - 4, y: cy, anchor: 'middle', rotate: true },
+      { x: cx, y: 12, anchor: 'middle' },
+      { x: 12, y: cy, anchor: 'middle', rotate: true },
+    ]
+    const lp = labelPositions[p]
+    const rotAttr = lp.rotate ? ` transform="rotate(-90 ${lp.x} ${lp.y})"` : ''
+    parts.push(`<text x="${lp.x}" y="${lp.y}" text-anchor="${lp.anchor}" font-size="10" fill="rgba(255,255,255,0.5)" font-family="system-ui"${rotAttr}>${label} (${hand.length})</text>`)
+    parts.push('</g>')
+  }
+
+  parts.push('</g>')
+  parts.push(`<text x="${w / 2}" y="${h - 6}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.3)" font-family="system-ui">${deckConfig.label} · ${variantDef.label} · seed: ${seed}</text>`)
+  parts.push('</svg>')
+
+  showSvg(parts.join('\n'))
+  showInfo({
+    deckType,
+    seed,
+    players: 4,
+    label: variantDef.label,
+    setupDesc: variantDef.setupDesc,
+    variantDesc: variantDef.variantDesc,
+    wall: `${wallTiles} tiles (${totalStacks} stacks), break at stack ${breakPoint + 1}`,
+    tilesPerHand: dealResult.hands[0]?.length || 0,
+  })
+  bindDeckHover()
+  requestAnimationFrame(fitToView)
+}
+
+function renderTableauSvg(dealResult, opts) {
+  const { deckType, deckConfig, variantDef, seed } = opts
+  const cardW = 44
+  const cardH = 64
+  const colGap = 6
+  const cascadeStep = 18
+  const pad = 20
+
+  const numCols = dealResult.tableau.length
+  const maxCascade = Math.max(...dealResult.tableau.map(col => col.length))
+  const tableauW = numCols * (cardW + colGap) - colGap
+  const tableauH = cardH + (maxCascade - 1) * cascadeStep
+
+  const foundationY = pad
+  const tableauY = foundationY + cardH + 20
+  const totalW = tableauW + pad * 2
+  const totalH = tableauY + tableauH + pad + 20
+  const tableauX = pad
+
+  const outerPad = 20
+  const w = totalW + outerPad * 2
+  const h = totalH + outerPad * 2
+
+  const parts = []
+  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">`)
+  parts.push(`<style>svg text{pointer-events:none;cursor:default}[data-card],[data-zone]{cursor:pointer}</style>`)
+  parts.push(`<rect width="${w}" height="${h}" fill="#1b5e3a" rx="16"/>`)
+  parts.push(`<rect x="${outerPad}" y="${outerPad}" width="${totalW}" height="${totalH}" fill="#2d7a4f" rx="12" stroke="#1a4a2e" stroke-width="2"/>`)
+  parts.push(`<g transform="translate(${outerPad},${outerPad})">`)
+
+  const suitNames = ['Spades', 'Hearts', 'Clubs', 'Diamonds']
+  const suitSymbols = ['♠', '♥', '♣', '♦']
+  const foundationX = totalW - 4 * (cardW + colGap) - pad + colGap
+  for (let f = 0; f < 4; f++) {
+    const fx = foundationX + f * (cardW + colGap)
+    parts.push(`<g data-zone="Foundation — ${suitNames[f]} (build A→K)">`)
+    parts.push(`<rect x="${fx}" y="${foundationY}" width="${cardW}" height="${cardH}" fill="rgba(0,0,0,0.01)" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" rx="3" stroke-dasharray="4 2"/>`)
+    parts.push(`<text x="${fx + cardW / 2}" y="${foundationY + cardH / 2 + 5}" text-anchor="middle" font-size="14" fill="rgba(255,255,255,0.2)">${suitSymbols[f]}</text>`)
+    parts.push('</g>')
+  }
+
+  const drawCount = dealResult.drawPile.length
+  const drawX = pad
+  const backPath = getCardBackPath(deckType)
+  parts.push(`<g data-zone="Stock — ${drawCount} cards (face down)">`)
+  if (backPath) {
+    parts.push(`<image href="${backPath}" x="${drawX}" y="${foundationY}" width="${cardW}" height="${cardH}" preserveAspectRatio="xMidYMid meet"/>`)
+  } else {
+    parts.push(`<rect x="${drawX}" y="${foundationY}" width="${cardW}" height="${cardH}" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1"/>`)
+  }
+  parts.push(`<text x="${drawX + cardW / 2}" y="${foundationY + cardH / 2 + 4}" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.85)" font-weight="bold">${drawCount}</text>`)
+  parts.push('</g>')
+
+  const wasteX = drawX + cardW + colGap
+  parts.push(`<g data-zone="Waste — draw cards here (empty at start)">`)
+  parts.push(`<rect x="${wasteX}" y="${foundationY}" width="${cardW}" height="${cardH}" fill="rgba(0,0,0,0.01)" stroke="rgba(255,255,255,0.2)" stroke-width="1" rx="3" stroke-dasharray="3 2"/>`)
+  parts.push(`<text x="${wasteX + cardW / 2}" y="${foundationY + cardH / 2 + 4}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.2)">waste</text>`)
+  parts.push('</g>')
+
+  for (let col = 0; col < numCols; col++) {
+    const colCards = dealResult.tableau[col]
+    const cx = tableauX + col * (cardW + colGap)
+    parts.push(`<g data-zone="Column ${col + 1} — ${colCards.length} cards">`)
+    for (let row = 0; row < colCards.length; row++) {
+      const card = colCards[row]
+      const cy = tableauY + row * cascadeStep
+      const cardLabel = card.faceUp ? (card.display || card.id) : 'Face down'
+      if (card.faceUp) {
+        const imgPath = getCardImagePath(card, deckType)
+        if (imgPath) {
+          parts.push(`<g data-card="${cardLabel}"><image href="${imgPath}" x="${cx}" y="${cy}" width="${cardW}" height="${cardH}" preserveAspectRatio="xMidYMid meet"/></g>`)
+        } else {
+          parts.push(`<g data-card="${cardLabel}"><rect x="${cx}" y="${cy}" width="${cardW}" height="${cardH}" fill="#fff" rx="3" stroke="#ccc" stroke-width="0.5"/><text x="${cx + cardW / 2}" y="${cy + cardH / 2 + 4}" text-anchor="middle" font-size="10" fill="#333" font-family="system-ui">${card.display || '?'}</text></g>`)
+        }
+      } else {
+        if (backPath) {
+          parts.push(`<g data-card="${cardLabel}"><image href="${backPath}" x="${cx}" y="${cy}" width="${cardW}" height="${cardH}" preserveAspectRatio="xMidYMid meet"/></g>`)
+        } else {
+          parts.push(`<rect x="${cx}" y="${cy}" width="${cardW}" height="${cardH}" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="${cardLabel}"/>`)
+        }
+      }
+    }
+    parts.push('</g>')
+  }
+
+  parts.push('</g>')
+  parts.push(`<text x="${w / 2}" y="${h - 6}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.3)" font-family="system-ui">${deckConfig.label} · ${variantDef.label} · seed: ${seed}</text>`)
+  parts.push('</svg>')
+
+  showSvg(parts.join('\n'))
+  showInfo({
+    deckType,
+    seed,
+    players: 1,
+    label: variantDef.label,
+    setupDesc: variantDef.setupDesc,
+    variantDesc: variantDef.variantDesc,
+    tableau: dealResult.tableau.map(col => col.length).join(', '),
+    drawPile: dealResult.drawPile.length,
+  })
+  bindDeckHover()
+  requestAnimationFrame(fitToView)
 }
 
 async function loadBoardDataAndRender(game, variantDef) {
@@ -1962,18 +2314,22 @@ function bindBoardHover(config) {
     man: 'Man', king: 'King', stone: 'Stone', piece: 'Disc',
   }
 
+  const pieceNameOverrides = config.pieceNames || {}
+  const centreMarker = config.centreMarker || null
+
   svgContainer.addEventListener('mouseover', e => {
     const cell = e.target.closest('.board-cell')
     if (!cell) return
     const sq = cell.dataset.sq
     const type = cell.dataset.type || ''
     let text = sq
-    if (type && type !== 'floor') text += ` [${type}]`
+    if (centreMarker && sq === '0,0') text += ' [Throne]'
+    else if (type && type !== 'floor') text += ` [${type}]`
     const piece = position[sq]
     if (piece) {
       const p = typeof piece === 'object' ? piece : { type: String(piece) }
       const color = p.color ? p.color : (p.type === p.type.toUpperCase() ? 'White' : 'Black')
-      const name = PIECE_NAMES[p.type] || p.type
+      const name = pieceNameOverrides[p.type] || PIECE_NAMES[p.type] || p.type
       text += ` — ${color} ${name}`
     }
     if (sq.startsWith('h') && type.startsWith('arm-')) {

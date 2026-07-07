@@ -86,6 +86,6 @@ registerDeck('hanafuda-48', {
   games: {
     'koi-koi': { minPlayers: 2, maxPlayers: 2, defaultPlayers: 2, perPlayer: 8, community: 8, remainder: 'draw' },
     'hana-awase': { minPlayers: 2, maxPlayers: 4, defaultPlayers: 3, perPlayer: 7, community: 6, remainder: 'draw' },
-    'oicho-kabu': { minPlayers: 2, maxPlayers: 8, defaultPlayers: 4, perPlayer: 0, community: 0, remainder: 'draw' },
+    'oicho-kabu': { minPlayers: 2, maxPlayers: 8, defaultPlayers: 4, perPlayer: 2, community: 0, remainder: 'draw' },
   },
 })

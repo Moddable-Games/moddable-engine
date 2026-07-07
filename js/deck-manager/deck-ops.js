@@ -20,7 +20,12 @@ export function shuffle(cards, seed) {
 }
 
 export function deal(cards, dealSpec) {
-  const { players, perPlayer, community = 0, remainder = 'draw' } = dealSpec
+  const { players, perPlayer, community = 0, remainder = 'draw', layout, tableau } = dealSpec
+
+  if (layout === 'tableau' && tableau) {
+    return dealTableau(cards, tableau)
+  }
+
   const result = {
     hands: Array.from({ length: players }, () => []),
     community: [],
@@ -57,5 +62,32 @@ export function deal(cards, dealSpec) {
     result.drawPile = cards.slice(idx)
   }
 
+  return result
+}
+
+function dealTableau(cards, tableau) {
+  const { columns, cascade } = tableau
+  const result = {
+    tableau: Array.from({ length: columns }, () => []),
+    foundations: [],
+    drawPile: [],
+    layout: 'tableau',
+  }
+
+  let idx = 0
+  for (let col = 0; col < columns; col++) {
+    const count = cascade[col]
+    for (let row = 0; row < count; row++) {
+      if (idx < cards.length) {
+        const card = cards[idx++]
+        result.tableau[col].push({
+          ...card,
+          faceUp: row === count - 1,
+        })
+      }
+    }
+  }
+
+  result.drawPile = cards.slice(idx)
   return result
 }

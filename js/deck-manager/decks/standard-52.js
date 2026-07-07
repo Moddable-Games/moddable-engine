@@ -49,7 +49,7 @@ registerDeck('standard-52', {
     'euchre': { minPlayers: 4, maxPlayers: 4, defaultPlayers: 4, perPlayer: 5, community: 0, remainder: 'draw' },
     'gin-rummy': { minPlayers: 2, maxPlayers: 2, defaultPlayers: 2, perPlayer: 10, community: 0, remainder: 'draw' },
     'hearts': { minPlayers: 3, maxPlayers: 6, defaultPlayers: 4, perPlayer: 'all', community: 0 },
-    'klondike': { minPlayers: 1, maxPlayers: 1, defaultPlayers: 1, perPlayer: 28, community: 0, remainder: 'draw' },
+    'klondike': { minPlayers: 1, maxPlayers: 1, defaultPlayers: 1, layout: 'tableau', tableau: { columns: 7, cascade: [1, 2, 3, 4, 5, 6, 7] }, community: 0, remainder: 'draw' },
     'spades': { minPlayers: 4, maxPlayers: 4, defaultPlayers: 4, perPlayer: 13, community: 0 },
   },
 })

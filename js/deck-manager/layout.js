@@ -93,6 +93,7 @@ export function layoutTable(dealResult, tableSpec) {
   const layout = { hands: [], community: null, drawPile: null }
 
   dealResult.hands.forEach((hand, i) => {
+    if (hand.length === 0) return
     const pos = positions[i]
     layout.hands.push({
       player: i,

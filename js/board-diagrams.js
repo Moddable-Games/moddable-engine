@@ -591,6 +591,12 @@ const hex = {
       parts.push(`<polygon points="${points}" fill="${fill}" stroke="${colors.stroke}" stroke-width="1" data-sq="${h.q},${h.r}" class="board-cell"/>`)
     }
 
+    if (opts.centreMarker) {
+      const p = flat ? axialToPixelFlat(0, 0, size) : axialToPixelPointy(0, 0, size)
+      const cx = oX + p.x, cy = oY + p.y
+      parts.push(`<text x="${cx}" y="${cy + size * 0.3}" text-anchor="middle" font-size="${size * 0.8}" fill="rgba(255,200,50,0.85)" pointer-events="none">${opts.centreMarker}</text>`)
+    }
+
     if (opts.hexPosition && opts.pieceImages) {
       parts.push(`<g pointer-events="none">`)
       for (const [key, piece] of Object.entries(opts.hexPosition)) {
@@ -1884,7 +1890,16 @@ function renderPieces(position, provider, ctx, colors) {
 
     if (pieceImages[imageKey]) {
       const x = pos.x - tileSize / 2, y = pos.y - tileSize / 2
-      parts.push(`<image href="${pieceImages[imageKey]}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" pointer-events="none"/>`)
+      if (opts.pieceBorders) {
+        const isUpper = piece.type === piece.type.toUpperCase()
+        const borderColor = isUpper ? (opts.pieceBorders.white || '#1565c0') : (opts.pieceBorders.black || '#c62828')
+        const discR = tileSize * 0.44
+        parts.push(`<circle cx="${pos.x}" cy="${pos.y}" r="${discR}" fill="${borderColor}" stroke="rgba(0,0,0,0.3)" stroke-width="1" pointer-events="none"/>`)
+        const imgSize = tileSize * 0.7
+        parts.push(`<image href="${pieceImages[imageKey]}" x="${pos.x - imgSize / 2}" y="${pos.y - imgSize / 2}" width="${imgSize}" height="${imgSize}" pointer-events="none"/>`)
+      } else {
+        parts.push(`<image href="${pieceImages[imageKey]}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" pointer-events="none"/>`)
+      }
     } else if (piece.type === 'stone') {
       parts.push(drawStone(piece, pos.x, pos.y, tileSize * 0.42, colors))
     } else if (piece.type === 'man' || piece.type === 'king') {
