@@ -872,7 +872,7 @@ const hex = {
     const hexes = this._getHexes(opts)
     const size = opts.hexSize || opts.tileSize || 30
     const flat = opts.flat || false
-    const pad = opts.hexFrame ? size * 1.4 : size + 10
+    const pad = opts.hexFrame ? size * 1.8 : size + 10
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
     for (const h of hexes) {
       const p = flat ? axialToPixelFlat(h.q, h.r, size) : axialToPixelPointy(h.q, h.r, size)
@@ -907,7 +907,7 @@ const hex = {
     } else {
       const borderEdges = computeHexBorderEdges(hexes, size, flat, oX, oY, 1.05)
       const borderColor = colors.border || '#6b4226'
-      parts.push(`<g fill="none" stroke="${borderColor}" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">`)
+      parts.push(`<g fill="none" stroke="${borderColor}" stroke-width="14" stroke-linecap="square" stroke-linejoin="miter">`)
       for (const [a, b] of borderEdges) {
         parts.push(`<line x1="${a.x.toFixed(2)}" y1="${a.y.toFixed(2)}" x2="${b.x.toFixed(2)}" y2="${b.y.toFixed(2)}"/>`)
       }
