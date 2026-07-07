@@ -673,14 +673,46 @@ const asalto = {
 
     parts.push(`<rect x="${ox}" y="${oy}" width="${size}" height="${size}" fill="${colors.background}" rx="4"/>`)
 
-    // Fortress highlight — convex hull of fortress nodes only (follows node lines exactly)
+    // Fortress highlight — main rectangle + ear triangles (each follows node lines)
     const fNodes = [...fortressNodes].map(i => nodes[i])
     if (fNodes.length > 0) {
-      // Compute convex hull
+      const gridDef = opts.asaltoGrid || { rows: [[2,3,4],[2,3,4],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[2,3,4],[2,3,4]], fortressRows: 2 }
+      const hasEars = gridDef.extraNodes && gridDef.extraNodes.some(n => n.fortress)
+      // Main body: the grid-row fortress nodes (excluding extras)
+      const bodyNodes = fNodes.filter(n => {
+        if (!hasEars) return true
+        const extras = gridDef.extraNodes.filter(e => e.fortress)
+        return !extras.some(e => {
+          const ex = nodes[nodes.length - gridDef.extraNodes.length + gridDef.extraNodes.indexOf(e)]
+          return Math.abs(n.x - ex.x) < 0.1 && Math.abs(n.y - ex.y) < 0.1
+        })
+      })
+      const bx = Math.min(...bodyNodes.map(n => n.x))
+      const by = Math.min(...bodyNodes.map(n => n.y))
+      const bw = Math.max(...bodyNodes.map(n => n.x)) - bx
+      const bh = Math.max(...bodyNodes.map(n => n.y)) - by
+      parts.push(`<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="${colors.fortress}" stroke="none"/>`)
+      // Ear triangles
+      if (hasEars) {
+        const extras = gridDef.extraNodes.filter(e => e.fortress)
+        const totalNodes = nodes.length
+        const extraStart = totalNodes - gridDef.extraNodes.length
+        for (const e of extras) {
+          const eIdx = gridDef.extraNodes.indexOf(e)
+          const ear = nodes[extraStart + eIdx]
+          // Each ear connects to two body nodes — draw triangle
+          const targets = e.connectsTo.map(t => nodes[nodeMap[`${t[0]},${t[1]}`]])
+          if (targets.length >= 2) {
+            const tri = `${ear.x},${ear.y} ${targets[0].x},${targets[0].y} ${targets[1].x},${targets[1].y}`
+            parts.push(`<polygon points="${tri}" fill="${colors.fortress}" stroke="none"/>`)
+          }
+        }
+      }
+      // Stroke the outer boundary
       const pts = fNodes.map(n => [n.x, n.y])
       const hull = convexHull(pts)
-      const points = hull.map(p => `${p[0]},${p[1]}`).join(' ')
-      parts.push(`<polygon points="${points}" fill="${colors.fortress}" stroke="${colors.fortressBorder}" stroke-width="2"/>`)
+      const outline = hull.map(p => `${p[0]},${p[1]}`).join(' ')
+      parts.push(`<polygon points="${outline}" fill="none" stroke="${colors.fortressBorder}" stroke-width="2"/>`)
     }
 
     // Draw edges
