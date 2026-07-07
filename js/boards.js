@@ -196,9 +196,9 @@ const JUNGLE_COLORS = {
 
 function generateTriangularHexGrid(sideLength) {
   const hexes = []
-  for (let r = 0; r < sideLength; r++) {
-    for (let q = 0; q <= r; q++) {
-      hexes.push({ q, r })
+  for (let row = 0; row < sideLength; row++) {
+    for (let i = 0; i <= row; i++) {
+      hexes.push({ q: -row + i, r: row })
     }
   }
   return hexes
