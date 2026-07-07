@@ -635,6 +635,19 @@ const asalto = {
       }
     }
 
+    // Extra nodes with explicit connections (e.g. fortress ears)
+    if (gridDef.extraNodes) {
+      for (const extra of gridDef.extraNodes) {
+        const idx = nodes.length
+        nodes.push({ x: xOffset + extra.col * spacing, y: yOffset + extra.row * spacing })
+        if (extra.fortress) fortressNodes.add(idx)
+        for (const target of extra.connectsTo) {
+          const tIdx = nodeMap[`${target[0]},${target[1]}`]
+          if (tIdx !== undefined) edges.push([idx, tIdx])
+        }
+      }
+    }
+
     return { nodes, edges, fortressNodes, nodeMap }
   },
   render(ctx) {
