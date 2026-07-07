@@ -945,6 +945,15 @@ const GAMES = {
   nyout: {
     label: 'Nyout',
     pieceSet: null,
+    nodeNames: {
+      n1: 'cham-meoki (start)', n2: 'nal-yut', n3: 'nal-geol', n4: 'nal-gae', n5: 'nal-do',
+      n6: 'chi-mo', n7: 'chi-yut', n8: 'chi-geol', n9: 'chi-gae', n10: 'chi-do',
+      n11: 'duet-mo (busan)', n12: 'duet-yut', n13: 'duet-geol', n14: 'duet-gae', n15: 'duet-mo',
+      n16: 'mo', n17: 'yut', n18: 'geol', n19: 'gae', n20: 'do',
+      n21: 'bang (seoul)', n22: 'duet-modo', n23: 'duet-mogae',
+      n24: 'saryeo', n25: 'anchi',
+      n26: 'mo-do', n27: 'mo-gae', n28: 'sok-yut', n29: 'sok-mo',
+    },
     variants: {
       standard: { label: 'Standard', boardStyle: 'nyout', boardSize: 320, setupDesc: '4 tokens per player, 29-position circular track', variantDesc: 'Korean stick-throwing race. Circular track with shortcut branches. Throw 4 sticks for movement. Capture by landing on opponent.' },
     },
@@ -1621,6 +1630,9 @@ function render() {
     }
     config.asaltoNotation = rowStrs.join('/')
   }
+
+  // Pass node names from game definition into config for hover display
+  if (game.nodeNames) config.nodeNames = game.nodeNames
 
   // Build piece image paths and surface map
   if (game.pieceSet) {
@@ -2355,6 +2367,7 @@ function bindBoardHover(config) {
 
   const pieceNameOverrides = config.pieceNames || {}
   const centreMarker = config.centreMarker || null
+  const nodeNames = config.nodeNames || null
 
   const layerLabels = config.layers && config.layers.labels || null
 
@@ -2369,7 +2382,8 @@ function bindBoardHover(config) {
       text += ` · ${layerLabels[parseInt(layer)]}`
     }
     if (centreMarker && sq === '0,0') text += ' [Throne]'
-    else if (type && type !== 'floor') text += ` [${type}]`
+    else if (type && type !== 'floor' && !(nodeNames && nodeNames[sq])) text += ` [${type}]`
+    if (nodeNames && nodeNames[sq]) text += ` — ${nodeNames[sq]}`
     const layerPositions = config.layerPositions || null
     const piece = (layer !== undefined && layerPositions) ? layerPositions[parseInt(layer)]?.[sq] : position[sq]
     if (piece) {
