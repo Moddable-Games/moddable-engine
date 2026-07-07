@@ -914,8 +914,8 @@ const GAMES = {
     label: 'Asalto',
     pieceSet: null,
     variants: {
-      standard: { label: 'Standard', boardStyle: 'asalto', boardSize: 320, asaltoSetup: { officers: [3, 5], soldiers: Array.from({ length: 34 }, (_, i) => i + 9) }, setupDesc: '2 Officers in fortress vs 34 Soldiers on plain', variantDesc: 'Asymmetric siege. Officers jump-capture like draughts; Soldiers advance forward/sideways. Immobilize to win.' },
-      'royal-garrison': { label: 'Royal Garrison', boardStyle: 'asalto', boardSize: 320, asaltoSetup: { officers: [3, 4, 5], soldiers: Array.from({ length: 34 }, (_, i) => i + 9) }, setupDesc: '3 Officers in larger fortress vs 50 Soldiers', variantDesc: 'Extended Asalto. Three Officers defend a larger fortress against 50 Soldiers.' },
+      standard: { label: 'Standard', boardStyle: 'asalto', boardSize: 320, asaltoSetup: { officers: [6, 8], soldiers: Array.from({ length: 24 }, (_, i) => i + 9) }, setupDesc: '2 Officers in fortress vs 24 Soldiers on plain', variantDesc: 'Asymmetric siege. Officers jump-capture like draughts; Soldiers advance forward/sideways. Immobilize to win.' },
+      'royal-garrison': { label: 'Royal Garrison', boardStyle: 'asalto', boardSize: 320, asaltoSetup: { officers: [6, 7, 8], soldiers: Array.from({ length: 24 }, (_, i) => i + 9) }, setupDesc: '3 Officers in larger fortress vs 24 Soldiers', variantDesc: 'Extended Asalto. Three Officers defend a larger fortress against Soldiers.' },
     },
   },
   'bavarian-32': {

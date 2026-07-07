@@ -567,52 +567,50 @@ const asalto = {
     return { boardW: size, boardH: size }
   },
   getNodes(size, ox, oy) {
-    // Cross-shaped board: fortress (3×3 top) + plain (7-wide middle + 3-wide bottom arm)
-    // 43 total positions matching reference images
+    // Standard Asalto cross: 33 positions
+    // Rows 0-2: 3 cols (fortress), rows 3-5: 5 cols (plain wide), rows 6-8: 3 cols (plain bottom)
     const nodes = []
     const edges = []
     const fortressNodes = new Set()
 
-    const spacing = size / 10
-    const topMargin = spacing * 0.8
-    const leftMargin = (size - 6 * spacing) / 2
+    // 9 rows (0-8), 5 cols (0-4). Spacing must fit all within size.
+    const margin = size * 0.08
+    const usable = size - margin * 2
+    const spacing = usable / 8  // 8 gaps for 9 rows; also 4 gaps for 5 cols
+    const xOffset = ox + (size - 4 * spacing) / 2
+    const yOffset = oy + margin
 
-    // Define which columns exist per row
     const rowDefs = [
-      { cols: [2, 3, 4], y: 0 },          // fortress row 0
-      { cols: [2, 3, 4], y: 1 },          // fortress row 1
-      { cols: [2, 3, 4], y: 2 },          // fortress row 2 / junction
-      { cols: [0, 1, 2, 3, 4, 5, 6], y: 3 }, // plain wide
-      { cols: [0, 1, 2, 3, 4, 5, 6], y: 4 },
-      { cols: [0, 1, 2, 3, 4, 5, 6], y: 5 },
-      { cols: [0, 1, 2, 3, 4, 5, 6], y: 6 },
-      { cols: [2, 3, 4], y: 7 },          // plain bottom arm
-      { cols: [2, 3, 4], y: 8 },
+      { cols: [1, 2, 3], y: 0 },
+      { cols: [1, 2, 3], y: 1 },
+      { cols: [1, 2, 3], y: 2 },
+      { cols: [0, 1, 2, 3, 4], y: 3 },
+      { cols: [0, 1, 2, 3, 4], y: 4 },
+      { cols: [0, 1, 2, 3, 4], y: 5 },
+      { cols: [1, 2, 3], y: 6 },
+      { cols: [1, 2, 3], y: 7 },
+      { cols: [1, 2, 3], y: 8 },
     ]
 
-    // Build node positions
-    const nodeMap = {} // "row,col" → index
+    const nodeMap = {}
     for (const row of rowDefs) {
       for (const col of row.cols) {
-        const x = ox + leftMargin + col * spacing
-        const y = oy + topMargin + row.y * spacing
         const idx = nodes.length
         nodeMap[`${row.y},${col}`] = idx
-        nodes.push({ x, y })
+        nodes.push({ x: xOffset + col * spacing, y: yOffset + row.y * spacing })
         if (row.y <= 2) fortressNodes.add(idx)
       }
     }
 
-    // Build edges: orthogonal connections between adjacent nodes in same row or column
+    // Horizontal edges
     for (const row of rowDefs) {
       for (let i = 0; i < row.cols.length - 1; i++) {
-        const c1 = row.cols[i], c2 = row.cols[i + 1]
-        if (c2 - c1 === 1) {
-          edges.push([nodeMap[`${row.y},${c1}`], nodeMap[`${row.y},${c2}`]])
+        if (row.cols[i + 1] - row.cols[i] === 1) {
+          edges.push([nodeMap[`${row.y},${row.cols[i]}`], nodeMap[`${row.y},${row.cols[i + 1]}`]])
         }
       }
     }
-    // Vertical connections
+    // Vertical edges
     for (let ri = 0; ri < rowDefs.length - 1; ri++) {
       const r1 = rowDefs[ri], r2 = rowDefs[ri + 1]
       for (const col of r1.cols) {
@@ -621,17 +619,13 @@ const asalto = {
         }
       }
     }
-    // Diagonal connections (both diagonals within each 2×2 cell)
+    // Diagonal edges: both diagonals within each cell (requires all 4 corners to exist)
     for (let ri = 0; ri < rowDefs.length - 1; ri++) {
       const r1 = rowDefs[ri], r2 = rowDefs[ri + 1]
       for (const col of r1.cols) {
-        // Down-right diagonal
-        if (r2.cols.includes(col + 1)) {
+        if (r1.cols.includes(col + 1) && r2.cols.includes(col) && r2.cols.includes(col + 1)) {
           edges.push([nodeMap[`${r1.y},${col}`], nodeMap[`${r2.y},${col + 1}`]])
-        }
-        // Down-left diagonal
-        if (r2.cols.includes(col - 1)) {
-          edges.push([nodeMap[`${r1.y},${col}`], nodeMap[`${r2.y},${col - 1}`]])
+          edges.push([nodeMap[`${r1.y},${col + 1}`], nodeMap[`${r2.y},${col}`]])
         }
       }
     }
@@ -647,14 +641,14 @@ const asalto = {
 
     parts.push(`<rect x="${ox}" y="${oy}" width="${size}" height="${size}" fill="${colors.background}" rx="4"/>`)
 
-    // Draw fortress background
+    // Fortress highlight — aligns with node positions (no extra padding)
     const fNodes = [...fortressNodes].map(i => nodes[i])
     if (fNodes.length > 0) {
-      const fx = Math.min(...fNodes.map(n => n.x)) - pointRadius * 2
-      const fy = Math.min(...fNodes.map(n => n.y)) - pointRadius * 2
-      const fw = Math.max(...fNodes.map(n => n.x)) - fx + pointRadius * 4
-      const fh = Math.max(...fNodes.map(n => n.y)) - fy + pointRadius * 4
-      parts.push(`<rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" fill="${colors.fortress}" stroke="${colors.fortressBorder}" stroke-width="1.5" rx="3"/>`)
+      const fx = Math.min(...fNodes.map(n => n.x))
+      const fy = Math.min(...fNodes.map(n => n.y))
+      const fw = Math.max(...fNodes.map(n => n.x)) - fx
+      const fh = Math.max(...fNodes.map(n => n.y)) - fy
+      parts.push(`<rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" fill="${colors.fortress}" stroke="${colors.fortressBorder}" stroke-width="2.5"/>`)
     }
 
     // Draw edges
