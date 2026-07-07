@@ -1,6 +1,8 @@
 // Board diagram generator — direct port of moddable-chess/js/svg-renderer.js + providers.
 // Produces identical output to the published rulebook SVGs.
 
+import { renderSurfaceSVG } from './piece-surface.js'
+
 // ─── PROVIDERS (ported verbatim from moddable-chess/js/svg-providers/) ──────
 
 const checkered = {
@@ -1890,13 +1892,14 @@ function renderPieces(position, provider, ctx, colors) {
 
     if (pieceImages[imageKey]) {
       const x = pos.x - tileSize / 2, y = pos.y - tileSize / 2
-      if (opts.pieceBorders) {
+      const surfaceMap = opts.pieceSurfaceMap || {}
+      const hasSurface = opts.pieceBorders || surfaceMap[imageKey]
+      if (hasSurface) {
         const isUpper = piece.type === piece.type.toUpperCase()
-        const borderColor = isUpper ? (opts.pieceBorders.white || '#1565c0') : (opts.pieceBorders.black || '#c62828')
-        const discR = tileSize * 0.44
-        parts.push(`<circle cx="${pos.x}" cy="${pos.y}" r="${discR}" fill="${borderColor}" stroke="rgba(0,0,0,0.3)" stroke-width="1" pointer-events="none"/>`)
-        const imgSize = tileSize * 0.7
-        parts.push(`<image href="${pieceImages[imageKey]}" x="${pos.x - imgSize / 2}" y="${pos.y - imgSize / 2}" width="${imgSize}" height="${imgSize}" pointer-events="none"/>`)
+        const owner = isUpper ? 'white' : 'black'
+        const surface = opts.pieceSurface && opts.pieceSurface.owners && opts.pieceSurface.owners[owner]
+        const ownerColors = surface || { fill: opts.pieceBorders && opts.pieceBorders[owner] || '#888', stroke: 'rgba(0,0,0,0.3)' }
+        parts.push(renderSurfaceSVG('disc', pos.x, pos.y, tileSize, ownerColors, pieceImages[imageKey]))
       } else {
         parts.push(`<image href="${pieceImages[imageKey]}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" pointer-events="none"/>`)
       }

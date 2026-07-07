@@ -183,6 +183,39 @@
   border-radius: 2px;
 }
 
+.piece-cell.has-surface .piece-surface-wrap {
+  position: relative;
+  width: var(--piece-size, 56px);
+  height: var(--piece-size, 56px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.piece-surface-disc {
+  position: absolute;
+  inset: 4%;
+  border-radius: 50%;
+  border: 2px solid;
+  box-sizing: border-box;
+}
+.piece-cell.has-surface img {
+  position: relative;
+  z-index: 1;
+  width: 65%;
+  height: 65%;
+  background: transparent;
+}
+
+.badge--virtual {
+  font-size: 10px;
+  padding: 1px 6px;
+  background: rgba(168, 85, 247, 0.15);
+  color: #a855f7;
+  border-radius: 3px;
+  font-weight: 500;
+  vertical-align: middle;
+}
+
 @media (max-width: 768px) {
   .control-row { flex-direction: column; gap: 10px; }
   .control-group input, .control-group select { min-width: 100%; }

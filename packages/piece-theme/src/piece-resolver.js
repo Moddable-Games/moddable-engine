@@ -1,28 +1,5 @@
-/**
- * Piece theme resolver.
- *
- * A piece set is a manifest declaring how to render each piece type for each
- * owner (player colour). The resolver takes (pieceType, owner) and returns
- * render data the renderer can consume.
- *
- * Manifest shape:
- * {
- *   id: 'classic',
- *   name: 'Classic Pieces',
- *   pieces: {
- *     stone: { element: 'circle', attrs: { r: 12 } },
- *     king:  { element: 'text', attrs: { 'font-size': 20 }, text: '♔' },
- *   },
- *   owners: {
- *     black: { fill: '#1c1c1c', stroke: '#000' },
- *     white: { fill: '#ffffff', stroke: '#666' },
- *   },
- *   fallback: { element: 'circle', attrs: { r: 10 } },
- * }
- */
-
 export function createPieceResolver(manifest, opts = {}) {
-  const { fallbackManifest = null } = opts
+  const { fallbackManifest = null, sourceManifests = {} } = opts
 
   function resolve(pieceType, owner) {
     const pieceDef = findPiece(pieceType)
@@ -32,7 +9,15 @@ export function createPieceResolver(manifest, opts = {}) {
 
   function findPiece(pieceType) {
     if (manifest.pieces && manifest.pieces[pieceType]) {
-      return manifest.pieces[pieceType]
+      const entry = manifest.pieces[pieceType]
+      if (entry.source && sourceManifests[entry.source]) {
+        const sourcePiece = sourceManifests[entry.source].pieces?.[entry.as || pieceType]
+        if (sourcePiece) return sourcePiece
+      }
+      return entry
+    }
+    for (const src of Object.values(sourceManifests)) {
+      if (src.pieces && src.pieces[pieceType]) return src.pieces[pieceType]
     }
     if (fallbackManifest && fallbackManifest.pieces && fallbackManifest.pieces[pieceType]) {
       return fallbackManifest.pieces[pieceType]
@@ -59,7 +44,11 @@ export function createPieceResolver(manifest, opts = {}) {
   }
 
   function listPieceTypes() {
-    return Object.keys(manifest.pieces || {})
+    const types = new Set(Object.keys(manifest.pieces || {}))
+    for (const src of Object.values(sourceManifests)) {
+      for (const key of Object.keys(src.pieces || {})) types.add(key)
+    }
+    return [...types]
   }
 
   function listOwners() {

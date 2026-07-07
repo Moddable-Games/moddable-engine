@@ -1634,6 +1634,47 @@
     }
   },
   {
+    "id": "mce-fairy-complete",
+    "name": "MCE Fairy Complete",
+    "family": "chess",
+    "author": "Moddable Games (composite)",
+    "license": "Mixed (see sources)",
+    "source": "https://github.com/Moddable-Games/moddable-engine",
+    "playable": true,
+    "recolorable": true,
+    "virtual": true,
+    "extends": "mce-chess",
+    "surface": {
+      "type": "disc",
+      "owners": {
+        "white": { "fill": "#f0f0f0", "stroke": "#999" },
+        "black": { "fill": "#2a2a2a", "stroke": "#555" }
+      }
+    },
+    "sources": {
+      "wikimedia-fairy": "../wikimedia-fairy/",
+      "wikimedia-standard": "../wikimedia-standard/",
+      "playstrategy-mono": "../playstrategy-mono/",
+      "twemoji": "../twemoji/"
+    },
+    "pieces": {
+      "wD": { "source": "wikimedia-fairy", "file": "White_dabbaba.svg" },
+      "bD": { "source": "wikimedia-fairy", "file": "Black_dabbaba.svg" },
+      "wJ": { "source": "wikimedia-fairy", "file": "White_chess_giraffe.svg" },
+      "bJ": { "source": "wikimedia-fairy", "file": "Black_chess_giraffe.svg" },
+      "wO": { "source": "twemoji", "file": "ogre.svg", "surface": "disc" },
+      "bO": { "source": "twemoji", "file": "ogre.svg", "surface": "disc" },
+      "wT": { "source": "playstrategy-mono", "file": "tower.svg" },
+      "bT": { "source": "playstrategy-mono", "file": "tower.svg" },
+      "wU": { "source": "wikimedia-standard", "file": "Chess_Ult45.svg" },
+      "bU": { "source": "wikimedia-standard", "file": "Chess_Udt45.svg" },
+      "wV": { "source": "playstrategy-mono", "file": "eagle.svg" },
+      "bV": { "source": "playstrategy-mono", "file": "eagle.svg" },
+      "wZ": { "source": "wikimedia-standard", "file": "Chess_Zlt45.svg" },
+      "bZ": { "source": "wikimedia-standard", "file": "Chess_Zdt45.svg" }
+    }
+  },
+  {
     "id": "mce-shogi",
     "name": "MCE Shogi (Original)",
     "family": "shogi",
@@ -4449,6 +4490,46 @@
       "September-Tanzaku": "Hanafuda_September_Tanzaku_Alt.svg",
       "blank-card": "Hanafuda_blank_card_Alt.svg",
       "card-back": "Hanafuda_card_back_Alt.svg"
+    }
+  },
+  {
+    "id": "mce-jungle",
+    "name": "MCE Jungle",
+    "family": "jungle",
+    "author": "Moddable Games (composite)",
+    "license": "CC-BY-4.0",
+    "source": "https://github.com/twitter/twemoji",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "playable": true,
+    "recolorable": false,
+    "virtual": true,
+    "sources": {
+      "twemoji": "../twemoji/"
+    },
+    "surface": {
+      "type": "disc",
+      "owners": {
+        "white": { "fill": "#bbdefb", "stroke": "#1565c0" },
+        "black": { "fill": "#ffcdd2", "stroke": "#c62828" }
+      }
+    },
+    "pieces": {
+      "wElephant": { "source": "twemoji", "file": "elephant.svg", "surface": "disc" },
+      "bElephant": { "source": "twemoji", "file": "elephant.svg", "surface": "disc" },
+      "wLion": { "source": "twemoji", "file": "lion.svg", "surface": "disc" },
+      "bLion": { "source": "twemoji", "file": "lion.svg", "surface": "disc" },
+      "wTiger": { "source": "twemoji", "file": "tiger.svg", "surface": "disc" },
+      "bTiger": { "source": "twemoji", "file": "tiger.svg", "surface": "disc" },
+      "wLeopard": { "source": "twemoji", "file": "leopard.svg", "surface": "disc" },
+      "bLeopard": { "source": "twemoji", "file": "leopard.svg", "surface": "disc" },
+      "wWolf": { "source": "twemoji", "file": "wolf.svg", "surface": "disc" },
+      "bWolf": { "source": "twemoji", "file": "wolf.svg", "surface": "disc" },
+      "wDog": { "source": "twemoji", "file": "dog.svg", "surface": "disc" },
+      "bDog": { "source": "twemoji", "file": "dog.svg", "surface": "disc" },
+      "wCat": { "source": "twemoji", "file": "cat.svg", "surface": "disc" },
+      "bCat": { "source": "twemoji", "file": "cat.svg", "surface": "disc" },
+      "wRat": { "source": "twemoji", "file": "rat.svg", "surface": "disc" },
+      "bRat": { "source": "twemoji", "file": "rat.svg", "surface": "disc" }
     }
   }
 ]

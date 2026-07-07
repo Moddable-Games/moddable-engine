@@ -1,0 +1,41 @@
+{
+  "id": "mce-fairy-complete",
+  "name": "MCE Fairy Complete",
+  "family": "chess",
+  "author": "Moddable Games (composite)",
+  "license": "Mixed (see sources)",
+  "source": "https://github.com/Moddable-Games/moddable-engine",
+  "playable": true,
+  "recolorable": true,
+  "virtual": true,
+  "extends": "mce-chess",
+  "surface": {
+    "type": "disc",
+    "owners": {
+      "white": { "fill": "#f0f0f0", "stroke": "#999" },
+      "black": { "fill": "#2a2a2a", "stroke": "#555" }
+    }
+  },
+  "sources": {
+    "wikimedia-fairy": "../wikimedia-fairy/",
+    "wikimedia-standard": "../wikimedia-standard/",
+    "playstrategy-mono": "../playstrategy-mono/",
+    "twemoji": "../twemoji/"
+  },
+  "pieces": {
+    "wD": { "source": "wikimedia-fairy", "file": "White_dabbaba.svg" },
+    "bD": { "source": "wikimedia-fairy", "file": "Black_dabbaba.svg" },
+    "wJ": { "source": "wikimedia-fairy", "file": "White_chess_giraffe.svg" },
+    "bJ": { "source": "wikimedia-fairy", "file": "Black_chess_giraffe.svg" },
+    "wO": { "source": "twemoji", "file": "ogre.svg", "surface": "disc" },
+    "bO": { "source": "twemoji", "file": "ogre.svg", "surface": "disc" },
+    "wT": { "source": "playstrategy-mono", "file": "tower.svg" },
+    "bT": { "source": "playstrategy-mono", "file": "tower.svg" },
+    "wU": { "source": "wikimedia-standard", "file": "Chess_Ult45.svg" },
+    "bU": { "source": "wikimedia-standard", "file": "Chess_Udt45.svg" },
+    "wV": { "source": "playstrategy-mono", "file": "eagle.svg" },
+    "bV": { "source": "playstrategy-mono", "file": "eagle.svg" },
+    "wZ": { "source": "wikimedia-standard", "file": "Chess_Zlt45.svg" },
+    "bZ": { "source": "wikimedia-standard", "file": "Chess_Zdt45.svg" }
+  }
+}

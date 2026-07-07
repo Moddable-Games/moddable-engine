@@ -127,6 +127,56 @@ describe('piece-theme resolver', () => {
     })
   })
 
+  describe('sourceManifests (composable virtual sets)', () => {
+    const primary = {
+      id: 'fairy-complete',
+      pieces: {
+        king: { element: 'text', attrs: {}, text: 'K' },
+        dabbaba: { source: 'fairy-source', as: 'dabbaba' },
+      },
+      owners: { white: { fill: '#fff' }, black: { fill: '#000' } },
+      fallback: { element: 'circle', attrs: { r: 6 } },
+    }
+    const fairySource = {
+      id: 'fairy-source',
+      pieces: {
+        dabbaba: { element: 'use', attrs: { href: '#dabbaba' } },
+        unicorn: { element: 'use', attrs: { href: '#unicorn' } },
+      },
+      owners: {},
+    }
+
+    it('resolves pieces from sourceManifests via explicit source reference', () => {
+      const resolver = createPieceResolver(primary, { sourceManifests: { 'fairy-source': fairySource } })
+      const result = resolver.resolve('dabbaba', 'white')
+      expect(result.element).toBe('use')
+      expect(result.attrs.href).toBe('#dabbaba')
+      expect(result.attrs.fill).toBe('#fff')
+    })
+
+    it('auto-resolves pieces found in any source manifest', () => {
+      const resolver = createPieceResolver(primary, { sourceManifests: { 'fairy-source': fairySource } })
+      const result = resolver.resolve('unicorn', 'black')
+      expect(result.element).toBe('use')
+      expect(result.attrs.href).toBe('#unicorn')
+      expect(result.attrs.fill).toBe('#000')
+    })
+
+    it('listPieceTypes includes source manifest pieces', () => {
+      const resolver = createPieceResolver(primary, { sourceManifests: { 'fairy-source': fairySource } })
+      const types = resolver.listPieceTypes()
+      expect(types).toContain('king')
+      expect(types).toContain('dabbaba')
+      expect(types).toContain('unicorn')
+    })
+
+    it('primary manifest takes priority over source manifests', () => {
+      const resolver = createPieceResolver(primary, { sourceManifests: { 'fairy-source': fairySource } })
+      const result = resolver.resolve('king', 'white')
+      expect(result.text).toBe('K')
+    })
+  })
+
   describe('listPieceTypes()', () => {
     it('returns piece types from manifest', () => {
       const resolver = createPieceResolver(chessManifest)

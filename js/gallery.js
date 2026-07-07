@@ -1,20 +1,53 @@
+import { createSurfaceDOM, getSurfaceRatios } from './piece-surface.js'
+
 const base = document.querySelector('meta[name="base-path"]')?.content || ''
 const GALLERY_INDEX_PATH = `${base}/pieces/gallery-index.json`
 const SETS_BASE = `${base}/pieces/sets`
 
 let SETS = []
 
+let SETS_MAP = {}
+
+function resolvePieceFiles(set) {
+  const files = []
+  const pieces = set.pieces || {}
+
+  if (set.extends && SETS_MAP[set.extends]) {
+    const base = SETS_MAP[set.extends]
+    for (const [key, val] of Object.entries(base.pieces || {})) {
+      const file = typeof val === 'string' ? val : val.file
+      files.push({ key, file, setId: base.id })
+    }
+  }
+
+  for (const [key, val] of Object.entries(pieces)) {
+    if (typeof val === 'string') {
+      files.push({ key, file: val, setId: set.id })
+    } else if (val.source && val.file) {
+      files.push({ key, file: val.file, setId: val.source, surface: val.surface || null })
+    }
+  }
+
+  files.sort((a, b) => a.key.localeCompare(b.key))
+  return files
+}
+
 function getPieceCount(set) {
-  if (set.pieces) return Object.keys(set.pieces).length
-  return 0
+  let count = set.pieces ? Object.keys(set.pieces).length : 0
+  if (set.extends && SETS_MAP[set.extends]) {
+    count += Object.keys(SETS_MAP[set.extends].pieces || {}).length
+  }
+  return count
 }
 
 async function init() {
   const res = await fetch(GALLERY_INDEX_PATH)
   SETS = await res.json()
 
+  SETS.forEach(s => { SETS_MAP[s.id] = s })
+
   SETS.forEach(s => {
-    s._svgFiles = s.pieces ? Object.values(s.pieces).sort() : []
+    s._svgFiles = resolvePieceFiles(s)
   })
 
   renderIntro()
@@ -88,7 +121,10 @@ function renderBySet(opts) {
     )
     let files = set._svgFiles
     if (opts.search && !setMatches) {
-      files = files.filter(f => f.toLowerCase().includes(opts.search))
+      files = files.filter(f => {
+        const name = typeof f === 'string' ? f : (f.key || f.file)
+        return name.toLowerCase().includes(opts.search)
+      })
     }
     if (files.length === 0 && opts.search && !setMatches) continue
 
@@ -98,7 +134,7 @@ function renderBySet(opts) {
     const header = document.createElement('div')
     header.className = 'set-header'
     header.innerHTML = `
-      <h2 class="set-title">${set.name}</h2>
+      <h2 class="set-title">${set.name}${set.virtual ? ' <span class="badge badge--virtual">virtual</span>' : ''}</h2>
       <div class="set-meta-row">
         <span class="set-family-badge">${set.family}</span>
         <span class="set-author">${set.author}</span>
@@ -116,8 +152,8 @@ function renderBySet(opts) {
     grid.style.setProperty('--piece-size', `${opts.size}px`)
 
     const display = files.length > 0 ? files : set._svgFiles
-    for (const file of display) {
-      grid.appendChild(createPieceCell(set, file, opts))
+    for (const entry of display) {
+      grid.appendChild(createPieceCell(set, entry, opts))
     }
 
     section.appendChild(grid)
@@ -142,11 +178,11 @@ function renderByPieceType(opts) {
       (set.author || '').toLowerCase().includes(opts.search) ||
       set.family.toLowerCase().includes(opts.search)
     )
-    for (const file of set._svgFiles) {
-      const name = file.replace('.svg', '')
+    for (const entry of set._svgFiles) {
+      const name = typeof entry === 'string' ? entry.replace('.svg', '') : (entry.key || entry.file.replace('.svg', ''))
       if (opts.search && !setMatches && !name.toLowerCase().includes(opts.search)) continue
       if (!pieceMap[name]) pieceMap[name] = []
-      pieceMap[name].push({ set, file })
+      pieceMap[name].push({ set, entry })
     }
   }
 
@@ -166,9 +202,9 @@ function renderByPieceType(opts) {
     grid.style.setProperty('--cell-size', `${opts.size + 20}px`)
     grid.style.setProperty('--piece-size', `${opts.size}px`)
 
-    for (const { set, file } of items) {
-      const cell = createPieceCell(set, file, opts)
-      cell.title = `${set.name} — ${file}`
+    for (const { set, entry } of items) {
+      const cell = createPieceCell(set, entry, opts)
+      cell.title = `${set.name} — ${name}`
       cell.querySelector('.piece-label').innerHTML = `<span class="label-set">${set.id}</span>`
       grid.appendChild(cell)
     }
@@ -180,22 +216,47 @@ function renderByPieceType(opts) {
   updateStats(filtered)
 }
 
-function createPieceCell(set, file, opts) {
+function createPieceCell(set, entry, opts) {
+  let file, sourceSetId, key, surface
+  if (typeof entry === 'string') {
+    file = entry
+    sourceSetId = set.id
+    key = file.replace('.svg', '')
+    surface = null
+  } else {
+    file = entry.file
+    sourceSetId = entry.setId || set.id
+    key = entry.key || file.replace('.svg', '')
+    surface = entry.surface || null
+  }
+
   const cell = document.createElement('div')
   cell.className = `piece-cell bg-${opts.bg}`
-  cell.title = file
+  cell.title = `${key} (${sourceSetId}/${file})`
 
   const img = document.createElement('img')
-  img.src = `${SETS_BASE}/${set.id}/${file}`
-  img.alt = file.replace('.svg', '')
-  img.width = opts.size
-  img.height = opts.size
+  img.src = `${SETS_BASE}/${sourceSetId}/${file}`
+  img.alt = key
   img.loading = 'lazy'
-  cell.appendChild(img)
+
+  if (surface === 'disc' && set.surface) {
+    const hasColorPrefix = /^[wb][A-Z]/.test(key)
+    const owner = hasColorPrefix ? (key[0] === 'w' ? 'white' : 'black') : 'white'
+    const colours = set.surface.owners?.[owner] || { fill: '#ccc', stroke: '#888' }
+    cell.classList.add('has-surface')
+
+    const result = createSurfaceDOM('disc', opts.size, colours)
+    result.wrap.appendChild(img)
+    cell.appendChild(result.wrap)
+  } else {
+    img.width = opts.size
+    img.height = opts.size
+    cell.appendChild(img)
+  }
 
   const label = document.createElement('span')
   label.className = 'piece-label'
-  label.textContent = file.replace('.svg', '')
+  label.textContent = key
   cell.appendChild(label)
 
   return cell

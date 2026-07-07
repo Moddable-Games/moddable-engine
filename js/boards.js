@@ -1,4 +1,5 @@
 import { renderBoard, fenToPosition } from './board-diagrams.js'
+import { renderSurfaceSVG } from './piece-surface.js'
 import { getGameConfig, getAllGames, HexSvg, createSeededRng } from './hex-games/index.js'
 import { getDeckConfig, getRegisteredDecks, createDeck, shuffle, deal, layoutTable } from './deck-manager/index.js'
 
@@ -472,7 +473,7 @@ const ASALTO_SETUP = '9/9/9/3W1W3/3b1b3/2bbbbb2/2bbbbb2/2bbbbb2/2bbbbb2'
 const GAMES = {
   'moddable-chess': {
     label: 'Chess',
-    pieceSet: 'mce-chess',
+    pieceSet: 'mce-fairy-complete',
     variants: {
       standard: { label: 'Standard', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Standard FIDE rules.'},
       absorption: { label: 'Absorption', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Capturing piece permanently gains the victim\'s movement abilities.'},
@@ -976,7 +977,7 @@ const GAMES = {
   },
   'dou-shou-qi': {
     label: 'Jungle',
-    pieceSet: 'fluent-emoji',
+    pieceSet: 'mce-jungle',
     variants: {
       standard: { label: 'Standard (7×9)', boardStyle: 'checkered', rows: 9, cols: 7, tileSize: 40, showLabels: false, cellMap: JUNGLE_MAP, colors: JUNGLE_COLORS, fen: JUNGLE_SETUP, pieceNames: { E: 'Elephant', e: 'Elephant', L: 'Lion', l: 'Lion', T: 'Tiger', t: 'Tiger', P: 'Leopard', p: 'Leopard', D: 'Dog', d: 'Dog', W: 'Wolf', w: 'Wolf', C: 'Cat', c: 'Cat', R: 'Rat', r: 'Rat' }, pieceBorders: { white: '#1565c0', black: '#c62828' }, setupDesc: '8 animals per player on 7x9 grid with river, dens, and traps', variantDesc: 'Animals battle across rivers and traps to reach the enemy den. Rank hierarchy: Elephant > Lion > ... > Rat (but Rat defeats Elephant).' },
     },
@@ -1004,41 +1005,72 @@ const GAMES = {
 const FEN_TO_PIECE_ID = {
   K: 'wK', Q: 'wQ', R: 'wR', B: 'wB', N: 'wN', P: 'wP',
   k: 'bK', q: 'bQ', r: 'bR', b: 'bB', n: 'bN', p: 'bP',
-  A: 'wA', a: 'bA', C: 'wC', c: 'bC', E: 'wE', e: 'bE',
-  F: 'wF', f: 'bF', S: 'wS', s: 'bS', G: 'wG', g: 'bG',
-  H: 'wH', h: 'bH', I: 'wI', i: 'bI', L: 'wL', l: 'bL',
-  M: 'wM', m: 'bM', W: 'wW', w: 'bW', Y: 'wY', y: 'bY',
+  A: 'wA', a: 'bA', C: 'wC', c: 'bC', D: 'wD', d: 'bD',
+  E: 'wE', e: 'bE', F: 'wF', f: 'bF', G: 'wG', g: 'bG',
+  H: 'wH', h: 'bH', I: 'wI', i: 'bI', J: 'wJ', j: 'bJ',
+  L: 'wL', l: 'bL', M: 'wM', m: 'bM', O: 'wO', o: 'bO',
+  S: 'wS', s: 'bS', T: 'wT', t: 'bT', U: 'wU', u: 'bU',
+  V: 'wV', v: 'bV', W: 'wW', w: 'bW', Y: 'wY', y: 'bY',
+  Z: 'wZ', z: 'bZ',
 }
 
 const GAME_FEN_OVERRIDES = {
   xiangqi: { H: 'wN', h: 'bN', R: 'wR', r: 'bR', E: 'wE', e: 'bE', A: 'wA', a: 'bA', K: 'wK', k: 'bK', C: 'wC', c: 'bC', P: 'wP', p: 'bP' },
   'dou-shou-qi': {
-    E: 'elephant', e: 'elephant', L: 'lion', l: 'lion',
-    T: 'tiger', t: 'tiger', P: 'leopard', p: 'leopard',
-    D: 'dog', d: 'dog', W: 'wolf', w: 'wolf',
-    C: 'cat', c: 'cat', R: 'rat', r: 'rat',
+    E: 'wElephant', e: 'bElephant', L: 'wLion', l: 'bLion',
+    T: 'wTiger', t: 'bTiger', P: 'wLeopard', p: 'bLeopard',
+    D: 'wDog', d: 'bDog', W: 'wWolf', w: 'bWolf',
+    C: 'wCat', c: 'bCat', R: 'wRat', r: 'bRat',
   },
   asalto: { W: 'wK', b: 'bM' },
 }
 
-function buildPieceImages(pieceSetId, galleryIndex, gameId) {
-  if (!pieceSetId || !galleryIndex) return {}
-  const setDef = galleryIndex.find(s => s.id === pieceSetId)
-  if (!setDef) return {}
-  const basePath = `../pieces/sets/${pieceSetId}/`
-  const images = {}
-  // Map all gallery piece IDs directly (covers bS, wS, bM, wM, bK, wK etc.)
-  for (const [pieceId, filename] of Object.entries(setDef.pieces)) {
-    images[pieceId] = basePath + filename
+function resolvePieceEntry(pieceId, entry, setId) {
+  if (typeof entry === 'string') {
+    return `../pieces/sets/${setId}/${entry}`
   }
-  // Also map FEN characters for chess-style games
-  const fenMap = GAME_FEN_OVERRIDES[gameId] || FEN_TO_PIECE_ID
-  for (const [fenChar, pieceId] of Object.entries(fenMap)) {
-    if (setDef.pieces[pieceId]) {
-      images[fenChar] = basePath + setDef.pieces[pieceId]
+  if (entry.source && entry.file) {
+    return `../pieces/sets/${entry.source}/${entry.file}`
+  }
+  return null
+}
+
+function buildPieceImages(pieceSetId, galleryIndex, gameId) {
+  const empty = { images: {}, surface: null, surfaceMap: {} }
+  if (!pieceSetId || !galleryIndex) return empty
+  const setDef = galleryIndex.find(s => s.id === pieceSetId)
+  if (!setDef) return empty
+  const images = {}
+  const surfaceMap = {}
+
+  if (setDef.extends) {
+    const baseDef = galleryIndex.find(s => s.id === setDef.extends)
+    if (baseDef) {
+      for (const [pieceId, entry] of Object.entries(baseDef.pieces || {})) {
+        const path = resolvePieceEntry(pieceId, entry, baseDef.id)
+        if (path) images[pieceId] = path
+      }
     }
   }
-  return images
+
+  for (const [pieceId, entry] of Object.entries(setDef.pieces || {})) {
+    const path = resolvePieceEntry(pieceId, entry, pieceSetId)
+    if (path) images[pieceId] = path
+    if (typeof entry === 'object' && entry.surface) {
+      surfaceMap[pieceId] = entry.surface
+    }
+  }
+
+  const fenMap = GAME_FEN_OVERRIDES[gameId] || FEN_TO_PIECE_ID
+  for (const [fenChar, pieceId] of Object.entries(fenMap)) {
+    if (images[pieceId]) {
+      images[fenChar] = images[pieceId]
+    }
+    if (surfaceMap[pieceId]) {
+      surfaceMap[fenChar] = surfaceMap[pieceId]
+    }
+  }
+  return { images, surface: setDef.surface || null, surfaceMap }
 }
 
 const DRAUGHTS_VOCABULARY = {
@@ -1237,7 +1269,7 @@ function pushState() {
 }
 
 async function init() {
-  galleryIndex = await fetch('../pieces/gallery-index.json').then(r => r.json()).catch(() => null)
+  galleryIndex = await fetch('../pieces/gallery-index.json').then(r => r.json()).catch(e => { console.error('Gallery load failed:', e); return null })
   populateGames()
   populateVariants()
   bindControls()
@@ -1396,7 +1428,10 @@ function renderMultiBoard(config, game) {
     for (let r = 0; r < config.rows; r++) {
       for (let c = 0; c < config.cols; c++) {
         const fill = (r + c) % 2 === 0 ? boardColors.lightSquare : boardColors.darkSquare
-        parts.push(`<rect x="${ox + c * ts}" y="${oy + r * ts}" width="${ts}" height="${ts}" fill="${fill}"/>`)
+        const file = String.fromCharCode(97 + c)
+        const rankNum = config.rows - r
+        const sq = `${file}${rankNum}`
+        parts.push(`<rect class="board-cell" data-sq="${sq}" data-layer="${i}" x="${ox + c * ts}" y="${oy + r * ts}" width="${ts}" height="${ts}" fill="${fill}"/>`)
       }
     }
 
@@ -1404,16 +1439,32 @@ function renderMultiBoard(config, game) {
     const fen = fens && fens[i]
     if (fen && fen !== '8/8/8/8/8/8/8/8') {
       const position = fenToPosition(fen, config.rows, config.cols)
+      const pieceImages = config.pieceImages || {}
+      const surfaceMap = config.pieceSurfaceMap || {}
+      const surface = config.pieceSurface || null
       for (const [sq, piece] of Object.entries(position)) {
         const file = sq.charCodeAt(0) - 97
         const rank = config.rows - parseInt(sq.slice(1))
         const cx = ox + file * ts + ts / 2
         const cy = oy + rank * ts + ts / 2
-        const fontSize = ts * 0.55
-        const isWhite = piece === piece.toUpperCase()
-        const fill = isWhite ? '#fff' : '#111'
-        const stroke = isWhite ? '#333' : '#888'
-        parts.push(`<text x="${cx}" y="${cy + fontSize * 0.35}" text-anchor="middle" font-size="${fontSize}" font-family="system-ui" font-weight="bold" fill="${fill}" stroke="${stroke}" stroke-width="0.5">${piece}</text>`)
+        if (pieceImages[piece]) {
+          if (surfaceMap[piece]) {
+            const isUpper = piece === piece.toUpperCase()
+            const owner = isUpper ? 'white' : 'black'
+            const ownerSurface = surface && surface.owners && surface.owners[owner]
+            const ownerColors = ownerSurface || { fill: '#ccc', stroke: '#888' }
+            parts.push(renderSurfaceSVG('disc', cx, cy, ts, ownerColors, pieceImages[piece]))
+          } else {
+            const imgSize = ts * 0.85
+            parts.push(`<image href="${pieceImages[piece]}" x="${cx - imgSize / 2}" y="${cy - imgSize / 2}" width="${imgSize}" height="${imgSize}" pointer-events="none"/>`)
+          }
+        } else {
+          const fontSize = ts * 0.55
+          const isWhite = piece === piece.toUpperCase()
+          const fill = isWhite ? '#fff' : '#111'
+          const stroke = isWhite ? '#333' : '#888'
+          parts.push(`<text x="${cx}" y="${cy + fontSize * 0.35}" text-anchor="middle" font-size="${fontSize}" font-family="system-ui" font-weight="bold" fill="${fill}" stroke="${stroke}" stroke-width="0.5">${piece}</text>`)
+        }
       }
     }
   }
@@ -1597,16 +1648,24 @@ function render() {
     config.position = buildFanoronaPosition(config.rows, config.cols)
   }
 
-  // Build piece image paths
-  if (game.pieceSet && (config.position || config.hexPosition || config.parsedSetup || config.filledArms)) {
-    config.pieceImages = buildPieceImages(game.pieceSet, galleryIndex, state.game)
+  // Build piece image paths and surface map
+  if (game.pieceSet) {
+    const built = buildPieceImages(game.pieceSet, galleryIndex, state.game)
+    config.pieceImages = built.images
+    if (built.surface) config.pieceSurface = built.surface
+    if (Object.keys(built.surfaceMap).length) config.pieceSurfaceMap = built.surfaceMap
   }
 
   // Multi-board rendering (Alice Chess, Gygax Chess)
   if (config.layers) {
     const svg = renderMultiBoard(config, game)
+    // Build per-layer positions for hover
+    const layerPositions = (config.layers.fens || []).map(fen => fen ? fenToPosition(fen, config.rows, config.cols) : {})
+    config.layerPositions = layerPositions
+    config.position = Object.assign({}, ...layerPositions)
     showSvg(svg)
     showInfo(config)
+    bindBoardHover(config)
     requestAnimationFrame(fitToView)
     return
   }
@@ -2308,24 +2367,37 @@ function bindBoardHover(config) {
     K: 'King', Q: 'Queen', R: 'Rook', B: 'Bishop', N: 'Knight', P: 'Pawn',
     k: 'King', q: 'Queen', r: 'Rook', b: 'Bishop', n: 'Knight', p: 'Pawn',
     A: 'Archbishop', a: 'Archbishop', C: 'Chancellor', c: 'Chancellor',
-    M: 'Amazon', m: 'Amazon', E: 'Elephant', e: 'Elephant',
-    F: 'Ferz', f: 'Ferz', S: 'Silver', s: 'Silver', G: 'Gold', g: 'Gold',
-    L: 'Lance', l: 'Lance', H: 'Horse', h: 'Horse',
+    D: 'Dabbaba', d: 'Dabbaba', E: 'Elephant', e: 'Elephant',
+    F: 'Ferz', f: 'Ferz', G: 'Gold', g: 'Gold',
+    H: 'Horse', h: 'Horse', I: 'Immobiliser', i: 'Immobiliser',
+    J: 'Giraffe', j: 'Giraffe', L: 'Lance', l: 'Lance',
+    M: 'Amazon', m: 'Amazon', O: 'Ogre', o: 'Ogre',
+    S: 'Silver', s: 'Silver', T: 'Tower', t: 'Tower',
+    U: 'Unicorn', u: 'Unicorn', V: 'Eagle', v: 'Eagle',
+    W: 'War Machine', w: 'War Machine', Y: 'Wyvern', y: 'Wyvern',
+    Z: 'Zebra', z: 'Zebra',
     man: 'Man', king: 'King', stone: 'Stone', piece: 'Disc',
   }
 
   const pieceNameOverrides = config.pieceNames || {}
   const centreMarker = config.centreMarker || null
 
+  const layerLabels = config.layers && config.layers.labels || null
+
   svgContainer.addEventListener('mouseover', e => {
     const cell = e.target.closest('.board-cell')
     if (!cell) return
     const sq = cell.dataset.sq
     const type = cell.dataset.type || ''
+    const layer = cell.dataset.layer
     let text = sq
+    if (layer !== undefined && layerLabels) {
+      text += ` · ${layerLabels[parseInt(layer)]}`
+    }
     if (centreMarker && sq === '0,0') text += ' [Throne]'
     else if (type && type !== 'floor') text += ` [${type}]`
-    const piece = position[sq]
+    const layerPositions = config.layerPositions || null
+    const piece = (layer !== undefined && layerPositions) ? layerPositions[parseInt(layer)]?.[sq] : position[sq]
     if (piece) {
       const p = typeof piece === 'object' ? piece : { type: String(piece) }
       const color = p.color ? p.color : (p.type === p.type.toUpperCase() ? 'White' : 'Black')

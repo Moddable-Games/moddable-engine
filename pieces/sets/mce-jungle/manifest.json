@@ -1,0 +1,40 @@
+{
+  "id": "mce-jungle",
+  "name": "MCE Jungle",
+  "family": "jungle",
+  "author": "Moddable Games (composite)",
+  "license": "CC-BY-4.0",
+  "source": "https://github.com/twitter/twemoji",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "playable": true,
+  "recolorable": false,
+  "virtual": true,
+  "sources": {
+    "twemoji": "../twemoji/"
+  },
+  "surface": {
+    "type": "disc",
+    "owners": {
+      "white": { "fill": "#bbdefb", "stroke": "#1565c0" },
+      "black": { "fill": "#ffcdd2", "stroke": "#c62828" }
+    }
+  },
+  "pieces": {
+    "wElephant": { "source": "twemoji", "file": "elephant.svg", "surface": "disc" },
+    "bElephant": { "source": "twemoji", "file": "elephant.svg", "surface": "disc" },
+    "wLion": { "source": "twemoji", "file": "lion.svg", "surface": "disc" },
+    "bLion": { "source": "twemoji", "file": "lion.svg", "surface": "disc" },
+    "wTiger": { "source": "twemoji", "file": "tiger.svg", "surface": "disc" },
+    "bTiger": { "source": "twemoji", "file": "tiger.svg", "surface": "disc" },
+    "wLeopard": { "source": "twemoji", "file": "leopard.svg", "surface": "disc" },
+    "bLeopard": { "source": "twemoji", "file": "leopard.svg", "surface": "disc" },
+    "wWolf": { "source": "twemoji", "file": "wolf.svg", "surface": "disc" },
+    "bWolf": { "source": "twemoji", "file": "wolf.svg", "surface": "disc" },
+    "wDog": { "source": "twemoji", "file": "dog.svg", "surface": "disc" },
+    "bDog": { "source": "twemoji", "file": "dog.svg", "surface": "disc" },
+    "wCat": { "source": "twemoji", "file": "cat.svg", "surface": "disc" },
+    "bCat": { "source": "twemoji", "file": "cat.svg", "surface": "disc" },
+    "wRat": { "source": "twemoji", "file": "rat.svg", "surface": "disc" },
+    "bRat": { "source": "twemoji", "file": "rat.svg", "surface": "disc" }
+  }
+}
