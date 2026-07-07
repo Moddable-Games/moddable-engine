@@ -904,6 +904,14 @@ const hex = {
     const frame = opts.hexFrame || null
     if (!frame) {
       parts.push(`<rect x="${ox}" y="${oy}" width="${layout.boardW}" height="${layout.boardH}" fill="${colors.background}" rx="6"/>`)
+    } else {
+      const borderEdges = computeHexBorderEdges(hexes, size, flat, oX, oY, 1.05)
+      const borderColor = colors.border || '#6b4226'
+      parts.push(`<g fill="none" stroke="${borderColor}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">`)
+      for (const [a, b] of borderEdges) {
+        parts.push(`<line x1="${a.x.toFixed(2)}" y1="${a.y.toFixed(2)}" x2="${b.x.toFixed(2)}" y2="${b.y.toFixed(2)}"/>`)
+      }
+      parts.push('</g>')
     }
 
     for (const h of hexes) {
@@ -945,16 +953,6 @@ const hex = {
         }
       }
       parts.push(`</g>`)
-    }
-
-    if (frame) {
-      const borderEdges = computeHexBorderEdges(hexes, size, flat, oX, oY, 1.05)
-      const borderColor = colors.border || '#6b4226'
-      parts.push(`<g fill="none" stroke="${borderColor}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">`)
-      for (const [a, b] of borderEdges) {
-        parts.push(`<line x1="${a.x.toFixed(2)}" y1="${a.y.toFixed(2)}" x2="${b.x.toFixed(2)}" y2="${b.y.toFixed(2)}"/>`)
-      }
-      parts.push('</g>')
     }
 
     return parts.join('')
