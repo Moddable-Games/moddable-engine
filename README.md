@@ -103,6 +103,11 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Changelog
 
+#### 2026-07-07
+- Added Korean station names to Nyout board hover (all 29 nodes from reference SVG)
+- Generic `nodeNames` support in hover system for any node-based game
+- Asalto/Royal Garrison fortress rendering fixes (ear nodes, hull stroke cleanup)
+
 #### 2026-07-04
 - Built Landlord's Game board renderer — all 3 editions (1904, 1906, 1932) from JSON data
 - 1932: type-driven stripe bands, 16-point star, inner track boxes with hover
