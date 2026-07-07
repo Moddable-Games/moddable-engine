@@ -912,10 +912,10 @@ const GAMES = {
   },
   asalto: {
     label: 'Asalto',
-    pieceSet: null,
+    pieceSet: 'fluent-emoji',
     variants: {
-      standard: { label: 'Standard', boardStyle: 'asalto', boardSize: 320, asaltoSetup: { officers: [6, 8], soldiers: Array.from({ length: 24 }, (_, i) => i + 9) }, setupDesc: '2 Officers in fortress vs 24 Soldiers on plain', variantDesc: 'Asymmetric siege. Officers jump-capture like draughts; Soldiers advance forward/sideways. Immobilize to win.' },
-      'royal-garrison': { label: 'Royal Garrison', boardStyle: 'asalto', boardSize: 320, asaltoSetup: { officers: [6, 7, 8], soldiers: Array.from({ length: 24 }, (_, i) => i + 9) }, setupDesc: '3 Officers in larger fortress vs 24 Soldiers', variantDesc: 'Extended Asalto. Three Officers defend a larger fortress against Soldiers.' },
+      standard: { label: 'Standard', boardStyle: 'asalto', boardSize: 320, asaltoSetup: { officers: [3, 5], soldiers: Array.from({ length: 27 }, (_, i) => i + 6) }, pieceNames: { officer: 'Officer', soldier: 'Soldier' }, setupDesc: '2 Officers in fortress vs 27 Soldiers on plain', variantDesc: 'Asymmetric siege. Officers jump-capture like draughts; Soldiers advance forward/sideways. Immobilize to win.' },
+      'royal-garrison': { label: 'Royal Garrison', boardStyle: 'asalto', boardSize: 320, asaltoSetup: { officers: [3, 4, 5], soldiers: Array.from({ length: 27 }, (_, i) => i + 6) }, pieceNames: { officer: 'Officer', soldier: 'Soldier' }, setupDesc: '3 Officers in fortress vs 27 Soldiers on plain', variantDesc: 'Extended Asalto. Three Officers defend a larger fortress against Soldiers.' },
     },
   },
   'bavarian-32': {
@@ -973,7 +973,7 @@ const GAME_FEN_OVERRIDES = {
     D: 'wDog', d: 'bDog', W: 'wWolf', w: 'bWolf',
     C: 'wCat', c: 'bCat', R: 'wRat', r: 'bRat',
   },
-  asalto: { W: 'wK', b: 'bM' },
+  asalto: { officer: 'red-circle', soldier: 'green-circle' },
 }
 
 function resolvePieceEntry(pieceId, entry, setId) {
@@ -1597,6 +1597,29 @@ function render() {
   // Build fanorona position
   if (config.fanoronaSetup) {
     config.position = buildFanoronaPosition(config.rows, config.cols)
+  }
+
+  // Build Asalto position from node indices
+  if (config.asaltoSetup) {
+    const pos = {}
+    const setup = config.asaltoSetup
+    if (setup.officers) for (const idx of setup.officers) pos[`n${idx + 1}`] = { type: 'officer' }
+    if (setup.soldiers) for (const idx of setup.soldiers) pos[`n${idx + 1}`] = { type: 'soldier' }
+    config.position = pos
+    // Generate setup notation: node-per-row, O=officer S=soldier .=empty
+    const rowSizes = [3, 3, 7, 7, 7, 3, 3]
+    const rowStrs = []
+    let nodeIdx = 0
+    for (const count of rowSizes) {
+      let row = ''
+      for (let c = 0; c < count; c++) {
+        const p = pos[`n${nodeIdx + 1}`]
+        row += p ? (p.type === 'officer' ? 'O' : 'S') : '.'
+        nodeIdx++
+      }
+      rowStrs.push(row)
+    }
+    config.asaltoNotation = rowStrs.join('/')
   }
 
   // Build piece image paths and surface map
@@ -2351,9 +2374,16 @@ function bindBoardHover(config) {
     const piece = (layer !== undefined && layerPositions) ? layerPositions[parseInt(layer)]?.[sq] : position[sq]
     if (piece) {
       const p = typeof piece === 'object' ? piece : { type: String(piece) }
-      const color = p.color ? p.color : (p.type === p.type.toUpperCase() ? 'White' : 'Black')
       const name = pieceNameOverrides[p.type] || PIECE_NAMES[p.type] || p.type
-      text += ` — ${color} ${name}`
+      if (p.color) {
+        text += ` — ${p.color} ${name}`
+      } else if (p.type !== p.type.toLowerCase()) {
+        text += ` — White ${name}`
+      } else if (PIECE_NAMES[p.type] && !pieceNameOverrides[p.type]) {
+        text += ` — Black ${name}`
+      } else {
+        text += ` — ${name}`
+      }
     }
     if (sq.startsWith('h') && type.startsWith('arm-')) {
       const arm = cell.dataset.arm || type.slice(4)
@@ -2488,9 +2518,11 @@ function showInfo(cfg) {
     else if (cfg.draughtsSetup) rows.push(`<div class="info-row"><span class="info-label">Setup</span><span class="info-value">${cfg.draughtsSetup.rows} rows each side</span></div>`)
     else if (cfg.fanoronaSetup) rows.push(`<div class="info-row"><span class="info-label">Setup</span><span class="info-value">Standard (22 each)</span></div>`)
     else if (cfg.goHandicap) rows.push(`<div class="info-row"><span class="info-label">Setup</span><span class="info-value">${cfg.goHandicap} handicap stones</span></div>`)
+    else if (cfg.asaltoNotation) rows.push(`<div class="info-row info-row--block"><span class="info-label">Setup</span><span class="info-value info-value--fen">${cfg.asaltoNotation}</span></div>`)
     else if (cfg.svgPath) rows.push(`<div class="info-row info-row--block"><span class="info-label">Source</span><span class="info-value info-value--fen">${cfg.svgPath}</span></div>`)
     else if (!cfg.position && !cfg.static) rows.push(`<div class="info-row"><span class="info-label">Setup</span><span class="info-value">Empty board</span></div>`)
     if (cfg.fen || cfg.setup) rows.push(`<div class="info-row"><span class="info-label">Notation</span><span class="info-value">FEN</span></div>`)
+    else if (cfg.asaltoNotation) rows.push(`<div class="info-row"><span class="info-label">Notation</span><span class="info-value">Node map</span></div>`)
   }
   if (cfg.deckType) {
     rows.push(`<div class="info-row"><span class="info-label">Deck</span><span class="info-value">${cfg.deckType}</span></div>`)

@@ -567,29 +567,26 @@ const asalto = {
     return { boardW: size, boardH: size }
   },
   getNodes(size, ox, oy) {
-    // Standard Asalto cross: 33 positions
-    // Rows 0-2: 3 cols (fortress), rows 3-5: 5 cols (plain wide), rows 6-8: 3 cols (plain bottom)
+    // Standard Asalto cross: 33 positions on a 7×7 grid
+    // Rows 0-1: 3 cols (fortress), rows 2-4: 7 cols (plain wide), rows 5-6: 3 cols (bottom arm)
     const nodes = []
     const edges = []
     const fortressNodes = new Set()
 
-    // 9 rows (0-8), 5 cols (0-4). Spacing must fit all within size.
     const margin = size * 0.08
     const usable = size - margin * 2
-    const spacing = usable / 8  // 8 gaps for 9 rows; also 4 gaps for 5 cols
-    const xOffset = ox + (size - 4 * spacing) / 2
+    const spacing = usable / 6  // 6 gaps for 7 rows/cols
+    const xOffset = ox + margin
     const yOffset = oy + margin
 
     const rowDefs = [
-      { cols: [1, 2, 3], y: 0 },
-      { cols: [1, 2, 3], y: 1 },
-      { cols: [1, 2, 3], y: 2 },
-      { cols: [0, 1, 2, 3, 4], y: 3 },
-      { cols: [0, 1, 2, 3, 4], y: 4 },
-      { cols: [0, 1, 2, 3, 4], y: 5 },
-      { cols: [1, 2, 3], y: 6 },
-      { cols: [1, 2, 3], y: 7 },
-      { cols: [1, 2, 3], y: 8 },
+      { cols: [2, 3, 4], y: 0 },
+      { cols: [2, 3, 4], y: 1 },
+      { cols: [0, 1, 2, 3, 4, 5, 6], y: 2 },
+      { cols: [0, 1, 2, 3, 4, 5, 6], y: 3 },
+      { cols: [0, 1, 2, 3, 4, 5, 6], y: 4 },
+      { cols: [2, 3, 4], y: 5 },
+      { cols: [2, 3, 4], y: 6 },
     ]
 
     const nodeMap = {}
@@ -598,7 +595,7 @@ const asalto = {
         const idx = nodes.length
         nodeMap[`${row.y},${col}`] = idx
         nodes.push({ x: xOffset + col * spacing, y: yOffset + row.y * spacing })
-        if (row.y <= 2) fortressNodes.add(idx)
+        if (row.y <= 1) fortressNodes.add(idx)
       }
     }
 
@@ -641,14 +638,15 @@ const asalto = {
 
     parts.push(`<rect x="${ox}" y="${oy}" width="${size}" height="${size}" fill="${colors.background}" rx="4"/>`)
 
-    // Fortress highlight — aligns with node positions (no extra padding)
+    // Fortress highlight — aligned to grid lines (node centres), covering rows 0-2
     const fNodes = [...fortressNodes].map(i => nodes[i])
     if (fNodes.length > 0) {
+      const sp = (size - size * 0.16) / 6
       const fx = Math.min(...fNodes.map(n => n.x))
       const fy = Math.min(...fNodes.map(n => n.y))
       const fw = Math.max(...fNodes.map(n => n.x)) - fx
-      const fh = Math.max(...fNodes.map(n => n.y)) - fy
-      parts.push(`<rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" fill="${colors.fortress}" stroke="${colors.fortressBorder}" stroke-width="2.5"/>`)
+      const fh = Math.max(...fNodes.map(n => n.y)) + sp - fy
+      parts.push(`<rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" fill="${colors.fortress}" stroke="${colors.fortressBorder}" stroke-width="2"/>`)
     }
 
     // Draw edges
@@ -667,19 +665,24 @@ const asalto = {
     }
     parts.push('</g>')
 
-    // Draw setup pieces if configured
-    const setup = opts.asaltoSetup
-    if (setup) {
-      const pieceR = pointRadius * 1.5
-      if (setup.officers) {
-        for (const idx of setup.officers) {
-          parts.push(`<circle cx="${nodes[idx].x}" cy="${nodes[idx].y}" r="${pieceR}" fill="#cc2222" stroke="#881111" stroke-width="1.5"/>`)
-        }
-      }
-      if (setup.soldiers) {
-        for (const idx of setup.soldiers) {
-          parts.push(`<circle cx="${nodes[idx].x}" cy="${nodes[idx].y}" r="${pieceR}" fill="#44aa44" stroke="#227722" stroke-width="1.5"/>`)
-        }
+    // Draw setup pieces from position map (uses gallery images when available)
+    const position = opts.position || {}
+    const pieceImages = opts.pieceImages || {}
+    const pieceSize = pointRadius * 3.5
+    for (let i = 0; i < nodes.length; i++) {
+      const sq = `n${i + 1}`
+      const piece = position[sq]
+      if (!piece) continue
+      const p = typeof piece === 'object' ? piece : { type: String(piece) }
+      const href = pieceImages[p.type]
+      if (href) {
+        const x = nodes[i].x - pieceSize / 2
+        const y = nodes[i].y - pieceSize / 2
+        parts.push(`<image href="${href}" x="${x}" y="${y}" width="${pieceSize}" height="${pieceSize}" pointer-events="none"/>`)
+      } else {
+        const fill = p.type.includes('red') ? '#cc2222' : '#44aa44'
+        const stroke = p.type.includes('red') ? '#881111' : '#227722'
+        parts.push(`<circle cx="${nodes[i].x}" cy="${nodes[i].y}" r="${pointRadius * 1.5}" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>`)
       }
     }
 
