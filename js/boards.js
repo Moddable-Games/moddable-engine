@@ -183,6 +183,13 @@ function buildCrossShapeMap(rows, cols, armWidth) {
 }
 
 const BALBO_MAP = buildDiamondMap(10, 11, [3, 5, 7, 9, 11, 11, 9, 7, 5, 3])
+const HOLE_CHESS_MAP = (() => {
+  const grid = buildDiamondMap(10, 7, [1, 3, 5, 7, 7, 7, 7, 5, 3, 1])
+  // Two holes at D4 and D7 (col 3, rows 6 and 3 in 0-indexed top-to-bottom)
+  grid[6][3] = 'hole'
+  grid[3][3] = 'hole'
+  return grid
+})()
 const FOUR_PLAYER_MAP = buildCrossShapeMap(14, 14, 8)
 const LOS_ALAMOS_V_MAP = buildCrossShapeMap(10, 10, 6)
 function buildCornerMap(innerSize) {
@@ -510,6 +517,7 @@ const GAMES = {
       chennis: { label: 'Chennis', boardStyle: 'checkered', rows: 7, cols: 7, tileSize: 40, fen: 'rnbkqbn/ppppppp/7/7/7/PPPPPPP/RNBKQBN', variantDesc: 'Tennis-themed 7x7 chess. Win by advancing a Pawn to the far rank. Net across rank 4 blocks most pieces. Corey Clark.'},
       chigorin: { label: 'Chigorin', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNNQKNNR', variantDesc: 'White\'s Bishops replaced by Knights. Four Knights vs standard army.'},
       'citadel-chess': { label: 'Citadel Chess', boardStyle: 'checkered', rows: 12, cols: 12, tileSize: 26, cellMap: OMEGA_MAP, colors: { voidFill: 'transparent' }, fen: '12/1dnbwqkwbnd1/1pppppppppp1/12/12/12/12/12/12/1PPPPPPPPPP1/1DNBWQKWBND1/12', variantDesc: 'Shatranj al-Husun. 10x10 + 4 corner citadels. King reaching enemy citadel draws. 2 Dabbabas + 12 Pawns per side. Historical.'},
+      'hole-chess': { label: 'Hole Chess', boardStyle: 'checkered', rows: 10, cols: 7, tileSize: 36, cellMap: HOLE_CHESS_MAP, colors: { voidFill: 'transparent', hole: '#1a1a1a', holeStroke: '#333' }, fen: '3k3/2rqb2/1ppppp1/7/7/7/7/1PPPPP1/2RQB2/3K3', variantDesc: '44-square diamond board with 2 holes at D4/D7. Pieces can be sucked into holes via Two-Action Rule. Gary K. Gifford, 2003.'},
       codrus: { label: 'Codrus', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'No check exists. Win by getting your own King captured.'},
       congo: { label: 'Congo', boardStyle: 'checkered', rows: 7, cols: 7, tileSize: 40, fen: 'gmelemz/ppppppp/7/7/7/PPPPPPP/GMELEMZ', variantDesc: '7x7 with Lion, Zebra, Giraffe, Elephant, Crocodile, Monkey. River rank, drowning rule. Capture Lion wins. Demian Freeling, 1982.'},
       courier: { label: 'Courier Chess', boardStyle: 'checkered', rows: 8, cols: 12, tileSize: 32, fen: 'rnebfsksbenr/pppppppppppp/12/12/12/12/PPPPPPPPPPPP/RNEBFSKSBENR', variantDesc: 'Medieval German variant (1200s). Extra bishops and sage pieces on 12x8 board.'},
