@@ -880,22 +880,15 @@ const GAMES = {
   econopoly: {
     label: 'Econopoly',
     pieceSet: null,
-    noRenderer: true,
+    needsBoardData: 'landlords-game-boards.json',
     variants: {
-      standard: { label: 'Standard', noRenderer: true, setupDesc: 'Board game, 2-6 players', variantDesc: 'Euro-style resource management meets Monopoly. Original Moddable mod.' },
-    },
-  },
-  'hyper-imperium': {
-    label: 'Hyper Imperium',
-    pieceSet: null,
-    noRenderer: true,
-    variants: {
-      standard: { label: 'Standard', noRenderer: true, setupDesc: 'Hex map, 3-6 players', variantDesc: '3D exploration and mercenary factions for Twilight Imperium. Original Moddable mod.' },
+      standard: { label: 'Standard', boardStyle: 'landlords', variant: '1932-prosperity', setupDesc: 'Circuit board, 2-6 players', variantDesc: 'Euro-style resource management meets Monopoly. Uses Landlord\'s Game 1932 board. Original Moddable mod.' },
     },
   },
   'dnd-5e': {
     label: 'D&D 5e SRD',
     pieceSet: null,
+    rpgGame: true,
     noRenderer: true,
     variants: {
       standard: { label: 'Core Rules', noRenderer: true, setupDesc: 'Tabletop RPG, 3-6 players', variantDesc: 'The open core rules for the world\'s most popular roleplaying game.' },
@@ -904,6 +897,7 @@ const GAMES = {
   ironsworn: {
     label: 'Ironsworn',
     pieceSet: null,
+    rpgGame: true,
     noRenderer: true,
     variants: {
       standard: { label: 'Standard', noRenderer: true, setupDesc: 'Solo/co-op RPG, 1-4 players', variantDesc: 'A perilous quest through the Ironlands, guided by vows and oracle tables.' },
