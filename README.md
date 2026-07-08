@@ -103,6 +103,12 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Changelog
 
+#### 2026-07-08
+- RPG provider: DOM-based search + card table for D&D 5e and Ironsworn
+- Colour-coded categories, universal cross-category search, rules.moddable.games links
+- Removed Hyper Imperium (now a Twilight variant); Econopoly uses Landlord's 1932 board
+- Created moddable-rules#167 for anchor-based deep linking
+
 #### 2026-07-07
 - Fixed Y game board — renders as centred equilateral triangle (was skewed parallelogram)
 - Added Hex size variants: 9x9, 13x13, 14x14, 19x19 alongside standard 11x11
