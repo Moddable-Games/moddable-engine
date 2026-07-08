@@ -2,6 +2,7 @@ import { renderBoard, fenToPosition } from './board-diagrams.js'
 import { renderSurfaceSVG } from './piece-surface.js'
 import { getGameConfig, getAllGames, HexSvg, createSeededRng } from './hex-games/index.js'
 import { getDeckConfig, getRegisteredDecks, createDeck, shuffle, deal, layoutTable } from './deck-manager/index.js'
+import { renderRpgProvider } from './rpg-provider.js'
 
 // ─── DUNGEON CHESS CELL MAPS ───────────────────────────────────────────────
 // null = void, 'floor' = standard, 'p1'/'p2' = deploy zones, 'water' = obstacle
@@ -889,18 +890,16 @@ const GAMES = {
     label: 'D&D 5e SRD',
     pieceSet: null,
     rpgGame: true,
-    noRenderer: true,
     variants: {
-      standard: { label: 'Core Rules', noRenderer: true, setupDesc: 'Tabletop RPG, 3-6 players', variantDesc: 'The open core rules for the world\'s most popular roleplaying game.' },
+      standard: { label: 'Core Rules', setupDesc: 'Tabletop RPG, 3-6 players', variantDesc: 'The open core rules for the world\'s most popular roleplaying game.' },
     },
   },
   ironsworn: {
     label: 'Ironsworn',
     pieceSet: null,
     rpgGame: true,
-    noRenderer: true,
     variants: {
-      standard: { label: 'Standard', noRenderer: true, setupDesc: 'Solo/co-op RPG, 1-4 players', variantDesc: 'A perilous quest through the Ironlands, guided by vows and oracle tables.' },
+      standard: { label: 'Standard', setupDesc: 'Solo/co-op RPG, 1-4 players', variantDesc: 'A perilous quest through the Ironlands, guided by vows and oracle tables.' },
     },
   },
   agon: {
@@ -1533,6 +1532,12 @@ function render() {
 
   if (variantDef.static) {
     loadStaticSvg(state.game, state.variant, variantDef)
+    return
+  }
+
+  if (game.rpgGame) {
+    renderRpgProvider(state.game)
+    showInfo(variantDef)
     return
   }
 
