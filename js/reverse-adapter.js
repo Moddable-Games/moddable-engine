@@ -155,6 +155,7 @@ function toSurfaceOverride(config) {
 // --- Setup ---
 
 function toSetup(config) {
+  if (config.fen4) return config.fen4
   if (config.fen) return config.fen
   if (config.setup) return config.setup
   if (config.filledArms) return { arms: config.filledArms }

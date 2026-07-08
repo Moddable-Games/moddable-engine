@@ -523,7 +523,7 @@ const GAMES = {
       'flip-chess': { label: 'Flip Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'After each capture, the capturing piece transforms into the type of piece it captured.'},
       'five-check': { label: 'Five-Check', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Extended Three-Check. Five checks wins instead of three.'},
       'fog-of-war': { label: 'Fog of War', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Only see squares your pieces can move to. No check warnings.'},
-      'four-handed-chess': { label: 'Four-Handed Chess', boardStyle: 'checkered', rows: 14, cols: 14, tileSize: 24, cellMap: FOUR_PLAYER_MAP, colors: { voidFill: 'transparent' }, noRenderer: true, variantDesc: '4-player on 14x14 cross-shaped board (160 squares). Standard armies on each wing. Requires 4-player position notation (not yet designed).'},
+      'four-handed-chess': { label: 'Four-Handed Chess', boardStyle: 'checkered', rows: 14, cols: 14, tileSize: 24, cellMap: FOUR_PLAYER_MAP, colors: { voidFill: 'transparent' }, fen4: '3,yR,yN,yB,yK,yQ,yB,yN,yR,3/3,yP,yP,yP,yP,yP,yP,yP,yP,3/14/bR,bP,10,gP,gR/bN,bP,10,gP,gN/bB,bP,10,gP,gB/bK,bP,10,gP,gQ/bQ,bP,10,gP,gK/bB,bP,10,gP,gB/bN,bP,10,gP,gN/bR,bP,10,gP,gR/14/3,rP,rP,rP,rP,rP,rP,rP,rP,3/3,rR,rN,rB,rQ,rK,rB,rN,rR,3', variantDesc: '4-player on 14x14 cross-shaped board (160 squares). Standard armies on each wing. Teams or free-for-all. FEN4 notation.'},
       giveaway: { label: 'Giveaway', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Forced captures. King is not royal. Stalemate is a loss.'},
       glinski: { label: 'Glinski (Hex)', boardStyle: 'hex', hexRadius: 5, hexSize: 22, flat: true, hexColorFn: glinskiColor, hexPosition: GLINSKI_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' } , variantDesc: 'Chess on a 91-cell hexagonal board. Three bishops per side.'},
       grand: { label: 'Grand Chess', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, fen: 'r8r/1nbqkcbn1/pppppppppp/10/10/10/10/PPPPPPPPPP/1NBQKCBN1/R8R', variantDesc: 'Archbishop and Chancellor on 10x10 board. Pawns start on rank 3.'},
@@ -1236,6 +1236,27 @@ function buildDraughtsFenFromSetup(rows, cols, setup) {
   return fenRows.join('/')
 }
 
+function fen4ToPosition(fen4, rows, cols) {
+  const position = {}
+  const ranks = fen4.split('/')
+  for (let r = 0; r < ranks.length && r < rows; r++) {
+    let c = 0
+    const cells = ranks[r].split(',')
+    for (const cell of cells) {
+      const trimmed = cell.trim()
+      if (/^\d+$/.test(trimmed)) {
+        c += parseInt(trimmed, 10)
+      } else {
+        const file = String.fromCharCode(97 + c)
+        const rankNum = rows - r
+        position[`${file}${rankNum}`] = trimmed
+        c++
+      }
+    }
+  }
+  return position
+}
+
 function parseDraughtsFen(fen, rows, cols, vocabulary) {
   const vocab = vocabulary || DRAUGHTS_VOCABULARY
   const position = {}
@@ -1683,6 +1704,9 @@ async function renderSchemaMode(game, variantDef) {
     if (augmented.asaltoSetup.soldiers) for (const idx of augmented.asaltoSetup.soldiers) pos[`n${idx + 1}`] = { type: 'soldier' }
     augmented._position = pos
   }
+  if (augmented.fen4) {
+    augmented._position = fen4ToPosition(augmented.fen4, augmented.rows || 14, augmented.cols || 14)
+  }
 
   const schema = reverseAdapt(augmented, game, state.game, { players: state.players, seed: state.seed })
   const surface = resolveSurface(schema.surface)
@@ -1836,7 +1860,9 @@ function render() {
   const config = { ...variantDef }
 
   // Build position from FEN
-  if (config.fen) {
+  if (config.fen4) {
+    config.position = fen4ToPosition(config.fen4, config.rows, config.cols)
+  } else if (config.fen) {
     config.position = fenToPosition(config.fen, config.rows, config.cols)
   }
 
