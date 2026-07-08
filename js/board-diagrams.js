@@ -298,7 +298,7 @@ const xiangqi = {
     parts.push(`<line x1="${pl}" y1="${gy + palaceBotRow * tileSize}" x2="${pr}" y2="${gy + (palaceBotRow + palaceRows) * tileSize}"/>`)
     parts.push(`<line x1="${pr}" y1="${gy + palaceBotRow * tileSize}" x2="${pl}" y2="${gy + (palaceBotRow + palaceRows) * tileSize}"/>`)
     parts.push('</g>')
-    if (river) {
+    if (river && cols >= 9) {
       const rtop = opts.riverRows ? opts.riverRows[0] : Math.floor(rows / 2) - 1
       const rbot = opts.riverRows ? opts.riverRows[1] : Math.floor(rows / 2)
       const rty1 = gy + rtop * tileSize, rty2 = gy + rbot * tileSize
