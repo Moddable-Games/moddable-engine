@@ -184,6 +184,14 @@ function buildCrossShapeMap(rows, cols, armWidth) {
 
 const BALBO_MAP = buildDiamondMap(10, 11, [3, 5, 7, 9, 11, 11, 9, 7, 5, 3])
 const FOUR_PLAYER_MAP = buildCrossShapeMap(14, 14, 8)
+const OMEGA_MAP = (() => {
+  const grid = Array.from({ length: 12 }, () => Array(12).fill(null))
+  // Central 10x10 (rows 1-10, cols 1-10)
+  for (let r = 1; r <= 10; r++) for (let c = 1; c <= 10; c++) grid[r][c] = true
+  // 4 corner wizard squares
+  grid[0][0] = true; grid[0][11] = true; grid[11][0] = true; grid[11][11] = true
+  return grid
+})()
 
 // ─── L'ATTAQUE / STRATEGO BOARD MAP ────────────────────────────────────────
 
@@ -563,7 +571,7 @@ const GAMES = {
       nightrider: { label: 'Nightrider Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Knights replaced by Nightriders (repeat knight leap in same direction).'},
       'no-retreat': { label: 'No Retreat', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Pieces cannot move backward toward their own starting rank.'},
       'oblong-chess': { label: 'Oblong Chess', boardStyle: 'checkered', rows: 16, cols: 4, tileSize: 34, fen: 'rnbk/pppp/4/4/4/4/4/4/4/4/4/4/4/4/PPPP/KBNR', variantDesc: '4x16 historical Shatranj variant (~1000 years old). Extreme rectangle shifts piece values. Often played with dice.'},
-      'omega-chess': { label: 'Omega Chess', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 30, fen: 'w8w/rnbqkbnr2/pppppppp2/10/10/10/10/2PPPPPPPP/2RNBQKBNR/W8W', variantDesc: '10x10 + 4 wizard squares (104 total). Champion (WAD) and Wizard (FC). Pawns advance 1-3 on first move. Daniel MacDonald, 1998.'},
+      'omega-chess': { label: 'Omega Chess', boardStyle: 'checkered', rows: 12, cols: 12, tileSize: 26, cellMap: OMEGA_MAP, colors: { voidFill: 'transparent' }, fen: 'w10w/1crnbqkbnrc1/1pppppppppp1/12/12/12/12/12/12/1PPPPPPPPPP1/1CRNBQKBNRC1/W10W', variantDesc: '10x10 + 4 wizard squares (104 total). Champion (WAD) and Wizard (FC). Pawns advance 1-3 on first move. Daniel MacDonald, 1998.'},
       omnicide: { label: 'Omnicide', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Lose all your pieces to win. Captures NOT forced.'},
       'orda-chess': { label: 'Orda Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'lhaykahl/8/pppppppp/8/8/PPPPPPPP/8/RNBQKBNR', variantDesc: 'Asymmetric: White standard vs Black Horde (divergent movers).'},
       'orda-mirror': { label: 'Orda Mirror', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'lkfyxfkl/pppppppp/8/8/8/8/PPPPPPPP/LKFYXFKL', variantDesc: 'Both players command the Horde. Pieces move as Knights, capture as FIDE counterparts. Corey Clark, 2020.'},
@@ -1257,6 +1265,21 @@ function fen4ToPosition(fen4, rows, cols) {
   return position
 }
 
+const FEN4_COLORS = { r: '#d32f2f', b: '#1565c0', y: '#f9a825', g: '#2e7d32' }
+const FEN4_SYMBOLS = { K: '♚', Q: '♛', R: '♜', B: '♝', N: '♞', P: '♟' }
+
+function buildFen4PieceDefs(position) {
+  const defs = {}
+  for (const piece of Object.values(position)) {
+    if (typeof piece !== 'string' || piece.length < 2 || defs[piece]) continue
+    const color = FEN4_COLORS[piece[0]] || '#666'
+    const type = piece.slice(1)
+    const symbol = FEN4_SYMBOLS[type] || type
+    defs[piece] = `<text x="22.5" y="33" text-anchor="middle" font-size="32" fill="${color}" font-family="serif">${symbol}</text>`
+  }
+  return defs
+}
+
 function parseDraughtsFen(fen, rows, cols, vocabulary) {
   const vocab = vocabulary || DRAUGHTS_VOCABULARY
   const position = {}
@@ -1859,9 +1882,10 @@ function render() {
 
   const config = { ...variantDef }
 
-  // Build position from FEN
+  // Build position from FEN4 (4-player)
   if (config.fen4) {
     config.position = fen4ToPosition(config.fen4, config.rows, config.cols)
+    config.pieceDefs = buildFen4PieceDefs(config.position)
   } else if (config.fen) {
     config.position = fenToPosition(config.fen, config.rows, config.cols)
   }
