@@ -1,4 +1,4 @@
-# Render Schema Spec (v6 — Content Layer + 5 Topologies)
+# Render Schema Spec (v7 — Runtime Pipeline + Dual-Mode Migration)
 
 ## Purpose
 
@@ -1483,28 +1483,240 @@ engine:
 
 ---
 
+## Runtime Pipeline
+
+The full path from authored frontmatter to rendered pixels. Every step is a discrete module — no step knows which game it's processing.
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│ AUTHORING (moddable-rules)                                          │
+│                                                                     │
+│  games/{family}/rulebook.md     ← family engine: + meta: defaults   │
+│  games/{family}/{variant}.md    ← variant engine: + meta: overrides  │
+│  games/{family}/data/*.json     ← external content (optional)        │
+│  surfaces/{name}.yaml           ← named surface definitions          │
+└──────────────────────────────────┬──────────────────────────────────┘
+                                   │
+                                   ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│ LOADING                                                             │
+│                                                                     │
+│  1. Index — build family/variant tree from filesystem                │
+│     Output: { family: string, variants: string[], paths: {...} }    │
+│                                                                     │
+│  2. Parse — extract YAML frontmatter from markdown                  │
+│     Module: packages/schema/src/parse-frontmatter.js (exists)       │
+│     Output: raw engine: + meta: objects                             │
+│                                                                     │
+│  3. Surface resolve — load named surface definition                 │
+│     Input: engine.surface (string or object)                        │
+│     Output: full surface colours + texture + gridLine               │
+└──────────────────────────────────┬──────────────────────────────────┘
+                                   │
+                                   ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│ CASCADE RESOLUTION                                                  │
+│                                                                     │
+│  4. Deep merge: surface defaults → family engine: → variant engine: │
+│     - Arrays replace (except meta.tags which concatenate)           │
+│     - Objects merge recursively (rightmost wins)                    │
+│     - Scalars replace                                               │
+│                                                                     │
+│  5. Derive defaults for missing fields:                             │
+│     - render.cellColor from topology.type                           │
+│     - render.frame from topology.shape                              │
+│     - render.labels from topology.type                              │
+│     - meta.category from topology.type + components                 │
+│                                                                     │
+│  6. Validate — minimum requirements:                                │
+│     - Board: topology.type + setup                                  │
+│     - Card/dice/tile: components.deck or components.dice            │
+│     - All: meta.label must resolve                                  │
+│                                                                     │
+│  Output: resolved game definition object (complete, renderable)     │
+└──────────────────────────────────┬──────────────────────────────────┘
+                                   │
+                                   ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│ CONTENT RESOLUTION (if content.source exists)                       │
+│                                                                     │
+│  7. Fetch external JSON from content.source path                    │
+│  8. Attach to resolved object as content.data                       │
+│  9. Schema type (position-list/category-list/oracle-tables)         │
+│     tells the renderer how to iterate the data                      │
+└──────────────────────────────────┬──────────────────────────────────┘
+                                   │
+                                   ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│ DISPATCH                                                            │
+│                                                                     │
+│  10. Route on topology.type:                                        │
+│      grid  → grid renderer                                          │
+│      hex   → hex renderer                                           │
+│      track → track renderer                                         │
+│      pit   → pit renderer                                           │
+│      graph → graph renderer                                         │
+│      none  → component renderer (cards/dice/tiles/RPG)              │
+│                                                                     │
+│  Each renderer receives the FULL resolved object.                   │
+│  No pre-filtering, no routing flags, no game-name dispatch.         │
+└──────────────────────────────────┬──────────────────────────────────┘
+                                   │
+                                   ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│ RENDERING                                                           │
+│                                                                     │
+│  11. Topology renderer draws base board:                            │
+│      - Reads topology.* for structure (rows, cols, shape, nodes)    │
+│      - Reads surface.colors for fills + strokes                     │
+│      - Reads render.cellColor for colouring strategy                │
+│      - Reads render.zones for cell-type classification              │
+│                                                                     │
+│  12. Decoration overlay:                                            │
+│      - Iterates render.decorations array                            │
+│      - Each decoration type is a pure function:                     │
+│        (positions, surface.colors, params) → SVG elements           │
+│      - Composable: markers + tint + gap + diagonals all layer       │
+│                                                                     │
+│  13. Surface treatments (if content + treatments exist):            │
+│      - Reads content.data[].type per position                       │
+│      - Looks up surface.treatments[type] → visual recipe            │
+│      - Applies recipe: stripe/medallion/bars/arc/split/tint         │
+│                                                                     │
+│  14. Piece placement (if setup exists):                             │
+│      - Parses topology-native setup notation                        │
+│      - Reads pieces.vocabulary for type/colour mapping              │
+│      - Reads pieces.set for asset resolution                        │
+│      - Places piece SVG elements at cell positions                  │
+│                                                                     │
+│  15. Meta/UI population:                                            │
+│      - Sidebar reads meta.label, meta.description, meta.tags        │
+│      - Hover reads content.data fields + pieces.names               │
+│      - Controls read meta.features (handicap, randomize)            │
+│                                                                     │
+│  Output: complete rendered board in SVG container + populated UI    │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Module boundaries
+
+| Step | Module | Exists? |
+|------|--------|---------|
+| 1 | `js/schema-loader.js` | No — new |
+| 2 | `packages/schema/src/parse-frontmatter.js` | Yes |
+| 3 | `js/surface-resolver.js` | No — new |
+| 4-6 | `js/cascade-resolver.js` | No — new |
+| 7-9 | `js/content-loader.js` | No — new |
+| 10 | `js/render-dispatch.js` | No — new |
+| 11-14 | `js/renderers/grid.js`, `hex.js`, `track.js`, `pit.js`, `graph.js`, `none.js` | No — new |
+| 12 | `js/renderers/decorations.js` | No — new |
+| 13 | `js/renderers/treatments.js` | No — new |
+| 15 | `js/studio-ui.js` | No — new (replaces boards.js UI logic) |
+
+### Data flow contract
+
+Every module receives and returns plain objects. No classes, no inheritance, no shared mutable state. Each module is testable in isolation:
+
+```js
+// cascade-resolver.js
+export function resolve(surface, family, variant) → resolvedDefinition
+
+// render-dispatch.js
+export function dispatch(resolvedDefinition, container) → void
+
+// renderers/grid.js
+export function renderGrid(resolved, svg) → void
+```
+
+---
+
 ## Migration Strategy
 
-### Phase 1: Define surfaces
-Create 9 named surface definitions in `packages/surface/builtins/`.
+### Principle: dual-mode visual comparison
 
-### Phase 2: Add family defaults (41 families)
-Add `engine:` + `meta:` blocks to each `rulebook.md`:
-- engine: topology, surface ref, render, pieces, players, components (card/dice/tile families)
-- meta: label, category, players, duration, tags
+The legacy code (boards.js + board-diagrams.js) IS the reference implementation. It runs unchanged alongside the new schema-driven renderers until every variant matches visually. No screenshots, no PNG baselines — the old code running live in the same browser session is the regression suite.
 
-### Phase 3: Add variant overrides (315 variants)
-Each variant gets:
-- engine: `setup` + any topology/render/component overrides
-- meta: `label`, `description`, `setupDesc`, variant-specific tags
+### Phase 1: Define surfaces + build pipeline infrastructure
 
-### Phase 4: Board studio reads dynamically
-Replace GAMES object: load surface → load family → merge variant → render.
-Board studio sidebar populates from resolved meta block.
-Component games route through `components.layout` instead of hardcoded flags.
+New files (coexist with legacy, don't touch it):
+- 9 named surface definitions (YAML files or JS objects)
+- `js/schema-loader.js` — fetch + parse frontmatter from rules
+- `js/surface-resolver.js` — resolve named surface → full colour object
+- `js/cascade-resolver.js` — deep merge surface → family → variant
+- `js/content-loader.js` — fetch external JSON when content.source exists
+- `js/render-dispatch.js` — route resolved object to topology renderer
 
-### Phase 5: Retire boards.js
-Delete the 2642-line file. All data lives in moddable-rules frontmatter.
+### Phase 2: Build topology renderers
+
+New files in `js/renderers/`:
+- `grid.js` — handles chess, go, xiangqi, shogi, draughts, reversi, halma, tafl, surakarta, alquerque, fanorona, dungeon-chess, dou-shou-qi, l'attaque, royal-ur, pachisi, chaupar
+- `hex.js` — handles hex, nukes, talisman, mongo, twilight, endless-skies, harvesters, agon, glinski
+- `track.js` — handles backgammon, landlords, econopoly
+- `pit.js` — handles mancala family (kalah, oware, bao, congkak)
+- `graph.js` — handles morris, nyout, asalto, stern-halma
+- `none.js` — handles card, dice, tile, RPG (components + content)
+- `decorations.js` — markers, tint, gap, diagonals, arcs, border
+- `treatments.js` — stripe, medallion, split, bars, arc, tint
+
+Each renderer reads ONLY from the resolved object. Zero imports from legacy code.
+
+### Phase 3: Wire dual-mode into studio UI
+
+Add a toggle to the board studio: **[Legacy]** / **[Schema]** / **[Split]**
+
+- **Legacy** — renders using current board-diagrams.js providers (unchanged code)
+- **Schema** — renders using new pipeline (loader → cascade → dispatch → renderer)
+- **Split** — side-by-side: legacy left, schema right, same variant
+
+Implementation:
+```
+┌──────────────────────────────────────────────────┐
+│  [Legacy]  [Schema]  [Split]     ← toggle bar    │
+├────────────────────┬─────────────────────────────┤
+│  board-diagrams.js │  new renderers              │
+│  (unchanged)       │  (schema-driven)            │
+│                    │                             │
+│  reads from:       │  reads from:               │
+│  GAMES object      │  resolved frontmatter      │
+│  (boards.js)       │  (cascade resolver)        │
+└────────────────────┴─────────────────────────────┘
+```
+
+Both renderers write to their own SVG container. The studio orchestrator passes the same variant selection to both. Visual differences are immediately apparent.
+
+### Phase 4: Author frontmatter + verify (family by family)
+
+For each of the 41 families:
+1. Author `engine:` + `meta:` in `rulebook.md` (family defaults)
+2. Author `engine:` + `meta:` in each variant file (overrides + setup)
+3. Open studio in Split mode — confirm visual match
+4. Fix any discrepancies in the frontmatter (not in the renderer — the renderer is game-agnostic)
+5. Mark family as migrated
+
+Order: start with the simplest (chess — just grid + checkered + FEN), end with the most complex (landlords — track + content + treatments).
+
+### Phase 5: Retire legacy code
+
+Once ALL 315 variants pass visual comparison in Split mode:
+1. Remove dual-mode toggle (Schema becomes the only mode)
+2. Delete `js/board-diagrams.js` (2325 lines)
+3. Delete GAMES object from `js/boards.js` (the remaining UI logic becomes `js/studio-ui.js`)
+4. Delete `js/hex-games/*.js` configs (2372 lines — hex-games generate functions become frontmatter)
+5. Delete `js/rpg-provider.js` (329 lines — becomes content.schema.type: category-list)
+
+**Total deleted:** ~7300 lines of hardcoded game config
+**Total added:** ~800 lines of topology-agnostic rendering + pipeline modules
+**Net result:** all game knowledge lives in frontmatter, all rendering is schema-driven
+
+### When to delete: the completion criteria
+
+A family is "done" when:
+- Every variant renders identically in Split mode (visual match)
+- Hover tooltips show the same data (content/pieces/meta)
+- Sidebar shows the same info (meta block)
+- Feature controls work (handicap, size selector, seed)
+
+The project is "done" when all 41 families pass and the Legacy toggle becomes dead code.
 
 ---
 
@@ -1604,6 +1816,12 @@ circular-chess, chess-in-the-round, byzantine-chess, cylindrical-chess, klein-bo
 16. **5 spatial topologies + 1 non-spatial.** Grid (covers chess, go, xiangqi, shogi, draughts, alquerque, surakarta — cells or intersections), Hex (all hex-cell games), Track (backgammon, landlords, pachisi), Pit (mancala family), Graph (morris, nyout, asalto, stern-halma/star). Star is not its own topology — it's a graph with `structure: star` and zone decorations for arm regions.
 
 17. **content: provides external structured data.** Complex boards (landlords space properties, RPG card databases, oracle tables) reference external JSON files. The renderer never hardcodes data — it reads a schema contract and renders accordingly. Three schema types: position-list, category-list, oracle-tables.
+
+18. **Pipeline is modular and testable.** Load → parse → resolve cascade → resolve content → dispatch → render. Each step is a pure function taking plain objects and returning plain objects. No shared mutable state between steps.
+
+19. **Legacy code IS the regression suite.** During migration, the old providers run unchanged alongside new renderers in dual-mode. No screenshot baselines, no PNG comparisons — live side-by-side rendering in the same browser session. The old code stays until every variant matches, then gets deleted in one pass.
+
+20. **New renderers never import from legacy.** The new pipeline (schema-loader, cascade-resolver, topology renderers) has zero dependencies on boards.js or board-diagrams.js. They coexist but don't couple. This makes deletion clean — no untangling required.
 
 ---
 
