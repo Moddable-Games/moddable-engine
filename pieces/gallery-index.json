@@ -4658,148 +4658,50 @@
     "family": "chess",
     "virtual": true,
     "recolorable": true,
-    "surface": {
-      "type": "disc",
-      "owners": {
-        "red": {
-          "fill": "#ffcdd2",
-          "stroke": "#d32f2f"
-        },
-        "blue": {
-          "fill": "#bbdefb",
-          "stroke": "#1565c0"
-        },
-        "yellow": {
-          "fill": "#fff9c4",
-          "stroke": "#f9a825"
-        },
-        "green": {
-          "fill": "#c8e6c9",
-          "stroke": "#2e7d32"
-        }
+    "baseSet": "mce-chess",
+    "owners": {
+      "red": {
+        "fill": "#d32f2f",
+        "stroke": "#000"
+      },
+      "blue": {
+        "fill": "#1565c0",
+        "stroke": "#000"
+      },
+      "yellow": {
+        "fill": "#fdd835",
+        "stroke": "#000"
+      },
+      "green": {
+        "fill": "#2e7d32",
+        "stroke": "#000"
       }
     },
     "pieces": {
-      "rK": {
-        "source": "mce-chess",
-        "file": "wK.svg",
-        "surface": "disc"
-      },
-      "rQ": {
-        "source": "mce-chess",
-        "file": "wQ.svg",
-        "surface": "disc"
-      },
-      "rR": {
-        "source": "mce-chess",
-        "file": "wR.svg",
-        "surface": "disc"
-      },
-      "rB": {
-        "source": "mce-chess",
-        "file": "wB.svg",
-        "surface": "disc"
-      },
-      "rN": {
-        "source": "mce-chess",
-        "file": "wN.svg",
-        "surface": "disc"
-      },
-      "rP": {
-        "source": "mce-chess",
-        "file": "wP.svg",
-        "surface": "disc"
-      },
-      "bK": {
-        "source": "mce-chess",
-        "file": "bK.svg",
-        "surface": "disc"
-      },
-      "bQ": {
-        "source": "mce-chess",
-        "file": "bQ.svg",
-        "surface": "disc"
-      },
-      "bR": {
-        "source": "mce-chess",
-        "file": "bR.svg",
-        "surface": "disc"
-      },
-      "bB": {
-        "source": "mce-chess",
-        "file": "bB.svg",
-        "surface": "disc"
-      },
-      "bN": {
-        "source": "mce-chess",
-        "file": "bN.svg",
-        "surface": "disc"
-      },
-      "bP": {
-        "source": "mce-chess",
-        "file": "bP.svg",
-        "surface": "disc"
-      },
-      "yK": {
-        "source": "mce-chess",
-        "file": "wK.svg",
-        "surface": "disc"
-      },
-      "yQ": {
-        "source": "mce-chess",
-        "file": "wQ.svg",
-        "surface": "disc"
-      },
-      "yR": {
-        "source": "mce-chess",
-        "file": "wR.svg",
-        "surface": "disc"
-      },
-      "yB": {
-        "source": "mce-chess",
-        "file": "wB.svg",
-        "surface": "disc"
-      },
-      "yN": {
-        "source": "mce-chess",
-        "file": "wN.svg",
-        "surface": "disc"
-      },
-      "yP": {
-        "source": "mce-chess",
-        "file": "wP.svg",
-        "surface": "disc"
-      },
-      "gK": {
-        "source": "mce-chess",
-        "file": "bK.svg",
-        "surface": "disc"
-      },
-      "gQ": {
-        "source": "mce-chess",
-        "file": "bQ.svg",
-        "surface": "disc"
-      },
-      "gR": {
-        "source": "mce-chess",
-        "file": "bR.svg",
-        "surface": "disc"
-      },
-      "gB": {
-        "source": "mce-chess",
-        "file": "bB.svg",
-        "surface": "disc"
-      },
-      "gN": {
-        "source": "mce-chess",
-        "file": "bN.svg",
-        "surface": "disc"
-      },
-      "gP": {
-        "source": "mce-chess",
-        "file": "bP.svg",
-        "surface": "disc"
-      }
+      "rK": "wK.svg",
+      "rQ": "wQ.svg",
+      "rR": "wR.svg",
+      "rB": "wB.svg",
+      "rN": "wN.svg",
+      "rP": "wP.svg",
+      "bK": "wK.svg",
+      "bQ": "wQ.svg",
+      "bR": "wR.svg",
+      "bB": "wB.svg",
+      "bN": "wN.svg",
+      "bP": "wP.svg",
+      "yK": "wK.svg",
+      "yQ": "wQ.svg",
+      "yR": "wR.svg",
+      "yB": "wB.svg",
+      "yN": "wN.svg",
+      "yP": "wP.svg",
+      "gK": "wK.svg",
+      "gQ": "wQ.svg",
+      "gR": "wR.svg",
+      "gB": "wB.svg",
+      "gN": "wN.svg",
+      "gP": "wP.svg"
     }
   }
 ]

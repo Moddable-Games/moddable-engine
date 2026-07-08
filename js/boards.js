@@ -1272,6 +1272,43 @@ function fen4GetOwner(pieceType) {
   return pieceType === pieceType.toUpperCase() ? 'white' : 'black'
 }
 
+const recolourCache = {}
+
+async function loadRecolouredPieces(config, gallery) {
+  const setDef = gallery?.find(s => s.id === (config.pieceSet4 || 'mce-4player'))
+  if (!setDef || !setDef.owners || !setDef.baseSet) return
+
+  const basePath = `../pieces/sets/${setDef.baseSet}/`
+  const images = {}
+  const owners = setDef.owners
+
+  const fetches = []
+  for (const [pieceId, filename] of Object.entries(setDef.pieces || {})) {
+    const ownerPrefix = pieceId[0]
+    const ownerName = FEN4_OWNERS[ownerPrefix]
+    const ownerColors = owners[ownerName]
+    if (!ownerColors) continue
+
+    const cacheKey = `${filename}:${ownerColors.fill}`
+    if (recolourCache[cacheKey]) {
+      images[pieceId] = recolourCache[cacheKey]
+      continue
+    }
+
+    fetches.push(
+      fetch(basePath + filename).then(r => r.text()).then(svg => {
+        const tinted = svg.replace(/fill:#fff/gi, `fill:${ownerColors.fill}`)
+        const dataUri = 'data:image/svg+xml,' + encodeURIComponent(tinted)
+        recolourCache[cacheKey] = dataUri
+        images[pieceId] = dataUri
+      }).catch(() => {})
+    )
+  }
+
+  await Promise.all(fetches)
+  config.pieceImages = images
+}
+
 function parseDraughtsFen(fen, rows, cols, vocabulary) {
   const vocab = vocabulary || DRAUGHTS_VOCABULARY
   const position = {}
@@ -1874,17 +1911,16 @@ function render() {
 
   const config = { ...variantDef }
 
-  // Build position from FEN4 (4-player)
+  // Build position from FEN4 (4-player) — piece images loaded async
   if (config.fen4) {
     config.position = fen4ToPosition(config.fen4, config.rows, config.cols)
-    const fen4Set = config.pieceSet4 || 'mce-4player'
-    if (galleryIndex) {
-      const built = buildPieceImages(fen4Set, galleryIndex, null)
-      config.pieceImages = built.images
-      if (built.surface) config.pieceSurface = built.surface
-      if (Object.keys(built.surfaceMap).length) config.pieceSurfaceMap = built.surfaceMap
-    }
     config.getOwner = fen4GetOwner
+    loadRecolouredPieces(config, galleryIndex).then(() => {
+      const svg = renderBoard(config)
+      showSvg(svg)
+      requestAnimationFrame(fitToView)
+    })
+    return
   } else if (config.fen) {
     config.position = fenToPosition(config.fen, config.rows, config.cols)
   }
