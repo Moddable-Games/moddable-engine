@@ -1,4 +1,4 @@
-# Render Schema Spec (v5 — Provider Elimination)
+# Render Schema Spec (v6 — Content Layer + 5 Topologies)
 
 ## Purpose
 
@@ -38,6 +38,7 @@ engine:
   surface: "wood-classic" # named surface (or inline override)
   render: { ... }         # layout + sizing + features
   pieces: { ... }         # piece set + vocabulary
+  content: { ... }        # external structured data (complex boards, RPG)
   components: { ... }     # deck/dice/tiles (non-spatial games)
   plugins: { ... }        # behavioural rules (existing)
 
@@ -57,7 +58,7 @@ Defines spatial structure. Unified field names across all types.
 
 | Field | Type | Meaning |
 |-------|------|---------|
-| `type` | string | `grid` / `hex` / `track` / `pit` / `graph` / `star` / `none` |
+| `type` | string | `grid` / `hex` / `track` / `pit` / `graph` / `none` |
 | `rows` | int | row count |
 | `cols` | int | column count |
 | `radius` | int | concentric ring count from centre |
@@ -118,23 +119,25 @@ topology:
 
 ### type: graph
 
+Covers ALL node-based games: morris, nyout, asalto, stern-halma (star), and any future node-edge board.
+
 ```yaml
 topology:
   type: graph
-  # Explicit node/edge definition (morris, custom boards):
+  # Explicit node/edge definition (custom boards):
   nodes: [a1, a4, a7, ...]
   edges:
     - [a1, d1]
     - [d1, g1]
 
   # OR parametric structure (eliminates game-named generators):
-  structure: concentric-rings | perimeter-cross | grid-cross | custom
+  structure: concentric-rings | perimeter-cross | grid-cross | star | custom
   params:
     # concentric-rings (morris family):
     rings: 3
     midpoints: true
     diagonals: false
-    # perimeter-cross (nyout/yut-nori family):
+    # perimeter-cross (nyout family):
     sides: 4
     nodesPerSide: 5
     diagonals: true
@@ -143,18 +146,15 @@ topology:
     rows: [[2,3,4], [2,3,4], [0,1,2,3,4,5,6], [0,1,2,3,4,5,6], [0,1,2,3,4,5,6], [2,3,4], [2,3,4]]
     fortressRows: 2
     diagonals: true
+    # star (stern-halma/chinese-checkers family):
+    arms: 6
+    armSize: 4          # nodes per arm
+    spacing: 24         # inter-node distance
 ```
 
-When `structure` is provided, the renderer computes nodes/edges from params. When explicit `nodes`/`edges` are provided, they are used directly. Both produce the same result — explicit is for non-parametric boards.
+When `structure` is provided, the renderer computes nodes/edges from params. When explicit `nodes`/`edges` are provided, they are used directly. Both produce the same data shape.
 
-### type: star
-
-```yaml
-topology:
-  type: star
-  arms: 6
-  armSize: 10
-```
+Star boards are graph nodes with hex-spaced positions and zone-coloured arm regions. The "star-ness" is visual (arm polygon fills, frame shape) — handled by decorations and zones, not topology.
 
 ### type: none
 
@@ -195,6 +195,41 @@ surface:
     background: "#2a1a0a"
   texture: none
 ```
+
+### Treatments (visual recipes for content types)
+
+When `content:` provides per-position type data, `surface.treatments` maps those types to visual recipes. The renderer applies the recipe without knowing what game it's drawing.
+
+```yaml
+surface:
+  base: parchment
+  colors:
+    lot: "#6a9a50"
+    railroad: "#d4889a"
+    franchise: "#d4c060"
+    corner: "#d4c898"
+  treatments:
+    lot: stripe              # colour band at cell edge
+    railroad: stripe
+    franchise: stripe
+    corner: medallion        # circular frame
+    jail: bars               # vertical bar lines
+    'go-to-jail': split      # diagonal split cell
+```
+
+Treatment types are a fixed vocabulary (the renderer must implement each):
+
+| Treatment | Visual effect | Used by |
+|-----------|---------------|---------|
+| `stripe` | Colour band at cell edge (top/side depending on orientation) | Landlords lots, Monopoly properties |
+| `medallion` | Circular frame with inner text | Landlords 1904 corners |
+| `split` | Diagonal split with two fills | Landlords 1906 jail/chance combo |
+| `bars` | Vertical lines over cell | Jail corners |
+| `arc` | Circular arc within cell | Landlords 1932 Wages/fare corners |
+| `tint` | Background fill from surface.colors | Zone highlights (general) |
+| `none` | Default rendering | Most cells |
+
+This is extensible — new treatment types can be added without modifying topology or content logic. A treatment is a pure function: (cell geometry, surface colours, content data) → SVG elements.
 
 ---
 
@@ -568,7 +603,7 @@ setup:
   a1: K
   d7: null
 
-# Star — filled arms:
+# Graph (star structure) — filled arms:
 setup:
   arms: [N, S]
 
@@ -598,6 +633,179 @@ pieces:
     white: "#1565c0"
     black: "#c62828"
 ```
+
+---
+
+## content: block
+
+External structured data that the renderer needs to populate complex surfaces — per-position labels, card text, oracle tables, space properties. Separates content from structure (topology) and appearance (surface).
+
+This is the bridge between "what's on the board" (structural) and "what does the user see/read" (presentational).
+
+### Schema
+
+```yaml
+engine:
+  content:
+    source: path/to/data.json           # external file (relative to variant dir)
+    # OR inline for small datasets:
+    data: [...]
+
+    # How to interpret the data — rendering contract:
+    schema:
+      type: position-list | category-list | oracle-tables
+      fields:
+        name: { display: true }
+        type: { mapTo: surface }         # type field maps to surface colours
+        rent: { display: true, prefix: "Rent $" }
+        price: { display: true, prefix: "$" }
+      # Category rendering (RPG, card databases):
+      categories:
+        - id: spells
+          label: Spells
+          file: spells.json              # relative to source dir
+          search: [name, school.name]
+          tag: { field: level, prefix: "Lvl " }
+        - id: monsters
+          label: Monsters
+          file: monsters.json
+          search: [name, type]
+          tag: { field: challenge_rating, prefix: "CR " }
+      # Card display template (how to render each item):
+      card:
+        title: name
+        meta: [level, school.name]       # fields shown as subtitle
+        body: desc[0]                    # truncated description
+      # Link pattern:
+      links:
+        base: https://rules.moddable.games/dnd-5e
+        pattern: "{category}/{group}/"   # interpolated per item
+```
+
+### Use cases
+
+#### Property track (Landlords, Econopoly)
+
+```yaml
+engine:
+  topology:
+    type: track
+    positions: 40
+    shape: circuit
+  surface: parchment
+  content:
+    source: board-data.json
+    schema:
+      type: position-list
+      fields:
+        name: { display: true }
+        type: { mapTo: surface }
+        rent: { display: true, prefix: "Rent $" }
+        price: { display: true, prefix: "$" }
+        side: { layout: true }
+```
+
+The surface then maps content.type values to visual treatments:
+
+```yaml
+surface:
+  base: parchment
+  colors:
+    lot: "#6a9a50"
+    railroad: "#d4889a"
+    franchise: "#d4c060"
+  treatments:
+    lot: stripe            # draw colour band at cell edge
+    railroad: stripe
+    corner: medallion      # draw circular frame
+    jail: bars             # draw bar lines
+```
+
+#### RPG reference (D&D 5e, Ironsworn)
+
+```yaml
+engine:
+  topology:
+    type: none
+  content:
+    source: data/
+    schema:
+      type: category-list
+      categories:
+        - id: spells
+          label: Spells
+          file: spells.json
+          search: [name, school.name]
+          tag: { field: level, prefix: "Lvl " }
+          color: { accent: "#7b5ea7" }
+        - id: monsters
+          label: Monsters
+          file: monsters.json
+          search: [name, type]
+          tag: { field: challenge_rating, prefix: "CR " }
+          color: { accent: "#c0392b" }
+      card:
+        title: name
+        meta: [level, school.name, casting_time, range]
+        body: desc[0]
+      links:
+        base: https://rules.moddable.games/dnd-5e
+        pattern: "{category}/"
+
+meta:
+  label: "D&D 5e SRD"
+  category: rpg
+```
+
+#### Board games with space effects (Royal Ur, Pachisi)
+
+```yaml
+engine:
+  content:
+    data:
+      - { pos: 4, type: rosette, effect: "Extra roll" }
+      - { pos: 8, type: rosette, effect: "Safe square + extra roll" }
+      - { pos: 14, type: rosette, effect: "Safe square + extra roll" }
+    schema:
+      type: position-list
+      fields:
+        type: { mapTo: surface }
+        effect: { display: true }
+```
+
+### How content flows through the pipeline
+
+```
+1. Loader resolves content.source → fetch JSON
+2. Schema.type tells renderer how to iterate the data:
+   - position-list: array of objects keyed by position
+   - category-list: grouped items with search + card display
+   - oracle-tables: roll tables with min/max ranges
+3. fields.mapTo: surface → content.type values map to surface.colors keys
+4. fields.display: true → values rendered as text in the cell/card
+5. surface.treatments → visual recipe applied per content.type
+6. card template → how to compose item display (RPG, complex cards)
+```
+
+### What content replaces in current code
+
+| Current | Becomes |
+|---------|---------|
+| `js/landlords-data.json` loaded as `opts.boardData` | `content.source: landlords-1906.json` |
+| `RPG_CONFIGS.dnd-5e.categories` | `content.schema.categories` |
+| `RPG_CONFIGS.dnd-5e.dataPath` | `content.source: data/` |
+| `renderDndCard()` / `renderIronswornCard()` | `content.schema.card` template |
+| `CAT_COLORS` | `content.schema.categories[].color` |
+| `getItemLink()` | `content.schema.links` |
+| Pachisi "safe square" tooltips | `content.data[].effect` |
+
+### Key constraint
+
+Content data is NEVER hardcoded in JS. It lives in:
+- JSON files alongside the variant markdown (same directory)
+- OR inline in frontmatter for tiny datasets (< 10 items)
+
+The renderer has zero knowledge of what the data means — it only knows the schema contract (position-list, category-list, oracle-tables) and renders accordingly.
 
 ---
 
@@ -1315,7 +1523,7 @@ Delete the 2642-line file. All data lives in moddable-rules frontmatter.
 | backgammon | board | track | parchment | — | 8 |
 | mancala | board | pit | earth | — | 8 |
 | halma | board | grid | wood-classic | checkered | 2 |
-| stern-halma | board | star | slate | — | 5 |
+| stern-halma | board | graph (star) | slate | — | 5 |
 | hex | board | hex | slate | uniform | 9 |
 | royal-ur | board | grid + zones | parchment | uniform | 1 |
 | surakarta | board | grid | parchment | uniform | 1 |
@@ -1391,7 +1599,11 @@ circular-chess, chess-in-the-round, byzantine-chess, cylindrical-chess, klein-bo
 
 14. **Decorations separate visual overlays from structure.** Star points, promotion tints, orbital arcs, river gaps, palace diagonals — all described declaratively in `render.decorations`, not baked into provider logic.
 
-15. **Providers collapse into topology dispatch.** The 14 named providers in board-diagrams.js (checkered, go, xiangqi, shogi, etc.) become a single renderer that dispatches on `topology.type` + `topology.layout` + `render.decorations`. All game-specific visual behaviour is expressible through the schema without provider branching.
+15. **Providers collapse into topology dispatch.** The 14 named providers in board-diagrams.js become 5 topology renderers (grid, hex, track, pit, graph). All game-specific visual behaviour is expressible through zones + decorations + surface treatments without provider branching.
+
+16. **5 spatial topologies + 1 non-spatial.** Grid (covers chess, go, xiangqi, shogi, draughts, alquerque, surakarta — cells or intersections), Hex (all hex-cell games), Track (backgammon, landlords, pachisi), Pit (mancala family), Graph (morris, nyout, asalto, stern-halma/star). Star is not its own topology — it's a graph with `structure: star` and zone decorations for arm regions.
+
+17. **content: provides external structured data.** Complex boards (landlords space properties, RPG card databases, oracle tables) reference external JSON files. The renderer never hardcodes data — it reads a schema contract and renders accordingly. Three schema types: position-list, category-list, oracle-tables.
 
 ---
 
@@ -1414,15 +1626,15 @@ How each current board-diagrams.js provider becomes schema-driven:
 | `hex` | hex (already parametric) | topology.type:hex, shape/radius/orientation |
 | `mancala` | pit (already parametric) | topology.type:pit, cols/rows/stores |
 | `backgammon` | track + trackStyle | topology.type:track, render.trackStyle:triangular-points |
-| `stern-halma` | star (already parametric) | topology.type:star, arms:6, armSize:10 |
-| `landlords` | track + zones (data-driven) | topology.type:track, zones from boardData |
+| `stern-halma` | graph + star structure | topology.type:graph, structure:star, params:{arms:6, armSize:4} + zone decorations |
+| `landlords` | track + content + surface treatments | topology.type:track, content.source:board-data.json, surface.treatments per type |
 
 ### What remains in code
 
 The renderer still needs drawing logic — it isn't eliminated. What changes:
 
 - **Before:** 14 named providers, each with hardcoded game knowledge, colour defaults, and structural assumptions
-- **After:** 7 topology renderers (grid, hex, track, pit, graph, star, none) that read all visual parameters from the resolved schema object. Zero game knowledge.
+- **After:** 5 topology renderers (grid, hex, track, pit, graph) + 1 non-spatial (none) that read all visual parameters from the resolved schema object. Zero game knowledge.
 
 Decorations are a composable overlay system — each decoration type (markers, tint, gap, diagonals, arcs, border) is a small pure function that receives position data and surface colours. No decoration knows which game it's drawing for.
 
