@@ -1918,6 +1918,8 @@ function render() {
     loadRecolouredPieces(config, galleryIndex).then(() => {
       const svg = renderBoard(config)
       showSvg(svg)
+      showInfo(config)
+      bindBoardHover(config)
       requestAnimationFrame(fitToView)
     })
     return
