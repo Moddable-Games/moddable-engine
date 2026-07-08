@@ -12,9 +12,11 @@ import { getDeckConfig, createDeck, shuffle, deal, layoutTable } from './deck-ma
 let _renderDeckSvg = null
 let _renderMahjongSvg = null
 let _renderTableauSvg = null
+let _renderMultiBoard = null
 export function setDeckRenderer(fn) { _renderDeckSvg = fn }
 export function setMahjongRenderer(fn) { _renderMahjongSvg = fn }
 export function setTableauRenderer(fn) { _renderTableauSvg = fn }
+export function setMultiBoardRenderer(fn) { _renderMultiBoard = fn }
 
 // --- FEN character → piece ID mapping (same as boards.js) ---
 
@@ -308,7 +310,9 @@ function buildRenderOpts(resolved) {
     opts.flat = topo.orientation === 'flat'
     opts.hexSize = render.cellSize || 20
     opts.hexFrame = render.frame || topo.shape || null
-    if (topo.shape === 'hexagonal' && topo.radius) {
+    if (resolved._hexGrid) {
+      opts.hexGrid = resolved._hexGrid
+    } else if (topo.shape === 'hexagonal' && topo.radius) {
       opts.hexRadius = topo.radius
     } else if (topo.rows && topo.cols) {
       opts.hexRows = topo.rows
@@ -671,6 +675,22 @@ export async function renderFromResolved(resolved, container) {
     return
   }
 
+  // Multi-board games (Alice, Gygax, Bughouse)
+  if (resolved._layers && _renderMultiBoard) {
+    const gallery = await loadGalleryIndex()
+    const config = { ...resolved._layers, rows: resolved.topology?.rows || 8, cols: resolved.topology?.cols || 8, tileSize: resolved.render?.cellSize || 34, layers: resolved._layers }
+    if (resolved.pieces?.set && gallery?.length > 0) {
+      const fenOverrides = resolved.pieces?.fenMap || null
+      const { images, surfaceMap, surface } = buildPieceImages(resolved.pieces.set, gallery, fenOverrides, false)
+      if (Object.keys(images).length > 0) config.pieceImages = images
+      if (Object.keys(surfaceMap).length > 0) config.pieceSurfaceMap = surfaceMap
+      if (surface) config.pieceSurface = surface
+    }
+    const svgString = _renderMultiBoard(config, {})
+    container.innerHTML = svgString
+    return
+  }
+
   const opts = buildRenderOpts(resolved)
 
   if (!opts) {
@@ -683,8 +703,6 @@ export async function renderFromResolved(resolved, container) {
   if (gallery && gallery.length > 0) {
     attachPieceImages(opts, resolved, gallery)
   }
-
-  console.debug('[schema-render]', opts.boardStyle, 'pieceImages:', Object.keys(opts.pieceImages || {}).length, 'position:', Object.keys(opts.position || {}).length)
 
   const svgString = renderBoard(opts)
   container.innerHTML = svgString

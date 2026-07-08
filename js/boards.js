@@ -3,7 +3,7 @@ import { renderSurfaceSVG } from './piece-surface.js'
 import { getGameConfig, getAllGames, HexSvg, createSeededRng } from './hex-games/index.js'
 import { getDeckConfig, getRegisteredDecks, createDeck, shuffle, deal, layoutTable } from './deck-manager/index.js'
 import { renderRpgProvider } from './rpg-provider.js'
-import { renderFromResolved, loadGalleryIndex as loadAdapterGallery, setDeckRenderer, setMahjongRenderer, setTableauRenderer } from './render-adapter.js'
+import { renderFromResolved, loadGalleryIndex as loadAdapterGallery, setDeckRenderer, setMahjongRenderer, setTableauRenderer, setMultiBoardRenderer } from './render-adapter.js'
 import { reverseAdapt } from './reverse-adapter.js'
 import { resolveSurface } from './surface-resolver.js'
 import { resolve as cascadeResolve } from './cascade-resolver.js'
@@ -11,6 +11,7 @@ import { resolve as cascadeResolve } from './cascade-resolver.js'
 setDeckRenderer(renderDeckSvg)
 setMahjongRenderer(renderMahjongSvg)
 setTableauRenderer(renderTableauSvg)
+setMultiBoardRenderer(renderMultiBoard)
 
 // ─── DUNGEON CHESS CELL MAPS ───────────────────────────────────────────────
 // null = void, 'floor' = standard, 'p1'/'p2' = deploy zones, 'water' = obstacle
@@ -1518,7 +1519,7 @@ function getStaticSvgPath(gameId, variantId) {
   return `../diagrams/static/${gameId}/${filename}`
 }
 
-function renderMultiBoard(config, game) {
+export function renderMultiBoard(config, game) {
   const { layers } = config
   const { count, layout, labels, fens, colors: layerColors } = layers
   const gap = layout === 'horizontal' ? 20 : 12

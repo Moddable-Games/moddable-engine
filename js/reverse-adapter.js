@@ -241,7 +241,9 @@ export function reverseAdapt(config, game, gameId, runtimeState) {
   if (config._position) variantEngine._position = config._position
   if (config.hexColorFn) variantEngine._hexColorFn = config.hexColorFn
   if (config.hexPosition) variantEngine._hexPosition = config.hexPosition
+  if (config.hexGrid) variantEngine._hexGrid = config.hexGrid
   if (config.centreMarker) variantEngine._centreMarker = config.centreMarker
+  if (config.layers) variantEngine._layers = config.layers
   if (runtimeState) variantEngine._runtimeState = runtimeState
 
   return {
