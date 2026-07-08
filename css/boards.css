@@ -489,3 +489,43 @@
   text-decoration: none;
 }
 .rpg-card-link:hover { color: #bde; text-decoration: underline; }
+
+.render-mode-toggle {
+  display: flex;
+  gap: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+}
+.mode-btn {
+  flex: 1;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: none;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.mode-btn:hover {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+.mode-btn.active {
+  background: var(--cosmic-glow, #4a6fff);
+  color: #fff;
+}
+.schema-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 5px;
+  border-radius: 3px;
+  background: var(--cosmic-glow, #4a6fff);
+  color: #fff;
+  margin-left: 6px;
+  vertical-align: middle;
+}
