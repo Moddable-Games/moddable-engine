@@ -184,6 +184,7 @@ function buildCrossShapeMap(rows, cols, armWidth) {
 
 const BALBO_MAP = buildDiamondMap(10, 11, [3, 5, 7, 9, 11, 11, 9, 7, 5, 3])
 const FOUR_PLAYER_MAP = buildCrossShapeMap(14, 14, 8)
+const LOS_ALAMOS_V_MAP = buildCrossShapeMap(10, 10, 6)
 function buildCornerMap(innerSize) {
   const size = innerSize + 2
   const grid = Array.from({ length: size }, () => Array(size).fill(null))
@@ -544,7 +545,6 @@ const GAMES = {
       gygax: { label: 'Gygax Chess', boardStyle: 'checkered', rows: 8, cols: 12, tileSize: 24, layers: { count: 3, layout: 'vertical', labels: ['Level 3 — Air', 'Level 2 — Land', 'Level 1 — Subterranean'], fens: ['2G3R3G1/S1S1S1S1S1S1/12/12/12/12/s1s1s1s1s1s1/2g3r3g1', 'OUHTCMKPTHUO/WWWWWWWWWWWW/12/12/12/12/wwwwwwwwwwww/ouhtcmkpthuo', '2B3E3B1/1D1D1D1D1D1D/12/12/12/12/1d1d1d1d1d1d/2b3e3b1'], colors: [{ lightSquare: '#a0c8e8', darkSquare: '#6a9ec8' }, { lightSquare: '#a8c890', darkSquare: '#6d9450' }, { lightSquare: '#d4a080', darkSquare: '#a06848' }] }, variantDesc: 'D&D-inspired three-level chess by Gary Gygax. 12x8 boards. Hero, Cleric, and fantasy pieces.'},
       'half-chess': { label: 'Half Chess', boardStyle: 'checkered', rows: 4, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/PPPPPPPP/RNBQKBNR', variantDesc: '4-rank board. Armies start adjacent. Immediate contact.'},
       hexapawn: { label: 'Hexapawn', boardStyle: 'checkered', rows: 3, cols: 3, tileSize: 50, fen: 'ppp/3/PPP', variantDesc: '3x3 pawn-only game. Reach far rank or stalemate opponent wins. Solved: Black wins with perfect play. Martin Gardner, 1962.'},
-      'hole-chess': { label: 'Hole Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: '44-square board with 2 permanent holes. Pieces can be sucked into holes via Two-Action Rule. Gary K. Gifford, 2003.'},
       'hoppel-poppel': { label: 'Hoppel-Poppel', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Knights capture like bishops; bishops capture like knights.'},
       'hostage-chess': { label: 'Hostage Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Captured pieces go to a prison. Can be released back to your opponent in exchange for one of your prisoners. John Leslie, 1997.'},
       horde: { label: 'Horde', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/1PP2PP1/PPPPPPPP/PPPPPPPP/PPPPPPPP/PPPPPPPP', variantDesc: 'White has full army. Black has 36 pawns. Asymmetric survival.'},
@@ -556,7 +556,7 @@ const GAMES = {
       kriegspiel: { label: 'Kriegspiel', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Blind chess with referee. Players cannot see opponent pieces. Referee announces checks and captures. Henry Michael Temple, 1899.'},
       'legan-chess': { label: 'Legan Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbkqbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBKQBNR', variantDesc: 'Berolina pawns. King and Queen swap starting squares.'},
       'los-alamos': { label: 'Los Alamos', boardStyle: 'checkered', rows: 6, cols: 6, tileSize: 40, fen: 'rnqknr/pppppp/6/6/PPPPPP/RNQKNR', variantDesc: 'First computer chess (1956). 6x6 board, no Bishops, no castling.'},
-      'los-alamos-vierschach': { label: 'Los Alamos Vierschach', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 30, fen: '10/10/2rnqknr2/2pppppp2/10/10/2PPPPPP2/2RNQKNR2/10/10', variantDesc: '4-player Los Alamos on 84-square cross board. No Bishops, no castling. Allied teams. Jörg Knappen.'},
+      'los-alamos-vierschach': { label: 'Los Alamos Vierschach', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 30, cellMap: LOS_ALAMOS_V_MAP, colors: { voidFill: 'transparent' }, fen4: '2,yR,yN,yB,yQ,yK,yR,2/2,yP,yP,yP,yP,yP,yP,2/bR,bP,6,gP,gR/bN,bP,6,gP,gN/bB,bP,6,gP,gK/bQ,bP,6,gP,gQ/bK,bP,6,gP,gB/bR,bP,6,gP,gR/2,rP,rP,rP,rP,rP,rP,2/2,rR,rN,rB,rQ,rK,rR,2', pieceSet4: 'mce-4player', variantDesc: '4-player Los Alamos variant on 84-square cross board. Allied teams. Jörg Knappen.'},
       madrasi: { label: 'Madrasi', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Same-type opposing pieces paralyse each other when they attack.'},
       maharaja: { label: 'Maharaja', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/8/4M3', variantDesc: 'One full army vs one piece that moves as Queen + Knight.'},
       makpong: { label: 'Makpong', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'King cannot move out of check. Must block or capture.'},
