@@ -2764,9 +2764,13 @@ function bindBoardHover(config) {
     const piece = (layer !== undefined && layerPositions) ? layerPositions[parseInt(layer)]?.[sq] : position[sq]
     if (piece) {
       const p = typeof piece === 'object' ? piece : { type: String(piece) }
-      const name = pieceNameOverrides[p.type] || PIECE_NAMES[p.type] || p.type
+      const fen4Prefix = p.type.length === 2 && FEN4_OWNERS[p.type[0]]
+      const name = pieceNameOverrides[p.type] || (fen4Prefix ? PIECE_NAMES[p.type[1]] : PIECE_NAMES[p.type]) || p.type
       if (p.color) {
         text += ` — ${p.color} ${name}`
+      } else if (fen4Prefix) {
+        const ownerName = FEN4_OWNERS[p.type[0]]
+        text += ` — ${ownerName.charAt(0).toUpperCase() + ownerName.slice(1)} ${name}`
       } else if (p.type !== p.type.toLowerCase()) {
         text += ` — White ${name}`
       } else if (PIECE_NAMES[p.type] && !pieceNameOverrides[p.type]) {
