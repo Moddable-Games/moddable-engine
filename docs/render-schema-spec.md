@@ -1,19 +1,20 @@
-# Render Schema Spec (v3 — Surface Abstraction)
+# Render Schema Spec (v4 — Meta + Components)
 
 ## Purpose
 
-Define the full data contract between moddable-rules frontmatter and the board studio renderer, eliminating all hardcoded config from `boards.js`. Every field needed to render any of the 41 game families and 315+ variants must be expressible in frontmatter alone.
+Define the full data contract between moddable-rules frontmatter and the board studio, eliminating all hardcoded config from `boards.js`. Covers all 41 game families and 315+ variants: board games, card games, dice games, tile games, and RPG references.
 
 ## Design Principles
 
 1. **Topology-agnostic naming.** No field name references a specific topology.
 2. **Concepts over implementations.** Fields describe WHAT not HOW.
 3. **Minimal per-variant config.** Family defaults + named surfaces cover 95%+ of fields.
-4. **Surfaces are reusable.** ~9 named surfaces serve all 315 variants. Per-game colour definitions are eliminated.
-5. **Three concerns, cleanly separated:**
+4. **Surfaces are reusable.** ~9 named surfaces serve all 315 variants.
+5. **Four concerns, cleanly separated:**
    - **Topology** — where things are (structure, geometry)
    - **Surface** — how the board looks (colours, texture, material)
    - **Render** — how to draw it (sizing, layout, features)
+   - **Meta** — what the UI shows humans (labels, descriptions, tags)
 
 ## Cascade Model
 
@@ -31,14 +32,19 @@ Deep-merge at every level. Variant wins over family wins over surface defaults.
 
 ```yaml
 engine:
-  topology: { ... }       # spatial structure
+  topology: { ... }       # spatial structure (board games)
   setup: "..."            # position notation
   players: [...]          # player identifiers
   surface: "wood-classic" # named surface (or inline override)
   render: { ... }         # layout + sizing + features
   pieces: { ... }         # piece set + vocabulary
+  components: { ... }     # deck/dice/tiles (non-spatial games)
   plugins: { ... }        # behavioural rules (existing)
-  components: { ... }     # deck/dice (existing)
+
+meta:                       # presentation metadata (sibling to engine:)
+  label: "Capablanca"
+  description: "..."
+  tags: [...]
 ```
 
 ---
@@ -502,6 +508,333 @@ pieces:
 
 ---
 
+## meta: block
+
+Presentation metadata for the board studio UI. Lives as a sibling to `engine:` in frontmatter (not nested inside it). Subject to the same cascade: family sets defaults, variant overrides.
+
+### Family-level meta (rulebook.md)
+
+```yaml
+meta:
+  label: "Chess"                 # family display name
+  category: board | card | dice | tile | rpg
+  players: "2"                   # player range string
+  duration: "10-120 min"         # time range
+  surface: felt-green            # table surface for card/dice (shared with engine)
+  tags: [abstract, combinatorial, perfect-information]
+```
+
+### Variant-level meta (variant.md)
+
+```yaml
+meta:
+  label: "Capablanca"            # variant display name
+  description: "Two extra compound pieces on a 10×8 board."
+  setupDesc: "Archbishop and Chancellor flank the Bishops."
+  players: "2"                   # override if different from family
+  duration: "30-60 min"          # override if different
+  tags: [large-board, fairy, compound-pieces]
+  author: "José Raúl Capablanca"
+  year: 1920
+  features:                      # UI feature flags
+    handicap: true               # show handicap selector
+    randomStart: true            # show randomize button
+    hidden: true                 # hidden-information game
+```
+
+### Complete field reference
+
+| Field | Level | Derivable? | Purpose |
+|-------|-------|------------|---------|
+| `label` | both | from H2 heading | display name in dropdown/sidebar |
+| `description` | variant | from first paragraph | hover tooltip / sidebar text |
+| `setupDesc` | variant | from Setup section | setup summary |
+| `category` | family | from topology.type | UI routing: board/card/dice/tile/rpg |
+| `players` | both | from engine.players | player count string |
+| `duration` | both | no | estimated play time |
+| `tags` | both | no | filtering, search, categorization |
+| `author` | variant | no | game designer attribution |
+| `year` | variant | no | year of invention/publication |
+| `features.*` | both | partial | UI feature toggles |
+| `nodeNames` | variant | no | position labels for graph games (nyout) |
+| `pieceNames` | variant | no | piece tooltips (merge with pieces.names) |
+
+### Tag vocabulary (standardized, extensible)
+
+**Topology tags:** `large-board`, `small-board`, `hex`, `3d`, `multi-board`, `circular`, `irregular`
+
+**Mechanic tags:** `fairy`, `compound-pieces`, `drops`, `hidden-info`, `asymmetric`, `racing`, `territory`, `connection`, `capture`, `climbing`, `trick-taking`, `sowing`, `custodian`, `flanking`
+
+**Era tags:** `historical`, `modern`, `ancient`, `medieval`
+
+**Origin tags:** `european`, `asian`, `african`, `american`, `indian`
+
+---
+
+## components: block
+
+For non-spatial games (cards, dice, tiles) and games that use components alongside a board (backgammon dice, shogi hand). Replaces the `deckGame`, `rpgGame`, and component-specific routing flags.
+
+### Deck (cards)
+
+```yaml
+components:
+  deck:
+    type: standard-52 | flower-48 | bavarian-32 | mahjong-136 | dominoes-28 | custom
+    # Standard-52 config:
+    suits: [spades, hearts, diamonds, clubs]
+    ranks: [A, 2, 3, 4, 5, 6, 7, 8, 9, 10, J, Q, K]
+    jokers: 0 | 1 | 2
+    # Hanafuda config:
+    months: 12
+    cardsPerMonth: 4
+    # Dominoes config:
+    maxPips: 6 | 9 | 12
+    # Mahjong config:
+    sets: [bamboo, circles, characters]
+    honors: [winds, dragons]
+    flowers: true
+    # Custom deck:
+    cards: [...]           # explicit card list
+```
+
+### Dice
+
+```yaml
+components:
+  dice:
+    count: 2
+    sides: 6
+    type: standard | binary | long    # standard d6, backgammon binary, pachisi long
+    doubling: false                   # backgammon doubling cube
+```
+
+### Hand / reserve
+
+For games with pieces held off-board (shogi drops, crazyhouse):
+
+```yaml
+components:
+  hand:
+    enabled: true
+    source: captured | reserve | dealt
+    maxSize: null | 7
+```
+
+### Table layout (card/dice display)
+
+Replaces `deckGame`/`rpgGame` routing. Defines how non-board components are visually arranged:
+
+```yaml
+components:
+  layout:
+    type: fan | grid | pile | pool | wall | tableau | none
+    # Fan: cards held in arc (hand games)
+    # Grid: cards in rows/cols (tableau games like Klondike)
+    # Pile: stacked (discard, draw pile)
+    # Pool: scattered (dice games)
+    # Wall: linear row (mahjong, dominoes)
+    # Tableau: multi-zone (solitaire)
+    # None: no visual layout (RPG rules references)
+    zones:                 # named areas on the table
+      - name: hand
+        type: fan
+        per: player
+      - name: community
+        type: grid
+        rows: 1
+        cols: 5
+      - name: pot
+        type: pile
+        position: center
+```
+
+### Component hub examples
+
+#### Standard 52 — family default
+
+```yaml
+engine:
+  topology:
+    type: none
+  surface: felt-green
+  components:
+    deck:
+      type: standard-52
+      suits: [spades, hearts, diamonds, clubs]
+      ranks: [A, 2, 3, 4, 5, 6, 7, 8, 9, 10, J, Q, K]
+    layout:
+      type: fan
+
+meta:
+  label: "52 Cards"
+  category: card
+  players: "2-8"
+  tags: [cards, classic]
+```
+
+Surface here controls the table background, card-back colour, and felt texture — the same `felt-green` surface serves reversi boards AND card table backgrounds. A poker variant could override:
+
+```yaml
+engine:
+  surface:
+    base: felt-green
+    colors:
+      background: "#0a2e0a"    # darker table
+      card-back: "#1a237e"     # navy card backs
+```
+
+#### Texas Hold'em — variant
+
+```yaml
+engine:
+  components:
+    layout:
+      zones:
+        - name: hand
+          type: fan
+          per: player
+        - name: community
+          type: grid
+          rows: 1
+          cols: 5
+        - name: pot
+          type: pile
+          position: center
+  setup:
+    deal: 2
+    community: 5
+    players: 6
+
+meta:
+  label: "Texas Hold'em"
+  description: "Community card poker. Two private, five shared."
+  setupDesc: "2 hole cards + 5 community, 6 players"
+  players: "2-10"
+  duration: "30-120 min"
+  tags: [betting, community-cards, bluffing]
+```
+
+#### Hanafuda Koi-Koi — variant
+
+```yaml
+engine:
+  components:
+    deck:
+      type: flower-48
+    layout:
+      zones:
+        - name: hand
+          type: fan
+          per: player
+          count: 8
+        - name: field
+          type: grid
+          rows: 2
+          cols: 4
+        - name: draw
+          type: pile
+  setup:
+    deal: 8
+    field: 8
+    players: 2
+
+meta:
+  label: "Koi-Koi"
+  description: "Complete a yaku and declare win, or keep playing for more."
+  setupDesc: "8 cards each + 8 field, 2 players"
+  players: "2"
+  tags: [matching, press-your-luck, japanese]
+```
+
+#### Yahtzee — variant
+
+```yaml
+engine:
+  components:
+    dice:
+      count: 5
+      sides: 6
+      type: standard
+    layout:
+      type: pool
+      zones:
+        - name: active
+          type: pool
+          count: 5
+        - name: kept
+          type: grid
+          rows: 1
+          cols: 5
+  setup:
+    players: 4
+    rounds: 13
+
+meta:
+  label: "Yahtzee"
+  description: "Five dice, 13 scoring categories, three rolls per turn."
+  setupDesc: "5 dice, 13 categories, 1-4 players"
+  players: "1-4"
+  duration: "20-40 min"
+  tags: [dice, press-your-luck, scoring]
+```
+
+#### Mahjong Riichi — variant
+
+```yaml
+engine:
+  components:
+    deck:
+      type: mahjong-136
+      sets: [bamboo, circles, characters]
+      honors: [winds, dragons]
+      flowers: false
+    layout:
+      type: wall
+      zones:
+        - name: hand
+          type: fan
+          per: player
+          count: 13
+        - name: wall
+          type: wall
+        - name: discard
+          type: grid
+          per: player
+  setup:
+    deal: 13
+    players: 4
+
+meta:
+  label: "Riichi"
+  description: "Japanese Mahjong. Yaku requirement to win."
+  setupDesc: "136 tiles, 4 players, 13-tile hand"
+  players: "4"
+  duration: "60-120 min"
+  tags: [tiles, japanese, yaku, riichi]
+```
+
+#### D&D 5e SRD — RPG reference
+
+```yaml
+engine:
+  topology:
+    type: none
+  components:
+    layout:
+      type: none
+
+meta:
+  label: "D&D 5e SRD"
+  category: rpg
+  description: "The open core rules for the world's most popular roleplaying game."
+  setupDesc: "Tabletop RPG, 3-6 players"
+  players: "3-6"
+  tags: [rpg, fantasy, d20]
+```
+
+---
+
 ## Cascade Resolution Algorithm
 
 ```
@@ -509,14 +842,25 @@ pieces:
    - If string → load named surface definition
    - If object with base → load base, merge overrides
    - If object without base → use as-is
-2. Load family engine: block from rulebook.md
-3. Load variant engine: block from variant.md
+   - Component games use surface for table/background appearance
+2. Load family engine: + meta: blocks from rulebook.md
+3. Load variant engine: + meta: blocks from variant.md
 4. Deep-merge: surface → family → variant (rightmost wins)
+   - engine: and meta: merge independently at each level
+   - meta.tags: concatenate (variant tags ADD to family tags, not replace)
 5. Derive defaults for missing fields:
    - render.cellColor: grid → checkered, hex → uniform, others → none
    - render.frame: from topology.shape if absent
    - render.labels: true for grid, false for others
-6. Validate: topology.type + setup present for board games
+   - meta.category: from topology.type (grid/hex/graph/star/track/pit → board,
+     none + deck → card, none + dice → dice, none + tiles → tile, none alone → rpg)
+   - meta.label: from markdown H2 heading if absent
+   - meta.description: from first paragraph after H2 if absent
+   - meta.players: from engine.players array length if absent
+6. Validate:
+   - Board games: topology.type + setup required
+   - Component games: components.deck or components.dice required
+   - All: meta.label must resolve (explicit or derived)
 ```
 
 ---
@@ -838,64 +1182,70 @@ engine:
 Create 9 named surface definitions in `packages/surface/builtins/`.
 
 ### Phase 2: Add family defaults (41 families)
-Add `engine:` block to each `rulebook.md`. Covers: topology, surface ref, render, pieces, players.
+Add `engine:` + `meta:` blocks to each `rulebook.md`:
+- engine: topology, surface ref, render, pieces, players, components (card/dice/tile families)
+- meta: label, category, players, duration, tags
 
-### Phase 3: Add variant setup + overrides (315 variants)
-Add `setup:` + any override fields. Most variants are just a setup string.
+### Phase 3: Add variant overrides (315 variants)
+Each variant gets:
+- engine: `setup` + any topology/render/component overrides
+- meta: `label`, `description`, `setupDesc`, variant-specific tags
 
 ### Phase 4: Board studio reads dynamically
 Replace GAMES object: load surface → load family → merge variant → render.
+Board studio sidebar populates from resolved meta block.
+Component games route through `components.layout` instead of hardcoded flags.
 
 ### Phase 5: Retire boards.js
-Delete the 2642-line file.
+Delete the 2642-line file. All data lives in moddable-rules frontmatter.
 
 ---
 
 ## Complete Family Coverage
 
-| Family | Topology | Surface | cellColor | Variants |
-|--------|----------|---------|-----------|----------|
-| moddable-chess | grid | wood-classic | checkered | 102 |
-| go | grid (intersections) | wood-light | uniform | 14 |
-| xiangqi | grid (intersections) | wood-light | uniform | 7 |
-| draughts | grid | wood-classic | checkered | 20 |
-| reversi | grid | felt-green | uniform | 3 |
-| shogi | grid | wood-light | uniform | 22 |
-| morris | graph | slate | uniform | 7 |
-| fanorona | grid | jungle | uniform | 1 |
-| backgammon | track | parchment | — | 8 |
-| mancala | pit | earth | — | 8 |
-| halma | grid | wood-classic | checkered | 2 |
-| stern-halma | star | slate | — | 5 |
-| hex | hex | slate | uniform | 9 |
-| royal-ur | grid + zones | parchment | uniform | 1 |
-| surakarta | grid | parchment | uniform | 1 |
-| tafl | grid + zones | parchment | uniform | 4 |
-| pachisi | grid + zones | parchment | uniform | 3 |
-| chaupar | grid + zones | parchment | uniform | 1 |
-| landlords-game | track | parchment | — | 3 |
-| dungeon-chess | grid + zones | military | uniform | 3 |
-| nukes | hex | cosmic | uniform | 5 |
-| talisman-worlds | hex | cosmic | uniform | 2 |
-| mongo | hex | cosmic | uniform | 1 |
-| twilight | hex | cosmic | uniform | 7 |
-| endless-skies | hex | cosmic | uniform | 1 |
-| harvesters | hex | cosmic | uniform | 7 |
-| standard-52 | none | felt-green | — | 12 |
-| flower-48 | none | felt-green | — | 3 |
-| standard-dice | none | felt-green | — | 3 |
-| mahjong | none | felt-green | — | 4 |
-| double-six-dominoes | none | felt-green | — | 3 |
-| bavarian-32 | none | felt-green | — | 1 |
-| baristasaurus | none | felt-green | — | 1 |
-| econopoly | track | parchment | — | 1 |
-| dnd-5e | none | — | — | 1 |
-| ironsworn | none | — | — | 1 |
-| agon | hex | cosmic | bicolor | 1 |
-| asalto | graph | parchment | uniform | 2 |
-| dou-shou-qi | grid + zones | jungle | uniform | 1 |
-| lattaque | grid + zones | military | uniform | 4 |
-| nyout | graph | parchment | uniform | 1 |
+| Family | Category | Topology | Surface | cellColor | Variants |
+|--------|----------|----------|---------|-----------|----------|
+| moddable-chess | board | grid | wood-classic | checkered | 102 |
+| go | board | grid (intersections) | wood-light | uniform | 14 |
+| xiangqi | board | grid (intersections) | wood-light | uniform | 7 |
+| draughts | board | grid | wood-classic | checkered | 20 |
+| reversi | board | grid | felt-green | uniform | 3 |
+| shogi | board | grid | wood-light | uniform | 22 |
+| morris | board | graph | slate | uniform | 7 |
+| fanorona | board | grid | jungle | uniform | 1 |
+| backgammon | board | track | parchment | — | 8 |
+| mancala | board | pit | earth | — | 8 |
+| halma | board | grid | wood-classic | checkered | 2 |
+| stern-halma | board | star | slate | — | 5 |
+| hex | board | hex | slate | uniform | 9 |
+| royal-ur | board | grid + zones | parchment | uniform | 1 |
+| surakarta | board | grid | parchment | uniform | 1 |
+| tafl | board | grid + zones | parchment | uniform | 4 |
+| pachisi | board | grid + zones | parchment | uniform | 3 |
+| chaupar | board | grid + zones | parchment | uniform | 1 |
+| landlords-game | board | track | parchment | — | 3 |
+| dungeon-chess | board | grid + zones | military | uniform | 3 |
+| nukes | board | hex | cosmic | uniform | 5 |
+| talisman-worlds | board | hex | cosmic | uniform | 2 |
+| mongo | board | hex | cosmic | uniform | 1 |
+| twilight | board | hex | cosmic | uniform | 7 |
+| endless-skies | board | hex | cosmic | uniform | 1 |
+| harvesters | board | hex | cosmic | uniform | 7 |
+| standard-52 | card | none | felt-green | — | 12 |
+| flower-48 | card | none | felt-green | — | 3 |
+| bavarian-32 | card | none | felt-green | — | 1 |
+| standard-dice | dice | none | felt-green | — | 3 |
+| mahjong | tile | none | felt-green | — | 4 |
+| double-six-dominoes | tile | none | felt-green | — | 3 |
+| baristasaurus | card | none | felt-green | — | 1 |
+| econopoly | board | track | parchment | — | 1 |
+| dnd-5e | rpg | none | — | — | 1 |
+| ironsworn | rpg | none | — | — | 1 |
+| agon | board | hex | cosmic | bicolor | 1 |
+| asalto | board | graph | parchment | uniform | 2 |
+| dou-shou-qi | board | grid + zones | jungle | uniform | 1 |
+| lattaque | board | grid + zones | military | uniform | 4 |
+| nyout | board | graph | parchment | uniform | 1 |
 
 ---
 
@@ -907,7 +1257,7 @@ circular-chess, chess-in-the-round, byzantine-chess, cylindrical-chess, klein-bo
 
 ## Key Design Decisions
 
-1. **Surface separates appearance from structure.** 9 named surfaces cover 315 variants. Per-game colour blocks eliminated.
+1. **Surface separates appearance from structure.** 9 named surfaces cover all 315 variants — board games AND component games. `felt-green` serves both reversi boards and poker tables.
 
 2. **Surface is a cascade layer.** Surface provides colour defaults → family can override → variant can override. Three-level deep merge.
 
@@ -919,6 +1269,21 @@ circular-chess, chess-in-the-round, byzantine-chess, cylindrical-chess, klein-bo
 
 6. **topology.layout replaces the go/chess/xiangqi distinction.** `intersections` vs `cells` is structural (where pieces sit). The visual treatment (line weight, star points) comes from surface.
 
-7. **Surfaces are extensible.** Users can define custom surfaces for custom games. The 9 built-ins cover all existing games.
+7. **meta is a sibling block, not nested in engine.** Presentation concerns (labels, descriptions, tags) are for humans/UI. Engine block is for machines/renderers. They cascade independently.
 
-8. **Most variants are just a setup string.** With family defaults + named surface, a typical variant override is 1-3 lines.
+8. **components: replaces all routing flags.** No more `deckGame`, `rpgGame`, `hexGame` booleans. The presence of `components.deck`, `components.dice`, or `topology.type: none` determines the renderer route.
+
+9. **components.layout defines table zones.** Card/dice/tile games need spatial layout too — just not topological. Zones (hand, community, pot, wall, discard) are the component equivalent of board cells.
+
+10. **meta.tags concatenate, not replace.** A variant inherits family tags AND adds its own. `[cards, classic]` + `[betting, bluffing]` = `[cards, classic, betting, bluffing]`.
+
+11. **Surfaces are extensible.** Users can define custom surfaces for custom games. The 9 built-ins cover all existing games.
+
+12. **Most variants are just setup + meta.** With family defaults + named surface, a typical variant override is:
+    ```yaml
+    engine:
+      setup: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+    meta:
+      label: "Standard"
+      description: "Standard FIDE rules."
+    ```
