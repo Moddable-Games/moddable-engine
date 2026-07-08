@@ -261,12 +261,14 @@ const xiangqi = {
     parts.push(`<rect x="${ox}" y="${oy}" width="${gridW + inset * 2}" height="${gridH + inset * 2}" fill="none" stroke="${colors.gridLine}" stroke-width="2"/>`)
     parts.push(`<g stroke="${colors.gridLine}" stroke-width="1">`)
     if (river) {
+      const riverTop = opts.riverRows ? opts.riverRows[0] : Math.floor(rows / 2) - 1
+      const riverBot = opts.riverRows ? opts.riverRows[1] : Math.floor(rows / 2)
       for (let r = 0; r < rows; r++) {
-        if (r === 4 || r === 5) continue
+        if (r === riverTop || r === riverBot) continue
         const y = gy + r * tileSize
         parts.push(`<line x1="${gx}" y1="${y}" x2="${gx + gridW}" y2="${y}"/>`)
       }
-      const ry1 = gy + 4 * tileSize, ry2 = gy + 5 * tileSize
+      const ry1 = gy + riverTop * tileSize, ry2 = gy + riverBot * tileSize
       parts.push(`<line x1="${gx}" y1="${ry1}" x2="${gx + gridW}" y2="${ry1}"/>`)
       parts.push(`<line x1="${gx}" y1="${ry2}" x2="${gx + gridW}" y2="${ry2}"/>`)
       for (let c = 0; c < cols; c++) {
@@ -297,10 +299,12 @@ const xiangqi = {
     parts.push(`<line x1="${pr}" y1="${gy + palaceBotRow * tileSize}" x2="${pl}" y2="${gy + (palaceBotRow + palaceRows) * tileSize}"/>`)
     parts.push('</g>')
     if (river) {
-      const ry1 = gy + 4 * tileSize, ry2 = gy + 5 * tileSize
-      const mid = (ry1 + ry2) / 2
-      parts.push(`<text x="${gx + gridW * 0.25}" y="${mid + 5}" text-anchor="middle" font-size="14" font-family="serif" pointer-events="none" fill="${colors.riverText}">楚 河</text>`)
-      parts.push(`<text x="${gx + gridW * 0.75}" y="${mid + 5}" text-anchor="middle" font-size="14" font-family="serif" pointer-events="none" fill="${colors.riverText}">漢 界</text>`)
+      const rtop = opts.riverRows ? opts.riverRows[0] : Math.floor(rows / 2) - 1
+      const rbot = opts.riverRows ? opts.riverRows[1] : Math.floor(rows / 2)
+      const rty1 = gy + rtop * tileSize, rty2 = gy + rbot * tileSize
+      const rmid = (rty1 + rty2) / 2
+      parts.push(`<text x="${gx + gridW * 0.25}" y="${rmid + 5}" text-anchor="middle" font-size="14" font-family="serif" pointer-events="none" fill="${colors.riverText}">楚 河</text>`)
+      parts.push(`<text x="${gx + gridW * 0.75}" y="${rmid + 5}" text-anchor="middle" font-size="14" font-family="serif" pointer-events="none" fill="${colors.riverText}">漢 界</text>`)
     }
     parts.push('<g fill="transparent">')
     for (let r = 0; r < rows; r++) {
