@@ -168,12 +168,13 @@ function buildDiamondMap(rows, cols, rankWidths) {
 
 function buildCrossShapeMap(rows, cols, armWidth) {
   const grid = Array.from({ length: rows }, () => Array(cols).fill(null))
-  const midR = Math.floor(rows / 2)
-  const midC = Math.floor(cols / 2)
-  const halfArm = Math.floor(armWidth / 2)
+  const startR = Math.floor((rows - armWidth) / 2)
+  const startC = Math.floor((cols - armWidth) / 2)
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      if (Math.abs(r - midR) < halfArm || Math.abs(c - midC) < halfArm) {
+      const inVertical = c >= startC && c < startC + armWidth
+      const inHorizontal = r >= startR && r < startR + armWidth
+      if (inVertical || inHorizontal) {
         grid[r][c] = true
       }
     }
@@ -182,6 +183,7 @@ function buildCrossShapeMap(rows, cols, armWidth) {
 }
 
 const BALBO_MAP = buildDiamondMap(10, 11, [3, 5, 7, 9, 11, 11, 9, 7, 5, 3])
+const FOUR_PLAYER_MAP = buildCrossShapeMap(14, 14, 8)
 
 // ─── L'ATTAQUE / STRATEGO BOARD MAP ────────────────────────────────────────
 
@@ -521,7 +523,7 @@ const GAMES = {
       'flip-chess': { label: 'Flip Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'After each capture, the capturing piece transforms into the type of piece it captured.'},
       'five-check': { label: 'Five-Check', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Extended Three-Check. Five checks wins instead of three.'},
       'fog-of-war': { label: 'Fog of War', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Only see squares your pieces can move to. No check warnings.'},
-      'four-handed-chess': { label: 'Four-Handed Chess', boardStyle: 'checkered', rows: 14, cols: 14, tileSize: 24, fen: '14/14/14/3rnbqkbnr3/3pppppppp3/14/14/14/14/3PPPPPPPP3/3RNBQKBNR3/14/14/14', variantDesc: '4-player on 14x14 cross-shaped board (160 squares). Standard armies on each wing. Teams or free-for-all.'},
+      'four-handed-chess': { label: 'Four-Handed Chess', boardStyle: 'checkered', rows: 14, cols: 14, tileSize: 24, cellMap: FOUR_PLAYER_MAP, colors: { voidFill: 'transparent' }, noRenderer: true, variantDesc: '4-player on 14x14 cross-shaped board (160 squares). Standard armies on each wing. Requires 4-player position notation (not yet designed).'},
       giveaway: { label: 'Giveaway', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Forced captures. King is not royal. Stalemate is a loss.'},
       glinski: { label: 'Glinski (Hex)', boardStyle: 'hex', hexRadius: 5, hexSize: 22, flat: true, hexColorFn: glinskiColor, hexPosition: GLINSKI_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' } , variantDesc: 'Chess on a 91-cell hexagonal board. Three bishops per side.'},
       grand: { label: 'Grand Chess', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, fen: 'r8r/1nbqkcbn1/pppppppppp/10/10/10/10/PPPPPPPPPP/1NBQKCBN1/R8R', variantDesc: 'Archbishop and Chancellor on 10x10 board. Pawns start on rank 3.'},
