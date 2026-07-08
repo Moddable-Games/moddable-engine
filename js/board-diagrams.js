@@ -298,13 +298,14 @@ const xiangqi = {
     parts.push(`<line x1="${pl}" y1="${gy + palaceBotRow * tileSize}" x2="${pr}" y2="${gy + (palaceBotRow + palaceRows) * tileSize}"/>`)
     parts.push(`<line x1="${pr}" y1="${gy + palaceBotRow * tileSize}" x2="${pl}" y2="${gy + (palaceBotRow + palaceRows) * tileSize}"/>`)
     parts.push('</g>')
-    if (river && cols >= 9) {
+    if (river) {
       const rtop = opts.riverRows ? opts.riverRows[0] : Math.floor(rows / 2) - 1
       const rbot = opts.riverRows ? opts.riverRows[1] : Math.floor(rows / 2)
       const rty1 = gy + rtop * tileSize, rty2 = gy + rbot * tileSize
       const rmid = (rty1 + rty2) / 2
-      parts.push(`<text x="${gx + gridW * 0.25}" y="${rmid + 5}" text-anchor="middle" font-size="14" font-family="serif" pointer-events="none" fill="${colors.riverText}">楚 河</text>`)
-      parts.push(`<text x="${gx + gridW * 0.75}" y="${rmid + 5}" text-anchor="middle" font-size="14" font-family="serif" pointer-events="none" fill="${colors.riverText}">漢 界</text>`)
+      const riverFontSize = Math.min(tileSize * 0.45, 14)
+      parts.push(`<text x="${gx + gridW * 0.25}" y="${rmid + riverFontSize * 0.35}" text-anchor="middle" font-size="${riverFontSize}" font-family="serif" pointer-events="none" fill="${colors.riverText}">楚 河</text>`)
+      parts.push(`<text x="${gx + gridW * 0.75}" y="${rmid + riverFontSize * 0.35}" text-anchor="middle" font-size="${riverFontSize}" font-family="serif" pointer-events="none" fill="${colors.riverText}">漢 界</text>`)
     }
     parts.push('<g fill="transparent">')
     for (let r = 0; r < rows; r++) {
