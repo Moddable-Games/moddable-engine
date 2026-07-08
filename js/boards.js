@@ -152,6 +152,37 @@ const TAFL_COLORS = {
   voidFill: 'transparent',
 }
 
+// ─── SHAPED BOARD MAPS (diamond, cross) ────────────────────────────────────
+
+function buildDiamondMap(rows, cols, rankWidths) {
+  const grid = Array.from({ length: rows }, () => Array(cols).fill(null))
+  for (let r = 0; r < rows; r++) {
+    const w = rankWidths[r]
+    const offset = Math.floor((cols - w) / 2)
+    for (let c = offset; c < offset + w; c++) {
+      grid[r][c] = true
+    }
+  }
+  return grid
+}
+
+function buildCrossShapeMap(rows, cols, armWidth) {
+  const grid = Array.from({ length: rows }, () => Array(cols).fill(null))
+  const midR = Math.floor(rows / 2)
+  const midC = Math.floor(cols / 2)
+  const halfArm = Math.floor(armWidth / 2)
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (Math.abs(r - midR) < halfArm || Math.abs(c - midC) < halfArm) {
+        grid[r][c] = true
+      }
+    }
+  }
+  return grid
+}
+
+const BALBO_MAP = buildDiamondMap(10, 11, [3, 5, 7, 9, 11, 11, 9, 7, 5, 3])
+
 // ─── L'ATTAQUE / STRATEGO BOARD MAP ────────────────────────────────────────
 
 function buildLatttaqueMap(rows, cols) {
@@ -451,7 +482,7 @@ const GAMES = {
       benedict: { label: 'Benedict', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'No captures. Attacked enemies convert to your colour instead.'},
       'berolina-chess': { label: 'Berolina', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Pawns move diagonally forward and capture straight forward.'},
       berserk: { label: 'Berserk', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Delivering check grants one bonus move with a different piece.'},
-      'balbos-chess': { label: "Balbo's Chess", boardStyle: 'checkered', rows: 10, cols: 11, tileSize: 28, fen: '5r5/4nbn4/3bqkqb3/2npppppn2/1ppppppppp1/1PPPPPPPPP1/2NPPPPPN2/3BQKQB3/4NBN4/5R5', variantDesc: 'Diamond-shaped 70-square board (widths 3-5-7-9-11-11-9-7-5-3). Position-dependent promotion. Third-move mate available. M.G. Balbo, 1974.'},
+      'balbos-chess': { label: "Balbo's Chess", boardStyle: 'checkered', rows: 10, cols: 11, tileSize: 28, cellMap: BALBO_MAP, colors: { voidFill: 'transparent' }, fen: '5r5/4nbn4/3bqkqb3/2npppppn2/1ppppppppp1/1PPPPPPPPP1/2NPPPPPN2/3BQKQB3/4NBN4/5R5', variantDesc: 'Diamond-shaped 70-square board (widths 3-5-7-9-11-11-9-7-5-3). Position-dependent promotion. Third-move mate available. M.G. Balbo, 1974.'},
       'blind-chess': { label: 'Banqi', boardStyle: 'checkered', rows: 8, cols: 4, tileSize: 40, fen: '????/????/????/????/????/????/????/????', variantDesc: 'Chinese hidden-piece game (Banqi). 4x8 (half Xiangqi board). 32 pieces face-down. Flip, move, or capture each turn. Rank hierarchy.'},
       'birds-chess': { label: "Bird's Chess", boardStyle: 'checkered', rows: 8, cols: 10, tileSize: 36, fen: 'rnbgqkebnr/pppppppppp/10/10/10/10/PPPPPPPPPP/RNBGQKEBNR', variantDesc: '10x8 with Guard (Rook+Knight) and Equerry (Bishop+Knight). King castles 3 squares. H. E. Bird, 1874.'},
       breakthrough: { label: 'Breakthrough', boardStyle: 'checkered', rows: 7, cols: 7, tileSize: 40, fen: 'ppppppp/ppppppp/7/7/7/PPPPPPP/PPPPPPP', variantDesc: 'Pawns only. First to reach the far side wins.'},
