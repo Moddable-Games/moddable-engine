@@ -184,14 +184,16 @@ function buildCrossShapeMap(rows, cols, armWidth) {
 
 const BALBO_MAP = buildDiamondMap(10, 11, [3, 5, 7, 9, 11, 11, 9, 7, 5, 3])
 const FOUR_PLAYER_MAP = buildCrossShapeMap(14, 14, 8)
-const OMEGA_MAP = (() => {
-  const grid = Array.from({ length: 12 }, () => Array(12).fill(null))
-  // Central 10x10 (rows 1-10, cols 1-10)
-  for (let r = 1; r <= 10; r++) for (let c = 1; c <= 10; c++) grid[r][c] = true
-  // 4 corner wizard squares
-  grid[0][0] = true; grid[0][11] = true; grid[11][0] = true; grid[11][11] = true
+function buildCornerMap(innerSize) {
+  const size = innerSize + 2
+  const grid = Array.from({ length: size }, () => Array(size).fill(null))
+  for (let r = 1; r <= innerSize; r++) for (let c = 1; c <= innerSize; c++) grid[r][c] = true
+  grid[0][0] = true; grid[0][size - 1] = true; grid[size - 1][0] = true; grid[size - 1][size - 1] = true
   return grid
-})()
+}
+
+const OMEGA_MAP = buildCornerMap(10)
+const GUSTAV_MAP = buildCornerMap(8)
 
 // ─── L'ATTAQUE / STRATEGO BOARD MAP ────────────────────────────────────────
 
@@ -506,7 +508,7 @@ const GAMES = {
       checkless: { label: 'Checkless', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Cannot give check unless it is checkmate.'},
       chennis: { label: 'Chennis', boardStyle: 'checkered', rows: 7, cols: 7, tileSize: 40, fen: 'rnbkqbn/ppppppp/7/7/7/PPPPPPP/RNBKQBN', variantDesc: 'Tennis-themed 7x7 chess. Win by advancing a Pawn to the far rank. Net across rank 4 blocks most pieces. Corey Clark.'},
       chigorin: { label: 'Chigorin', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNNQKNNR', variantDesc: 'White\'s Bishops replaced by Knights. Four Knights vs standard army.'},
-      'citadel-chess': { label: 'Citadel Chess', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 30, fen: 'rnbwqkwbnr/pppppppppp/10/10/10/10/10/10/PPPPPPPPPP/RNBWQKWBNR', variantDesc: 'Shatranj al-Husun. 10x10 + 4 corner citadels. King reaching enemy citadel draws. War Machines as Bishops. Historical.'},
+      'citadel-chess': { label: 'Citadel Chess', boardStyle: 'checkered', rows: 12, cols: 12, tileSize: 26, cellMap: OMEGA_MAP, colors: { voidFill: 'transparent' }, fen: '12/1dnbwqkwbnd1/1pppppppppp1/12/12/12/12/12/12/1PPPPPPPPPP1/1DNBWQKWBND1/12', variantDesc: 'Shatranj al-Husun. 10x10 + 4 corner citadels. King reaching enemy citadel draws. 2 Dabbabas + 12 Pawns per side. Historical.'},
       codrus: { label: 'Codrus', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'No check exists. Win by getting your own King captured.'},
       congo: { label: 'Congo', boardStyle: 'checkered', rows: 7, cols: 7, tileSize: 40, fen: 'gmelemz/ppppppp/7/7/7/PPPPPPP/GMELEMZ', variantDesc: '7x7 with Lion, Zebra, Giraffe, Elephant, Crocodile, Monkey. River rank, drowning rule. Capture Lion wins. Demian Freeling, 1982.'},
       courier: { label: 'Courier Chess', boardStyle: 'checkered', rows: 8, cols: 12, tileSize: 32, fen: 'rnebfsksbenr/pppppppppppp/12/12/12/12/PPPPPPPPPPPP/RNEBFSKSBENR', variantDesc: 'Medieval German variant (1200s). Extra bishops and sage pieces on 12x8 board.'},
@@ -537,7 +539,7 @@ const GAMES = {
       grand: { label: 'Grand Chess', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, fen: 'r8r/1nbqkcbn1/pppppppppp/10/10/10/10/PPPPPPPPPP/1NBQKCBN1/R8R', variantDesc: 'Archbishop and Chancellor on 10x10 board. Pawns start on rank 3.'},
       'grande-acedrex': { label: 'Grande Acedrex', boardStyle: 'checkered', rows: 12, cols: 12, tileSize: 26, fen: 'rnuclgkglcunr/12/12/ppppppppppppp/12/12/12/12/PPPPPPPPPPPPP/12/12/RNUCLGKGLCUNR', variantDesc: 'Medieval 12x12 (Alfonso X, 1283). Griffon, Unicorn, Lion, Giraffe, Crocodile. Pawns start rank 4. File-based promotion.'},
       grasshopper: { label: 'Grasshopper Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbgkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBGKBNR', variantDesc: 'Queens replaced by Grasshoppers (hop over any piece, land immediately beyond).'},
-      'gustav-iii-chess': { label: 'Gustav III Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: '8x8 + 4 corner extensions with Amazons (Queen+Knight). 68 squares total. Billberg, 1839.'},
+      'gustav-iii-chess': { label: 'Gustav III Chess', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, cellMap: GUSTAV_MAP, colors: { voidFill: 'transparent' }, fen: 'm8m/1rnbqkbnr1/1pppppppp1/10/10/10/10/1PPPPPPPP1/1RNBQKBNR1/M8M', variantDesc: '8x8 + 4 corner extensions with Amazons (Queen+Knight). 68 squares total. Billberg, 1839.'},
       'grid-chess': { label: 'Grid Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Moves must cross at least one 2x2 grid line.'},
       gygax: { label: 'Gygax Chess', boardStyle: 'checkered', rows: 8, cols: 12, tileSize: 24, layers: { count: 3, layout: 'vertical', labels: ['Level 3 — Air', 'Level 2 — Land', 'Level 1 — Subterranean'], fens: ['2G3R3G1/S1S1S1S1S1S1/12/12/12/12/s1s1s1s1s1s1/2g3r3g1', 'OUHTCMKPTHUO/WWWWWWWWWWWW/12/12/12/12/wwwwwwwwwwww/ouhtcmkpthuo', '2B3E3B1/1D1D1D1D1D1D/12/12/12/12/1d1d1d1d1d1d/2b3e3b1'], colors: [{ lightSquare: '#a0c8e8', darkSquare: '#6a9ec8' }, { lightSquare: '#a8c890', darkSquare: '#6d9450' }, { lightSquare: '#d4a080', darkSquare: '#a06848' }] }, variantDesc: 'D&D-inspired three-level chess by Gary Gygax. 12x8 boards. Hero, Cleric, and fantasy pieces.'},
       'half-chess': { label: 'Half Chess', boardStyle: 'checkered', rows: 4, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/PPPPPPPP/RNBQKBNR', variantDesc: '4-rank board. Armies start adjacent. Immediate contact.'},
