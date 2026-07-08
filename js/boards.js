@@ -2783,9 +2783,11 @@ function bindBoardHover(config) {
         const ownerName = FEN4_OWNERS[p.type[0]]
         text += ` — ${ownerName.charAt(0).toUpperCase() + ownerName.slice(1)} ${name}`
       } else if (p.type !== p.type.toLowerCase()) {
-        text += ` — White ${name}`
+        const upperOwner = state.game === 'xiangqi' ? 'Red' : 'White'
+        text += ` — ${upperOwner} ${name}`
       } else if (PIECE_NAMES[p.type] && !pieceNameOverrides[p.type]) {
-        text += ` — Black ${name}`
+        const lowerOwner = state.game === 'xiangqi' ? 'Black' : 'Black'
+        text += ` — ${lowerOwner} ${name}`
       } else {
         text += ` — ${name}`
       }
