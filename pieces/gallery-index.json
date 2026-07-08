@@ -1647,8 +1647,14 @@
     "surface": {
       "type": "disc",
       "owners": {
-        "white": { "fill": "#f0f0f0", "stroke": "#999" },
-        "black": { "fill": "#2a2a2a", "stroke": "#555" }
+        "white": {
+          "fill": "#f0f0f0",
+          "stroke": "#999"
+        },
+        "black": {
+          "fill": "#2a2a2a",
+          "stroke": "#555"
+        }
       }
     },
     "sources": {
@@ -1658,20 +1664,64 @@
       "twemoji": "../twemoji/"
     },
     "pieces": {
-      "wD": { "source": "wikimedia-fairy", "file": "White_dabbaba.svg" },
-      "bD": { "source": "wikimedia-fairy", "file": "Black_dabbaba.svg" },
-      "wJ": { "source": "wikimedia-fairy", "file": "White_chess_giraffe.svg" },
-      "bJ": { "source": "wikimedia-fairy", "file": "Black_chess_giraffe.svg" },
-      "wO": { "source": "twemoji", "file": "ogre.svg", "surface": "disc" },
-      "bO": { "source": "twemoji", "file": "ogre.svg", "surface": "disc" },
-      "wT": { "source": "playstrategy-mono", "file": "tower.svg" },
-      "bT": { "source": "playstrategy-mono", "file": "tower.svg" },
-      "wU": { "source": "wikimedia-standard", "file": "Chess_Ult45.svg" },
-      "bU": { "source": "wikimedia-standard", "file": "Chess_Udt45.svg" },
-      "wV": { "source": "playstrategy-mono", "file": "eagle.svg" },
-      "bV": { "source": "playstrategy-mono", "file": "eagle.svg" },
-      "wZ": { "source": "wikimedia-standard", "file": "Chess_Zlt45.svg" },
-      "bZ": { "source": "wikimedia-standard", "file": "Chess_Zdt45.svg" }
+      "wD": {
+        "source": "wikimedia-fairy",
+        "file": "White_dabbaba.svg"
+      },
+      "bD": {
+        "source": "wikimedia-fairy",
+        "file": "Black_dabbaba.svg"
+      },
+      "wJ": {
+        "source": "wikimedia-fairy",
+        "file": "White_chess_giraffe.svg"
+      },
+      "bJ": {
+        "source": "wikimedia-fairy",
+        "file": "Black_chess_giraffe.svg"
+      },
+      "wO": {
+        "source": "twemoji",
+        "file": "ogre.svg",
+        "surface": "disc"
+      },
+      "bO": {
+        "source": "twemoji",
+        "file": "ogre.svg",
+        "surface": "disc"
+      },
+      "wT": {
+        "source": "playstrategy-mono",
+        "file": "tower.svg"
+      },
+      "bT": {
+        "source": "playstrategy-mono",
+        "file": "tower.svg"
+      },
+      "wU": {
+        "source": "wikimedia-standard",
+        "file": "Chess_Ult45.svg"
+      },
+      "bU": {
+        "source": "wikimedia-standard",
+        "file": "Chess_Udt45.svg"
+      },
+      "wV": {
+        "source": "playstrategy-mono",
+        "file": "eagle.svg"
+      },
+      "bV": {
+        "source": "playstrategy-mono",
+        "file": "eagle.svg"
+      },
+      "wZ": {
+        "source": "wikimedia-standard",
+        "file": "Chess_Zlt45.svg"
+      },
+      "bZ": {
+        "source": "wikimedia-standard",
+        "file": "Chess_Zdt45.svg"
+      }
     }
   },
   {
@@ -4509,27 +4559,247 @@
     "surface": {
       "type": "disc",
       "owners": {
-        "white": { "fill": "#bbdefb", "stroke": "#1565c0" },
-        "black": { "fill": "#ffcdd2", "stroke": "#c62828" }
+        "white": {
+          "fill": "#bbdefb",
+          "stroke": "#1565c0"
+        },
+        "black": {
+          "fill": "#ffcdd2",
+          "stroke": "#c62828"
+        }
       }
     },
     "pieces": {
-      "wElephant": { "source": "twemoji", "file": "elephant.svg", "surface": "disc" },
-      "bElephant": { "source": "twemoji", "file": "elephant.svg", "surface": "disc" },
-      "wLion": { "source": "twemoji", "file": "lion.svg", "surface": "disc" },
-      "bLion": { "source": "twemoji", "file": "lion.svg", "surface": "disc" },
-      "wTiger": { "source": "twemoji", "file": "tiger.svg", "surface": "disc" },
-      "bTiger": { "source": "twemoji", "file": "tiger.svg", "surface": "disc" },
-      "wLeopard": { "source": "twemoji", "file": "leopard.svg", "surface": "disc" },
-      "bLeopard": { "source": "twemoji", "file": "leopard.svg", "surface": "disc" },
-      "wWolf": { "source": "twemoji", "file": "wolf.svg", "surface": "disc" },
-      "bWolf": { "source": "twemoji", "file": "wolf.svg", "surface": "disc" },
-      "wDog": { "source": "twemoji", "file": "dog.svg", "surface": "disc" },
-      "bDog": { "source": "twemoji", "file": "dog.svg", "surface": "disc" },
-      "wCat": { "source": "twemoji", "file": "cat.svg", "surface": "disc" },
-      "bCat": { "source": "twemoji", "file": "cat.svg", "surface": "disc" },
-      "wRat": { "source": "twemoji", "file": "rat.svg", "surface": "disc" },
-      "bRat": { "source": "twemoji", "file": "rat.svg", "surface": "disc" }
+      "wElephant": {
+        "source": "twemoji",
+        "file": "elephant.svg",
+        "surface": "disc"
+      },
+      "bElephant": {
+        "source": "twemoji",
+        "file": "elephant.svg",
+        "surface": "disc"
+      },
+      "wLion": {
+        "source": "twemoji",
+        "file": "lion.svg",
+        "surface": "disc"
+      },
+      "bLion": {
+        "source": "twemoji",
+        "file": "lion.svg",
+        "surface": "disc"
+      },
+      "wTiger": {
+        "source": "twemoji",
+        "file": "tiger.svg",
+        "surface": "disc"
+      },
+      "bTiger": {
+        "source": "twemoji",
+        "file": "tiger.svg",
+        "surface": "disc"
+      },
+      "wLeopard": {
+        "source": "twemoji",
+        "file": "leopard.svg",
+        "surface": "disc"
+      },
+      "bLeopard": {
+        "source": "twemoji",
+        "file": "leopard.svg",
+        "surface": "disc"
+      },
+      "wWolf": {
+        "source": "twemoji",
+        "file": "wolf.svg",
+        "surface": "disc"
+      },
+      "bWolf": {
+        "source": "twemoji",
+        "file": "wolf.svg",
+        "surface": "disc"
+      },
+      "wDog": {
+        "source": "twemoji",
+        "file": "dog.svg",
+        "surface": "disc"
+      },
+      "bDog": {
+        "source": "twemoji",
+        "file": "dog.svg",
+        "surface": "disc"
+      },
+      "wCat": {
+        "source": "twemoji",
+        "file": "cat.svg",
+        "surface": "disc"
+      },
+      "bCat": {
+        "source": "twemoji",
+        "file": "cat.svg",
+        "surface": "disc"
+      },
+      "wRat": {
+        "source": "twemoji",
+        "file": "rat.svg",
+        "surface": "disc"
+      },
+      "bRat": {
+        "source": "twemoji",
+        "file": "rat.svg",
+        "surface": "disc"
+      }
+    }
+  },
+  {
+    "id": "mce-4player",
+    "name": "MCE 4-Player Chess",
+    "family": "chess",
+    "virtual": true,
+    "recolorable": true,
+    "surface": {
+      "type": "disc",
+      "owners": {
+        "red": {
+          "fill": "#ffcdd2",
+          "stroke": "#d32f2f"
+        },
+        "blue": {
+          "fill": "#bbdefb",
+          "stroke": "#1565c0"
+        },
+        "yellow": {
+          "fill": "#fff9c4",
+          "stroke": "#f9a825"
+        },
+        "green": {
+          "fill": "#c8e6c9",
+          "stroke": "#2e7d32"
+        }
+      }
+    },
+    "pieces": {
+      "rK": {
+        "source": "mce-chess",
+        "file": "wK.svg",
+        "surface": "disc"
+      },
+      "rQ": {
+        "source": "mce-chess",
+        "file": "wQ.svg",
+        "surface": "disc"
+      },
+      "rR": {
+        "source": "mce-chess",
+        "file": "wR.svg",
+        "surface": "disc"
+      },
+      "rB": {
+        "source": "mce-chess",
+        "file": "wB.svg",
+        "surface": "disc"
+      },
+      "rN": {
+        "source": "mce-chess",
+        "file": "wN.svg",
+        "surface": "disc"
+      },
+      "rP": {
+        "source": "mce-chess",
+        "file": "wP.svg",
+        "surface": "disc"
+      },
+      "bK": {
+        "source": "mce-chess",
+        "file": "bK.svg",
+        "surface": "disc"
+      },
+      "bQ": {
+        "source": "mce-chess",
+        "file": "bQ.svg",
+        "surface": "disc"
+      },
+      "bR": {
+        "source": "mce-chess",
+        "file": "bR.svg",
+        "surface": "disc"
+      },
+      "bB": {
+        "source": "mce-chess",
+        "file": "bB.svg",
+        "surface": "disc"
+      },
+      "bN": {
+        "source": "mce-chess",
+        "file": "bN.svg",
+        "surface": "disc"
+      },
+      "bP": {
+        "source": "mce-chess",
+        "file": "bP.svg",
+        "surface": "disc"
+      },
+      "yK": {
+        "source": "mce-chess",
+        "file": "wK.svg",
+        "surface": "disc"
+      },
+      "yQ": {
+        "source": "mce-chess",
+        "file": "wQ.svg",
+        "surface": "disc"
+      },
+      "yR": {
+        "source": "mce-chess",
+        "file": "wR.svg",
+        "surface": "disc"
+      },
+      "yB": {
+        "source": "mce-chess",
+        "file": "wB.svg",
+        "surface": "disc"
+      },
+      "yN": {
+        "source": "mce-chess",
+        "file": "wN.svg",
+        "surface": "disc"
+      },
+      "yP": {
+        "source": "mce-chess",
+        "file": "wP.svg",
+        "surface": "disc"
+      },
+      "gK": {
+        "source": "mce-chess",
+        "file": "bK.svg",
+        "surface": "disc"
+      },
+      "gQ": {
+        "source": "mce-chess",
+        "file": "bQ.svg",
+        "surface": "disc"
+      },
+      "gR": {
+        "source": "mce-chess",
+        "file": "bR.svg",
+        "surface": "disc"
+      },
+      "gB": {
+        "source": "mce-chess",
+        "file": "bB.svg",
+        "surface": "disc"
+      },
+      "gN": {
+        "source": "mce-chess",
+        "file": "bN.svg",
+        "surface": "disc"
+      },
+      "gP": {
+        "source": "mce-chess",
+        "file": "bP.svg",
+        "surface": "disc"
+      }
     }
   }
 ]

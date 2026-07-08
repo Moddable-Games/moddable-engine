@@ -531,7 +531,7 @@ const GAMES = {
       'flip-chess': { label: 'Flip Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'After each capture, the capturing piece transforms into the type of piece it captured.'},
       'five-check': { label: 'Five-Check', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Extended Three-Check. Five checks wins instead of three.'},
       'fog-of-war': { label: 'Fog of War', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Only see squares your pieces can move to. No check warnings.'},
-      'four-handed-chess': { label: 'Four-Handed Chess', boardStyle: 'checkered', rows: 14, cols: 14, tileSize: 24, cellMap: FOUR_PLAYER_MAP, colors: { voidFill: 'transparent' }, fen4: '3,yR,yN,yB,yK,yQ,yB,yN,yR,3/3,yP,yP,yP,yP,yP,yP,yP,yP,3/14/bR,bP,10,gP,gR/bN,bP,10,gP,gN/bB,bP,10,gP,gB/bK,bP,10,gP,gQ/bQ,bP,10,gP,gK/bB,bP,10,gP,gB/bN,bP,10,gP,gN/bR,bP,10,gP,gR/14/3,rP,rP,rP,rP,rP,rP,rP,rP,3/3,rR,rN,rB,rQ,rK,rB,rN,rR,3', variantDesc: '4-player on 14x14 cross-shaped board (160 squares). Standard armies on each wing. Teams or free-for-all. FEN4 notation.'},
+      'four-handed-chess': { label: 'Four-Handed Chess', boardStyle: 'checkered', rows: 14, cols: 14, tileSize: 24, cellMap: FOUR_PLAYER_MAP, colors: { voidFill: 'transparent' }, fen4: '3,yR,yN,yB,yK,yQ,yB,yN,yR,3/3,yP,yP,yP,yP,yP,yP,yP,yP,3/14/bR,bP,10,gP,gR/bN,bP,10,gP,gN/bB,bP,10,gP,gB/bK,bP,10,gP,gQ/bQ,bP,10,gP,gK/bB,bP,10,gP,gB/bN,bP,10,gP,gN/bR,bP,10,gP,gR/14/3,rP,rP,rP,rP,rP,rP,rP,rP,3/3,rR,rN,rB,rQ,rK,rB,rN,rR,3', pieceSet4: 'mce-4player', variantDesc: '4-player on 14x14 cross-shaped board (160 squares). Standard armies on each wing. Teams or free-for-all. FEN4 notation.'},
       giveaway: { label: 'Giveaway', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Forced captures. King is not royal. Stalemate is a loss.'},
       glinski: { label: 'Glinski (Hex)', boardStyle: 'hex', hexRadius: 5, hexSize: 22, flat: true, hexColorFn: glinskiColor, hexPosition: GLINSKI_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' } , variantDesc: 'Chess on a 91-cell hexagonal board. Three bishops per side.'},
       grand: { label: 'Grand Chess', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, fen: 'r8r/1nbqkcbn1/pppppppppp/10/10/10/10/PPPPPPPPPP/1NBQKCBN1/R8R', variantDesc: 'Archbishop and Chancellor on 10x10 board. Pawns start on rank 3.'},
@@ -1265,19 +1265,11 @@ function fen4ToPosition(fen4, rows, cols) {
   return position
 }
 
-const FEN4_COLORS = { r: '#d32f2f', b: '#1565c0', y: '#f9a825', g: '#2e7d32' }
-const FEN4_SYMBOLS = { K: '♚', Q: '♛', R: '♜', B: '♝', N: '♞', P: '♟' }
+const FEN4_OWNERS = { r: 'red', b: 'blue', y: 'yellow', g: 'green' }
 
-function buildFen4PieceDefs(position) {
-  const defs = {}
-  for (const piece of Object.values(position)) {
-    if (typeof piece !== 'string' || piece.length < 2 || defs[piece]) continue
-    const color = FEN4_COLORS[piece[0]] || '#666'
-    const type = piece.slice(1)
-    const symbol = FEN4_SYMBOLS[type] || type
-    defs[piece] = `<text x="22.5" y="33" text-anchor="middle" font-size="32" fill="${color}" font-family="serif">${symbol}</text>`
-  }
-  return defs
+function fen4GetOwner(pieceType) {
+  if (pieceType.length >= 2) return FEN4_OWNERS[pieceType[0]] || 'white'
+  return pieceType === pieceType.toUpperCase() ? 'white' : 'black'
 }
 
 function parseDraughtsFen(fen, rows, cols, vocabulary) {
@@ -1885,7 +1877,14 @@ function render() {
   // Build position from FEN4 (4-player)
   if (config.fen4) {
     config.position = fen4ToPosition(config.fen4, config.rows, config.cols)
-    config.pieceDefs = buildFen4PieceDefs(config.position)
+    const fen4Set = config.pieceSet4 || 'mce-4player'
+    if (galleryIndex) {
+      const built = buildPieceImages(fen4Set, galleryIndex, null)
+      config.pieceImages = built.images
+      if (built.surface) config.pieceSurface = built.surface
+      if (Object.keys(built.surfaceMap).length) config.pieceSurfaceMap = built.surfaceMap
+    }
+    config.getOwner = fen4GetOwner
   } else if (config.fen) {
     config.position = fenToPosition(config.fen, config.rows, config.cols)
   }

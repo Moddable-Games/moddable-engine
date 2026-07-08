@@ -2236,7 +2236,7 @@ function renderPieces(position, provider, ctx, colors) {
       const hasSurface = opts.pieceBorders || surfaceMap[imageKey]
       if (hasSurface) {
         const isUpper = piece.type === piece.type.toUpperCase()
-        const owner = isUpper ? 'white' : 'black'
+        const owner = opts.getOwner ? opts.getOwner(piece.type) : (isUpper ? 'white' : 'black')
         const surface = opts.pieceSurface && opts.pieceSurface.owners && opts.pieceSurface.owners[owner]
         const ownerColors = surface || { fill: opts.pieceBorders && opts.pieceBorders[owner] || '#888', stroke: 'rgba(0,0,0,0.3)' }
         parts.push(renderSurfaceSVG('disc', pos.x, pos.y, tileSize, ownerColors, pieceImages[imageKey]))
