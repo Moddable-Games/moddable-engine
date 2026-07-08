@@ -666,7 +666,7 @@ const GAMES = {
       minixiangqi: { label: 'Mini Xiangqi', boardStyle: 'xiangqi', rows: 7, cols: 7, tileSize: 40, river: false, fen: 'rchkhcr/p1ppp1p/7/7/7/P1PPP1P/RCHKHCR', setupDesc: '12 pieces each on 7x7', variantDesc: '7x7 Xiangqi. No river, no Advisors/Elephants. Soldiers move sideways from start. No palace.'},
       'quang-trung': { label: 'Quang Trung', boardStyle: 'xiangqi', rows: 10, cols: 10, tileSize: 32, river: true, fen: 'rheaakaehr/10/1c6c1/p1p1pp1p1p/10/10/P1P1PP1P1P/1C6C1/10/RHEAAKAEHR', setupDesc: '18 pieces each on 10x10', variantDesc: 'Vietnamese 10x10 Xiangqi. General/Pawns restricted to files c-h. Pawn reaching last rank wins. NEEDS VERIFIED SFEN.'},
       'xiangqi-42': { label: 'Xiangqi-42', boardStyle: 'xiangqi', rows: 6, cols: 7, tileSize: 40, river: true, fen: 'rhakahr/1c3c1/p2p2p/P2P2P/1C3C1/RHAKAHR', setupDesc: '12 pieces each on 7x6 (42 intersections)', variantDesc: 'Compact Xiangqi on 42 intersections (7x6). No Elephants. Cannons in front of Horses. Robert Price, 2001.'},
-      'yang-qi': { label: 'Yang Qi', boardStyle: 'xiangqi', rows: 10, cols: 9, tileSize: 36, river: true, fen: 'rhvakavhr/1c5c1/p1p1p1p1p/1p1p1p1p1/9/9/1P1P1P1P1/P1P1P1P1P/1C5C1/RHVAKAVHR', setupDesc: '25 pieces each (9 soldiers on two ranks)', variantDesc: 'Western-influenced Xiangqi. Vaos (diagonal screen-capture) replace Elephants. 9 soldiers per side on ranks 3-4.'},
+      'yang-qi': { label: 'Yang Qi', boardStyle: 'xiangqi', rows: 10, cols: 9, tileSize: 36, river: true, pieceSetOverride: 'mce-xiangqi-fairy', fen: 'rhvakavhr/1c5c1/p1p1p1p1p/1p1p1p1p1/9/9/1P1P1P1P1/P1P1P1P1P/1C5C1/RHVAKAVHR', setupDesc: '25 pieces each (9 soldiers on two ranks)', variantDesc: 'Western-influenced Xiangqi. Vaos (diagonal screen-capture) replace Elephants. 9 soldiers per side on ranks 3-4.'},
     },
   },
   draughts: {
@@ -1103,7 +1103,7 @@ const FEN_TO_PIECE_ID = {
 }
 
 const GAME_FEN_OVERRIDES = {
-  xiangqi: { H: 'wN', h: 'bN', R: 'wR', r: 'bR', E: 'wE', e: 'bE', A: 'wA', a: 'bA', K: 'wK', k: 'bK', C: 'wC', c: 'bC', P: 'wP', p: 'bP' },
+  xiangqi: { H: 'wN', h: 'bN', R: 'wR', r: 'bR', E: 'wE', e: 'bE', A: 'wA', a: 'bA', K: 'wK', k: 'bK', C: 'wC', c: 'bC', P: 'wP', p: 'bP', V: 'wV', v: 'bV', B: 'wB', b: 'bB', I: 'wI', i: 'bI', U: 'wU', u: 'bU' },
   'dou-shou-qi': {
     E: 'wElephant', e: 'bElephant', L: 'wLion', l: 'bLion',
     T: 'wTiger', t: 'bTiger', P: 'wLeopard', p: 'bLeopard',
@@ -2008,8 +2008,9 @@ function render() {
   if (game.nodeNames) config.nodeNames = game.nodeNames
 
   // Build piece image paths and surface map
-  if (game.pieceSet) {
-    const built = buildPieceImages(game.pieceSet, galleryIndex, state.game)
+  const effectivePieceSet = config.pieceSetOverride || game.pieceSet
+  if (effectivePieceSet) {
+    const built = buildPieceImages(effectivePieceSet, galleryIndex, state.game)
     config.pieceImages = built.images
     if (built.surface) config.pieceSurface = built.surface
     if (Object.keys(built.surfaceMap).length) config.pieceSurfaceMap = built.surfaceMap

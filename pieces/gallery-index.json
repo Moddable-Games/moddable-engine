@@ -4703,5 +4703,22 @@
       "gN": "wN.svg",
       "gP": "wP.svg"
     }
+  },
+  {
+    "id": "mce-xiangqi-fairy",
+    "name": "MCE Xiangqi Fairy",
+    "family": "xiangqi",
+    "virtual": true,
+    "extends": "mce-xiangqi-trad",
+    "pieces": {
+      "wV": "wV.svg",
+      "bV": "bV.svg",
+      "wB": "wB.svg",
+      "bB": "bB.svg",
+      "wI": "wI.svg",
+      "bI": "bI.svg",
+      "wU": "wU.svg",
+      "bU": "bU.svg"
+    }
   }
 ]
