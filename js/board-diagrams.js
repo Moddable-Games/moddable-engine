@@ -283,12 +283,17 @@ const xiangqi = {
       for (let c = 0; c < cols; c++) parts.push(`<line x1="${gx + c * tileSize}" y1="${gy}" x2="${gx + c * tileSize}" y2="${gy + gridH}"/>`)
     }
     parts.push('</g>')
-    const pl = gx + 3 * tileSize, pr = gx + 5 * tileSize
+    const mid = Math.floor(cols / 2)
+    const palaceLeft = opts.palaceCols ? opts.palaceCols[0] : mid - 1
+    const palaceRight = opts.palaceCols ? opts.palaceCols[1] : mid + 1
+    const palaceTopRow = 0
+    const palaceBotRow = rows - 3
+    const pl = gx + palaceLeft * tileSize, pr = gx + palaceRight * tileSize
     parts.push(`<g stroke="${colors.palace}" stroke-width="0.8" stroke-dasharray="4,3">`)
-    parts.push(`<line x1="${pl}" y1="${gy}" x2="${pr}" y2="${gy + 2 * tileSize}"/>`)
-    parts.push(`<line x1="${pr}" y1="${gy}" x2="${pl}" y2="${gy + 2 * tileSize}"/>`)
-    parts.push(`<line x1="${pl}" y1="${gy + 7 * tileSize}" x2="${pr}" y2="${gy + 9 * tileSize}"/>`)
-    parts.push(`<line x1="${pr}" y1="${gy + 7 * tileSize}" x2="${pl}" y2="${gy + 9 * tileSize}"/>`)
+    parts.push(`<line x1="${pl}" y1="${gy + palaceTopRow * tileSize}" x2="${pr}" y2="${gy + (palaceTopRow + 2) * tileSize}"/>`)
+    parts.push(`<line x1="${pr}" y1="${gy + palaceTopRow * tileSize}" x2="${pl}" y2="${gy + (palaceTopRow + 2) * tileSize}"/>`)
+    parts.push(`<line x1="${pl}" y1="${gy + palaceBotRow * tileSize}" x2="${pr}" y2="${gy + (palaceBotRow + 2) * tileSize}"/>`)
+    parts.push(`<line x1="${pr}" y1="${gy + palaceBotRow * tileSize}" x2="${pl}" y2="${gy + (palaceBotRow + 2) * tileSize}"/>`)
     parts.push('</g>')
     if (river) {
       const ry1 = gy + 4 * tileSize, ry2 = gy + 5 * tileSize
