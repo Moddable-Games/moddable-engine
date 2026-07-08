@@ -1,4 +1,4 @@
-# Render Schema Spec (v4 — Meta + Components)
+# Render Schema Spec (v5 — Provider Elimination)
 
 ## Purpose
 
@@ -121,11 +121,31 @@ topology:
 ```yaml
 topology:
   type: graph
+  # Explicit node/edge definition (morris, custom boards):
   nodes: [a1, a4, a7, ...]
   edges:
     - [a1, d1]
     - [d1, g1]
+
+  # OR parametric structure (eliminates game-named generators):
+  structure: concentric-rings | perimeter-cross | grid-cross | custom
+  params:
+    # concentric-rings (morris family):
+    rings: 3
+    midpoints: true
+    diagonals: false
+    # perimeter-cross (nyout/yut-nori family):
+    sides: 4
+    nodesPerSide: 5
+    diagonals: true
+    intermediatesPerDiagonal: 2
+    # grid-cross (asalto/fox-and-geese family):
+    rows: [[2,3,4], [2,3,4], [0,1,2,3,4,5,6], [0,1,2,3,4,5,6], [0,1,2,3,4,5,6], [2,3,4], [2,3,4]]
+    fortressRows: 2
+    diagonals: true
 ```
+
+When `structure` is provided, the renderer computes nodes/edges from params. When explicit `nodes`/`edges` are provided, they are used directly. Both produce the same result — explicit is for non-parametric boards.
 
 ### type: star
 
@@ -384,18 +404,20 @@ render:
 
 Defines WHICH cells are which type. Surface defines HOW they look.
 
+**No game-named generators.** Every zone definition is either an inline map, declarative positions, or a parametric pattern with universal parameters. The renderer never needs to know the game name to draw zones.
+
 ```yaml
 render:
   zones:
-    # Parametric generator:
-    generator: tafl
-    params: { size: 9, corners: true }
-
-    # OR inline string grid:
+    # String grid — each char is a zone type key (surface maps key → colour):
     map: |
-      rfff..rf
-      ffffrfff
-      rfff..rf
+      ...t...
+      .......
+      .......
+      t..T..t
+      .......
+      .......
+      ...t...
 
     # OR declarative positions:
     cells:
@@ -403,6 +425,77 @@ render:
         at: [4,4]
       - type: corner
         at: [[0,0], [0,8], [8,0], [8,8]]
+      - type: rosette
+        at: [[0,3], [0,7], [2,3], [4,3], [4,7]]
+
+    # OR parametric pattern (no game names):
+    pattern: symmetric-points
+    params:
+      centre: true
+      corners: true
+      edgeMidpoints: false
+```
+
+Zone type keys are single chars (in map) or strings (in cells). Surface definition maps them to colours:
+
+```yaml
+surface:
+  base: parchment
+  colors:
+    throne: "#8b4513"
+    corner: "#2e7d32"
+    rosette: "#c49040"
+```
+
+### decorations (visual overlays)
+
+Structural visual elements rendered on top of the base board. Not interactable cells — purely visual. Separated from zones because they describe rendering behaviour, not cell types.
+
+```yaml
+render:
+  decorations:
+    # Star points (go, shogi, xiangqi):
+    - type: markers
+      style: dot            # dot | cross | ring
+      size: 3               # radius in px
+      at: [[2,2], [6,6], [2,6], [6,2]]  # explicit positions
+      # OR parametric:
+      auto: star-points     # auto-calculate for board size (9→4, 13→5, 19→9)
+
+    # Promotion zones (shogi):
+    - type: tint
+      region: { rows: [0,2] }     # all cols
+      color: promotion            # key into surface.colors
+
+    # River (xiangqi):
+    - type: gap
+      between: [4, 5]             # gap between row 4 and row 5
+
+    # Palace diagonals (xiangqi):
+    - type: diagonals
+      region: { rows: [0,2], cols: [3,5] }
+
+    # Orbital arcs (surakarta):
+    - type: arcs
+      rings: 2                    # concentric orbital track count
+      cornerOffset: 2             # distance from corner
+
+    # Frame border (shaped boards):
+    - type: border
+      style: shaped               # follows board edge geometry
+      width: 14
+      color: border               # key into surface.colors
+```
+
+### trackStyle (visual rendering of track topology)
+
+```yaml
+render:
+  trackStyle: triangular-points | dots | numbered | bar
+  # triangular-points: backgammon triangle shape
+  # dots: simple circles at positions
+  # numbered: positions with number labels
+  # bar: central bar divider
 ```
 
 ### layers (multi-board)
@@ -1037,8 +1130,8 @@ engine:
     cols: 9
   render:
     zones:
-      generator: tafl
-      params: { size: 9, corners: true }
+      pattern: symmetric-points
+      params: { centre: true, corners: true }
   setup: "3bbb3/4b4/4w4/b3w3b/bbwwKwwbb/b3w3b/4w4/4b4/3bbb3"
 ```
 
@@ -1052,8 +1145,8 @@ engine:
   render:
     cellSize: 34
     zones:
-      generator: tafl
-      params: { size: 11, corners: true }
+      pattern: symmetric-points
+      params: { centre: true, corners: true }
   setup: "3bbbbb3/5b5/11/b4w4b/b3www3b/bb1wwKww1bb/b3www3b/b4w4b/11/5b5/3bbbbb3"
 ```
 
@@ -1116,7 +1209,13 @@ engine:
     cellColor: uniform
     labels: false
     zones:
-      generator: jungle
+      cells:
+        - type: river
+          at: [[3,1], [3,2], [4,1], [4,2], [5,1], [5,2], [3,4], [3,5], [4,4], [4,5], [5,4], [5,5]]
+        - type: den
+          at: [[0,3], [8,3]]
+        - type: trap
+          at: [[0,2], [0,4], [1,3], [8,2], [8,4], [7,3]]
   pieces:
     set: mce-jungle
     vocabulary:
@@ -1287,3 +1386,52 @@ circular-chess, chess-in-the-round, byzantine-chess, cylindrical-chess, klein-bo
       label: "Standard"
       description: "Standard FIDE rules."
     ```
+
+13. **No game-named generators.** Zones use `pattern:` with universal params, or explicit `cells:`/`map:` definitions. The renderer never needs game knowledge to produce zone highlights.
+
+14. **Decorations separate visual overlays from structure.** Star points, promotion tints, orbital arcs, river gaps, palace diagonals — all described declaratively in `render.decorations`, not baked into provider logic.
+
+15. **Providers collapse into topology dispatch.** The 14 named providers in board-diagrams.js (checkered, go, xiangqi, shogi, etc.) become a single renderer that dispatches on `topology.type` + `topology.layout` + `render.decorations`. All game-specific visual behaviour is expressible through the schema without provider branching.
+
+---
+
+## Provider Elimination Map
+
+How each current board-diagrams.js provider becomes schema-driven:
+
+| Provider | Becomes | Schema expression |
+|----------|---------|-------------------|
+| `checkered` | grid + cellColor:checkered | topology.type:grid, render.cellColor:checkered, zones for special cells |
+| `mono-grid` | grid + cellColor:uniform | topology.type:grid, render.cellColor:uniform |
+| `go` | grid + intersections + decorations | topology.layout:intersections, decorations:[{type:markers, auto:star-points}] |
+| `surakarta` | grid + intersections + decorations | topology.layout:intersections, decorations:[{type:arcs, rings:2, cornerOffset:2}] |
+| `xiangqi` | grid + intersections + decorations | topology.layout:intersections, decorations:[{type:gap, between:[4,5]}, {type:diagonals, region:{rows:[0,2],cols:[3,5]}}] |
+| `shogi` | grid + intersections + decorations | topology.layout:intersections, decorations:[{type:markers, at:shogi-hoshi}, {type:tint, region:{rows:[0,2]}, color:promotion}] |
+| `nyout` | graph + perimeter-cross | topology.type:graph, structure:perimeter-cross, params:{sides:4, nodesPerSide:5, diagonals:true} |
+| `morris` | graph + concentric-rings | topology.type:graph, structure:concentric-rings, params:{rings:3, midpoints:true} |
+| `asalto` | graph + grid-cross | topology.type:graph, structure:grid-cross, params:{rows:[[2,3,4],...], fortressRows:2} |
+| `alquerque` | grid + intersections + decorations | topology.layout:intersections, decorations:[{type:diagonals, pattern:alternating}] |
+| `hex` | hex (already parametric) | topology.type:hex, shape/radius/orientation |
+| `mancala` | pit (already parametric) | topology.type:pit, cols/rows/stores |
+| `backgammon` | track + trackStyle | topology.type:track, render.trackStyle:triangular-points |
+| `stern-halma` | star (already parametric) | topology.type:star, arms:6, armSize:10 |
+| `landlords` | track + zones (data-driven) | topology.type:track, zones from boardData |
+
+### What remains in code
+
+The renderer still needs drawing logic — it isn't eliminated. What changes:
+
+- **Before:** 14 named providers, each with hardcoded game knowledge, colour defaults, and structural assumptions
+- **After:** 7 topology renderers (grid, hex, track, pit, graph, star, none) that read all visual parameters from the resolved schema object. Zero game knowledge.
+
+Decorations are a composable overlay system — each decoration type (markers, tint, gap, diagonals, arcs, border) is a small pure function that receives position data and surface colours. No decoration knows which game it's drawing for.
+
+### Files eliminated by full migration
+
+| File | Lines | Status |
+|------|-------|--------|
+| `js/boards.js` | 2642 | **Fully replaced** by frontmatter |
+| `js/board-diagrams.js` | 2325 | **Refactored** into 7 topology renderers + decoration system |
+| `js/hex-games/*.js` | 2372 | **Already registry-based** — configs move to frontmatter |
+
+Total: ~7300 lines of hardcoded game config → frontmatter + ~800 lines of topology-agnostic rendering code.
