@@ -2147,6 +2147,7 @@ function render() {
   }
 
   if (game.rpgGame) {
+    if (renderMode === 'consolidated') { showNotImplemented('rpg'); return }
     renderRpgProvider(state.game)
     showInfo(variantDef)
     return
@@ -2159,16 +2160,19 @@ function render() {
   }
 
   if (game.needsBoardData) {
+    if (renderMode === 'consolidated') { showNotImplemented(config.boardStyle || 'boardData'); return }
     loadBoardDataAndRender(game, variantDef)
     return
   }
 
   if (game.deckGame) {
+    if (renderMode === 'consolidated') { showNotImplemented('deck'); return }
     renderDeckGame(game, variantDef)
     return
   }
 
   if (game.hexGame) {
+    if (renderMode === 'consolidated') { showNotImplemented('hex'); return }
     renderHexGame(game, variantDef)
     return
   }
@@ -2177,6 +2181,7 @@ function render() {
 
   // Build position from FEN4 (4-player) — piece images loaded async
   if (config.fen4) {
+    if (renderMode === 'consolidated') { showNotImplemented('fen4'); return }
     config.position = fen4ToPosition(config.fen4, config.rows, config.cols)
     config.getOwner = fen4GetOwner
     loadRecolouredPieces(config, galleryIndex).then(() => {
@@ -2285,10 +2290,16 @@ function render() {
   }
 
   let svg
-  if (renderMode === 'consolidated' && isGridProvider(config.boardStyle)) {
-    svg = renderConsolidated(config)
+  if (renderMode === 'consolidated') {
+    if (isGridProvider(config.boardStyle)) {
+      svg = renderConsolidated(config)
+    }
+    if (!svg) {
+      svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="400" height="200" fill="#1a1a2e" rx="8"/><text x="200" y="80" text-anchor="middle" font-size="14" fill="#e8a030" font-family="system-ui">Final mode — not yet implemented</text><text x="200" y="110" text-anchor="middle" font-size="12" fill="#888" font-family="system-ui">Provider: ${config.boardStyle || 'unknown'}</text><text x="200" y="135" text-anchor="middle" font-size="11" fill="#555" font-family="system-ui">Switch to Original to view</text></svg>`
+    }
+  } else {
+    svg = renderBoard(config)
   }
-  if (!svg) svg = renderBoard(config)
   showSvg(svg)
   showInfo(config)
   if (config.overlays) {
@@ -2977,6 +2988,11 @@ function showStaticPlaceholder(variantDef, path) {
   container.innerHTML = `<div class="static-placeholder"><div class="static-icon">&#x1F4CB;</div><p class="static-label">${variantDef.label}</p><p class="static-note">Static SVG — not yet imported</p><p class="static-path">${path}</p></div>`
   container.classList.add('active')
   empty.style.display = 'none'
+}
+
+function showNotImplemented(provider) {
+  showSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="400" height="200" fill="#1a1a2e" rx="8"/><text x="200" y="80" text-anchor="middle" font-size="14" fill="#e8a030" font-family="system-ui">Final mode — not yet implemented</text><text x="200" y="110" text-anchor="middle" font-size="12" fill="#888" font-family="system-ui">Provider: ${provider}</text><text x="200" y="135" text-anchor="middle" font-size="11" fill="#555" font-family="system-ui">Switch to Original to view</text></svg>`)
+  requestAnimationFrame(fitToView)
 }
 
 function showSvg(svg) {

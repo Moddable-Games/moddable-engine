@@ -457,8 +457,9 @@ export function createGridTopology(config) {
     const oy = pad + effectiveInset
 
     // Position mapping: row,col → pixel centre
-    function posX(c) { return ox + c * tileSize }
-    function posY(r) { return oy + r * tileSize }
+    const halfCell = isIntersection ? 0 : tileSize / 2
+    function posX(c) { return ox + c * tileSize + halfCell }
+    function posY(r) { return oy + r * tileSize + halfCell }
 
     const elements = []
 
@@ -482,6 +483,16 @@ export function createGridTopology(config) {
           if (cellFill.stroke) attrs.stroke = cellFill.stroke(r, c)
           if (cellFill.strokeWidth) attrs['stroke-width'] = cellFill.strokeWidth(r, c)
           elements.push({ tag: 'rect', attrs })
+        }
+      }
+    }
+
+    // 2b. Cell decorations — extra elements drawn at cell centres
+    if (config.cellDecorations) {
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const decs = config.cellDecorations(r, c, posX(c), posY(r), tileSize)
+          if (decs) for (const d of decs) elements.push(d)
         }
       }
     }

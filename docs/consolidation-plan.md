@@ -234,14 +234,27 @@ parametric options and produces publication-quality layout data.
 
 ## Execution Order
 
-### Pre-work: Verify render package can composite
+### Pre-work: Verify render pipeline (DONE)
 
-Before upgrading any topology, confirm the render pipeline works end-to-end:
-1. Take one simple case (mono-grid, e.g. Hnefatafl)
-2. Feed its schema through reverse-adapter → topology-grid.getLayout() → render
-3. Compare output to Original mode
-4. Identify gaps in render package (piece rendering, label positioning)
-5. Fix render package gaps FIRST — shared infrastructure
+Pipeline proven: topology-grid `renderLayout()` → render `serializeLayout()` → valid SVG.
+13 tests passing. Structured elements ({tag, attrs}) work as the intermediate format.
+
+### MANDATORY before each phase: All-providers-at-once analysis
+
+**Do NOT start writing consolidated code until this analysis is complete.**
+
+For each topology being consolidated, read ALL providers being absorbed SIMULTANEOUSLY.
+Not one at a time. Extract the universal drawing primitives — what do ALL boards of this
+topology consist of as drawing operations?
+
+The consolidated renderer is ONE straight pipeline that processes a list of primitives.
+It never branches on which game/provider/mode it's serving. If it needs a new branch
+to support a new game, the consolidation has FAILED — all we did was reorganize.
+
+**The test:** "If I add a new game using this topology tomorrow, does this code need
+ANY new branches?" If yes → not consolidated. Back to the drawing board.
+
+See memory: `feedback_consolidate-not-reorganize.md`
 
 ### Phase 1: topology-grid (7 providers, ~300 variants)
 

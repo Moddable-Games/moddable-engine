@@ -32,7 +32,48 @@ export function renderConsolidated(config) {
   if (!layoutConfig) return null
 
   const layout = grid.renderLayout(layoutConfig)
-  return serializeLayout(layout, { title: config.label })
+
+  // Resolve position to image keys that match pieceImages
+  const pieceImages = config.pieceImages || null
+  let resolvedPieces = null
+  if (config.position && pieceImages) {
+    resolvedPieces = {}
+    for (const [sq, raw] of Object.entries(config.position)) {
+      const piece = typeof raw === 'object' ? raw : { type: String(raw) }
+      // Try direct key first (FEN chars are mapped directly in pieceImages)
+      if (pieceImages[piece.type]) {
+        resolvedPieces[sq] = { type: piece.type }
+      } else {
+        const key = resolvePieceImageKey(piece)
+        if (pieceImages[key]) resolvedPieces[sq] = { type: key }
+      }
+    }
+  }
+
+  return serializeLayout(layout, {
+    title: config.label,
+    pieces: resolvedPieces,
+    pieceImages,
+    tileSize,
+  })
+}
+
+function resolvePieceImageKey(piece) {
+  if (piece.color) {
+    const prefix = piece.color === 'white' ? 'w' : 'b'
+    if (piece.type === 'stone') return prefix + 'S'
+    if (piece.type === 'man') return prefix + 'M'
+    if (piece.type === 'king') return prefix + 'K'
+    return prefix + piece.type.charAt(0).toUpperCase()
+  }
+  // FEN character: uppercase = white, lowercase = black
+  const ch = piece.type
+  if (ch.length === 1) {
+    const isUpper = ch === ch.toUpperCase() && ch !== ch.toLowerCase()
+    const prefix = isUpper ? 'w' : 'b'
+    return prefix + ch.toUpperCase()
+  }
+  return piece.type
 }
 
 function buildLayoutConfig(boardStyle, rows, cols, tileSize, colors, config) {
@@ -95,6 +136,12 @@ function buildCheckered(rows, cols, tileSize, colors, config) {
     result.cellAttrs = (r, c) => {
       const cell = cellMap[r]?.[c]
       return cell ? { 'data-type': cell } : {}
+    }
+    result.cellDecorations = (r, c, cx, cy, ts) => {
+      const cell = cellMap[r]?.[c]
+      if (cell === 'rosette') return crossCirclePattern(cx, cy, ts, colors.rosette || '#8b3a3a', colors.rosetteOuter || '#a04848')
+      if (cell === 'castle') return diagonalCross(cx, cy, ts, colors.castleX || '#fff8f0')
+      return null
     }
   }
 
@@ -258,6 +305,29 @@ function buildSurakarta(rows, cols, tileSize, colors) {
     })),
     labels: { alphabet: GO_ALPHABET, fontFamily: 'sans-serif' },
   }
+}
+
+function crossCirclePattern(cx, cy, ts, fill, fillOuter) {
+  const s = ts * 0.25
+  return [
+    { tag: 'circle', attrs: { cx, cy, r: s * 0.42, fill } },
+    { tag: 'circle', attrs: { cx, cy: cy - s, r: s * 0.25, fill } },
+    { tag: 'circle', attrs: { cx, cy: cy + s, r: s * 0.25, fill } },
+    { tag: 'circle', attrs: { cx: cx - s, cy, r: s * 0.25, fill } },
+    { tag: 'circle', attrs: { cx: cx + s, cy, r: s * 0.25, fill } },
+    { tag: 'circle', attrs: { cx: cx - s * 0.7, cy: cy - s * 0.7, r: s * 0.17, fill: fillOuter } },
+    { tag: 'circle', attrs: { cx: cx + s * 0.7, cy: cy - s * 0.7, r: s * 0.17, fill: fillOuter } },
+    { tag: 'circle', attrs: { cx: cx - s * 0.7, cy: cy + s * 0.7, r: s * 0.17, fill: fillOuter } },
+    { tag: 'circle', attrs: { cx: cx + s * 0.7, cy: cy + s * 0.7, r: s * 0.17, fill: fillOuter } },
+  ]
+}
+
+function diagonalCross(cx, cy, ts, stroke) {
+  const d = ts * 0.3
+  return [
+    { tag: 'line', attrs: { x1: cx - d, y1: cy - d, x2: cx + d, y2: cy + d, stroke, 'stroke-width': 1.5, 'stroke-linecap': 'round' } },
+    { tag: 'line', attrs: { x1: cx + d, y1: cy - d, x2: cx - d, y2: cy + d, stroke, 'stroke-width': 1.5, 'stroke-linecap': 'round' } },
+  ]
 }
 
 function buildOverlayPaths(overlays, rows, cols, tileSize) {
