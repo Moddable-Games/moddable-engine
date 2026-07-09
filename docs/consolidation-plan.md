@@ -239,13 +239,14 @@ parametric options and produces publication-quality layout data.
 Pipeline proven: topology-grid `renderLayout()` → render `serializeLayout()` → valid SVG.
 13 tests passing. Structured elements ({tag, attrs}) work as the intermediate format.
 
-### MANDATORY before each phase: All-providers-at-once analysis
+### MANDATORY before each phase: All-providers-at-once analysis + master notation design
 
-**Do NOT start writing consolidated code until this analysis is complete.**
+**Do NOT start writing consolidated code until BOTH steps are complete.**
 
-For each topology being consolidated, read ALL providers being absorbed SIMULTANEOUSLY.
-Not one at a time. Extract the universal drawing primitives — what do ALL boards of this
-topology consist of as drawing operations?
+#### Step 1: Extract universal drawing primitives
+
+Read ALL providers being absorbed SIMULTANEOUSLY. Not one at a time.
+Extract what ALL boards of this topology consist of as drawing operations.
 
 The consolidated renderer is ONE straight pipeline that processes a list of primitives.
 It never branches on which game/provider/mode it's serving. If it needs a new branch
@@ -254,7 +255,28 @@ to support a new game, the consolidation has FAILED — all we did was reorganiz
 **The test:** "If I add a new game using this topology tomorrow, does this code need
 ANY new branches?" If yes → not consolidated. Back to the drawing board.
 
-See memory: `feedback_consolidate-not-reorganize.md`
+#### Step 2: Design the master topology notation
+
+For this topology type, define the canonical cell state format that:
+- Describes EVERY cell completely (position, type, fill, decoration, piece, state)
+- Is what the renderer CONSUMES (no further interpretation needed)
+- Is what FEN/SFEN/setup strings translate INTO (not the other way around)
+- Uses generic shape/decoration names (never game names)
+
+The notation design comes FROM the primitives analysis — once you know what all
+boards consist of, the notation is just the structured format to express that.
+
+**Example (grid topology):**
+```
+Cell { id: 'e4', fill: '#f0d9b5', decoration: null, piece: { image: 'wP' } }
+Cell { id: 'a1', fill: '#c0622f', decoration: { shape: 'diagonal-cross', stroke: '#fff' }, piece: null }
+```
+
+The renderer iterates cells, draws fill, draws decoration, draws piece. One path.
+The bridge layer (render-consolidated.js) builds these cell descriptions from
+GAMES config now, and from frontmatter later. The renderer never changes.
+
+See memories: `feedback_consolidate-not-reorganize.md`, `project_master-topology-notation.md`
 
 ### Phase 1: topology-grid (7 providers, ~300 variants)
 
