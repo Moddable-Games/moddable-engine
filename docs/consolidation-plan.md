@@ -48,7 +48,82 @@ After consolidation:
 - **boards.js** config objects contain ALL visual/structural options per variant
 - Board studio toggle switches between "Original" (current providers) and "Packages" (topology packages via render layer)
 - Every variant renders identically in both modes
-- `packages/render/` composites topology + surface + pieces into final SVG
+- `packages/render/` serialises topology output + adds pieces on top
+
+---
+
+## Implementation Approach: Code Move, Not Rewrite
+
+### Why the original packages failed
+
+`getLayout()` returned minimal abstract data — cell centres, line coordinates,
+dimensions. The render package couldn't produce quality output because it wasn't
+given enough information. All the fiddly detail (exact insets, padding, stroke
+widths, arc calculations, multi-layer frames) lived only in board-diagrams.js.
+
+Adding a richer intermediate format between topology and SVG just recreates the
+complexity of SVG itself. The abstraction layer adds cost without value.
+
+### Decision: Structured SVG elements (Option A)
+
+Each topology package gets a `renderLayout(config)` method that returns structured
+SVG elements — NOT raw strings, NOT abstract layout data:
+
+```javascript
+// What the topology package returns:
+[
+  { tag: 'rect', attrs: { x: 5, y: 5, width: 320, height: 320, fill: '#d9b483' } },
+  { tag: 'line', attrs: { x1: 5, y1: 45, x2: 325, y2: 45, stroke: '#8b6914' } },
+  { tag: 'circle', attrs: { cx: 165, cy: 165, r: 3, fill: '#333' } },
+  // ... all the elements that produce the polished board
+]
+```
+
+This is trivially:
+- Serialised to SVG string (for PNG export, MCP tools, static generation)
+- Mounted to DOM (for interactivity, highlighting, animation)
+- Tested (assertions on element count, attributes, structure)
+
+### The extraction is a CODE MOVE
+
+Provider code moves bodily from board-diagrams.js into topology packages:
+
+```javascript
+// BEFORE (in board-diagrams.js provider):
+parts.push(`<rect x="${ox}" y="${oy}" width="${boardW}" height="${boardH}" fill="${monoFill}"/>`)
+
+// AFTER (in topology package):
+elements.push({ tag: 'rect', attrs: { x: ox, y: oy, width: boardW, height: boardH, fill: colors.mono } })
+```
+
+Same logic. Same pixel values. Same visual output. Structural refactor ONLY.
+
+**What this is NOT:**
+- NOT starting from the old bare `getLayout()` and iterating until it matches (weeks wasted)
+- NOT writing new rendering logic from scratch
+- NOT re-deriving spacing/padding/insets by trial and error
+
+### The split rule during extraction
+
+When moving provider code into a topology package, every line splits into one of:
+
+| Goes INTO the topology package | Stays in CONFIG (boards.js / frontmatter) |
+|-------------------------------|------------------------------------------|
+| HOW to draw a gap at row N | Row 4 IS the river |
+| HOW to draw arcs at radius R | R=1 for inner, R=2 for outer |
+| HOW to draw star points at positions P | THESE positions get star points |
+| HOW to render text at a gap | The text IS "楚河" / "漢界" |
+| HOW to apply zone colours from a map | THIS map string defines zones |
+
+The provider code moves. The game knowledge embedded in it does NOT move with it.
+
+### What packages/render/ becomes
+
+THIN. It does NOT reinterpret or re-layout anything the topology produced:
+- Wrap structured elements in SVG document (viewBox, xmlns)
+- Add piece images/surfaces on top of topology output at cell positions
+- Serialise structured elements to SVG string
+- Optionally mount to DOM for interactivity
 
 ---
 
