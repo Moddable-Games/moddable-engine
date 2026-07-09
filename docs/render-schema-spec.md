@@ -2,7 +2,16 @@
 
 ## Purpose
 
-Define the full data contract between moddable-rules frontmatter and the board studio, eliminating all hardcoded config from `boards.js`. Covers all 41 game families and 315+ variants: board games, card games, dice games, tile games, and RPG references.
+Define the full data contract between moddable-rules frontmatter and the rendering
+pipeline. Covers all 41 game families and 315+ variants.
+
+**Consumers of this schema:** The topology packages (`packages/topology-*/`) receive
+the `topology:` and `render:` blocks as `getLayout()` options. The render package
+(`packages/render/`) receives the full resolved schema and composites layers.
+The board studio is a thin shell that orchestrates this pipeline.
+
+**NOT consumed by:** standalone `js/renderers/` files (those don't exist — the
+topology packages ARE the renderers). See docs/consolidation-plan.md for context.
 
 ## Design Principles
 
@@ -482,9 +491,21 @@ surface:
     rosette: "#c49040"
 ```
 
-### decorations (visual overlays)
+### decorations (visual overlays — NOT game positions)
 
-Structural visual elements rendered on top of the base board. Not interactable cells — purely visual. Separated from zones because they describe rendering behaviour, not cell types.
+Structural visual elements rendered on top of the base board. Decorations are
+purely visual — they have NO `data-sq`, are NOT addressable by the engine, and
+CANNOT hold pieces or tokens. They exist only to help players understand the
+board geometry (star points show where to place handicap stones, promotion zones
+show where pieces transform, arcs show capture paths).
+
+**The test:** "Can a piece/token ever occupy this or does the engine ever need
+to reference it by ID?" If yes → it's a POSITION (goes in topology or content),
+not a decoration. Surakarta arcs are decorative (pieces sit on intersections,
+not on the arcs themselves). Landlords inner spaces are POSITIONS (tokens land
+on them during play).
+
+Separated from zones because they describe rendering behaviour, not cell types.
 
 ```yaml
 render:
@@ -690,8 +711,11 @@ engine:
 engine:
   topology:
     type: track
-    positions: 40
+    positions: 44              # ALL game positions (40 perimeter + 4 inner)
     shape: circuit
+    zones:
+      perimeter: 40            # outer track loop
+      inner: 4                 # inner-area game positions (Treasury, Land Office, etc.)
   surface: parchment
   content:
     source: board-data.json
@@ -702,8 +726,16 @@ engine:
         type: { mapTo: surface }
         rent: { display: true, prefix: "Rent $" }
         price: { display: true, prefix: "$" }
-        side: { layout: true }
+        side: { layout: true }  # 'bottom'|'left'|'top'|'right'|'corner'|'inner'
 ```
+
+**Critical:** Inner-area positions (Public Treasury, Natural Opportunities, Land
+in Use, Idle Land) are GAME POSITIONS — players interact with them during play.
+They are part of the topology's position count, have `data-sq` IDs, and are
+addressable by the engine. They are NOT decorations. The `side: 'inner'` field
+tells the renderer to place them in the inner area rather than the perimeter.
+The renderer draws them according to their type/treatment like any other
+position — it just uses inner-area layout geometry instead of perimeter layout.
 
 The surface then maps content.type values to visual treatments:
 
@@ -1602,31 +1634,32 @@ The full path from authored frontmatter to rendered pixels. Every step is a disc
 
 | Step | Module | Exists? |
 |------|--------|---------|
-| 1 | `js/schema-loader.js` | No — new |
+| 1 | `js/schema-loader.js` | Yes |
 | 2 | `packages/schema/src/parse-frontmatter.js` | Yes |
-| 3 | `js/surface-resolver.js` | No — new |
-| 4-6 | `js/cascade-resolver.js` | No — new |
-| 7-9 | `js/content-loader.js` | No — new |
-| 10 | `js/render-dispatch.js` | No — new |
-| 11-14 | `js/renderers/grid.js`, `hex.js`, `track.js`, `pit.js`, `graph.js`, `none.js` | No — new |
-| 12 | `js/renderers/decorations.js` | No — new |
-| 13 | `js/renderers/treatments.js` | No — new |
-| 15 | `js/studio-ui.js` | No — new (replaces boards.js UI logic) |
+| 3 | `js/surface-resolver.js` | Yes |
+| 4-6 | `js/cascade-resolver.js` | Yes |
+| 7-9 | `js/content-loader.js` | Yes |
+| 10 | Topology packages `getLayout()` | Yes (needs quality upgrade) |
+| 11 | `packages/render/` layer compositor | Yes (needs gap fixes) |
 
 ### Data flow contract
 
-Every module receives and returns plain objects. No classes, no inheritance, no shared mutable state. Each module is testable in isolation:
+Every module receives and returns plain objects. No classes, no inheritance, no shared mutable state.
 
 ```js
 // cascade-resolver.js
 export function resolve(surface, family, variant) → resolvedDefinition
 
-// render-dispatch.js
-export function dispatch(resolvedDefinition, container) → void
+// topology package (e.g. topology-grid)
+topology.getLayout(resolvedDefinition.render) → layout object
 
-// renderers/grid.js
-export function renderGrid(resolved, svg) → void
+// packages/render/
+renderer.render(layout, { theme, board, pieces }) → SVG string
 ```
+
+**NOTE (2026-07-09):** The rendering destination is the topology packages
+(`packages/topology-*/`) + the render package (`packages/render/`), NOT standalone
+`js/renderers/` files. See docs/consolidation-plan.md for full context on reconciliation.
 
 ---
 
@@ -1634,31 +1667,27 @@ export function renderGrid(resolved, svg) → void
 
 ### Principle: dual-mode visual comparison
 
-The legacy code (boards.js + board-diagrams.js) IS the reference implementation. It runs unchanged alongside the new schema-driven renderers until every variant matches visually. No screenshots, no PNG baselines — the old code running live in the same browser session is the regression suite.
+The legacy code (boards.js + board-diagrams.js) IS the reference implementation. It runs unchanged alongside the new package-driven pipeline until every variant matches visually. Toggle: "Original" vs "Packages" in the board studio.
 
-### Phase 1: Define surfaces + build pipeline infrastructure
+### Phase 1: Pipeline infrastructure (DONE)
 
-New files (coexist with legacy, don't touch it):
-- 9 named surface definitions (YAML files or JS objects)
-- `js/schema-loader.js` — fetch + parse frontmatter from rules
+- 9 named surface definitions
+- `js/schema-loader.js` — fetch + parse frontmatter
 - `js/surface-resolver.js` — resolve named surface → full colour object
 - `js/cascade-resolver.js` — deep merge surface → family → variant
 - `js/content-loader.js` — fetch external JSON when content.source exists
-- `js/render-dispatch.js` — route resolved object to topology renderer
+- `js/reverse-adapter.js` — GAMES → schema format (temporary bridge)
 
-### Phase 2: Build topology renderers
+### Phase 2: Reconcile topology packages (NEXT)
 
-New files in `js/renderers/`:
-- `grid.js` — handles chess, go, xiangqi, shogi, draughts, reversi, halma, tafl, surakarta, alquerque, fanorona, dungeon-chess, dou-shou-qi, l'attaque, royal-ur, pachisi, chaupar
-- `hex.js` — handles hex, nukes, talisman, mongo, twilight, endless-skies, harvesters, agon, glinski
-- `track.js` — handles backgammon, landlords, econopoly
-- `pit.js` — handles mancala family (kalah, oware, bao, congkak)
-- `graph.js` — handles morris, nyout, asalto, stern-halma
-- `none.js` — handles card, dice, tile, RPG (components + content)
-- `decorations.js` — markers, tint, gap, diagonals, arcs, border
-- `treatments.js` — stripe, medallion, split, bars, arc, tint
+Upgrade topology packages to produce publication-quality layout output:
+- `packages/topology-grid/` — absorbs checkered, mono-grid, go, xiangqi, shogi, surakarta, alquerque
+- `packages/topology-hex/` — absorbs hex provider (all shapes, colour strategies)
+- `packages/topology-track/` — absorbs backgammon, landlords
+- `packages/topology-pit/` — absorbs mancala
+- `packages/topology-graph/` — absorbs morris, nyout, asalto, stern-halma
 
-Each renderer reads ONLY from the resolved object. Zero imports from legacy code.
+Each topology package reads ONLY from the resolved schema object. Zero game knowledge.
 
 ### Phase 3: Wire dual-mode into studio UI
 

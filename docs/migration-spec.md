@@ -1,8 +1,13 @@
 # Render Data Migration Spec — boards.js → moddable-rules frontmatter
 
-## Status: READY FOR EXECUTION
+## Status: BLOCKED (awaiting consolidation/reconciliation)
 ## Created: 2026-07-09
-## Depends on: render-schema-spec.md (data contract), consolidation (may refine)
+## Depends on: render-schema-spec.md (data contract), consolidation-plan.md (reconciliation)
+
+**NOTE (2026-07-09):** This migration cannot begin until the reconciliation is complete —
+i.e. topology packages produce publication-quality output matching board-diagrams.js,
+verified via dual-mode toggle. The migration moves data from boards.js to frontmatter;
+the topology packages must be able to consume that frontmatter and render correctly first.
 
 ---
 
