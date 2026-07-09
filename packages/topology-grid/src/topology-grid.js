@@ -427,6 +427,285 @@ export function createGridTopology(config) {
     return toIndex(nr, nc)
   }
 
+  function renderLayout(config = {}) {
+    const {
+      tileSize = 56,
+      mode = 'tiles',
+      colors = {},
+      showLabels = true,
+      cellColor = 'uniform',
+      cellMap,
+      inset,
+      decorations = [],
+      markers = [],
+    } = config
+
+    if (mode === 'intersections') {
+      return renderIntersections(config)
+    }
+
+    return renderTiles(config)
+  }
+
+  function renderTiles(config) {
+    const {
+      tileSize = 56,
+      colors = {},
+      showLabels = true,
+      cellColor = 'uniform',
+      cellMap,
+    } = config
+
+    const boardW = cols * tileSize
+    const boardH = rows * tileSize
+    const pad = showLabels ? 24 : 0
+    const ox = pad
+    const oy = pad
+    const elements = []
+
+    // Background fill
+    if (cellColor === 'uniform') {
+      elements.push({ tag: 'rect', attrs: { x: ox, y: oy, width: boardW, height: boardH, fill: colors.mono || '#d9b483' } })
+    } else if (cellColor === 'checkered') {
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const isLight = (r + c) % 2 === 0
+          const fill = isLight ? (colors.light || '#f0d9b5') : (colors.dark || '#b58863')
+          elements.push({ tag: 'rect', attrs: { x: ox + c * tileSize, y: oy + r * tileSize, width: tileSize, height: tileSize, fill } })
+        }
+      }
+    } else if (cellColor === 'cellMap' && cellMap) {
+      const mapRows = cellMap.split('\n')
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const mapChar = mapRows[r]?.[c] || '.'
+          const fill = colors.zoneColors?.[mapChar] || colors.light || '#f0d9b5'
+          elements.push({ tag: 'rect', attrs: { x: ox + c * tileSize, y: oy + r * tileSize, width: tileSize, height: tileSize, fill } })
+        }
+      }
+    }
+
+    // Grid lines (uniform + cellMap modes)
+    if (cellColor === 'uniform' || cellColor === 'cellMap') {
+      const lineColor = colors.gridLine || colors.stroke || '#8b6914'
+      for (let c = 0; c <= cols; c++) {
+        const x = ox + c * tileSize
+        elements.push({ tag: 'line', attrs: { x1: x, y1: oy, x2: x, y2: oy + boardH, stroke: lineColor, 'stroke-width': 1.5 } })
+      }
+      for (let r = 0; r <= rows; r++) {
+        const y = oy + r * tileSize
+        elements.push({ tag: 'line', attrs: { x1: ox, y1: y, x2: ox + boardW, y2: y, stroke: lineColor, 'stroke-width': 1.5 } })
+      }
+    }
+
+    // Hit targets (transparent cells with position IDs)
+    const cells = []
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const sq = String.fromCharCode(97 + c) + (rows - r)
+        cells.push({
+          id: sq,
+          x: ox + c * tileSize + tileSize / 2,
+          y: oy + r * tileSize + tileSize / 2,
+          element: { tag: 'rect', attrs: { x: ox + c * tileSize, y: oy + r * tileSize, width: tileSize, height: tileSize, fill: 'transparent', 'data-sq': sq, class: 'board-cell' } },
+        })
+      }
+    }
+
+    // Labels
+    const labels = []
+    if (showLabels) {
+      const labelColor = colors.labelText || colors.gridLine || '#8b6914'
+      const fs = Math.min(13, pad * 0.55)
+      for (let c = 0; c < cols; c++) {
+        const x = ox + c * tileSize + tileSize / 2
+        labels.push({ tag: 'text', attrs: { x, y: oy + boardH + pad * 0.65, 'text-anchor': 'middle', 'font-size': fs, fill: labelColor, 'font-family': 'monospace' }, text: String.fromCharCode(97 + c) })
+      }
+      for (let r = 0; r < rows; r++) {
+        const y = oy + r * tileSize + tileSize / 2
+        labels.push({ tag: 'text', attrs: { x: pad * 0.5, y: y + fs * 0.35, 'text-anchor': 'middle', 'font-size': fs, fill: labelColor, 'font-family': 'monospace' }, text: String(rows - r) })
+      }
+    }
+
+    return {
+      width: boardW + pad * 2,
+      height: boardH + pad * 2,
+      elements,
+      cells,
+      labels,
+      tileSize,
+      ox,
+      oy,
+    }
+  }
+
+  function renderIntersections(config) {
+    const {
+      tileSize = 20,
+      colors = {},
+      showLabels = true,
+      inset = 15,
+      decorations = [],
+      markers = [],
+      riverAfterRow,
+      riverHeight = 20,
+      palaces = [],
+      diagonals = 'none',
+      labelStyle = 'algebraic',
+    } = config
+
+    const gap = riverAfterRow != null ? riverHeight : 0
+    const gridW = (cols - 1) * tileSize
+    const gridH = (rows - 1) * tileSize + gap
+    const boardW = gridW + inset * 2
+    const boardH = gridH + inset * 2
+    const pad = showLabels ? 24 : 0
+    const ox = pad + inset
+    const oy = pad + inset
+    const elements = []
+
+    function posY(r) {
+      if (riverAfterRow != null && r > riverAfterRow) return oy + r * tileSize + gap
+      return oy + r * tileSize
+    }
+
+    // Board background (from config)
+    if (colors.background) {
+      elements.push({ tag: 'rect', attrs: { x: pad, y: pad, width: boardW, height: boardH, fill: colors.background } })
+    }
+    if (colors.surface) {
+      elements.push({ tag: 'rect', attrs: { x: ox, y: oy, width: gridW, height: gridH, fill: colors.surface, rx: 2 } })
+    }
+
+    // Grid lines — horizontal
+    const lineColor = colors.gridLine || '#3d2b1a'
+    const lineWidth = colors.gridLineWidth || 0.8
+    for (let r = 0; r < rows; r++) {
+      const y = posY(r)
+      elements.push({ tag: 'line', attrs: { x1: ox, y1: y, x2: ox + gridW, y2: y, stroke: lineColor, 'stroke-width': lineWidth } })
+    }
+
+    // Grid lines — vertical (split at river if present)
+    for (let c = 0; c < cols; c++) {
+      const x = ox + c * tileSize
+      if (riverAfterRow != null) {
+        elements.push({ tag: 'line', attrs: { x1: x, y1: oy, x2: x, y2: posY(riverAfterRow), stroke: lineColor, 'stroke-width': lineWidth } })
+        elements.push({ tag: 'line', attrs: { x1: x, y1: posY(riverAfterRow + 1), x2: x, y2: posY(rows - 1), stroke: lineColor, 'stroke-width': lineWidth } })
+      } else {
+        elements.push({ tag: 'line', attrs: { x1: x, y1: oy, x2: x, y2: posY(rows - 1), stroke: lineColor, 'stroke-width': lineWidth } })
+      }
+    }
+
+    // Diagonal decorations
+    if (diagonals === 'full') {
+      for (let r = 0; r < rows - 1; r++) {
+        for (let c = 0; c < cols - 1; c++) {
+          elements.push({ tag: 'line', attrs: { x1: ox + c * tileSize, y1: posY(r), x2: ox + (c + 1) * tileSize, y2: posY(r + 1), stroke: lineColor, 'stroke-width': lineWidth } })
+          elements.push({ tag: 'line', attrs: { x1: ox + (c + 1) * tileSize, y1: posY(r), x2: ox + c * tileSize, y2: posY(r + 1), stroke: lineColor, 'stroke-width': lineWidth } })
+        }
+      }
+    } else if (diagonals === 'alternating') {
+      for (let r = 0; r < rows - 1; r++) {
+        for (let c = 0; c < cols - 1; c++) {
+          if ((r + c) % 2 === 0) {
+            elements.push({ tag: 'line', attrs: { x1: ox + c * tileSize, y1: posY(r), x2: ox + (c + 1) * tileSize, y2: posY(r + 1), stroke: lineColor, 'stroke-width': lineWidth } })
+            elements.push({ tag: 'line', attrs: { x1: ox + (c + 1) * tileSize, y1: posY(r), x2: ox + c * tileSize, y2: posY(r + 1), stroke: lineColor, 'stroke-width': lineWidth } })
+          }
+        }
+      }
+    }
+
+    // Palace diagonals
+    for (const palace of palaces) {
+      const { row, col, width: pw, height: ph } = palace
+      const dasharray = palace.dasharray || '4,3'
+      const palaceWidth = palace.lineWidth || lineWidth
+      const x1 = ox + col * tileSize, y1 = posY(row)
+      const x2 = ox + (col + pw) * tileSize, y2 = posY(row + ph)
+      elements.push({ tag: 'line', attrs: { x1, y1, x2, y2, stroke: lineColor, 'stroke-width': palaceWidth, 'stroke-dasharray': dasharray } })
+      elements.push({ tag: 'line', attrs: { x1: x2, y1, x2: x1, y2, stroke: lineColor, 'stroke-width': palaceWidth, 'stroke-dasharray': dasharray } })
+    }
+
+    // Star points / markers
+    for (const marker of markers) {
+      const [r, c] = marker
+      const cx = ox + c * tileSize
+      const cy = posY(r)
+      elements.push({ tag: 'circle', attrs: { cx, cy, r: 3, fill: colors.markerFill || lineColor } })
+    }
+
+    // River text decorations
+    for (const dec of decorations) {
+      if (dec.type === 'river-text' && riverAfterRow != null) {
+        const riverY1 = posY(riverAfterRow)
+        const riverY2 = posY(riverAfterRow + 1)
+        const midY = (riverY1 + riverY2) / 2
+        const textColor = dec.color || colors.gridLine || lineColor
+        const fontSize = dec.fontSize || tileSize * 0.9
+        for (let i = 0; i < (dec.texts || []).length; i++) {
+          const textX = ox + gridW * (dec.positions?.[i] || (i === 0 ? 0.25 : 0.75))
+          elements.push({ tag: 'text', attrs: { x: textX, y: midY, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': fontSize, 'font-family': dec.fontFamily || 'serif', fill: textColor, 'letter-spacing': '0.2em' }, text: dec.texts[i] })
+        }
+      }
+    }
+
+    // Hit targets (intersections as circles)
+    const cells = []
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        let sq
+        if (labelStyle === 'go') {
+          let letterIdx = c
+          if (letterIdx >= 8) letterIdx++
+          sq = String.fromCharCode(65 + letterIdx) + (rows - r)
+        } else {
+          sq = String.fromCharCode(97 + c) + (rows - r)
+        }
+        const cx = ox + c * tileSize
+        const cy = posY(r)
+        cells.push({
+          id: sq,
+          x: cx,
+          y: cy,
+          element: { tag: 'circle', attrs: { cx, cy, r: tileSize * 0.45, fill: 'transparent', 'data-sq': sq, class: 'board-cell' } },
+        })
+      }
+    }
+
+    // Labels
+    const labels = []
+    if (showLabels) {
+      const labelColor = colors.labelText || lineColor
+      const fs = 10
+      if (labelStyle === 'go') {
+        let letterIdx = 0
+        for (let c = 0; c < cols; c++) {
+          if (letterIdx === 8) letterIdx++
+          labels.push({ tag: 'text', attrs: { x: ox + c * tileSize, y: posY(rows - 1) + 14 + inset, 'text-anchor': 'middle', 'font-size': fs, fill: labelColor, 'font-family': 'sans-serif' }, text: String.fromCharCode(65 + letterIdx) })
+          letterIdx++
+        }
+      } else {
+        for (let c = 0; c < cols; c++) {
+          labels.push({ tag: 'text', attrs: { x: ox + c * tileSize, y: posY(rows - 1) + 14 + inset, 'text-anchor': 'middle', 'font-size': fs, fill: labelColor, 'font-family': 'monospace' }, text: String.fromCharCode(97 + c) })
+        }
+      }
+      for (let r = 0; r < rows; r++) {
+        labels.push({ tag: 'text', attrs: { x: ox - inset - 4, y: posY(r), 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': fs, fill: labelColor, 'font-family': labelStyle === 'go' ? 'sans-serif' : 'monospace' }, text: String(rows - r) })
+      }
+    }
+
+    return {
+      width: boardW + pad * 2,
+      height: boardH + pad * 2,
+      elements,
+      cells,
+      labels,
+      tileSize,
+      ox,
+      oy,
+    }
+  }
+
   return {
     rows,
     cols,
@@ -451,6 +730,7 @@ export function createGridTopology(config) {
     onBoard,
     getDirections,
     getLayout,
+    renderLayout,
     getAllCells,
     getCellCount,
     step,
