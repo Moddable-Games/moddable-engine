@@ -11,6 +11,7 @@ let SETS_MAP = {}
 function resolvePieceFiles(set) {
   const files = []
   const pieces = set.pieces || {}
+  const sourceId = set.virtual && set.baseSet ? set.baseSet : set.id
 
   if (set.extends && SETS_MAP[set.extends]) {
     const base = SETS_MAP[set.extends]
@@ -22,7 +23,7 @@ function resolvePieceFiles(set) {
 
   for (const [key, val] of Object.entries(pieces)) {
     if (typeof val === 'string') {
-      files.push({ key, file: val, setId: set.id })
+      files.push({ key, file: val, setId: sourceId })
     } else if (val.source && val.file) {
       files.push({ key, file: val.file, setId: val.source, surface: val.surface || null })
     }
