@@ -575,9 +575,10 @@ export function createGridTopology(config) {
           ? labelConfig.alphabet[c] + (rows - r)
           : String.fromCharCode(97 + c) + (rows - r)
         const cx = posX(c), cy = posY(r)
+        const extra = config.cellAttrs ? config.cellAttrs(r, c) : {}
         const element = isIntersection
-          ? { tag: 'circle', attrs: { cx, cy, r: tileSize * 0.45, fill: 'transparent', 'data-sq': sq, class: 'board-cell' } }
-          : { tag: 'rect', attrs: { x: pad + c * tileSize, y: pad + r * tileSize, width: tileSize, height: tileSize, fill: 'transparent', 'data-sq': sq, class: 'board-cell' } }
+          ? { tag: 'circle', attrs: { cx, cy, r: tileSize * 0.45, fill: 'transparent', 'data-sq': sq, class: 'board-cell', ...extra } }
+          : { tag: 'rect', attrs: { x: pad + c * tileSize, y: pad + r * tileSize, width: tileSize, height: tileSize, fill: 'transparent', 'data-sq': sq, class: 'board-cell', ...extra } }
         cells.push({ id: sq, x: cx, y: cy, element })
       }
     }

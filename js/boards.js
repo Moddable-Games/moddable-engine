@@ -7,6 +7,7 @@ import { renderFromResolved, loadGalleryIndex as loadAdapterGallery, setDeckRend
 import { reverseAdapt } from './reverse-adapter.js'
 import { resolveSurface } from './surface-resolver.js'
 import { resolve as cascadeResolve } from './cascade-resolver.js'
+import { renderConsolidated, isGridProvider } from './render-consolidated.js'
 
 setDeckRenderer(renderDeckSvg)
 setMahjongRenderer(renderMahjongSvg)
@@ -2283,9 +2284,22 @@ function render() {
     return
   }
 
-  const svg = renderBoard(config)
+  let svg
+  if (renderMode === 'consolidated' && isGridProvider(config.boardStyle)) {
+    svg = renderConsolidated(config)
+  }
+  if (!svg) svg = renderBoard(config)
   showSvg(svg)
   showInfo(config)
+  if (config.overlays) {
+    const overlaySquares = {}
+    for (const overlay of config.overlays) {
+      if (overlay.path) {
+        for (const sq of overlay.path) overlaySquares[sq] = overlay.type || 'overlay'
+      }
+    }
+    config._overlaySquares = overlaySquares
+  }
   bindBoardHover(config)
   requestAnimationFrame(fitToView)
 }
@@ -2971,14 +2985,6 @@ function showSvg(svg) {
   container.innerHTML = svg
   container.classList.add('active')
   empty.style.display = 'none'
-
-  if (renderMode === 'schema') {
-    const game = GAMES[state.game]
-    const variantDef = game?.variants[state.variant]
-    if (game && variantDef) {
-      renderSchemaMode(game, variantDef)
-    }
-  }
 }
 
 function bindBoardHover(config) {
@@ -3021,7 +3027,9 @@ function bindBoardHover(config) {
     if (layer !== undefined && layerLabels) {
       text += ` · ${layerLabels[parseInt(layer)]}`
     }
+    const overlayInfo = config._overlaySquares?.[sq]
     if (centreMarker && sq === '0,0') text += ' [Throne]'
+    else if (overlayInfo) text += ` [${overlayInfo}]`
     else if (type && type !== 'floor' && !(nodeNames && nodeNames[sq])) text += ` [${type}]`
     if (nodeNames && nodeNames[sq]) text += ` — ${nodeNames[sq]}`
     const layerPositions = config.layerPositions || null
