@@ -2203,6 +2203,14 @@ export function fenToPosition(fen, rows, cols) {
         const next = rank[i + 1]
         if (next >= '0' && next <= '9') { c += parseInt(ch + next); i += 2 }
         else { c += parseInt(ch); i++ }
+      } else if (ch === '[') {
+        const close = rank.indexOf(']', i)
+        if (close === -1) { i++; continue }
+        const code = rank.slice(i + 1, close)
+        const file = String.fromCharCode(97 + c)
+        const rankNum = rows - r
+        position[`${file}${rankNum}`] = code
+        c++; i = close + 1
       } else {
         const file = String.fromCharCode(97 + c)
         const rankNum = rows - r
@@ -2245,12 +2253,16 @@ function renderPieces(position, provider, ctx, colors) {
       const x = pos.x - tileSize / 2, y = pos.y - tileSize / 2
       const surfaceMap = opts.pieceSurfaceMap || {}
       const hasSurface = opts.pieceBorders || surfaceMap[imageKey]
+      const rotations = opts.pieceRotations
+      const rot = rotations && opts.getOwner ? rotations[opts.getOwner(piece.type)] : 0
       if (hasSurface) {
         const isUpper = piece.type === piece.type.toUpperCase()
         const owner = opts.getOwner ? opts.getOwner(piece.type) : (isUpper ? 'white' : 'black')
         const surface = opts.pieceSurface && opts.pieceSurface.owners && opts.pieceSurface.owners[owner]
         const ownerColors = surface || { fill: opts.pieceBorders && opts.pieceBorders[owner] || '#888', stroke: 'rgba(0,0,0,0.3)' }
         parts.push(renderSurfaceSVG('disc', pos.x, pos.y, tileSize, ownerColors, pieceImages[imageKey]))
+      } else if (rot) {
+        parts.push(`<g transform="rotate(${rot} ${pos.x} ${pos.y})"><image href="${pieceImages[imageKey]}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" pointer-events="none"/></g>`)
       } else {
         parts.push(`<image href="${pieceImages[imageKey]}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" pointer-events="none"/>`)
       }

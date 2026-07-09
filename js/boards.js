@@ -661,12 +661,12 @@ const GAMES = {
     variants: {
       standard: { label: 'Standard', boardStyle: 'xiangqi', rows: 10, cols: 9, tileSize: 36, river: true, fen: 'rheakaehr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RHEAKAEHR', setupDesc: '16 pieces each across river', variantDesc: 'Chinese chess. Palace confines generals and advisors. River restricts elephants. Cannons screen-jump to capture.' },
       janggi: { label: 'Janggi', boardStyle: 'xiangqi', rows: 10, cols: 9, tileSize: 36, river: false, fen: 'rhea1aehr/4k4/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/4K4/RHEA1AEHR', setupDesc: '16 pieces each, generals in palace centre', variantDesc: 'Korean chess. No river. Elephants move wider. Generals and guards move along palace diagonals.' },
-      jieqi: { label: 'Jieqi', boardStyle: 'xiangqi', rows: 10, cols: 9, tileSize: 36, river: true, fen: 'rheakaehr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RHEAKAEHR', setupDesc: 'Standard position, pieces face-down', variantDesc: 'Hidden-information Xiangqi. All pieces except General start face-down, revealed on first move. Rank hierarchy for captures.' },
-      'manchu-plus': { label: 'Manchu', boardStyle: 'xiangqi', rows: 10, cols: 9, tileSize: 36, river: true, fen: 'rheakaehr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/9/9/4B4K', setupDesc: 'Red standard vs Black Banner piece', variantDesc: 'Asymmetric: Red standard Xiangqi vs Black with one Banner piece (combines Chariot+Cannon+Horse). Extreme imbalance. NEEDS VERIFIED SFEN.'},
+      jieqi: { label: 'Jieqi', boardStyle: 'xiangqi', rows: 10, cols: 9, tileSize: 36, river: true, pieceSetOverride: 'mce-xiangqi-fairy', fen: 'ffffkffff/9/1f5f1/f1f1f1f1f/9/9/F1F1F1F1F/1F5F1/9/FFFFKFFFF', pieceNames: { F: 'Face-down piece', f: 'Face-down piece', K: 'General', k: 'General' }, setupDesc: 'Standard positions, all pieces face-down except Generals', variantDesc: 'Hidden-information Xiangqi. All pieces except General start face-down, revealed on first move. Rank hierarchy for captures.' },
+      'manchu-plus': { label: 'Manchu', boardStyle: 'xiangqi', rows: 10, cols: 9, tileSize: 36, river: true, pieceSetOverride: 'mce-xiangqi-fairy', fen: 'r1eakae1z/9/p1p1p1p1p/9/9/9/P1P1P1P1P/1C5C1/9/RHEAKAEHR', pieceNames: { Z: 'Banner', z: 'Banner' }, setupDesc: 'Black: Chariot, 2 Elephants, 2 Advisors, General, Banner. Red: standard', variantDesc: 'Asymmetric: Red has standard Xiangqi army. Black has no Horses or Cannons — replaced by one Banner (combines Chariot+Cannon+Horse movement).'},
       minixiangqi: { label: 'Mini Xiangqi', boardStyle: 'xiangqi', rows: 7, cols: 7, tileSize: 40, river: false, fen: 'rchkhcr/p1ppp1p/7/7/7/P1PPP1P/RCHKHCR', setupDesc: '12 pieces each on 7x7', variantDesc: '7x7 Xiangqi. No river, no Advisors/Elephants. Soldiers move sideways from start. No palace.'},
       'quang-trung': { label: 'Quang Trung', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 30, fen: 'rheaakaehr/10/1c6c1/p1p1pp1p1p/10/10/P1P1PP1P1P/1C6C1/10/RHEAAKAEHR', setupDesc: '18 pieces each on 10x10 checkered board', variantDesc: 'Vietnamese 10x10 chess variant. Pieces on squares (not intersections). Pawn reaching last rank wins. NEEDS VERIFIED SETUP.'},
       'xiangqi-42': { label: 'Xiangqi-42', boardStyle: 'xiangqi', rows: 6, cols: 7, tileSize: 40, river: true, fen: 'rhakahr/1c3c1/p2p2p/P2P2P/1C3C1/RHAKAHR', setupDesc: '12 pieces each on 7x6 (42 intersections)', variantDesc: 'Compact Xiangqi on 42 intersections (7x6). No Elephants. Cannons in front of Horses. Robert Price, 2001.'},
-      'yang-qi': { label: 'Yang Qi', boardStyle: 'xiangqi', rows: 10, cols: 9, tileSize: 36, river: true, pieceSetOverride: 'mce-xiangqi-fairy', fen: 'rhvakavhr/1c5c1/p1p1p1p1p/1p1p1p1p1/9/9/1P1P1P1P1/P1P1P1P1P/1C5C1/RHVAKAVHR', setupDesc: '25 pieces each (9 soldiers on two ranks)', variantDesc: 'Western-influenced Xiangqi. Vaos (diagonal screen-capture) replace Elephants. 9 soldiers per side on ranks 3-4.'},
+      'yang-qi': { label: 'Yang Qi', boardStyle: 'xiangqi', rows: 10, cols: 9, tileSize: 36, river: true, pieceSetOverride: 'mce-xiangqi-fairy', fen: 'rhvakavhr/1c5c1/p1p1p1p1p/1p1p1p1p1/9/9/1P1P1P1P1/P1P1P1P1P/1C5C1/RHVAKAVHR', setupDesc: '20 pieces each (9 pawns on two ranks, 2 Cannons, 9 back rank)', variantDesc: 'Western-influenced Xiangqi. Vaos (diagonal screen-capture) replace Elephants. 9 soldiers per side staggered on ranks 3-4. No river/palace restrictions.'},
     },
   },
   draughts: {
@@ -710,27 +710,35 @@ const GAMES = {
     variants: {
       standard: { label: 'Standard (9×9)', boardStyle: 'shogi', rows: 9, cols: 9, tileSize: 36, fen: 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL', setupDesc: '20 pieces each on back ranks and third row', variantDesc: 'Captured pieces become your own and can be dropped back onto the board.' },
       'annan-shogi': { label: 'Annan Shogi (9×9)', boardStyle: 'shogi', rows: 9, cols: 9, tileSize: 36, fen: 'lnsgkgsnl/1r5b1/p1ppppp1p/1p5p1/9/1P5P1/P1PPPPP1P/1B5R1/LNSGKGSNL', setupDesc: 'Standard position with b/h file pawns advanced', variantDesc: 'Pieces borrow movement of the friendly piece directly behind them. Standard Shogi otherwise.' },
-      'cannon-shogi': { label: 'Cannon Shogi (9×9)', boardStyle: 'shogi', rows: 9, cols: 9, tileSize: 36, fen: 'lnsgkgsnl/1rci1uab1/p1p1p1p1p/9/9/9/P1P1P1P1P/1BAU1ICR1/LNSGKGSNL', setupDesc: '22 pieces each with 4 Cannon types', variantDesc: 'Shogi + 4 Cannon types from Xiangqi/Janggi. Soldiers replace Pawns. Drops permitted. Peter Michaelsen, 1998.' },
-      'chu-shogi': { label: 'Chu Shogi (12×12)', boardStyle: 'shogi', rows: 12, cols: 12, tileSize: 28, fen: 'lnfcsgkgscfnl/a1i1h1h1i1a/p1o1o1o1o1p/ppppppppppppp/12/12/12/12/PPPPPPPPPPPPP/P1O1O1O1O1P/A1I1H1H1I1A/LNFCSGKGSCFNL', setupDesc: '46 pieces per side, 21 types', variantDesc: 'Historical 12x12. Lion (double-mover), Drunk Elephant promotes to Crown Prince. No drops. Extinction royalty.' },
-      'dai-shogi': { label: 'Dai Shogi (15×15)', boardStyle: 'shogi', rows: 15, cols: 15, tileSize: 22, fen: 'lnifcmsgkgsmcfinl/15/a1b1t1h1h1t1b1a/p1o1o1o1o1o1o1p/ppppppppppppppp/15/15/15/15/15/PPPPPPPPPPPPPPP/P1O1O1O1O1O1O1P/A1B1T1H1H1T1B1A/15/LNIFCMSGKGSMCFINL', setupDesc: '65 pieces per side', variantDesc: 'Historical 15x15. Lion, Drunk Elephant promotes to Crown Prince. No drops. Precursor to standard Shogi.' },
-      dobutsu: { label: 'Dobutsu Shogi (3×4)', boardStyle: 'shogi', rows: 4, cols: 3, tileSize: 50, fen: 'gle/1c1/1C1/ELG', setupDesc: '4 animals per side', variantDesc: 'Animal Shogi for children. 3x4. Lion, Giraffe, Elephant, Chick. Drops. Solved: second player wins perfectly.' },
-      'four-player-shogi': { label: 'Four-Player Shogi', boardStyle: 'shogi', rows: 9, cols: 9, tileSize: 36, fen: 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL', setupDesc: '4 armies on cross-shaped board', variantDesc: '4 standard Shogi armies on cross-shaped extension board. Team or free-for-all. Drops go to own territory only.' },
+      'cannon-shogi': { label: 'Cannon Shogi (9×9)', boardStyle: 'shogi', rows: 9, cols: 9, tileSize: 36, pieceSetOverride: 'mce-shogi-fairy', fen: 'lnsgkgsnl/1rci1uab1/p1p1p1p1p/9/9/9/P1P1P1P1P/1BAU1ICR1/LNSGKGSNL', pieceNames: { A: 'Silver Cannon', a: 'Silver Cannon', U: 'Gold Cannon', u: 'Gold Cannon', I: 'Iron Cannon', i: 'Iron Cannon', C: 'Copper Cannon', c: 'Copper Cannon' }, setupDesc: '20 pieces each (9 back rank + 6 rank 2 + 5 Soldiers)', variantDesc: 'Shogi + 4 Cannon types from Xiangqi/Janggi. Soldiers replace Pawns. Drops permitted. Peter Michaelsen, 1998.' },
+      'chu-shogi': { label: 'Chu Shogi (12×12)', boardStyle: 'shogi', rows: 12, cols: 12, tileSize: 28, pieceSetOverride: 'mce-shogi-fairy', fen: 'lfcsgekgscfl/a1b1txot1b1a/mvrhdqndhrvm/pppppppppppp/3i4i3/12/12/3I4I3/PPPPPPPPPPPP/MVRHDNQDHRVM/A1B1TOXT1B1A/LFCSGKEGSCFL', pieceNames: { E: 'Drunk Elephant', e: 'Drunk Elephant', C: 'Copper General', c: 'Copper General', F: 'Ferocious Leopard', f: 'Ferocious Leopard', A: 'Reverse Chariot', a: 'Reverse Chariot', T: 'Blind Tiger', t: 'Blind Tiger', O: 'Kirin', o: 'Kirin', X: 'Phoenix', x: 'Phoenix', M: 'Side Mover', m: 'Side Mover', V: 'Vertical Mover', v: 'Vertical Mover', H: 'Dragon Horse', h: 'Dragon Horse', D: 'Dragon King', d: 'Dragon King', N: 'Lion', n: 'Lion', Q: 'Queen', q: 'Queen', I: 'Go-Between', i: 'Go-Between' }, setupDesc: '46 pieces per side, 21 types', variantDesc: 'Historical 12x12. Lion (double-mover), Drunk Elephant promotes to Crown Prince. No drops. Extinction royalty.' },
+      'dai-shogi': { label: 'Dai Shogi (15×15)', boardStyle: 'shogi', rows: 15, cols: 15, tileSize: 22, pieceSetOverride: 'mce-shogi-fairy', fen: '[ln][kn][st][ig][cg][sg][gg][ki][gg][sg][cg][ig][st][kn][ln]/[rc]1[ct]1[fl]1[bt][de][bt]1[fl]1[ct]1[rc]/1[vo]1[ab]1[ew][ph][li][kr][ew]1[ab]1[vo]1/[rk][fy][sm][vm][bi][dh][dk][fk][dk][dh][bi][vm][sm][fy][rk]/[pw][pw][pw][pw][gb][pw][pw][pw][pw][pw][gb][pw][pw][pw][pw]/15/15/15/15/15/[PW][PW][PW][PW][GB][PW][PW][PW][PW][PW][GB][PW][PW][PW][PW]/[RK][FY][SM][VM][BI][DH][DK][FK][DK][DH][BI][VM][SM][FY][RK]/1[VO]1[AB]1[EW][KR][LI][PH][EW]1[AB]1[VO]1/[RC]1[CT]1[FL]1[BT][DE][BT]1[FL]1[CT]1[RC]/[LN][KN][ST][IG][CG][SG][GG][KI][GG][SG][CG][IG][ST][KN][LN]', pieceNames: { LN: 'Lance', KN: 'Knight', ST: 'Stone General', IG: 'Iron General', CG: 'Copper General', SG: 'Silver General', GG: 'Gold General', KI: 'King', DE: 'Drunk Elephant', RC: 'Reverse Chariot', CT: 'Cat Sword', FL: 'Ferocious Leopard', BT: 'Blind Tiger', VO: 'Violent Ox', AB: 'Angry Boar', EW: 'Evil Wolf', KR: 'Kirin', LI: 'Lion', PH: 'Phoenix', RK: 'Rook', FY: 'Flying Dragon', SM: 'Side Mover', VM: 'Vertical Mover', BI: 'Bishop', DH: 'Dragon Horse', DK: 'Dragon King', FK: 'Free King', PW: 'Pawn', GB: 'Go-Between' }, setupDesc: '63 pieces per side, 29 types', variantDesc: 'Historical 15x15. Lion, Drunk Elephant promotes to Crown Prince. No drops. Precursor to standard Shogi.' },
+      dobutsu: { label: 'Dobutsu Shogi (3×4)', boardStyle: 'shogi', rows: 4, cols: 3, tileSize: 50, pieceSetOverride: 'mce-shogi-fairy', fen: 'gle/1c1/1C1/ELG', pieceNames: { G: 'Giraffe', g: 'Giraffe', L: 'Lion', l: 'Lion', E: 'Elephant', e: 'Elephant', C: 'Chick', c: 'Chick', H: 'Hen', h: 'Hen' }, setupDesc: '4 animals per side', variantDesc: 'Animal Shogi for children. 3x4. Lion, Giraffe, Elephant, Chick. Drops. Solved: second player wins perfectly.' },
+      'four-player-shogi': { label: 'Four-Player Shogi', boardStyle: 'checkered', rows: 15, cols: 15, tileSize: 22, cellMap: buildCrossShapeMap(15, 15, 9), colors: { voidFill: 'transparent', lightSquare: '#f0d9b5', darkSquare: '#b58863' }, fen4: '3,yR,yN,yS,yG,yK,yG,yS,yN,yR,3/3,1,yB,5,yR,1,3/3,yP,yP,yP,yP,yP,yP,yP,yP,yP,3/rR,1,rP,9,bP,1,bR/rN,rR,rP,9,bP,bB,bN/rS,1,rP,9,bP,1,bS/rG,1,rP,9,bP,1,bG/rK,1,rP,9,bP,1,bK/rG,1,rP,9,bP,1,bG/rS,1,rP,9,bP,1,bS/rN,rB,rP,9,bP,bR,bN/rR,1,rP,9,bP,1,bR/3,gP,gP,gP,gP,gP,gP,gP,gP,gP,3/3,1,gR,5,gB,1,3/3,gR,gN,gS,gG,gK,gG,gS,gN,gR,3', pieceSet4: 'mce-4player-shogi', pieceRotations: { red: 90, yellow: 180, blue: 270, green: 0 }, pieceNames: { K: 'King', G: 'Gold', S: 'Silver', N: 'Knight', L: 'Lance', R: 'Rook', B: 'Bishop', P: 'Pawn' }, setupDesc: '4 armies on 15×15 cross-shaped board', variantDesc: '4 standard Shogi armies on cross-shaped board. Team or free-for-all. Drops go to own territory only. Michael Shipley, 1999.' },
       'gorogoro-plus': { label: 'Gorogoro+ (5×6)', boardStyle: 'shogi', rows: 6, cols: 5, tileSize: 40, fen: 'sgkgs/5/1ppp1/1PPP1/5/SGKGS', setupDesc: '6 pieces on board + hand pieces', variantDesc: '5x6 Shogi. No Rook/Bishop. Knight+Lance start in hand. Promotion zone last 2 ranks.' },
       'heian-shogi': { label: 'Heian Shogi (9×8)', boardStyle: 'shogi', rows: 8, cols: 9, tileSize: 36, fen: 'lnsgkgsnl/9/ppppppppp/9/9/PPPPPPPPP/9/LNSGKGSNL', setupDesc: '16 pieces each', variantDesc: 'Earliest Japanese chess (~8th-9th century). 9x8. No drops. No Rook/Bishop. All non-King promote to Gold.' },
-      'hex-shogi-91': { label: 'Hex Shogi 91', boardStyle: 'hex', hexRadius: 5, hexSize: 22, flat: true, hexColorFn: glinskiColor, colors: { lightHex: '#d4a76a', darkHex: '#8b6535', midHex: '#b88b50', stroke: 'rgba(0,0,0,0.2)', background: '#3a2a1a' }, variantDesc: 'Shogi on 91-hex Glinski board. Drops with hex-specific Pawn rules. 4-rank promotion zone. Fergus Duniho.' },
+      'hex-shogi-91': { label: 'Hex Shogi 91', boardStyle: 'hex', hexRadius: 5, hexSize: 22, flat: false, hexColorFn: glinskiColor, pieceSetOverride: 'kahu-shogi-international', hexPosition: buildHexPositionExplicit([
+        ['L', -5, 5], ['N', -4, 5], ['G', -3, 5], ['G', -2, 5], ['N', -1, 5], ['L', 0, 5],
+        ['R', -4, 4], ['S', -3, 4], ['K', -2, 4], ['S', -1, 4], ['B', 0, 4],
+        ['P', -5, 2], ['P', -4, 2], ['P', -3, 2], ['P', -2, 2], ['P', -1, 2], ['P', 0, 2], ['P', 1, 2], ['P', 2, 2], ['P', 3, 2],
+      ], [
+        ['l', 5, -5], ['n', 4, -5], ['g', 3, -5], ['g', 2, -5], ['n', 1, -5], ['l', 0, -5],
+        ['r', 4, -4], ['s', 3, -4], ['k', 2, -4], ['s', 1, -4], ['b', 0, -4],
+        ['p', 5, -2], ['p', 4, -2], ['p', 3, -2], ['p', 2, -2], ['p', 1, -2], ['p', 0, -2], ['p', -1, -2], ['p', -2, -2], ['p', -3, -2],
+      ]), pieceNames: { K: 'King', k: 'King', G: 'Gold', g: 'Gold', S: 'Silver', s: 'Silver', N: 'Knight', n: 'Knight', L: 'Lance', l: 'Lance', R: 'Rook', r: 'Rook', B: 'Bishop', b: 'Bishop', P: 'Pawn', p: 'Pawn' }, colors: { lightHex: '#d4a76a', darkHex: '#8b6535', midHex: '#b88b50', stroke: 'rgba(0,0,0,0.2)', background: '#3a2a1a' }, setupDesc: '20 pieces per side on 91-hex board (positions approximate)', variantDesc: 'Shogi on 91-hex Glinski board. Drops with hex-specific Pawn rules. 4-rank promotion zone. Fergus Duniho. SETUP NEEDS VERIFICATION.' },
       'judkins-shogi': { label: 'Judkins Shogi (6×6)', boardStyle: 'shogi', rows: 6, cols: 6, tileSize: 40, fen: 'rbsgkn/5p/6/6/P5/NKGSBR', setupDesc: '7 pieces per side', variantDesc: '6x6 miniature Shogi. Drops. Promotion zone last 2 ranks. Paul Judkins, 1998.' },
       'maka-dai-dai-shogi': { label: 'Maka-Dai-Dai (19×19)', boardStyle: 'shogi', rows: 19, cols: 19, tileSize: 18, fen: '19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19', setupDesc: '96 pieces per side, 50 types', variantDesc: 'Historical 19x19. Contagious promotion. Emperor leaps anywhere. Largest well-documented pre-modern shogi.' },
       minishogi: { label: 'Minishogi (5×5)', boardStyle: 'shogi', rows: 5, cols: 5, tileSize: 40, fen: 'rbsgk/4p/5/P4/KGSBR', setupDesc: '6 pieces each on a 5x5 board', variantDesc: 'Standard Shogi on a 5x5 board. Single-rank promotion zone. No Knights or Lances.' },
       'mortal-shogi': { label: 'Mortal Shogi (9×9)', boardStyle: 'shogi', rows: 9, cols: 9, tileSize: 36, fen: 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL', setupDesc: 'Standard Shogi position', variantDesc: 'Captured pieces demote one rank down fixed chain. Pawns removed permanently. Drops use demoted type.' },
       'kyoto-shogi': { label: 'Kyoto Shogi (5×5)', boardStyle: 'shogi', rows: 5, cols: 5, tileSize: 40, fen: 'pgskl/5/5/5/LKSGP', setupDesc: '5 pieces each on back rank', variantDesc: 'Every piece except the King flips to its alternate face after each move.' },
       'hasami-shogi': { label: 'Hasami Shogi (9×9)', boardStyle: 'shogi', rows: 9, cols: 9, tileSize: 36, fen: 'ppppppppp/9/9/9/9/9/9/9/PPPPPPPPP', setupDesc: '9 pawns each on back rank', variantDesc: 'Custodial sandwich capture. No drops, no promotion. All pieces are identical.' },
-      'sho-shogi': { label: 'Sho Shogi (9×9)', boardStyle: 'shogi', rows: 9, cols: 9, tileSize: 36, fen: 'lnsgkgsnl/1r2e2b1/ppppppppp/9/9/9/PPPPPPPPP/1B2E2R1/LNSGKGSNL', setupDesc: '22 pieces each with Drunk Elephant', variantDesc: '16th-century predecessor to Shogi. Drunken Elephant promotes to Crown Prince. No drops.' },
+      'sho-shogi': { label: 'Sho Shogi (9×9)', boardStyle: 'shogi', rows: 9, cols: 9, tileSize: 36, pieceSetOverride: 'mce-shogi-fairy', fen: 'lnsgkgsnl/1r2e2b1/ppppppppp/9/9/9/PPPPPPPPP/1B2E2R1/LNSGKGSNL', pieceNames: { E: 'Drunk Elephant', e: 'Drunk Elephant' }, setupDesc: '21 pieces each (standard + Drunk Elephant)', variantDesc: '16th-century predecessor to Shogi. Drunken Elephant promotes to Crown Prince (second royal). No drops.' },
       'tai-shogi': { label: 'Tai Shogi (25×25)', boardStyle: 'shogi', rows: 25, cols: 25, tileSize: 14, fen: '25/25/25/25/25/25/25/25/25/25/25/25/25/25/25/25/25/25/25/25/25/25/25/25/25', setupDesc: '~177 piece types per side', variantDesc: 'Historical 25x25. Largest variant with fully documented movements. Games last thousands of moves.' },
       'taikyoku-shogi': { label: 'Taikyoku Shogi (36×36)', boardStyle: 'shogi', rows: 36, cols: 36, tileSize: 10, fen: '36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36/36', setupDesc: '402 pieces per side', variantDesc: 'Largest chess variant ever documented. 36x36. ~10,000+ moves per game. 209 piece types.' },
-      'tenjiku-shogi': { label: 'Tenjiku Shogi (16×16)', boardStyle: 'shogi', rows: 16, cols: 16, tileSize: 20, fen: '16/16/16/16/16/16/16/16/16/16/16/16/16/16/16/16', setupDesc: '78 pieces per side', variantDesc: 'Medieval 16x16. Fire Demons burn adjacent enemies. Jumping generals. No drops. ~100 piece types total.' },
-      'tori-shogi': { label: 'Tori Shogi (7×7)', boardStyle: 'shogi', rows: 7, cols: 7, tileSize: 40, fen: 'rpckcpl/3f3/sssssss/2s1S2/SSSSSSS/3F3/LPCKCPR', setupDesc: '16 bird pieces per side', variantDesc: 'Bird Shogi (1799). 7x7. Drops. Only Swallow and Falcon promote. Repetition = loss for causer.' },
-      'wa-shogi': { label: 'Wa Shogi (11×11)', boardStyle: 'shogi', rows: 11, cols: 11, tileSize: 30, fen: '11/11/11/11/11/11/11/11/11/11/11', setupDesc: '23 pieces per side, 14 types', variantDesc: 'Japanese 11x11. All non-Pawn pieces unique. Capture Crane King wins. No drops.' },
-      'yari-shogi': { label: 'Yari Shogi (7×9)', boardStyle: 'shogi', rows: 9, cols: 7, tileSize: 36, fen: 'lllklll/1r3b1/ppppppp/9/9/9/PPPPPPP/1B3R1/LLLKLLL', setupDesc: '18 pieces per side', variantDesc: '7x9. All pieces include forward-Lance movement. Pawn drops can checkmate (unlike standard Shogi).' },
+      'tenjiku-shogi': { label: 'Tenjiku Shogi (16×16)', boardStyle: 'shogi', rows: 16, cols: 16, tileSize: 20, pieceSetOverride: 'mce-shogi-fairy', fen: '[ln][kn][fl][ig][cg][sg][gg][de][ki][gg][sg][cg][ig][fl][kn][ln]/[rc]1[cs][cs]1[bt][ph][fk][li][kr][bt]1[cs][cs]1[rc]/[ss][vt][bi][dh][dk][wb][fd][fe][lw][fd][wb][dk][dh][bi][vt][ss]/[sm][vm][rk][hf][se][bg][rg][vg][gr][rg][bg][se][hf][rk][vm][sm]/[pw][pw][pw][pw][pw][pw][pw][pw][pw][pw][pw][pw][pw][pw][pw][pw]/4[dg]6[dg]4/16/16/16/16/4[DG]6[DG]4/[PW][PW][PW][PW][PW][PW][PW][PW][PW][PW][PW][PW][PW][PW][PW][PW]/[SM][VM][RK][HF][SE][BG][RG][GR][VG][RG][BG][SE][HF][RK][VM][SM]/[SS][VT][BI][DH][DK][WB][FD][LW][FE][FD][WB][DK][DH][BI][VT][SS]/[RC]1[CS][CS]1[BT][KR][LI][FK][PH][BT]1[CS][CS]1[RC]/[LN][KN][FL][IG][CG][SG][GG][KI][DE][GG][SG][CG][IG][FL][KN][LN]', pieceNames: { LN: 'Lance', KN: 'Knight', FL: 'Ferocious Leopard', IG: 'Iron General', CG: 'Copper General', SG: 'Silver General', GG: 'Gold General', KI: 'King', DE: 'Drunk Elephant', RC: 'Reverse Chariot', CS: 'Chariot Soldier', BT: 'Blind Tiger', KR: 'Kirin', LI: 'Lion', FK: 'Free King', PH: 'Phoenix', SS: 'Side Soldier', VT: 'Vertical Soldier', BI: 'Bishop', DH: 'Dragon Horse', DK: 'Dragon King', WB: 'Water Buffalo', FD: 'Fire Demon', LW: 'Lion Hawk', FE: 'Free Eagle', SM: 'Side Mover', VM: 'Vertical Mover', RK: 'Rook', HF: 'Horned Falcon', SE: 'Soaring Eagle', BG: 'Bishop General', RG: 'Rook General', GR: 'Great General', VG: 'Vice General', PW: 'Pawn', DG: 'Dog' }, setupDesc: '78 pieces per side, 36 types', variantDesc: 'Medieval 16x16. Fire Demons burn adjacent enemies. Jumping generals. No drops. Extinction royalty.' },
+      'tori-shogi': { label: 'Tori Shogi (7×7)', boardStyle: 'shogi', rows: 7, cols: 7, tileSize: 40, pieceSetOverride: 'mce-shogi-fairy', fen: 'rpckcpl/3f3/sssssss/2s1S2/SSSSSSS/3F3/LPCKCPR', pieceNames: { C: 'Crane', c: 'Crane', F: 'Falcon', f: 'Falcon', P: 'Pheasant', p: 'Pheasant', R: 'Right Quail', r: 'Right Quail', L: 'Left Quail', l: 'Left Quail', S: 'Swallow', s: 'Swallow', K: 'Phoenix', k: 'Phoenix', G: 'Goose', g: 'Goose' }, setupDesc: '16 bird pieces per side', variantDesc: 'Bird Shogi (1799). 7x7. Drops. Only Swallow and Falcon promote. Repetition = loss for causer.' },
+      'wa-shogi': { label: 'Wa Shogi (11×11)', boardStyle: 'shogi', rows: 11, cols: 11, tileSize: 30, pieceSetOverride: 'mce-shogi-fairy', fen: '[lh][cm][so][fc][vs][ck][vw][fg][sc][bd][oc]/1[ce]3[sw]3[ff]1/[sp][sp][sp][rr][sp][sp][sp][tf][sp][sp][sp]/3[sp]3[sp]3/11/11/11/3[SP]3[SP]3/[SP][SP][SP][TF][SP][SP][SP][RR][SP][SP][SP]/1[FF]3[SW]3[CE]1/[OC][BD][SC][FG][VW][CK][VS][FC][SO][CM][LH]', pieceNames: { CK: 'Crane King', OC: 'Oxcart', BD: 'Blind Dog', SC: 'Strutting Crow', FG: 'Flying Goose', VW: 'Violent Wolf', VS: 'Violent Stag', FC: 'Flying Cock', SO: 'Swooping Owl', CM: 'Climbing Monkey', LH: 'Liberated Horse', FF: 'Flying Falcon', SW: "Swallow's Wings", CE: 'Cloud Eagle', TF: 'Treacherous Fox', RR: 'Running Rabbit', SP: 'Sparrow Pawn' }, setupDesc: '23 pieces per side, 17 types', variantDesc: 'Japanese 11x11. All non-Pawn pieces unique. Capture Crane King wins. Historical (no drops) or modern (with drops).' },
+      'yari-shogi': { label: 'Yari Shogi (7×9)', boardStyle: 'shogi', rows: 9, cols: 7, tileSize: 36, pieceSetOverride: 'mce-shogi-fairy', fen: 'ynnkbby/7/ppppppp/7/7/7/PPPPPPP/7/YBBKNNY', pieceNames: { Y: 'Forward Rook', y: 'Forward Rook', B: 'Yari Bishop', b: 'Yari Bishop', N: 'Yari Knight', n: 'Yari Knight', K: 'General', k: 'General' }, setupDesc: '9 pieces per side on 7×9', variantDesc: '7x9. All unpromoted pieces include forward-Lance movement. Pawn drops can checkmate (unlike standard Shogi). Christian Freeling, 1981.' },
     },
   },
   morris: {
@@ -1103,7 +1111,8 @@ const FEN_TO_PIECE_ID = {
 }
 
 const GAME_FEN_OVERRIDES = {
-  xiangqi: { H: 'wN', h: 'bN', R: 'wR', r: 'bR', E: 'wE', e: 'bE', A: 'wA', a: 'bA', K: 'wK', k: 'bK', C: 'wC', c: 'bC', P: 'wP', p: 'bP', V: 'wV', v: 'bV', B: 'wB', b: 'bB', I: 'wI', i: 'bI', U: 'wU', u: 'bU' },
+  xiangqi: { H: 'wN', h: 'bN', R: 'wR', r: 'bR', E: 'wE', e: 'bE', A: 'wA', a: 'bA', K: 'wK', k: 'bK', C: 'wC', c: 'bC', P: 'wP', p: 'bP', V: 'wV', v: 'bV', B: 'wB', b: 'bB', I: 'wI', i: 'bI', U: 'wU', u: 'bU', Z: 'wZ', z: 'bZ' },
+  'xiangqi/jieqi': { K: 'wK', k: 'bK', F: 'wFD', f: 'bFD' },
   'dou-shou-qi': {
     E: 'wElephant', e: 'bElephant', L: 'wLion', l: 'bLion',
     T: 'wTiger', t: 'bTiger', P: 'wLeopard', p: 'bLeopard',
@@ -1111,6 +1120,71 @@ const GAME_FEN_OVERRIDES = {
     C: 'wCat', c: 'bCat', R: 'wRat', r: 'bRat',
   },
   asalto: { officer: 'red-circle', soldier: 'green-circle' },
+  'shogi/sho-shogi': {
+    K: 'wK', k: 'bK', G: 'wG', g: 'bG', S: 'wS', s: 'bS', N: 'wN', n: 'bN',
+    L: 'wL', l: 'bL', R: 'wR', r: 'bR', B: 'wB', b: 'bB', P: 'wP', p: 'bP',
+    E: 'wE', e: 'bE',
+  },
+  'shogi/dobutsu': {
+    G: 'wdG', g: 'bdG', L: 'wdL', l: 'bdL', E: 'wdE', e: 'bdE', C: 'wdC', c: 'bdC', H: 'wdH', h: 'bdH',
+  },
+  'shogi/cannon-shogi': {
+    K: 'wK', k: 'bK', G: 'wG', g: 'bG', S: 'wS', s: 'bS', N: 'wN', n: 'bN',
+    L: 'wL', l: 'bL', R: 'wR', r: 'bR', B: 'wB', b: 'bB', P: 'wP', p: 'bP',
+    A: 'wcA', a: 'bcA', U: 'wcU', u: 'bcU', I: 'wcI', i: 'bcI', C: 'wcC', c: 'bcC',
+  },
+  'shogi/tori-shogi': {
+    C: 'wtC', c: 'btC', F: 'wtF', f: 'btF', P: 'wtP', p: 'btP',
+    R: 'wtR', r: 'btR', L: 'wtL', l: 'btL', S: 'wtS', s: 'btS',
+    K: 'wtK', k: 'btK', G: 'wtG', g: 'btG',
+  },
+  'shogi/yari-shogi': {
+    K: 'wK', k: 'bK', B: 'wB', b: 'bB', N: 'wN', n: 'bN', P: 'wP', p: 'bP',
+    Y: 'wY', y: 'bY', G: 'wG', g: 'bG', S: 'wS', s: 'bS',
+  },
+  'shogi/dai-shogi': {
+    LN: 'wLN', ln: 'bLN', KN: 'wKN', kn: 'bKN', ST: 'wST', st: 'bST',
+    IG: 'wIG', ig: 'bIG', CG: 'wCG', cg: 'bCG', SG: 'wSG', sg: 'bSG',
+    GG: 'wGG', gg: 'bGG', KI: 'wKI', ki: 'bKI', DE: 'wDE', de: 'bDE',
+    RC: 'wRC', rc: 'bRC', CT: 'wCT', ct: 'bCT', FL: 'wFL', fl: 'bFL',
+    BT: 'wBT', bt: 'bBT', VO: 'wVO', vo: 'bVO', AB: 'wAB', ab: 'bAB',
+    EW: 'wEW', ew: 'bEW', KR: 'wKR', kr: 'bKR', LI: 'wLI', li: 'bLI',
+    PH: 'wPH', ph: 'bPH', RK: 'wRK', rk: 'bRK', FY: 'wFY', fy: 'bFY',
+    SM: 'wSM', sm: 'bSM', VM: 'wVM', vm: 'bVM', BI: 'wBI', bi: 'bBI',
+    DH: 'wDH', dh: 'bDH', DK: 'wDK', dk: 'bDK', FK: 'wFK', fk: 'bFK',
+    PW: 'wPW', pw: 'bPW', GB: 'wGB', gb: 'bGB',
+  },
+  'shogi/tenjiku-shogi': {
+    LN: 'wLN', ln: 'bLN', KN: 'wKN', kn: 'bKN', FL: 'wFL', fl: 'bFL',
+    IG: 'wIG', ig: 'bIG', CG: 'wCG', cg: 'bCG', SG: 'wSG', sg: 'bSG',
+    GG: 'wGG', gg: 'bGG', KI: 'wKI', ki: 'bKI', DE: 'wDE', de: 'bDE',
+    RC: 'wRC', rc: 'bRC', CS: 'wCS', cs: 'bCS', BT: 'wBT', bt: 'bBT',
+    KR: 'wKR', kr: 'bKR', LI: 'wLI', li: 'bLI', FK: 'wFK', fk: 'bFK',
+    PH: 'wPH', ph: 'bPH', SS: 'wSS', ss: 'bSS', VT: 'wVT', vt: 'bVT',
+    BI: 'wBI', bi: 'bBI', DH: 'wDH', dh: 'bDH', DK: 'wDK', dk: 'bDK',
+    WB: 'wWB', wb: 'bWB', FD: 'wFD', fd: 'bFD', LW: 'wLW', lw: 'bLW',
+    FE: 'wFE', fe: 'bFE', SM: 'wSM', sm: 'bSM', VM: 'wVM', vm: 'bVM',
+    RK: 'wRK', rk: 'bRK', HF: 'wHF', hf: 'bHF', SE: 'wSE', se: 'bSE',
+    BG: 'wBG', bg: 'bBG', RG: 'wRG', rg: 'bRG', GR: 'wGR', gr: 'bGR',
+    VG: 'wVG', vg: 'bVG', PW: 'wPW', pw: 'bPW', DG: 'wDG', dg: 'bDG',
+  },
+  'shogi/wa-shogi': {
+    CK: 'wCK', ck: 'bCK', OC: 'wOC', oc: 'bOC', BD: 'wBD', bd: 'bBD',
+    SC: 'wSC', sc: 'bSC', FG: 'wFG', fg: 'bFG', VW: 'wVW', vw: 'bVW',
+    VS: 'wVS', vs: 'bVS', FC: 'wFC', fc: 'bFC', SO: 'wSO', so: 'bSO',
+    CM: 'wCM', cm: 'bCM', LH: 'wLH', lh: 'bLH', FF: 'wFF', ff: 'bFF',
+    SW: 'wSW', sw: 'bSW', CE: 'wCE', ce: 'bCE', TF: 'wTF', tf: 'bTF',
+    RR: 'wRR', rr: 'bRR', SP: 'wSP', sp: 'bSP',
+  },
+  'shogi/chu-shogi': {
+    K: 'wK', k: 'bK', G: 'wG', g: 'bG', S: 'wS', s: 'bS', L: 'wL', l: 'bL',
+    R: 'wR', r: 'bR', B: 'wB', b: 'bB', P: 'wP', p: 'bP',
+    E: 'wxE', e: 'bxE', C: 'wxC', c: 'bxC', F: 'wxF', f: 'bxF',
+    A: 'wxA', a: 'bxA', T: 'wxT', t: 'bxT', O: 'wxI', o: 'bxI',
+    X: 'wxH', x: 'bxH', M: 'wxM', m: 'bxM', V: 'wxV', v: 'bxV',
+    H: 'wxW', h: 'bxW', D: 'wxD', d: 'bxD', N: 'wxN', n: 'bxN',
+    Q: 'wxQ', q: 'bxQ', I: 'wxO', i: 'bxO',
+  },
 }
 
 function resolvePieceEntry(pieceId, entry, setId) {
@@ -1123,7 +1197,7 @@ function resolvePieceEntry(pieceId, entry, setId) {
   return null
 }
 
-function buildPieceImages(pieceSetId, galleryIndex, gameId) {
+function buildPieceImages(pieceSetId, galleryIndex, gameId, variantId) {
   const empty = { images: {}, surface: null, surfaceMap: {} }
   if (!pieceSetId || !galleryIndex) return empty
   const setDef = galleryIndex.find(s => s.id === pieceSetId)
@@ -1149,7 +1223,7 @@ function buildPieceImages(pieceSetId, galleryIndex, gameId) {
     }
   }
 
-  const fenMap = GAME_FEN_OVERRIDES[gameId] || FEN_TO_PIECE_ID
+  const fenMap = (variantId && GAME_FEN_OVERRIDES[`${gameId}/${variantId}`]) || GAME_FEN_OVERRIDES[gameId] || FEN_TO_PIECE_ID
   for (const [fenChar, pieceId] of Object.entries(fenMap)) {
     if (images[pieceId]) {
       images[fenChar] = images[pieceId]
@@ -1291,6 +1365,7 @@ async function loadRecolouredPieces(config, gallery) {
   const basePath = `../pieces/sets/${setDef.baseSet}/`
   const images = {}
   const owners = setDef.owners
+  const matchColor = setDef.recolourMatch || '#fff'
 
   const fetches = []
   for (const [pieceId, filename] of Object.entries(setDef.pieces || {})) {
@@ -1307,7 +1382,7 @@ async function loadRecolouredPieces(config, gallery) {
 
     fetches.push(
       fetch(basePath + filename).then(r => r.text()).then(svg => {
-        const tinted = svg.replace(/fill:#fff/gi, `fill:${ownerColors.fill}`)
+        const tinted = svg.replaceAll(matchColor, ownerColors.fill)
         const dataUri = 'data:image/svg+xml,' + encodeURIComponent(tinted)
         recolourCache[cacheKey] = dataUri
         images[pieceId] = dataUri
@@ -2010,7 +2085,7 @@ function render() {
   // Build piece image paths and surface map
   const effectivePieceSet = config.pieceSetOverride || game.pieceSet
   if (effectivePieceSet) {
-    const built = buildPieceImages(effectivePieceSet, galleryIndex, state.game)
+    const built = buildPieceImages(effectivePieceSet, galleryIndex, state.game, state.variant)
     config.pieceImages = built.images
     if (built.surface) config.pieceSurface = built.surface
     if (Object.keys(built.surfaceMap).length) config.pieceSurfaceMap = built.surfaceMap
@@ -2776,7 +2851,7 @@ function bindBoardHover(config) {
     if (piece) {
       const p = typeof piece === 'object' ? piece : { type: String(piece) }
       const fen4Prefix = p.type.length === 2 && FEN4_OWNERS[p.type[0]]
-      const name = pieceNameOverrides[p.type] || (fen4Prefix ? PIECE_NAMES[p.type[1]] : PIECE_NAMES[p.type]) || p.type
+      const name = pieceNameOverrides[p.type] || pieceNameOverrides[p.type.toUpperCase()] || (fen4Prefix ? PIECE_NAMES[p.type[1]] : PIECE_NAMES[p.type]) || p.type
       if (p.color) {
         text += ` — ${p.color} ${name}`
       } else if (fen4Prefix) {
@@ -2785,7 +2860,7 @@ function bindBoardHover(config) {
       } else if (p.type !== p.type.toLowerCase()) {
         const upperOwner = state.game === 'xiangqi' ? 'Red' : 'White'
         text += ` — ${upperOwner} ${name}`
-      } else if (PIECE_NAMES[p.type] && !pieceNameOverrides[p.type]) {
+      } else if (p.type !== p.type.toUpperCase()) {
         const lowerOwner = state.game === 'xiangqi' ? 'Black' : 'Black'
         text += ` — ${lowerOwner} ${name}`
       } else {
@@ -2919,7 +2994,8 @@ function showInfo(cfg) {
     if (cfg.boardStyle) rows.push(`<div class="info-row"><span class="info-label">Board</span><span class="info-value">${cfg.boardStyle}</span></div>`)
     if (cfg.rows) rows.push(`<div class="info-row"><span class="info-label">Size</span><span class="info-value">${cfg.rows}×${cfg.cols}</span></div>`)
     if (cfg.rings) rows.push(`<div class="info-row"><span class="info-label">Rings</span><span class="info-value">${cfg.rings}</span></div>`)
-    if (game && game.pieceSet) rows.push(`<div class="info-row"><span class="info-label">Pieces</span><span class="info-value">${game.pieceSet}</span></div>`)
+    const displayPieceSet = cfg.pieceSetOverride || cfg.pieceSet4 || (game && game.pieceSet)
+    if (displayPieceSet) rows.push(`<div class="info-row"><span class="info-label">Pieces</span><span class="info-value">${displayPieceSet}</span></div>`)
     if (cfg.fen) rows.push(`<div class="info-row info-row--block"><span class="info-label">Setup</span><span class="info-value info-value--fen">${cfg.fen}</span></div>`)
     else if (cfg.setup) rows.push(`<div class="info-row info-row--block"><span class="info-label">Setup</span><span class="info-value info-value--fen">${cfg.setup}</span></div>`)
     else if (cfg.draughtsSetup) rows.push(`<div class="info-row"><span class="info-label">Setup</span><span class="info-value">${cfg.draughtsSetup.rows} rows each side</span></div>`)

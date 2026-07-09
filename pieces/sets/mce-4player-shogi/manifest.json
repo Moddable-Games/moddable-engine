@@ -1,0 +1,21 @@
+{
+  "id": "mce-4player-shogi",
+  "name": "MCE 4-Player Shogi",
+  "family": "shogi",
+  "virtual": true,
+  "recolorable": true,
+  "recolourMatch": "#f5deb3",
+  "baseSet": "mce-shogi-fairy",
+  "owners": {
+    "red": { "fill": "#d32f2f", "stroke": "#000" },
+    "blue": { "fill": "#1565c0", "stroke": "#000" },
+    "yellow": { "fill": "#fdd835", "stroke": "#000" },
+    "green": { "fill": "#2e7d32", "stroke": "#000" }
+  },
+  "pieces": {
+    "rK": "wK.svg", "rG": "wG.svg", "rS": "wS.svg", "rN": "wN.svg", "rL": "wL.svg", "rR": "wR.svg", "rB": "wB.svg", "rP": "wP.svg",
+    "bK": "wK.svg", "bG": "wG.svg", "bS": "wS.svg", "bN": "wN.svg", "bL": "wL.svg", "bR": "wR.svg", "bB": "wB.svg", "bP": "wP.svg",
+    "yK": "wK.svg", "yG": "wG.svg", "yS": "wS.svg", "yN": "wN.svg", "yL": "wL.svg", "yR": "wR.svg", "yB": "wB.svg", "yP": "wP.svg",
+    "gK": "wK.svg", "gG": "wG.svg", "gS": "wS.svg", "gN": "wN.svg", "gL": "wL.svg", "gR": "wR.svg", "gB": "wB.svg", "gP": "wP.svg"
+  }
+}
