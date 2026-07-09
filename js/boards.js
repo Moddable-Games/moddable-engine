@@ -17,8 +17,14 @@ setMultiBoardRenderer(renderMultiBoard)
 // null = void, 'floor' = standard, 'p1'/'p2' = deploy zones, 'water' = obstacle
 
 function parseCellMap(template) {
+  const CELL_TYPES = {
+    '.': null, f: 'floor', w: 'water', '1': 'p1', '2': 'p2',
+    r: 'rosette', c: 'castle', h: 'home',
+    l: 'lake', s: 'sea', a: 'aerodrome', b: 'base', H: 'harbour',
+    L: 'land', R: 'river', Q: 'hq', q: 'hq', d: 'den', t: 'trap',
+  }
   return template.trim().split('\n').map(row =>
-    [...row].map(c => c === '.' ? null : c === 'f' ? 'floor' : c === 'w' ? 'water' : c === '1' ? 'p1' : c === '2' ? 'p2' : c === 'r' ? 'rosette' : c === 'c' ? 'castle' : c === 'h' ? 'home' : null)
+    [...row].map(c => CELL_TYPES[c] !== undefined ? CELL_TYPES[c] : null)
   )
 }
 
@@ -203,23 +209,89 @@ function buildCornerMap(innerSize) {
 const OMEGA_MAP = buildCornerMap(10)
 const GUSTAV_MAP = buildCornerMap(8)
 
-// ─── L'ATTAQUE / STRATEGO BOARD MAP ────────────────────────────────────────
+// ─── L'ATTAQUE FAMILY BOARD MAPS ──────────────────────────────────────────
 
-function buildLatttaqueMap(rows, cols) {
-  const grid = Array.from({ length: rows }, () => Array(cols).fill('floor'))
-  // Two 2x2 lakes in the centre (rows 4-5, cols 2-3 and cols 6-7)
-  grid[4][2] = 'lake'; grid[4][3] = 'lake'
-  grid[5][2] = 'lake'; grid[5][3] = 'lake'
-  grid[4][6] = 'lake'; grid[4][7] = 'lake'
-  grid[5][6] = 'lake'; grid[5][7] = 'lake'
-  return grid
-}
+const LATTAQUE_STANDARD_MAP = parseCellMap(`
+fffffffff
+fffffffff
+fffffffff
+fffffffff
+fflflflff
+fflflflff
+fffffffff
+fffffffff
+fffffffff
+fffffffff
+`)
 
-const LATTAQUE_MAP = buildLatttaqueMap(10, 10)
+const AVIATION_MAP = parseCellMap(`
+fffaafff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+ffffffff
+fffaafff
+`)
+
+const DOVER_PATROL_MAP = parseCellMap(`
+sssssbHH
+sssssHHH
+sssssHHH
+ssssssss
+ssssssss
+ssssssss
+ssssssss
+ssssssss
+ssssssss
+HHHsssss
+HHHsssss
+HHbsssss
+`)
+
+const TRI_TACTICS_MAP = parseCellMap(`
+LLLLLqLLLLLL
+LLLLLLLLlLLL
+LLLLLLLLLLLL
+ssssssLLLLLL
+ssssssssLLLL
+ssssssssLLLL
+ssssssssLLLL
+ssssssssLLLL
+ssssssLLLLLL
+LLLLLLLLLLLL
+LLLLLLLLlLLL
+LLLLLQLLLLLL
+`)
 
 const LATTAQUE_COLORS = {
-  floor: '#c8b896', floorStroke: '#7a6545',
+  floor: '#5a8a3a', floorStroke: '#3d6b28',
   lake: '#4a7ab5', lakeStroke: '#2a5a8a',
+  voidFill: 'transparent',
+}
+
+const AVIATION_COLORS = {
+  floor: '#8fa8bf', floorStroke: '#6b8aa5',
+  aerodrome: '#d4a843', aerodromeStroke: '#a07c20',
+  voidFill: 'transparent',
+}
+
+const DOVER_PATROL_COLORS = {
+  sea: '#3a6e9e', seaStroke: '#2a5580',
+  harbour: '#5a8ab5', harbourStroke: '#3a6a95',
+  base: '#c8a832', baseStroke: '#9a8020',
+  voidFill: 'transparent',
+}
+
+const TRI_TACTICS_COLORS = {
+  land: '#5a8a3a', landStroke: '#3d6b28',
+  sea: '#3a6e9e', seaStroke: '#2a5580',
+  lake: '#3a6e9e', lakeStroke: '#2a5580',
+  hq: '#c8a832', hqStroke: '#9a8020',
   voidFill: 'transparent',
 }
 
@@ -1072,10 +1144,10 @@ const GAMES = {
     label: "L'Attaque",
     pieceSet: null,
     variants: {
-      standard: { label: 'Standard', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, showLabels: false, cellMap: LATTAQUE_MAP, colors: LATTAQUE_COLORS, setupDesc: '30 pieces per player, 10x10 grid with lakes', variantDesc: 'Hidden-rank warfare. Higher rank defeats lower. Bombs immovable, Scouts slide unlimited. Precursor to Stratego.' },
-      aviation: { label: 'Aviation', boardStyle: 'checkered', rows: 11, cols: 8, tileSize: 34, showLabels: false, colors: LATTAQUE_COLORS, setupDesc: '42 pieces per player, 8x11 with aerodrome zones', variantDesc: 'Aerial warfare variant. Searchlight and AAA ranging. Hidden-information. Planes, bombers, and ground forces.' },
-      'dover-patrol': { label: 'Dover Patrol', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, showLabels: false, cellMap: LATTAQUE_MAP, colors: LATTAQUE_COLORS, setupDesc: 'Naval grid with minefields', variantDesc: 'Naval warfare variant. Ships replace soldiers; Mine Sweepers defuse Mines; Submarines defeat Battleships on attack.' },
-      'tri-tactics': { label: 'Tri-Tactics', boardStyle: 'checkered', rows: 12, cols: 12, tileSize: 30, showLabels: false, colors: LATTAQUE_COLORS, setupDesc: 'Larger board, Army/Navy/Air Force units', variantDesc: 'Three-service variant: Army, Navy, Air Force with unique movement. Air units overfly impassable squares.' },
+      standard: { label: 'Standard', boardStyle: 'checkered', rows: 10, cols: 9, tileSize: 34, showLabels: false, cellMap: LATTAQUE_STANDARD_MAP, colors: LATTAQUE_COLORS, setupDesc: '36 pieces per player, 9×10 grid with three 1×2 lakes', variantDesc: 'Hidden-rank warfare by Hermance Edan (1909). Higher rank defeats lower. Mines immovable, Scouts slide unlimited. Precursor to Stratego.' },
+      aviation: { label: 'Aviation', boardStyle: 'checkered', rows: 11, cols: 8, tileSize: 34, showLabels: false, cellMap: AVIATION_MAP, colors: AVIATION_COLORS, setupDesc: '42 pieces per player, 8×11 with aerodrome zones', variantDesc: 'Aerial warfare variant. Searchlight and AAA ranging. Hidden-information. Planes, bombers, and ground forces. Troop Carriers win by landing on enemy Aerodrome.' },
+      'dover-patrol': { label: 'Dover Patrol', boardStyle: 'checkered', rows: 12, cols: 8, tileSize: 34, showLabels: false, cellMap: DOVER_PATROL_MAP, colors: DOVER_PATROL_COLORS, setupDesc: '40 pieces per player, 8×12 naval grid with walled harbours', variantDesc: 'Naval Capture the Flag. Seize the enemy Flag from their Harbour Base and convey it home. Flying Boat crosses Harbour Walls.' },
+      'tri-tactics': { label: 'Tri-Tactics', boardStyle: 'checkered', rows: 12, cols: 12, tileSize: 30, showLabels: false, cellMap: TRI_TACTICS_MAP, colors: TRI_TACTICS_COLORS, overlays: [{ type: 'river', path: ['f9', 'f10', 'g10', 'h10', 'i10', 'i11'], stroke: '#3a6e9e', width: 9 }, { type: 'river', path: ['f4', 'f3', 'g3', 'h3', 'i3', 'i2'], stroke: '#3a6e9e', width: 9 }], setupDesc: '56 pieces per player, 12×12 land/sea combined terrain', variantDesc: 'Combined-arms: Army, Navy, Air Force on one board with land, sea, river, lake, and HQ terrain. Pieces caught out of element are forfeit.' },
     },
   },
   nyout: {

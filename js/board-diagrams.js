@@ -2141,6 +2141,22 @@ function algToRC(alg, rows, skipI) {
   return [rows - parseInt(alg.slice(1), 10), col]
 }
 
+function renderOverlays(overlays, ctx) {
+  const { rows, tileSize, ox, oy } = ctx
+  const parts = []
+  for (const o of overlays) {
+    if (!o.path || o.path.length < 2) continue
+    const points = o.path.map(alg => {
+      const col = alg.charCodeAt(0) - 97
+      const row = rows - parseInt(alg.slice(1), 10)
+      return [ox + col * tileSize + tileSize / 2, oy + row * tileSize + tileSize / 2]
+    })
+    const d = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0]},${p[1]}`).join(' ')
+    parts.push(`<path d="${d}" fill="none" stroke="${o.stroke || '#5a9ec8'}" stroke-width="${o.width || 3}" stroke-linecap="round" stroke-linejoin="round"/>`)
+  }
+  return parts.join('')
+}
+
 export function renderBoard(opts) {
   opts = opts || {}
   const boardStyle = opts.boardStyle || 'checkered'
@@ -2175,6 +2191,10 @@ export function renderBoard(opts) {
 
   const ctx = { rows, cols, tileSize, ox, oy, colors, opts, boardW, boardH }
   parts.push(provider.render(ctx))
+
+  if (opts.overlays && opts.overlays.length > 0) {
+    parts.push(renderOverlays(opts.overlays, ctx))
+  }
 
   if (position && Object.keys(position).length > 0) {
     parts.push(`<g pointer-events="none">${renderPieces(position, provider, ctx, colors)}</g>`)
