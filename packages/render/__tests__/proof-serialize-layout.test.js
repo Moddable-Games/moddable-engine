@@ -2,14 +2,14 @@ import { createGridTopology } from '../../topology-grid/src/topology-grid.js'
 import { serializeLayout } from '../src/serialize-layout.js'
 
 describe('proof: renderLayout → serializeLayout produces valid SVG', () => {
-  test('mono-grid 8x8 (Reversi) produces complete SVG', () => {
+  test('mono-grid 8x8 (uniform fill) produces complete SVG', () => {
     const grid = createGridTopology({ rows: 8, cols: 8 })
     const layout = grid.renderLayout({
       tileSize: 40,
-      mode: 'tiles',
-      cellColor: 'uniform',
-      colors: { mono: '#2e7d32', gridLine: '#1b5e20' },
+      positionType: 'square',
       showLabels: false,
+      backgrounds: [{ fill: '#2e7d32' }],
+      lines: { color: '#1b5e20', width: 1.5 },
     })
 
     const svg = serializeLayout(layout, { title: 'Reversi' })
@@ -24,16 +24,21 @@ describe('proof: renderLayout → serializeLayout produces valid SVG', () => {
     expect(svg).toContain('</svg>')
   })
 
-  test('intersection grid 19x19 (Go) with star points', () => {
+  test('intersection grid 19x19 with star points', () => {
     const grid = createGridTopology({ rows: 19, cols: 19 })
+    const goAlphabet = 'ABCDEFGHJKLMNOPQRST'.split('')
     const layout = grid.renderLayout({
       tileSize: 20,
-      mode: 'intersections',
-      colors: { background: '#dcb35c', surface: '#d4a843', gridLine: '#3d2b1a' },
+      positionType: 'intersection',
       showLabels: true,
       inset: 15,
-      labelStyle: 'go',
+      backgrounds: [
+        { fill: '#dcb35c' },
+        { x: 39, y: 39, width: 360, height: 360, fill: '#d4a843', rx: 2 },
+      ],
+      lines: { color: '#3d2b1a', width: 0.8 },
       markers: [[3, 3], [3, 9], [3, 15], [9, 3], [9, 9], [9, 15], [15, 3], [15, 9], [15, 15]],
+      labels: { alphabet: goAlphabet, fontFamily: 'sans-serif', color: '#5a4020' },
     })
 
     const svg = serializeLayout(layout)
@@ -51,14 +56,15 @@ describe('proof: renderLayout → serializeLayout produces valid SVG', () => {
     expect(svg).not.toContain('>I<')
   })
 
-  test('checkered grid with labels (Chess standard)', () => {
+  test('checkered grid with labels (cellFill function)', () => {
     const grid = createGridTopology({ rows: 8, cols: 8 })
     const layout = grid.renderLayout({
       tileSize: 56,
-      mode: 'tiles',
-      cellColor: 'checkered',
-      colors: { light: '#f0d9b5', dark: '#b58863', labelText: '#5a4020' },
+      positionType: 'square',
       showLabels: true,
+      cellFill: (r, c) => (r + c) % 2 === 0 ? '#f0d9b5' : '#b58863',
+      lines: { horizontal: false },
+      labels: { color: '#5a4020' },
     })
 
     const svg = serializeLayout(layout)
@@ -72,22 +78,23 @@ describe('proof: renderLayout → serializeLayout produces valid SVG', () => {
     expect(svg).toContain('>8<')
   })
 
-  test('xiangqi intersection grid with river + palaces', () => {
+  test('intersection grid with split lines + texts', () => {
     const grid = createGridTopology({ rows: 10, cols: 9 })
     const layout = grid.renderLayout({
       tileSize: 40,
-      mode: 'intersections',
-      colors: { background: '#f5e6c8', gridLine: '#333' },
+      positionType: 'intersection',
       showLabels: false,
       inset: 20,
-      riverAfterRow: 4,
-      riverHeight: 20,
-      palaces: [
-        { row: 0, col: 3, width: 2, height: 2 },
-        { row: 7, col: 3, width: 2, height: 2 },
-      ],
-      decorations: [
-        { type: 'river-text', texts: ['楚 河', '漢 界'], positions: [0.25, 0.75], fontFamily: 'serif' },
+      backgrounds: [{ fill: '#f5e6c8' }],
+      lines: { color: '#333', width: 1, splitAfterRow: 4 },
+      diagonals: {
+        predicate: (r, c) => (r >= 0 && r <= 2 && c >= 3 && c <= 5) || (r >= 7 && r <= 9 && c >= 3 && c <= 5),
+        color: '#333',
+        width: 0.8,
+      },
+      texts: [
+        { x: 100, y: 200, text: '楚 河', fontSize: 14, fontFamily: 'serif', fill: '#4a3520' },
+        { x: 260, y: 200, text: '漢 界', fontSize: 14, fontFamily: 'serif', fill: '#4a3520' },
       ],
     })
 
@@ -95,7 +102,6 @@ describe('proof: renderLayout → serializeLayout produces valid SVG', () => {
 
     expect(svg).toContain('楚 河')
     expect(svg).toContain('漢 界')
-    expect(svg).toContain('stroke-dasharray')
     expect(svg).toContain('data-sq=')
     expect(layout.cells.length).toBe(90) // 10x9
   })

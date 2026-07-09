@@ -430,281 +430,177 @@ export function createGridTopology(config) {
   function renderLayout(config = {}) {
     const {
       tileSize = 56,
-      mode = 'tiles',
       colors = {},
       showLabels = true,
-      cellColor = 'uniform',
-      cellMap,
-      inset,
-      decorations = [],
+      inset = 0,
+      backgrounds = [],
+      lines: lineConfig = {},
+      cellFill,
+      diagonals,
       markers = [],
+      zones = [],
+      paths = [],
+      texts = [],
+      labels: labelConfig = {},
+      positionType = 'square',
     } = config
 
-    if (mode === 'intersections') {
-      return renderIntersections(config)
-    }
-
-    return renderTiles(config)
-  }
-
-  function renderTiles(config) {
-    const {
-      tileSize = 56,
-      colors = {},
-      showLabels = true,
-      cellColor = 'uniform',
-      cellMap,
-    } = config
-
-    const boardW = cols * tileSize
-    const boardH = rows * tileSize
+    // Compute geometry
+    const isIntersection = positionType === 'intersection'
+    const gridW = isIntersection ? (cols - 1) * tileSize : cols * tileSize
+    const gridH = isIntersection ? (rows - 1) * tileSize : rows * tileSize
+    const effectiveInset = isIntersection ? (inset || Math.round(tileSize * 0.5)) : 0
     const pad = showLabels ? 24 : 0
-    const ox = pad
-    const oy = pad
+    const boardW = gridW + effectiveInset * 2
+    const boardH = gridH + effectiveInset * 2
+    const ox = pad + effectiveInset
+    const oy = pad + effectiveInset
+
+    // Position mapping: row,col → pixel centre
+    function posX(c) { return ox + c * tileSize }
+    function posY(r) { return oy + r * tileSize }
+
     const elements = []
 
-    // Background fill
-    if (cellColor === 'uniform') {
-      elements.push({ tag: 'rect', attrs: { x: ox, y: oy, width: boardW, height: boardH, fill: colors.mono || '#d9b483' } })
-    } else if (cellColor === 'checkered') {
+    // 1. Backgrounds — rects drawn in order (frame layers, surfaces)
+    for (const bg of backgrounds) {
+      const attrs = { ...bg }
+      if (attrs.x === undefined) attrs.x = pad
+      if (attrs.y === undefined) attrs.y = pad
+      if (attrs.width === undefined) attrs.width = boardW
+      if (attrs.height === undefined) attrs.height = boardH
+      elements.push({ tag: 'rect', attrs })
+    }
+
+    // 2. Cell fills — one function determines each cell's fill from (r, c)
+    if (cellFill) {
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
-          const isLight = (r + c) % 2 === 0
-          const fill = isLight ? (colors.light || '#f0d9b5') : (colors.dark || '#b58863')
-          elements.push({ tag: 'rect', attrs: { x: ox + c * tileSize, y: oy + r * tileSize, width: tileSize, height: tileSize, fill } })
-        }
-      }
-    } else if (cellColor === 'cellMap' && cellMap) {
-      const mapRows = cellMap.split('\n')
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const mapChar = mapRows[r]?.[c] || '.'
-          const fill = colors.zoneColors?.[mapChar] || colors.light || '#f0d9b5'
-          elements.push({ tag: 'rect', attrs: { x: ox + c * tileSize, y: oy + r * tileSize, width: tileSize, height: tileSize, fill } })
+          const fill = cellFill(r, c)
+          if (fill === null) continue
+          const attrs = { x: pad + c * tileSize, y: pad + r * tileSize, width: tileSize, height: tileSize, fill }
+          if (cellFill.stroke) attrs.stroke = cellFill.stroke(r, c)
+          if (cellFill.strokeWidth) attrs['stroke-width'] = cellFill.strokeWidth(r, c)
+          elements.push({ tag: 'rect', attrs })
         }
       }
     }
 
-    // Grid lines (uniform + cellMap modes)
-    if (cellColor === 'uniform' || cellColor === 'cellMap') {
-      const lineColor = colors.gridLine || colors.stroke || '#8b6914'
-      for (let c = 0; c <= cols; c++) {
-        const x = ox + c * tileSize
-        elements.push({ tag: 'line', attrs: { x1: x, y1: oy, x2: x, y2: oy + boardH, stroke: lineColor, 'stroke-width': 1.5 } })
+    // 3. Zone highlights — tinted rects over row/col ranges
+    for (const zone of zones) {
+      const zx = posX(zone.fromCol || 0) - (isIntersection ? 0 : 0)
+      const zy = posY(zone.fromRow || 0)
+      const zw = ((zone.toCol || cols - 1) - (zone.fromCol || 0)) * tileSize
+      const zh = ((zone.toRow || rows - 1) - (zone.fromRow || 0)) * tileSize
+      elements.push({ tag: 'rect', attrs: { x: zx, y: zy, width: zw, height: zh, fill: zone.fill } })
+    }
+
+    // 4. Grid lines — built from lineConfig
+    if (lineConfig.horizontal !== false) {
+      const stroke = lineConfig.color || colors.gridLine || '#333'
+      const strokeWidth = lineConfig.width || 1.5
+      const skipRows = new Set(lineConfig.skipRows || [])
+      const splitAfterRow = lineConfig.splitAfterRow
+      const splitGap = lineConfig.splitGap || 0
+
+      for (let r = 0; r < (isIntersection ? rows : rows + 1); r++) {
+        if (skipRows.has(r)) continue
+        const y = isIntersection ? posY(r) : pad + r * tileSize
+        const x1 = isIntersection ? ox : pad
+        const x2 = isIntersection ? ox + gridW : pad + gridW
+        elements.push({ tag: 'line', attrs: { x1, y1: y, x2, y2: y, stroke, 'stroke-width': strokeWidth } })
       }
-      for (let r = 0; r <= rows; r++) {
-        const y = oy + r * tileSize
-        elements.push({ tag: 'line', attrs: { x1: ox, y1: y, x2: ox + boardW, y2: y, stroke: lineColor, 'stroke-width': 1.5 } })
-      }
-    }
 
-    // Hit targets (transparent cells with position IDs)
-    const cells = []
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const sq = String.fromCharCode(97 + c) + (rows - r)
-        cells.push({
-          id: sq,
-          x: ox + c * tileSize + tileSize / 2,
-          y: oy + r * tileSize + tileSize / 2,
-          element: { tag: 'rect', attrs: { x: ox + c * tileSize, y: oy + r * tileSize, width: tileSize, height: tileSize, fill: 'transparent', 'data-sq': sq, class: 'board-cell' } },
-        })
-      }
-    }
-
-    // Labels
-    const labels = []
-    if (showLabels) {
-      const labelColor = colors.labelText || colors.gridLine || '#8b6914'
-      const fs = Math.min(13, pad * 0.55)
-      for (let c = 0; c < cols; c++) {
-        const x = ox + c * tileSize + tileSize / 2
-        labels.push({ tag: 'text', attrs: { x, y: oy + boardH + pad * 0.65, 'text-anchor': 'middle', 'font-size': fs, fill: labelColor, 'font-family': 'monospace' }, text: String.fromCharCode(97 + c) })
-      }
-      for (let r = 0; r < rows; r++) {
-        const y = oy + r * tileSize + tileSize / 2
-        labels.push({ tag: 'text', attrs: { x: pad * 0.5, y: y + fs * 0.35, 'text-anchor': 'middle', 'font-size': fs, fill: labelColor, 'font-family': 'monospace' }, text: String(rows - r) })
-      }
-    }
-
-    return {
-      width: boardW + pad * 2,
-      height: boardH + pad * 2,
-      elements,
-      cells,
-      labels,
-      tileSize,
-      ox,
-      oy,
-    }
-  }
-
-  function renderIntersections(config) {
-    const {
-      tileSize = 20,
-      colors = {},
-      showLabels = true,
-      inset = 15,
-      decorations = [],
-      markers = [],
-      riverAfterRow,
-      riverHeight = 20,
-      palaces = [],
-      diagonals = 'none',
-      labelStyle = 'algebraic',
-    } = config
-
-    const gap = riverAfterRow != null ? riverHeight : 0
-    const gridW = (cols - 1) * tileSize
-    const gridH = (rows - 1) * tileSize + gap
-    const boardW = gridW + inset * 2
-    const boardH = gridH + inset * 2
-    const pad = showLabels ? 24 : 0
-    const ox = pad + inset
-    const oy = pad + inset
-    const elements = []
-
-    function posY(r) {
-      if (riverAfterRow != null && r > riverAfterRow) return oy + r * tileSize + gap
-      return oy + r * tileSize
-    }
-
-    // Board background (from config)
-    if (colors.background) {
-      elements.push({ tag: 'rect', attrs: { x: pad, y: pad, width: boardW, height: boardH, fill: colors.background } })
-    }
-    if (colors.surface) {
-      elements.push({ tag: 'rect', attrs: { x: ox, y: oy, width: gridW, height: gridH, fill: colors.surface, rx: 2 } })
-    }
-
-    // Grid lines — horizontal
-    const lineColor = colors.gridLine || '#3d2b1a'
-    const lineWidth = colors.gridLineWidth || 0.8
-    for (let r = 0; r < rows; r++) {
-      const y = posY(r)
-      elements.push({ tag: 'line', attrs: { x1: ox, y1: y, x2: ox + gridW, y2: y, stroke: lineColor, 'stroke-width': lineWidth } })
-    }
-
-    // Grid lines — vertical (split at river if present)
-    for (let c = 0; c < cols; c++) {
-      const x = ox + c * tileSize
-      if (riverAfterRow != null) {
-        elements.push({ tag: 'line', attrs: { x1: x, y1: oy, x2: x, y2: posY(riverAfterRow), stroke: lineColor, 'stroke-width': lineWidth } })
-        elements.push({ tag: 'line', attrs: { x1: x, y1: posY(riverAfterRow + 1), x2: x, y2: posY(rows - 1), stroke: lineColor, 'stroke-width': lineWidth } })
-      } else {
-        elements.push({ tag: 'line', attrs: { x1: x, y1: oy, x2: x, y2: posY(rows - 1), stroke: lineColor, 'stroke-width': lineWidth } })
+      for (let c = 0; c < (isIntersection ? cols : cols + 1); c++) {
+        const x = isIntersection ? posX(c) : pad + c * tileSize
+        if (splitAfterRow != null && isIntersection) {
+          const isEdge = lineConfig.edgeCols ? lineConfig.edgeCols.includes(c) : (c === 0 || c === cols - 1)
+          if (isEdge) {
+            elements.push({ tag: 'line', attrs: { x1: x, y1: posY(0), x2: x, y2: posY(rows - 1), stroke, 'stroke-width': strokeWidth } })
+          } else {
+            elements.push({ tag: 'line', attrs: { x1: x, y1: posY(0), x2: x, y2: posY(splitAfterRow), stroke, 'stroke-width': strokeWidth } })
+            elements.push({ tag: 'line', attrs: { x1: x, y1: posY(splitAfterRow + 1), x2: x, y2: posY(rows - 1), stroke, 'stroke-width': strokeWidth } })
+          }
+        } else {
+          const y1 = isIntersection ? posY(0) : pad
+          const y2 = isIntersection ? posY(rows - 1) : pad + gridH
+          elements.push({ tag: 'line', attrs: { x1: x, y1, x2: x, y2, stroke, 'stroke-width': strokeWidth } })
+        }
       }
     }
 
-    // Diagonal decorations
-    if (diagonals === 'full') {
+    // 5. Diagonal lines — determined by a predicate function
+    if (diagonals) {
+      const stroke = diagonals.color || lineConfig.color || colors.gridLine || '#333'
+      const strokeWidth = diagonals.width || 1.5
       for (let r = 0; r < rows - 1; r++) {
         for (let c = 0; c < cols - 1; c++) {
-          elements.push({ tag: 'line', attrs: { x1: ox + c * tileSize, y1: posY(r), x2: ox + (c + 1) * tileSize, y2: posY(r + 1), stroke: lineColor, 'stroke-width': lineWidth } })
-          elements.push({ tag: 'line', attrs: { x1: ox + (c + 1) * tileSize, y1: posY(r), x2: ox + c * tileSize, y2: posY(r + 1), stroke: lineColor, 'stroke-width': lineWidth } })
-        }
-      }
-    } else if (diagonals === 'alternating') {
-      for (let r = 0; r < rows - 1; r++) {
-        for (let c = 0; c < cols - 1; c++) {
-          if ((r + c) % 2 === 0) {
-            elements.push({ tag: 'line', attrs: { x1: ox + c * tileSize, y1: posY(r), x2: ox + (c + 1) * tileSize, y2: posY(r + 1), stroke: lineColor, 'stroke-width': lineWidth } })
-            elements.push({ tag: 'line', attrs: { x1: ox + (c + 1) * tileSize, y1: posY(r), x2: ox + c * tileSize, y2: posY(r + 1), stroke: lineColor, 'stroke-width': lineWidth } })
+          if (!diagonals.predicate(r, c)) continue
+          const x1 = posX(c), y1 = posY(r)
+          const x2 = posX(c + 1), y2 = posY(r + 1)
+          if (diagonals.forward !== false) {
+            elements.push({ tag: 'line', attrs: { x1, y1, x2, y2, stroke, 'stroke-width': strokeWidth } })
+          }
+          if (diagonals.backward !== false) {
+            elements.push({ tag: 'line', attrs: { x1: x2, y1, x2: x1, y2, stroke, 'stroke-width': strokeWidth } })
           }
         }
       }
     }
 
-    // Palace diagonals
-    for (const palace of palaces) {
-      const { row, col, width: pw, height: ph } = palace
-      const dasharray = palace.dasharray || '4,3'
-      const palaceWidth = palace.lineWidth || lineWidth
-      const x1 = ox + col * tileSize, y1 = posY(row)
-      const x2 = ox + (col + pw) * tileSize, y2 = posY(row + ph)
-      elements.push({ tag: 'line', attrs: { x1, y1, x2, y2, stroke: lineColor, 'stroke-width': palaceWidth, 'stroke-dasharray': dasharray } })
-      elements.push({ tag: 'line', attrs: { x1: x2, y1, x2: x1, y2, stroke: lineColor, 'stroke-width': palaceWidth, 'stroke-dasharray': dasharray } })
+    // 6. Paths — SVG path elements (arcs, curves, custom shapes)
+    for (const p of paths) {
+      elements.push({ tag: 'path', attrs: { d: p.d, fill: p.fill || 'none', stroke: p.stroke, 'stroke-width': p.strokeWidth || 2.5, 'stroke-linecap': p.linecap || 'round' } })
     }
 
-    // Star points / markers
+    // 7. Point markers — circles at specified positions
     for (const marker of markers) {
-      const [r, c] = marker
-      const cx = ox + c * tileSize
-      const cy = posY(r)
-      elements.push({ tag: 'circle', attrs: { cx, cy, r: 3, fill: colors.markerFill || lineColor } })
+      const [r, c] = Array.isArray(marker) ? marker : [marker.r, marker.c]
+      const cx = posX(c), cy = posY(r)
+      const radius = marker.radius || 3
+      const fill = marker.fill || lineConfig.color || colors.gridLine || '#333'
+      elements.push({ tag: 'circle', attrs: { cx, cy, r: radius, fill } })
     }
 
-    // River text decorations
-    for (const dec of decorations) {
-      if (dec.type === 'river-text' && riverAfterRow != null) {
-        const riverY1 = posY(riverAfterRow)
-        const riverY2 = posY(riverAfterRow + 1)
-        const midY = (riverY1 + riverY2) / 2
-        const textColor = dec.color || colors.gridLine || lineColor
-        const fontSize = dec.fontSize || tileSize * 0.9
-        for (let i = 0; i < (dec.texts || []).length; i++) {
-          const textX = ox + gridW * (dec.positions?.[i] || (i === 0 ? 0.25 : 0.75))
-          elements.push({ tag: 'text', attrs: { x: textX, y: midY, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': fontSize, 'font-family': dec.fontFamily || 'serif', fill: textColor, 'letter-spacing': '0.2em' }, text: dec.texts[i] })
-        }
-      }
+    // 8. Texts — positioned text elements
+    for (const t of texts) {
+      elements.push({ tag: 'text', attrs: { x: t.x, y: t.y, 'text-anchor': t.anchor || 'middle', 'dominant-baseline': t.baseline || 'central', 'font-size': t.fontSize, 'font-family': t.fontFamily || 'serif', fill: t.fill || '#333', ...(t.attrs || {}) }, text: t.text })
     }
 
-    // Hit targets (intersections as circles)
+    // 9. Hit targets — one per playable position
     const cells = []
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
-        let sq
-        if (labelStyle === 'go') {
-          let letterIdx = c
-          if (letterIdx >= 8) letterIdx++
-          sq = String.fromCharCode(65 + letterIdx) + (rows - r)
-        } else {
-          sq = String.fromCharCode(97 + c) + (rows - r)
-        }
-        const cx = ox + c * tileSize
-        const cy = posY(r)
-        cells.push({
-          id: sq,
-          x: cx,
-          y: cy,
-          element: { tag: 'circle', attrs: { cx, cy, r: tileSize * 0.45, fill: 'transparent', 'data-sq': sq, class: 'board-cell' } },
-        })
+        const sq = labelConfig.alphabet
+          ? labelConfig.alphabet[c] + (rows - r)
+          : String.fromCharCode(97 + c) + (rows - r)
+        const cx = posX(c), cy = posY(r)
+        const element = isIntersection
+          ? { tag: 'circle', attrs: { cx, cy, r: tileSize * 0.45, fill: 'transparent', 'data-sq': sq, class: 'board-cell' } }
+          : { tag: 'rect', attrs: { x: pad + c * tileSize, y: pad + r * tileSize, width: tileSize, height: tileSize, fill: 'transparent', 'data-sq': sq, class: 'board-cell' } }
+        cells.push({ id: sq, x: cx, y: cy, element })
       }
     }
 
-    // Labels
+    // 10. Coordinate labels
     const labels = []
     if (showLabels) {
-      const labelColor = colors.labelText || lineColor
-      const fs = 10
-      if (labelStyle === 'go') {
-        let letterIdx = 0
-        for (let c = 0; c < cols; c++) {
-          if (letterIdx === 8) letterIdx++
-          labels.push({ tag: 'text', attrs: { x: ox + c * tileSize, y: posY(rows - 1) + 14 + inset, 'text-anchor': 'middle', 'font-size': fs, fill: labelColor, 'font-family': 'sans-serif' }, text: String.fromCharCode(65 + letterIdx) })
-          letterIdx++
-        }
-      } else {
-        for (let c = 0; c < cols; c++) {
-          labels.push({ tag: 'text', attrs: { x: ox + c * tileSize, y: posY(rows - 1) + 14 + inset, 'text-anchor': 'middle', 'font-size': fs, fill: labelColor, 'font-family': 'monospace' }, text: String.fromCharCode(97 + c) })
-        }
+      const labelColor = labelConfig.color || colors.labelText || colors.gridLine || '#555'
+      const fs = labelConfig.fontSize || 10
+      const font = labelConfig.fontFamily || 'monospace'
+      const alphabet = labelConfig.alphabet || null
+      for (let c = 0; c < cols; c++) {
+        const text = alphabet ? alphabet[c] : String.fromCharCode(97 + c)
+        labels.push({ tag: 'text', attrs: { x: posX(c), y: posY(rows - 1) + effectiveInset + 14, 'text-anchor': 'middle', 'font-size': fs, fill: labelColor, 'font-family': font }, text })
       }
       for (let r = 0; r < rows; r++) {
-        labels.push({ tag: 'text', attrs: { x: ox - inset - 4, y: posY(r), 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': fs, fill: labelColor, 'font-family': labelStyle === 'go' ? 'sans-serif' : 'monospace' }, text: String(rows - r) })
+        labels.push({ tag: 'text', attrs: { x: ox - effectiveInset - 4, y: posY(r), 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': fs, fill: labelColor, 'font-family': font }, text: String(rows - r) })
       }
     }
 
-    return {
-      width: boardW + pad * 2,
-      height: boardH + pad * 2,
-      elements,
-      cells,
-      labels,
-      tileSize,
-      ox,
-      oy,
-    }
+    return { width: boardW + pad * 2, height: boardH + pad * 2, elements, cells, labels, tileSize, ox, oy }
   }
+
 
   return {
     rows,
