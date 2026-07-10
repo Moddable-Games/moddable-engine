@@ -3432,7 +3432,6 @@ async function render() {
   }
 
   if (game.rpgGame) {
-    if (renderMode === 'consolidated') { showNotImplemented('rpg'); return }
     renderRpgProvider(state.game)
     showInfo(variantDef)
     return
@@ -3463,7 +3462,6 @@ async function render() {
   }
 
   if (game.deckGame) {
-    if (renderMode === 'consolidated') { showNotImplemented('deck'); return }
     renderDeckGame(game, variantDef)
     return
   }
