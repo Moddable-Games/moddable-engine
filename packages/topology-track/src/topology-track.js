@@ -428,7 +428,169 @@ export function createTrackTopology(config) {
   function renderLayout(opts = {}) {
     const style = opts.style || 'points'
     if (style === 'points') return renderPointsLayout(opts)
+    if (style === 'perimeter') return renderPerimeterLayout(opts)
     return { width: 0, height: 0, elements: [], cells: [], labels: [], defs: [] }
+  }
+
+  function renderPerimeterLayout(opts) {
+    const totalSpaces = opts.totalSpaces || 40
+    const corners = opts.corners || 4
+    const perSide = (totalSpaces - corners) / corners
+    const spaceW = opts.spaceW || 56
+    const cornerSize = opts.cornerSize || 80
+    const boardW = opts.boardW || (cornerSize * 2 + perSide * spaceW)
+    const boardH = opts.boardH || boardW
+    const colors = opts.colors || {}
+
+    const elements = []
+    const cells = []
+
+    // Board background
+    elements.push({ tag: 'rect', attrs: { x: 0, y: 0, width: boardW, height: boardH, fill: colors.board || '#f0e4c8' } })
+    // Border
+    elements.push({ tag: 'rect', attrs: { x: 2, y: 2, width: boardW - 4, height: boardH - 4, fill: 'none', stroke: colors.border || '#5a4a30', 'stroke-width': 2.5 } })
+
+    // Corner positions (clockwise from bottom-right: BR, BL, TL, TR)
+    const cornerPositions = [
+      { x: boardW - cornerSize, y: boardH - cornerSize },
+      { x: 0, y: boardH - cornerSize },
+      { x: 0, y: 0 },
+      { x: boardW - cornerSize, y: 0 },
+    ]
+
+    // Render corners
+    const cornerSpaces = opts.cornerSpaces || []
+    for (let ci = 0; ci < corners; ci++) {
+      const pos = cornerPositions[ci]
+      const space = cornerSpaces[ci] || {}
+      const fill = space.fill || colors.corner || '#e8d8b8'
+      const id = space.id || `corner-${ci}`
+
+      elements.push({ tag: 'rect', attrs: {
+        x: pos.x, y: pos.y, width: cornerSize, height: cornerSize,
+        fill, stroke: colors.cornerStroke || '#5a4a30', 'stroke-width': 1.5,
+        class: 'board-cell', 'data-sq': id, 'data-type': 'corner',
+      } })
+
+      // Corner decorations — coordinates relative to corner origin
+      if (space.decorations) {
+        const decEls = space.decorations.map(dec => {
+          const a = { ...dec.attrs }
+          delete a.x
+          delete a.y
+          return { ...dec, attrs: a }
+        })
+        elements.push({ tag: 'g', attrs: { transform: `translate(${pos.x},${pos.y})` }, children: decEls })
+      }
+
+      // Corner texts from config
+      if (space.texts) {
+        for (const t of space.texts) {
+          elements.push({ tag: 'text', attrs: {
+            x: pos.x + cornerSize / 2 + (t.dx || 0),
+            y: pos.y + cornerSize / 2 + (t.dy || 0),
+            'text-anchor': 'middle', 'dominant-baseline': 'central',
+            'font-size': t.fontSize || 8, 'font-weight': t.fontWeight || 'bold',
+            'font-family': t.fontFamily || 'sans-serif', fill: t.fill || colors.text || '#333',
+            ...(t.attrs || {}),
+          }, text: t.text })
+        }
+      }
+
+      cells.push({ id, x: pos.x + cornerSize / 2, y: pos.y + cornerSize / 2 })
+    }
+
+    // Side spaces (4 sides: bottom, left, top, right)
+    const sides = ['bottom', 'left', 'top', 'right']
+    const sideSpaces = opts.sideSpaces || { bottom: [], left: [], top: [], right: [] }
+
+    for (const side of sides) {
+      const arr = sideSpaces[side] || []
+      const count = arr.length || perSide
+      for (let i = 0; i < count; i++) {
+        const space = arr[i] || {}
+        const rect = getPerimeterRect(side, i, count, cornerSize, boardW, boardH)
+        const fill = space.fill || '#f0f0f0'
+        const id = space.id || `${side}-${i}`
+
+        elements.push({ tag: 'rect', attrs: {
+          x: rect.x, y: rect.y, width: rect.w, height: rect.h,
+          fill, stroke: colors.spaceStroke || '#5a4a30',
+          'stroke-width': opts.spaceStrokeWidth || 0.75,
+          class: 'board-cell', 'data-sq': id, 'data-type': space.type || 'space',
+        } })
+
+        // Space decorations (stripes, patterns) — coordinates relative to space rect origin
+        if (space.decorations) {
+          const decEls = space.decorations.map(dec => ({ ...dec, attrs: { ...dec.attrs } }))
+          elements.push({ tag: 'g', attrs: { transform: `translate(${rect.x},${rect.y})` }, children: decEls })
+        }
+
+        // Space text (rendered centred within the cell via transform group)
+        if (space.texts) {
+          const cx = rect.x + rect.w / 2
+          const cy = rect.y + rect.h / 2
+          const textEls = space.texts.map(t => ({
+            tag: 'text', attrs: {
+              x: t.dx || 0, y: t.dy || 0,
+              'text-anchor': 'middle', 'dominant-baseline': 'central',
+              'font-size': t.fontSize || 6, 'font-weight': t.fontWeight || 'normal',
+              'font-family': t.fontFamily || 'serif', fill: t.fill || colors.text || '#333',
+              ...(t.attrs || {}),
+            }, text: t.text,
+          }))
+          elements.push({ tag: 'g', attrs: { transform: `translate(${cx},${cy})` }, children: textEls })
+        }
+
+        cells.push({ id, x: rect.x + rect.w / 2, y: rect.y + rect.h / 2 })
+      }
+    }
+
+    // Inner area
+    const innerX = cornerSize, innerY = cornerSize
+    const innerW = boardW - cornerSize * 2, innerH = boardH - cornerSize * 2
+    elements.push({ tag: 'rect', attrs: {
+      x: innerX, y: innerY, width: innerW, height: innerH,
+      fill: colors.innerBg || '#f0e4c8',
+    } })
+
+    // Inner content from config (arbitrary elements)
+    if (opts.innerContent) {
+      for (const el of opts.innerContent) {
+        elements.push(el)
+      }
+    }
+
+    // Inner cells (addressable positions inside the board)
+    if (opts.innerCells) {
+      for (const ic of opts.innerCells) {
+        cells.push({ id: ic.id, x: ic.x, y: ic.y })
+        if (ic.element) elements.push(ic.element)
+      }
+    }
+
+    return { width: boardW, height: boardH, elements, cells, labels: [], defs: [] }
+  }
+
+  function getPerimeterRect(side, idx, count, cornerSize, boardW, boardH) {
+    const spanW = boardW - cornerSize * 2
+    const spanH = boardH - cornerSize * 2
+    const cellW = spanW / count
+    const cellH = spanH / count
+
+    if (side === 'bottom') {
+      return { x: boardW - cornerSize - (idx + 1) * cellW, y: boardH - cornerSize, w: cellW, h: cornerSize }
+    }
+    if (side === 'left') {
+      return { x: 0, y: boardH - cornerSize - (idx + 1) * cellH, w: cornerSize, h: cellH }
+    }
+    if (side === 'top') {
+      return { x: cornerSize + idx * cellW, y: 0, w: cellW, h: cornerSize }
+    }
+    if (side === 'right') {
+      return { x: boardW - cornerSize, y: cornerSize + idx * cellH, w: cornerSize, h: cellH }
+    }
+    return { x: 0, y: 0, w: cellW, h: cellH }
   }
 
   function renderPointsLayout(opts) {

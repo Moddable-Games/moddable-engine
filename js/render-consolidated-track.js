@@ -9,24 +9,33 @@ import { serializeLayout } from '../packages/render/src/serialize-layout.js'
 
 export function renderConsolidatedTrack(config) {
   const layout = config.layout || {}
-  const positions = Array.from({ length: layout.totalPoints || 24 }, (_, i) => `point-${i + 1}`)
+  const style = layout.style || 'points'
 
-  const topo = createTrackTopology({ positions, circuit: false })
+  let positions
+  if (style === 'perimeter') {
+    const total = layout.totalSpaces || 40
+    positions = Array.from({ length: total }, (_, i) => `pos-${i + 1}`)
+  } else {
+    positions = Array.from({ length: layout.totalPoints || 24 }, (_, i) => `point-${i + 1}`)
+  }
+
+  const topo = createTrackTopology({ positions, circuit: style === 'perimeter' })
 
   const renderConfig = {
     ...layout,
     parsedSetup: config.parsedSetup || null,
     pieceImages: config.pieceImages || null,
-    colors: config.colors || {},
+    colors: layout.colors || config.colors || {},
   }
 
   const result = topo.renderLayout(renderConfig)
 
   return serializeLayout(result, {
     title: config.label,
+    overflow: layout.overflow || false,
   })
 }
 
 export function isTrackProvider(config) {
-  return config.layout != null && config.layout.style === 'points'
+  return config.layout != null && (config.layout.style === 'points' || config.layout.style === 'perimeter')
 }

@@ -850,10 +850,15 @@ Renderer draws nodes and edges. Zero new code.
 Upgrade getLayout() to produce publication-quality pit positioning, seed
 layout, store sizing matching what the mancala provider currently renders.
 
-### Phase 4: topology-track (2 providers, ~8 variants)
+### Phase 4: topology-track (2 providers, ~8 variants) — COMPLETE
 
-1. **backgammon** — triangular-points layout
-2. **landlords** — perimeter-loop with addressable positions
+1. **backgammon** — triangular-points layout (DONE — `renderLayout` style:'points')
+2. **landlords** — perimeter-loop with addressable positions (DONE — `renderLayout` style:'perimeter')
+
+Implementation: `renderPerimeterLayout()` in topology-track handles the full Monopoly-style
+perimeter board. Config provides all space data (fills, texts, decorations, inner content).
+`buildPerimeterLayout` in boards.js transforms JSON board data + theme into the config.
+Bridge updated to handle both styles. `serializeLayout` gains `overflow` support.
 
 ### Phase 5: topology-hex (2 pipelines, ~40 variants)
 

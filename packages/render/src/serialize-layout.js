@@ -12,7 +12,8 @@ export function serializeLayout(layout, opts = {}) {
   const { width, height, elements, cells, labels, defs } = layout
 
   const parts = []
-  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">`)
+  const overflow = opts.overflow ? ' style="overflow:visible"' : ''
+  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"${overflow}>`)
 
   if (title) parts.push(`<title>${esc(title)}</title>`)
 
