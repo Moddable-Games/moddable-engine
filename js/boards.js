@@ -1,5 +1,4 @@
 import { renderBoard, fenToPosition } from './board-diagrams.js'
-import { renderSurfaceSVG } from './piece-surface.js'
 import { getGameConfig, getAllGames, HexSvg, createSeededRng } from './hex-games/index.js'
 import { getDeckConfig, getRegisteredDecks, createDeck, shuffle, deal, layoutTable } from './deck-manager/index.js'
 import { renderRpgProvider } from './rpg-provider.js'
@@ -3202,10 +3201,11 @@ export function renderMultiBoard(config, game) {
   const gap = layout === 'horizontal' ? 20 : 12
   const labelH = 18
 
-  // Compute individual board dimensions
   const ts = config.tileSize || 34
-  const boardW = config.cols * ts
-  const boardH = config.rows * ts
+  const rows = config.rows || 8
+  const cols = config.cols || 8
+  const boardW = cols * ts
+  const boardH = rows * ts
   const pad = 24
 
   let totalW, totalH
@@ -3236,53 +3236,31 @@ export function renderMultiBoard(config, game) {
     const labelY = oy - 4
     parts.push(`<text x="${labelX}" y="${labelY}" text-anchor="middle" font-size="11" fill="#aaa" font-family="system-ui">${labels[i] || 'Board ' + (i + 1)}</text>`)
 
-    // Render board squares
+    // Build per-layer config and render through consolidated pipeline
     const boardColors = layerColors && layerColors[i]
       ? { lightSquare: layerColors[i].lightSquare || '#f0d9b5', darkSquare: layerColors[i].darkSquare || '#b58863' }
-      : { lightSquare: '#f0d9b5', darkSquare: '#b58863' }
-
-    for (let r = 0; r < config.rows; r++) {
-      for (let c = 0; c < config.cols; c++) {
-        const fill = (r + c) % 2 === 0 ? boardColors.lightSquare : boardColors.darkSquare
-        const file = String.fromCharCode(97 + c)
-        const rankNum = config.rows - r
-        const sq = `${file}${rankNum}`
-        parts.push(`<rect class="board-cell" data-sq="${sq}" data-layer="${i}" x="${ox + c * ts}" y="${oy + r * ts}" width="${ts}" height="${ts}" fill="${fill}"/>`)
-      }
-    }
-
-    // Render pieces from layer FEN
+      : config.colors || {}
     const fen = fens && fens[i]
-    if (fen && fen !== '8/8/8/8/8/8/8/8') {
-      const position = fenToPosition(fen, config.rows, config.cols)
-      const pieceImages = config.pieceImages || {}
-      const surfaceMap = config.pieceSurfaceMap || {}
-      const surface = config.pieceSurface || null
-      for (const [sq, piece] of Object.entries(position)) {
-        const file = sq.charCodeAt(0) - 97
-        const rank = config.rows - parseInt(sq.slice(1))
-        const cx = ox + file * ts + ts / 2
-        const cy = oy + rank * ts + ts / 2
-        if (pieceImages[piece]) {
-          if (surfaceMap[piece]) {
-            const isUpper = piece === piece.toUpperCase()
-            const owner = isUpper ? 'white' : 'black'
-            const ownerSurface = surface && surface.owners && surface.owners[owner]
-            const ownerColors = ownerSurface || { fill: '#ccc', stroke: '#888' }
-            parts.push(renderSurfaceSVG('disc', cx, cy, ts, ownerColors, pieceImages[piece]))
-          } else {
-            const imgSize = ts * 0.85
-            parts.push(`<image href="${pieceImages[piece]}" x="${cx - imgSize / 2}" y="${cy - imgSize / 2}" width="${imgSize}" height="${imgSize}" pointer-events="none"/>`)
-          }
-        } else {
-          const fontSize = ts * 0.55
-          const isWhite = piece === piece.toUpperCase()
-          const fill = isWhite ? '#fff' : '#111'
-          const stroke = isWhite ? '#333' : '#888'
-          parts.push(`<text x="${cx}" y="${cy + fontSize * 0.35}" text-anchor="middle" font-size="${fontSize}" font-family="system-ui" font-weight="bold" fill="${fill}" stroke="${stroke}" stroke-width="0.5">${piece}</text>`)
-        }
-      }
+    const position = fen ? fenToPosition(fen, rows, cols) : {}
+
+    const layerConfig = {
+      ...config,
+      rows, cols, tileSize: ts,
+      colors: boardColors,
+      position,
+      layers: undefined,
     }
+
+    // Use consolidated grid renderer per layer
+    const layerSvg = renderConsolidated(layerConfig)
+    // Extract inner SVG content (strip outer <svg> and </svg> tags)
+    const innerStart = layerSvg.indexOf('>') + 1
+    const innerEnd = layerSvg.lastIndexOf('</svg>')
+    const innerContent = layerSvg.slice(innerStart, innerEnd)
+
+    parts.push(`<g transform="translate(${ox},${oy})">`)
+    parts.push(innerContent)
+    parts.push('</g>')
   }
 
   parts.push('</svg>')
