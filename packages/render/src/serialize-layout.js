@@ -5,8 +5,10 @@
  * SVG document. Pieces are added on top if provided.
  */
 
+const DISC_RATIO = { disc: 0.92, image: 0.60 }
+
 export function serializeLayout(layout, opts = {}) {
-  const { title, pieces, pieceImages } = opts
+  const { title, pieces, pieceImages, pieceSurface, pieceSurfaceMap, pieceRotations } = opts
   const { width, height, elements, cells, labels } = layout
 
   const parts = []
@@ -29,8 +31,24 @@ export function serializeLayout(layout, opts = {}) {
       if (!piece) continue
       const imgKey = typeof piece === 'string' ? piece : piece.type
       const imgPath = pieceImages?.[imgKey]
-      if (imgPath) {
-        const size = layout.tileSize || 40
+      if (!imgPath) continue
+      const size = layout.tileSize || 40
+      const rot = pieceRotations && piece.owner ? (pieceRotations[piece.owner] || 0) : 0
+      const surface = pieceSurfaceMap?.[imgKey] ? pieceSurface : null
+      if (surface && surface.type === 'disc') {
+        const owner = piece.owner || (imgKey[0] === 'w' || imgKey[0] === imgKey[0].toUpperCase() ? 'white' : 'black')
+        const ownerColors = surface.owners?.[owner] || { fill: '#ccc', stroke: '#888' }
+        const discR = size * DISC_RATIO.disc / 2
+        const imgSize = size * DISC_RATIO.image
+        parts.push(`<circle cx="${cell.x}" cy="${cell.y}" r="${discR}" fill="${ownerColors.fill}" stroke="${ownerColors.stroke}" stroke-width="2"/>`)
+        if (rot) {
+          parts.push(`<g transform="rotate(${rot} ${cell.x} ${cell.y})"><image href="${imgPath}" x="${cell.x - imgSize / 2}" y="${cell.y - imgSize / 2}" width="${imgSize}" height="${imgSize}"/></g>`)
+        } else {
+          parts.push(`<image href="${imgPath}" x="${cell.x - imgSize / 2}" y="${cell.y - imgSize / 2}" width="${imgSize}" height="${imgSize}"/>`)
+        }
+      } else if (rot) {
+        parts.push(`<g transform="rotate(${rot} ${cell.x} ${cell.y})"><image href="${imgPath}" x="${cell.x - size / 2}" y="${cell.y - size / 2}" width="${size}" height="${size}"/></g>`)
+      } else {
         parts.push(`<image href="${imgPath}" x="${cell.x - size / 2}" y="${cell.y - size / 2}" width="${size}" height="${size}"/>`)
       }
     }

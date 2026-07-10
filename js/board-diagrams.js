@@ -285,19 +285,21 @@ const xiangqi = {
       for (let c = 0; c < cols; c++) parts.push(`<line x1="${gx + c * tileSize}" y1="${gy}" x2="${gx + c * tileSize}" y2="${gy + gridH}"/>`)
     }
     parts.push('</g>')
-    const mid = Math.floor(cols / 2)
-    const palaceLeft = opts.palaceCols ? opts.palaceCols[0] : mid - 1
-    const palaceRight = opts.palaceCols ? opts.palaceCols[1] : mid + 1
-    const palaceRows = opts.palaceRows || 2
-    const palaceTopRow = 0
-    const palaceBotRow = rows - 1 - palaceRows
-    const pl = gx + palaceLeft * tileSize, pr = gx + palaceRight * tileSize
-    parts.push(`<g stroke="${colors.palace}" stroke-width="0.8" stroke-dasharray="4,3">`)
-    parts.push(`<line x1="${pl}" y1="${gy + palaceTopRow * tileSize}" x2="${pr}" y2="${gy + (palaceTopRow + palaceRows) * tileSize}"/>`)
-    parts.push(`<line x1="${pr}" y1="${gy + palaceTopRow * tileSize}" x2="${pl}" y2="${gy + (palaceTopRow + palaceRows) * tileSize}"/>`)
-    parts.push(`<line x1="${pl}" y1="${gy + palaceBotRow * tileSize}" x2="${pr}" y2="${gy + (palaceBotRow + palaceRows) * tileSize}"/>`)
-    parts.push(`<line x1="${pr}" y1="${gy + palaceBotRow * tileSize}" x2="${pl}" y2="${gy + (palaceBotRow + palaceRows) * tileSize}"/>`)
-    parts.push('</g>')
+    if (opts.palace !== false) {
+      const mid = Math.floor(cols / 2)
+      const palaceLeft = opts.palaceCols ? opts.palaceCols[0] : mid - 1
+      const palaceRight = opts.palaceCols ? opts.palaceCols[1] : mid + 1
+      const palaceRows = opts.palaceRows || 2
+      const palaceTopRow = 0
+      const palaceBotRow = rows - 1 - palaceRows
+      const pl = gx + palaceLeft * tileSize, pr = gx + palaceRight * tileSize
+      parts.push(`<g stroke="${colors.palace}" stroke-width="0.8" stroke-dasharray="4,3">`)
+      parts.push(`<line x1="${pl}" y1="${gy + palaceTopRow * tileSize}" x2="${pr}" y2="${gy + (palaceTopRow + palaceRows) * tileSize}"/>`)
+      parts.push(`<line x1="${pr}" y1="${gy + palaceTopRow * tileSize}" x2="${pl}" y2="${gy + (palaceTopRow + palaceRows) * tileSize}"/>`)
+      parts.push(`<line x1="${pl}" y1="${gy + palaceBotRow * tileSize}" x2="${pr}" y2="${gy + (palaceBotRow + palaceRows) * tileSize}"/>`)
+      parts.push(`<line x1="${pr}" y1="${gy + palaceBotRow * tileSize}" x2="${pl}" y2="${gy + (palaceBotRow + palaceRows) * tileSize}"/>`)
+      parts.push('</g>')
+    }
     if (river) {
       const rtop = opts.riverRows ? opts.riverRows[0] : Math.floor(rows / 2) - 1
       const rbot = opts.riverRows ? opts.riverRows[1] : Math.floor(rows / 2)

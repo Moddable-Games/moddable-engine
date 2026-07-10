@@ -278,6 +278,197 @@ GAMES config now, and from frontmatter later. The renderer never changes.
 
 See memories: `feedback_consolidate-not-reorganize.md`, `project_master-topology-notation.md`
 
+---
+
+## Grid Master Notation (Phase 1 complete design)
+
+### Status: DESIGNED (2026-07-09)
+
+This is the canonical board description format for ALL grid-topology games.
+The renderer consumes this. Nothing else. No game names, no branching.
+
+### Source analysis (all 7 grid providers read simultaneously)
+
+| Provider | Position type | Unique features |
+|----------|--------------|-----------------|
+| checkered | tile (square) | cellMap zones (rosette/castle decorations), void cells |
+| mono-grid | tile (square) | uniform fill + grid lines only |
+| go | intersection | star points, wood layers, Go-alphabet labels |
+| xiangqi | intersection | river split (skip rows + gap columns), palace diagonals, CJK text |
+| shogi | intersection | promotion zone highlights, hoshi markers, border frame |
+| alquerque | intersection | all-cell dot markers, alternating diagonal lines |
+| surakarta | intersection | nested frame layers, corner arc paths, all-cell dots |
+
+### The 10 universal drawing primitives
+
+Every grid board is composed exclusively of these operations, drawn in this order:
+
+1. **Backgrounds** — rectangular fills (board surface, inner frame, nested borders)
+2. **Zones** — tinted rectangles over row/col ranges (promotion areas)
+3. **Cell fills** — per-cell colour from (r,c) → fill (checkered, zone-mapped, void)
+4. **Cell decorations** — per-cell ornamental SVG elements (rosette pattern, X-mark)
+5. **Grid lines** — horizontal + vertical strokes (with optional river-split, skip-rows)
+6. **Diagonal lines** — per-cell-pair predicate determines which squares get X-crosses (alquerque/fanorona style — both `\` and `/` per cell). NOT for palace diagonals (those are paths).
+7. **Paths** — SVG path/line elements (surakarta arcs, xiangqi palace diagonals, river overlays)
+8. **Point markers** — small circles at specific (r,c) positions (star points, hoshi, dots)
+9. **Texts** — positioned text elements (river calligraphy, annotations)
+10. **Hit targets** — transparent interactive regions (rects for tiles, circles for intersections)
+
+The renderer iterates 1-10 in order. One pass. No branching on game or provider.
+
+### The notation format
+
+A grid board description is a single object — `GridBoardLayout`:
+
+```js
+{
+  // Geometry
+  rows: 8,
+  cols: 8,
+  tileSize: 56,
+  positionType: 'tile' | 'intersection',
+  inset: 0,              // padding between board edge and first grid line (intersection mode)
+
+  // 1. Backgrounds — drawn first, in order (frame → surface → inner surface)
+  backgrounds: [
+    { fill, rx?, stroke?, 'stroke-width'?, x?, y?, width?, height? }
+  ],
+
+  // 2. Zones — tinted rectangles over row/col ranges
+  zones: [
+    { fromRow, toRow, fromCol, toCol, fill }
+  ],
+
+  // 3. Cell fills — function or map: (r, c) → fill colour | null (null = void/skip)
+  //    Optional .stroke(r,c) and .strokeWidth(r,c) sub-functions
+  cellFill: (r, c) => '#f0d9b5' | null,
+
+  // 4. Cell decorations — function: (r, c, cx, cy, tileSize) → [{tag, attrs}] | null
+  cellDecorations: (r, c, cx, cy, ts) => [...elements] | null,
+
+  // 5. Grid lines — config object (NOT individual line elements)
+  lines: {
+    color: '#333',
+    width: 1.5,
+    horizontal: true,         // false to suppress entirely (checkered uses fills only)
+    skipRows: [],             // row indices to skip drawing
+    splitAfterRow: null,      // river: columns break at this row (non-edge cols)
+    edgeCols: [0, cols-1],    // which cols get full-height lines when split
+  },
+
+  // 6. Diagonals — predicate-based (game-agnostic: "which cell-pairs get X-lines?")
+  diagonals: {
+    predicate: (r, c) => boolean,   // true = draw both diagonals in cell (r,c)→(r+1,c+1)
+    forward: true,                  // draw \ diagonal
+    backward: true,                 // draw / diagonal
+    color: '#333',
+    width: 1.5,
+  },
+
+  // 7. Paths — pre-computed SVG path strings (arcs, curves, any shape)
+  paths: [
+    { d: 'M ... A ...', stroke, strokeWidth?, fill?, linecap? }
+  ],
+
+  // 8. Point markers — circles at specific grid positions
+  markers: [
+    { r, c, radius?, fill? }     // or [r, c] shorthand
+  ],
+
+  // 9. Texts — positioned text elements
+  texts: [
+    { x, y, text, fontSize?, fontFamily?, fill?, anchor?, baseline?, attrs? }
+  ],
+
+  // 10. Labels — coordinate labels config (not individual elements)
+  labels: {
+    show: true,
+    alphabet: null,             // null = a-z; array = custom (Go uses 'ABCDEFGHJK...')
+    color: '#555',
+    fontSize: 10,
+    fontFamily: 'monospace',
+  },
+
+  // Per-cell attrs for hit targets (optional metadata on interactive regions)
+  cellAttrs: (r, c) => { 'data-type'?: string },
+}
+```
+
+### What the renderer does (one straight pipeline)
+
+```
+renderLayout(config) → { width, height, elements[], cells[], labels[] }
+```
+
+1. Compute geometry (gridW/gridH from rows × cols × tileSize, pad for labels)
+2. Draw backgrounds[] as rect elements
+3. Draw zones[] as tinted rect elements
+4. Iterate (r,c): call cellFill(r,c) → rect element per non-null fill
+5. Iterate (r,c): call cellDecorations(r,c,...) → append decoration elements
+6. Draw grid lines from lines config (respecting skipRows, splitAfterRow)
+7. Iterate (r,c) pairs: if diagonals.predicate(r,c) → draw diagonal line pair
+8. Draw paths[] as SVG path elements
+9. Draw markers[] as circle elements at grid positions
+10. Draw texts[] as text elements
+11. Build cells[] — one hit-target element per (r,c) position, with id
+12. Build labels[] — coordinate text elements along edges
+
+This is ALREADY what `renderLayout()` does today. The notation IS the config format.
+
+### What changed (2026-07-10 refactor)
+
+The bridge layer (`render-consolidated.js`) was completely rewritten. All game-specific
+builder functions (`buildGo`, `buildXiangqi`, etc.) were removed. The bridge is now a
+generic pass-through: it reads `config.layout` and feeds primitives to `renderLayout()`.
+
+**Game data now lives on game configs** via `buildLayout(rows, cols, tileSize, colors, config)`
+functions on each family or variant in boards.js. These are TEMPORARY — they document
+exactly what `produce()` will need to support when frontmatter arrives.
+
+**Shared layout builders** (e.g. `buildIntersectionGridLayout`) are defined before the
+GAMES object and referenced by any family/variant that needs them. A variant can override
+its family's builder (e.g. alquerque under draughts uses the fanorona-style builder).
+
+**Decoration registry pattern**: cell-type decorations (rosettes, X-marks) are declared
+as `cellTypeDecorations` maps on the variant config — keyed by cell type name, valued
+as drawing functions. The bridge passes these through without knowing what they mean.
+
+**Guard test**: `packages/schema/__tests__/produce-purity.test.js` permanently prevents
+game names, topology names, hardcoded coordinates, or game-specific text from entering
+`produce.js`. This enforces the contract at CI level.
+
+### Remaining mechanical work (non-blocking)
+
+- Chess/Draughts/Tafl/Pachisi families use a 2-line checkered/mono-grid fallback
+  instead of explicit `buildLayout`. Works correctly, but implicit.
+- `isGridProvider` still checks `boardStyle` names as fallback (disappears when above done)
+- `resolvePieceImageKey` — 15 lines of vocabulary→key mapping, moves to game config later
+
+None of these block hex consolidation or any other phase.
+
+### How buildLayout becomes frontmatter
+
+1. The data inside each `buildLayout` (coordinates, colours, parameters) becomes YAML
+2. The dimension computation (background sizing from rows×cols×tileSize) becomes a
+   generic resolver in `produce()` — e.g. `sizing: grid-area` → pixel rect
+3. The `buildLayout` function is deleted
+4. `produce()` NEVER learns game names (purity test enforces this)
+5. `isGridProvider` becomes `config.layout != null` and is eventually deleted too
+
+### Validation: the "new game tomorrow" test
+
+Q: "If someone adds Jungle Chess (9×7 grid, intersection-mode, river squares, dens, traps), does the renderer need new code?"
+
+A: No. The variant declares its layout via `buildLayout` (today) or frontmatter (future).
+The bridge and renderer never change.
+
+Q: "If someone adds Brandubh (7×7 tile grid with central throne + corner castles)?"
+
+A: No. Declares `cellTypeDecorations: { throne: drawFn }` on the variant config.
+The bridge passes it through, the renderer draws whatever it's told.
+
+---
+
 ### Phase 1: topology-grid (7 providers, ~300 variants)
 
 Grid topology already has tiles + intersections. Upgrade to match studio quality:

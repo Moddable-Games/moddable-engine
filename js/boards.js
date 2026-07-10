@@ -134,7 +134,76 @@ const CHAUPAR_COLORS = {
 const ROYAL_UR_COLORS = {
   floor: '#d4b896', floorStroke: '#8b7355',
   rosette: '#c4956a', rosetteStroke: '#8b5a3a',
+  rosetteDot: '#8b3a3a', rosetteDotOuter: '#a04848',
   voidFill: 'transparent',
+}
+
+const ROYAL_UR_DECORATIONS = {
+  rosette: (cx, cy, ts, colors) => {
+    const s = ts * 0.25
+    const fill = colors.rosetteDot || '#8b3a3a'
+    const fillOuter = colors.rosetteDotOuter || '#a04848'
+    return [
+      { tag: 'circle', attrs: { cx, cy, r: s * 0.42, fill } },
+      { tag: 'circle', attrs: { cx, cy: cy - s, r: s * 0.25, fill } },
+      { tag: 'circle', attrs: { cx, cy: cy + s, r: s * 0.25, fill } },
+      { tag: 'circle', attrs: { cx: cx - s, cy, r: s * 0.25, fill } },
+      { tag: 'circle', attrs: { cx: cx + s, cy, r: s * 0.25, fill } },
+      { tag: 'circle', attrs: { cx: cx - s * 0.7, cy: cy - s * 0.7, r: s * 0.17, fill: fillOuter } },
+      { tag: 'circle', attrs: { cx: cx + s * 0.7, cy: cy - s * 0.7, r: s * 0.17, fill: fillOuter } },
+      { tag: 'circle', attrs: { cx: cx - s * 0.7, cy: cy + s * 0.7, r: s * 0.17, fill: fillOuter } },
+      { tag: 'circle', attrs: { cx: cx + s * 0.7, cy: cy + s * 0.7, r: s * 0.17, fill: fillOuter } },
+    ]
+  },
+}
+
+const PACHISI_DECORATIONS = {
+  castle: (cx, cy, ts, colors) => {
+    const d = ts * 0.3
+    const stroke = colors.castleX || '#fff8f0'
+    return [
+      { tag: 'line', attrs: { x1: cx - d, y1: cy - d, x2: cx + d, y2: cy + d, stroke, 'stroke-width': 1.5, 'stroke-linecap': 'round' } },
+      { tag: 'line', attrs: { x1: cx + d, y1: cy - d, x2: cx - d, y2: cy + d, stroke, 'stroke-width': 1.5, 'stroke-linecap': 'round' } },
+    ]
+  },
+}
+
+// ─── LAYOUT BUILDERS (shared, referenced by any family/variant that needs them) ─
+// TEMPORARY: move to packages/schema/src/produce.js when frontmatter lands.
+// Data (coordinates, colours) goes into frontmatter YAML.
+// Dimension computation becomes a generic resolver in produce().
+// See: packages/schema/__tests__/produce-purity.test.js
+
+function buildCheckeredLayout(rows, cols, tileSize, colors) {
+  return { positionType: 'square' }
+}
+
+function buildMonoGridLayout(rows, cols, tileSize, colors) {
+  return {
+    positionType: 'square',
+    cellFill: 'none',
+    backgrounds: [{ fill: colors.monoSquare || '#d9b483' }],
+    lines: { color: colors.gridLine || '#8b6914', width: 1.5 },
+  }
+}
+
+function buildIntersectionGridLayout(rows, cols, tileSize, colors, config = {}) {
+  const inset = config.inset ?? Math.round(tileSize * 0.5)
+  const diagonals = config.diagonals === 'alternating'
+    ? { predicate: 'alternating', color: colors.gridLine || '#8b6914', width: 1.5 }
+    : config.diagonals || null
+  return {
+    positionType: 'intersection',
+    showLabels: config.showLabels !== false,
+    inset,
+    cellFill: 'none',
+    backgrounds: [{ fill: colors.monoSquare || '#d9b483', rx: 4 }],
+    lines: { color: colors.gridLine || '#8b6914', width: 2 },
+    diagonals,
+    markers: config.allDots !== false
+      ? Array.from({ length: rows * cols }, (_, i) => ({ r: Math.floor(i / cols), c: i % cols, radius: 3, fill: colors.gridLine || '#8b6914' }))
+      : (config.markers || []),
+  }
 }
 
 // ─── TAFL BOARD MAPS ────────────────────────────────────────────────────────
@@ -559,6 +628,7 @@ const GAMES = {
   'moddable-chess': {
     label: 'Chess',
     pieceSet: 'mce-fairy-complete',
+    buildLayout: buildCheckeredLayout,
     variants: {
       standard: { label: 'Standard', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Standard FIDE rules.'},
       absorption: { label: 'Absorption', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Capturing piece permanently gains the victim\'s movement abilities.'},
@@ -711,6 +781,27 @@ const GAMES = {
     label: 'Go',
     pieceSet: 'playstrategy-go-classic',
     hasHandicap: true,
+    // TEMPORARY: moves to packages/schema/src/produce.js when frontmatter lands.
+    // The data (star points, inset, colours) goes INTO the frontmatter YAML.
+    // The dimension computation (background sizing) becomes a generic resolver in produce().
+    // See: packages/schema/__tests__/produce-purity.test.js (guards against game knowledge in produce)
+    buildLayout(rows, cols, tileSize, colors) {
+      const inset = 15
+      const STAR_POINTS = { 9: [[2,2],[2,6],[4,4],[6,2],[6,6]], 13: [[3,3],[3,9],[6,6],[9,3],[9,9]], 19: [[3,3],[3,9],[3,15],[9,3],[9,9],[9,15],[15,3],[15,9],[15,15]] }
+      return {
+        positionType: 'intersection',
+        showLabels: true,
+        inset,
+        cellFill: 'none',
+        backgrounds: [
+          { fill: colors.woodLight || '#dcb35c' },
+          { x: 24 + inset, y: 24 + inset, width: (cols - 1) * tileSize, height: (rows - 1) * tileSize, fill: colors.woodDark || '#d4a843', rx: 2 },
+        ],
+        lines: { color: colors.gridLine || '#3d2b1a', width: 0.8 },
+        markers: (STAR_POINTS[rows] || []).map(([r, c]) => ({ r, c, fill: colors.starPoint || '#3d2b1a' })),
+        labels: { alphabet: 'abcdefghjklmnopqrst'.split(''), fontFamily: 'sans-serif', color: colors.labelText || '#5a4020' },
+      }
+    },
     variants: {
       standard: { label: 'Standard (19×19)', boardStyle: 'go', rows: 19, cols: 19, tileSize: 20, setupDesc: 'Empty board, 361 intersections, komi 6.5', variantDesc: 'Full tournament game. Area or territory scoring.' },
       '13x13': { label: '13×13', boardStyle: 'go', rows: 13, cols: 13, tileSize: 20, setupDesc: 'Empty board, 169 intersections, komi 5.5', variantDesc: 'Intermediate board. 30-60 minute games.' },
@@ -731,12 +822,63 @@ const GAMES = {
   xiangqi: {
     label: 'Xiangqi',
     pieceSet: 'mce-xiangqi-trad',
+    // TEMPORARY: moves to packages/schema/src/produce.js when frontmatter lands.
+    buildLayout(rows, cols, tileSize, colors, config = {}) {
+      const inset = 20
+      const river = config.river !== false
+      const riverRows = config.riverRows || [Math.floor(rows / 2) - 1, Math.floor(rows / 2)]
+      const hasPalace = config.palace !== false
+      const mid = Math.floor(cols / 2)
+      const palaceLeft = config.palaceCols?.[0] ?? (mid - 1)
+      const palaceRight = config.palaceCols?.[1] ?? (mid + 1)
+      const palaceRows = config.palaceRows || 2
+      const ox = inset
+      const posX = (c) => ox + c * tileSize
+      const posY = (r) => ox + r * tileSize
+
+      const paths = []
+      if (hasPalace) {
+        const stroke = colors.palace || '#4a3520'
+        const palaceBotRow = rows - 1 - palaceRows
+        paths.push(
+          { d: `M ${posX(palaceLeft)},${posY(0)} L ${posX(palaceRight)},${posY(palaceRows)}`, stroke, strokeWidth: 0.8, fill: 'none' },
+          { d: `M ${posX(palaceRight)},${posY(0)} L ${posX(palaceLeft)},${posY(palaceRows)}`, stroke, strokeWidth: 0.8, fill: 'none' },
+          { d: `M ${posX(palaceLeft)},${posY(palaceBotRow)} L ${posX(palaceRight)},${posY(palaceBotRow + palaceRows)}`, stroke, strokeWidth: 0.8, fill: 'none' },
+          { d: `M ${posX(palaceRight)},${posY(palaceBotRow)} L ${posX(palaceLeft)},${posY(palaceBotRow + palaceRows)}`, stroke, strokeWidth: 0.8, fill: 'none' },
+        )
+      }
+
+      const texts = []
+      if (river) {
+        const gridW = (cols - 1) * tileSize
+        const fontSize = Math.min(tileSize * 0.45, 14)
+        const y = inset + (riverRows[0] + riverRows[1]) * tileSize / 2 + fontSize * 0.35
+        texts.push(
+          { x: inset + gridW * 0.25, y, text: '楚 河', fontSize, fontFamily: 'serif', fill: colors.riverText || '#4a3520' },
+          { x: inset + gridW * 0.75, y, text: '漢 界', fontSize, fontFamily: 'serif', fill: colors.riverText || '#4a3520' },
+        )
+      }
+
+      return {
+        positionType: 'intersection',
+        showLabels: false,
+        inset,
+        cellFill: 'none',
+        backgrounds: [
+          { fill: colors.board || '#f5deb3' },
+          { fill: 'none', stroke: colors.gridLine || '#4a3520', 'stroke-width': 2 },
+        ],
+        lines: { color: colors.gridLine || '#4a3520', width: 1, splitAfterRow: river ? riverRows[0] : undefined },
+        paths,
+        texts,
+      }
+    },
     variants: {
       standard: { label: 'Standard', boardStyle: 'xiangqi', rows: 10, cols: 9, tileSize: 36, river: true, fen: 'rheakaehr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RHEAKAEHR', setupDesc: '16 pieces each across river', variantDesc: 'Chinese chess. Palace confines generals and advisors. River restricts elephants. Cannons screen-jump to capture.' },
       janggi: { label: 'Janggi', boardStyle: 'xiangqi', rows: 10, cols: 9, tileSize: 36, river: false, fen: 'rhea1aehr/4k4/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/4K4/RHEA1AEHR', setupDesc: '16 pieces each, generals in palace centre', variantDesc: 'Korean chess. No river. Elephants move wider. Generals and guards move along palace diagonals.' },
       jieqi: { label: 'Jieqi', boardStyle: 'xiangqi', rows: 10, cols: 9, tileSize: 36, river: true, pieceSetOverride: 'mce-xiangqi-fairy', fen: 'ffffkffff/9/1f5f1/f1f1f1f1f/9/9/F1F1F1F1F/1F5F1/9/FFFFKFFFF', pieceNames: { F: 'Face-down piece', f: 'Face-down piece', K: 'General', k: 'General' }, setupDesc: 'Standard positions, all pieces face-down except Generals', variantDesc: 'Hidden-information Xiangqi. All pieces except General start face-down, revealed on first move. Rank hierarchy for captures.' },
       'manchu-plus': { label: 'Manchu', boardStyle: 'xiangqi', rows: 10, cols: 9, tileSize: 36, river: true, pieceSetOverride: 'mce-xiangqi-fairy', fen: 'r1eakae1z/9/p1p1p1p1p/9/9/9/P1P1P1P1P/1C5C1/9/RHEAKAEHR', pieceNames: { Z: 'Banner', z: 'Banner' }, setupDesc: 'Black: Chariot, 2 Elephants, 2 Advisors, General, Banner. Red: standard', variantDesc: 'Asymmetric: Red has standard Xiangqi army. Black has no Horses or Cannons — replaced by one Banner (combines Chariot+Cannon+Horse movement).'},
-      minixiangqi: { label: 'Mini Xiangqi', boardStyle: 'xiangqi', rows: 7, cols: 7, tileSize: 40, river: false, fen: 'rchkhcr/p1ppp1p/7/7/7/P1PPP1P/RCHKHCR', setupDesc: '12 pieces each on 7x7', variantDesc: '7x7 Xiangqi. No river, no Advisors/Elephants. Soldiers move sideways from start. No palace.'},
+      minixiangqi: { label: 'Mini Xiangqi', boardStyle: 'xiangqi', rows: 7, cols: 7, tileSize: 40, river: false, palace: false, fen: 'rchkhcr/p1ppp1p/7/7/7/P1PPP1P/RCHKHCR', setupDesc: '12 pieces each on 7x7', variantDesc: '7x7 Xiangqi. No river, no Advisors/Elephants. Soldiers move sideways from start. No palace.'},
       'quang-trung': { label: 'Quang Trung', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 30, fen: 'rheaakaehr/10/1c6c1/p1p1pp1p1p/10/10/P1P1PP1P1P/1C6C1/10/RHEAAKAEHR', setupDesc: '18 pieces each on 10x10 checkered board', variantDesc: 'Vietnamese 10x10 chess variant. Pieces on squares (not intersections). Pawn reaching last rank wins. NEEDS VERIFIED SETUP.'},
       'xiangqi-42': { label: 'Xiangqi-42', boardStyle: 'xiangqi', rows: 6, cols: 7, tileSize: 40, river: true, fen: 'rhakahr/1c3c1/p2p2p/P2P2P/1C3C1/RHAKAHR', setupDesc: '12 pieces each on 7x6 (42 intersections)', variantDesc: 'Compact Xiangqi on 42 intersections (7x6). No Elephants. Cannons in front of Horses. Robert Price, 2001.'},
       'yang-qi': { label: 'Yang Qi', boardStyle: 'xiangqi', rows: 10, cols: 9, tileSize: 36, river: true, pieceSetOverride: 'mce-xiangqi-fairy', fen: 'rhvakavhr/1c5c1/p1p1p1p1p/1p1p1p1p1/9/9/1P1P1P1P1/P1P1P1P1P/1C5C1/RHVAKAVHR', setupDesc: '20 pieces each (9 pawns on two ranks, 2 Cannons, 9 back rank)', variantDesc: 'Western-influenced Xiangqi. Vaos (diagonal screen-capture) replace Elephants. 9 soldiers per side staggered on ranks 3-4. No river/palace restrictions.'},
@@ -745,6 +887,7 @@ const GAMES = {
   draughts: {
     label: 'Draughts',
     pieceSet: 'playstrategy-dameo-fabirovsky',
+    buildLayout: buildCheckeredLayout,
     variants: {
       english: { label: 'English (8×8)', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, draughtsSetup: { rows: 3, dark: true }, setupDesc: '12 per side, dark squares, 3 rows', variantDesc: 'Men capture forward only. Kings move one square diagonally.' },
       brazilian: { label: 'Brazilian (8×8)', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, draughtsSetup: { rows: 3, dark: true }, setupDesc: '12 per side, dark squares, 3 rows', variantDesc: 'Flying kings, mandatory maximum capture. International rules on 8×8.' },
@@ -761,9 +904,9 @@ const GAMES = {
       ghanaian: { label: 'Ghanaian (10×10)', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, draughtsSetup: { rows: 4, dark: true }, setupDesc: '20 per side, dark squares, 4 rows', variantDesc: 'International rules. Kings captured before men when choice exists.' },
       canadian: { label: 'Canadian (12×12)', boardStyle: 'checkered', rows: 12, cols: 12, tileSize: 28, draughtsSetup: { rows: 5, dark: true }, setupDesc: '30 per side, dark squares, 5 rows', variantDesc: 'International rules on 12×12. Longest games in the draughts family.' },
       spantsiretti: { label: 'Spantsiretti (10×8)', boardStyle: 'checkered', rows: 8, cols: 10, tileSize: 36, draughtsSetup: { rows: 4, dark: true }, setupDesc: '20 per side, dark squares, 4 rows on 10-wide board', variantDesc: 'Wide board variant. Men may optionally move sideways (not just forward).' },
-      'turkish-draughts': { label: 'Turkish', boardStyle: 'mono-grid', rows: 8, cols: 8, tileSize: 40, draughtsSetup: { rows: 2, dark: false }, setupDesc: '16 per side, all squares, rows 2-3 and 6-7', variantDesc: 'Orthogonal movement only (no diagonals). All 64 squares used.' },
+      'turkish-draughts': { label: 'Turkish', boardStyle: 'mono-grid', rows: 8, cols: 8, tileSize: 40, buildLayout: buildMonoGridLayout, draughtsSetup: { rows: 2, dark: false }, setupDesc: '16 per side, all squares, rows 2-3 and 6-7', variantDesc: 'Orthogonal movement only (no diagonals). All 64 squares used.' },
       lasca: { label: 'Lasca (7×7)', boardStyle: 'checkered', rows: 7, cols: 7, tileSize: 40, draughtsSetup: { rows: 3, dark: true }, setupDesc: '11 per side, dark squares, 3 rows', variantDesc: 'Column draughts: captured pieces join the column. Columns commanded by top piece.' },
-      alquerque: { label: 'Alquerque (5×5)', boardStyle: 'alquerque', rows: 5, cols: 5, tileSize: 48, fanoronaSetup: true, setupDesc: '12 per side, all intersections except center', variantDesc: 'Medieval ancestor of draughts. Move along lines, capture by jumping.' },
+      alquerque: { label: 'Alquerque (5×5)', boardStyle: 'alquerque', rows: 5, cols: 5, tileSize: 48, fanoronaSetup: true, pieceSetOverride: 'playstrategy-go-classic', buildLayout: (rows, cols, tileSize, colors) => buildIntersectionGridLayout(rows, cols, tileSize, colors, { diagonals: 'alternating' }), setupDesc: '12 per side, all intersections except center', variantDesc: 'Medieval ancestor of draughts. Move along lines, capture by jumping.' },
       dameo: { label: 'Dameo (8×8)', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, setup: 'bbbbbbbb/1bbbbbb1/2bbbb2/8/8/2wwww2/1wwwwww1/wwwwwwww', setupDesc: '18 per side, all squares, trapezoidal (8/6/4)', variantDesc: 'Phalanx movement: lines of men slide together. Orthogonal captures only.' },
       diagonal: { label: 'Diagonal (10×10)', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, setup: '2b1b1b1b1/3b1b1b1b/w3b1b1b1/1w3b1b1b/w1w3b1b1/1w1w3b1b/w1w1w3b1/1w1w1w3b/w1w1w1w3/1w1w1w1w2', setupDesc: '20 per side, dark squares, split along main diagonal', variantDesc: 'International rules with rotated starting position. Main diagonal empty.' },
     },
@@ -771,6 +914,16 @@ const GAMES = {
   reversi: {
     label: 'Reversi',
     pieceSet: 'playstrategy-flipello-classic',
+    // TEMPORARY: moves to packages/schema/src/produce.js when frontmatter lands.
+    buildLayout(rows, cols, tileSize, colors) {
+      return {
+        positionType: 'square',
+        showLabels: true,
+        cellFill: 'none',
+        backgrounds: [{ fill: colors.monoSquare || '#d9b483' }],
+        lines: { color: colors.gridLine || '#8b6914', width: 1.5 },
+      }
+    },
     variants: {
       standard: { label: 'Standard (8×8)', boardStyle: 'mono-grid', rows: 8, cols: 8, tileSize: 40, setup: '8/8/8/3bw3/3wb3/8/8/8', colors: { monoSquare: '#2e7d32', gridLine: '#1b5e20' }, setupDesc: '4 discs in centre (2 each, diagonal)', variantDesc: 'Flank opponent discs to flip them. Most discs at end wins.' },
       'six-by-six': { label: '6×6', boardStyle: 'mono-grid', rows: 6, cols: 6, tileSize: 40, setup: '6/6/2bw2/2wb2/6/6', colors: { monoSquare: '#2e7d32', gridLine: '#1b5e20' }, setupDesc: '4 discs in centre (2 each, diagonal)', variantDesc: 'Standard Reversi on a smaller 6x6 board. Faster games, fewer options.' },
@@ -780,6 +933,32 @@ const GAMES = {
   shogi: {
     label: 'Shogi',
     pieceSet: 'kahu-shogi-kanji-red-wood',
+    // TEMPORARY: moves to packages/schema/src/produce.js when frontmatter lands.
+    buildLayout(rows, cols, tileSize, colors) {
+      const inset = 20
+      const HOSHI = { 9: [[2,2],[2,6],[6,2],[6,6]] }
+      const zones = []
+      if (rows === 9) {
+        zones.push(
+          { fromRow: 0, toRow: 2, fromCol: 0, toCol: cols - 1, fill: colors.promotionZone || 'rgba(180, 60, 40, 0.08)' },
+          { fromRow: 6, toRow: 8, fromCol: 0, toCol: cols - 1, fill: colors.promotionZone || 'rgba(180, 60, 40, 0.08)' },
+        )
+      }
+      const markers = (rows === 9 && cols === 9) ? HOSHI[9].map(([r, c]) => ({ r, c, fill: colors.hoshi || '#6b4e1a' })) : []
+      return {
+        positionType: 'intersection',
+        showLabels: false,
+        inset,
+        cellFill: 'none',
+        backgrounds: [
+          { fill: colors.board || '#e8c97a' },
+          { fill: 'none', stroke: colors.boardBorder || '#8b6914', 'stroke-width': 2 },
+        ],
+        lines: { color: colors.gridLine || '#6b4e1a', width: 0.8 },
+        zones,
+        markers,
+      }
+    },
     variants: {
       standard: { label: 'Standard (9×9)', boardStyle: 'shogi', rows: 9, cols: 9, tileSize: 36, fen: 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL', setupDesc: '20 pieces each on back ranks and third row', variantDesc: 'Captured pieces become your own and can be dropped back onto the board.' },
       'annan-shogi': { label: 'Annan Shogi (9×9)', boardStyle: 'shogi', rows: 9, cols: 9, tileSize: 36, fen: 'lnsgkgsnl/1r5b1/p1ppppp1p/1p5p1/9/1P5P1/P1PPPPP1P/1B5R1/LNSGKGSNL', setupDesc: 'Standard position with b/h file pawns advanced', variantDesc: 'Pieces borrow movement of the friendly piece directly behind them. Standard Shogi otherwise.' },
@@ -829,7 +1008,10 @@ const GAMES = {
   },
   fanorona: {
     label: 'Fanorona',
-    pieceSet: 'playstrategy-dameo-fabirovsky',
+    pieceSet: 'playstrategy-go-classic',
+    buildLayout(rows, cols, tileSize, colors) {
+      return buildIntersectionGridLayout(rows, cols, tileSize, colors, { diagonals: 'alternating' })
+    },
     variants: {
       standard: { label: 'Standard (5×9)', boardStyle: 'alquerque', rows: 5, cols: 9, tileSize: 40, colors: { monoSquare: '#d4a96a', gridLine: '#7a4510', whitePieceFill: '#f0e8d0', whitePieceStroke: '#7a4510', blackPieceFill: '#1e1000', blackPieceStroke: '#c8963c' }, fanoronaSetup: true, setupDesc: '22 per side, all intersections except center', variantDesc: 'Malagasy war game. Capture by approach or withdrawal. Chain captures in one turn.' },
     },
@@ -898,20 +1080,64 @@ const GAMES = {
   'royal-ur': {
     label: 'Royal Ur',
     pieceSet: 'playstrategy-draughts-plain',
+    buildLayout: buildCheckeredLayout,
     variants: {
-      standard: { label: 'Standard', boardStyle: 'checkered', rows: 3, cols: 8, tileSize: 40, showLabels: false, cellMap: ROYAL_UR_MAP, colors: ROYAL_UR_COLORS, setupDesc: '7 pieces each, race along a shared middle track', variantDesc: 'Ancient Mesopotamian race game. Roll 4 binary dice. Rosettes grant extra turns and safety.' },
+      standard: { label: 'Standard', boardStyle: 'checkered', rows: 3, cols: 8, tileSize: 40, showLabels: false, cellMap: ROYAL_UR_MAP, colors: ROYAL_UR_COLORS, cellTypeDecorations: ROYAL_UR_DECORATIONS, setupDesc: '7 pieces each, race along a shared middle track', variantDesc: 'Ancient Mesopotamian race game. Roll 4 binary dice. Rosettes grant extra turns and safety.' },
     },
   },
   surakarta: {
     label: 'Surakarta',
     pieceSet: 'playstrategy-go-classic',
+    // TEMPORARY: moves to packages/schema/src/produce.js when frontmatter lands.
+    buildLayout(rows, cols, tileSize, colors) {
+      const arcPad = tileSize * 2.3
+      const gridW = (cols - 1) * tileSize
+      const gridH = (rows - 1) * tileSize
+      const boardW = gridW + arcPad * 2
+      const boardH = gridH + arcPad * 2
+      const pad = 24
+      const gx = pad + arcPad
+      const gy = pad + arcPad
+      const ix = (i) => gx + i * tileSize
+      const iy = (i) => gy + i * tileSize
+      const innerR = tileSize
+      const outerR = tileSize * 2
+
+      return {
+        positionType: 'intersection',
+        showLabels: true,
+        inset: arcPad,
+        cellFill: 'none',
+        backgrounds: [
+          { fill: colors.frame || '#5a3e28', rx: 8 },
+          { x: pad + 6, y: pad + 6, width: boardW - 12, height: boardH - 12, fill: colors.board || '#c8a872', rx: 5 },
+          { x: pad + 10, y: pad + 10, width: boardW - 20, height: boardH - 20, fill: colors.boardInner || '#d4b896', rx: 3 },
+        ],
+        lines: { color: colors.gridLine || '#6b4a30', width: 1.5 },
+        paths: [
+          { d: `M ${ix(1)},${iy(0)} A ${innerR},${innerR} 0 1,0 ${ix(0)},${iy(1)}`, stroke: colors.innerArc || '#6b4a30' },
+          { d: `M ${ix(cols-2)},${iy(0)} A ${innerR},${innerR} 0 1,1 ${ix(cols-1)},${iy(1)}`, stroke: colors.innerArc || '#6b4a30' },
+          { d: `M ${ix(0)},${iy(rows-2)} A ${innerR},${innerR} 0 1,0 ${ix(1)},${iy(rows-1)}`, stroke: colors.innerArc || '#6b4a30' },
+          { d: `M ${ix(cols-1)},${iy(rows-2)} A ${innerR},${innerR} 0 1,1 ${ix(cols-2)},${iy(rows-1)}`, stroke: colors.innerArc || '#6b4a30' },
+          { d: `M ${ix(2)},${iy(0)} A ${outerR},${outerR} 0 1,0 ${ix(0)},${iy(2)}`, stroke: colors.outerArc || '#6b4a30' },
+          { d: `M ${ix(cols-3)},${iy(0)} A ${outerR},${outerR} 0 1,1 ${ix(cols-1)},${iy(2)}`, stroke: colors.outerArc || '#6b4a30' },
+          { d: `M ${ix(0)},${iy(rows-3)} A ${outerR},${outerR} 0 1,0 ${ix(2)},${iy(rows-1)}`, stroke: colors.outerArc || '#6b4a30' },
+          { d: `M ${ix(cols-1)},${iy(rows-3)} A ${outerR},${outerR} 0 1,1 ${ix(cols-3)},${iy(rows-1)}`, stroke: colors.outerArc || '#6b4a30' },
+        ],
+        markers: Array.from({ length: rows * cols }, (_, i) => ({
+          r: Math.floor(i / cols), c: i % cols, radius: 3.5, fill: colors.dotFill || '#4a3320',
+        })),
+        labels: { alphabet: 'abcdefghjklmnopqrst'.split(''), fontFamily: 'sans-serif' },
+      }
+    },
     variants: {
       standard: { label: 'Standard (6×6)', boardStyle: 'surakarta', rows: 6, cols: 6, tileSize: 50, setup: 'bbbbbb/bbbbbb/6/6/wwwwww/wwwwww', setupDesc: '12 pieces each on nearest two rows', variantDesc: 'Javanese capture game. Pieces move one step orthogonally. Capture by travelling along loop arcs.' },
     },
   },
   tafl: {
     label: 'Tafl',
-    pieceSet: 'playstrategy-go-classic',
+    pieceSet: 'mce-tafl',
+    buildLayout: buildCheckeredLayout,
     variants: {
       standard: { label: 'Tablut (9×9)', boardStyle: 'checkered', rows: 9, cols: 9, tileSize: 40, showLabels: false, cellMap: buildTaflMap(9), colors: TAFL_COLORS, setup: '3bbb3/4b4/4w4/b3w3b/bbwwKwwbb/b3w3b/4w4/4b4/3bbb3', setupDesc: 'King + 8 defenders vs 16 attackers', variantDesc: 'Sami tafl recorded by Linnaeus (1732). King escapes to any edge. Only tafl variant documented from living practice.' },
       brandubh: { label: 'Brandubh (7×7)', boardStyle: 'checkered', rows: 7, cols: 7, tileSize: 40, showLabels: false, cellMap: buildTaflMap(7), colors: TAFL_COLORS, setup: '3b3/3b3/3w3/bbwKwbb/3w3/3b3/3b3', setupDesc: 'King + 4 defenders vs 8 attackers', variantDesc: 'Irish tafl. King escapes to corners. Smallest standard tafl board.' },
@@ -922,15 +1148,17 @@ const GAMES = {
   pachisi: {
     label: 'Pachisi',
     pieceSet: 'playstrategy-draughts-plain',
+    buildLayout: buildCheckeredLayout,
     variants: {
-      standard: { label: 'Standard', boardStyle: 'checkered', rows: 19, cols: 19, tileSize: 20, showLabels: false, cellMap: PACHISI_MAP, colors: PACHISI_COLORS, setupDesc: '4 players, 4 pieces each start at Charkoni (centre)', variantDesc: 'Indian cross-track race game for 4 players. Roll cowrie shells. Castle squares grant safety. First to return all pieces home wins.' },
-      'two-player': { label: '2-Player', boardStyle: 'checkered', rows: 19, cols: 19, tileSize: 20, showLabels: false, cellMap: PACHISI_MAP, colors: PACHISI_COLORS, setupDesc: '2 players, 8 pieces each (2 colours per player)', variantDesc: 'Each player controls two opposite arms. 8 pieces total. Same board and rules as standard.' },
-      'seven-shell': { label: 'Seven-Shell', boardStyle: 'checkered', rows: 19, cols: 19, tileSize: 20, showLabels: false, cellMap: PACHISI_MAP, colors: PACHISI_COLORS, setupDesc: '4 players, 7 cowrie shells', variantDesc: 'Seven shells instead of six. Different throw table with higher max (Paintees = 35). More grace throws.' },
+      standard: { label: 'Standard', boardStyle: 'checkered', rows: 19, cols: 19, tileSize: 20, showLabels: false, cellMap: PACHISI_MAP, colors: PACHISI_COLORS, cellTypeDecorations: PACHISI_DECORATIONS, setupDesc: '4 players, 4 pieces each start at Charkoni (centre)', variantDesc: 'Indian cross-track race game for 4 players. Roll cowrie shells. Castle squares grant safety. First to return all pieces home wins.' },
+      'two-player': { label: '2-Player', boardStyle: 'checkered', rows: 19, cols: 19, tileSize: 20, showLabels: false, cellMap: PACHISI_MAP, colors: PACHISI_COLORS, cellTypeDecorations: PACHISI_DECORATIONS, setupDesc: '2 players, 8 pieces each (2 colours per player)', variantDesc: 'Each player controls two opposite arms. 8 pieces total. Same board and rules as standard.' },
+      'seven-shell': { label: 'Seven-Shell', boardStyle: 'checkered', rows: 19, cols: 19, tileSize: 20, showLabels: false, cellMap: PACHISI_MAP, colors: PACHISI_COLORS, cellTypeDecorations: PACHISI_DECORATIONS, setupDesc: '4 players, 7 cowrie shells', variantDesc: 'Seven shells instead of six. Different throw table with higher max (Paintees = 35). More grace throws.' },
     },
   },
   chaupar: {
     label: 'Chaupar',
     pieceSet: 'playstrategy-draughts-plain',
+    buildLayout: buildCheckeredLayout,
     variants: {
       standard: { label: 'Standard', boardStyle: 'checkered', rows: 19, cols: 19, tileSize: 20, showLabels: false, cellMap: CHAUPAR_MAP, colors: CHAUPAR_COLORS, setupDesc: '4 players, 4 pieces each start at centre', variantDesc: 'Indian cross-track race game. Similar to Pachisi but with long dice (pase) and different safe squares. More aggressive captures.' },
     },
@@ -1137,6 +1365,7 @@ const GAMES = {
   'dou-shou-qi': {
     label: 'Jungle',
     pieceSet: 'mce-jungle',
+    buildLayout: buildCheckeredLayout,
     variants: {
       standard: { label: 'Standard (7×9)', boardStyle: 'checkered', rows: 9, cols: 7, tileSize: 40, showLabels: false, cellMap: JUNGLE_MAP, colors: JUNGLE_COLORS, fen: JUNGLE_SETUP, pieceNames: { E: 'Elephant', e: 'Elephant', L: 'Lion', l: 'Lion', T: 'Tiger', t: 'Tiger', P: 'Leopard', p: 'Leopard', D: 'Dog', d: 'Dog', W: 'Wolf', w: 'Wolf', C: 'Cat', c: 'Cat', R: 'Rat', r: 'Rat' }, pieceBorders: { white: '#1565c0', black: '#c62828' }, setupDesc: '8 animals per player on 7x9 grid with river, dens, and traps', variantDesc: 'Animals battle across rivers and traps to reach the enemy den. Rank hierarchy: Elephant > Lion > ... > Rat (but Rat defeats Elephant).' },
     },
@@ -1144,6 +1373,7 @@ const GAMES = {
   lattaque: {
     label: "L'Attaque",
     pieceSet: null,
+    buildLayout: buildCheckeredLayout,
     variants: {
       standard: { label: 'Standard', boardStyle: 'checkered', rows: 10, cols: 9, tileSize: 34, showLabels: false, cellMap: LATTAQUE_STANDARD_MAP, colors: LATTAQUE_COLORS, setupDesc: '36 pieces per player, 9×10 grid with three 1×2 lakes', variantDesc: 'Hidden-rank warfare by Hermance Edan (1909). Higher rank defeats lower. Mines immovable, Scouts slide unlimited. Precursor to Stratego.' },
       aviation: { label: 'Aviation', boardStyle: 'checkered', rows: 11, cols: 8, tileSize: 34, showLabels: false, cellMap: AVIATION_MAP, colors: AVIATION_COLORS, setupDesc: '42 pieces per player, 8×11 with aerodrome zones', variantDesc: 'Aerial warfare variant. Searchlight and AAA ranging. Hidden-information. Planes, bombers, and ground forces. Troop Carriers win by landing on enemy Aerodrome.' },
@@ -1553,7 +1783,7 @@ async function loadRecolouredPieces(config, gallery) {
     const ownerColors = owners[ownerName]
     if (!ownerColors) continue
 
-    const cacheKey = `${filename}:${ownerColors.fill}`
+    const cacheKey = `${setDef.baseSet}/${filename}:${ownerColors.fill}`
     if (recolourCache[cacheKey]) {
       images[pieceId] = recolourCache[cacheKey]
       continue
@@ -2181,11 +2411,14 @@ function render() {
 
   // Build position from FEN4 (4-player) — piece images loaded async
   if (config.fen4) {
-    if (renderMode === 'consolidated') { showNotImplemented('fen4'); return }
     config.position = fen4ToPosition(config.fen4, config.rows, config.cols)
     config.getOwner = fen4GetOwner
     loadRecolouredPieces(config, galleryIndex).then(() => {
-      const svg = renderBoard(config)
+      let svg
+      if (renderMode === 'consolidated' && isGridProvider(config)) {
+        svg = renderConsolidated(config)
+      }
+      if (!svg) svg = renderBoard(config)
       showSvg(svg)
       showInfo(config)
       bindBoardHover(config)
@@ -2289,9 +2522,15 @@ function render() {
     return
   }
 
+  // Build layout from variant or family declaration
+  const layoutBuilder = config.buildLayout || game.buildLayout
+  if (layoutBuilder && !config.layout) {
+    config.layout = layoutBuilder(config.rows || 8, config.cols || 8, config.tileSize || 56, config.colors || {}, config)
+  }
+
   let svg
   if (renderMode === 'consolidated') {
-    if (isGridProvider(config.boardStyle)) {
+    if (isGridProvider(config)) {
       svg = renderConsolidated(config)
     }
     if (!svg) {

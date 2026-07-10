@@ -217,6 +217,14 @@ function renderByPieceType(opts) {
   updateStats(filtered)
 }
 
+const recolourCache = {}
+
+function getOwnerFromKey(key, owners) {
+  const prefix = key[0]
+  const map = { r: 'red', b: 'blue', y: 'yellow', g: 'green', w: 'white' }
+  return owners[map[prefix]] || null
+}
+
 function createPieceCell(set, entry, opts) {
   let file, sourceSetId, key, surface
   if (typeof entry === 'string') {
@@ -236,9 +244,34 @@ function createPieceCell(set, entry, opts) {
   cell.title = `${key} (${sourceSetId}/${file})`
 
   const img = document.createElement('img')
-  img.src = `${SETS_BASE}/${sourceSetId}/${file}`
   img.alt = key
   img.loading = 'lazy'
+
+  if (set.virtual && set.recolorable && set.owners) {
+    const ownerColors = getOwnerFromKey(key, set.owners)
+    if (ownerColors) {
+      const matchColor = set.recolourMatch || '#fff'
+      const cacheKey = `${sourceSetId}/${file}:${ownerColors.fill}`
+      if (recolourCache[cacheKey]) {
+        img.src = recolourCache[cacheKey]
+      } else {
+        img.src = ''
+        fetch(`${SETS_BASE}/${sourceSetId}/${file}`)
+          .then(r => r.text())
+          .then(svg => {
+            const tinted = svg.replaceAll(matchColor, ownerColors.fill)
+            const dataUri = 'data:image/svg+xml,' + encodeURIComponent(tinted)
+            recolourCache[cacheKey] = dataUri
+            img.src = dataUri
+          })
+          .catch(() => { img.src = `${SETS_BASE}/${sourceSetId}/${file}` })
+      }
+    } else {
+      img.src = `${SETS_BASE}/${sourceSetId}/${file}`
+    }
+  } else {
+    img.src = `${SETS_BASE}/${sourceSetId}/${file}`
+  }
 
   if (surface === 'disc' && set.surface) {
     const hasColorPrefix = /^[wb][A-Z]/.test(key)

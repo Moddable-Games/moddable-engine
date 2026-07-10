@@ -601,12 +601,14 @@ export function createGridTopology(config) {
       const fs = labelConfig.fontSize || 10
       const font = labelConfig.fontFamily || 'monospace'
       const alphabet = labelConfig.alphabet || null
+      const bottomY = pad + boardH + pad * 0.65
+      const leftX = pad * 0.5
       for (let c = 0; c < cols; c++) {
         const text = alphabet ? alphabet[c] : String.fromCharCode(97 + c)
-        labels.push({ tag: 'text', attrs: { x: posX(c), y: posY(rows - 1) + effectiveInset + 14, 'text-anchor': 'middle', 'font-size': fs, fill: labelColor, 'font-family': font }, text })
+        labels.push({ tag: 'text', attrs: { x: posX(c), y: bottomY, 'text-anchor': 'middle', 'font-size': fs, fill: labelColor, 'font-family': font }, text })
       }
       for (let r = 0; r < rows; r++) {
-        labels.push({ tag: 'text', attrs: { x: ox - effectiveInset - 4, y: posY(r), 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': fs, fill: labelColor, 'font-family': font }, text: String(rows - r) })
+        labels.push({ tag: 'text', attrs: { x: leftX, y: posY(r), 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': fs, fill: labelColor, 'font-family': font }, text: String(rows - r) })
       }
     }
 

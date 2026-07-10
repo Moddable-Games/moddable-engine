@@ -5322,5 +5322,26 @@
       "gB": "wB.svg",
       "gP": "wP.svg"
     }
+  },
+  {
+    "id": "mce-tafl",
+    "name": "MCE Tafl",
+    "family": "tafl",
+    "author": "Moddable Games (composite)",
+    "license": "Mixed (see sources)",
+    "source": "https://github.com/Moddable-Games/moddable-engine",
+    "playable": true,
+    "recolorable": false,
+    "virtual": true,
+    "extends": "playstrategy-go-classic",
+    "sources": {
+      "playstrategy-draughts-wide-crown": "../playstrategy-draughts-wide-crown/"
+    },
+    "pieces": {
+      "wK": {
+        "source": "playstrategy-draughts-wide-crown",
+        "file": "wK.svg"
+      }
+    }
   }
 ]
