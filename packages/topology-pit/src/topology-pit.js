@@ -225,11 +225,10 @@ export function createPitTopology(config) {
       return renderEllipseLayout(opts)
     }
 
-    // EXACT match of board-diagrams.js mancala computeLayout + render (rect path)
     const pad = opts.padEdge || pitRadius * 1.65
-    const frameInset = 16
-    const interRow = pitRadius * 2.4
-    const divGap = boardRows === 4 ? pitRadius * 2.7 : 0
+    const frameInset = opts.frameInset || 16
+    const interRow = opts.interRow || pitRadius * 2.4
+    const divGap = boardRows === 4 ? (opts.divGap || pitRadius * 2.7) : 0
     const contentH = boardRows === 4 ? interRow * 2 + divGap : interRow * (boardRows - 1)
     const boardH = contentH + pad * 2 + frameInset * 2
     const storeWidth = hasStores ? storeRx * 2 + 16 : 0
@@ -335,16 +334,15 @@ export function createPitTopology(config) {
     const pieceImages = opts.pieceImages || null
     const markerSet = new Set(opts.markers || [])
 
-    // EXACT match of board-diagrams.js computeLayout (ellipse path)
-    const pitSpacing = pitRadius * 2.96
+    const pitSpacing = opts.pitSpacing || pitRadius * 2.96
     const pitSpan = (pitsPerSide - 1) * pitSpacing
-    const rowOffset = pitRadius * 2
-    const storeGap = 2
+    const rowOffset = opts.rowOffset || pitRadius * 2
+    const storeGap = opts.storeGap || 2
     const storeCenterOffset = hasStores ? pitSpan / 2 + pitRadius + storeGap + storeRx : 0
-    const outerRx = (hasStores ? storeCenterOffset + storeRx : pitSpan / 2 + pitRadius) + pitRadius * 2.67
-    const outerRy = rowOffset + pitRadius * 2.22
-    const boardW = Math.round(2 * (outerRx + pitRadius * 0.67))
-    const boardH = Math.round(2 * (outerRy + pitRadius * 0.78))
+    const outerRx = (hasStores ? storeCenterOffset + storeRx : pitSpan / 2 + pitRadius) + (opts.ellipsePadX || pitRadius * 2.67)
+    const outerRy = rowOffset + (opts.ellipsePadY || pitRadius * 2.22)
+    const boardW = Math.round(2 * (outerRx + (opts.ellipseMarginX || pitRadius * 0.67)))
+    const boardH = Math.round(2 * (outerRy + (opts.ellipseMarginY || pitRadius * 0.78)))
     const cx = boardW / 2, cy = boardH / 2
 
     const elements = []
