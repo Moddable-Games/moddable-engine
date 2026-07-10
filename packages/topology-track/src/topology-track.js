@@ -425,6 +425,131 @@ export function createTrackTopology(config) {
     }
   }
 
+  function renderLayout(opts = {}) {
+    const style = opts.style || 'points'
+    if (style === 'points') return renderPointsLayout(opts)
+    return { width: 0, height: 0, elements: [], cells: [], labels: [], defs: [] }
+  }
+
+  function renderPointsLayout(opts) {
+    const colors = opts.colors || {}
+    const frameW = opts.frameW || 16
+    const barW = opts.barW || 24
+    const pointW = opts.pointW || 32
+    const pointsPerSide = opts.pointsPerSide || 6
+    const panelW = pointW * pointsPerSide
+    const boardW = opts.boardW || (frameW * 2 + panelW * 2 + barW)
+    const boardH = opts.boardH || 320
+    const panelH = boardH - frameW * 2
+    const pointH = opts.pointH || Math.round(panelH * 0.417)
+    const pieceSize = opts.pieceSize || 22
+    const pieceSpacing = opts.pieceSpacing || 22
+    const maxStack = opts.maxStack || 5
+
+    const elements = []
+    const cells = []
+
+    // Board frame
+    elements.push({ tag: 'rect', attrs: { x: 0, y: 0, width: boardW, height: boardH, rx: 6, ry: 6, fill: colors.frame || '#3d2b1f' } })
+    // Left felt panel
+    elements.push({ tag: 'rect', attrs: { x: frameW, y: frameW, width: panelW, height: panelH, fill: colors.felt || '#1a5c3a' } })
+    // Right felt panel
+    elements.push({ tag: 'rect', attrs: { x: frameW + panelW + barW, y: frameW, width: panelW, height: panelH, fill: colors.felt || '#1a5c3a' } })
+    // Centre bar
+    elements.push({ tag: 'rect', attrs: { x: frameW + panelW, y: 0, width: barW, height: boardH, fill: colors.frame || '#3d2b1f' } })
+
+    const bottomBase = boardH - frameW
+    const topBase = frameW
+    const totalPoints = pointsPerSide * 4
+
+    // 24 triangular points
+    for (let i = 0; i < totalPoints; i++) {
+      const quadrant = Math.floor(i / pointsPerSide)
+      const posInQuad = i % pointsPerSide
+      const isBottom = quadrant === 0 || quadrant === 1
+      const isRight = quadrant === 0 || quadrant === 3
+      const panelX = isRight ? frameW + panelW + barW : frameW
+      const ptColor = ((posInQuad % 2 === 0) === isBottom) ? (colors.pointA || '#c47e3b') : (colors.pointB || '#8b2500')
+
+      let lx
+      if (isBottom) {
+        lx = panelX + panelW - (posInQuad + 1) * pointW
+      } else {
+        lx = panelX + posInQuad * pointW
+      }
+
+      const x1 = lx, x2 = lx + pointW, tipX = lx + pointW / 2
+
+      if (isBottom) {
+        const baseY = bottomBase, tipY = bottomBase - pointH
+        elements.push({ tag: 'polygon', attrs: { points: `${x1},${baseY} ${x2},${baseY} ${tipX},${tipY}`, fill: ptColor } })
+      } else {
+        const baseY = topBase, tipY = topBase + pointH
+        elements.push({ tag: 'polygon', attrs: { points: `${x1},${baseY} ${x2},${baseY} ${tipX},${tipY}`, fill: ptColor } })
+      }
+
+      cells.push({ id: `point-${i + 1}`, x: tipX, y: isBottom ? bottomBase - pointH / 2 : topBase + pointH / 2,
+        element: { tag: 'polygon', attrs: { points: isBottom ? `${x1},${bottomBase} ${x2},${bottomBase} ${tipX},${bottomBase - pointH}` : `${x1},${topBase} ${x2},${topBase} ${tipX},${topBase + pointH}`, fill: 'transparent', 'data-sq': `point-${i + 1}`, class: 'board-cell' } } })
+    }
+
+    // Checkers from parsedSetup
+    const setup = opts.parsedSetup || null
+    if (setup) {
+      const pieceImages = opts.pieceImages || {}
+      const darkImg = pieceImages.bM || pieceImages.b || null
+      const lightImg = pieceImages.wM || pieceImages.w || null
+
+      for (let i = 0; i < totalPoints; i++) {
+        const dark = setup.dark ? (setup.dark[i] || 0) : 0
+        const light = setup.light ? (setup.light[i] || 0) : 0
+        if (!dark && !light) continue
+
+        const quadrant = Math.floor(i / pointsPerSide)
+        const posInQuad = i % pointsPerSide
+        const isBottom = quadrant === 0 || quadrant === 1
+        const isRight = quadrant === 0 || quadrant === 3
+        const panelX = isRight ? frameW + panelW + barW : frameW
+
+        let lx
+        if (isBottom) {
+          lx = panelX + panelW - (posInQuad + 1) * pointW
+        } else {
+          lx = panelX + posInQuad * pointW
+        }
+        const cx = lx + pointW / 2
+
+        const renderStack = (count, img, isDark, startY, dir) => {
+          const show = Math.min(count, maxStack)
+          const overflow = count > maxStack ? count - (maxStack - 1) : 0
+          for (let j = 0; j < show; j++) {
+            const cy = startY + dir * j * pieceSpacing
+            if (img) {
+              elements.push({ tag: 'image', attrs: { href: img, x: cx - pieceSize / 2, y: cy - pieceSize / 2, width: pieceSize, height: pieceSize } })
+            } else {
+              elements.push({ tag: 'circle', attrs: { cx, cy, r: pieceSize / 2 - 1, fill: isDark ? '#191716' : '#F8F6F2', stroke: isDark ? '#4d433a' : '#5E5854', 'stroke-width': 1.5 } })
+            }
+            if (j === 0 && overflow > 0) {
+              elements.push({ tag: 'text', attrs: { x: cx, y: cy + 4, 'font-family': 'sans-serif', 'font-size': 9, 'font-weight': 'bold', 'text-anchor': 'middle', fill: isDark ? '#fff' : '#333' }, text: String(overflow) })
+            }
+          }
+        }
+
+        if (dark > 0) {
+          const startY = isBottom ? bottomBase - pieceSize / 2 - 2 : topBase + pieceSize / 2 + 2
+          const dir = isBottom ? -1 : 1
+          renderStack(dark, darkImg, true, startY, dir)
+        }
+        if (light > 0) {
+          const startY = isBottom ? bottomBase - pieceSize / 2 - 2 : topBase + pieceSize / 2 + 2
+          const dir = isBottom ? -1 : 1
+          renderStack(light, lightImg, false, startY, dir)
+        }
+      }
+    }
+
+    return { width: boardW, height: boardH, elements, cells, labels: [], defs: [], tileSize: pieceSize }
+  }
+
   return {
     isValid,
     getIndex,
@@ -442,6 +567,7 @@ export function createTrackTopology(config) {
     fromJSON,
     isCircuit,
     getLayout,
+    renderLayout,
     serializePosition,
     parsePosition,
   }

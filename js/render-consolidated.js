@@ -191,5 +191,5 @@ function buildLayoutConfig(config, rows, cols, tileSize, colors) {
 }
 
 export function isGridProvider(config) {
-  return config.layout != null && !config.layout.hexes && !config.layout.nodes && !config.layout.pitRadius
+  return config.layout != null && !config.layout.hexes && !config.layout.nodes && !config.layout.pitRadius && !config.layout.style
 }
