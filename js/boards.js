@@ -8,6 +8,7 @@ import { reverseAdapt } from './reverse-adapter.js'
 import { resolveSurface } from './surface-resolver.js'
 import { resolve as cascadeResolve } from './cascade-resolver.js'
 import { renderConsolidated, isGridProvider } from './render-consolidated.js'
+import { renderConsolidatedHex, isHexProvider } from './render-consolidated-hex.js'
 
 setDeckRenderer(renderDeckSvg)
 setMahjongRenderer(renderMahjongSvg)
@@ -395,7 +396,29 @@ const JUNGLE_COLORS = {
 
 // ─── (Asalto + Nyout now use dedicated providers in board-diagrams.js) ────
 
-// ─── Y GAME (TRIANGULAR HEX) ───────────────────────────────────────────────
+// ─── HEX GRID GENERATORS (DATA FACTORIES) ──────────────────────────────────
+
+function generateHexGrid(radius) {
+  const hexes = []
+  for (let q = -radius; q <= radius; q++) {
+    const r1 = Math.max(-radius, -q - radius)
+    const r2 = Math.min(radius, -q + radius)
+    for (let r = r1; r <= r2; r++) {
+      hexes.push({ q, r })
+    }
+  }
+  return hexes
+}
+
+function generateHexRhombus(rows, cols) {
+  const hexes = []
+  for (let r = 0; r < rows; r++) {
+    for (let q = 0; q < cols; q++) {
+      hexes.push({ q, r })
+    }
+  }
+  return hexes
+}
 
 function generateTriangularHexGrid(sideLength) {
   const hexes = []
@@ -595,6 +618,89 @@ function buildGoPreset(name, rows) {
   return position
 }
 
+// ─── SHARED HEX LAYOUT BUILDERS ─────────────────────────────────────────────
+// These produce HexBoardLayout config objects consumed by topology-hex renderLayout().
+// Game-specific data (colour functions, positions, frame specs) lives on the variant.
+
+function buildHexagonalLayout(hexes, cellSize, orientation, colors, config = {}) {
+  const hasFrame = !!config.hexFrame
+  const colorFn = config.hexColorFn
+    ? (q, r, hex) => config.hexColorFn(hex, colors)
+    : (q, r) => {
+        const s = q + r
+        return s % 3 === 0 ? (colors.lightHex || '#f0d9b5')
+          : s % 3 === 1 ? (colors.darkHex || '#b58863')
+          : (colors.midHex || '#d4a96a')
+      }
+  return {
+    hexes,
+    orientation,
+    cellSize,
+    scale: config.hexScale || 0.95,
+    background: hasFrame ? null : { fill: colors.background || '#2c2c2c', rx: 6 },
+    frame: hasFrame ? {
+      stroke: colors.border || '#6b4226',
+      strokeWidth: 14,
+      linecap: 'round',
+      linejoin: 'round',
+      scale: 1.05,
+    } : null,
+    cellFill: colorFn,
+    cellStroke: { color: colors.stroke || 'rgba(0,0,0,0.2)', width: 1 },
+    centreMarker: config.centreMarker
+      ? { q: 0, r: 0, text: config.centreMarker, fontSize: cellSize * 0.8, fill: 'rgba(255,200,50,0.85)' }
+      : null,
+  }
+}
+
+function buildRhombusLayout(hexes, cellSize, orientation, colors, config = {}) {
+  return {
+    hexes,
+    orientation,
+    cellSize,
+    scale: config.hexScale || 0.95,
+    background: null,
+    frame: {
+      stroke: colors.border || '#6b4226',
+      strokeWidth: 14,
+      linecap: 'round',
+      linejoin: 'round',
+      scale: 1.05,
+    },
+    cellFill: config.hexColorFn || ((q, r) => {
+      const s = q + r
+      return s % 3 === 0 ? (colors.lightHex || '#e8e8e8')
+        : s % 3 === 1 ? (colors.darkHex || '#c0c0c0')
+        : (colors.midHex || '#d8d8d8')
+    }),
+    cellStroke: { color: colors.stroke || 'rgba(0,0,0,0.3)', width: 1 },
+  }
+}
+
+function buildTriangularLayout(hexes, cellSize, orientation, colors, config = {}) {
+  return {
+    hexes,
+    orientation,
+    cellSize,
+    scale: config.hexScale || 0.95,
+    background: null,
+    frame: {
+      stroke: colors.border || '#6b4226',
+      strokeWidth: 14,
+      linecap: 'round',
+      linejoin: 'round',
+      scale: 1.05,
+    },
+    cellFill: config.hexColorFn || ((q, r) => {
+      const s = q + r
+      return s % 3 === 0 ? (colors.lightHex || '#e8e8e8')
+        : s % 3 === 1 ? (colors.darkHex || '#c0c0c0')
+        : (colors.midHex || '#d8d8d8')
+    }),
+    cellStroke: { color: colors.stroke || 'rgba(0,0,0,0.3)', width: 1 },
+  }
+}
+
 // ─── AGON POSITION (Queen + 6 Guards per side on outer ring) ────────────────
 
 function buildAgonPosition() {
@@ -649,7 +755,7 @@ const GAMES = {
       'blind-chess': { label: 'Banqi', boardStyle: 'checkered', rows: 8, cols: 4, tileSize: 40, fen: '????/????/????/????/????/????/????/????', variantDesc: 'Chinese hidden-piece game (Banqi). 4x8 (half Xiangqi board). 32 pieces face-down. Flip, move, or capture each turn. Rank hierarchy.'},
       'birds-chess': { label: "Bird's Chess", boardStyle: 'checkered', rows: 8, cols: 10, tileSize: 36, fen: 'rnbgqkebnr/pppppppppp/10/10/10/10/PPPPPPPPPP/RNBGQKEBNR', variantDesc: '10x8 with Guard (Rook+Knight) and Equerry (Bishop+Knight). King castles 3 squares. H. E. Bird, 1874.'},
       breakthrough: { label: 'Breakthrough', boardStyle: 'checkered', rows: 7, cols: 7, tileSize: 40, fen: 'ppppppp/ppppppp/7/7/7/PPPPPPP/PPPPPPP', variantDesc: 'Pawns only. First to reach the far side wins.'},
-      brusky: { label: 'Brusky (Hex)', boardStyle: 'hex', hexGrid: BRUSKY_GRID, hexSize: 20, flat: false, hexColorFn: glinskiColor, hexPosition: BRUSKY_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, variantDesc: 'Irregular 84-hex board. 10 pawns per side. Unmoved pawns may capture straight forward. Blockage rule. Yakov Brusky, 1966.'},
+      brusky: { label: 'Brusky (Hex)', boardStyle: 'hex', hexGrid: BRUSKY_GRID, hexSize: 20, flat: false, hexColorFn: glinskiColor, hexPosition: BRUSKY_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, buildLayout(rows, cols, tileSize, colors) { return buildHexagonalLayout(BRUSKY_GRID, 20, 'pointy', colors, { hexColorFn: glinskiColor }) }, variantDesc: 'Irregular 84-hex board. 10 pawns per side. Unmoved pawns may capture straight forward. Blockage rule. Yakov Brusky, 1966.'},
       capablanca: { label: 'Capablanca', boardStyle: 'checkered', rows: 8, cols: 10, tileSize: 36, fen: 'rnabqkbcnr/pppppppppp/10/10/10/10/PPPPPPPPPP/RNABQKBCNR', variantDesc: 'Two extra pieces: Archbishop (B+N) and Chancellor (R+N) on 10x8 board.'},
       carrera: { label: "Carrera's Chess", boardStyle: 'checkered', rows: 8, cols: 10, tileSize: 36, fen: 'rAnbqkbnCr/pppppppppp/10/10/10/10/PPPPPPPPPP/RANBQKBNCR', variantDesc: '10x8 with Champion (Rook+Knight) and Centaur (Bishop+Knight). No castling, no en passant. Pietro Carrera, 1617.'},
       'centennial-chess': { label: 'Centennial Chess', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 30, fen: 'rcnbsqksbcr/pppppppppp/10/10/10/10/10/10/PPPPPPPPPP/RCNBSQKSBCR', variantDesc: '10x10 with Steward, Camel, Murray Lion, Rotating Spearman. Two moves per turn until first capture. J. W. Brown, 1999.'},
@@ -668,7 +774,7 @@ const GAMES = {
       'crazy-38s': { label: "Crazy 38's", boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: '38-square board with loop connection. Shogi-style drops. King, Rook, Bishop, Knight, Silver, Gold, 4 Pawns. Dual win: checkmate or reach Home Square. Ben Good, 1998.'},
       'cylinder-chess': { label: 'Cylinder Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Files wrap. The a-file connects to the h-file.'},
       'dark-chess': { label: 'Dark Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Total fog. Only see squares occupied by your own pieces.'},
-      'de-vasa': { label: 'De Vasa (Hex)', boardStyle: 'hex', hexRows: 9, hexCols: 9, hexSize: 20, flat: false, hexColorFn: glinskiColor, hexPosition: DE_VASA_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, variantDesc: '81-hex rhombus board. Pawns start rank 3. Kings on opposite wings. Castling permitted. Helge E. de Vasa, 1953.'},
+      'de-vasa': { label: 'De Vasa (Hex)', boardStyle: 'hex', hexRows: 9, hexCols: 9, hexSize: 20, flat: false, hexColorFn: glinskiColor, hexPosition: DE_VASA_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, buildLayout(rows, cols, tileSize, colors) { return buildHexagonalLayout(generateHexRhombus(9, 9), 20, 'pointy', colors, { hexColorFn: glinskiColor }) }, variantDesc: '81-hex rhombus board. Pawns start rank 3. Kings on opposite wings. Castling permitted. Helge E. de Vasa, 1953.'},
       diana: { label: 'Diana', boardStyle: 'checkered', rows: 6, cols: 6, tileSize: 40, fen: 'rbbkr1/pppppp/6/6/PPPPPP/RBBKR1', variantDesc: '6x6 board. No queens or knights.'},
       'delirious-bughouse': { label: 'Delirious Bughouse', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 34, layers: { count: 2, layout: 'horizontal', labels: ['Board 1', 'Board 2'], fens: ['rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'] }, variantDesc: 'Bughouse with dice, relay capture, worst-move mechanic, and fairy pieces. Alberto Monteiro, c. 1984.'},
       'dice-chess': { label: 'Dice Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Die roll constrains which piece type must move.'},
@@ -687,7 +793,7 @@ const GAMES = {
       'fog-of-war': { label: 'Fog of War', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Only see squares your pieces can move to. No check warnings.'},
       'four-handed-chess': { label: 'Four-Handed Chess', boardStyle: 'checkered', rows: 14, cols: 14, tileSize: 24, cellMap: FOUR_PLAYER_MAP, colors: { voidFill: 'transparent' }, fen4: '3,yR,yN,yB,yK,yQ,yB,yN,yR,3/3,yP,yP,yP,yP,yP,yP,yP,yP,3/14/bR,bP,10,gP,gR/bN,bP,10,gP,gN/bB,bP,10,gP,gB/bK,bP,10,gP,gQ/bQ,bP,10,gP,gK/bB,bP,10,gP,gB/bN,bP,10,gP,gN/bR,bP,10,gP,gR/14/3,rP,rP,rP,rP,rP,rP,rP,rP,3/3,rR,rN,rB,rQ,rK,rB,rN,rR,3', pieceSet4: 'mce-4player', variantDesc: '4-player on 14x14 cross-shaped board (160 squares). Standard armies on each wing. Teams or free-for-all. FEN4 notation.'},
       giveaway: { label: 'Giveaway', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Forced captures. King is not royal. Stalemate is a loss.'},
-      glinski: { label: 'Glinski (Hex)', boardStyle: 'hex', hexRadius: 5, hexSize: 22, flat: true, hexColorFn: glinskiColor, hexPosition: GLINSKI_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' } , variantDesc: 'Chess on a 91-cell hexagonal board. Three bishops per side.'},
+      glinski: { label: 'Glinski (Hex)', boardStyle: 'hex', hexRadius: 5, hexSize: 22, flat: true, hexColorFn: glinskiColor, hexPosition: GLINSKI_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, buildLayout(rows, cols, tileSize, colors) { return buildHexagonalLayout(generateHexGrid(5), 22, 'flat', colors, { hexColorFn: glinskiColor }) }, variantDesc: 'Chess on a 91-cell hexagonal board. Three bishops per side.'},
       grand: { label: 'Grand Chess', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, fen: 'r8r/1nbqkcbn1/pppppppppp/10/10/10/10/PPPPPPPPPP/1NBQKCBN1/R8R', variantDesc: 'Archbishop and Chancellor on 10x10 board. Pawns start on rank 3.'},
       'grande-acedrex': { label: 'Grande Acedrex', boardStyle: 'checkered', rows: 12, cols: 12, tileSize: 26, fen: 'rnuclgkglcunr/12/12/ppppppppppppp/12/12/12/12/PPPPPPPPPPPPP/12/12/RNUCLGKGLCUNR', variantDesc: 'Medieval 12x12 (Alfonso X, 1283). Griffon, Unicorn, Lion, Giraffe, Crocodile. Pawns start rank 4. File-based promotion.'},
       grasshopper: { label: 'Grasshopper Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbgkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBGKBNR', variantDesc: 'Queens replaced by Grasshoppers (hop over any piece, land immediately beyond).'},
@@ -714,10 +820,10 @@ const GAMES = {
       makruk: { label: 'Makruk', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rngfkgnr/8/pppppppp/8/8/PPPPPPPP/8/RNGFKGNR', variantDesc: 'Thai chess. Pawns promote on rank 6. No castling or en passant.'},
       mansindam: { label: 'Mansindam', boardStyle: 'checkered', rows: 9, cols: 8, tileSize: 38, fen: 'rncakqbm/pppppppp/9/9/9/9/9/PPPPPPPP/RNCAKQBM', variantDesc: 'Shogi-style drops with compound pieces on 8x9 board. No draws. Win by checkmate, campmate, or stalemate. Couch Tomato.'},
       marseillais: { label: 'Marseillais', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Each player makes two moves per turn (except White\'s first).'},
-      mccooey: { label: 'McCooey (Hex)', boardStyle: 'hex', hexRadius: 5, hexSize: 22, flat: true, hexColorFn: glinskiColor, hexPosition: MCCOOEY_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, variantDesc: 'McCooey hex chess. 7 pawns, diagonal pawn capture. Same 91-hex board as Glinski.'},
+      mccooey: { label: 'McCooey (Hex)', boardStyle: 'hex', hexRadius: 5, hexSize: 22, flat: true, hexColorFn: glinskiColor, hexPosition: MCCOOEY_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, buildLayout(rows, cols, tileSize, colors) { return buildHexagonalLayout(generateHexGrid(5), 22, 'flat', colors, { hexColorFn: glinskiColor }) }, variantDesc: 'McCooey hex chess. 7 pawns, diagonal pawn capture. Same 91-hex board as Glinski.'},
       metamachy: { label: 'Metamachy', boardStyle: 'checkered', rows: 12, cols: 12, tileSize: 26, fen: 'rnbclqklcbnr/pppppppppppp/12/12/12/12/12/12/12/12/PPPPPPPPPPPP/RNBCLQKLCBNR', variantDesc: '12x12 with 12 piece types. Variable King/Queen/Lion/Eagle placement. Cannon, Camel, Eagle. Jean-Louis Cazaux, 2012.'},
       'medusa-chess': { label: 'Medusa Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'After queen moves, attacked enemy pieces are petrified for 2 turns.'},
-      'mini-hexchess': { label: 'Mini Hexchess', boardStyle: 'hex', hexRadius: 3, hexSize: 28, flat: true, hexColorFn: glinskiColor, hexPosition: MINI_HEXCHESS_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, variantDesc: 'Compact 37-hex board. No Queen. McCooey 1997.'},
+      'mini-hexchess': { label: 'Mini Hexchess', boardStyle: 'hex', hexRadius: 3, hexSize: 28, flat: true, hexColorFn: glinskiColor, hexPosition: MINI_HEXCHESS_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, buildLayout(rows, cols, tileSize, colors) { return buildHexagonalLayout(generateHexGrid(3), 28, 'flat', colors, { hexColorFn: glinskiColor }) }, variantDesc: 'Compact 37-hex board. No Queen. McCooey 1997.'},
       minichess: { label: 'Minichess', boardStyle: 'checkered', rows: 5, cols: 5, tileSize: 40, fen: 'kqbnr/ppppp/5/PPPPP/RNBQK', variantDesc: 'Gardner\'s 5x5 board. All piece types, fast tactical games.'},
       'monster-chess': { label: 'Monster Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/R3K2R', variantDesc: 'White moves twice per turn but starts with only King, Rooks, and pawns.'},
       'no-castling': { label: 'No Castling', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Standard chess with castling removed. Kings must develop naturally.'},
@@ -747,7 +853,7 @@ const GAMES = {
       shatar: { label: 'Shatar', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Mongolian chess. No check. Win by leaving opponent with only their King.'},
       shatranj: { label: 'Shatranj', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnekfenr/pppppppp/8/8/8/8/PPPPPPPP/RNEKFENR', variantDesc: 'Medieval Islamic chess. Bare king and stalemate are wins.'},
       'shatranj-kamil': { label: 'Shatranj Kamil', boardStyle: 'checkered', rows: 10, cols: 10, tileSize: 34, fen: 'rncbqkbcnr/pppppppppp/10/10/10/10/10/10/PPPPPPPPPP/RNCBQKBCNR', variantDesc: 'Perfect Shatranj. 10x10 board with Camels added. Invented by Imam Ubaydullah ibn Ali Al-Tibrizi, c. 1100s.'},
-      shafran: { label: 'Shafran (Hex)', boardStyle: 'hex', hexGrid: SHAFRAN_GRID, hexSize: 22, flat: true, hexColorFn: glinskiColor, hexPosition: SHAFRAN_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, variantDesc: 'Irregular 70-hex board, 9 files. Castling permitted. Pawn initial step varies by file. Isaak Shafran, 1939.'},
+      shafran: { label: 'Shafran (Hex)', boardStyle: 'hex', hexGrid: SHAFRAN_GRID, hexSize: 22, flat: true, hexColorFn: glinskiColor, hexPosition: SHAFRAN_POSITION, colors: { lightHex: '#ffce9e', darkHex: '#d18b47', midHex: '#e8ab6f', stroke: 'rgba(0,0,0,0.15)', background: '#2c2c2c' }, buildLayout(rows, cols, tileSize, colors) { return buildHexagonalLayout(SHAFRAN_GRID, 22, 'flat', colors, { hexColorFn: glinskiColor }) }, variantDesc: 'Irregular 70-hex board, 9 files. Castling permitted. Pawn initial step varies by file. Isaak Shafran, 1939.'},
       'single-check': { label: 'Single-Check', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'One check wins. No checkmate needed.'},
       shinobi: { label: 'Shinobi Chess', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'cmujtmuc/2pppp2/8/8/8/8/PPPPPPPP/RNBQKBNR', variantDesc: 'Asymmetric: FIDE vs Shinobi Clan. Clan drops ninja pieces from hand, promotes in zone. Corey Clark, 2021.'},
       shinobiplus: { label: 'Shinobi+', boardStyle: 'checkered', rows: 8, cols: 8, tileSize: 40, fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/4K3', variantDesc: 'Asymmetric: Black Kingdom (FIDE setup) vs White Clan (King only, drops 7 ninja pieces from hand). Extended Shinobi.'},
@@ -977,7 +1083,7 @@ const GAMES = {
         ['l', 5, -5], ['n', 4, -5], ['g', 3, -5], ['g', 2, -5], ['n', 1, -5], ['l', 0, -5],
         ['r', 4, -4], ['s', 3, -4], ['k', 2, -4], ['s', 1, -4], ['b', 0, -4],
         ['p', 5, -2], ['p', 4, -2], ['p', 3, -2], ['p', 2, -2], ['p', 1, -2], ['p', 0, -2], ['p', -1, -2], ['p', -2, -2], ['p', -3, -2],
-      ]), pieceNames: { K: 'King', k: 'King', G: 'Gold', g: 'Gold', S: 'Silver', s: 'Silver', N: 'Knight', n: 'Knight', L: 'Lance', l: 'Lance', R: 'Rook', r: 'Rook', B: 'Bishop', b: 'Bishop', P: 'Pawn', p: 'Pawn' }, colors: { lightHex: '#d4a76a', darkHex: '#8b6535', midHex: '#b88b50', stroke: 'rgba(0,0,0,0.2)', background: '#3a2a1a' }, setupDesc: '20 pieces per side on 91-hex board (positions approximate)', variantDesc: 'Shogi on 91-hex Glinski board. Drops with hex-specific Pawn rules. 4-rank promotion zone. Fergus Duniho. SETUP NEEDS VERIFICATION.' },
+      ]), pieceNames: { K: 'King', k: 'King', G: 'Gold', g: 'Gold', S: 'Silver', s: 'Silver', N: 'Knight', n: 'Knight', L: 'Lance', l: 'Lance', R: 'Rook', r: 'Rook', B: 'Bishop', b: 'Bishop', P: 'Pawn', p: 'Pawn' }, colors: { lightHex: '#d4a76a', darkHex: '#8b6535', midHex: '#b88b50', stroke: 'rgba(0,0,0,0.2)', background: '#3a2a1a' }, buildLayout(rows, cols, tileSize, colors) { return buildHexagonalLayout(generateHexGrid(5), 22, 'pointy', colors, { hexColorFn: glinskiColor }) }, setupDesc: '20 pieces per side on 91-hex board (positions approximate)', variantDesc: 'Shogi on 91-hex Glinski board. Drops with hex-specific Pawn rules. 4-rank promotion zone. Fergus Duniho. SETUP NEEDS VERIFICATION.' },
       'judkins-shogi': { label: 'Judkins Shogi (6×6)', boardStyle: 'shogi', rows: 6, cols: 6, tileSize: 40, fen: 'rbsgkn/5p/6/6/P5/NKGSBR', setupDesc: '7 pieces per side', variantDesc: '6x6 miniature Shogi. Drops. Promotion zone last 2 ranks. Paul Judkins, 1998.' },
       'maka-dai-dai-shogi': { label: 'Maka-Dai-Dai (19×19)', boardStyle: 'shogi', rows: 19, cols: 19, tileSize: 18, pieceSetOverride: 'mce-shogi-fairy', fen: '[ln][eg][st][tg][ig][cg][sg][gg][ds][ki][dv][gg][sg][cg][ig][tg][st][eg][ln]/[rc]1[ct]1[bm]1[rd][fl][bt][de][bt][fl][co]1[cc]1[ct]1[rc]/1[or]1[ab]1[bb]1[ew][ph][li][kr][ew]1[bb]1[ab]1[or]1/[dy][kn]1[vo]1[fy]1[sd][gd][ld][wr][bv][fy]1[vo]1[kn]1[dy]/[rk][rt][sm][sf][vm][bi][dh][dk][hm][fk][cp][dk][dh][bi][vm][sf][sm][lc][rk]/[pw][pw][pw][pw][pw][pw][pw][pw][pw][pw][pw][pw][pw][pw][pw][pw][pw][pw][pw]/5[gb]7[gb]5/19/19/19/19/19/5[GB]7[GB]5/[PW][PW][PW][PW][PW][PW][PW][PW][PW][PW][PW][PW][PW][PW][PW][PW][PW][PW][PW]/[RK][LC][SM][SF][VM][BI][DH][DK][CP][FK][HM][DK][DH][BI][VM][SF][SM][RT][RK]/[DY]1[KN]1[VO]1[FY][BV][WR][LD][GD][SD]1[FY]1[VO]1[KN][DY]/1[OR]1[AB]1[BB]1[EW][KR][LI][PH][EW]1[BB]1[AB]1[OR]1/[RC]1[CT]1[CC]1[CO][FL][BT][DE][BT][FL][RD]1[BM]1[CT]1[RC]/[LN][EG][ST][TG][IG][CG][SG][GG][DV][KI][DS][GG][SG][CG][IG][TG][ST][EG][LN]', pieceNames: { LN: 'Lance', EG: 'Earth General', ST: 'Stone General', TG: 'Tile General', IG: 'Iron General', CG: 'Copper General', SG: 'Silver General', GG: 'Gold General', DV: 'Deva', KI: 'King', DS: 'Dark Spirit', RC: 'Reverse Chariot', CT: 'Cat Sword', CC: 'Chinese Cock', CO: 'Coiled Serpent', FL: 'Ferocious Leopard', BT: 'Blind Tiger', DE: 'Drunk Elephant', RD: 'Reclining Dragon', BM: 'Blind Monkey', OR: 'Old Rat', AB: 'Angry Boar', BB: 'Blind Bear', EW: 'Evil Wolf', KR: 'Kirin', LI: 'Lion', PH: 'Phoenix', DY: 'Donkey', KN: 'Knight', VO: 'Violent Ox', FY: 'Flying Dragon', BV: 'Buddhist Devil', WR: 'Wrestler', LD: 'Lion Dog', GD: 'Guardian of the Gods', SD: 'She-Devil', RK: 'Rook', LC: 'Left Chariot', SM: 'Side Mover', SF: 'Side Flyer', VM: 'Vertical Mover', BI: 'Bishop', DH: 'Dragon Horse', DK: 'Dragon King', CP: 'Capricorn', FK: 'Queen', HM: 'Hook Mover', RT: 'Right Chariot', PW: 'Pawn', GB: 'Go-Between' }, setupDesc: '96 pieces per side, 50 types', variantDesc: 'Historical 19x19. Contagious promotion. Emperor leaps anywhere. Largest well-documented pre-modern shogi.' },
       minishogi: { label: 'Minishogi (5×5)', boardStyle: 'shogi', rows: 5, cols: 5, tileSize: 40, fen: 'rbsgk/4p/5/P4/KGSBR', setupDesc: '6 pieces each on a 5x5 board', variantDesc: 'Standard Shogi on a 5x5 board. Single-rank promotion zone. No Knights or Lances.' },
@@ -1067,14 +1173,14 @@ const GAMES = {
     label: 'Hex',
     pieceSet: 'playstrategy-go-classic',
     variants: {
-      standard: { label: 'Standard (11×11)', boardStyle: 'hex', hexRows: 11, hexCols: 11, hexSize: 20, flat: false, hexFrame: 'rhombus', colors: { lightHex: '#e8e8e8', darkHex: '#c0c0c0', midHex: '#d8d8d8', stroke: 'rgba(0,0,0,0.3)', background: '#f5f5f5' }, setupDesc: 'Empty 11x11 rhombus board', variantDesc: 'Connection game. Place stones to connect your two opposite edges. No captures.' },
-      '9x9': { label: 'Hex 9×9', boardStyle: 'hex', hexRows: 9, hexCols: 9, hexSize: 24, flat: false, hexFrame: 'rhombus', colors: { lightHex: '#e8e8e8', darkHex: '#c0c0c0', midHex: '#d8d8d8', stroke: 'rgba(0,0,0,0.3)', background: '#f5f5f5' }, setupDesc: 'Empty 9x9 rhombus board, 81 cells', variantDesc: 'Smaller board for faster, more tactical games. Common beginner size.' },
-      '13x13': { label: 'Hex 13×13', boardStyle: 'hex', hexRows: 13, hexCols: 13, hexSize: 17, flat: false, hexFrame: 'rhombus', colors: { lightHex: '#e8e8e8', darkHex: '#c0c0c0', midHex: '#d8d8d8', stroke: 'rgba(0,0,0,0.3)', background: '#f5f5f5' }, setupDesc: 'Empty 13x13 rhombus board, 169 cells', variantDesc: 'Tournament size. More strategic depth than 11x11.' },
-      '14x14': { label: 'Hex 14×14', boardStyle: 'hex', hexRows: 14, hexCols: 14, hexSize: 16, flat: false, hexFrame: 'rhombus', colors: { lightHex: '#e8e8e8', darkHex: '#c0c0c0', midHex: '#d8d8d8', stroke: 'rgba(0,0,0,0.3)', background: '#f5f5f5' }, setupDesc: 'Empty 14x14 rhombus board, 196 cells', variantDesc: 'BoardSpace standard. Slightly larger than tournament 13x13.' },
-      '19x19': { label: 'Hex 19×19', boardStyle: 'hex', hexRows: 19, hexCols: 19, hexSize: 12, flat: false, hexFrame: 'rhombus', colors: { lightHex: '#e8e8e8', darkHex: '#c0c0c0', midHex: '#d8d8d8', stroke: 'rgba(0,0,0,0.3)', background: '#f5f5f5' }, setupDesc: 'Empty 19x19 rhombus board, 361 cells', variantDesc: 'Go-sized board for deep strategic play. Very long games.' },
-      'y-game': { label: 'Y (side 12)', boardStyle: 'hex', hexGrid: generateTriangularHexGrid(12), hexSize: 18, flat: false, hexFrame: 'triangle', colors: { lightHex: '#e8e8e8', darkHex: '#c0c0c0', midHex: '#d8d8d8', stroke: 'rgba(0,0,0,0.3)', background: '#f5f5f5' }, setupDesc: 'Empty triangular board, 78 cells', variantDesc: 'Triangular hex board. Connect all 3 edges with a single chain. Generalises Hex. Shannon & Schensted, 1950s.' },
-      'y-small': { label: 'Y (side 9)', boardStyle: 'hex', hexGrid: generateTriangularHexGrid(9), hexSize: 22, flat: false, hexFrame: 'triangle', colors: { lightHex: '#e8e8e8', darkHex: '#c0c0c0', midHex: '#d8d8d8', stroke: 'rgba(0,0,0,0.3)', background: '#f5f5f5' }, setupDesc: 'Empty triangular board, 45 cells', variantDesc: 'Smaller Y board for faster tactical games. Side-length 9.' },
-      'y-large': { label: 'Y (side 15)', boardStyle: 'hex', hexGrid: generateTriangularHexGrid(15), hexSize: 14, flat: false, hexFrame: 'triangle', colors: { lightHex: '#e8e8e8', darkHex: '#c0c0c0', midHex: '#d8d8d8', stroke: 'rgba(0,0,0,0.3)', background: '#f5f5f5' }, setupDesc: 'Empty triangular board, 120 cells', variantDesc: 'Large Y board for deep strategic play. Side-length 15.' },
+      standard: { label: 'Standard (11×11)', boardStyle: 'hex', hexRows: 11, hexCols: 11, hexSize: 20, flat: false, hexFrame: 'rhombus', colors: { lightHex: '#e8e8e8', darkHex: '#c0c0c0', midHex: '#d8d8d8', stroke: 'rgba(0,0,0,0.3)', background: '#f5f5f5' }, buildLayout(rows, cols, tileSize, colors) { return buildRhombusLayout(generateHexRhombus(11, 11), 20, 'pointy', colors) }, setupDesc: 'Empty 11x11 rhombus board', variantDesc: 'Connection game. Place stones to connect your two opposite edges. No captures.' },
+      '9x9': { label: 'Hex 9×9', boardStyle: 'hex', hexRows: 9, hexCols: 9, hexSize: 24, flat: false, hexFrame: 'rhombus', colors: { lightHex: '#e8e8e8', darkHex: '#c0c0c0', midHex: '#d8d8d8', stroke: 'rgba(0,0,0,0.3)', background: '#f5f5f5' }, buildLayout(rows, cols, tileSize, colors) { return buildRhombusLayout(generateHexRhombus(9, 9), 24, 'pointy', colors) }, setupDesc: 'Empty 9x9 rhombus board, 81 cells', variantDesc: 'Smaller board for faster, more tactical games. Common beginner size.' },
+      '13x13': { label: 'Hex 13×13', boardStyle: 'hex', hexRows: 13, hexCols: 13, hexSize: 17, flat: false, hexFrame: 'rhombus', colors: { lightHex: '#e8e8e8', darkHex: '#c0c0c0', midHex: '#d8d8d8', stroke: 'rgba(0,0,0,0.3)', background: '#f5f5f5' }, buildLayout(rows, cols, tileSize, colors) { return buildRhombusLayout(generateHexRhombus(13, 13), 17, 'pointy', colors) }, setupDesc: 'Empty 13x13 rhombus board, 169 cells', variantDesc: 'Tournament size. More strategic depth than 11x11.' },
+      '14x14': { label: 'Hex 14×14', boardStyle: 'hex', hexRows: 14, hexCols: 14, hexSize: 16, flat: false, hexFrame: 'rhombus', colors: { lightHex: '#e8e8e8', darkHex: '#c0c0c0', midHex: '#d8d8d8', stroke: 'rgba(0,0,0,0.3)', background: '#f5f5f5' }, buildLayout(rows, cols, tileSize, colors) { return buildRhombusLayout(generateHexRhombus(14, 14), 16, 'pointy', colors) }, setupDesc: 'Empty 14x14 rhombus board, 196 cells', variantDesc: 'BoardSpace standard. Slightly larger than tournament 13x13.' },
+      '19x19': { label: 'Hex 19×19', boardStyle: 'hex', hexRows: 19, hexCols: 19, hexSize: 12, flat: false, hexFrame: 'rhombus', colors: { lightHex: '#e8e8e8', darkHex: '#c0c0c0', midHex: '#d8d8d8', stroke: 'rgba(0,0,0,0.3)', background: '#f5f5f5' }, buildLayout(rows, cols, tileSize, colors) { return buildRhombusLayout(generateHexRhombus(19, 19), 12, 'pointy', colors) }, setupDesc: 'Empty 19x19 rhombus board, 361 cells', variantDesc: 'Go-sized board for deep strategic play. Very long games.' },
+      'y-game': { label: 'Y (side 12)', boardStyle: 'hex', hexGrid: generateTriangularHexGrid(12), hexSize: 18, flat: false, hexFrame: 'triangle', colors: { lightHex: '#e8e8e8', darkHex: '#c0c0c0', midHex: '#d8d8d8', stroke: 'rgba(0,0,0,0.3)', background: '#f5f5f5' }, buildLayout(rows, cols, tileSize, colors) { return buildTriangularLayout(generateTriangularHexGrid(12), 18, 'pointy', colors) }, setupDesc: 'Empty triangular board, 78 cells', variantDesc: 'Triangular hex board. Connect all 3 edges with a single chain. Generalises Hex. Shannon & Schensted, 1950s.' },
+      'y-small': { label: 'Y (side 9)', boardStyle: 'hex', hexGrid: generateTriangularHexGrid(9), hexSize: 22, flat: false, hexFrame: 'triangle', colors: { lightHex: '#e8e8e8', darkHex: '#c0c0c0', midHex: '#d8d8d8', stroke: 'rgba(0,0,0,0.3)', background: '#f5f5f5' }, buildLayout(rows, cols, tileSize, colors) { return buildTriangularLayout(generateTriangularHexGrid(9), 22, 'pointy', colors) }, setupDesc: 'Empty triangular board, 45 cells', variantDesc: 'Smaller Y board for faster tactical games. Side-length 9.' },
+      'y-large': { label: 'Y (side 15)', boardStyle: 'hex', hexGrid: generateTriangularHexGrid(15), hexSize: 14, flat: false, hexFrame: 'triangle', colors: { lightHex: '#e8e8e8', darkHex: '#c0c0c0', midHex: '#d8d8d8', stroke: 'rgba(0,0,0,0.3)', background: '#f5f5f5' }, buildLayout(rows, cols, tileSize, colors) { return buildTriangularLayout(generateTriangularHexGrid(15), 14, 'pointy', colors) }, setupDesc: 'Empty triangular board, 120 cells', variantDesc: 'Large Y board for deep strategic play. Side-length 15.' },
     },
   },
   'royal-ur': {
@@ -1343,7 +1449,7 @@ const GAMES = {
     label: 'Agon',
     pieceSet: 'mce-chess',
     variants: {
-      standard: { label: 'Standard (91 hexes)', boardStyle: 'hex', hexRadius: 5, hexSize: 22, flat: false, hexColorFn: agonRingColor, colors: { lightHex: '#e6a817', darkHex: '#8b2240', stroke: 'rgba(0,0,0,0.25)', background: '#2a1a0a' }, hexPosition: buildAgonPosition(), centreMarker: '★', pieceNames: { P: 'Guard', p: 'Guard' }, setupDesc: 'Queen + 6 Guards per player on outer ring', variantDesc: 'Guide your Queen to the centre hex while blocking opponent. Concentric 91-hex board. France, 1842.' },
+      standard: { label: 'Standard (91 hexes)', boardStyle: 'hex', hexRadius: 5, hexSize: 22, flat: false, hexColorFn: agonRingColor, colors: { lightHex: '#e6a817', darkHex: '#8b2240', stroke: 'rgba(0,0,0,0.25)', background: '#2a1a0a' }, hexPosition: buildAgonPosition(), centreMarker: '★', pieceNames: { P: 'Guard', p: 'Guard' }, buildLayout(rows, cols, tileSize, colors) { return buildHexagonalLayout(generateHexGrid(5), 22, 'pointy', colors, { hexColorFn: agonRingColor, centreMarker: '★' }) }, setupDesc: 'Queen + 6 Guards per player on outer ring', variantDesc: 'Guide your Queen to the centre hex while blocking opponent. Concentric 91-hex board. France, 1842.' },
     },
   },
   asalto: {
@@ -2402,7 +2508,10 @@ function render() {
   }
 
   if (game.hexGame) {
-    if (renderMode === 'consolidated') { showNotImplemented('hex'); return }
+    if (renderMode === 'consolidated') {
+      renderHexGameConsolidated(game, variantDef)
+      return
+    }
     renderHexGame(game, variantDef)
     return
   }
@@ -2417,6 +2526,8 @@ function render() {
       let svg
       if (renderMode === 'consolidated' && isGridProvider(config)) {
         svg = renderConsolidated(config)
+      } else if (renderMode === 'consolidated' && isHexProvider(config)) {
+        svg = renderConsolidatedHex(config)
       }
       if (!svg) svg = renderBoard(config)
       showSvg(svg)
@@ -2532,6 +2643,8 @@ function render() {
   if (renderMode === 'consolidated') {
     if (isGridProvider(config)) {
       svg = renderConsolidated(config)
+    } else if (isHexProvider(config)) {
+      svg = renderConsolidatedHex(config)
     }
     if (!svg) {
       svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="400" height="200" fill="#1a1a2e" rx="8"/><text x="200" y="80" text-anchor="middle" font-size="14" fill="#e8a030" font-family="system-ui">Final mode — not yet implemented</text><text x="200" y="110" text-anchor="middle" font-size="12" fill="#888" font-family="system-ui">Provider: ${config.boardStyle || 'unknown'}</text><text x="200" y="135" text-anchor="middle" font-size="11" fill="#555" font-family="system-ui">Switch to Original to view</text></svg>`
@@ -2595,6 +2708,80 @@ function renderHexGame(game, variantDef) {
   }
 
   const svg = HexSvg.toSVG(hexes, svgOpts)
+  showSvg(svg)
+  showInfo({
+    hexGame: game.hexGame,
+    hexSize: size,
+    hexCount: hexes.length,
+    seed,
+    style,
+    label: variantDef.label,
+  })
+  bindHexHover(gameConfig)
+  requestAnimationFrame(fitToView)
+}
+
+function renderHexGameConsolidated(game, variantDef) {
+  const gameConfig = getGameConfig(game.hexGame)
+  if (!gameConfig) {
+    showSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="60"><text x="100" y="35" text-anchor="middle" font-size="12" fill="#888">No generator: "${game.hexGame}"</text></svg>`)
+    return
+  }
+
+  const size = variantDef.hexSize || gameConfig.defaultSize
+  const players = state.players || gameConfig.defaultPlayers || 0
+  const seed = state.seed
+  const style = state.style || 'classic'
+  const layout = variantDef.hexLayout || null
+
+  const hexes = gameConfig.generate(size, players, seed, layout)
+  if (!hexes || hexes.length === 0) {
+    showSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="60"><text x="100" y="35" text-anchor="middle" font-size="12" fill="#888">Empty map</text></svg>`)
+    return
+  }
+
+  const colors = gameConfig.getColors ? gameConfig.getColors() : {}
+  const images = gameConfig.getImages ? gameConfig.getImages(style) : null
+  const rendererOpts = gameConfig.rendererOptions ? gameConfig.rendererOptions() : {}
+  const flat = rendererOpts.flat || gameConfig.orientation === 'flat'
+  const cellSize = rendererOpts.hexSize || 40
+
+  const hasPerHexImages = images && images._perHex
+  const hasTypeImages = images && !images._perHex
+  const useImages = style !== 'classic' && (hasTypeImages || hasPerHexImages)
+
+  let cellImage = null
+  if (useImages) {
+    if (hasPerHexImages) {
+      cellImage = (q, r, hex) => hex.imagePath || null
+    } else if (hasTypeImages) {
+      cellImage = (q, r, hex) => images[hex.type] || null
+    }
+  }
+
+  const config = {
+    label: variantDef.label,
+    layout: {
+      hexes,
+      orientation: flat ? 'flat' : 'pointy',
+      cellSize,
+      scale: 0.95,
+      background: null,
+      frame: null,
+      cellFill: (q, r, hex) => colors[hex.type] || '#666',
+      cellStroke: { color: 'rgba(0,0,0,0.3)', width: 1 },
+      cellImage,
+      cellLabel: gameConfig.labels !== false ? (q, r, hex) => hex.label || null : null,
+      overlays: hexes.filter(h => h.overlay).map(h => ({
+        q: h.q, r: h.r,
+        color: h.overlay.color || '#C62828',
+        text: h.overlay.text || null,
+        radius: h.overlay.size || 0.35,
+      })),
+    },
+  }
+
+  const svg = renderConsolidatedHex(config)
   showSvg(svg)
   showInfo({
     hexGame: game.hexGame,

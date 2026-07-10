@@ -431,6 +431,219 @@ export function createHexTopology(config) {
     return cells.has(k) ? k : null
   }
 
+  function renderLayout(config = {}) {
+    const {
+      hexes: inputHexes,
+      cellSize = 30,
+      scale = 0.95,
+      background = null,
+      frame = null,
+      cellFill,
+      cellStroke = { color: 'rgba(0,0,0,0.2)', width: 1 },
+      cellImage = null,
+      cellLabel = null,
+      labelStyle = {},
+      overlays = [],
+      centreMarker = null,
+    } = config
+
+    const hexList = inputHexes || getAllCells().map(k => parse(k))
+    const orient = config.orientation || orientation
+
+    function toPixelLocal(q, r) {
+      if (orient === 'flat') {
+        return { x: cellSize * (3 / 2 * q), y: cellSize * (Math.sqrt(3) / 2 * q + Math.sqrt(3) * r) }
+      }
+      return { x: cellSize * (Math.sqrt(3) * q + Math.sqrt(3) / 2 * r), y: cellSize * (3 / 2 * r) }
+    }
+
+    function getCornersLocal(cx, cy, sz) {
+      const corners = []
+      for (let i = 0; i < 6; i++) {
+        const deg = orient === 'flat' ? 60 * i : 60 * i - 30
+        const rad = Math.PI / 180 * deg
+        corners.push({ x: cx + sz * Math.cos(rad), y: cy + sz * Math.sin(rad) })
+      }
+      return corners
+    }
+
+    function isLightHex(hex) {
+      const c = hex.replace('#', '')
+      const full = c.length === 3 ? c[0]+c[0]+c[1]+c[1]+c[2]+c[2] : c
+      const r = parseInt(full.substring(0, 2), 16)
+      const g = parseInt(full.substring(2, 4), 16)
+      const b = parseInt(full.substring(4, 6), 16)
+      return (r * 299 + g * 587 + b * 114) / 1000 > 180
+    }
+
+    // Compute bounding box
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
+    for (const h of hexList) {
+      const p = toPixelLocal(h.q, h.r)
+      if (p.x < minX) minX = p.x
+      if (p.x > maxX) maxX = p.x
+      if (p.y < minY) minY = p.y
+      if (p.y > maxY) maxY = p.y
+    }
+
+    const pad = frame ? cellSize * 1.8 : cellSize + 10
+    const boardW = (maxX - minX) + pad * 2
+    const boardH = (maxY - minY) + pad * 2
+    const originX = -minX + pad
+    const originY = -minY + pad
+
+    const elements = []
+    const clipDefs = []
+
+    // 1. Background
+    if (background) {
+      const attrs = { x: 0, y: 0, width: boardW, height: boardH, fill: background.fill }
+      if (background.rx) attrs.rx = background.rx
+      elements.push({ tag: 'rect', attrs })
+    }
+
+    // 2. Border frame — edge segments along exposed perimeter
+    if (frame) {
+      const hexSet = new Set(hexList.map(h => `${h.q},${h.r}`))
+      const edgeDirs = [[1, 0], [0, 1], [-1, 1], [-1, 0], [0, -1], [1, -1]]
+      const frameScale = frame.scale || 1.05
+      const edges = []
+      for (const h of hexList) {
+        const p = toPixelLocal(h.q, h.r)
+        const cx = originX + p.x, cy = originY + p.y
+        const corners = getCornersLocal(cx, cy, cellSize * frameScale)
+        for (let i = 0; i < 6; i++) {
+          const [dq, dr] = edgeDirs[i]
+          if (!hexSet.has(`${h.q + dq},${h.r + dr}`)) {
+            edges.push([corners[i], corners[(i + 1) % 6]])
+          }
+        }
+      }
+      for (const [a, b] of edges) {
+        elements.push({ tag: 'line', attrs: {
+          x1: +a.x.toFixed(2), y1: +a.y.toFixed(2),
+          x2: +b.x.toFixed(2), y2: +b.y.toFixed(2),
+          stroke: frame.stroke || '#6b4226',
+          'stroke-width': frame.strokeWidth || 14,
+          'stroke-linecap': frame.linecap || 'round',
+          'stroke-linejoin': frame.linejoin || 'round',
+        }})
+      }
+    }
+
+    // 3. Cell polygons
+    for (const h of hexList) {
+      const p = toPixelLocal(h.q, h.r)
+      const cx = originX + p.x, cy = originY + p.y
+      const corners = getCornersLocal(cx, cy, cellSize * scale)
+      const points = corners.map(c => `${c.x.toFixed(2)},${c.y.toFixed(2)}`).join(' ')
+
+      const fill = cellFill ? cellFill(h.q, h.r, h) : '#ccc'
+
+      const attrs = { points, fill }
+      if (cellStroke) {
+        attrs.stroke = cellStroke.color
+        attrs['stroke-width'] = cellStroke.width
+      }
+      elements.push({ tag: 'polygon', attrs })
+    }
+
+    // 4. Cell images — clipped to hex polygon
+    if (cellImage) {
+      for (const h of hexList) {
+        const href = cellImage(h.q, h.r, h)
+        if (!href) continue
+        const p = toPixelLocal(h.q, h.r)
+        const cx = originX + p.x, cy = originY + p.y
+        const corners = getCornersLocal(cx, cy, cellSize * scale)
+        const points = corners.map(c => `${c.x.toFixed(2)},${c.y.toFixed(2)}`).join(' ')
+        const clipId = `clip-${h.q}-${h.r}`
+        const imgSize = cellSize * 2 * scale
+        clipDefs.push({ tag: 'clipPath', attrs: { id: clipId }, children: [{ tag: 'polygon', attrs: { points } }] })
+        elements.push({ tag: 'image', attrs: {
+          href, x: +(cx - imgSize / 2).toFixed(2), y: +(cy - imgSize / 2).toFixed(2),
+          width: +imgSize.toFixed(2), height: +imgSize.toFixed(2),
+          'clip-path': `url(#${clipId})`, 'pointer-events': 'none',
+          preserveAspectRatio: 'xMidYMid slice',
+        }})
+      }
+    }
+
+    // 5. Cell labels
+    if (cellLabel) {
+      const fontSize = (labelStyle.fontSize || 0.4) * cellSize
+      const fill = labelStyle.fill || '#fff'
+      const fontFamily = labelStyle.fontFamily || 'sans-serif'
+      for (const h of hexList) {
+        const text = cellLabel(h.q, h.r, h)
+        if (!text) continue
+        const p = toPixelLocal(h.q, h.r)
+        const cx = originX + p.x, cy = originY + p.y
+        elements.push({ tag: 'text', attrs: {
+          x: +cx.toFixed(2), y: +(cy + fontSize * 0.3).toFixed(2),
+          'text-anchor': 'middle', 'font-size': +fontSize.toFixed(1),
+          'pointer-events': 'none', fill, 'font-family': fontFamily,
+        }, text })
+      }
+    }
+
+    // 6. Overlays — circles + optional text
+    for (const ov of overlays) {
+      const p = toPixelLocal(ov.q, ov.r)
+      const cx = originX + p.x, cy = originY + p.y
+      const r = cellSize * (ov.radius || 0.35)
+      const color = ov.color || '#C62828'
+      elements.push({ tag: 'circle', attrs: {
+        cx: +cx.toFixed(2), cy: +cy.toFixed(2), r: +r.toFixed(2),
+        fill: color, 'pointer-events': 'none',
+        stroke: ov.stroke || '#fff', 'stroke-width': 1.5,
+      }})
+      if (ov.text) {
+        const textFill = ov.textFill || (isLightHex(color) ? '#333' : '#fff')
+        elements.push({ tag: 'text', attrs: {
+          x: +cx.toFixed(2), y: +(cy + r * 0.35).toFixed(2),
+          'text-anchor': 'middle', 'font-size': +(r * 1.2).toFixed(1),
+          'pointer-events': 'none', fill: textFill,
+          'font-weight': 'bold', 'font-family': 'sans-serif',
+        }, text: ov.text })
+      }
+    }
+
+    // 7. Centre marker
+    if (centreMarker) {
+      const mq = centreMarker.q || 0, mr = centreMarker.r || 0
+      const p = toPixelLocal(mq, mr)
+      const cx = originX + p.x, cy = originY + p.y
+      const fontSize = centreMarker.fontSize || cellSize * 0.8
+      elements.push({ tag: 'text', attrs: {
+        x: cx, y: cy + fontSize * 0.3,
+        'text-anchor': 'middle', 'font-size': fontSize,
+        fill: centreMarker.fill || 'rgba(255,200,50,0.85)',
+        'pointer-events': 'none',
+      }, text: centreMarker.text })
+    }
+
+    // 8. Hit targets — transparent polygons
+    const cellTargets = []
+    for (const h of hexList) {
+      const p = toPixelLocal(h.q, h.r)
+      const cx = originX + p.x, cy = originY + p.y
+      const corners = getCornersLocal(cx, cy, cellSize * scale)
+      const points = corners.map(c => `${c.x.toFixed(2)},${c.y.toFixed(2)}`).join(' ')
+      const sq = `${h.q},${h.r}`
+      const attrs = { points, fill: 'transparent', 'data-sq': sq, 'data-q': String(h.q), 'data-r': String(h.r), class: 'board-cell hex-cell' }
+      if (h.type) attrs['data-type'] = h.type
+      if (h.id) attrs['data-id'] = h.id
+      if (h.tileName) attrs['data-name'] = h.tileName
+      cellTargets.push({
+        id: sq, x: cx, y: cy,
+        element: { tag: 'polygon', attrs },
+      })
+    }
+
+    return { width: boardW, height: boardH, elements, cells: cellTargets, labels: [], defs: clipDefs, tileSize: cellSize * 1.6 }
+  }
+
   return {
     radius,
     size: cells.size,
@@ -458,6 +671,7 @@ export function createHexTopology(config) {
       return DIRECTION_CATEGORIES[category] || []
     },
     getLayout,
+    renderLayout,
     step,
     serializePosition,
     parsePosition,

@@ -9,12 +9,18 @@ const DISC_RATIO = { disc: 0.92, image: 0.60 }
 
 export function serializeLayout(layout, opts = {}) {
   const { title, pieces, pieceImages, pieceSurface, pieceSurfaceMap, pieceRotations } = opts
-  const { width, height, elements, cells, labels } = layout
+  const { width, height, elements, cells, labels, defs } = layout
 
   const parts = []
   parts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">`)
 
   if (title) parts.push(`<title>${esc(title)}</title>`)
+
+  if (defs && defs.length > 0) {
+    parts.push('<defs>')
+    for (const d of defs) parts.push(elementToSvg(d))
+    parts.push('</defs>')
+  }
 
   for (const el of elements) {
     parts.push(elementToSvg(el))
