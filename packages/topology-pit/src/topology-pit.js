@@ -206,6 +206,252 @@ export function createPitTopology(config) {
     return { pits, stores: storesArr }
   }
 
+  function renderLayout(opts = {}) {
+    const colors = opts.colors || {}
+    const pitRadius = opts.pitRadius || 22
+    const storeRx = opts.storeRx || 24
+    const storeRy = opts.storeRy || 50
+    const boardShape = opts.boardShape || 'rect'
+    const boardRows = opts.boardRows || 2
+    const rx = opts.cornerRadius || 22
+    const pitCurve = opts.pitCurve || 0
+    const markerSet = new Set(opts.markers || [])
+    const seedsPerPit = opts.seedsPerPit || 4
+    const seedRadius = Math.min(4.5, pitRadius * 0.2)
+    const parsedSetup = opts.parsedSetup || null
+    const pieceImages = opts.pieceImages || null
+
+    if (boardShape === 'ellipse') {
+      return renderEllipseLayout(opts)
+    }
+
+    // EXACT match of board-diagrams.js mancala computeLayout + render (rect path)
+    const pad = opts.padEdge || pitRadius * 1.65
+    const frameInset = 16
+    const interRow = pitRadius * 2.4
+    const divGap = boardRows === 4 ? pitRadius * 2.7 : 0
+    const contentH = boardRows === 4 ? interRow * 2 + divGap : interRow * (boardRows - 1)
+    const boardH = contentH + pad * 2 + frameInset * 2
+    const storeWidth = hasStores ? storeRx * 2 + 16 : 0
+    const pitsAreaWidth = pitsPerSide * (pitRadius * 2 + 10)
+    const boardW = storeWidth * 2 + pitsAreaWidth + pad * 2 + frameInset * 2
+
+    const elements = []
+    const cells = []
+
+    // Board frame — exact match of original
+    const bx = frameInset / 2, by = frameInset / 2
+    const bw = boardW - frameInset, bh = boardH - frameInset
+    elements.push({ tag: 'rect', attrs: { x: bx, y: by, width: bw, height: bh, rx, ry: rx, fill: colors.boardOuter || '#7A5A32' } })
+    elements.push({ tag: 'rect', attrs: { x: bx + 6, y: by + 6, width: bw - 12, height: bh - 12, rx: rx - 4, ry: rx - 4, fill: colors.boardInner || '#9B7740' } })
+    if (colors.border) {
+      const attrs = { x: bx + 12, y: by + 12, width: bw - 24, height: bh - 24, rx: rx - 8, ry: rx - 8, fill: 'none', stroke: colors.border, 'stroke-width': 1.5 }
+      if (colors.borderDash) attrs['stroke-dasharray'] = colors.borderDash
+      elements.push({ tag: 'rect', attrs })
+    }
+
+    // Stores — exact match: left=store-1, right=store-0
+    if (hasStores) {
+      const storeCy = boardH / 2
+      const leftX = frameInset + storeWidth / 2
+      const rightX = boardW - frameInset - storeWidth / 2
+      elements.push({ tag: 'ellipse', attrs: { cx: leftX, cy: storeCy, rx: storeRx, ry: storeRy, fill: colors.pit || '#4E3320', stroke: colors.pitStroke || '#3A2515', 'stroke-width': 1.5 } })
+      elements.push({ tag: 'ellipse', attrs: { cx: rightX, cy: storeCy, rx: storeRx, ry: storeRy, fill: colors.pit || '#4E3320', stroke: colors.pitStroke || '#3A2515', 'stroke-width': 1.5 } })
+      cells.push({ id: 'store-1', x: leftX, y: storeCy, element: { tag: 'ellipse', attrs: { cx: leftX, cy: storeCy, rx: storeRx, ry: storeRy, fill: 'transparent', 'data-sq': 'store-1', class: 'board-cell' } } })
+      cells.push({ id: 'store-0', x: rightX, y: storeCy, element: { tag: 'ellipse', attrs: { cx: rightX, cy: storeCy, rx: storeRx, ry: storeRy, fill: 'transparent', 'data-sq': 'store-0', class: 'board-cell' } } })
+    }
+
+    // Pit positions — exact match of original
+    const pitsLeftEdge = frameInset + (hasStores ? storeWidth : 0) + pad
+    const pitsRightEdge = boardW - frameInset - (hasStores ? storeWidth : 0) - pad
+    const pitsAvailWidth = pitsRightEdge - pitsLeftEdge
+    const pitSpacing = pitsPerSide > 1 ? pitsAvailWidth / (pitsPerSide - 1) : 0
+
+    const topPitCenter = frameInset + pad
+    const botPitCenter = boardH - frameInset - pad
+    const rowCenters = []
+    if (boardRows === 2) {
+      rowCenters.push(topPitCenter, botPitCenter)
+    } else if (boardRows === 4) {
+      rowCenters.push(topPitCenter, topPitCenter + interRow, botPitCenter - interRow, botPitCenter)
+    }
+
+    for (let row = 0; row < boardRows; row++) {
+      const isTopHalf = row < boardRows / 2
+      const baseCy = rowCenters[row]
+      for (let i = 0; i < pitsPerSide; i++) {
+        const displayIdx = isTopHalf ? (pitsPerSide - 1 - i) : i
+        const pitIdx = row * pitsPerSide + displayIdx
+        const cx = pitsLeftEdge + i * pitSpacing
+
+        let cy = baseCy
+        if (pitCurve) {
+          const t = (i - (pitsPerSide - 1) / 2) / ((pitsPerSide - 1) / 2)
+          const curveOffset = pitCurve * t * t
+          cy += isTopHalf ? curveOffset : -curveOffset
+        }
+
+        elements.push({ tag: 'circle', attrs: { cx, cy, r: pitRadius, fill: colors.pit || '#4E3320', stroke: colors.pitStroke || '#3A2515', 'stroke-width': 1.5 } })
+
+        if (markerSet.has(pitIdx)) {
+          elements.push({ tag: 'circle', attrs: { cx, cy, r: pitRadius - 8, fill: 'none', stroke: colors.marker || '#C49040', 'stroke-width': 2, 'stroke-dasharray': '4,3' } })
+        }
+
+        const seedCount = parsedSetup && parsedSetup.pits ? parsedSetup.pits[pitIdx] : seedsPerPit
+        if (seedCount > 0) {
+          if (pieceImages && pieceImages[String(seedCount)]) {
+            const size = pitRadius * 1.6
+            elements.push({ tag: 'image', attrs: { href: pieceImages[String(seedCount)], x: cx - size / 2, y: cy - size / 2, width: size, height: size, 'pointer-events': 'none' } })
+          } else {
+            const positions = seedLayout(seedCount, seedRadius)
+            for (const [sx, sy] of positions) {
+              elements.push({ tag: 'circle', attrs: { cx: cx + sx, cy: cy + sy, r: seedRadius, fill: colors.seed || '#C8B898', stroke: colors.seedStroke || '#8A7A5A', 'stroke-width': 0.5 } })
+            }
+          }
+        }
+
+        cells.push({ id: `pit-${pitIdx}`, x: cx, y: cy, element: { tag: 'circle', attrs: { cx, cy, r: pitRadius, fill: 'transparent', 'data-sq': `pit-${pitIdx}`, class: 'board-cell' } } })
+      }
+    }
+
+    // 4-row divider
+    if (boardRows === 4) {
+      const divY = boardH / 2
+      elements.push({ tag: 'line', attrs: { x1: pitsLeftEdge - pitRadius, y1: divY, x2: pitsLeftEdge + (pitsPerSide - 1) * pitSpacing + pitRadius, y2: divY, stroke: colors.boardOuter || '#7A5A32', 'stroke-width': 2.5, 'stroke-dasharray': '6,4' } })
+    }
+
+    return { width: boardW, height: boardH, elements, cells, labels: [], defs: [], tileSize: pitRadius * 1.6 }
+  }
+
+  function renderEllipseLayout(opts) {
+    const colors = opts.colors || {}
+    const pitRadius = opts.pitRadius || 18
+    const storeRx = opts.storeRx || 20
+    const storeRy = opts.storeRy || 38
+    const pitCurve = opts.pitCurve || 0
+    const seedsPerPit = opts.seedsPerPit || 4
+    const seedRadius = Math.min(4.5, pitRadius * 0.2)
+    const parsedSetup = opts.parsedSetup || null
+    const pieceImages = opts.pieceImages || null
+    const markerSet = new Set(opts.markers || [])
+
+    // EXACT match of board-diagrams.js computeLayout (ellipse path)
+    const pitSpacing = pitRadius * 2.96
+    const pitSpan = (pitsPerSide - 1) * pitSpacing
+    const rowOffset = pitRadius * 2
+    const storeGap = 2
+    const storeCenterOffset = hasStores ? pitSpan / 2 + pitRadius + storeGap + storeRx : 0
+    const outerRx = (hasStores ? storeCenterOffset + storeRx : pitSpan / 2 + pitRadius) + pitRadius * 2.67
+    const outerRy = rowOffset + pitRadius * 2.22
+    const boardW = Math.round(2 * (outerRx + pitRadius * 0.67))
+    const boardH = Math.round(2 * (outerRy + pitRadius * 0.78))
+    const cx = boardW / 2, cy = boardH / 2
+
+    const elements = []
+    const cells = []
+
+    // Board ellipses
+    elements.push({ tag: 'ellipse', attrs: { cx, cy, rx: outerRx, ry: outerRy, fill: colors.boardOuter || '#7A5A32' } })
+    elements.push({ tag: 'ellipse', attrs: { cx, cy, rx: outerRx - 8, ry: outerRy - 8, fill: colors.boardInner || '#9B7740' } })
+
+    // Stores
+    if (hasStores) {
+      const leftX = cx - storeCenterOffset
+      const rightX = cx + storeCenterOffset
+      elements.push({ tag: 'ellipse', attrs: { cx: leftX, cy, rx: storeRx, ry: storeRy, fill: colors.pit || '#4E3320', stroke: colors.pitStroke || '#3A2515', 'stroke-width': 1.5 } })
+      elements.push({ tag: 'ellipse', attrs: { cx: rightX, cy, rx: storeRx, ry: storeRy, fill: colors.pit || '#4E3320', stroke: colors.pitStroke || '#3A2515', 'stroke-width': 1.5 } })
+      cells.push({ id: 'store-1', x: leftX, y: cy, element: { tag: 'ellipse', attrs: { cx: leftX, cy, rx: storeRx, ry: storeRy, fill: 'transparent', 'data-sq': 'store-1', class: 'board-cell' } } })
+      cells.push({ id: 'store-0', x: rightX, y: cy, element: { tag: 'ellipse', attrs: { cx: rightX, cy, rx: storeRx, ry: storeRy, fill: 'transparent', 'data-sq': 'store-0', class: 'board-cell' } } })
+    }
+
+    // Pits — exact match of original renderEllipse
+    const topCy = cy - rowOffset, botCy = cy + rowOffset
+    for (let i = 0; i < pitsPerSide; i++) {
+      const px = cx + (i - (pitsPerSide - 1) / 2) * pitSpacing
+
+      let topY = topCy, botY = botCy
+      if (pitCurve) {
+        const t = (i - (pitsPerSide - 1) / 2) / ((pitsPerSide - 1) / 2)
+        const curveOffset = pitCurve * t * t
+        topY += curveOffset
+        botY -= curveOffset
+      }
+
+      const topIdx = pitsPerSide - 1 - i
+      const botIdx = i
+      elements.push({ tag: 'circle', attrs: { cx: px, cy: topY, r: pitRadius, fill: colors.pit || '#4E3320', stroke: colors.pitStroke || '#3A2515', 'stroke-width': 1.5 } })
+      elements.push({ tag: 'circle', attrs: { cx: px, cy: botY, r: pitRadius, fill: colors.pit || '#4E3320', stroke: colors.pitStroke || '#3A2515', 'stroke-width': 1.5 } })
+
+      if (markerSet.has(topIdx)) {
+        elements.push({ tag: 'circle', attrs: { cx: px, cy: topY, r: pitRadius - 8, fill: 'none', stroke: colors.marker || '#C49040', 'stroke-width': 2, 'stroke-dasharray': '4,3' } })
+      }
+      if (markerSet.has(pitsPerSide + botIdx)) {
+        elements.push({ tag: 'circle', attrs: { cx: px, cy: botY, r: pitRadius - 8, fill: 'none', stroke: colors.marker || '#C49040', 'stroke-width': 2, 'stroke-dasharray': '4,3' } })
+      }
+
+      const topSeedCount = parsedSetup && parsedSetup.pits ? parsedSetup.pits[topIdx] : seedsPerPit
+      const botSeedCount = parsedSetup && parsedSetup.pits ? parsedSetup.pits[pitsPerSide + botIdx] : seedsPerPit
+      if (topSeedCount > 0) {
+        if (pieceImages && pieceImages[String(topSeedCount)]) {
+          const size = pitRadius * 1.6
+          elements.push({ tag: 'image', attrs: { href: pieceImages[String(topSeedCount)], x: px - size / 2, y: topY - size / 2, width: size, height: size, 'pointer-events': 'none' } })
+        } else {
+          for (const [sx, sy] of seedLayout(topSeedCount, seedRadius)) {
+            elements.push({ tag: 'circle', attrs: { cx: px + sx, cy: topY + sy, r: seedRadius, fill: colors.seed || '#C8B898', stroke: colors.seedStroke || '#8A7A5A', 'stroke-width': 0.5 } })
+          }
+        }
+      }
+      if (botSeedCount > 0) {
+        if (pieceImages && pieceImages[String(botSeedCount)]) {
+          const size = pitRadius * 1.6
+          elements.push({ tag: 'image', attrs: { href: pieceImages[String(botSeedCount)], x: px - size / 2, y: botY - size / 2, width: size, height: size, 'pointer-events': 'none' } })
+        } else {
+          for (const [sx, sy] of seedLayout(botSeedCount, seedRadius)) {
+            elements.push({ tag: 'circle', attrs: { cx: px + sx, cy: botY + sy, r: seedRadius, fill: colors.seed || '#C8B898', stroke: colors.seedStroke || '#8A7A5A', 'stroke-width': 0.5 } })
+          }
+        }
+      }
+
+      cells.push({ id: `pit-${topIdx}`, x: px, y: topY, element: { tag: 'circle', attrs: { cx: px, cy: topY, r: pitRadius, fill: 'transparent', 'data-sq': `pit-${topIdx}`, class: 'board-cell' } } })
+      cells.push({ id: `pit-${pitsPerSide + botIdx}`, x: px, y: botY, element: { tag: 'circle', attrs: { cx: px, cy: botY, r: pitRadius, fill: 'transparent', 'data-sq': `pit-${pitsPerSide + botIdx}`, class: 'board-cell' } } })
+    }
+
+    return { width: boardW, height: boardH, elements, cells, labels: [], defs: [], tileSize: pitRadius * 1.6 }
+  }
+
+  function seedLayout(count, r) {
+    const gap = r * 2.5
+    if (count === 1) return [[0, 0]]
+    if (count === 2) return [[-gap / 2, 0], [gap / 2, 0]]
+    if (count === 3) return [[0, -gap / 2], [-gap / 2, gap / 2], [gap / 2, gap / 2]]
+    if (count === 4) return [[-gap / 2, -gap / 2], [gap / 2, -gap / 2], [-gap / 2, gap / 2], [gap / 2, gap / 2]]
+    if (count <= 6) {
+      const top = Math.ceil(count / 2), bot = Math.floor(count / 2)
+      const positions = []
+      for (let i = 0; i < top; i++) positions.push([(i - (top - 1) / 2) * gap, -gap / 2])
+      for (let i = 0; i < bot; i++) positions.push([(i - (bot - 1) / 2) * gap, gap / 2])
+      return positions
+    }
+    if (count <= 9) {
+      const rows = 3
+      const perRow = [Math.ceil(count / 3), Math.ceil((count - Math.ceil(count / 3)) / 2), count - Math.ceil(count / 3) - Math.ceil((count - Math.ceil(count / 3)) / 2)]
+      const positions = []
+      for (let row = 0; row < rows; row++) {
+        const n = perRow[row]
+        for (let i = 0; i < n; i++) positions.push([(i - (n - 1) / 2) * gap, (row - 1) * gap])
+      }
+      return positions
+    }
+    const side = Math.ceil(Math.sqrt(count))
+    const smallGap = gap * 0.8
+    const positions = []
+    for (let i = 0; i < count; i++) {
+      const col = i % side, row = Math.floor(i / side)
+      positions.push([(col - (side - 1) / 2) * smallGap, (row - (Math.ceil(count / side) - 1) / 2) * smallGap])
+    }
+    return positions
+  }
+
   return {
     pitIndex,
     storeIndex,
@@ -224,6 +470,7 @@ export function createPitTopology(config) {
     getPitsPerSide,
     getTotalPits,
     getLayout,
+    renderLayout,
     serializePosition,
     parsePosition,
     pitsPerSide,

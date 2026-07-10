@@ -10,6 +10,7 @@ import { resolve as cascadeResolve } from './cascade-resolver.js'
 import { renderConsolidated, isGridProvider } from './render-consolidated.js'
 import { renderConsolidatedHex, isHexProvider } from './render-consolidated-hex.js'
 import { renderConsolidatedGraph, isGraphProvider } from './render-consolidated-graph.js'
+import { renderConsolidatedPit, isPitProvider } from './render-consolidated-pit.js'
 
 setDeckRenderer(renderDeckSvg)
 setMahjongRenderer(renderMahjongSvg)
@@ -1553,6 +1554,19 @@ const GAMES = {
   mancala: {
     label: 'Mancala',
     pieceSet: 'playstrategy-oware',
+    buildLayout(rows, cols, tileSize, colors, config) {
+      return {
+        pitRadius: config.pitRadius || 22,
+        storeRx: config.storeRx || 24,
+        storeRy: config.storeRy || 50,
+        boardShape: config.boardShape || 'rect',
+        boardRows: config.boardRows || 2,
+        pitCurve: config.pitCurve || 0,
+        cornerRadius: config.cornerRadius,
+        markers: config.markers || [],
+        seedRadius: 5,
+      }
+    },
     variants: {
       kalah: { label: 'Kalah', boardStyle: 'mancala', pitsPerSide: 6, seedsPerPit: 4, hasStores: true, pitRadius: 22, storeRx: 24, storeRy: 50, colors: { boardOuter: '#7A5A32', boardInner: '#9B7740', pit: '#4E3320', pitStroke: '#3A2515', seed: '#C8B898', seedStroke: '#8A7A5A' }, setupDesc: '6 pits per side, 4 seeds each, 2 stores', variantDesc: 'Landing in own store grants extra turn. Capture opposite pit when landing in own empty pit.', setup: '4,4,4,4,4,4;0;4,4,4,4,4,4;0' },
       oware: { label: 'Oware', boardStyle: 'mancala', pitsPerSide: 6, seedsPerPit: 4, hasStores: false, pitRadius: 24, colors: { boardOuter: '#7A5A32', boardInner: '#9B7740', pit: '#4E3320', pitStroke: '#3A2515', seed: '#C8B898', seedStroke: '#8A7A5A' }, setupDesc: '6 pits per side, 4 seeds each, no stores', variantDesc: 'Capture seeds from opponent side when sowing ends in pit with 2 or 3 seeds. No extra turns.', setup: '4,4,4,4,4,4;0;4,4,4,4,4,4;0' },
@@ -3086,6 +3100,8 @@ function render() {
       svg = renderConsolidatedHex(config)
     } else if (isGraphProvider(config)) {
       svg = renderConsolidatedGraph(config)
+    } else if (isPitProvider(config)) {
+      svg = renderConsolidatedPit(config)
     }
     if (!svg) {
       svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="400" height="200" fill="#1a1a2e" rx="8"/><text x="200" y="80" text-anchor="middle" font-size="14" fill="#e8a030" font-family="system-ui">Final mode — not yet implemented</text><text x="200" y="110" text-anchor="middle" font-size="12" fill="#888" font-family="system-ui">Provider: ${config.boardStyle || 'unknown'}</text><text x="200" y="135" text-anchor="middle" font-size="11" fill="#555" font-family="system-ui">Switch to Original to view</text></svg>`
