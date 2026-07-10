@@ -5,9 +5,10 @@
 Define the full data contract between moddable-rules frontmatter and the rendering
 pipeline. Covers all 41 game families and 315+ variants.
 
-**Consumers of this schema:** The topology packages (`packages/topology-*/`) receive
-the `topology:` and `render:` blocks as `getLayout()` options. The render package
-(`packages/render/`) receives the full resolved schema and composites layers.
+**Consumers of this schema:** The topology packages (`packages/topology-*/`) expose
+`renderLayout(config)` which accepts a flat imperative config object (produced by an
+adapter layer from the resolved schema). The render package (`packages/render/`)
+provides `serializeLayout()` to convert structured SVG elements into SVG strings.
 The board studio is a thin shell that orchestrates this pipeline.
 
 **NOT consumed by:** standalone `js/renderers/` files (those don't exist — the
@@ -239,6 +240,13 @@ Treatment types are a fixed vocabulary (the renderer must implement each):
 | `none` | Default rendering | Most cells |
 
 This is extensible — new treatment types can be added without modifying topology or content logic. A treatment is a pure function: (cell geometry, surface colours, content data) → SVG elements.
+
+**Implementation note:** Treatment names are NOT implemented as named recipes inside
+topology `renderLayout()` code. Topologies receive pre-computed SVG elements (via the
+`decorations` array in their config). The treatment vocabulary is what `produce()` (future)
+will implement — it maps YAML treatment names to structured SVG elements that get passed
+down to `renderLayout()`. Currently, `buildLayout()` in the board studio performs this
+translation as the temporary adapter layer.
 
 ---
 
@@ -1580,67 +1588,81 @@ The full path from authored frontmatter to rendered pixels. Every step is a disc
                                    │
                                    ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│ DISPATCH                                                            │
+│ ADAPTER (resolved schema → imperative render config)                │
 │                                                                     │
-│  10. Route on topology.type:                                        │
-│      grid  → grid renderer                                          │
-│      hex   → hex renderer                                           │
-│      track → track renderer                                         │
-│      pit   → pit renderer                                           │
-│      graph → graph renderer                                         │
-│      none  → component renderer (cards/dice/tiles/RPG)              │
+│  10. buildLayout() [current] or produce() [future]:                 │
+│      - Translates resolved schema into flat imperative config       │
+│      - Converts strategy names (e.g. "checkered") into functions    │
+│        (e.g. cellFill: (row, col) => color)                         │
+│      - Pre-computes decoration SVG elements from render.decorations │
+│      - Resolves surface.treatments → structured SVG elements        │
+│      - Routes on topology.type to select topology package           │
+│      - NO game knowledge — maps schema vocabulary to functions      │
 │                                                                     │
-│  Each renderer receives the FULL resolved object.                   │
-│  No pre-filtering, no routing flags, no game-name dispatch.         │
+│  Output: { config, topologyModule } ready for renderLayout()        │
 └──────────────────────────────────┬──────────────────────────────────┘
                                    │
                                    ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│ RENDERING                                                           │
+│ RENDERING (topology renderLayout)                                   │
 │                                                                     │
-│  11. Topology renderer draws base board:                            │
-│      - Reads topology.* for structure (rows, cols, shape, nodes)    │
-│      - Reads surface.colors for fills + strokes                     │
-│      - Reads render.cellColor for colouring strategy                │
-│      - Reads render.zones for cell-type classification              │
+│  11. topology.renderLayout(config) produces structured SVG:         │
+│      Returns: { width, height, elements[], cells[], labels[],       │
+│                 defs[] }                                             │
 │                                                                     │
-│  12. Decoration overlay:                                            │
-│      - Iterates render.decorations array                            │
-│      - Each decoration type is a pure function:                     │
-│        (positions, surface.colors, params) → SVG elements           │
-│      - Composable: markers + tint + gap + diagonals all layer       │
+│      - elements[] — SVG element descriptors: {tag, attrs, text?,    │
+│        children?}                                                    │
+│      - cells[] — per-cell descriptors with position metadata        │
+│        (for hit targets, hover, piece placement)                    │
+│      - labels[] — coordinate labels (a-h, 1-8, etc.)               │
+│      - defs[] — SVG <defs> (gradients, patterns, clip paths)        │
 │                                                                     │
-│  13. Surface treatments (if content + treatments exist):            │
-│      - Reads content.data[].type per position                       │
-│      - Looks up surface.treatments[type] → visual recipe            │
-│      - Applies recipe: stripe/medallion/bars/arc/split/tint         │
+│      The topology reads ONLY from the config object passed in.      │
+│      It receives functions (cellFill, cellStroke) and pre-computed  │
+│      elements (decorations) — never strategy names or game data.    │
 │                                                                     │
-│  14. Piece placement (if setup exists):                             │
+│  12. Piece placement (if setup exists):                             │
 │      - Parses topology-native setup notation                        │
 │      - Reads pieces.vocabulary for type/colour mapping              │
 │      - Reads pieces.set for asset resolution                        │
-│      - Places piece SVG elements at cell positions                  │
+│      - Places piece SVG elements at cell positions from cells[]     │
 │                                                                     │
-│  15. Meta/UI population:                                            │
+│  13. Meta/UI population:                                            │
 │      - Sidebar reads meta.label, meta.description, meta.tags        │
 │      - Hover reads content.data fields + pieces.names               │
 │      - Controls read meta.features (handicap, randomize)            │
 │                                                                     │
-│  Output: complete rendered board in SVG container + populated UI    │
+│  Output: structured layout object (elements + metadata)             │
+└──────────────────────────────────┬──────────────────────────────────┘
+                                   │
+                                   ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│ SERIALIZATION                                                       │
+│                                                                     │
+│  14. serializeLayout(layout, opts) → SVG string                     │
+│      Module: packages/render/src/serialize-layout.js                │
+│                                                                     │
+│      - Converts structured elements to SVG markup                   │
+│      - Adds title, viewBox, overflow attributes                     │
+│      - Injects piece images if opts.pieces/opts.pieceImages         │
+│      - Handles defs block (gradients, patterns)                     │
+│                                                                     │
+│  Output: complete SVG string ready for DOM insertion or export      │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Module boundaries
 
-| Step | Module | Exists? |
-|------|--------|---------|
-| 1 | `js/schema-loader.js` | Yes |
-| 2 | `packages/schema/src/parse-frontmatter.js` | Yes |
-| 3 | `js/surface-resolver.js` | Yes |
-| 4-6 | `js/cascade-resolver.js` | Yes |
-| 7-9 | `js/content-loader.js` | Yes |
-| 10 | Topology packages `getLayout()` | Yes (needs quality upgrade) |
-| 11 | `packages/render/` layer compositor | Yes (needs gap fixes) |
+| Step | Module | Status |
+|------|--------|--------|
+| 1 | `js/schema-loader.js` | Done |
+| 2 | `packages/schema/src/parse-frontmatter.js` | Done |
+| 3 | `js/surface-resolver.js` | Done |
+| 4-6 | `js/cascade-resolver.js` | Done |
+| 7-9 | `js/content-loader.js` | Done |
+| 10 | `js/render-adapter.js` (buildLayout adapter) | Done (temporary; becomes produce()) |
+| 11 | Topology packages `renderLayout()` | Done (consolidated) |
+| 14 | `packages/render/src/serialize-layout.js` | Done |
 
 ### Data flow contract
 
@@ -1650,16 +1672,133 @@ Every module receives and returns plain objects. No classes, no inheritance, no 
 // cascade-resolver.js
 export function resolve(surface, family, variant) → resolvedDefinition
 
-// topology package (e.g. topology-grid)
-topology.getLayout(resolvedDefinition.render) → layout object
+// buildLayout (temporary adapter) or produce() (future)
+adapter(resolvedConfig) → renderLayoutConfig
 
-// packages/render/
-renderer.render(layout, { theme, board, pieces }) → SVG string
+// topology package (e.g. topology-grid)
+topology.renderLayout(config) → { width, height, elements[], cells[], labels[], defs[] }
+
+// packages/render/src/serialize-layout.js
+serializeLayout(layout, { title, pieces, pieceImages, overflow }) → SVG string
 ```
 
-**NOTE (2026-07-09):** The rendering destination is the topology packages
-(`packages/topology-*/`) + the render package (`packages/render/`), NOT standalone
-`js/renderers/` files. See docs/consolidation-plan.md for full context on reconciliation.
+The adapter layer (`buildLayout` / future `produce()`) is where schema vocabulary
+(strategy names like "checkered", decoration types, treatment names) gets translated
+into imperative values (functions, pre-computed SVG elements). The topology packages
+never see strategy names — only functions and elements.
+
+**NOTE:** The rendering destination is the topology packages (`packages/topology-*/`)
++ the render package (`packages/render/`), NOT standalone `js/renderers/` files.
+See docs/consolidation-plan.md for full context on reconciliation.
+
+---
+
+## Implementation Contract
+
+What `renderLayout(config)` actually accepts per topology type. The adapter layer
+(currently `buildLayout()`, future `produce()`) is responsible for constructing these
+config objects from the resolved schema. Topologies receive **functions** and
+**pre-computed elements**, never high-level strategy names.
+
+See `docs/consolidation-plan.md` for the full master notations per topology.
+
+### Common config fields (all topologies)
+
+```js
+{
+  cellSize: number,           // base unit for geometry calculations
+  cellFill: fn(row, col) | fn(node) → string,  // fill colour per cell
+  cellStroke: string,         // stroke colour for cell borders
+  lineWidth: number,          // stroke width
+  labels: boolean,            // whether to render coordinate labels
+  decorations: element[],     // pre-computed SVG elements to overlay
+  hitTargets: boolean,        // whether to emit invisible hit-target rects/circles
+}
+```
+
+### topology-grid
+
+```js
+{
+  rows, cols,                 // board dimensions
+  layout: 'cells' | 'intersections' | 'cross',
+  cellFill: fn(row, col) → string,
+  diagonals: boolean | fn(row, col) → directions[],
+  zones: { river: {...}, palace: {...} },  // zone definitions
+  wrap: 'none' | 'horizontal' | 'vertical' | 'both',
+}
+```
+
+### topology-hex
+
+```js
+{
+  shape: 'hexagonal' | 'rhombus' | 'irregular',
+  radius: number,             // for hexagonal shape
+  rows, cols,                 // for rhombus shape
+  ranks: number[],            // for irregular shape
+  orientation: 'pointy' | 'flat',
+  cellFill: fn(q, r) → string,
+  frame: boolean,             // shaped outer border
+}
+```
+
+### topology-track
+
+```js
+{
+  positions: number,          // total track positions
+  mode: 'linear' | 'circuit' | 'points' | 'cross',
+  cellFill: fn(index) → string,
+  pointsConfig: {...},        // for backgammon-style points
+}
+```
+
+### topology-pit
+
+```js
+{
+  pitsPerSide: number,        // pits per player side
+  stores: boolean,            // whether end stores exist
+  cellFill: fn(index) → string,
+}
+```
+
+### topology-graph
+
+```js
+{
+  nodes: [{id, x, y}],       // positioned node definitions
+  edges: [[id, id]],         // connections between nodes
+  cellFill: fn(node) → string,
+  nodeRadius: number,         // visual size of nodes
+}
+```
+
+### Return value (all topologies)
+
+```js
+{
+  width: number,              // SVG viewport width
+  height: number,             // SVG viewport height
+  elements: [                 // ordered SVG element descriptors
+    { tag: 'rect', attrs: { x, y, width, height, fill, ... } },
+    { tag: 'circle', attrs: { cx, cy, r, fill, ... } },
+    { tag: 'line', attrs: { x1, y1, x2, y2, stroke, ... } },
+    { tag: 'text', attrs: { x, y, ... }, text: 'a1' },
+    { tag: 'g', attrs: { class: '...' }, children: [...] },
+  ],
+  cells: [                    // per-cell metadata for interaction
+    { id: 'a1', x, y, width, height },
+  ],
+  labels: [                   // coordinate labels (optional)
+    { tag: 'text', attrs: {...}, text: '1' },
+  ],
+  defs: [                     // SVG defs (gradients, patterns, clips)
+    { tag: 'linearGradient', attrs: { id: '...' }, children: [...] },
+  ],
+}
+```
 
 ---
 
@@ -1667,7 +1806,7 @@ renderer.render(layout, { theme, board, pieces }) → SVG string
 
 ### Principle: dual-mode visual comparison
 
-The legacy code (boards.js + board-diagrams.js) IS the reference implementation. It runs unchanged alongside the new package-driven pipeline until every variant matches visually. Toggle: "Original" vs "Packages" in the board studio.
+The legacy code (boards.js + board-diagrams.js) IS the reference implementation. It runs unchanged alongside the new package-driven pipeline until every variant matches visually. Toggle: "Original" vs "Final" in the board studio.
 
 ### Phase 1: Pipeline infrastructure (DONE)
 
@@ -1678,40 +1817,44 @@ The legacy code (boards.js + board-diagrams.js) IS the reference implementation.
 - `js/content-loader.js` — fetch external JSON when content.source exists
 - `js/reverse-adapter.js` — GAMES → schema format (temporary bridge)
 
-### Phase 2: Reconcile topology packages (NEXT)
+### Phase 2: Consolidate topology renderLayout (DONE)
 
-Upgrade topology packages to produce publication-quality layout output:
-- `packages/topology-grid/` — absorbs checkered, mono-grid, go, xiangqi, shogi, surakarta, alquerque
-- `packages/topology-hex/` — absorbs hex provider (all shapes, colour strategies)
-- `packages/topology-track/` — absorbs backgammon, landlords
-- `packages/topology-pit/` — absorbs mancala
-- `packages/topology-graph/` — absorbs morris, nyout, asalto, stern-halma
+All 5 topology types consolidated into `renderLayout()` producing structured SVG:
+- `packages/topology-grid/` — checkered, mono-grid, go, xiangqi, shogi, surakarta, alquerque
+- `packages/topology-hex/` — hex provider (all shapes, colour strategies, frame borders)
+- `packages/topology-track/` — backgammon (points mode), landlords
+- `packages/topology-pit/` — mancala (parametric pit rendering)
+- `packages/topology-graph/` — morris, nyout, asalto, stern-halma, halma
 
-Each topology package reads ONLY from the resolved schema object. Zero game knowledge.
+Each topology package reads ONLY from the imperative config passed to `renderLayout()`.
+Zero game knowledge. The adapter layer (`buildLayout()`) translates schema vocabulary
+into the functions and elements that `renderLayout()` accepts.
 
-### Phase 3: Wire dual-mode into studio UI
+### Phase 3: Dual-mode toggle in studio UI (DONE)
 
-Add a toggle to the board studio: **[Legacy]** / **[Schema]** / **[Split]**
+The board studio has a working **[Original]** / **[Final]** toggle:
 
-- **Legacy** — renders using current board-diagrams.js providers (unchanged code)
-- **Schema** — renders using new pipeline (loader → cascade → dispatch → renderer)
-- **Split** — side-by-side: legacy left, schema right, same variant
+- **Original** — renders using legacy board-diagrams.js providers (unchanged code)
+- **Final** — renders using consolidated pipeline (cascade → adapter → renderLayout → serialize)
 
 Implementation:
 ```
 ┌──────────────────────────────────────────────────┐
-│  [Legacy]  [Schema]  [Split]     ← toggle bar    │
+│  [Original]  [Final]             ← toggle bar     │
 ├────────────────────┬─────────────────────────────┤
-│  board-diagrams.js │  new renderers              │
-│  (unchanged)       │  (schema-driven)            │
+│  board-diagrams.js │  renderLayout() pipeline    │
+│  (legacy)          │  (consolidated)             │
 │                    │                             │
 │  reads from:       │  reads from:               │
-│  GAMES object      │  resolved frontmatter      │
-│  (boards.js)       │  (cascade resolver)        │
+│  GAMES object      │  resolved schema →         │
+│  (boards.js)       │  buildLayout() → topology  │
 └────────────────────┴─────────────────────────────┘
 ```
 
-Both renderers write to their own SVG container. The studio orchestrator passes the same variant selection to both. Visual differences are immediately apparent.
+Both modes write to their own SVG container. The studio orchestrator passes the same
+variant selection to both. All 5 spatial topologies (grid, hex, track, pit, graph)
+render through the consolidated path. Visual differences between Original and Final
+are immediately apparent for verification.
 
 ### Phase 4: Author frontmatter + verify (family by family)
 
