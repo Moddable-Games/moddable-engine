@@ -919,6 +919,225 @@ function generateNyoutLayout(boardSize, opts = {}) {
   }
 }
 
+function generateAsaltoLayout(boardSize, opts = {}) {
+  const size = boardSize || 320
+  const pointRadius = opts.pointRadius || 6
+  const colors = opts.colors || {}
+  const lineColor = colors.line || '#2a2a2a'
+  const gridDef = opts.asaltoGrid || {
+    rows: [[2,3,4],[2,3,4],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[2,3,4],[2,3,4]],
+    fortressRows: 2,
+    fortressExtraRow: 2,
+    fortressCols: [2, 3, 4],
+  }
+
+  const rowDefs = gridDef.rows.map((cols, y) => ({ cols, y }))
+  const fortressRowCount = gridDef.fortressRows || 2
+  const maxCol = Math.max(...rowDefs.flatMap(r => r.cols))
+  const maxRow = rowDefs.length - 1
+  const margin = size * 0.08
+  const usable = size - margin * 2
+  const spacing = usable / Math.max(maxCol, maxRow)
+  const xOffset = (size - maxCol * spacing) / 2
+  const yOffset = (size - maxRow * spacing) / 2
+
+  const nodes = []
+  const edges = []
+  const nodeMap = {}
+  const fortressIndices = new Set()
+  const fortressExtraRow = gridDef.fortressExtraRow
+  const fortressCols = gridDef.fortressCols || null
+
+  for (const row of rowDefs) {
+    for (const col of row.cols) {
+      const idx = nodes.length
+      nodeMap[`${row.y},${col}`] = idx
+      nodes.push({ id: `n${idx + 1}`, x: xOffset + col * spacing, y: yOffset + row.y * spacing })
+      if (row.y < fortressRowCount) fortressIndices.add(idx)
+      else if (row.y === fortressExtraRow && fortressCols && fortressCols.includes(col)) fortressIndices.add(idx)
+    }
+  }
+
+  // Horizontal edges
+  for (const row of rowDefs) {
+    for (let i = 0; i < row.cols.length - 1; i++) {
+      if (row.cols[i + 1] - row.cols[i] === 1) {
+        edges.push({ from: nodes[nodeMap[`${row.y},${row.cols[i]}`]].id, to: nodes[nodeMap[`${row.y},${row.cols[i + 1]}`]].id })
+      }
+    }
+  }
+  // Vertical edges
+  for (let ri = 0; ri < rowDefs.length - 1; ri++) {
+    const r1 = rowDefs[ri], r2 = rowDefs[ri + 1]
+    for (const col of r1.cols) {
+      if (r2.cols.includes(col)) {
+        edges.push({ from: nodes[nodeMap[`${r1.y},${col}`]].id, to: nodes[nodeMap[`${r2.y},${col}`]].id })
+      }
+    }
+  }
+  // Diagonal edges
+  for (let ri = 0; ri < rowDefs.length - 1; ri++) {
+    const r1 = rowDefs[ri], r2 = rowDefs[ri + 1]
+    for (const col of r1.cols) {
+      if (r1.cols.includes(col + 1) && r2.cols.includes(col) && r2.cols.includes(col + 1)) {
+        edges.push({ from: nodes[nodeMap[`${r1.y},${col}`]].id, to: nodes[nodeMap[`${r2.y},${col + 1}`]].id })
+        edges.push({ from: nodes[nodeMap[`${r1.y},${col + 1}`]].id, to: nodes[nodeMap[`${r2.y},${col}`]].id })
+      }
+    }
+  }
+  // Extra nodes (fortress ears)
+  if (gridDef.extraNodes) {
+    for (const extra of gridDef.extraNodes) {
+      const idx = nodes.length
+      nodes.push({ id: `n${idx + 1}`, x: xOffset + extra.col * spacing, y: yOffset + extra.row * spacing })
+      if (extra.fortress) fortressIndices.add(idx)
+      for (const target of extra.connectsTo) {
+        const tIdx = nodeMap[`${target[0]},${target[1]}`]
+        if (tIdx !== undefined) edges.push({ from: nodes[idx].id, to: nodes[tIdx].id })
+      }
+    }
+  }
+
+  // Fortress zone fills
+  const zones = []
+  const fNodes = [...fortressIndices].map(i => nodes[i])
+  if (fNodes.length > 0) {
+    const hasEars = gridDef.extraNodes && gridDef.extraNodes.some(n => n.fortress)
+    const bodyNodes = hasEars
+      ? fNodes.slice(0, fNodes.length - gridDef.extraNodes.filter(e => e.fortress).length)
+      : fNodes
+    const bx = Math.min(...bodyNodes.map(n => n.x))
+    const by = Math.min(...bodyNodes.map(n => n.y))
+    const bw = Math.max(...bodyNodes.map(n => n.x)) - bx
+    const bh = Math.max(...bodyNodes.map(n => n.y)) - by
+    zones.push({ type: 'rect', attrs: { x: bx, y: by, width: bw, height: bh, fill: colors.fortress || 'rgba(40,80,180,0.15)' } })
+    if (hasEars) {
+      const extras = gridDef.extraNodes.filter(e => e.fortress)
+      const extraStart = nodes.length - gridDef.extraNodes.length
+      for (const e of extras) {
+        const eIdx = gridDef.extraNodes.indexOf(e)
+        const ear = nodes[extraStart + eIdx]
+        const targets = e.connectsTo.map(t => nodes[nodeMap[`${t[0]},${t[1]}`]])
+        if (targets.length >= 2) {
+          zones.push({ type: 'polygon', attrs: { points: `${ear.x},${ear.y} ${targets[0].x},${targets[0].y} ${targets[1].x},${targets[1].y}`, fill: colors.fortress || 'rgba(40,80,180,0.15)' } })
+        }
+      }
+    }
+    zones.push({ type: 'rect', attrs: { x: bx, y: by, width: bw, height: bh, fill: 'none', stroke: colors.fortressBorder || '#3355aa', 'stroke-width': 2 } })
+  }
+
+  return {
+    nodes, edges, width: size, height: size,
+    backgrounds: [{ fill: colors.background || '#f5e6c8', rx: 4 }],
+    zones,
+    structures: [],
+    edgeStyle: { stroke: lineColor, strokeWidth: 2, linecap: 'round' },
+    nodeRadius: pointRadius,
+    nodeColor: colors.point || '#2a2a2a',
+    nodeScale: {},
+    nodeColorMap: {},
+    labels: [],
+    defs: [],
+  }
+}
+
+function generateSternHalmaLayout(holeSpacing, opts = {}) {
+  const spacing = holeSpacing || 24
+  const colors = opts.colors || {}
+  const rowH = spacing * Math.sqrt(3) / 2
+  const rim = spacing * 1.2
+  const margin = spacing * 2.5
+  const innerW = spacing * 16 + margin * 2
+  const innerH = Math.round(rowH * 16) + margin * 2 + spacing
+  const boardW = innerW + rim * 2
+  const boardH = innerH + rim * 2
+  const cx = rim + spacing * 8 + margin
+  const topY = rim + margin + spacing * 0.5
+
+  const rowWidths = [1, 2, 3, 4, 13, 12, 11, 10, 9, 10, 11, 12, 13, 4, 3, 2, 1]
+  const nodes = []
+  const armMap = { N: [], NE: [], SE: [], S: [], SW: [], NW: [] }
+
+  for (let row = 0; row < 17; row++) {
+    const w = rowWidths[row]
+    const y = topY + row * rowH
+    const startX = cx - (w - 1) * spacing / 2
+    for (let i = 0; i < w; i++) {
+      const x = startX + i * spacing
+      const idx = nodes.length
+      let arm = 'centre'
+      if (row < 4) arm = 'N'
+      else if (row >= 13) arm = 'S'
+      else if (row >= 4 && row <= 7) {
+        const armWidth = 4 - (row - 4)
+        if (i < armWidth) arm = 'NW'
+        else if (i >= w - armWidth) arm = 'NE'
+      } else if (row >= 9 && row <= 12) {
+        const armWidth = row - 8
+        if (i < armWidth) arm = 'SW'
+        else if (i >= w - armWidth) arm = 'SE'
+      }
+      nodes.push({ id: `h${idx + 1}`, x, y, type: arm !== 'centre' ? `arm-${arm}` : 'centre', arm: arm !== 'centre' ? arm : undefined })
+      if (arm !== 'centre') armMap[arm].push(idx)
+    }
+  }
+
+  // Star geometry for zones
+  const s = spacing / 24
+  const midY = topY + 8 * rowH
+  const polyScale = 1.04
+  const hex = [[-50.5, -93], [50.5, -93], [104.3, 0], [50.5, 92.9], [-50.5, 92.9], [-104.3, 0]]
+    .map(([dx, dy]) => ({ x: cx + dx * s * polyScale, y: midY + dy * s * polyScale }))
+  const tips = [[0, -180.3], [158, -93], [158, 92.9], [0, 180.3], [-158, 92.9], [-158, -93]]
+    .map(([dx, dy]) => ({ x: cx + dx * s * polyScale, y: midY + dy * s * polyScale }))
+
+  const armFills = [colors.armN || '#f2e8d4', colors.armNE || '#d4e4f0', colors.armSE || '#e8d8ec', colors.armS || '#f2e8d4', colors.armSW || '#d4e4f0', colors.armNW || '#e8d8ec']
+  const zones = []
+  zones.push({ type: 'polygon', attrs: { points: hex.map(v => `${v.x},${v.y}`).join(' '), fill: colors.centre || '#e8dcc8' } })
+  for (let i = 0; i < 6; i++) {
+    zones.push({ type: 'polygon', attrs: { points: `${tips[i].x},${tips[i].y} ${hex[i].x},${hex[i].y} ${hex[(i + 1) % 6].x},${hex[(i + 1) % 6].y}`, fill: armFills[i] } })
+  }
+
+  // Star outline as structures
+  const structures = []
+  const outlineColor = colors.outline || '#6b5a40'
+  structures.push({ tag: 'polygon', attrs: { points: `${tips[0].x},${tips[0].y} ${tips[4].x},${tips[4].y} ${tips[2].x},${tips[2].y}`, fill: 'none', stroke: outlineColor, 'stroke-width': 1.5 } })
+  structures.push({ tag: 'polygon', attrs: { points: `${tips[3].x},${tips[3].y} ${tips[5].x},${tips[5].y} ${tips[1].x},${tips[1].y}`, fill: 'none', stroke: outlineColor, 'stroke-width': 1.5 } })
+
+  // Labels
+  const labelPad = spacing * 1.0
+  const labels = [
+    { text: 'N', x: cx, y: tips[0].y - labelPad },
+    { text: 'S', x: cx, y: tips[3].y + labelPad + 5 },
+    { text: 'NE', x: tips[1].x + labelPad, y: tips[1].y + 4 },
+    { text: 'NW', x: tips[5].x - labelPad, y: tips[5].y + 4 },
+    { text: 'SE', x: tips[2].x + labelPad, y: tips[2].y + 4 },
+    { text: 'SW', x: tips[4].x - labelPad, y: tips[4].y + 4 },
+  ]
+
+  return {
+    nodes, edges: [], width: boardW, height: boardH,
+    backgrounds: [
+      { fill: colors.boardBody || '#4a3728', rx: 18, filter: 'url(#board-shadow)' },
+      { x: 3, y: 3, width: boardW - 6, height: boardH - 6, fill: colors.boardRim || '#5c4636', rx: 15 },
+      { x: rim, y: rim, width: innerW, height: innerH, fill: colors.boardFelt || '#2d5c3d', rx: 6 },
+    ],
+    zones,
+    structures,
+    edgeStyle: { stroke: 'none', strokeWidth: 0 },
+    nodeRadius: 2.5,
+    nodeColor: colors.hole || '#3a2c1c',
+    nodeScale: {},
+    nodeColorMap: {},
+    labels,
+    defs: [
+      { tag: 'filter', attrs: { id: 'board-shadow', x: '-5%', y: '-3%', width: '110%', height: '110%' }, children: [
+        { tag: 'feDropShadow', attrs: { dx: 0, dy: 4, stdDeviation: 6, 'flood-color': 'rgba(0,0,0,0.35)' } },
+      ]},
+    ],
+  }
+}
+
 // ─── GAME DEFINITIONS ───────────────────────────────────────────────────────
 // Each variant specifies: boardStyle, dimensions, pieceSet, fen/position
 
@@ -1348,6 +1567,7 @@ const GAMES = {
   halma: {
     label: 'Halma',
     pieceSet: 'playstrategy-draughts-plain',
+    buildLayout: buildCheckeredLayout,
     variants: {
       'standard-2p': { label: '2-Player (16×16)', boardStyle: 'checkered', rows: 16, cols: 16, tileSize: 20, showLabels: false, colors: { lightSquare: '#f5e6c8', darkSquare: '#e8d4a8' }, setup: 'bbbbb11/bbbbb11/bbbbb11/bbb13/b15/16/16/16/16/16/16/15w/13www/11wwwww/11wwwww/11wwwww', setupDesc: '19 pieces each in opposite corner camps (5-col staircase triangle)', variantDesc: 'Move all pieces from own camp to opponent camp by stepping or jumping.' },
       'standard-4p': { label: '4-Player (16×16)', boardStyle: 'checkered', rows: 16, cols: 16, tileSize: 20, showLabels: false, colors: { lightSquare: '#f5e6c8', darkSquare: '#e8d4a8' }, setup: 'bbbb8bbbb/bbbb8bbbb/bbb10bbb/bb12bb/16/16/16/16/16/16/16/16/ww12ww/www10www/wwww8wwww/wwww8wwww', setupDesc: '13 pieces each in all 4 corner camps (4-col staircase triangle)', variantDesc: '4-player variant. Move all pieces from own camp to opposite corner camp.' },
@@ -1356,6 +1576,9 @@ const GAMES = {
   'stern-halma': {
     label: 'Stern-Halma',
     pieceSet: 'fluent-emoji',
+    buildLayout(rows, cols, tileSize, colors, config) {
+      return generateSternHalmaLayout(config.holeSpacing || 30, { colors })
+    },
     variants: {
       '2-player': { label: '2 Player (N vs S)', boardStyle: 'stern-halma', holeSpacing: 30, filledArms: ['N', 'S'], setupDesc: '10 pieces each in opposite arms (N and S)', variantDesc: 'Race across the star board. Hop chains in any direction. No captures.' },
       '3-player': { label: '3 Player', boardStyle: 'stern-halma', holeSpacing: 30, filledArms: ['N', 'SE', 'SW'], setupDesc: '10 pieces each in alternating arms (N, SE, SW)', variantDesc: '3 players on alternating arms. Each races to the diagonally opposite arm.' },
@@ -1650,8 +1873,11 @@ const GAMES = {
   asalto: {
     label: 'Asalto',
     pieceSet: 'fluent-emoji',
+    buildLayout(rows, cols, tileSize, colors, config) {
+      return generateAsaltoLayout(config.boardSize || 320, { asaltoGrid: config.asaltoGrid, colors })
+    },
     variants: {
-      standard: { label: 'Standard', boardStyle: 'asalto', boardSize: 320, asaltoSetup: { officers: [3, 5], soldiers: Array.from({ length: 27 }, (_, i) => i + 6) }, pieceNames: { officer: 'Officer', soldier: 'Soldier' }, setupDesc: '2 Officers in fortress vs 27 Soldiers on plain', variantDesc: 'Asymmetric siege. Officers jump-capture like draughts; Soldiers advance forward/sideways. Immobilize to win.' },
+      standard: { label: 'Standard', boardStyle: 'asalto', boardSize: 320, asaltoSetup: { officers: [3, 5], soldiers: Array.from({ length: 27 }, (_, i) => i + 6).filter(i => i !== 8 && i !== 9 && i !== 10) }, pieceNames: { officer: 'Officer', soldier: 'Soldier' }, setupDesc: '2 Officers in fortress vs 24 Soldiers on plain', variantDesc: 'Asymmetric siege. Officers jump-capture like draughts; Soldiers advance forward/sideways. Immobilize to win.' },
       'royal-garrison': { label: 'Royal Garrison', boardStyle: 'asalto', boardSize: 380, asaltoGrid: { rows: [[2,3,4,5,6],[2,3,4,5,6],[0,1,2,3,4,5,6,7,8],[0,1,2,3,4,5,6,7,8],[0,1,2,3,4,5,6,7,8],[0,1,2,3,4,5,6,7,8],[0,1,2,3,4,5,6,7,8],[2,3,4,5,6],[2,3,4,5,6]], fortressRows: 2, fortressCols: [2,3,4,5,6], fortressExtraRow: 2, extraNodes: [{ row: 0, col: 1, fortress: true, connectsTo: [[0,2],[1,2]] }, { row: 0, col: 7, fortress: true, connectsTo: [[0,6],[1,6]] }] }, asaltoSetup: { officers: [12, 14, 16], soldiers: Array.from({ length: 55 }, (_, i) => i + 10).filter(i => i !== 12 && i !== 13 && i !== 14 && i !== 15 && i !== 16) }, pieceNames: { officer: 'Officer', soldier: 'Soldier' }, setupDesc: '3 Officers vs 50 Soldiers on plain', variantDesc: 'Extended Asalto on 9×9 cross. Three Officers defend fortress against 50 Soldiers.' },
     },
   },
@@ -2837,6 +3063,21 @@ function render() {
     config.layout = layoutBuilder(config.rows || 8, config.cols || 8, config.tileSize || 56, config.colors || {}, config)
   }
 
+  // Stern-halma: build position from filledArms + layout nodes (consolidated mode only)
+  if (renderMode === 'consolidated' && config.filledArms && config.layout && config.layout.nodes && !config.position) {
+    const armOrder = ['N', 'NE', 'SE', 'S', 'SW', 'NW']
+    const armKeys = ['red-circle', 'blue-circle', 'green-circle', 'black-circle', 'purple-circle', 'brown-circle']
+    const pos = {}
+    for (const armName of config.filledArms) {
+      const colorIdx = armOrder.indexOf(armName)
+      const key = armKeys[colorIdx]
+      for (const node of config.layout.nodes) {
+        if (node.arm === armName) pos[node.id] = key
+      }
+    }
+    config.position = pos
+  }
+
   let svg
   if (renderMode === 'consolidated') {
     if (isGridProvider(config)) {
@@ -3699,7 +3940,7 @@ function bindBoardHover(config) {
       const arm = cell.dataset.arm || type.slice(4)
       const armNames = { N: 'North', NE: 'North-East', SE: 'South-East', S: 'South', SW: 'South-West', NW: 'North-West' }
       const armOrder = ['N', 'NE', 'SE', 'S', 'SW', 'NW']
-      const armPlayerColors = ['Red', 'Blue', 'Green', 'Yellow', 'Purple', 'Orange']
+      const armPlayerColors = ['Red', 'Blue', 'Green', 'Black', 'Purple', 'Brown']
       text = `${sq} — ${armNames[arm] || arm} arm`
       const filledArms = config.filledArms || []
       if (filledArms.includes(arm)) {

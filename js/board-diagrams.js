@@ -607,6 +607,8 @@ const asalto = {
         [2, 3, 4],
       ],
       fortressRows: 2,
+      fortressExtraRow: 2,
+      fortressCols: [2, 3, 4],
     }
     const rowDefs = gridDef.rows.map((cols, y) => ({ cols, y }))
     const fortressRowCount = gridDef.fortressRows || 2
