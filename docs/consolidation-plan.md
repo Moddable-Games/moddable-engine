@@ -683,10 +683,167 @@ A: No. Passes explicit `hexes[]` array with whatever cells they want. The render
 
 ### Phase 2: topology-graph (4 providers, ~15 variants)
 
-1. **morris** — concentric rings structure generator
-2. **nyout** — perimeter-cross structure generator
-3. **asalto** — grid-cross + fortress zone computation
-4. **stern-halma** — star structure + arm zone assignment
+Master notation designed (see below). Execution steps:
+
+1. **Add `renderLayout(config)` to topology-graph** — receives `GraphBoardLayout` config,
+   returns `{ width, height, elements[], cells[], labels[], defs[] }`.
+   Code MOVED from the 4 providers: same pixel math, structured output.
+
+2. **Write `render-consolidated-graph.js` bridge** — thin pass-through (same pattern).
+   Reads `config.layout` from graph variants, calls topology-graph `renderLayout()`.
+
+3. **Add `buildLayout` to graph families in boards.js** — morris, nyout, asalto,
+   stern-halma each get explicit builders using shared structure generators.
+
+4. **Wire toggle** — "Original" = board-diagrams providers, "Final" = new pipeline.
+   Verify all ~15 variants.
+
+---
+
+## Graph Master Notation (Phase 2 complete design)
+
+### Status: DESIGNED (2026-07-10)
+
+This is the canonical board description format for ALL graph-topology games.
+The renderer consumes this. Nothing else. No game names, no branching.
+
+### Source analysis (all 4 providers read simultaneously)
+
+| Provider | Games served | Unique features |
+|----------|-------------|-----------------|
+| morris | 7 variants (3/6/9/12-mens, lasker, morabaraba, shax) | Concentric ring rects, midpoint cross-lines, diagonal lines, uniform node dots |
+| nyout | 1 variant | Square perimeter + diagonal cross, junction nodes (larger), centre node (largest) |
+| asalto | 2 variants (standard, royal garrison) | Grid-cross node layout, fortress zone highlight (rect + ear polygons), diagonal edges, pieces |
+| stern-halma | 5 variants (2-6 player Chinese Checkers) | Star geometry, nested board frame (body/rim/felt), arm fill polygons, hole dots, arm labels, pieces |
+
+### The 8 universal drawing primitives
+
+Every graph board is composed exclusively of these operations, drawn in this order:
+
+1. **Backgrounds** — rect fills, potentially nested (body → rim → felt for stern-halma style)
+2. **Zone fills** — coloured polygons/rects marking regions (fortress area, arm triangles, centre hex)
+3. **Structure shapes** — geometric structure that IS NOT edges (concentric ring rects for morris, star outline polygons)
+4. **Edges** — lines between connected nodes
+5. **Node dots** — filled circles at each playable position (radius may vary by node type)
+6. **Hit targets** — transparent circles for interaction (larger radius than visible dots)
+7. **Pieces** — images or coloured circles at occupied positions
+8. **Labels** — text elements (direction labels, position names)
+
+The renderer iterates 1-8 in order. One pass. No branching on game or provider.
+
+### The notation format
+
+A graph board description is a single object — `GraphBoardLayout`:
+
+```js
+{
+  // Geometry — absolute positions for all nodes
+  nodes: [
+    { id: 'n1', x: 20, y: 20, type?: 'junction' | 'centre' | 'arm-N' | ... }
+  ],
+
+  // Connectivity — which nodes connect (for edge drawing)
+  edges: [
+    { from: 'n1', to: 'n2' }    // or [fromIdx, toIdx] shorthand
+  ],
+
+  // Board dimensions
+  width: 320,
+  height: 320,
+
+  // 1. Backgrounds — rects drawn in order (outer → inner for layered frames)
+  backgrounds: [
+    { fill, rx?, stroke?, 'stroke-width'?, x?, y?, width?, height?, filter? }
+  ],
+
+  // 2. Zone fills — polygons/rects highlighting regions
+  zones: [
+    { type: 'rect', attrs: { x, y, width, height, fill, rx? } }
+    | { type: 'polygon', attrs: { points, fill } }
+  ],
+
+  // 3. Structure shapes — geometric structure that isn't edges
+  //    (ring rects, star outlines, fortress borders)
+  structures: [
+    { tag: 'rect' | 'polygon' | 'line', attrs: { ... } }
+  ],
+
+  // 4. Edge style
+  edgeStyle: { stroke: '#333', strokeWidth: 2.5, linecap: 'round' },
+
+  // 5. Node dots — how to render visible node markers
+  nodeRadius: 7,                    // base radius
+  nodeColor: '#333',                // default fill
+  nodeScale: { junction: 1.2, centre: 1.4 },  // type → scale multiplier
+  nodeColorMap: { centre: '#gold' },           // type → fill override
+
+  // 6. Hit targets — automatically generated (transparent circles at node positions)
+  //    Radius = nodeRadius * 2 for comfortable click targets
+  //    Attrs: data-sq, data-type, class="board-cell"
+
+  // 7. Pieces — not part of topology, handled by serializeLayout (same as grid/hex)
+
+  // 8. Labels — text elements at absolute positions
+  labels: [
+    { x, y, text, fontSize?, fill?, anchor? }
+  ],
+
+  // Optional: SVG filter definitions (drop-shadow for stern-halma frame)
+  defs: [
+    { tag: 'filter', attrs: { id: 'board-shadow', ... }, children: [...] }
+  ],
+}
+```
+
+### What the renderer does (one straight pipeline)
+
+```
+renderLayout(config) → { width, height, elements[], cells[], labels[], defs[] }
+```
+
+1. Emit background rects from `backgrounds[]`
+2. Emit zone fills from `zones[]` (rects and polygons)
+3. Emit structure shapes from `structures[]`
+4. For each edge: look up node positions, emit line element
+5. For each node: emit filled circle (radius scaled by type)
+6. Build cells[] — transparent circle per node for hit targets
+7. Emit labels from `labels[]`
+8. Pass through `defs[]` for filter definitions
+
+### Structure generators (live in boards.js as data factories)
+
+```js
+// Morris — concentric ring positions + edges
+function generateMorrisLayout(rings, size, opts) → { nodes, edges, structures }
+
+// Nyout — perimeter square + diagonals
+function generateNyoutLayout(size) → { nodes, edges }
+
+// Asalto — grid-cross + fortress
+function generateAsaltoLayout(gridDef, size) → { nodes, edges, zones }
+
+// Stern-Halma — 6-pointed star holes
+function generateSternHalmaLayout(spacing) → { nodes, edges, zones, structures, backgrounds }
+```
+
+### Validation: the "new game tomorrow" test
+
+Q: "If someone adds Twelve Men's Morris with diagonals, does the renderer need new code?"
+
+A: No. Passes `rings: 3, diagonals: true` to generator. Generator produces extra diagonal
+edges. Renderer draws lines between connected nodes. Done.
+
+Q: "If someone adds Fox & Geese (asymmetric piece game on a cross grid)?"
+
+A: No. Same cross-grid generator as Asalto with different `asaltoGrid` params.
+Pieces declared via position map. Renderer draws whatever it's given.
+
+Q: "If someone adds a custom abstract on a pentagonal star layout?"
+
+A: No. Passes explicit `nodes[]` with absolute positions + `edges[]` connections.
+Renderer draws nodes and edges. Zero new code.
+
+---
 
 ### Phase 3: topology-pit (1 provider, ~10 variants)
 

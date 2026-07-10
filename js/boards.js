@@ -9,6 +9,7 @@ import { resolveSurface } from './surface-resolver.js'
 import { resolve as cascadeResolve } from './cascade-resolver.js'
 import { renderConsolidated, isGridProvider } from './render-consolidated.js'
 import { renderConsolidatedHex, isHexProvider } from './render-consolidated-hex.js'
+import { renderConsolidatedGraph, isGraphProvider } from './render-consolidated-graph.js'
 
 setDeckRenderer(renderDeckSvg)
 setMahjongRenderer(renderMahjongSvg)
@@ -727,6 +728,197 @@ function buildAgonPosition() {
 
 const JUNGLE_SETUP = 'l5t/1d3c1/r1p1w1e/7/7/7/E1W1P1R/1C3D1/T5L'
 
+// ─── GRAPH LAYOUT GENERATORS (DATA FACTORIES) ───────────────────────────────
+
+function generateMorrisLayout(rings, boardSize, opts = {}) {
+  const size = boardSize || 320
+  const diagonals = opts.diagonals || false
+  const midpoints = opts.midpoints !== false
+  const pointRadius = opts.pointRadius || 7
+  const colors = opts.colors || {}
+  const lineColor = colors.line || '#4a3520'
+
+  const margin = size * 0.0625, maxInset = size * 0.375
+  const step = rings > 1 ? (maxInset - margin) / (rings - 1) : 0
+  const cx = size / 2, cy = size / 2
+  const ringRects = []
+  for (let i = 0; i < rings; i++) {
+    const inset = margin + i * step
+    ringRects.push({ x: inset, y: inset, w: size - inset * 2, h: size - inset * 2 })
+  }
+
+  // Compute node positions (corners + midpoints of each ring)
+  const nodes = []
+  for (const rect of ringRects) {
+    nodes.push({ id: `n${nodes.length + 1}`, x: rect.x, y: rect.y })
+    nodes.push({ id: `n${nodes.length + 1}`, x: rect.x + rect.w, y: rect.y })
+    nodes.push({ id: `n${nodes.length + 1}`, x: rect.x + rect.w, y: rect.y + rect.h })
+    nodes.push({ id: `n${nodes.length + 1}`, x: rect.x, y: rect.y + rect.h })
+    if (midpoints) {
+      nodes.push({ id: `n${nodes.length + 1}`, x: cx, y: rect.y })
+      nodes.push({ id: `n${nodes.length + 1}`, x: rect.x + rect.w, y: cy })
+      nodes.push({ id: `n${nodes.length + 1}`, x: cx, y: rect.y + rect.h })
+      nodes.push({ id: `n${nodes.length + 1}`, x: rect.x, y: cy })
+    }
+  }
+  if (rings === 1 && midpoints) nodes.push({ id: `n${nodes.length + 1}`, x: cx, y: cy })
+
+  // Compute edges from ring connectivity
+  const edges = []
+  const ppRing = midpoints ? 8 : 4
+  for (let r = 0; r < rings; r++) {
+    const base = r * ppRing
+    for (let i = 0; i < 4; i++) {
+      const curr = base + i
+      const next = base + ((i + 1) % 4)
+      if (midpoints) {
+        const mid = base + 4 + i
+        edges.push({ from: nodes[curr].id, to: nodes[mid].id })
+        edges.push({ from: nodes[mid].id, to: nodes[next].id })
+      } else {
+        edges.push({ from: nodes[curr].id, to: nodes[next].id })
+      }
+    }
+  }
+  // Cross-lines connecting rings at midpoints
+  if (midpoints && rings > 1) {
+    for (let i = 0; i < 4; i++) {
+      for (let r = 0; r < rings - 1; r++) {
+        const a = r * ppRing + 4 + i
+        const b = (r + 1) * ppRing + 4 + i
+        edges.push({ from: nodes[a].id, to: nodes[b].id })
+      }
+    }
+  }
+  // Diagonal edges
+  if (diagonals) {
+    if (rings === 1) {
+      edges.push({ from: nodes[0].id, to: nodes[2].id })
+      edges.push({ from: nodes[1].id, to: nodes[3].id })
+    } else {
+      for (let i = 0; i < 4; i++) {
+        const outer = i
+        const inner = (rings - 1) * ppRing + i
+        edges.push({ from: nodes[outer].id, to: nodes[inner].id })
+      }
+    }
+  }
+
+  // Structure: ring rects (drawn as stroke-only rectangles)
+  const structures = []
+  for (const rect of ringRects) {
+    structures.push({ tag: 'rect', attrs: {
+      x: rect.x, y: rect.y, width: rect.w, height: rect.h,
+      fill: 'none', stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square',
+    }})
+  }
+  // Midpoint cross-lines as structure (not edges — they're geometric, not connectivity)
+  if (midpoints) {
+    if (rings === 1) {
+      const r = ringRects[0]
+      structures.push({ tag: 'line', attrs: { x1: cx, y1: r.y, x2: cx, y2: r.y + r.h, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+      structures.push({ tag: 'line', attrs: { x1: r.x, y1: cy, x2: r.x + r.w, y2: cy, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+    } else {
+      structures.push({ tag: 'line', attrs: { x1: cx, y1: ringRects[0].y, x2: cx, y2: ringRects[rings - 1].y, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+      const last = ringRects[rings - 1]
+      structures.push({ tag: 'line', attrs: { x1: cx, y1: last.y + last.h, x2: cx, y2: ringRects[0].y + ringRects[0].h, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+      structures.push({ tag: 'line', attrs: { x1: ringRects[0].x, y1: cy, x2: ringRects[rings - 1].x, y2: cy, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+      structures.push({ tag: 'line', attrs: { x1: last.x + last.w, y1: cy, x2: ringRects[0].x + ringRects[0].w, y2: cy, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+    }
+  }
+  if (diagonals) {
+    if (rings === 1) {
+      const r = ringRects[0]
+      structures.push({ tag: 'line', attrs: { x1: r.x, y1: r.y, x2: r.x + r.w, y2: r.y + r.h, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+      structures.push({ tag: 'line', attrs: { x1: r.x + r.w, y1: r.y, x2: r.x, y2: r.y + r.h, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+    } else {
+      const o = ringRects[0], inner = ringRects[rings - 1]
+      structures.push({ tag: 'line', attrs: { x1: o.x, y1: o.y, x2: inner.x, y2: inner.y, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+      structures.push({ tag: 'line', attrs: { x1: o.x + o.w, y1: o.y, x2: inner.x + inner.w, y2: inner.y, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+      structures.push({ tag: 'line', attrs: { x1: o.x, y1: o.y + o.h, x2: inner.x, y2: inner.y + inner.h, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+      structures.push({ tag: 'line', attrs: { x1: o.x + o.w, y1: o.y + o.h, x2: inner.x + inner.w, y2: inner.y + inner.h, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+    }
+  }
+
+  return {
+    nodes, edges, width: size, height: size,
+    backgrounds: [{ fill: colors.background || '#f5e6c8', rx: 4 }],
+    structures,
+    zones: [],
+    edgeStyle: { stroke: 'none', strokeWidth: 0, linecap: 'round' },
+    nodeRadius: pointRadius,
+    nodeColor: colors.point || '#4a3520',
+    nodeScale: {},
+    nodeColorMap: {},
+    labels: [],
+    defs: [],
+  }
+}
+
+function generateNyoutLayout(boardSize, opts = {}) {
+  const size = boardSize || 320
+  const pointRadius = opts.pointRadius || 7
+  const colors = opts.colors || {}
+  const lineColor = colors.line || '#4a3520'
+
+  const margin = size * 0.08
+  const x0 = margin, x1 = size - margin
+  const y0 = margin, y1 = size - margin
+  const cx = size / 2, cy = size / 2
+
+  const corners = [
+    { x: x1, y: y1 }, { x: x0, y: y1 }, { x: x0, y: y0 }, { x: x1, y: y0 },
+  ]
+
+  const nodes = []
+  const edges = []
+
+  // Outer ring: 4 sides × 5 nodes
+  for (let side = 0; side < 4; side++) {
+    const from = corners[side], to = corners[(side + 1) % 4]
+    nodes.push({ id: `n${nodes.length + 1}`, x: from.x, y: from.y, type: 'junction' })
+    for (let i = 1; i <= 4; i++) {
+      nodes.push({ id: `n${nodes.length + 1}`, x: from.x + (to.x - from.x) * i / 5, y: from.y + (to.y - from.y) * i / 5 })
+    }
+  }
+  for (let i = 0; i < 20; i++) edges.push({ from: nodes[i].id, to: nodes[(i + 1) % 20].id })
+
+  // Centre (index 20)
+  nodes.push({ id: `n${nodes.length + 1}`, x: cx, y: cy, type: 'centre' })
+
+  // Diagonal intermediates
+  const nw = corners[2], se = corners[0], ne = corners[3], sw = corners[1]
+  nodes.push({ id: `n${nodes.length + 1}`, x: nw.x + (cx - nw.x) / 3, y: nw.y + (cy - nw.y) / 3 })
+  nodes.push({ id: `n${nodes.length + 1}`, x: nw.x + (cx - nw.x) * 2 / 3, y: nw.y + (cy - nw.y) * 2 / 3 })
+  nodes.push({ id: `n${nodes.length + 1}`, x: cx + (se.x - cx) / 3, y: cy + (se.y - cy) / 3 })
+  nodes.push({ id: `n${nodes.length + 1}`, x: cx + (se.x - cx) * 2 / 3, y: cy + (se.y - cy) * 2 / 3 })
+  nodes.push({ id: `n${nodes.length + 1}`, x: ne.x + (cx - ne.x) / 3, y: ne.y + (cy - ne.y) / 3 })
+  nodes.push({ id: `n${nodes.length + 1}`, x: ne.x + (cx - ne.x) * 2 / 3, y: ne.y + (cy - ne.y) * 2 / 3 })
+  nodes.push({ id: `n${nodes.length + 1}`, x: cx + (sw.x - cx) / 3, y: cy + (sw.y - cy) / 3 })
+  nodes.push({ id: `n${nodes.length + 1}`, x: cx + (sw.x - cx) * 2 / 3, y: cy + (sw.y - cy) * 2 / 3 })
+
+  // Diagonal edges: NW(n11)→n22→n23→centre(n21)→n24→n25→SE(n1)
+  edges.push({ from: 'n11', to: 'n22' }, { from: 'n22', to: 'n23' }, { from: 'n23', to: 'n21' })
+  edges.push({ from: 'n21', to: 'n24' }, { from: 'n24', to: 'n25' }, { from: 'n25', to: 'n1' })
+  // NE(n16)→n26→n27→centre(n21)→n28→n29→SW(n6)
+  edges.push({ from: 'n16', to: 'n26' }, { from: 'n26', to: 'n27' }, { from: 'n27', to: 'n21' })
+  edges.push({ from: 'n21', to: 'n28' }, { from: 'n28', to: 'n29' }, { from: 'n29', to: 'n6' })
+
+  return {
+    nodes, edges, width: size, height: size,
+    backgrounds: [{ fill: colors.background || '#f5e6c8', rx: 4 }],
+    structures: [],
+    zones: [],
+    edgeStyle: { stroke: lineColor, strokeWidth: 2.5, linecap: 'round' },
+    nodeRadius: pointRadius,
+    nodeColor: colors.point || '#4a3520',
+    nodeScale: { junction: 1.2, centre: 1.4 },
+    nodeColorMap: { junction: colors.junction || '#c0622f', centre: colors.centre || '#8b1a1a' },
+    labels: [],
+    defs: [],
+  }
+}
+
 // ─── GAME DEFINITIONS ───────────────────────────────────────────────────────
 // Each variant specifies: boardStyle, dimensions, pieceSet, fen/position
 
@@ -1102,6 +1294,9 @@ const GAMES = {
   morris: {
     label: 'Morris',
     pieceSet: 'playstrategy-go-classic',
+    buildLayout(rows, cols, tileSize, colors, config) {
+      return generateMorrisLayout(config.rings || 3, config.boardSize || 320, { diagonals: config.diagonals, midpoints: config.midpoints, colors })
+    },
     variants: {
       'nine-mens-morris': { label: "Nine Men's Morris", boardStyle: 'morris', boardSize: 320, rings: 3, setupDesc: '9 pieces each, placed alternately on intersections', variantDesc: 'Three concentric squares joined at midpoints. Flying allowed when reduced to 3 pieces.' },
       'six-mens-morris': { label: "Six Men's Morris", boardStyle: 'morris', boardSize: 260, rings: 2, setupDesc: '6 pieces each, placed alternately on intersections', variantDesc: 'Two concentric squares with connecting lines. Medieval European standard before Nine Men\'s Morris.' },
@@ -1490,6 +1685,9 @@ const GAMES = {
   nyout: {
     label: 'Nyout',
     pieceSet: null,
+    buildLayout(rows, cols, tileSize, colors, config) {
+      return generateNyoutLayout(config.boardSize || 320, { colors })
+    },
     nodeNames: {
       n1: 'cham-meoki (start)', n2: 'nal-yut', n3: 'nal-geol', n4: 'nal-gae', n5: 'nal-do',
       n6: 'chi-mo', n7: 'chi-yut', n8: 'chi-geol', n9: 'chi-gae', n10: 'chi-do',
@@ -2645,6 +2843,8 @@ function render() {
       svg = renderConsolidated(config)
     } else if (isHexProvider(config)) {
       svg = renderConsolidatedHex(config)
+    } else if (isGraphProvider(config)) {
+      svg = renderConsolidatedGraph(config)
     }
     if (!svg) {
       svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="400" height="200" fill="#1a1a2e" rx="8"/><text x="200" y="80" text-anchor="middle" font-size="14" fill="#e8a030" font-family="system-ui">Final mode — not yet implemented</text><text x="200" y="110" text-anchor="middle" font-size="12" fill="#888" font-family="system-ui">Provider: ${config.boardStyle || 'unknown'}</text><text x="200" y="135" text-anchor="middle" font-size="11" fill="#555" font-family="system-ui">Switch to Original to view</text></svg>`

@@ -217,6 +217,112 @@ export function createGraphTopology(config) {
     }
   }
 
+  function renderLayout(config = {}) {
+    const {
+      nodes: inputNodes,
+      edges: inputEdges,
+      width = 320,
+      height = 320,
+      backgrounds = [],
+      zones = [],
+      structures = [],
+      edgeStyle = { stroke: '#333', strokeWidth: 2.5, linecap: 'round' },
+      nodeRadius = 7,
+      nodeColor = '#333',
+      nodeScale = {},
+      nodeColorMap = {},
+      labels = [],
+      defs = [],
+    } = config
+
+    const nodeList = inputNodes || []
+    const edgeList = inputEdges || []
+
+    const elements = []
+
+    // 1. Backgrounds
+    for (const bg of backgrounds) {
+      const attrs = { ...bg }
+      if (attrs.x === undefined) attrs.x = 0
+      if (attrs.y === undefined) attrs.y = 0
+      if (attrs.width === undefined) attrs.width = width
+      if (attrs.height === undefined) attrs.height = height
+      elements.push({ tag: 'rect', attrs })
+    }
+
+    // 2. Zone fills
+    for (const zone of zones) {
+      elements.push({ tag: zone.type || 'rect', attrs: zone.attrs })
+    }
+
+    // 3. Structure shapes (ring rects, star outlines, fortress borders)
+    for (const s of structures) {
+      elements.push(s)
+    }
+
+    // Build position lookup
+    const posMap = {}
+    for (const n of nodeList) {
+      posMap[n.id] = { x: n.x, y: n.y }
+    }
+
+    // 4. Edges
+    for (const e of edgeList) {
+      const fromId = typeof e.from === 'string' ? e.from : nodeList[e.from]?.id
+      const toId = typeof e.to === 'string' ? e.to : nodeList[e.to]?.id
+      const fromPos = posMap[fromId]
+      const toPos = posMap[toId]
+      if (!fromPos || !toPos) continue
+      elements.push({ tag: 'line', attrs: {
+        x1: fromPos.x, y1: fromPos.y,
+        x2: toPos.x, y2: toPos.y,
+        stroke: edgeStyle.stroke,
+        'stroke-width': edgeStyle.strokeWidth,
+        'stroke-linecap': edgeStyle.linecap || 'round',
+      }})
+    }
+
+    // 5. Node dots
+    for (const n of nodeList) {
+      const scale = nodeScale[n.type] || 1
+      const fill = nodeColorMap[n.type] || nodeColor
+      elements.push({ tag: 'circle', attrs: {
+        cx: n.x, cy: n.y, r: nodeRadius * scale, fill,
+      }})
+    }
+
+    // 6. Hit targets
+    const cells = []
+    for (const n of nodeList) {
+      const attrs = {
+        cx: n.x, cy: n.y, r: nodeRadius * 2,
+        fill: 'transparent', 'data-sq': n.id, class: 'board-cell',
+        'data-type': 'node',
+      }
+      if (n.type) attrs['data-type'] = n.type
+      if (n.arm) attrs['data-arm'] = n.arm
+      cells.push({
+        id: n.id, x: n.x, y: n.y,
+        element: { tag: 'circle', attrs },
+      })
+    }
+
+    // 8. Labels
+    const labelElements = []
+    for (const lbl of labels) {
+      labelElements.push({ tag: 'text', attrs: {
+        x: lbl.x, y: lbl.y,
+        'text-anchor': lbl.anchor || 'middle',
+        'font-size': lbl.fontSize || 10,
+        fill: lbl.fill || 'rgba(255,255,255,0.5)',
+        'font-family': lbl.fontFamily || 'sans-serif',
+        'pointer-events': 'none',
+      }, text: lbl.text })
+    }
+
+    return { width, height, elements, cells, labels: labelElements, defs, tileSize: nodeRadius * 3.5 }
+  }
+
   return {
     size: nodeSet.size,
     directed,
@@ -233,6 +339,7 @@ export function createGraphTopology(config) {
     jumpPairs,
     adjacentPairs,
     getLayout,
+    renderLayout,
     serializePosition,
     parsePosition,
   }
