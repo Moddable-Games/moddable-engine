@@ -318,7 +318,14 @@ function serializeWithDefs(layout, opts) {
     let content = readFileSync(filePath, 'utf8')
     content = content.replace(/<\?xml[^>]*\?>/, '').replace(/<!DOCTYPE[^>]*>/, '').trim()
     const viewBox = content.match(/viewBox="([^"]+)"/)
-    const vb = viewBox ? viewBox[1] : '0 0 45 45'
+    let vb
+    if (viewBox) {
+      vb = viewBox[1]
+    } else {
+      const w = content.match(/width="(\d+)"/)
+      const h = content.match(/height="(\d+)"/)
+      vb = `0 0 ${w ? w[1] : '45'} ${h ? h[1] : '45'}`
+    }
     const inner = content.replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').trim()
     pieceDefs.push(`<symbol id="piece-${key}" viewBox="${vb}">${inner}</symbol>`)
   }
