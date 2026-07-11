@@ -592,7 +592,11 @@ function parseVocabularyFen(fen, rows, cols, vocabulary) {
         const rankNum = rows - r
         const vocabEntry = vocabulary[ch]
         if (vocabEntry) {
-          position[`${file}${rankNum}`] = { ...vocabEntry }
+          if (typeof vocabEntry === 'string') {
+            position[`${file}${rankNum}`] = vocabEntry
+          } else {
+            position[`${file}${rankNum}`] = { ...vocabEntry }
+          }
         } else {
           position[`${file}${rankNum}`] = ch
         }
