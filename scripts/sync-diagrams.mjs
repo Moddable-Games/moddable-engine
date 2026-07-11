@@ -33,6 +33,7 @@ import { createPitTopology } from '../packages/topology-pit/src/topology-pit.js'
 import { createGraphTopology } from '../packages/topology-graph/src/topology-graph.js'
 import { createTrackTopology } from '../packages/topology-track/src/topology-track.js'
 import { serializeLayout } from '../packages/render/src/serialize-layout.js'
+import { buildPerimeterLayout, PERIMETER_THEMES } from '../js/perimeter-layout.mjs'
 
 const args = process.argv.slice(2)
 const doExport = args.includes('--export')
@@ -266,12 +267,13 @@ function renderToSvg(layout, engine, title) {
     }
     case 'track': {
       const track = createTrackTopology({ positions: engine.topology?.positions || 24 })
-      const trackConfig = { ...config }
+      let trackConfig = { ...config }
       if (config.style === 'perimeter' && engine.content?.source) {
         const boardData = loadContentData(engine.content.source)
         if (boardData && engine.content.board) {
-          const board = boardData.boards?.[engine.content.board]
-          if (board) Object.assign(trackConfig, buildPerimeterConfig(board, engine))
+          const variant = engine.content.board
+          const perimeterConfig = { variant, boardData, theme: PERIMETER_THEMES[variant] }
+          trackConfig = buildPerimeterLayout(0, 0, 0, {}, perimeterConfig)
         }
       }
       rendered = track.renderLayout(trackConfig)
