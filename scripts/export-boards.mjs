@@ -150,6 +150,7 @@ function embedPieceImages(svg) {
 
     let content = readFileSync(filePath, 'utf8')
     content = content.replace(/<\?xml[^>]*\?>\s*/, '').replace(/<!DOCTYPE[^>]*>\s*/, '').trim()
+    content = content.replace(/xlink:href/g, 'href')
     const vbMatch = content.match(/viewBox="([^"]+)"/)
     let vb
     if (vbMatch) {

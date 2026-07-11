@@ -339,6 +339,7 @@ function buildRenderOpts(resolved) {
       if (resolved._boardData) opts.boardData = resolved._boardData
       else if (resolved.content?.data) opts.boardData = resolved.content.data
       if (resolved._variant) opts.variant = resolved._variant
+      else if (resolved.content?.board) opts.variant = resolved.content.board
     }
     if (boardStyle === 'backgammon' && resolved.setup && typeof resolved.setup === 'string') {
       opts.parsedSetup = parseBackgammonSetup(resolved.setup)
