@@ -486,6 +486,14 @@ function buildCellMap(zones, rows, cols) {
   const fill = zones.fill || true
   const map = Array.from({ length: rows }, () => Array(cols).fill(fill))
 
+  if (zones.voids) {
+    for (const [r, c] of zones.voids) {
+      if (r >= 0 && r < rows && c >= 0 && c < cols) {
+        map[r][c] = null
+      }
+    }
+  }
+
   if (zones.cells) {
     for (const def of zones.cells) {
       const positions = Array.isArray(def.at[0]) ? def.at : [def.at]
