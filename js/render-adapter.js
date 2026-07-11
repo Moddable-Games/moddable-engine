@@ -404,6 +404,11 @@ function buildRenderOpts(resolved) {
     opts.layers = render.layers
   }
 
+  // Overlays (rivers, borders, paths drawn over the board)
+  if (render.overlays) {
+    opts.overlays = render.overlays
+  }
+
   // Position/setup
   if (resolved._position) {
     // Pre-built runtime position (handicap, fanorona, go presets)
