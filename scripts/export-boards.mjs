@@ -232,11 +232,12 @@ function parseFenToPosition(fen) {
 function parseHexSetup(setup) {
   if (!setup.includes(':')) return null
   const position = {}
-  for (const pair of setup.split(',')) {
-    const colonIdx = pair.lastIndexOf(':')
-    if (colonIdx < 0) continue
-    const coord = pair.substring(0, colonIdx)
-    const piece = pair.substring(colonIdx + 1)
+  const entries = setup.match(/-?\d+,-?\d+:[A-Za-z]+/g)
+  if (!entries) return null
+  for (const entry of entries) {
+    const colonIdx = entry.lastIndexOf(':')
+    const coord = entry.substring(0, colonIdx)
+    const piece = entry.substring(colonIdx + 1)
     position[coord] = { type: piece }
   }
   return position

@@ -321,10 +321,13 @@ function parseFenToPosition(fen) {
 function parseHexSetup(setup) {
   if (!setup.includes(':')) return null
   const position = {}
-  for (const pair of setup.split(',')) {
-    const colonIdx = pair.lastIndexOf(':')
-    if (colonIdx < 0) continue
-    position[pair.substring(0, colonIdx)] = { type: pair.substring(colonIdx + 1) }
+  const entries = setup.match(/-?\d+,-?\d+:[A-Za-z]+/g)
+  if (!entries) return null
+  for (const entry of entries) {
+    const colonIdx = entry.lastIndexOf(':')
+    const coord = entry.substring(0, colonIdx)
+    const piece = entry.substring(colonIdx + 1)
+    position[coord] = { type: piece }
   }
   return position
 }
@@ -332,16 +335,48 @@ function parseHexSetup(setup) {
 function resolvePieceImages(engine) {
   if (!engine.pieces?.set) return null
   const setName = engine.pieces.set
-  const galleryPath = resolve(ENGINE_ROOT, 'pieces/sets', setName, 'manifest.json')
-  if (!existsSync(galleryPath)) return null
+  return loadPieceSet(setName)
+}
+
+function loadPieceSet(setName) {
+  const setDir = resolve(ENGINE_ROOT, 'pieces/sets', setName)
+  const manifestPath = resolve(setDir, 'manifest.json')
+  if (!existsSync(manifestPath)) return null
+
   try {
-    const manifest = JSON.parse(readFileSync(galleryPath, 'utf8'))
+    const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
     const images = {}
-    const setDir = resolve(ENGINE_ROOT, 'pieces/sets', setName)
-    for (const [key, file] of Object.entries(manifest.pieces || {})) {
-      images[key] = resolve(setDir, file)
+
+    if (manifest.extends) {
+      const base = loadPieceSet(manifest.extends)
+      if (base) Object.assign(images, base)
     }
-    return images
+
+    for (const [key, entry] of Object.entries(manifest.pieces || {})) {
+      if (typeof entry === 'string') {
+        images[key] = resolve(setDir, entry)
+      } else if (entry && entry.file) {
+        if (entry.source) {
+          const sourceDir = resolve(setDir, manifest.sources?.[entry.source] || `../${entry.source}`)
+          images[key] = resolve(sourceDir, entry.file)
+        } else {
+          images[key] = resolve(setDir, entry.file)
+        }
+      }
+    }
+
+    // FEN character mapping: uppercase = white piece, lowercase = black
+    // Map single FEN chars to their piece image keys
+    const fenMap = {}
+    for (const key of Object.keys(images)) {
+      if (key.length === 2 && (key[0] === 'w' || key[0] === 'b')) {
+        const fenChar = key[0] === 'w' ? key[1].toUpperCase() : key[1].toLowerCase()
+        if (!images[fenChar]) fenMap[fenChar] = images[key]
+      }
+    }
+    Object.assign(images, fenMap)
+
+    return Object.keys(images).length > 0 ? images : null
   } catch { return null }
 }
 
