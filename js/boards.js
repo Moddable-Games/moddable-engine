@@ -4645,3 +4645,5 @@ function fitToView() {
 if (document.getElementById('game-select')) {
   document.addEventListener('DOMContentLoaded', init)
 }
+
+export { buildDraughtsFenFromSetup, parseDraughtsFen, buildGoHandicap, buildGoPreset, buildFanoronaPosition, fen4ToPosition }
