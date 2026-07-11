@@ -385,6 +385,7 @@ function buildRenderOpts(resolved) {
 
   // Graph
   if (topo.type === 'graph') {
+    if (render.canvasSize) opts.boardSize = render.canvasSize
     if (topo.params) {
       if (topo.params.rings) opts.rings = topo.params.rings
       if (topo.params.midpoints !== undefined) opts.midpoints = topo.params.midpoints
