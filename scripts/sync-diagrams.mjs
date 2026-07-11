@@ -277,14 +277,26 @@ function renderToSvg(layout, engine, title) {
 
   const pieces = engine.setup ? parseSetupToPieces(engine.setup, layout.type) : null
   const pieceImages = resolvePieceImages(engine)
+  const vocabulary = engine.pieces?.vocabulary || null
 
   const tileSize = config.tileSize || rendered.tileSize || 40
 
   if (pieces && pieceImages) {
-    return serializeWithDefs(rendered, { title, pieces, pieceImages, tileSize })
+    const resolvedPieces = vocabulary ? applyVocabulary(pieces, vocabulary) : pieces
+    return serializeWithDefs(rendered, { title, pieces: resolvedPieces, pieceImages, tileSize })
   }
 
   return serializeLayout(rendered, { title, pieces: null, pieceImages: null, tileSize })
+}
+
+function applyVocabulary(pieces, vocabulary) {
+  const result = {}
+  for (const [cellId, piece] of Object.entries(pieces)) {
+    const fenChar = piece.type
+    const imageKey = vocabulary[fenChar] || fenChar
+    result[cellId] = { type: imageKey }
+  }
+  return result
 }
 
 function serializeWithDefs(layout, opts) {
