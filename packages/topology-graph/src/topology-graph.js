@@ -217,26 +217,314 @@ export function createGraphTopology(config) {
     }
   }
 
+  function computeStructure(type, params, size, opts) {
+    if (type === 'concentric-rings') return computeConcentricRings(params, size, opts)
+    if (type === 'perimeter-cross') return computePerimeterCross(params, size, opts)
+    if (type === 'grid-cross') return computeGridCross(params, size, opts)
+    if (type === 'star') return computeStar(params, size, opts)
+    return { nodes: [], edges: [], width: size, height: size }
+  }
+
+  function computeConcentricRings(params, size, opts) {
+    const rings = params.rings || 3
+    const midpoints = params.midpoints !== false
+    const diagonals = params.diagonals || false
+    const lineColor = opts.edgeStyle?.stroke || '#333'
+
+    const margin = size * 0.0625
+    const maxInset = size * 0.375
+    const step = rings > 1 ? (maxInset - margin) / (rings - 1) : 0
+    const cx = size / 2, cy = size / 2
+
+    const ringRects = []
+    for (let i = 0; i < rings; i++) {
+      const inset = margin + i * step
+      ringRects.push({ x: inset, y: inset, w: size - inset * 2, h: size - inset * 2 })
+    }
+
+    const nodes = []
+    for (const rect of ringRects) {
+      nodes.push({ id: `n${nodes.length + 1}`, x: rect.x, y: rect.y })
+      nodes.push({ id: `n${nodes.length + 1}`, x: rect.x + rect.w, y: rect.y })
+      nodes.push({ id: `n${nodes.length + 1}`, x: rect.x + rect.w, y: rect.y + rect.h })
+      nodes.push({ id: `n${nodes.length + 1}`, x: rect.x, y: rect.y + rect.h })
+      if (midpoints) {
+        nodes.push({ id: `n${nodes.length + 1}`, x: cx, y: rect.y })
+        nodes.push({ id: `n${nodes.length + 1}`, x: rect.x + rect.w, y: cy })
+        nodes.push({ id: `n${nodes.length + 1}`, x: cx, y: rect.y + rect.h })
+        nodes.push({ id: `n${nodes.length + 1}`, x: rect.x, y: cy })
+      }
+    }
+    if (rings === 1 && midpoints) nodes.push({ id: `n${nodes.length + 1}`, x: cx, y: cy })
+
+    const edges = []
+    const ppRing = midpoints ? 8 : 4
+    for (let r = 0; r < rings; r++) {
+      const base = r * ppRing
+      for (let i = 0; i < 4; i++) {
+        const curr = base + i
+        const next = base + ((i + 1) % 4)
+        if (midpoints) {
+          edges.push({ from: nodes[curr].id, to: nodes[base + 4 + i].id })
+          edges.push({ from: nodes[base + 4 + i].id, to: nodes[next].id })
+        } else {
+          edges.push({ from: nodes[curr].id, to: nodes[next].id })
+        }
+      }
+    }
+    if (midpoints && rings > 1) {
+      for (let i = 0; i < 4; i++) {
+        for (let r = 0; r < rings - 1; r++) {
+          edges.push({ from: nodes[r * ppRing + 4 + i].id, to: nodes[(r + 1) * ppRing + 4 + i].id })
+        }
+      }
+    }
+    if (diagonals) {
+      if (rings === 1) {
+        edges.push({ from: nodes[0].id, to: nodes[2].id })
+        edges.push({ from: nodes[1].id, to: nodes[3].id })
+      } else {
+        for (let i = 0; i < 4; i++) {
+          edges.push({ from: nodes[i].id, to: nodes[(rings - 1) * ppRing + i].id })
+        }
+      }
+    }
+
+    const structures = []
+    for (const rect of ringRects) {
+      structures.push({ tag: 'rect', attrs: {
+        x: rect.x, y: rect.y, width: rect.w, height: rect.h,
+        fill: 'none', stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square',
+      }})
+    }
+    if (midpoints) {
+      if (rings === 1) {
+        const r = ringRects[0]
+        structures.push({ tag: 'line', attrs: { x1: cx, y1: r.y, x2: cx, y2: r.y + r.h, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+        structures.push({ tag: 'line', attrs: { x1: r.x, y1: cy, x2: r.x + r.w, y2: cy, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+      } else {
+        structures.push({ tag: 'line', attrs: { x1: cx, y1: ringRects[0].y, x2: cx, y2: ringRects[rings - 1].y, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+        const last = ringRects[rings - 1]
+        structures.push({ tag: 'line', attrs: { x1: cx, y1: last.y + last.h, x2: cx, y2: ringRects[0].y + ringRects[0].h, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+        structures.push({ tag: 'line', attrs: { x1: ringRects[0].x, y1: cy, x2: ringRects[rings - 1].x, y2: cy, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+        structures.push({ tag: 'line', attrs: { x1: last.x + last.w, y1: cy, x2: ringRects[0].x + ringRects[0].w, y2: cy, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+      }
+    }
+    if (diagonals) {
+      if (rings === 1) {
+        const r = ringRects[0]
+        structures.push({ tag: 'line', attrs: { x1: r.x, y1: r.y, x2: r.x + r.w, y2: r.y + r.h, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+        structures.push({ tag: 'line', attrs: { x1: r.x + r.w, y1: r.y, x2: r.x, y2: r.y + r.h, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+      } else {
+        const o = ringRects[0], inner = ringRects[rings - 1]
+        structures.push({ tag: 'line', attrs: { x1: o.x, y1: o.y, x2: inner.x, y2: inner.y, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+        structures.push({ tag: 'line', attrs: { x1: o.x + o.w, y1: o.y, x2: inner.x + inner.w, y2: inner.y, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+        structures.push({ tag: 'line', attrs: { x1: o.x, y1: o.y + o.h, x2: inner.x, y2: inner.y + inner.h, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+        structures.push({ tag: 'line', attrs: { x1: o.x + o.w, y1: o.y + o.h, x2: inner.x + inner.w, y2: inner.y + inner.h, stroke: lineColor, 'stroke-width': 2.5, 'stroke-linecap': 'square' } })
+      }
+    }
+
+    return { nodes, edges, width: size, height: size, structures, zones: [] }
+  }
+
+  function computePerimeterCross(params, size, opts) {
+    const sides = params.sides || 4
+    const nodesPerSide = params.nodesPerSide || 5
+    const hasDiagonals = params.diagonals !== false
+    const intermediates = params.intermediatesPerDiagonal || 2
+    const lineColor = opts.edgeStyle?.stroke || '#333'
+
+    const margin = size * 0.08
+    const x0 = margin, x1 = size - margin, y0 = margin, y1 = size - margin
+    const cx = size / 2, cy = size / 2
+    const corners = [{ x: x1, y: y1 }, { x: x0, y: y1 }, { x: x0, y: y0 }, { x: x1, y: y0 }]
+
+    const nodes = []
+    const edges = []
+
+    for (let side = 0; side < sides; side++) {
+      const from = corners[side], to = corners[(side + 1) % sides]
+      nodes.push({ id: `n${nodes.length + 1}`, x: from.x, y: from.y, type: 'junction' })
+      for (let i = 1; i < nodesPerSide; i++) {
+        nodes.push({ id: `n${nodes.length + 1}`, x: from.x + (to.x - from.x) * i / nodesPerSide, y: from.y + (to.y - from.y) * i / nodesPerSide })
+      }
+    }
+    const perimeterCount = nodes.length
+    for (let i = 0; i < perimeterCount; i++) edges.push({ from: nodes[i].id, to: nodes[(i + 1) % perimeterCount].id })
+
+    nodes.push({ id: `n${nodes.length + 1}`, x: cx, y: cy, type: 'centre' })
+    const centreIdx = nodes.length - 1
+
+    if (hasDiagonals) {
+      const cornerIndices = []
+      for (let s = 0; s < sides; s++) cornerIndices.push(s * nodesPerSide)
+      for (const ci of cornerIndices) {
+        const corner = nodes[ci]
+        let prev = ci
+        for (let i = 1; i <= intermediates; i++) {
+          const t = i / (intermediates + 1)
+          nodes.push({ id: `n${nodes.length + 1}`, x: corner.x + (cx - corner.x) * t, y: corner.y + (cy - corner.y) * t })
+          edges.push({ from: nodes[prev].id, to: nodes[nodes.length - 1].id })
+          prev = nodes.length - 1
+        }
+        edges.push({ from: nodes[prev].id, to: nodes[centreIdx].id })
+      }
+    }
+
+    return { nodes, edges, width: size, height: size, structures: [], zones: [] }
+  }
+
+  function computeGridCross(params, size, opts) {
+    const rowDefs = params.rows || [[2,3,4],[2,3,4],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[2,3,4],[2,3,4]]
+    const fortressRows = params.fortressRows || 0
+    const hasDiagonals = params.diagonals !== false
+    const lineColor = opts.edgeStyle?.stroke || '#333'
+
+    const maxCol = Math.max(...rowDefs.flat())
+    const maxRow = rowDefs.length - 1
+    const margin = size * 0.08
+    const usable = size - margin * 2
+    const spacing = usable / Math.max(maxCol, maxRow)
+    const xOffset = (size - maxCol * spacing) / 2
+    const yOffset = (size - maxRow * spacing) / 2
+
+    const nodes = []
+    const edges = []
+    const nodeMap = {}
+
+    for (let y = 0; y < rowDefs.length; y++) {
+      for (const col of rowDefs[y]) {
+        const idx = nodes.length
+        nodeMap[`${y},${col}`] = idx
+        nodes.push({ id: `n${idx + 1}`, x: xOffset + col * spacing, y: yOffset + y * spacing })
+      }
+    }
+
+    for (let y = 0; y < rowDefs.length; y++) {
+      const cols = rowDefs[y]
+      for (let i = 0; i < cols.length - 1; i++) {
+        if (cols[i + 1] - cols[i] === 1) {
+          edges.push({ from: nodes[nodeMap[`${y},${cols[i]}`]].id, to: nodes[nodeMap[`${y},${cols[i + 1]}`]].id })
+        }
+      }
+    }
+    for (let y = 0; y < rowDefs.length - 1; y++) {
+      for (const col of rowDefs[y]) {
+        if (rowDefs[y + 1].includes(col)) {
+          edges.push({ from: nodes[nodeMap[`${y},${col}`]].id, to: nodes[nodeMap[`${y + 1},${col}`]].id })
+        }
+      }
+    }
+    if (hasDiagonals) {
+      for (let y = 0; y < rowDefs.length - 1; y++) {
+        for (const col of rowDefs[y]) {
+          if (rowDefs[y].includes(col + 1) && rowDefs[y + 1].includes(col) && rowDefs[y + 1].includes(col + 1)) {
+            edges.push({ from: nodes[nodeMap[`${y},${col}`]].id, to: nodes[nodeMap[`${y + 1},${col + 1}`]].id })
+            edges.push({ from: nodes[nodeMap[`${y},${col + 1}`]].id, to: nodes[nodeMap[`${y + 1},${col}`]].id })
+          }
+        }
+      }
+    }
+
+    const zones = []
+    if (fortressRows > 0) {
+      const fNodes = nodes.filter((_, i) => {
+        for (let y = 0; y < fortressRows; y++) {
+          if (rowDefs[y].some(c => nodeMap[`${y},${c}`] === i)) return true
+        }
+        return false
+      })
+      if (fNodes.length) {
+        const bx = Math.min(...fNodes.map(n => n.x))
+        const by = Math.min(...fNodes.map(n => n.y))
+        const bw = Math.max(...fNodes.map(n => n.x)) - bx
+        const bh = Math.max(...fNodes.map(n => n.y)) - by
+        zones.push({ type: 'rect', attrs: { x: bx, y: by, width: bw, height: bh, fill: 'rgba(40,80,180,0.15)' } })
+      }
+    }
+
+    return { nodes, edges, width: size, height: size, structures: [], zones }
+  }
+
+  function computeStar(params, size, opts) {
+    const armSize = params.armSize || 4
+    const spacing = params.spacing || 24
+    const rowH = spacing * Math.sqrt(3) / 2
+    const margin = spacing * 2.5
+    const innerW = spacing * 16 + margin * 2
+    const innerH = Math.round(rowH * 16) + margin * 2 + spacing
+    const boardW = innerW
+    const boardH = innerH
+    const cx = spacing * 8 + margin
+    const topY = margin + spacing * 0.5
+
+    const rowWidths = [1, 2, 3, 4, 13, 12, 11, 10, 9, 10, 11, 12, 13, 4, 3, 2, 1]
+    const nodes = []
+
+    for (let row = 0; row < 17; row++) {
+      const w = rowWidths[row]
+      const y = topY + row * rowH
+      const startX = cx - (w - 1) * spacing / 2
+      for (let i = 0; i < w; i++) {
+        const x = startX + i * spacing
+        let arm = undefined
+        if (row < 4) arm = 'N'
+        else if (row >= 13) arm = 'S'
+        else if (row >= 4 && row <= 7) {
+          const armWidth = 4 - (row - 4)
+          if (i < armWidth) arm = 'NW'
+          else if (i >= w - armWidth) arm = 'NE'
+        } else if (row >= 9 && row <= 12) {
+          const armWidth = row - 8
+          if (i < armWidth) arm = 'SW'
+          else if (i >= w - armWidth) arm = 'SE'
+        }
+        nodes.push({ id: `h${nodes.length + 1}`, x, y, type: arm ? `arm-${arm}` : 'centre', arm })
+      }
+    }
+
+    return { nodes, edges: [], width: boardW, height: boardH, structures: [], zones: [], labels: [] }
+  }
+
   function renderLayout(config = {}) {
     const {
       nodes: inputNodes,
       edges: inputEdges,
-      width = 320,
-      height = 320,
+      structure,
+      params,
+      width: inputWidth = 320,
+      height: inputHeight = 320,
       backgrounds = [],
-      zones = [],
-      structures = [],
+      zones: inputZones = [],
+      structures: inputStructures = [],
       edgeStyle = { stroke: '#333', strokeWidth: 2.5, linecap: 'round' },
       nodeRadius = 7,
       nodeColor = '#333',
       nodeScale = {},
       nodeColorMap = {},
-      labels = [],
+      labels: inputLabels = [],
       defs = [],
     } = config
 
-    const nodeList = inputNodes || []
-    const edgeList = inputEdges || []
+    let nodeList, edgeList, width, height, zones, structures, labels
+    if (structure && !inputNodes) {
+      const generated = computeStructure(structure, params || {}, inputWidth, { edgeStyle, nodeRadius, nodeColor })
+      nodeList = generated.nodes
+      edgeList = generated.edges
+      width = generated.width || inputWidth
+      height = generated.height || inputHeight
+      zones = [...(generated.zones || []), ...inputZones]
+      structures = [...(generated.structures || []), ...inputStructures]
+      labels = [...(generated.labels || []), ...inputLabels]
+    } else {
+      nodeList = inputNodes || []
+      edgeList = inputEdges || []
+      width = inputWidth
+      height = inputHeight
+      zones = inputZones
+      structures = inputStructures
+      labels = inputLabels
+    }
 
     const elements = []
 

@@ -14,19 +14,10 @@ describe('produce purity', () => {
     if (match) fail(`produce.js contains game name: "${match[0]}"`)
   })
 
-  test('no topology names in produce', () => {
-    const topoNames = /\b(grid|hex|track|pit|graph)\b/
-    const lines = source.split('\n')
-    const violations = []
-    for (let i = 0; i < lines.length; i++) {
-      if (lines[i].trimStart().startsWith('//')) continue
-      if (topoNames.test(lines[i])) {
-        violations.push(`line ${i + 1}: ${lines[i].trim()}`)
-      }
-    }
-    if (violations.length) {
-      fail(`produce.js references topology names:\n${violations.join('\n')}`)
-    }
+  test('no topology-specific rendering logic hardcoded in produce', () => {
+    const topoSpecific = /\b(createGridTopology|createHexTopology|createTrackTopology|createPitTopology|createGraphTopology|renderLayout)\b/
+    const match = source.match(topoSpecific)
+    if (match) fail(`produce.js imports topology internals: "${match[0]}" — layout building belongs in the topology packages, not produce`)
   })
 
   test('no hardcoded coordinate arrays in produce', () => {

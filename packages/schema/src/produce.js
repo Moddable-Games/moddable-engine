@@ -1,3 +1,5 @@
+import { produceLayout } from './produce-layout.js'
+
 export function produce(meta) {
   const engine = meta.engine
   const definition = {
@@ -24,6 +26,11 @@ export function produce(meta) {
 
   if (engine.setup) {
     definition.setup = engine.setup
+  }
+
+  const layout = produceLayout(engine)
+  if (layout) {
+    definition.layout = layout
   }
 
   return definition

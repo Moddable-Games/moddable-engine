@@ -2,6 +2,8 @@ export { parseGameDefinition, parseVariantFile, validateMeta, produceDefinition 
 export { parseFrontmatter } from './src/parse-frontmatter.js'
 export { validate } from './src/validate.js'
 export { produce } from './src/produce.js'
+export { produceLayout } from './src/produce-layout.js'
+export { resolveSurface, BUILTIN_SURFACES } from './src/surfaces.js'
 export { loadVariantFile, loadGameDefinition, loadFamily, loadAllFamilies, scanFrontmatter, loadEngineReady } from './src/loader.js'
 export { inferTopology, inferPlayers, inferEngineBlock, generateEngineFrontmatter } from './src/infer.js'
 export { enrichMeta, serializeFrontmatter, enrichFile, enrichDryRun } from './src/enrich.js'
