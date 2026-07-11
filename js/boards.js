@@ -1669,7 +1669,7 @@ function build1906NaturalOpportunities(elements, cells, board, innerX, innerY, i
 // ─── GAME DEFINITIONS ───────────────────────────────────────────────────────
 // Each variant specifies: boardStyle, dimensions, pieceSet, fen/position
 
-const GAMES = {
+export const GAMES = {
   'moddable-chess': {
     label: 'Chess',
     pieceSet: 'mce-fairy-complete',
