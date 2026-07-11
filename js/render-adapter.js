@@ -146,8 +146,8 @@ function mapColorsForProvider(boardStyle, surface) {
         lightSquare: c['cell-light'] || '#f0d9b5',
         darkSquare: c['cell-dark'] || '#b58863',
         voidFill: c['void'] || 'transparent',
-        ...(c.throne && { throne: c.throne }),
-        ...(c.corner && { corner: c.corner }),
+        ...(c.throne && { throne: c.throne, throneStroke: c['throne-stroke'] || c.stroke }),
+        ...(c.corner && { corner: c.corner, cornerStroke: c['corner-stroke'] || c.stroke }),
         ...(c.rosette && { rosette: c.rosette }),
         ...(c.castle && { castle: c.castle, castleStroke: c['castle-stroke'] || c.stroke }),
         ...(c.home && { home: c.home, homeStroke: c['home-stroke'] || c.stroke }),
@@ -468,7 +468,8 @@ function buildCellMap(zones, rows, cols) {
     return buildCrossMap(rows, cols, zones.castles || [])
   }
 
-  const map = Array.from({ length: rows }, () => Array(cols).fill(true))
+  const fill = zones.fill || true
+  const map = Array.from({ length: rows }, () => Array(cols).fill(fill))
 
   if (zones.cells) {
     for (const def of zones.cells) {
