@@ -365,6 +365,7 @@ function buildRenderOpts(resolved) {
     opts.boardRows = topo.rows || 2
     opts.hasStores = topo.stores !== false
     opts.pitRadius = render.cellSize || 22
+    if (render.boardShape) opts.boardShape = render.boardShape
     if (render.cornerRadius) opts.cornerRadius = render.cornerRadius
     if (render.markers) opts.markers = render.markers
     if (render.storeSize) {
