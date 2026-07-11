@@ -708,4 +708,4 @@ export async function renderFromResolved(resolved, container) {
   container.innerHTML = svgString
 }
 
-export { resolveBoardStyle, mapColorsForProvider, buildRenderOpts }
+export { resolveBoardStyle, mapColorsForProvider, buildRenderOpts, attachPieceImages, buildPieceImages, renderDeckFromResolved }
