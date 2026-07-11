@@ -266,7 +266,15 @@ function renderToSvg(layout, engine, title) {
     }
     case 'track': {
       const track = createTrackTopology({ positions: engine.topology?.positions || 24 })
-      rendered = track.renderLayout(config)
+      const trackConfig = { ...config }
+      if (config.style === 'perimeter' && engine.content?.source) {
+        const boardData = loadContentData(engine.content.source)
+        if (boardData && engine.content.board) {
+          const board = boardData.boards?.[engine.content.board]
+          if (board) Object.assign(trackConfig, buildPerimeterConfig(board, engine))
+        }
+      }
+      rendered = track.renderLayout(trackConfig)
       break
     }
     default:
@@ -472,6 +480,70 @@ function loadPieceSet(setName) {
 
     return Object.keys(images).length > 0 ? images : null
   } catch { return null }
+}
+
+function loadContentData(source) {
+  const dataPath = resolve(ENGINE_ROOT, 'data', source)
+  if (!existsSync(dataPath)) return null
+  try { return JSON.parse(readFileSync(dataPath, 'utf8')) }
+  catch { return null }
+}
+
+function buildPerimeterConfig(board, engine) {
+  const totalSpaces = board.totalSpaces || 40
+  const corners = 4
+  const perSide = (totalSpaces - corners) / corners
+  const spaceW = 56
+  const cornerSize = 80
+
+  const spaces = board.spaces || []
+  const sideArrays = { bottom: [], left: [], top: [], right: [] }
+  const cornerList = []
+
+  for (const s of spaces) {
+    if (s.side === 'corner') cornerList.push(s)
+    else if (sideArrays[s.side]) sideArrays[s.side].push(s)
+  }
+
+  const typeColors = {
+    lot: '#6a9a50', necessity: '#7aaac0', railroad: '#d4889a',
+    franchise: '#d4c060', corner: '#d4c898', luxury: '#d4889a',
+    chance: '#cc3030', special: '#7aaac0', broker: '#d4c060',
+  }
+
+  const cornerSpaces = cornerList.map(s => ({
+    id: `pos-${s.pos}`,
+    fill: typeColors.corner || '#d4c898',
+    texts: [{ text: s.name, fontSize: 7, dy: 0 }],
+  }))
+
+  const sideSpaces = {}
+  for (const side of ['bottom', 'left', 'top', 'right']) {
+    sideSpaces[side] = sideArrays[side].map(s => ({
+      id: `pos-${s.pos}`,
+      fill: typeColors[s.type] || '#f0f0f0',
+      type: s.type,
+      texts: [{ text: s.name, fontSize: 5, dy: 0 }],
+    }))
+  }
+
+  return {
+    style: 'perimeter',
+    totalSpaces,
+    corners,
+    spaceW,
+    cornerSize,
+    cornerSpaces,
+    sideSpaces,
+    colors: {
+      board: '#f0e4c8',
+      border: '#5a4a30',
+      corner: '#d4c898',
+      cornerStroke: '#5a4a30',
+      spaceStroke: '#5a4a30',
+      text: '#3a2a15',
+    },
+  }
 }
 
 main()
