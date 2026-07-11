@@ -141,19 +141,24 @@ function mapColorsForProvider(boardStyle, surface) {
   const c = surface?.colors || {}
 
   switch (boardStyle) {
-    case 'checkered':
-      return {
+    case 'checkered': {
+      const result = {
         lightSquare: c['cell-light'] || '#f0d9b5',
         darkSquare: c['cell-dark'] || '#b58863',
         voidFill: c['void'] || 'transparent',
-        ...(c.throne && { throne: c.throne, throneStroke: c['throne-stroke'] || c.stroke }),
-        ...(c.corner && { corner: c.corner, cornerStroke: c['corner-stroke'] || c.stroke }),
-        ...(c.rosette && { rosette: c.rosette }),
-        ...(c.castle && { castle: c.castle, castleStroke: c['castle-stroke'] || c.stroke }),
-        ...(c.home && { home: c.home, homeStroke: c['home-stroke'] || c.stroke }),
-        ...(c.floor && { floor: c.floor, floorStroke: c['floor-stroke'] || c.stroke }),
         castleX: c['castle-x'] || '#fff8f0',
       }
+      // Pass through all cell-type colours + their stroke variants
+      for (const [key, val] of Object.entries(c)) {
+        if (key.endsWith('-stroke')) {
+          const base = key.slice(0, -7)
+          result[base + 'Stroke'] = val
+        } else if (!key.includes('-') && key !== 'void' && key !== 'stroke') {
+          result[key] = val
+        }
+      }
+      return result
+    }
     case 'mono-grid':
       return {
         monoSquare: c['cell-light'] || '#d9b483',
