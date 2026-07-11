@@ -278,27 +278,87 @@ function renderToSvg(layout, engine, title) {
   const pieces = engine.setup ? parseSetupToPieces(engine.setup, layout.type) : null
   const pieceImages = resolvePieceImages(engine)
 
-  let svg = serializeLayout(rendered, {
-    title,
-    pieces: pieces && pieceImages ? pieces : null,
-    pieceImages,
-    tileSize: config.tileSize || rendered.tileSize || 40,
-  })
+  const tileSize = config.tileSize || rendered.tileSize || 40
 
-  svg = inlineImages(svg)
-  return svg
+  if (pieces && pieceImages) {
+    return serializeWithDefs(rendered, { title, pieces, pieceImages, tileSize })
+  }
+
+  return serializeLayout(rendered, { title, pieces: null, pieceImages: null, tileSize })
 }
 
-function inlineImages(svg) {
-  return svg.replace(/<image ([^>]*?)href="([^"]+)"([^>]*?)\/>/g, (match, before, href, after) => {
-    if (href.startsWith('data:')) return match
-    if (!existsSync(href)) return match
-    try {
-      const content = readFileSync(href, 'utf8')
-      const encoded = 'data:image/svg+xml;base64,' + Buffer.from(content).toString('base64')
-      return `<image ${before}href="${encoded}"${after}/>`
-    } catch { return match }
-  })
+function serializeWithDefs(layout, opts) {
+  const { title, pieces, pieceImages, tileSize } = opts
+  const { width, height, elements, cells, labels, defs: layoutDefs } = layout
+
+  const usedPieceTypes = new Set()
+  for (const cell of cells) {
+    const piece = pieces[cell.id]
+    if (!piece) continue
+    const key = typeof piece === 'string' ? piece : piece.type
+    if (pieceImages[key]) usedPieceTypes.add(key)
+  }
+
+  const pieceDefs = []
+  for (const key of usedPieceTypes) {
+    const filePath = pieceImages[key]
+    if (!existsSync(filePath)) continue
+    let content = readFileSync(filePath, 'utf8')
+    content = content.replace(/<\?xml[^>]*\?>/, '').replace(/<!DOCTYPE[^>]*>/, '').trim()
+    const viewBox = content.match(/viewBox="([^"]+)"/)
+    const vb = viewBox ? viewBox[1] : '0 0 45 45'
+    const inner = content.replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').trim()
+    pieceDefs.push(`<symbol id="piece-${key}" viewBox="${vb}">${inner}</symbol>`)
+  }
+
+  const parts = []
+  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">`)
+  if (title) parts.push(`<title>${esc(title)}</title>`)
+
+  if (pieceDefs.length || (layoutDefs && layoutDefs.length)) {
+    parts.push('<defs>')
+    if (layoutDefs) for (const d of layoutDefs) parts.push(elementToSvg(d))
+    for (const def of pieceDefs) parts.push(def)
+    parts.push('</defs>')
+  }
+
+  for (const el of elements) parts.push(elementToSvg(el))
+  for (const cell of cells) parts.push(elementToSvg(cell.element))
+
+  const pieceUses = []
+  for (const cell of cells) {
+    const piece = pieces[cell.id]
+    if (!piece) continue
+    const key = typeof piece === 'string' ? piece : piece.type
+    if (!usedPieceTypes.has(key)) continue
+    const size = tileSize
+    pieceUses.push(`<use href="#piece-${key}" x="${cell.x - size / 2}" y="${cell.y - size / 2}" width="${size}" height="${size}"/>`)
+  }
+  if (pieceUses.length) {
+    parts.push('<g pointer-events="none">')
+    for (const u of pieceUses) parts.push(u)
+    parts.push('</g>')
+  }
+
+  for (const lbl of labels) parts.push(elementToSvg(lbl))
+  parts.push('</svg>')
+  return parts.join('\n')
+}
+
+function elementToSvg(el) {
+  if (!el || !el.tag) return ''
+  const { tag, attrs = {}, text, children } = el
+  const attrStr = Object.entries(attrs).map(([k, v]) => `${k}="${esc(String(v))}"`).join(' ')
+  if (text != null) return `<${tag}${attrStr ? ' ' + attrStr : ''}>${esc(String(text))}</${tag}>`
+  if (children && children.length) {
+    const inner = children.map(c => elementToSvg(c)).join('')
+    return `<${tag}${attrStr ? ' ' + attrStr : ''}>${inner}</${tag}>`
+  }
+  return `<${tag}${attrStr ? ' ' + attrStr : ''}/>`
+}
+
+function esc(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
 function parseSetupToPieces(setup, topoType) {
