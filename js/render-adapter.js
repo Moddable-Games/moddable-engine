@@ -334,6 +334,8 @@ function buildRenderOpts(resolved) {
       opts.hexColorFn = resolved._hexColorFn
     } else if (render.cellColor === 'tricolor') {
       opts.hexColorFn = tricolorFn
+    } else if (render.cellColor === 'rings') {
+      opts.hexColorFn = ringColorFn
     }
     // Hex position (map of "q,r" → piece)
     if (resolved._hexPosition) {
@@ -719,6 +721,11 @@ function parsePitSetup(setup) {
 function tricolorFn(hex, colors) {
   const mod = (((hex.q - hex.r) % 3) + 3) % 3
   return mod === 0 ? colors.lightHex : mod === 1 ? colors.midHex : colors.darkHex
+}
+
+function ringColorFn(hex, colors) {
+  const ring = Math.max(Math.abs(hex.q), Math.abs(hex.r), Math.abs(hex.q + hex.r))
+  return ring % 2 === 0 ? colors.darkHex : colors.lightHex
 }
 
 // --- Hex position string parser ---
