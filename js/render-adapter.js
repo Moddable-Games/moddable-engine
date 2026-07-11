@@ -105,6 +105,7 @@ function resolveBoardStyle(resolved) {
         if (render.decorations?.some(d => d.type === 'gap')) return 'xiangqi'
         if (render.decorations?.some(d => d.type === 'markers' && d.style === 'dot' && d.auto === 'shogi-hoshi')) return 'shogi'
         if (render.decorations?.some(d => d.type === 'arcs')) return 'surakarta'
+        if (render.decorations?.some(d => d.type === 'diagonals' && d.pattern === 'alternating')) return 'alquerque'
         return 'go'
       }
       if (render.decorations?.some(d => d.type === 'diagonals' && d.pattern === 'alternating')) return 'alquerque'
