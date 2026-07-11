@@ -98,8 +98,11 @@ for (const family of families) {
       if (!opts) { skipped++; continue }
       attachPieceImages(opts, resolved, gallery)
 
-      const svg = renderBoard(opts)
-      if (!svg) { skipped++; continue }
+      const rawSvg = renderBoard(opts)
+      if (!rawSvg) { skipped++; continue }
+
+      // Embed external piece images inline so SVGs are self-contained
+      const svg = embedPieceImages(rawSvg)
 
       const diagramDir = resolve(GAMES_DIR, family, 'diagrams', 'svg')
       mkdirSync(diagramDir, { recursive: true })
@@ -117,4 +120,66 @@ if (!doExport) {
   console.log(`${exported} renderable variants. Run with --export to generate.`)
 } else {
   console.log(`Done: ${exported} exported, ${skipped} skipped, ${errors} errors`)
+}
+
+function embedPieceImages(svg) {
+  const imagePattern = /<image\s+href="([^"]+)"\s+x="([^"]+)"\s+y="([^"]+)"\s+width="([^"]+)"\s+height="([^"]+)"[^/>]*\/>/g
+  const usedPaths = new Map()
+
+  let match
+  while ((match = imagePattern.exec(svg)) !== null) {
+    const href = match[1]
+    if (!usedPaths.has(href)) {
+      const parts = href.split('/')
+      const filename = parts[parts.length - 1].replace('.svg', '')
+      const setName = parts.length >= 2 ? parts[parts.length - 2] : 'unknown'
+      usedPaths.set(href, `piece-${setName}-${filename}`)
+    }
+  }
+
+  if (usedPaths.size === 0) return svg
+
+  const defs = []
+  for (const [href, symbolId] of usedPaths) {
+    const filePath = href.startsWith('../pieces/')
+      ? resolve(ENGINE_ROOT, href.replace('../', ''))
+      : href.startsWith('pieces/')
+        ? resolve(ENGINE_ROOT, href)
+        : null
+    if (!filePath || !existsSync(filePath)) continue
+
+    let content = readFileSync(filePath, 'utf8')
+    content = content.replace(/<\?xml[^>]*\?>\s*/, '').replace(/<!DOCTYPE[^>]*>\s*/, '').trim()
+    const vbMatch = content.match(/viewBox="([^"]+)"/)
+    let vb
+    if (vbMatch) {
+      vb = vbMatch[1]
+    } else {
+      const w = content.match(/width="(\d+)"/)
+      const h = content.match(/height="(\d+)"/)
+      vb = `0 0 ${w ? w[1] : '45'} ${h ? h[1] : '45'}`
+    }
+    const inner = content.replace(/<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '').trim()
+    defs.push(`<symbol id="${symbolId}" viewBox="${vb}">${inner}</symbol>`)
+  }
+
+  if (defs.length === 0) return svg
+
+  // Replace <image> with <use>
+  let result = svg.replace(imagePattern, (full, href, x, y, w, h) => {
+    const symbolId = usedPaths.get(href)
+    if (!symbolId) return full
+    return `<use href="#${symbolId}" x="${x}" y="${y}" width="${w}" height="${h}"/>`
+  })
+
+  // Insert defs
+  const existingDefs = result.indexOf('<defs>')
+  if (existingDefs !== -1) {
+    result = result.replace('<defs>', `<defs>\n${defs.join('\n')}`)
+  } else {
+    const svgOpen = result.indexOf('>') + 1
+    result = result.slice(0, svgOpen) + `\n<defs>\n${defs.join('\n')}\n</defs>` + result.slice(svgOpen)
+  }
+
+  return result
 }
