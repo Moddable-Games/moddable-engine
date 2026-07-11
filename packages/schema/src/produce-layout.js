@@ -41,8 +41,9 @@ function produceGridLayout(topo, colors, render) {
   const backgrounds = isIntersection
     ? [{ fill: colors['cell-light'] || '#d9b483', rx: 4 }]
     : []
-  const lines = isIntersection
-    ? { color: colors.stroke || '#333', width: 2 }
+  const needsLines = isIntersection || render.cellColor === 'uniform'
+  const lines = needsLines
+    ? { color: colors.stroke || '#333', width: isIntersection ? 2 : 1 }
     : { horizontal: false }
 
   const layout = {

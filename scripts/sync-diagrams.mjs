@@ -278,11 +278,26 @@ function renderToSvg(layout, engine, title) {
   const pieces = engine.setup ? parseSetupToPieces(engine.setup, layout.type) : null
   const pieceImages = resolvePieceImages(engine)
 
-  return serializeLayout(rendered, {
+  let svg = serializeLayout(rendered, {
     title,
     pieces: pieces && pieceImages ? pieces : null,
     pieceImages,
     tileSize: config.tileSize || rendered.tileSize || 40,
+  })
+
+  svg = inlineImages(svg)
+  return svg
+}
+
+function inlineImages(svg) {
+  return svg.replace(/<image ([^>]*?)href="([^"]+)"([^>]*?)\/>/g, (match, before, href, after) => {
+    if (href.startsWith('data:')) return match
+    if (!existsSync(href)) return match
+    try {
+      const content = readFileSync(href, 'utf8')
+      const encoded = 'data:image/svg+xml;base64,' + Buffer.from(content).toString('base64')
+      return `<image ${before}href="${encoded}"${after}/>`
+    } catch { return match }
   })
 }
 
