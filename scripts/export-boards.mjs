@@ -177,14 +177,15 @@ function embedPieceImages(svg) {
     let content = readFileSync(filePath, 'utf8')
     content = content.replace(/<\?xml[^>]*\?>\s*/, '').replace(/<!DOCTYPE[^>]*>\s*/, '').trim()
     content = content.replace(/xlink:href/g, 'href')
-    const vbMatch = content.match(/viewBox="([^"]+)"/)
+    const svgTag = content.match(/<svg[^>]*>/)?.[0] || ''
+    const vbMatch = svgTag.match(/viewBox="([^"]+)"/)
     let vb
     if (vbMatch) {
       vb = vbMatch[1]
     } else {
-      const w = content.match(/width="(\d+)"/)
-      const h = content.match(/height="(\d+)"/)
-      vb = `0 0 ${w ? w[1] : '45'} ${h ? h[1] : '45'}`
+      const w = svgTag.match(/width="([\d.]+)"/)
+      const h = svgTag.match(/height="([\d.]+)"/)
+      vb = `0 0 ${w ? Math.round(parseFloat(w[1])) : '45'} ${h ? Math.round(parseFloat(h[1])) : '45'}`
     }
     let inner = content.replace(/<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '').trim()
     inner = stripSvgBloat(inner)
