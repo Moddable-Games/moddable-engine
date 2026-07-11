@@ -122,6 +122,32 @@ if (!doExport) {
   console.log(`Done: ${exported} exported, ${skipped} skipped, ${errors} errors`)
 }
 
+function stripSvgBloat(svgContent) {
+  let s = svgContent
+  // Remove Inkscape/Sodipodi metadata elements
+  s = s.replace(/<metadata[\s\S]*?<\/metadata>/gi, '')
+  s = s.replace(/<sodipodi:[^>]*\/>/gi, '')
+  s = s.replace(/<sodipodi:[^>]*>[\s\S]*?<\/sodipodi:[^>]*>/gi, '')
+  // Remove RDF
+  s = s.replace(/<rdf:RDF[\s\S]*?<\/rdf:RDF>/gi, '')
+  // Remove Inkscape named views
+  s = s.replace(/<inkscape:[^>]*\/>/gi, '')
+  s = s.replace(/<inkscape:[^>]*>[\s\S]*?<\/inkscape:[^>]*>/gi, '')
+  // Remove XML comments
+  s = s.replace(/<!--[\s\S]*?-->/g, '')
+  // Remove Inkscape/Sodipodi attributes from remaining elements
+  s = s.replace(/\s+(inkscape|sodipodi):[a-z-]+="[^"]*"/gi, '')
+  // Remove -inkscape-font-specification from style attributes
+  s = s.replace(/-inkscape-font-specification:[^;"]+(;|(?="))/g, '')
+  // Remove empty defs
+  s = s.replace(/<defs[^>]*>\s*<\/defs>/gi, '')
+  // Remove empty id attributes on anonymous groups
+  s = s.replace(/\s+id="(defs|metadata|layer)\d*"/gi, '')
+  // Collapse multiple whitespace
+  s = s.replace(/\n\s*\n/g, '\n')
+  return s.trim()
+}
+
 function embedPieceImages(svg) {
   const imagePattern = /<image\s+href="([^"]+)"\s+x="([^"]+)"\s+y="([^"]+)"\s+width="([^"]+)"\s+height="([^"]+)"[^/>]*\/>/g
   const usedPaths = new Map()
@@ -160,7 +186,8 @@ function embedPieceImages(svg) {
       const h = content.match(/height="(\d+)"/)
       vb = `0 0 ${w ? w[1] : '45'} ${h ? h[1] : '45'}`
     }
-    const inner = content.replace(/<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '').trim()
+    let inner = content.replace(/<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '').trim()
+    inner = stripSvgBloat(inner)
     defs.push(`<symbol id="${symbolId}" viewBox="${vb}">${inner}</symbol>`)
   }
 

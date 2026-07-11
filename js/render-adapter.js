@@ -145,10 +145,14 @@ function mapColorsForProvider(boardStyle, surface) {
       return {
         lightSquare: c['cell-light'] || '#f0d9b5',
         darkSquare: c['cell-dark'] || '#b58863',
-        voidFill: 'transparent',
+        voidFill: c['void'] || 'transparent',
         ...(c.throne && { throne: c.throne }),
         ...(c.corner && { corner: c.corner }),
         ...(c.rosette && { rosette: c.rosette }),
+        ...(c.castle && { castle: c.castle, castleStroke: c['castle-stroke'] || c.stroke }),
+        ...(c.home && { home: c.home, homeStroke: c['home-stroke'] || c.stroke }),
+        ...(c.floor && { floor: c.floor, floorStroke: c['floor-stroke'] || c.stroke }),
+        castleX: c['castle-x'] || '#fff8f0',
       }
     case 'mono-grid':
       return {
@@ -297,6 +301,8 @@ function buildRenderOpts(resolved) {
       opts.cellMap = resolved._cellMap
     } else if (render.zones) {
       opts.cellMap = buildCellMap(render.zones, opts.rows, opts.cols)
+    } else if (topo.layout === 'cross') {
+      opts.cellMap = buildCrossMap(opts.rows, opts.cols, render.castles || [])
     }
 
     // Provider-specific flags derived from decorations
@@ -328,6 +334,8 @@ function buildRenderOpts(resolved) {
       opts.hexPosition = resolved._hexPosition
     } else if (resolved.setup && typeof resolved.setup === 'object' && !Array.isArray(resolved.setup)) {
       opts.hexPosition = resolved.setup
+    } else if (resolved.setup && typeof resolved.setup === 'string' && resolved.setup.includes(',') && resolved.setup.includes(':')) {
+      opts.hexPosition = parseHexPositionString(resolved.setup)
     }
     if (resolved._centreMarker) opts.centreMarker = resolved._centreMarker
   }
@@ -393,15 +401,31 @@ function buildRenderOpts(resolved) {
   if (resolved._position) {
     // Pre-built runtime position (handicap, fanorona, go presets)
     opts.position = resolved._position
+  } else if (Array.isArray(resolved.setup)) {
+    // Multi-board array-FEN — render first board only for diagrams
+    const firstBoard = resolved.setup[0]
+    if (firstBoard && typeof firstBoard === 'string' && firstBoard.includes('/')) {
+      const rows = opts.rows || topo.rows || 8
+      const cols = opts.cols || topo.cols || 8
+      if (resolved.pieces?.vocabulary) {
+        opts.position = parseVocabularyFen(firstBoard, rows, cols, resolved.pieces.vocabulary)
+      } else {
+        opts.position = fenToPosition(firstBoard, rows, cols)
+      }
+    }
   } else if (resolved.setup && typeof resolved.setup === 'string' && resolved.setup.includes('/')) {
     const rows = opts.rows || topo.rows || 8
     const cols = opts.cols || topo.cols || 8
-    // If vocabulary exists, parse with it (draughts, tafl, go, reversi)
-    if (resolved.pieces?.vocabulary) {
+    // Multi-char SFEN (large shogi: [xx] bracket notation)
+    if (resolved.setup.includes('[')) {
+      opts.position = parseSfenToPosition(resolved.setup, rows, cols)
+    } else if (resolved.pieces?.vocabulary) {
       opts.position = parseVocabularyFen(resolved.setup, rows, cols, resolved.pieces.vocabulary)
     } else {
       opts.position = fenToPosition(resolved.setup, rows, cols)
     }
+  } else if (topo.type === 'graph' && resolved.setup && typeof resolved.setup === 'string' && resolved.setup.includes(':')) {
+    opts.position = parseGraphSetup(resolved.setup)
   }
 
   // Piece rendering
@@ -438,6 +462,12 @@ function attachPieceImages(opts, resolved, gallery) {
 
 function buildCellMap(zones, rows, cols) {
   if (!zones) return null
+
+  // Generator-based maps (pachisi cross, chaupar, etc.)
+  if (zones.generator === 'cross') {
+    return buildCrossMap(rows, cols, zones.castles || [])
+  }
+
   const map = Array.from({ length: rows }, () => Array(cols).fill(true))
 
   if (zones.cells) {
@@ -462,6 +492,29 @@ function buildCellMap(zones, rows, cols) {
   }
 
   return map
+}
+
+function buildCrossMap(rows, cols, castles) {
+  const grid = Array.from({ length: rows }, () => Array(cols).fill(null))
+  const midR = Math.floor(rows / 2)
+  const midC = Math.floor(cols / 2)
+  const armWidth = 3
+  const half = Math.floor(armWidth / 2)
+  // Top arm
+  for (let r = 0; r < midR - half; r++) for (let c = midC - half; c <= midC + half; c++) grid[r][c] = 'floor'
+  // Bottom arm
+  for (let r = midR + half + 1; r < rows; r++) for (let c = midC - half; c <= midC + half; c++) grid[r][c] = 'floor'
+  // Left arm
+  for (let c = 0; c < midC - half; c++) for (let r = midR - half; r <= midR + half; r++) grid[r][c] = 'floor'
+  // Right arm
+  for (let c = midC + half + 1; c < cols; c++) for (let r = midR - half; r <= midR + half; r++) grid[r][c] = 'floor'
+  // Centre (charkoni)
+  for (let r = midR - half; r <= midR + half; r++) for (let c = midC - half; c <= midC + half; c++) grid[r][c] = 'home'
+  // Castle squares
+  for (const [r, c] of castles) {
+    if (r >= 0 && r < rows && c >= 0 && c < cols) grid[r][c] = 'castle'
+  }
+  return grid
 }
 
 // --- Deck/dice game rendering ---
@@ -652,6 +705,88 @@ function parsePitSetup(setup) {
 function tricolorFn(hex, colors) {
   const mod = (((hex.q - hex.r) % 3) + 3) % 3
   return mod === 0 ? colors.lightHex : mod === 1 ? colors.midHex : colors.darkHex
+}
+
+// --- Hex position string parser ---
+// Parses "q,r:piece,q,r:piece,..." into { "q,r": { type: "piece" }, ... }
+
+function parseHexPositionString(setup) {
+  const position = {}
+  const entries = setup.match(/-?\d+,-?\d+:[A-Za-z+]+/g)
+  if (!entries) return position
+  for (const entry of entries) {
+    const colonIdx = entry.lastIndexOf(':')
+    const coord = entry.substring(0, colonIdx)
+    const piece = entry.substring(colonIdx + 1)
+    position[coord] = { type: piece }
+  }
+  return position
+}
+
+// --- Multi-char SFEN parser (large shogi: [xx] bracketed notation) ---
+// Parses "[ln][kn]..../[xx][yy].../..." into position map
+// Convention: all-lowercase [xy] = sente (w prefix), all-uppercase [XY] = gote (b prefix)
+
+function parseSfenToPosition(fen, rows, cols) {
+  const position = {}
+  const positionPart = fen.split(' ')[0]
+  const ranks = positionPart.split('/')
+  for (let r = 0; r < ranks.length && r < rows; r++) {
+    let c = 0, i = 0
+    const rank = ranks[r]
+    while (i < rank.length && c < cols) {
+      if (rank[i] === '[') {
+        const close = rank.indexOf(']', i)
+        if (close === -1) { i++; continue }
+        const code = rank.substring(i + 1, close)
+        const file = String.fromCharCode(97 + c)
+        const rankNum = rows - r
+        const isGote = code === code.toUpperCase()
+        const prefix = isGote ? 'b' : 'w'
+        position[`${file}${rankNum}`] = prefix + code.toUpperCase()
+        c++
+        i = close + 1
+      } else if (rank[i] >= '1' && rank[i] <= '9') {
+        const next = rank[i + 1]
+        if (next >= '0' && next <= '9') { c += parseInt(rank[i] + next); i += 2 }
+        else { c += parseInt(rank[i]); i++ }
+      } else if (rank[i] === '+' && i + 1 < rank.length) {
+        const file = String.fromCharCode(97 + c)
+        const rankNum = rows - r
+        const ch = rank[i + 1]
+        const isGote = ch === ch.toUpperCase()
+        const prefix = isGote ? 'b' : 'w'
+        position[`${file}${rankNum}`] = prefix + '+' + ch.toUpperCase()
+        c++
+        i += 2
+      } else {
+        const file = String.fromCharCode(97 + c)
+        const rankNum = rows - r
+        const ch = rank[i]
+        const isGote = ch === ch.toUpperCase()
+        const prefix = isGote ? 'b' : 'w'
+        position[`${file}${rankNum}`] = prefix + ch.toUpperCase()
+        c++
+        i++
+      }
+    }
+  }
+  return position
+}
+
+// --- Graph node setup parser ---
+// Parses "n4:O,n6:O,n7:S,..." into position map
+
+function parseGraphSetup(setup) {
+  const position = {}
+  const entries = setup.split(',')
+  for (const entry of entries) {
+    const [node, piece] = entry.trim().split(':')
+    if (node && piece) {
+      position[node] = piece
+    }
+  }
+  return position
 }
 
 // --- Public API ---
