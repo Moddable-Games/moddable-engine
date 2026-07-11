@@ -368,6 +368,7 @@ function buildRenderOpts(resolved) {
     if (render.boardShape) opts.boardShape = render.boardShape
     if (render.cornerRadius) opts.cornerRadius = render.cornerRadius
     if (render.markers) opts.markers = render.markers
+    if (render.pitCurve) opts.pitCurve = render.pitCurve
     if (render.storeSize) {
       opts.storeRx = render.storeSize[0]
       opts.storeRy = render.storeSize[1]
