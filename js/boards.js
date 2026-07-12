@@ -795,7 +795,7 @@ export function renderMultiBoard(config, game) {
     const innerEnd = layerSvg.lastIndexOf('</svg>')
     const innerContent = layerSvg.slice(innerStart, innerEnd)
 
-    parts.push(`<g transform="translate(${ox},${oy})">`)
+    parts.push(`<g transform="translate(${ox},${oy})" data-layer="${i}">`)
     parts.push(innerContent)
     parts.push('</g>')
   }
@@ -1647,7 +1647,8 @@ function bindBoardHover(config) {
     if (!cell) return
     const sq = cell.dataset.sq
     const type = cell.dataset.type || ''
-    const layer = cell.dataset.layer
+    const layerGroup = cell.closest('[data-layer]')
+    const layer = layerGroup ? layerGroup.dataset.layer : cell.dataset.layer
     let text = sq
     if (layer !== undefined && layerLabels) {
       text += ` · ${layerLabels[parseInt(layer)]}`
