@@ -946,22 +946,6 @@ export async function renderFromResolved(resolved, container) {
     return
   }
 
-  // Multi-board games (Alice, Gygax, Bughouse)
-  if (resolved._layers && _renderMultiBoard) {
-    const gallery = await loadGalleryIndex()
-    const config = { ...resolved._layers, rows: resolved.topology?.rows || 8, cols: resolved.topology?.cols || 8, tileSize: resolved.render?.cellSize || 34, layers: resolved._layers }
-    if (resolved.pieces?.set && gallery?.length > 0) {
-      const fenOverrides = resolved.pieces?.fenMap || null
-      const { images, surfaceMap, surface } = buildPieceImages(resolved.pieces.set, gallery, fenOverrides, false)
-      if (Object.keys(images).length > 0) config.pieceImages = images
-      if (Object.keys(surfaceMap).length > 0) config.pieceSurfaceMap = surfaceMap
-      if (surface) config.pieceSurface = surface
-    }
-    const svgString = _renderMultiBoard(config, {})
-    container.innerHTML = svgString
-    return
-  }
-
   const opts = buildRenderOpts(resolved)
 
   if (!opts) {
@@ -975,7 +959,12 @@ export async function renderFromResolved(resolved, container) {
     attachPieceImages(opts, resolved, gallery)
   }
 
-  const svgString = renderBoard(opts)
+  let svgString
+  if (opts.layers && _renderMultiBoard) {
+    svgString = _renderMultiBoard(opts)
+  } else {
+    svgString = renderBoard(opts)
+  }
   container.innerHTML = svgString
 }
 
