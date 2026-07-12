@@ -215,6 +215,7 @@ function embedPieceImages(svg, setDef) {
         inner = inner.replace(/fill="white"/gi, `fill="${fill}"`)
         inner = inner.replace(/fill="#fff"/gi, `fill="${fill}"`)
         inner = inner.replace(/fill="#ffffff"/gi, `fill="${fill}"`)
+        inner = inner.replace(/fill="#f5deb3"/gi, `fill="${fill}"`)
       }
     }
 

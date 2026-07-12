@@ -462,6 +462,9 @@ function buildRenderOpts(resolved) {
   if (resolved.pieces) {
     if (resolved.pieces.borders) opts.pieceBorders = resolved.pieces.borders
   }
+  if (resolved.pieceRotations) {
+    opts.pieceRotations = resolved.pieceRotations
+  }
 
   return opts
 }
