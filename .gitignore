@@ -92,3 +92,6 @@ tags
 *.rej
 .cache/
 .turbo/
+
+# SVG snapshots (provider migration acceptance tests)
+snapshots/

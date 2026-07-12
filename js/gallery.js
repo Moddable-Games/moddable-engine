@@ -1,4 +1,4 @@
-import { createSurfaceDOM, getSurfaceRatios } from './piece-surface.js'
+import { createSurfaceDOM, getSurfaceRatios } from '../packages/render/src/piece-surface.js'
 
 const base = document.querySelector('meta[name="base-path"]')?.content || ''
 const GALLERY_INDEX_PATH = `${base}/pieces/gallery-index.json`

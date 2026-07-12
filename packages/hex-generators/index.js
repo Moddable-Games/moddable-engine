@@ -1,0 +1,11 @@
+import './src/nukes.js'
+import './src/talisman.js'
+import './src/mongo.js'
+import './src/endless.js'
+import './src/colony.js'
+import './src/twilight.js'
+
+export { getGameConfig, getRegisteredGames, getAllGames } from './src/game-registry.js'
+export { HexSvg } from './src/hex-svg.js'
+export { HexMath } from './src/hex-math.js'
+export { createSeededRng } from '../core/src/xorshift.js'

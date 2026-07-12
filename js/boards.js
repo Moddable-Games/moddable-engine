@@ -1,11 +1,75 @@
-import { renderBoard, fenToPosition } from './board-diagrams.js'
-import { getGameConfig, getAllGames, HexSvg, createSeededRng } from './hex-games/index.js'
-import { getDeckConfig, getRegisteredDecks, createDeck, shuffle, deal, layoutTable } from './deck-manager/index.js'
+import { renderBoard, fenToPosition } from '../packages/render/src/board-diagrams.js'
+import { renderMultiBoard } from '../packages/render/src/multi-board.js'
+import { getGameConfig, getAllGames, HexSvg, createSeededRng } from '../packages/hex-generators/index.js'
+import { getDeckConfig, getRegisteredDecks, createDeck, shuffle, deal, layoutTable } from '../packages/component-deck/index.js'
+import { renderDeckSvg, renderMahjongSvg, renderTableauSvg } from '../packages/component-deck/src/renderers.js'
 import { renderRpgProvider } from './rpg-provider.js'
-import { renderFromResolved, loadGalleryIndex as loadAdapterGallery, setDeckRenderer, setMahjongRenderer, setTableauRenderer, setMultiBoardRenderer } from './render-adapter.js'
-import { resolveSurface } from './surface-resolver.js'
-import { resolve as cascadeResolve } from './cascade-resolver.js'
-import { loadVariant } from './schema-loader.js'
+import { buildRenderOpts, attachPieceImages, renderDeckFromResolved, setDeckRenderer, setMahjongRenderer, setTableauRenderer, setMultiBoardRenderer, getMultiBoardRenderer } from '../packages/schema/src/render-adapter.js'
+
+let galleryIndex = null
+async function loadGalleryIndex(basePath = '../pieces/') {
+  if (galleryIndex) return galleryIndex
+  try { galleryIndex = await fetch(basePath + 'gallery-index.json').then(r => r.json()) }
+  catch { galleryIndex = [] }
+  return galleryIndex
+}
+
+async function renderFromResolved(resolved, container) {
+  const topo = resolved.topology || {}
+  if (topo.type === 'none' || !topo.type) {
+    const components = resolved.components || {}
+    const meta = resolved.meta || {}
+    if (components.deck || components.dice) {
+      const svg = renderDeckFromResolved(resolved)
+      if (svg) { container.innerHTML = svg; return }
+    }
+    container.innerHTML = `<div style="padding:20px;color:#aaa;text-align:center;font-family:system-ui"><p style="font-size:16px;margin-bottom:8px">${meta.label || 'Non-spatial game'}</p><p style="font-size:12px;color:#666">Category: ${meta.category || 'unknown'}</p></div>`
+    return
+  }
+  const opts = buildRenderOpts(resolved)
+  if (!opts) { container.innerHTML = '<p style="color:#f44">Cannot determine board style</p>'; return }
+  const gallery = await loadGalleryIndex()
+  if (gallery && gallery.length > 0) attachPieceImages(opts, resolved, gallery)
+  if (resolved._recolouredPieceImages) opts.pieceImages = { ...opts.pieceImages, ...resolved._recolouredPieceImages }
+  const multiBoardFn = getMultiBoardRenderer()
+  container.innerHTML = (opts.layers && multiBoardFn) ? multiBoardFn(opts) : renderBoard(opts)
+  return opts
+}
+import { resolveSurface } from '../packages/schema/src/surfaces.js'
+import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolver.js'
+import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
+
+async function loadContent(resolved, basePath) {
+  const content = resolved.content
+  if (!content || (content.data && !content.source) || !content.source) return resolved
+  const url = content.source.startsWith('http') ? content.source
+    : content.source.endsWith('.json') && !content.source.includes('/') ? '../data/' + content.source
+    : (basePath?.endsWith('/') ? basePath : (basePath || '') + '/') + content.source
+  try {
+    const data = await fetch(url).then(r => r.ok ? r.json() : null)
+    return data ? { ...resolved, content: { ...content, data } } : resolved
+  } catch { return resolved }
+}
+
+async function loadVariant({ familyPath, variantPath, basePath }) {
+  const [familyMd, variantMd] = await Promise.all([
+    fetch(basePath + familyPath).then(r => r.text()),
+    fetch(basePath + variantPath).then(r => r.text()),
+  ])
+  const familyFm = parseFrontmatter(familyMd).meta || {}
+  const variantFm = parseFrontmatter(variantMd).meta || {}
+  const surfaceRef = variantFm.engine?.surface || familyFm.engine?.surface
+  const surface = resolveSurface(surfaceRef)
+  const { resolved, errors } = cascadeResolve({
+    surface,
+    family: { engine: familyFm.engine || {}, meta: { label: familyFm.title || '' } },
+    variant: { engine: variantFm.engine || {}, meta: { label: variantFm.title || variantFm.slug || '' } },
+  })
+  if (errors.length > 0) return { resolved, errors }
+  const contentBasePath = basePath + variantPath.replace(/\/[^/]+$/, '/')
+  const final = await loadContent(resolved, contentBasePath)
+  return { resolved: final, errors: [] }
+}
 
 setDeckRenderer(renderDeckSvg)
 setMahjongRenderer(renderMahjongSvg)
@@ -13,371 +77,10 @@ setTableauRenderer(renderTableauSvg)
 setMultiBoardRenderer(renderMultiBoard)
 
 
-// ─── FEN → pieceImages mapping ──────────────────────────────────────────────
 
-const FEN_TO_PIECE_ID = {
-  K: 'wK', Q: 'wQ', R: 'wR', B: 'wB', N: 'wN', P: 'wP',
-  k: 'bK', q: 'bQ', r: 'bR', b: 'bB', n: 'bN', p: 'bP',
-  A: 'wA', a: 'bA', C: 'wC', c: 'bC', D: 'wD', d: 'bD',
-  E: 'wE', e: 'bE', F: 'wF', f: 'bF', G: 'wG', g: 'bG',
-  H: 'wH', h: 'bH', I: 'wI', i: 'bI', J: 'wJ', j: 'bJ',
-  L: 'wL', l: 'bL', M: 'wM', m: 'bM', O: 'wO', o: 'bO',
-  S: 'wS', s: 'bS', T: 'wT', t: 'bT', U: 'wU', u: 'bU',
-  V: 'wV', v: 'bV', W: 'wW', w: 'bW', Y: 'wY', y: 'bY',
-  Z: 'wZ', z: 'bZ',
-}
-
-const GAME_FEN_OVERRIDES = {
-  xiangqi: { H: 'wN', h: 'bN', R: 'wR', r: 'bR', E: 'wE', e: 'bE', A: 'wA', a: 'bA', K: 'wK', k: 'bK', C: 'wC', c: 'bC', P: 'wP', p: 'bP', V: 'wV', v: 'bV', B: 'wB', b: 'bB', I: 'wI', i: 'bI', U: 'wU', u: 'bU', Z: 'wZ', z: 'bZ' },
-  'xiangqi/jieqi': { K: 'wK', k: 'bK', F: 'wFD', f: 'bFD' },
-  'dou-shou-qi': {
-    E: 'wElephant', e: 'bElephant', L: 'wLion', l: 'bLion',
-    T: 'wTiger', t: 'bTiger', P: 'wLeopard', p: 'bLeopard',
-    D: 'wDog', d: 'bDog', W: 'wWolf', w: 'bWolf',
-    C: 'wCat', c: 'bCat', R: 'wRat', r: 'bRat',
-  },
-  asalto: { officer: 'red-circle', soldier: 'green-circle' },
-  'shogi/sho-shogi': {
-    K: 'wK', k: 'bK', G: 'wG', g: 'bG', S: 'wS', s: 'bS', N: 'wN', n: 'bN',
-    L: 'wL', l: 'bL', R: 'wR', r: 'bR', B: 'wB', b: 'bB', P: 'wP', p: 'bP',
-    E: 'wE', e: 'bE',
-  },
-  'shogi/dobutsu': {
-    G: 'wdG', g: 'bdG', L: 'wdL', l: 'bdL', E: 'wdE', e: 'bdE', C: 'wdC', c: 'bdC', H: 'wdH', h: 'bdH',
-  },
-  'shogi/cannon-shogi': {
-    K: 'wK', k: 'bK', G: 'wG', g: 'bG', S: 'wS', s: 'bS', N: 'wN', n: 'bN',
-    L: 'wL', l: 'bL', R: 'wR', r: 'bR', B: 'wB', b: 'bB', P: 'wP', p: 'bP',
-    A: 'wcA', a: 'bcA', U: 'wcU', u: 'bcU', I: 'wcI', i: 'bcI', C: 'wcC', c: 'bcC',
-  },
-  'shogi/tori-shogi': {
-    C: 'wtC', c: 'btC', F: 'wtF', f: 'btF', P: 'wtP', p: 'btP',
-    R: 'wtR', r: 'btR', L: 'wtL', l: 'btL', S: 'wtS', s: 'btS',
-    K: 'wtK', k: 'btK', G: 'wtG', g: 'btG',
-  },
-  'shogi/yari-shogi': {
-    K: 'wK', k: 'bK', B: 'wB', b: 'bB', N: 'wN', n: 'bN', P: 'wP', p: 'bP',
-    Y: 'wY', y: 'bY', G: 'wG', g: 'bG', S: 'wS', s: 'bS',
-  },
-  'shogi/dai-shogi': {
-    LN: 'wLN', ln: 'bLN', KN: 'wKN', kn: 'bKN', ST: 'wST', st: 'bST',
-    IG: 'wIG', ig: 'bIG', CG: 'wCG', cg: 'bCG', SG: 'wSG', sg: 'bSG',
-    GG: 'wGG', gg: 'bGG', KI: 'wKI', ki: 'bKI', DE: 'wDE', de: 'bDE',
-    RC: 'wRC', rc: 'bRC', CT: 'wCT', ct: 'bCT', FL: 'wFL', fl: 'bFL',
-    BT: 'wBT', bt: 'bBT', VO: 'wVO', vo: 'bVO', AB: 'wAB', ab: 'bAB',
-    EW: 'wEW', ew: 'bEW', KR: 'wKR', kr: 'bKR', LI: 'wLI', li: 'bLI',
-    PH: 'wPH', ph: 'bPH', RK: 'wRK', rk: 'bRK', FY: 'wFY', fy: 'bFY',
-    SM: 'wSM', sm: 'bSM', VM: 'wVM', vm: 'bVM', BI: 'wBI', bi: 'bBI',
-    DH: 'wDH', dh: 'bDH', DK: 'wDK', dk: 'bDK', FK: 'wFK', fk: 'bFK',
-    PW: 'wPW', pw: 'bPW', GB: 'wGB', gb: 'bGB',
-  },
-  'shogi/tenjiku-shogi': {
-    LN: 'wLN', ln: 'bLN', KN: 'wKN', kn: 'bKN', FL: 'wFL', fl: 'bFL',
-    IG: 'wIG', ig: 'bIG', CG: 'wCG', cg: 'bCG', SG: 'wSG', sg: 'bSG',
-    GG: 'wGG', gg: 'bGG', KI: 'wKI', ki: 'bKI', DE: 'wDE', de: 'bDE',
-    RC: 'wRC', rc: 'bRC', CS: 'wCS', cs: 'bCS', BT: 'wBT', bt: 'bBT',
-    KR: 'wKR', kr: 'bKR', LI: 'wLI', li: 'bLI', FK: 'wFK', fk: 'bFK',
-    PH: 'wPH', ph: 'bPH', SS: 'wSS', ss: 'bSS', VT: 'wVT', vt: 'bVT',
-    BI: 'wBI', bi: 'bBI', DH: 'wDH', dh: 'bDH', DK: 'wDK', dk: 'bDK',
-    WB: 'wWB', wb: 'bWB', FD: 'wFD', fd: 'bFD', LW: 'wLW', lw: 'bLW',
-    FE: 'wFE', fe: 'bFE', SM: 'wSM', sm: 'bSM', VM: 'wVM', vm: 'bVM',
-    RK: 'wRK', rk: 'bRK', HF: 'wHF', hf: 'bHF', SE: 'wSE', se: 'bSE',
-    BG: 'wBG', bg: 'bBG', RG: 'wRG', rg: 'bRG', GR: 'wGR', gr: 'bGR',
-    VG: 'wVG', vg: 'bVG', PW: 'wPW', pw: 'bPW', DG: 'wDG', dg: 'bDG',
-  },
-  'shogi/wa-shogi': {
-    CK: 'wCK', ck: 'bCK', OC: 'wOC', oc: 'bOC', BD: 'wBD', bd: 'bBD',
-    SC: 'wSC', sc: 'bSC', FG: 'wFG', fg: 'bFG', VW: 'wVW', vw: 'bVW',
-    VS: 'wVS', vs: 'bVS', FC: 'wFC', fc: 'bFC', SO: 'wSO', so: 'bSO',
-    CM: 'wCM', cm: 'bCM', LH: 'wLH', lh: 'bLH', FF: 'wFF', ff: 'bFF',
-    SW: 'wSW', sw: 'bSW', CE: 'wCE', ce: 'bCE', TF: 'wTF', tf: 'bTF',
-    RR: 'wRR', rr: 'bRR', SP: 'wSP', sp: 'bSP',
-  },
-  'shogi/chu-shogi': {
-    K: 'wK', k: 'bK', G: 'wG', g: 'bG', S: 'wS', s: 'bS', L: 'wL', l: 'bL',
-    R: 'wR', r: 'bR', B: 'wB', b: 'bB', P: 'wP', p: 'bP',
-    E: 'wxE', e: 'bxE', C: 'wxC', c: 'bxC', F: 'wxF', f: 'bxF',
-    A: 'wxA', a: 'bxA', T: 'wxT', t: 'bxT', O: 'wxI', o: 'bxI',
-    X: 'wxH', x: 'bxH', M: 'wxM', m: 'bxM', V: 'wxV', v: 'bxV',
-    H: 'wxW', h: 'bxW', D: 'wxD', d: 'bxD', N: 'wxN', n: 'bxN',
-    Q: 'wxQ', q: 'bxQ', I: 'wxO', i: 'bxO',
-  },
-  'shogi/maka-dai-dai-shogi': {
-    LN: 'wLN', ln: 'bLN', EG: 'wEG', eg: 'bEG', ST: 'wST', st: 'bST',
-    TG: 'wTG', tg: 'bTG', IG: 'wIG', ig: 'bIG', CG: 'wCG', cg: 'bCG',
-    SG: 'wSG', sg: 'bSG', GG: 'wGG', gg: 'bGG', DV: 'wDV', dv: 'bDV',
-    KI: 'wKI', ki: 'bKI', DS: 'wDS', ds: 'bDS', RC: 'wRC', rc: 'bRC',
-    CT: 'wCT', ct: 'bCT', CC: 'wCC', cc: 'bCC', CO: 'wCO', co: 'bCO',
-    FL: 'wFL', fl: 'bFL', BT: 'wBT', bt: 'bBT', DE: 'wDE', de: 'bDE',
-    RD: 'wRD', rd: 'bRD', BM: 'wBM', bm: 'bBM', OR: 'wOR', or: 'bOR',
-    AB: 'wAB', ab: 'bAB', BB: 'wBB', bb: 'bBB', EW: 'wEW', ew: 'bEW',
-    KR: 'wKR', kr: 'bKR', LI: 'wLI', li: 'bLI', PH: 'wPH', ph: 'bPH',
-    DY: 'wDY', dy: 'bDY', KN: 'wKN', kn: 'bKN', VO: 'wVO', vo: 'bVO',
-    FY: 'wFY', fy: 'bFY', BV: 'wBV', bv: 'bBV', WR: 'wWR', wr: 'bWR',
-    LD: 'wLD', ld: 'bLD', GD: 'wGD', gd: 'bGD', SD: 'wSD', sd: 'bSD',
-    RK: 'wRK', rk: 'bRK', LC: 'wLC', lc: 'bLC', SM: 'wSM', sm: 'bSM',
-    SF: 'wSF', sf: 'bSF', VM: 'wVM', vm: 'bVM', BI: 'wBI', bi: 'bBI',
-    DH: 'wDH', dh: 'bDH', DK: 'wDK', dk: 'bDK', CP: 'wCP', cp: 'bCP',
-    FK: 'wFK', fk: 'bFK', HM: 'wHM', hm: 'bHM', RT: 'wRT', rt: 'bRT',
-    PW: 'wPW', pw: 'bPW', GB: 'wGB', gb: 'bGB',
-  },
-  'shogi/tai-shogi': {
-    LN: 'wLN', ln: 'bLN', TS: 'wTS', ts: 'bTS', WL: 'wWL', wl: 'bWL',
-    FY: 'wFY', fy: 'bFY', LO: 'wLO', lo: 'bLO', DW: 'wDW', dw: 'bDW',
-    RK: 'wRK', rk: 'bRK', DH: 'wDH', dh: 'bDH', DK: 'wDK', dk: 'bDK',
-    FK: 'wFK', fk: 'bFK', GG: 'wGG', gg: 'bGG', DV: 'wDV', dv: 'bDV',
-    EM: 'wEM', em: 'bEM', DS: 'wDS', ds: 'bDS', RC: 'wRC', rc: 'bRC',
-    SI: 'wSI', si: 'bSI', SE: 'wSE', se: 'bSE', KN: 'wKN', kn: 'bKN',
-    PS: 'wPS', ps: 'bPS', FT: 'wFT', ft: 'bFT', BI: 'wBI', bi: 'bBI',
-    FE: 'wFE', fe: 'bFE', WE: 'wWE', we: 'bWE', FR: 'wFR', fr: 'bFR',
-    SG: 'wSG', sg: 'bSG', LG: 'wLG', lg: 'bLG', CR: 'wCR', cr: 'bCR',
-    RG: 'wRG', rg: 'bRG', SC: 'wSC', sc: 'bSC', WH: 'wWH', wh: 'bWH',
-    RS: 'wRS', rs: 'bRS', VO: 'wVO', vo: 'bVO', CS: 'wCS', cs: 'bCS',
-    BB: 'wBB', bb: 'bBB', SV: 'wSV', sv: 'bSV', GL: 'wGL', gl: 'bGL',
-    BM: 'wBM', bm: 'bBM', BT: 'wBT', bt: 'bBT', BV: 'wBV', bv: 'bBV',
-    WR: 'wWR', wr: 'bWR', NK: 'wNK', nk: 'bNK', GD: 'wGD', gd: 'bGD',
-    SD: 'wSD', sd: 'bSD', SL: 'wSL', sl: 'bSL', WB: 'wWB', wb: 'bWB',
-    FL: 'wFL', fl: 'bFL', WS: 'wWS', ws: 'bWS', EB: 'wEB', eb: 'bEB',
-    CC: 'wCC', cc: 'bCC', HF: 'wHF', hf: 'bHF', OM: 'wOM', om: 'bOM',
-    OK: 'wOK', ok: 'bOK', PC: 'wPC', pc: 'bPC', GT: 'wGT', gt: 'bGT',
-    KR: 'wKR', kr: 'bKR', LI: 'wLI', li: 'bLI', PH: 'wPH', ph: 'bPH',
-    GO: 'wGO', go: 'bGO', RB: 'wRB', rb: 'bRB', NB: 'wNB', nb: 'bNB',
-    SU: 'wSU', su: 'bSU', LC: 'wLC', lc: 'bLC', BD: 'wBD', bd: 'bBD',
-    WO: 'wWO', wo: 'bWO', EG: 'wEG', eg: 'bEG', ST: 'wST', st: 'bST',
-    TG: 'wTG', tg: 'bTG', IG: 'wIG', ig: 'bIG', CG: 'wCG', cg: 'bCG',
-    OR: 'wOR', or: 'bOR', CO: 'wCO', co: 'bCO', RD: 'wRD', rd: 'bRD',
-    CP: 'wCP', cp: 'bCP', DE: 'wDE', de: 'bDE', HM: 'wHM', hm: 'bHM',
-    VS: 'wVS', vs: 'bVS', HD: 'wHD', hd: 'bHD', FH: 'wFH', fh: 'bFH',
-    EN: 'wEN', en: 'bEN', DY: 'wDY', dy: 'bDY', FO: 'wFO', fo: 'bFO',
-    SM: 'wSM', sm: 'bSM', VM: 'wVM', vm: 'bVM', VB: 'wVB', vb: 'bVB',
-    SB: 'wSB', sb: 'bSB', PR: 'wPR', pr: 'bPR', AB: 'wAB', ab: 'bAB',
-    EW: 'wEW', ew: 'bEW', LD: 'wLD', ld: 'bLD', PW: 'wPW', pw: 'bPW',
-    GB: 'wGB', gb: 'bGB', WT: 'wWT', wt: 'bWT',
-  },
-  'shogi/taikyoku-shogi': {
-    AB: 'wAB', ab: 'bAB', BA: 'wBA', ba: 'bBA', BC: 'wBC', bc: 'bBC', BO: 'wBO', bo: 'bBO',
-    BI: 'wBI', bi: 'bBI', BG: 'wBG', bg: 'bBG', BB: 'wBB', bb: 'bBB', BL: 'wBL', bl: 'bBL',
-    BM: 'wBM', bm: 'bBM', BT: 'wBT', bt: 'bBT', BD: 'wBD', bd: 'bBD', BS: 'wBS', bs: 'bBS',
-    BV: 'wBV', bv: 'bBV', BU: 'wBU', bu: 'bBU', CP: 'wCP', cp: 'bCP', CA: 'wCA', ca: 'bCA',
-    CF: 'wCF', cf: 'bCF', CS: 'wCS', cs: 'bCS', CN: 'wCN', cn: 'bCN', CT: 'wCT', ct: 'bCT',
-    CD: 'wCD', cd: 'bCD', CH: 'wCH', ch: 'bCH', CK: 'wCK', ck: 'bCK', CC: 'wCC', cc: 'bCC',
-    CM: 'wCM', cm: 'bCM', CL: 'wCL', cl: 'bCL', CE: 'wCE', ce: 'bCE', CO: 'wCO', co: 'bCO',
-    CU: 'wCU', cu: 'bCU', CG: 'wCG', cg: 'bCG', CR: 'wCR', cr: 'bCR', DS: 'wDS', ds: 'bDS',
-    DV: 'wDV', dv: 'bDV', DG: 'wDG', dg: 'bDG', DY: 'wDY', dy: 'bDY', DH: 'wDH', dh: 'bDH',
-    DK: 'wDK', dk: 'bDK', DE: 'wDE', de: 'bDE', EC: 'wEC', ec: 'bEC', ED: 'wED', ed: 'bED',
-    EG: 'wEG', eg: 'bEG', EB: 'wEB', eb: 'bEB', EN: 'wEN', en: 'bEN', EW: 'wEW', ew: 'bEW',
-    FL: 'wFL', fl: 'bFL', FE: 'wFE', fe: 'bFE', FD: 'wFD', fd: 'bFD', FI: 'wFI', fi: 'bFI',
-    FG: 'wFG', fg: 'bFG', FA: 'wFA', fa: 'bFA', FC: 'wFC', fc: 'bFC', FY: 'wFY', fy: 'bFY',
-    FN: 'wFN', fn: 'bFN', FH: 'wFH', fh: 'bFH', FO: 'wFO', fo: 'bFO', FS: 'wFS', fs: 'bFS',
-    FM: 'wFM', fm: 'bFM', FP: 'wFP', fp: 'bFP', FR: 'wFR', fr: 'bFR', FQ: 'wFQ', fq: 'bFQ',
-    FK: 'wFK', fk: 'bFK', FU: 'wFU', fu: 'bFU', FT: 'wFT', ft: 'bFT', FF: 'wFF', ff: 'bFF',
-    GB: 'wGB', gb: 'bGB', GC: 'wGC', gc: 'bGC', GG: 'wGG', gg: 'bGG', GO: 'wGO', go: 'bGO',
-    GL: 'wGL', gl: 'bGL', GV: 'wGV', gv: 'bGV', GT: 'wGT', gt: 'bGT', GR: 'wGR', gr: 'bGR',
-    GM: 'wGM', gm: 'bGM', GS: 'wGS', gs: 'bGS', GA: 'wGA', ga: 'bGA', GU: 'wGU', gu: 'bGU',
-    GD: 'wGD', gd: 'bGD', HM: 'wHM', hm: 'bHM', HF: 'wHF', hf: 'bHF', HG: 'wHG', hg: 'bHG',
-    HS: 'wHS', hs: 'bHS', HN: 'wHN', hn: 'bHN', HL: 'wHL', hl: 'bHL', HR: 'wHR', hr: 'bHR',
-    IG: 'wIG', ig: 'bIG', KI: 'wKI', ki: 'bKI', KN: 'wKN', kn: 'bKN', KY: 'wKY', ky: 'bKY',
-    KM: 'wKM', km: 'bKM', LN: 'wLN', ln: 'bLN', LC: 'wLC', lc: 'bLC', LA: 'wLA', la: 'bLA',
-    LG: 'wLG', lg: 'bLG', LT: 'wLT', lt: 'bLT', LS: 'wLS', ls: 'bLS', LH: 'wLH', lh: 'bLH',
-    LI: 'wLI', li: 'bLI', LD: 'wLD', ld: 'bLD', LW: 'wLW', lw: 'bLW', LL: 'wLL', ll: 'bLL',
-    LU: 'wLU', lu: 'bLU', LO: 'wLO', lo: 'bLO', LB: 'wLB', lb: 'bLB', MD: 'wMD', md: 'bMD',
-    ME: 'wME', me: 'bME', MF: 'wMF', mf: 'bMF', MG: 'wMG', mg: 'bMG', MS: 'wMS', ms: 'bMS',
-    NK: 'wNK', nk: 'bNK', NS: 'wNS', ns: 'bNS', NB: 'wNB', nb: 'bNB', OK: 'wOK', ok: 'bOK',
-    OM: 'wOM', om: 'bOM', OR: 'wOR', or: 'bOR', OC: 'wOC', oc: 'bOC', OG: 'wOG', og: 'bOG',
-    OS: 'wOS', os: 'bOS', PW: 'wPW', pw: 'bPW', PC: 'wPC', pc: 'bPC', PH: 'wPH', ph: 'bPH',
-    PM: 'wPM', pm: 'bPM', PG: 'wPG', pg: 'bPG', PS: 'wPS', ps: 'bPS', PR: 'wPR', pr: 'bPR',
-    PU: 'wPU', pu: 'bPU', RA: 'wRA', ra: 'bRA', RS: 'wRS', rs: 'bRS', RE: 'wRE', re: 'bRE',
-    RD: 'wRD', rd: 'bRD', RC: 'wRC', rc: 'bRC', RT: 'wRT', rt: 'bRT', RI: 'wRI', ri: 'bRI',
-    RG: 'wRG', rg: 'bRG', RV: 'wRV', rv: 'bRV', RW: 'wRW', rw: 'bRW', RO: 'wRO', ro: 'bRO',
-    RM: 'wRM', rm: 'bRM', RK: 'wRK', rk: 'bRK', RR: 'wRR', rr: 'bRR', RU: 'wRU', ru: 'bRU',
-    RX: 'wRX', rx: 'bRX', RH: 'wRH', rh: 'bRH', RP: 'wRP', rp: 'bRP', RQ: 'wRQ', rq: 'bRQ',
-    RN: 'wRN', rn: 'bRN', RF: 'wRF', rf: 'bRF', RJ: 'wRJ', rj: 'bRJ', RL: 'wRL', rl: 'bRL',
-    RB: 'wRB', rb: 'bRB', SV: 'wSV', sv: 'bSV', SB: 'wSB', sb: 'bSB', SI: 'wSI', si: 'bSI',
-    SD: 'wSD', sd: 'bSD', SF: 'wSF', sf: 'bSF', SK: 'wSK', sk: 'bSK', SM: 'wSM', sm: 'bSM',
-    SX: 'wSX', sx: 'bSX', SS: 'wSS', ss: 'bSS', SN: 'wSN', sn: 'bSN', SW: 'wSW', sw: 'bSW',
-    SA: 'wSA', sa: 'bSA', SG: 'wSG', sg: 'bSG', SR: 'wSR', sr: 'bSR', SE: 'wSE', se: 'bSE',
-    SL: 'wSL', sl: 'bSL', SU: 'wSU', su: 'bSU', SP: 'wSP', sp: 'bSP', SQ: 'wSQ', sq: 'bSQ',
-    TC: 'wTC', tc: 'bTC', ST: 'wST', st: 'bST', SC: 'wSC', sc: 'bSC', WI: 'wWI', wi: 'bWI',
-    SO: 'wSO', so: 'bSO', WD: 'wWD', wd: 'bWD', TL: 'wTL', tl: 'bTL', TG: 'wTG', tg: 'bTG',
-    TF: 'wTF', tf: 'bTF', TS: 'wTS', ts: 'bTS', VS: 'wVS', vs: 'bVS', VB: 'wVB', vb: 'bVB',
-    VH: 'wVH', vh: 'bVH', VL: 'wVL', vl: 'bVL', VM: 'wVM', vm: 'bVM', VP: 'wVP', vp: 'bVP',
-    VT: 'wVT', vt: 'bVT', VR: 'wVR', vr: 'bVR', VW: 'wVW', vw: 'bVW', VG: 'wVG', vg: 'bVG',
-    VI: 'wVI', vi: 'bVI', VD: 'wVD', vd: 'bVD', VO: 'wVO', vo: 'bVO', VA: 'wVA', va: 'bVA',
-    VF: 'wVF', vf: 'bVF', WB: 'wWB', wb: 'bWB', WQ: 'wWQ', wq: 'bWQ', WG: 'wWG', wg: 'bWG',
-    WS: 'wWS', ws: 'bWS', WL: 'wWL', wl: 'bWL', WE: 'wWE', we: 'bWE', WH: 'wWH', wh: 'bWH',
-    WT: 'wWT', wt: 'bWT', WN: 'wWN', wn: 'bWN', WF: 'wWF', wf: 'bWF', WC: 'wWC', wc: 'bWC',
-    WO: 'wWO', wo: 'bWO', DN: 'wDN', dn: 'bDN', WX: 'wWX', wx: 'bWX', WR: 'wWR', wr: 'bWR',
-  },
-}
-
-function resolvePieceEntry(pieceId, entry, setId) {
-  if (typeof entry === 'string') {
-    return `../pieces/sets/${setId}/${entry}`
-  }
-  if (entry.source && entry.file) {
-    return `../pieces/sets/${entry.source}/${entry.file}`
-  }
-  return null
-}
-
-function buildPieceImages(pieceSetId, galleryIndex, gameId, variantId) {
-  const empty = { images: {}, surface: null, surfaceMap: {} }
-  if (!pieceSetId || !galleryIndex) return empty
-  const setDef = galleryIndex.find(s => s.id === pieceSetId)
-  if (!setDef) return empty
-  const images = {}
-  const surfaceMap = {}
-
-  if (setDef.extends) {
-    const baseDef = galleryIndex.find(s => s.id === setDef.extends)
-    if (baseDef) {
-      for (const [pieceId, entry] of Object.entries(baseDef.pieces || {})) {
-        const path = resolvePieceEntry(pieceId, entry, baseDef.id)
-        if (path) images[pieceId] = path
-      }
-    }
-  }
-
-  for (const [pieceId, entry] of Object.entries(setDef.pieces || {})) {
-    const path = resolvePieceEntry(pieceId, entry, pieceSetId)
-    if (path) images[pieceId] = path
-    if (typeof entry === 'object' && entry.surface) {
-      surfaceMap[pieceId] = entry.surface
-    }
-  }
-
-  const fenMap = (variantId && GAME_FEN_OVERRIDES[`${gameId}/${variantId}`]) || GAME_FEN_OVERRIDES[gameId] || FEN_TO_PIECE_ID
-  for (const [fenChar, pieceId] of Object.entries(fenMap)) {
-    if (images[pieceId]) {
-      images[fenChar] = images[pieceId]
-    }
-    if (surfaceMap[pieceId]) {
-      surfaceMap[fenChar] = surfaceMap[pieceId]
-    }
-  }
-  return { images, surface: setDef.surface || null, surfaceMap }
-}
-
-const DRAUGHTS_VOCABULARY = {
-  w: { type: 'man', color: 'white' },
-  b: { type: 'man', color: 'black' },
-  W: { type: 'king', color: 'white' },
-  B: { type: 'king', color: 'black' },
-}
-
-const REVERSI_VOCABULARY = {
-  w: { type: 'piece', color: 'white' },
-  b: { type: 'piece', color: 'black' },
-}
-
-const STONE_VOCABULARY = {
-  w: { type: 'stone', color: 'white' },
-  b: { type: 'stone', color: 'black' },
-}
-
-const TAFL_VOCABULARY = {
-  K: { type: 'king', color: 'white' },
-  w: { type: 'stone', color: 'white' },
-  b: { type: 'stone', color: 'black' },
-}
-
-function parseMancalaSetup(notation, pitsPerSide, boardRows) {
-  const sections = notation.split(';')
-  const players = boardRows === 4 ? 2 : 2
-  const pitsPerPlayer = pitsPerSide * (boardRows / 2)
-  const pits = new Array(pitsPerPlayer * players).fill(0)
-  const stores = [0, 0]
-  let sectionIdx = 0
-  for (let p = 0; p < players; p++) {
-    if (sectionIdx < sections.length) {
-      const vals = sections[sectionIdx].split(',').map(s => parseInt(s.trim(), 10) || 0)
-      for (let i = 0; i < vals.length && i < pitsPerPlayer; i++) {
-        pits[p * pitsPerPlayer + i] = vals[i]
-      }
-      sectionIdx++
-    }
-    if (sectionIdx < sections.length) {
-      stores[p] = parseInt(sections[sectionIdx].trim(), 10) || 0
-      sectionIdx++
-    }
-  }
-  return { pits, stores }
-}
-
-function parseBackgammonSetup(notation) {
-  const dark = new Array(24).fill(0)
-  const light = new Array(24).fill(0)
-  if (!notation || notation === 'empty') return { dark, light }
-  const pairs = notation.split(',')
-  for (const pair of pairs) {
-    const [posStr, countSymbol] = pair.split(':')
-    if (!countSymbol || posStr === 'home' || posStr === 'bar') continue
-    const pos = parseInt(posStr, 10)
-    const match = countSymbol.match(/^(\d+)([WB])$/)
-    if (!match) continue
-    const count = parseInt(match[1], 10)
-    const owner = match[2]
-    if (owner === 'W') light[pos] = count
-    else dark[pos] = count
-  }
-  return { dark, light }
-}
-
-function buildDraughtsFenFromSetup(rows, cols, setup) {
-  const setupRows = setup.rows
-  const darkOnly = setup.dark !== false
-  const fenRows = []
-  for (let r = 0; r < rows; r++) {
-    let row = ''
-    let empty = 0
-    for (let c = 0; c < cols; c++) {
-      const isDark = (r + c) % 2 === 1
-      const isBlackZone = r < setupRows
-      const isWhiteZone = r >= rows - setupRows
-      const playable = !darkOnly || isDark
-      if (playable && isBlackZone) {
-        if (empty > 0) { row += empty > 9 ? String(empty) : String(empty); empty = 0 }
-        row += 'b'
-      } else if (playable && isWhiteZone) {
-        if (empty > 0) { row += String(empty); empty = 0 }
-        row += 'w'
-      } else {
-        empty++
-      }
-    }
-    if (empty > 0) row += String(empty)
-    fenRows.push(row)
-  }
-  return fenRows.join('/')
-}
-
-function fen4ToPosition(fen4, rows, cols) {
-  const position = {}
-  const ranks = fen4.split('/')
-  for (let r = 0; r < ranks.length && r < rows; r++) {
-    let c = 0
-    const cells = ranks[r].split(',')
-    for (const cell of cells) {
-      const trimmed = cell.trim()
-      if (/^\d+$/.test(trimmed)) {
-        c += parseInt(trimmed, 10)
-      } else {
-        const file = String.fromCharCode(97 + c)
-        const rankNum = rows - r
-        position[`${file}${rankNum}`] = trimmed
-        c++
-      }
-    }
-  }
-  return position
-}
 
 const FEN4_OWNERS = { r: 'red', b: 'blue', y: 'yellow', g: 'green' }
 
-function fen4GetOwner(pieceType) {
-  if (pieceType.length >= 2) return FEN4_OWNERS[pieceType[0]] || 'white'
-  return pieceType === pieceType.toUpperCase() ? 'white' : 'black'
-}
 
 const recolourCache = {}
 
@@ -417,85 +120,10 @@ async function loadRecolouredPieces(config, gallery) {
   config.pieceImages = images
 }
 
-function parseDraughtsFen(fen, rows, cols, vocabulary) {
-  const vocab = vocabulary || DRAUGHTS_VOCABULARY
-  const position = {}
-  const ranks = fen.split('/')
-  for (let r = 0; r < ranks.length; r++) {
-    let c = 0, i = 0
-    const rank = ranks[r]
-    while (i < rank.length) {
-      const ch = rank[i]
-      if (ch >= '0' && ch <= '9') {
-        const next = rank[i + 1]
-        if (next >= '0' && next <= '9') { c += parseInt(ch + next, 10); i += 2 }
-        else { c += parseInt(ch, 10); i++ }
-      } else {
-        if (vocab[ch]) {
-          const file = String.fromCharCode(97 + c)
-          const rankNum = rows - r
-          position[`${file}${rankNum}`] = { ...vocab[ch] }
-        }
-        c++; i++
-      }
-    }
-  }
-  return position
-}
-
-function getHandicapPoints(rows) {
-  const off = rows <= 9 ? 2 : 3
-  const mid = Math.floor((rows - 1) / 2)
-  const far = rows - 1 - off
-  // Standard placement order: opposing corners, remaining corners, sides, tengen
-  return [
-    [off, far], [far, off],
-    [off, off], [far, far],
-    [mid, off], [mid, far],
-    [off, mid], [far, mid],
-    [mid, mid],
-  ]
-}
-
-function buildGoHandicap(count, rows) {
-  const points = getHandicapPoints(rows).slice(0, count)
-  const position = {}
-  const GO_LETTERS = 'abcdefghjklmnopqrst'
-  for (const [r, c] of points) {
-    const file = GO_LETTERS[c]
-    const rank = rows - r
-    position[`${file}${rank}`] = { type: 'stone', color: 'black' }
-  }
-  return position
-}
-
-function buildFanoronaPosition(rows, cols) {
-  const position = {}
-  const midRow = Math.floor(rows / 2)
-  const midCol = Math.floor(cols / 2)
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const file = String.fromCharCode(97 + c)
-      const rank = rows - r
-      const sq = `${file}${rank}`
-      if (r < midRow) {
-        position[sq] = { type: 'stone', color: 'white' }
-      } else if (r > midRow) {
-        position[sq] = { type: 'stone', color: 'black' }
-      } else if (c < midCol) {
-        position[sq] = { type: 'stone', color: 'white' }
-      } else if (c > midCol) {
-        position[sq] = { type: 'stone', color: 'black' }
-      }
-    }
-  }
-  return position
-}
 
 // ─── APP STATE ──────────────────────────────────────────────────────────────
 
 let state = readStateFromURL()
-let galleryIndex = null
 
 const boardDataCache = {}
 
@@ -708,102 +336,6 @@ async function inlineExternalImages(svgEl) {
   await Promise.all(promises)
 }
 
-function getStaticSvgPath(gameId, variantId) {
-  const STATIC_PATH_OVERRIDES = {
-    'landlords-game/standard': 'landlords-game-board.svg',
-    'halma/standard-2p': 'halma-2p-board.svg',
-    'halma/standard-4p': 'halma-4p-board.svg',
-    'stern-halma/standard': 'stern-halma-board.svg',
-    'royal-ur/standard': 'royal-ur-board.svg',
-    'surakarta/standard': 'surakarta-board.svg',
-    'pachisi/standard': 'pachisi-board.svg',
-    'chaupar/standard': 'chaupar-board.svg',
-    'hex/standard': 'hex-board.svg',
-    'landlords-game/1904-original': '1904-original-board.svg',
-    'landlords-game/1906-commercial': '1906-commercial-board.svg',
-  }
-  const key = `${gameId}/${variantId}`
-  const filename = STATIC_PATH_OVERRIDES[key] || `${variantId}-board.svg`
-  return `../diagrams/static/${gameId}/${filename}`
-}
-
-export function renderMultiBoard(config, game) {
-  const { layers } = config
-  const { count, layout, labels, fens, colors: layerColors } = layers
-  const gap = layout === 'horizontal' ? 20 : 12
-  const labelH = 18
-
-  const ts = config.tileSize || 34
-  const rows = config.rows || 8
-  const cols = config.cols || 8
-  const innerPad = 24
-  const boardW = cols * ts + innerPad * 2
-  const boardH = rows * ts + innerPad * 2
-  const pad = 4
-
-  let totalW, totalH
-  if (layout === 'horizontal') {
-    totalW = count * boardW + (count - 1) * gap + pad * 2
-    totalH = boardH + pad * 2 + labelH
-  } else {
-    totalW = boardW + pad * 2
-    totalH = count * (boardH + labelH) + (count - 1) * gap + pad * 2
-  }
-
-  const parts = []
-  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalW} ${totalH}" width="${totalW}" height="${totalH}">`)
-  const bgColor = config.background || 'transparent'
-  if (bgColor !== 'transparent') {
-    parts.push(`<rect width="${totalW}" height="${totalH}" fill="${bgColor}" rx="6"/>`)
-  }
-
-  for (let i = 0; i < count; i++) {
-    let ox, oy
-    if (layout === 'horizontal') {
-      ox = pad + i * (boardW + gap)
-      oy = pad + labelH
-    } else {
-      ox = pad
-      oy = pad + i * (boardH + labelH + gap)
-    }
-
-    // Layer label
-    const labelX = ox + boardW / 2
-    const labelY = oy - 4
-    const labelColor = bgColor === 'transparent' ? '#333' : '#aaa'
-    parts.push(`<text x="${labelX}" y="${labelY}" text-anchor="middle" font-size="11" fill="${labelColor}" font-family="system-ui">${labels[i] || 'Board ' + (i + 1)}</text>`)
-
-    // Build per-layer config and render through consolidated pipeline
-    const boardColors = layerColors && layerColors[i]
-      ? { lightSquare: layerColors[i].lightSquare || '#f0d9b5', darkSquare: layerColors[i].darkSquare || '#b58863' }
-      : config.colors || {}
-    const fen = fens && fens[i]
-    const position = fen ? fenToPosition(fen, rows, cols) : {}
-
-    const layerConfig = {
-      ...config,
-      rows, cols, tileSize: ts,
-      colors: boardColors,
-      position,
-      layers: undefined,
-    }
-
-    // Use consolidated grid renderer per layer
-    const layerSvg = renderBoard(layerConfig)
-    // Extract inner SVG content (strip outer <svg> and </svg> tags)
-    const innerStart = layerSvg.indexOf('>') + 1
-    const innerEnd = layerSvg.lastIndexOf('</svg>')
-    const innerContent = layerSvg.slice(innerStart, innerEnd)
-
-    parts.push(`<g transform="translate(${ox},${oy})" data-layer="${i}">`)
-    parts.push(innerContent)
-    parts.push('</g>')
-  }
-
-  parts.push('</svg>')
-  return parts.join('\n')
-}
-
 async function render() {
   if (!state.game || !state.variant) return
   const basePath = '../../moddable-rules/games/'
@@ -836,9 +368,9 @@ async function render() {
       bindBoardHover(opts)
     }
     const topo = resolved.topology || {}
-    const render = resolved.render || {}
+    const rend = resolved.render || {}
     showInfo({
-      boardStyle: render.cellColor || topo.type,
+      boardStyle: rend.cellColor || topo.type,
       rows: topo.rows, cols: topo.cols, rings: topo.radius,
       pieceSet: resolved.pieces?.set,
       setup: resolved.setup,
@@ -983,451 +515,6 @@ function bindDeckHover() {
   svgContainer.addEventListener('mouseleave', () => {
     infoBar.textContent = 'Hover over a card or zone'
   })
-}
-
-export function renderDeckSvg(layout, opts) {
-  const { tableW, tableH, cardW, cardH, deckLabel, gameLabel, deckType, seed } = opts
-  const pad = 20
-  const w = tableW + pad * 2
-  const h = tableH + pad * 2
-  const parts = []
-
-  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">`)
-  parts.push(`<style>svg text{pointer-events:none;cursor:default}[data-card],[data-zone]{cursor:pointer}</style>`)
-  parts.push(`<rect width="${w}" height="${h}" fill="#1b5e3a" rx="16"/>`)
-  parts.push(`<rect x="${pad}" y="${pad}" width="${tableW}" height="${tableH}" fill="#2d7a4f" rx="12" stroke="#1a4a2e" stroke-width="2"/>`)
-
-  for (const hand of layout.hands) {
-    const zoneDesc = hand.cards[0]?.faceUp ? `${hand.label} — ${hand.cards.length} cards (visible)` : `${hand.label} — ${hand.cards.length} cards (hidden)`
-    parts.push(`<g class="hand" data-zone="${zoneDesc}">`)
-    for (const pos of hand.cards) {
-      parts.push(renderCard(pos, cardW, cardH, pad, deckType))
-    }
-    const midIdx = Math.floor(hand.cards.length / 2)
-    const labelX = hand.cards.length > 0 ? (hand.cards[0].x + hand.cards[hand.cards.length - 1].x) / 2 + pad : tableW / 2 + pad
-    const labelY = hand.cards.length > 0 ? hand.cards[0].y + pad : tableH / 2 + pad
-    const isBottom = labelY > tableH / 2 + pad
-    const labelOffset = isBottom ? cardH / 2 + 14 : -cardH / 2 - 6
-    parts.push(`<text x="${labelX}" y="${labelY + labelOffset}" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.6)" font-family="system-ui">${hand.label} (${hand.cards.length})</text>`)
-    parts.push('</g>')
-  }
-
-  if (layout.community && layout.community.length > 0) {
-    parts.push(`<g class="community" data-zone="Community / Field — ${layout.community.length} cards (face up)">`)
-    for (const pos of layout.community) {
-      parts.push(renderCard(pos, cardW, cardH, pad, deckType))
-    }
-    const cy = layout.community[0].y + pad + cardH / 2 + 14
-    parts.push(`<text x="${tableW / 2 + pad}" y="${cy}" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.5)" font-family="system-ui">Field (${layout.community.length})</text>`)
-    parts.push('</g>')
-  }
-
-  if (layout.drawPile && layout.drawPile.length > 0) {
-    const dp = layout.drawPile[0]
-    const dx = dp.x + pad
-    const dy = dp.y + pad
-    const count = dp.count || layout.drawPile.length
-    const backPath = getCardBackPath(deckType)
-    parts.push(`<g data-zone="Draw pile — ${count} cards remaining (face down)">`)
-    const stackDepth = Math.min(4, count)
-    for (let s = stackDepth - 1; s >= 0; s--) {
-      const sx = dx - s * 1.5
-      const sy = dy - s * 1.5
-      if (backPath) {
-        parts.push(`<image href="${backPath}" x="${sx - cardW / 2}" y="${sy - cardH / 2}" width="${cardW}" height="${cardH}" preserveAspectRatio="xMidYMid meet"/>`)
-      } else {
-        parts.push(`<rect x="${sx - cardW / 2}" y="${sy - cardH / 2}" width="${cardW}" height="${cardH}" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1"/>`)
-      }
-    }
-    parts.push(`<text x="${dx}" y="${dy + 3}" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.85)" font-family="system-ui" font-weight="bold">${count}</text>`)
-    parts.push('</g>')
-  }
-
-  parts.push(`<text x="${w / 2}" y="${h - 6}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.3)" font-family="system-ui">${deckLabel} · ${gameLabel} · seed: ${seed !== undefined ? seed : ''}</text>`)
-  parts.push('</svg>')
-  return parts.join('\n')
-}
-
-function getCardImagePath(card, deckType, opts) {
-  if (deckType === 'standard-52') {
-    if (card.suit === 'joker') return `../pieces/sets/letele-cards/J-1.svg`
-    const suitLetter = { spades: 'S', hearts: 'H', clubs: 'C', diamonds: 'D' }[card.suit]
-    const rank = card.rank === '10' ? '10' : card.rank
-    return `../pieces/sets/letele-cards/${suitLetter}-${rank}.svg`
-  }
-  if (deckType === 'hanafuda-48') {
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-    const month = monthNames[card.monthIndex]
-    const type = card.type.charAt(0).toUpperCase() + card.type.slice(1)
-    const name = card.name
-    if (name.match(/Plain \d/)) {
-      return `../pieces/sets/hanafuda-traditional/Hanafuda_${month}_${type}_${name.slice(-1)}_Alt.svg`
-    }
-    return `../pieces/sets/hanafuda-traditional/Hanafuda_${month}_${type}_Alt.svg`
-  }
-  if (deckType === 'bavarian-32') {
-    const suitMap = { acorns: 'eichel', leaves: 'blatt', hearts: 'hart', bells: 'schellen' }
-    const suit = suitMap[card.suit]
-    const faceMap = {
-      eichel: { 'U': '11_unter', 'O': '12_ober', 'K': '13_konig', 'A': '01_daus' },
-      hart:   { 'U': '11_unter', 'O': '12_ober', 'K': '13_konig', 'A': '01_daus' },
-      blatt:  { 'U': '11_jack', 'O': '12_queen', 'K': '13_king', 'A': '01_daus' },
-      schellen: { 'U': '11_jack', 'O': '12_queen', 'K': '13_king', 'A': '01' },
-    }
-    const numericMap = { '7': '07', '8': '08', '9': '09', '10': '10' }
-    const rank = faceMap[suit]?.[card.rank] || numericMap[card.rank] || card.rank
-    return `../pieces/sets/mfrasca-skat/Playing_card-german-${suit}-${rank}.svg`
-  }
-  if (deckType === 'mahjong-136') {
-    if (opts?.tileSet === 'mahjong-planar') {
-      const suitFileMap = { bamboo: 'tiao', circles: 'bing', characters: 'wan' }
-      const windFileMap = { east: 'Eastwind', south: 'Southwind', west: 'Westwind', north: 'Northwind' }
-      const dragonFileMap = { red: 'Reddragon', green: 'Greendragon', white: 'Whitedragon' }
-      const flowerFileMap = { 1: 'mei', 2: 'lan', 3: 'ju', 4: 'zhu' }
-      const seasonFileMap = { 1: 'spring', 2: 'summer', 3: 'autumn', 4: 'winter' }
-      if (card.suit === 'wind') return `../pieces/sets/mahjong-planar/MJ${windFileMap[card.rank]}.svg`
-      if (card.suit === 'dragon') return `../pieces/sets/mahjong-planar/MJ${dragonFileMap[card.rank]}.svg`
-      if (card.suit === 'flower') return `../pieces/sets/mahjong-planar/MJ${flowerFileMap[card.rank]}.svg`
-      if (card.suit === 'season') return `../pieces/sets/mahjong-planar/MJ${seasonFileMap[card.rank]}.svg`
-      if (suitFileMap[card.suit]) return `../pieces/sets/mahjong-planar/MJ${card.rank}${suitFileMap[card.suit]}.svg`
-      return null
-    }
-    const suitFileMap = { bamboo: 'Sou', circles: 'Pin', characters: 'Man' }
-    const windFileMap = { east: 'Ton', south: 'Nan', west: 'Shaa', north: 'Pei' }
-    const dragonFileMap = { red: 'Chun', green: 'Hatsu', white: 'Haku' }
-    if (card.suit === 'wind') return `../pieces/sets/mahjong-regular/${windFileMap[card.rank]}.svg`
-    if (card.suit === 'dragon') return `../pieces/sets/mahjong-regular/${dragonFileMap[card.rank]}.svg`
-    if (suitFileMap[card.suit]) return `../pieces/sets/mahjong-regular/${suitFileMap[card.suit]}${card.rank}.svg`
-    return null
-  }
-  if (deckType === 'standard-dice') {
-    const valueNames = { 1: 'one', 2: 'two', 3: 'three', 4: 'four', 5: 'five', 6: 'six' }
-    const name = valueNames[card.value]
-    if (name) return `../pieces/sets/playstrategy-backgammon/wdice${name}.svg`
-    return `../pieces/sets/playstrategy-backgammon/wdicerandom.svg`
-  }
-  if (deckType === 'dominoes-28') {
-    const a = String(card.low).padStart(2, '0')
-    const b = String(card.high).padStart(2, '0')
-    return `../pieces/sets/dominoes-classic/domino-${a}-${b}.svg`
-  }
-  return null
-}
-
-function getCardBackPath(deckType) {
-  if (deckType === 'standard-52') return `../pieces/sets/letele-cards/B-1.svg`
-  if (deckType === 'mahjong-136') return `../pieces/sets/mahjong-regular/Back.svg`
-  if (deckType === 'dominoes-28') return `../pieces/sets/dominoes-classic/domino-back.svg`
-  return null
-}
-
-function renderCard(pos, cardW, cardH, pad, deckType) {
-  const x = pos.x + pad - cardW / 2
-  const y = pos.y + pad - cardH / 2
-  const rot = pos.rot ? ` transform="rotate(${pos.rot.toFixed(1)} ${pos.x + pad} ${pos.y + pad})"` : ''
-  const cardLabel = pos.card?.display || pos.card?.id || '?'
-
-  const tileBgDecks = new Set(['mahjong-136', 'dominoes-28'])
-  const needsTileBg = tileBgDecks.has(deckType)
-
-  if (!pos.faceUp) {
-    const backPath = getCardBackPath(deckType)
-    if (backPath && needsTileBg) {
-      const inset = 3
-      return `<g${rot} data-card="Face down"><rect x="${x}" y="${y}" width="${cardW}" height="${cardH}" fill="#f0ede6" rx="4" stroke="#bbb" stroke-width="0.8"/><image href="${backPath}" x="${x + inset}" y="${y + inset}" width="${cardW - inset * 2}" height="${cardH - inset * 2}" preserveAspectRatio="xMidYMid meet"/></g>`
-    }
-    if (backPath) {
-      return `<g${rot} data-card="Face down"><image href="${backPath}" x="${x}" y="${y}" width="${cardW}" height="${cardH}" preserveAspectRatio="xMidYMid meet"/></g>`
-    }
-    return `<rect x="${x}" y="${y}" width="${cardW}" height="${cardH}" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1"${rot} data-card="Face down"/>`
-  }
-
-  const card = pos.card
-  const imgPath = getCardImagePath(card, deckType)
-
-  if (imgPath) {
-    if (needsTileBg) {
-      const inset = 3
-      return `<g${rot} data-card="${cardLabel}"><rect x="${x}" y="${y}" width="${cardW}" height="${cardH}" fill="#f0ede6" rx="4" stroke="#bbb" stroke-width="0.8"/><image href="${imgPath}" x="${x + inset}" y="${y + inset}" width="${cardW - inset * 2}" height="${cardH - inset * 2}" preserveAspectRatio="xMidYMid meet"/></g>`
-    }
-    return `<g${rot} data-card="${cardLabel}"><image href="${imgPath}" x="${x}" y="${y}" width="${cardW}" height="${cardH}" preserveAspectRatio="xMidYMid meet"/></g>`
-  }
-
-  const parts = []
-  parts.push(`<g${rot} data-card="${cardLabel}">`)
-  parts.push(`<rect x="${x}" y="${y}" width="${cardW}" height="${cardH}" fill="#fff" rx="3" stroke="#ccc" stroke-width="0.5"/>`)
-  const fs = Math.min(cardW * 0.3, 10)
-  parts.push(`<text x="${x + cardW / 2}" y="${y + cardH / 2 + fs * 0.35}" text-anchor="middle" font-size="${fs}" fill="#333" font-family="system-ui">${card.display || '?'}</text>`)
-  parts.push('</g>')
-  return parts.join('')
-}
-
-export function renderMahjongSvg(dealResult, opts) {
-  const { deckType, deckConfig, variantDef, seed, tileSet } = opts
-  const tileW = 30
-  const tileH = 40
-  const tileGap = 2
-  const stackOffset = 3
-  const pad = 20
-  const outerPad = 20
-
-  const wallTiles = dealResult.drawPile.length
-  const totalStacks = Math.ceil(wallTiles / 2)
-  const stacksPerSide = Math.ceil(totalStacks / 4)
-  const step = tileW + tileGap
-  const wallLen = stacksPerSide * step
-  const wallSquare = wallLen + 2 * tileH
-
-  const handSize = Math.max(...dealResult.hands.map(h => h.length))
-  const handLen = handSize * step
-  const totalSize = Math.max(wallSquare + 140, handLen + 2 * (pad + tileH) + 40)
-
-  const w = totalSize + outerPad * 2
-  const h = w
-
-  const parts = []
-  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">`)
-  parts.push(`<style>svg text{pointer-events:none;cursor:default}[data-card],[data-zone]{cursor:pointer}</style>`)
-  parts.push(`<rect width="${w}" height="${h}" fill="#1b5e3a" rx="16"/>`)
-  parts.push(`<rect x="${outerPad}" y="${outerPad}" width="${totalSize}" height="${totalSize}" fill="#2d7a4f" rx="12" stroke="#1a4a2e" stroke-width="2"/>`)
-  parts.push(`<g transform="translate(${outerPad},${outerPad})">`)
-
-  const cx = totalSize / 2
-  const cy = totalSize / 2
-  const halfSquare = wallSquare / 2
-
-  const breakPoint = (seed % totalStacks)
-  const windNames = ['South', 'East', 'North', 'West']
-
-  let stackCount = 0
-  for (let side = 0; side < 4; side++) {
-    const sideStacks = Math.min(stacksPerSide, totalStacks - stackCount)
-    const tilesOnSide = Math.min(sideStacks * 2, wallTiles - stackCount * 2)
-    const isLiveEnd = breakPoint >= stackCount && breakPoint < stackCount + sideStacks
-    const startIdx = stackCount
-    const zoneLabel = `Wall — ${windNames[side]} side · ${tilesOnSide} tiles (${sideStacks} stacks of 2)${isLiveEnd ? ' · draw from here' : ''}`
-    parts.push(`<g data-zone="${zoneLabel}">`)
-
-    for (let i = 0; i < sideStacks; i++) {
-      const globalIdx = startIdx + i
-      const remaining = wallTiles - globalIdx * 2
-      const height = Math.min(2, remaining)
-      let tx, ty, rw, rh
-
-      // Four equal-length walls, each centred on its side, small corner gaps
-      const half = wallLen / 2
-      const inset = half + tileH
-      if (side === 0) {
-        tx = cx - half + i * step
-        ty = cy + inset - tileH
-        rw = tileW; rh = tileH
-      } else if (side === 1) {
-        tx = cx + inset - tileH
-        ty = cy + half - (i + 1) * step
-        rw = tileH; rh = tileW
-      } else if (side === 2) {
-        tx = cx + half - (i + 1) * step
-        ty = cy - inset
-        rw = tileW; rh = tileH
-      } else {
-        tx = cx - inset
-        ty = cy - half + i * step
-        rw = tileH; rh = tileW
-      }
-
-      const soX = side === 1 ? -stackOffset : side === 3 ? stackOffset : 0
-      const soY = side === 0 ? -stackOffset : side === 2 ? stackOffset : 0
-      parts.push(`<g data-card="Stack ${globalIdx + 1} · ${height} tile${height > 1 ? 's' : ''} high${globalIdx === breakPoint ? ' · BREAK' : ''}">`)
-      if (height === 2) {
-        parts.push(`<rect x="${tx + soX}" y="${ty + soY}" width="${rw}" height="${rh}" fill="#d4c9a8" rx="3" stroke="#a89060" stroke-width="0.5"/>`)
-      }
-      parts.push(`<rect x="${tx}" y="${ty}" width="${rw}" height="${rh}" fill="#f0ede6" rx="3" stroke="#bbb" stroke-width="0.6"/>`)
-      if (globalIdx === breakPoint) {
-        parts.push(`<rect x="${tx}" y="${ty}" width="${rw}" height="${rh}" fill="none" rx="3" stroke="#ffcc00" stroke-width="1.5"/>`)
-      }
-      parts.push('</g>')
-    }
-    parts.push('</g>')
-    stackCount += sideStacks
-  }
-
-  const playerLabels = ['South (you)', 'East', 'North', 'West']
-  for (let p = 0; p < 4; p++) {
-    const hand = dealResult.hands[p]
-    const faceUp = p === 0
-    const label = playerLabels[p]
-    const zoneDesc = faceUp ? `${label} — ${hand.length} tiles (visible)` : `${label} — ${hand.length} tiles (hidden)`
-    parts.push(`<g data-zone="${zoneDesc}">`)
-
-    for (let i = 0; i < hand.length; i++) {
-      const card = hand[i]
-      const cardLabel = faceUp ? (card.display || card.id) : 'Face down'
-      let tx, ty
-
-      if (p === 0) {
-        tx = cx - (hand.length * (tileW + tileGap)) / 2 + i * (tileW + tileGap)
-        ty = totalSize - pad - tileH
-      } else if (p === 1) {
-        tx = totalSize - pad - tileH
-        ty = cy + (hand.length * (tileW + tileGap)) / 2 - (i + 1) * (tileW + tileGap)
-      } else if (p === 2) {
-        tx = cx + (hand.length * (tileW + tileGap)) / 2 - (i + 1) * (tileW + tileGap)
-        ty = pad
-      } else {
-        tx = pad
-        ty = cy - (hand.length * (tileW + tileGap)) / 2 + i * (tileW + tileGap)
-      }
-
-      const isVertical = p === 1 || p === 3
-      const rw = isVertical ? tileH : tileW
-      const rh = isVertical ? tileW : tileH
-
-      if (faceUp) {
-        const imgPath = getCardImagePath(card, deckType, { tileSet })
-        const inset = 2
-        parts.push(`<g data-card="${cardLabel}"><rect x="${tx}" y="${ty}" width="${rw}" height="${rh}" fill="#f0ede6" rx="4" stroke="#bbb" stroke-width="0.8"/><image href="${imgPath}" x="${tx + inset}" y="${ty + inset}" width="${rw - inset * 2}" height="${rh - inset * 2}" preserveAspectRatio="xMidYMid meet"/></g>`)
-      } else {
-        parts.push(`<g data-card="${cardLabel}"><rect x="${tx}" y="${ty}" width="${rw}" height="${rh}" fill="#f0ede6" rx="4" stroke="#bbb" stroke-width="0.8"/><rect x="${tx + 2}" y="${ty + 2}" width="${rw - 4}" height="${rh - 4}" fill="#c8a96e" rx="2" opacity="0.4"/></g>`)
-      }
-    }
-
-    const labelPositions = [
-      { x: cx, y: totalSize - 4, anchor: 'middle' },
-      { x: totalSize - 4, y: cy, anchor: 'middle', rotate: true },
-      { x: cx, y: 12, anchor: 'middle' },
-      { x: 12, y: cy, anchor: 'middle', rotate: true },
-    ]
-    const lp = labelPositions[p]
-    const rotAttr = lp.rotate ? ` transform="rotate(-90 ${lp.x} ${lp.y})"` : ''
-    parts.push(`<text x="${lp.x}" y="${lp.y}" text-anchor="${lp.anchor}" font-size="10" fill="rgba(255,255,255,0.5)" font-family="system-ui"${rotAttr}>${label} (${hand.length})</text>`)
-    parts.push('</g>')
-  }
-
-  parts.push('</g>')
-  parts.push(`<text x="${w / 2}" y="${h - 6}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.3)" font-family="system-ui">${deckConfig.label} · ${variantDef.label} · seed: ${seed}</text>`)
-  parts.push('</svg>')
-
-  const svg = parts.join('\n')
-  if (opts._returnOnly) return svg
-  showSvg(svg)
-  showInfo({
-    deckType,
-    seed,
-    players: 4,
-    label: variantDef.label,
-    setupDesc: variantDef.setupDesc,
-    variantDesc: variantDef.variantDesc,
-    wall: `${wallTiles} tiles (${totalStacks} stacks), break at stack ${breakPoint + 1}`,
-    tilesPerHand: dealResult.hands[0]?.length || 0,
-  })
-  bindDeckHover()
-  requestAnimationFrame(fitToView)
-}
-
-export function renderTableauSvg(dealResult, opts) {
-  const { deckType, deckConfig, variantDef, seed } = opts
-  const cardW = 44
-  const cardH = 64
-  const colGap = 6
-  const cascadeStep = 18
-  const pad = 20
-
-  const numCols = dealResult.tableau.length
-  const maxCascade = Math.max(...dealResult.tableau.map(col => col.length))
-  const tableauW = numCols * (cardW + colGap) - colGap
-  const tableauH = cardH + (maxCascade - 1) * cascadeStep
-
-  const foundationY = pad
-  const tableauY = foundationY + cardH + 20
-  const totalW = tableauW + pad * 2
-  const totalH = tableauY + tableauH + pad + 20
-  const tableauX = pad
-
-  const outerPad = 20
-  const w = totalW + outerPad * 2
-  const h = totalH + outerPad * 2
-
-  const parts = []
-  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">`)
-  parts.push(`<style>svg text{pointer-events:none;cursor:default}[data-card],[data-zone]{cursor:pointer}</style>`)
-  parts.push(`<rect width="${w}" height="${h}" fill="#1b5e3a" rx="16"/>`)
-  parts.push(`<rect x="${outerPad}" y="${outerPad}" width="${totalW}" height="${totalH}" fill="#2d7a4f" rx="12" stroke="#1a4a2e" stroke-width="2"/>`)
-  parts.push(`<g transform="translate(${outerPad},${outerPad})">`)
-
-  const suitNames = ['Spades', 'Hearts', 'Clubs', 'Diamonds']
-  const suitSymbols = ['♠', '♥', '♣', '♦']
-  const foundationX = totalW - 4 * (cardW + colGap) - pad + colGap
-  for (let f = 0; f < 4; f++) {
-    const fx = foundationX + f * (cardW + colGap)
-    parts.push(`<g data-zone="Foundation — ${suitNames[f]} (build A→K)">`)
-    parts.push(`<rect x="${fx}" y="${foundationY}" width="${cardW}" height="${cardH}" fill="rgba(0,0,0,0.01)" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" rx="3" stroke-dasharray="4 2"/>`)
-    parts.push(`<text x="${fx + cardW / 2}" y="${foundationY + cardH / 2 + 5}" text-anchor="middle" font-size="14" fill="rgba(255,255,255,0.2)">${suitSymbols[f]}</text>`)
-    parts.push('</g>')
-  }
-
-  const drawCount = dealResult.drawPile.length
-  const drawX = pad
-  const backPath = getCardBackPath(deckType)
-  parts.push(`<g data-zone="Stock — ${drawCount} cards (face down)">`)
-  if (backPath) {
-    parts.push(`<image href="${backPath}" x="${drawX}" y="${foundationY}" width="${cardW}" height="${cardH}" preserveAspectRatio="xMidYMid meet"/>`)
-  } else {
-    parts.push(`<rect x="${drawX}" y="${foundationY}" width="${cardW}" height="${cardH}" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1"/>`)
-  }
-  parts.push(`<text x="${drawX + cardW / 2}" y="${foundationY + cardH / 2 + 4}" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.85)" font-weight="bold">${drawCount}</text>`)
-  parts.push('</g>')
-
-  const wasteX = drawX + cardW + colGap
-  parts.push(`<g data-zone="Waste — draw cards here (empty at start)">`)
-  parts.push(`<rect x="${wasteX}" y="${foundationY}" width="${cardW}" height="${cardH}" fill="rgba(0,0,0,0.01)" stroke="rgba(255,255,255,0.2)" stroke-width="1" rx="3" stroke-dasharray="3 2"/>`)
-  parts.push(`<text x="${wasteX + cardW / 2}" y="${foundationY + cardH / 2 + 4}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.2)">waste</text>`)
-  parts.push('</g>')
-
-  for (let col = 0; col < numCols; col++) {
-    const colCards = dealResult.tableau[col]
-    const cx = tableauX + col * (cardW + colGap)
-    parts.push(`<g data-zone="Column ${col + 1} — ${colCards.length} cards">`)
-    for (let row = 0; row < colCards.length; row++) {
-      const card = colCards[row]
-      const cy = tableauY + row * cascadeStep
-      const cardLabel = card.faceUp ? (card.display || card.id) : 'Face down'
-      if (card.faceUp) {
-        const imgPath = getCardImagePath(card, deckType)
-        if (imgPath) {
-          parts.push(`<g data-card="${cardLabel}"><image href="${imgPath}" x="${cx}" y="${cy}" width="${cardW}" height="${cardH}" preserveAspectRatio="xMidYMid meet"/></g>`)
-        } else {
-          parts.push(`<g data-card="${cardLabel}"><rect x="${cx}" y="${cy}" width="${cardW}" height="${cardH}" fill="#fff" rx="3" stroke="#ccc" stroke-width="0.5"/><text x="${cx + cardW / 2}" y="${cy + cardH / 2 + 4}" text-anchor="middle" font-size="10" fill="#333" font-family="system-ui">${card.display || '?'}</text></g>`)
-        }
-      } else {
-        if (backPath) {
-          parts.push(`<g data-card="${cardLabel}"><image href="${backPath}" x="${cx}" y="${cy}" width="${cardW}" height="${cardH}" preserveAspectRatio="xMidYMid meet"/></g>`)
-        } else {
-          parts.push(`<rect x="${cx}" y="${cy}" width="${cardW}" height="${cardH}" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="${cardLabel}"/>`)
-        }
-      }
-    }
-    parts.push('</g>')
-  }
-
-  parts.push('</g>')
-  parts.push(`<text x="${w / 2}" y="${h - 6}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.3)" font-family="system-ui">${deckConfig.label} · ${variantDef.label} · seed: ${seed}</text>`)
-  parts.push('</svg>')
-
-  const svg = parts.join('\n')
-  if (opts._returnOnly) return svg
-  showSvg(svg)
-  showInfo({
-    deckType,
-    seed,
-    players: 1,
-    label: variantDef.label,
-    setupDesc: variantDef.setupDesc,
-    variantDesc: variantDef.variantDesc,
-    tableau: dealResult.tableau.map(col => col.length).join(', '),
-    drawPile: dealResult.drawPile.length,
-  })
-  bindDeckHover()
-  requestAnimationFrame(fitToView)
 }
 
 function showSvg(svg) {
@@ -1676,4 +763,3 @@ if (document.getElementById('game-select')) {
   document.addEventListener('DOMContentLoaded', init)
 }
 
-export { buildDraughtsFenFromSetup, parseDraughtsFen, buildGoHandicap, buildFanoronaPosition, fen4ToPosition }

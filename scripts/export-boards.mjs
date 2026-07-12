@@ -29,13 +29,13 @@ globalThis.requestAnimationFrame = () => {}
 globalThis.URLSearchParams = class { get() { return null } }
 globalThis.IntersectionObserver = class { observe() {} disconnect() {} }
 
-import { resolveSurface } from '../js/surface-resolver.js'
-import { resolve as cascadeResolve } from '../js/cascade-resolver.js'
-import { buildRenderOpts, attachPieceImages } from '../js/render-adapter.js'
-import { renderBoard } from '../js/board-diagrams.js'
+import { resolveSurface } from '../packages/schema/src/surfaces.js'
+import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolver.js'
+import { buildRenderOpts, attachPieceImages } from '../packages/schema/src/render-adapter.js'
+import { renderBoard } from '../packages/render/src/board-diagrams.js'
 import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
 
-const { renderMultiBoard } = await import('../js/boards.js')
+import { renderMultiBoard } from '../packages/render/src/multi-board.js'
 
 const gallery = JSON.parse(readFileSync(resolve(ENGINE_ROOT, 'pieces/gallery-index.json'), 'utf8'))
 
