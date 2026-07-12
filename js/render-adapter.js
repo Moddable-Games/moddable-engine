@@ -436,8 +436,12 @@ function buildRenderOpts(resolved) {
   } else if (resolved.setup && typeof resolved.setup === 'string' && resolved.setup.includes('/')) {
     const rows = opts.rows || topo.rows || 8
     const cols = opts.cols || topo.cols || 8
+    // FEN4 (4-player: comma-separated, colour-prefixed pieces)
+    if (resolved.setup.includes(',') && resolved.setup.match(/[yrgb][A-Z]/)) {
+      opts.position = parseFen4(resolved.setup, rows, cols)
+      opts.getOwner = fen4GetOwner
     // Multi-char SFEN (large shogi: [xx] bracket notation)
-    if (resolved.setup.includes('[')) {
+    } else if (resolved.setup.includes('[')) {
       opts.position = parseSfenToPosition(resolved.setup, rows, cols)
     } else if (resolved.pieces?.vocabulary) {
       opts.position = parseVocabularyFen(resolved.setup, rows, cols, resolved.pieces.vocabulary)
@@ -739,6 +743,33 @@ function tricolorFn(hex, colors) {
 function ringColorFn(hex, colors) {
   const ring = Math.max(Math.abs(hex.q), Math.abs(hex.r), Math.abs(hex.q + hex.r))
   return ring % 2 === 0 ? colors.darkHex : colors.lightHex
+}
+
+function parseFen4(fen4, rows, cols) {
+  const position = {}
+  const ranks = fen4.split('/')
+  for (let r = 0; r < ranks.length && r < rows; r++) {
+    let c = 0
+    const cells = ranks[r].split(',')
+    for (const cell of cells) {
+      const trimmed = cell.trim()
+      if (/^\d+$/.test(trimmed)) {
+        c += parseInt(trimmed, 10)
+      } else {
+        const file = String.fromCharCode(97 + c)
+        const rankNum = rows - r
+        position[`${file}${rankNum}`] = trimmed
+        c++
+      }
+    }
+  }
+  return position
+}
+
+const FEN4_OWNERS = { r: 'red', b: 'blue', y: 'yellow', g: 'green' }
+function fen4GetOwner(pieceType) {
+  if (pieceType.length >= 2) return FEN4_OWNERS[pieceType[0]] || 'white'
+  return pieceType === pieceType.toUpperCase() ? 'white' : 'black'
 }
 
 function generateTriangularHexGrid(sideLength) {
