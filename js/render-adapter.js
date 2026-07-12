@@ -324,6 +324,8 @@ function buildRenderOpts(resolved) {
     opts.hexFrame = render.frame || topo.shape || null
     if (resolved._hexGrid) {
       opts.hexGrid = resolved._hexGrid
+    } else if (topo.shape === 'triangular' && topo.sideLength) {
+      opts.hexGrid = generateTriangularHexGrid(topo.sideLength)
     } else if (topo.shape === 'hexagonal' && topo.radius) {
       opts.hexRadius = topo.radius
     } else if (topo.rows && topo.cols) {
@@ -735,6 +737,16 @@ function tricolorFn(hex, colors) {
 function ringColorFn(hex, colors) {
   const ring = Math.max(Math.abs(hex.q), Math.abs(hex.r), Math.abs(hex.q + hex.r))
   return ring % 2 === 0 ? colors.darkHex : colors.lightHex
+}
+
+function generateTriangularHexGrid(sideLength) {
+  const hexes = []
+  for (let row = 0; row < sideLength; row++) {
+    for (let i = 0; i <= row; i++) {
+      hexes.push({ q: -row + i, r: row })
+    }
+  }
+  return hexes
 }
 
 // --- Hex position string parser ---
