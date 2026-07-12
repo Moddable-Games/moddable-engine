@@ -273,10 +273,8 @@ const xiangqi = {
           let zy = gy + minR * tileSize
           let zw = Math.max((maxC - minC) * tileSize, tileSize)
           let zh = Math.max((maxR - minR) * tileSize, tileSize)
-          const boardRight = ox + gridW + inset * 2
-          const boardBottom = oy + gridH + inset * 2
-          if (zx + zw > boardRight) zw = boardRight - zx
-          if (zy + zh > boardBottom) zh = boardBottom - zy
+          if (zy + zh > gy + gridH + inset) { zy = gy + gridH + inset - zh }
+          if (zx + zw > gx + gridW + inset) { zx = gx + gridW + inset - zw }
           parts.push(`<rect x="${zx}" y="${zy}" width="${zw}" height="${zh}" fill="${fill}" opacity="${opacity}"/>`)
         }
       }
