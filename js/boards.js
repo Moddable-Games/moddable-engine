@@ -827,6 +827,7 @@ async function render() {
     await renderFromResolved(resolved, target)
     target.classList.add('active')
     document.getElementById('board-empty').style.display = 'none'
+    bindBoardHover({ position: resolved._position || {}, setup: resolved.setup })
     const topo = resolved.topology || {}
     const render = resolved.render || {}
     showInfo({
