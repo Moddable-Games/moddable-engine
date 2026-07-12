@@ -1,0 +1,1370 @@
+{
+  "meta": {
+    "source": "https://landlordsgame.info/",
+    "transcribed": "2026-07-03",
+    "notes": "Board transcriptions from original photographs/patent drawings. Uncertainties flagged inline."
+  },
+  "boards": {
+    "1904-patent": {
+      "title": "The Landlord's Game",
+      "year": 1904,
+      "patent": "US 748,626",
+      "designer": "Elizabeth Magie",
+      "publisher": null,
+      "direction": "counter-clockwise",
+      "totalSpaces": 40,
+      "corners": 4,
+      "notes": "Rent = lot number. Price = 10x lot number. Perfectly linear progression.",
+      "spaces": [
+        {
+          "pos": 1,
+          "name": "MOTHER EARTH",
+          "type": "corner",
+          "side": "corner",
+          "notes": "Start / collect wages"
+        },
+        {
+          "pos": 2,
+          "name": "Lot 1",
+          "type": "lot",
+          "side": "bottom",
+          "price": 10,
+          "rent": 1
+        },
+        {
+          "pos": 3,
+          "name": "BREAD",
+          "type": "necessity",
+          "side": "bottom",
+          "tax": 5
+        },
+        {
+          "pos": 4,
+          "name": "Lot 2",
+          "type": "lot",
+          "side": "bottom",
+          "price": 20,
+          "rent": 2
+        },
+        {
+          "pos": 5,
+          "name": "NO TRESPASSING",
+          "type": "go-to-jail",
+          "side": "bottom"
+        },
+        {
+          "pos": 6,
+          "name": "R.R.",
+          "type": "railroad",
+          "side": "bottom",
+          "fare": 5
+        },
+        {
+          "pos": 7,
+          "name": "Lot 3",
+          "type": "lot",
+          "side": "bottom",
+          "price": 30,
+          "rent": 3
+        },
+        {
+          "pos": 8,
+          "name": "Lot 4",
+          "type": "lot",
+          "side": "bottom",
+          "price": 40,
+          "rent": 4
+        },
+        {
+          "pos": 9,
+          "name": "LUXURY",
+          "type": "luxury",
+          "side": "bottom",
+          "tax": 50,
+          "endValue": 60
+        },
+        {
+          "pos": 10,
+          "name": "Lot 5",
+          "type": "lot",
+          "side": "bottom",
+          "price": 50,
+          "rent": 5
+        },
+        {
+          "pos": 11,
+          "name": "JAIL",
+          "type": "corner",
+          "side": "corner"
+        },
+        {
+          "pos": 12,
+          "name": "Lot 6",
+          "type": "lot",
+          "side": "left",
+          "price": 60,
+          "rent": 6
+        },
+        {
+          "pos": 13,
+          "name": "SHELTER",
+          "type": "necessity",
+          "side": "left",
+          "tax": 5
+        },
+        {
+          "pos": 14,
+          "name": "Lot 7",
+          "type": "lot",
+          "side": "left",
+          "price": 70,
+          "rent": 7
+        },
+        {
+          "pos": 15,
+          "name": "Lot 8",
+          "type": "lot",
+          "side": "left",
+          "price": 80,
+          "rent": 8
+        },
+        {
+          "pos": 16,
+          "name": "R.R.",
+          "type": "railroad",
+          "side": "left",
+          "fare": 5
+        },
+        {
+          "pos": 17,
+          "name": "Lot 9",
+          "type": "lot",
+          "side": "left",
+          "price": 90,
+          "rent": 9
+        },
+        {
+          "pos": 18,
+          "name": "LIGHT FRANCHISE",
+          "type": "franchise",
+          "side": "left",
+          "fee": 5
+        },
+        {
+          "pos": 19,
+          "name": "Lot 10",
+          "type": "lot",
+          "side": "left",
+          "price": 100,
+          "rent": 10
+        },
+        {
+          "pos": 20,
+          "name": "Lot 11",
+          "type": "lot",
+          "side": "left",
+          "price": 110,
+          "rent": 11
+        },
+        {
+          "pos": 21,
+          "name": "PUBLIC PARK",
+          "type": "corner",
+          "side": "corner",
+          "notes": "Also POOR HOUSE"
+        },
+        {
+          "pos": 22,
+          "name": "Lot 12",
+          "type": "lot",
+          "side": "top",
+          "price": 120,
+          "rent": 12
+        },
+        {
+          "pos": 23,
+          "name": "COAL",
+          "type": "necessity",
+          "side": "top",
+          "tax": 5
+        },
+        {
+          "pos": 24,
+          "name": "Lot 13",
+          "type": "lot",
+          "side": "top",
+          "price": 130,
+          "rent": 13
+        },
+        {
+          "pos": 25,
+          "name": "Lot 14",
+          "type": "lot",
+          "side": "top",
+          "price": 140,
+          "rent": 14
+        },
+        {
+          "pos": 26,
+          "name": "R.R.",
+          "type": "railroad",
+          "side": "top",
+          "fare": 5
+        },
+        {
+          "pos": 27,
+          "name": "Lot 15",
+          "type": "lot",
+          "side": "top",
+          "price": 150,
+          "rent": 15
+        },
+        {
+          "pos": 28,
+          "name": "WATER FRANCHISE",
+          "type": "franchise",
+          "side": "top",
+          "fee": 5
+        },
+        {
+          "pos": 29,
+          "name": "Lot 16",
+          "type": "lot",
+          "side": "top",
+          "price": 160,
+          "rent": 16
+        },
+        {
+          "pos": 30,
+          "name": "Lot 17",
+          "type": "lot",
+          "side": "top",
+          "price": 170,
+          "rent": 17
+        },
+        {
+          "pos": 31,
+          "name": "NO TRESPASSING",
+          "type": "corner",
+          "side": "corner",
+          "notes": "Go to Jail corner"
+        },
+        {
+          "pos": 32,
+          "name": "Lot 18",
+          "type": "lot",
+          "side": "right",
+          "price": 180,
+          "rent": 18
+        },
+        {
+          "pos": 33,
+          "name": "CLOTHING",
+          "type": "necessity",
+          "side": "right",
+          "tax": 5
+        },
+        {
+          "pos": 34,
+          "name": "Lot 19",
+          "type": "lot",
+          "side": "right",
+          "price": 190,
+          "rent": 19
+        },
+        {
+          "pos": 35,
+          "name": "Lot 20",
+          "type": "lot",
+          "side": "right",
+          "price": 200,
+          "rent": 20
+        },
+        {
+          "pos": 36,
+          "name": "R.R.",
+          "type": "railroad",
+          "side": "right",
+          "fare": 5
+        },
+        {
+          "pos": 37,
+          "name": "Lot 21",
+          "type": "lot",
+          "side": "right",
+          "price": 210,
+          "rent": 21
+        },
+        {
+          "pos": 38,
+          "name": "LEGACY",
+          "type": "legacy",
+          "side": "right",
+          "receive": 100,
+          "notes": "Receive $100 cash + legacy ticket from wages-box"
+        },
+        {
+          "pos": 39,
+          "name": "Lot 22",
+          "type": "lot",
+          "side": "right",
+          "price": 220,
+          "rent": 22
+        },
+        {
+          "pos": 40,
+          "name": "LUXURY",
+          "type": "luxury",
+          "side": "right",
+          "tax": 50,
+          "endValue": 60
+        }
+      ],
+      "boardCentre": [
+        "BANK",
+        "WAGES",
+        "PUBLIC TREASURY",
+        "RAILROAD"
+      ],
+      "components": {
+        "lotTickets": {
+          "count": 22,
+          "notes": "Numbered 1-22, placed face down on board"
+        },
+        "dice": {
+          "count": 4,
+          "notes": "Four pairs of dice"
+        },
+        "shakingBoxes": {
+          "count": 4,
+          "notes": "Dice cups"
+        },
+        "checkers": {
+          "count": 4
+        },
+        "money": "Various colored chips \u2014 not limited to any certain number or colors",
+        "otherTickets": "Deeds, notes ($20), individual mortgages ($100), bank mortgages ($50), charters, legacies, luxuries"
+      },
+      "setup": {
+        "players": "2 or more",
+        "startingCash": 500,
+        "lotDeal": "22 lot tickets placed face down on board. Each player draws one until 12 have been taken. Rest put back in wages-box. Players look at tickets and may purchase lots at marked price, or return ticket to wages-box.",
+        "gameBegins": "When all 12 lots have been bought or refused and owner's deeds placed upon those purchased.",
+        "firstPlayer": "Dice thrown to determine, highest wins."
+      },
+      "movement": {
+        "direction": "Counter-clockwise from Mother Earth, moving to the left.",
+        "dice": "2d6",
+        "doubles": "Throwing doubles = 'gets a pass' \u2014 privilege of jumping once from one railroad to another, provided ordinary moving pass would bring him to the R.R. space.",
+        "fiveCircuits": "After going around 5 times, player may move in either direction, provided clear of debt and each other player has also been around 5 times."
+      },
+      "spaceRules": {
+        "lots": "Pay rent to owner. If unowned and 'For Sale', purchase at marked price. If 2 players stop on same lot, second pays first one-half of rent (odd number: first gets benefit). If 3rd player lands, cannot occupy it \u2014 must remain on space next to it, counting throw one less. In case of lot 1 the single player gets the whole rent.",
+        "necessities": "Absolute Necessities (Bread, Shelter, Coal, Clothing): pay $5 into Public Treasury. Represents indirect taxation.",
+        "noTrespassing": "Property held out of use. Player landing here must go to Jail and remain until throws a double OR pays $50 fine into Public Treasury. On exit, count from space immediately in front of Jail.",
+        "railroad": "R.R. represents transportation. Pay $5 to Railroad box. Doubles = pass to jump between railroads.",
+        "franchise": "Light Franchise / Water Franchise: first player to stop puts his charter \u2014 taxing all other players $5 whenever they stop on it. Costs him nothing, counts nothing at end.",
+        "luxury": "Pay $50 to Public Treasury, receive luxury ticket (counts $60 at end of game). Player may purchase or not \u2014 if not, does not move (loses turn). If cannot afford, loses move.",
+        "legacy": "Landing on Legacy: get $100 cash and a legacy ticket from wages-box.",
+        "publicPark": "Player may stop here without paying anything.",
+        "poorHouse": "If player has no money to meet expenses and has no property to borrow on, must go to Poor House. Remains until makes throws enabling him to finish the round.",
+        "motherEarth": "Each complete circuit = $100 wages from board."
+      },
+      "propertyRules": {
+        "buying": "Pay marked price (10x lot number). Take deed from wages-box.",
+        "rent": "Rent = lot number in dollars. Always pay to owner.",
+        "borrowing": "May borrow from Bank in $100 amounts. Bank takes mortgage on one or more lots (total value at least $10 more than borrowed). Player puts note in Bank box. Must pay $5 interest (to Bank) every time receiving wages. One player may borrow from another \u2014 mortgage on any property, negotiate terms.",
+        "bankMortgage": "For every $100 borrowed, bank mortgage placed on top of borrower's deed to show mortgage exists. If loan repaid before passing Mother Earth, borrower saves the interest."
+      },
+      "scoring": {
+        "endCondition": "Game ends when one player has been around the board 5 times (checked on tally sheet).",
+        "countingUp": "Deeds removed from lots \u2014 each player credited with value of lots owned. Cash on hand counted, amount set down under total lot value. Luxuries counted ($60 each). Add together: lots + cash + luxuries. Largest sum-total wins.",
+        "alternateEnd": "Players may agree to stop at any convenient point and count up."
+      },
+      "variants": {
+        "withoutLotTickets": "Players purchase lots as they come to them in ordinary moving. Each starts with $100. Number of circuits regulated by will of the players.",
+        "monarchOfTheWorld": "Not described in 1904 patent \u2014 this is a 1906 addition."
+      }
+    },
+    "1906-egc": {
+      "title": "The Landlord's Game",
+      "year": 1906,
+      "patent": null,
+      "designer": "Elizabeth Magie",
+      "publisher": "Economic Game Company",
+      "direction": "counter-clockwise",
+      "totalSpaces": 40,
+      "corners": 4,
+      "innerSpaces": 4,
+      "notes": "Named lots in 4 price tiers. First commercial edition. 4 inner Natural Opportunity spaces accessible from perimeter.",
+      "spaces": [
+        {
+          "pos": 1,
+          "name": "WAYBACK",
+          "type": "lot",
+          "side": "bottom",
+          "price": 25,
+          "rent": 0
+        },
+        {
+          "pos": 2,
+          "name": "FUEL",
+          "type": "necessity",
+          "side": "bottom",
+          "tax": 10
+        },
+        {
+          "pos": 3,
+          "name": "LONELY LANE",
+          "type": "lot",
+          "side": "bottom",
+          "price": 25,
+          "rent": 2
+        },
+        {
+          "pos": 4,
+          "name": "D.F. HOGG'S GAME PRESERVES",
+          "type": "go-to-jail",
+          "side": "bottom",
+          "notes": "No Trespassing / Go to Jail"
+        },
+        {
+          "pos": 5,
+          "name": "ROYAL RUSHER R.R.",
+          "type": "railroad",
+          "side": "bottom",
+          "fare": 5,
+          "price": 50
+        },
+        {
+          "pos": 6,
+          "name": "THE PIKE",
+          "type": "lot",
+          "side": "bottom",
+          "price": 25,
+          "rent": 4
+        },
+        {
+          "pos": 7,
+          "name": "THE FARM",
+          "type": "lot",
+          "side": "bottom",
+          "price": 25,
+          "rent": 4
+        },
+        {
+          "pos": 8,
+          "name": "SPECULATION",
+          "type": "special",
+          "side": "bottom",
+          "price": 50,
+          "rent": 10,
+          "notes": "Mrs. B. Sharp Broker"
+        },
+        {
+          "pos": 9,
+          "name": "RUBBVILLE",
+          "type": "lot",
+          "side": "bottom",
+          "price": 25,
+          "rent": 6
+        },
+        {
+          "pos": 10,
+          "name": "JAIL",
+          "type": "corner",
+          "side": "corner",
+          "split": {
+            "name": "SHELTER",
+            "type": "necessity",
+            "tax": 10,
+            "notes": "Absolute Necessity"
+          }
+        },
+        {
+          "pos": 11,
+          "name": "BOOMTOWN",
+          "type": "lot",
+          "side": "left",
+          "price": 50,
+          "rent": 6
+        },
+        {
+          "pos": 12,
+          "name": "GOAT ALLEY",
+          "type": "lot",
+          "side": "left",
+          "price": 50,
+          "rent": 8
+        },
+        {
+          "pos": 13,
+          "name": "SOAKUM LIGHTING SYSTEM",
+          "type": "franchise",
+          "side": "left",
+          "price": 50,
+          "fee": 5
+        },
+        {
+          "pos": 14,
+          "name": "BEGGARMAN'S COURT",
+          "type": "lot",
+          "side": "left",
+          "price": 50,
+          "rent": 8
+        },
+        {
+          "pos": 15,
+          "name": "SHOOTING STAR R.R.",
+          "type": "railroad",
+          "side": "left",
+          "fare": 5,
+          "price": 50
+        },
+        {
+          "pos": 16,
+          "name": "RICKETY ROW",
+          "type": "lot",
+          "side": "left",
+          "price": 50,
+          "rent": 10
+        },
+        {
+          "pos": 17,
+          "name": "FOOD",
+          "type": "necessity",
+          "side": "left",
+          "tax": 10
+        },
+        {
+          "pos": 18,
+          "name": "MARKET PLACE",
+          "type": "lot",
+          "side": "left",
+          "price": 50,
+          "rent": 10
+        },
+        {
+          "pos": 19,
+          "name": "COTTAGE TERRACE",
+          "type": "lot",
+          "side": "left",
+          "price": 50,
+          "rent": 12
+        },
+        {
+          "pos": 20,
+          "name": "CENTRAL PARK",
+          "type": "corner",
+          "side": "corner",
+          "split": {
+            "name": "POORHOUSE",
+            "type": "corner"
+          },
+          "notes": "Free"
+        },
+        {
+          "pos": 21,
+          "name": "EASY STREET",
+          "type": "lot",
+          "side": "top",
+          "price": 75,
+          "rent": 12
+        },
+        {
+          "pos": 22,
+          "name": "CHANCE",
+          "type": "chance",
+          "side": "top"
+        },
+        {
+          "pos": 23,
+          "name": "GEORGE STREET",
+          "type": "lot",
+          "side": "top",
+          "price": 75,
+          "rent": 14
+        },
+        {
+          "pos": 24,
+          "name": "MAGUIRE FLATS",
+          "type": "lot",
+          "side": "top",
+          "price": 75,
+          "rent": 14
+        },
+        {
+          "pos": 25,
+          "name": "GEE WHIZ R.R.",
+          "type": "railroad",
+          "side": "top",
+          "fare": 5,
+          "price": 50
+        },
+        {
+          "pos": 26,
+          "name": "FAIRHOPE AVENUE",
+          "type": "lot",
+          "side": "top",
+          "price": 75,
+          "rent": 16
+        },
+        {
+          "pos": 27,
+          "name": "SLAMBANG TROLLEY",
+          "type": "franchise",
+          "side": "top",
+          "price": 50,
+          "fare": 5
+        },
+        {
+          "pos": 28,
+          "name": "JOHNSON CIRCLE",
+          "type": "lot",
+          "side": "top",
+          "price": 75,
+          "rent": 16
+        },
+        {
+          "pos": 29,
+          "name": "THE BOWERY",
+          "type": "lot",
+          "side": "top",
+          "price": 75,
+          "rent": 18
+        },
+        {
+          "pos": 30,
+          "name": "NO TRESPASSING",
+          "type": "corner",
+          "side": "corner",
+          "notes": "Lord Blueblood's Estate / Go to Jail"
+        },
+        {
+          "pos": 31,
+          "name": "BROADWAY",
+          "type": "lot",
+          "side": "right",
+          "price": 100,
+          "rent": 18
+        },
+        {
+          "pos": 32,
+          "name": "CLOTHING",
+          "type": "necessity",
+          "side": "right",
+          "tax": 10
+        },
+        {
+          "pos": 33,
+          "name": "MADISON SQUARE",
+          "type": "lot",
+          "side": "right",
+          "price": 100,
+          "rent": 20
+        },
+        {
+          "pos": 34,
+          "name": "FIFTH AVENUE",
+          "type": "lot",
+          "side": "right",
+          "price": 100,
+          "rent": 20
+        },
+        {
+          "pos": 35,
+          "name": "P.D.Q. R.R.",
+          "type": "railroad",
+          "side": "right",
+          "fare": 5,
+          "price": 50
+        },
+        {
+          "pos": 36,
+          "name": "GRAND BOULEVARD",
+          "type": "lot",
+          "side": "right",
+          "price": 100,
+          "rent": 22
+        },
+        {
+          "pos": 37,
+          "name": "CHANCE",
+          "type": "chance",
+          "side": "right"
+        },
+        {
+          "pos": 38,
+          "name": "WALL STREET",
+          "type": "lot",
+          "side": "right",
+          "price": 100,
+          "rent": 22
+        },
+        {
+          "pos": 39,
+          "name": "LUXURY",
+          "type": "luxury",
+          "side": "right",
+          "price": 75,
+          "notes": "Forced payment"
+        },
+        {
+          "pos": 40,
+          "name": "MOTHER EARTH",
+          "type": "corner",
+          "side": "corner",
+          "notes": "Collect $100 wages / Start From Here"
+        }
+      ],
+      "naturalOpportunities": [
+        {
+          "name": "TIMBERLAND",
+          "location": "inner-bottom-right",
+          "wages": 40,
+          "rent": 10,
+          "reentry": 1,
+          "reentryName": "WAYBACK",
+          "flavour": "Margin of Cultivation / No Man's Land"
+        },
+        {
+          "name": "FARMLANDS",
+          "location": "inner-bottom-left",
+          "wages": 60,
+          "rent": 25,
+          "reentry": 11,
+          "reentryName": "BOOMTOWN",
+          "flavour": "For permission to make two blades of grass grow on this land where one grew before apply to Graball & Holdup Improvement Co."
+        },
+        {
+          "name": "COAL MINES",
+          "location": "inner-top-left",
+          "wages": 80,
+          "rent": 50,
+          "reentry": 21,
+          "reentryName": "EASY STREET",
+          "flavour": "Wylie Bear Special Agent / No Trespassing"
+        },
+        {
+          "name": "OIL FIELDS",
+          "location": "inner-top-right",
+          "wages": 100,
+          "rent": 75,
+          "reentry": 31,
+          "reentryName": "BROADWAY",
+          "flavour": "John D. Squeezum / General Manager / Keep Off"
+        }
+      ],
+      "gameModes": {
+        "standard": "Conventional property game. Poor House (Central Park) active. Title Deeds have value.",
+        "singleTax": {
+          "activation": "Vote of at least 2 players at any time during game. Players keep holdings but Title Deeds have no value.",
+          "rule1": "Pay no taxes on Absolute Necessities.",
+          "rule2": "All land rent paid into Public Treasury (start with empty treasury).",
+          "rule3": "Railroad fares and franchise rates paid to owners until public takes control (then FREE).",
+          "rule4": "Landing on unimproved lot: pay full land rent to Treasury, then optionally build house ($100). Landing on improved lot: pay land rent to Treasury + house rent to house owner. Can build on any unimproved lot in your turn (others may outbid for privilege).",
+          "rule5": "Hogg's Game Preserves and Lord Blueblood's Estate are Government Reserved for college sites. Landing = trespassing = Jail (until colleges built).",
+          "rule6_progression": [
+            "Treasury reaches $50 \u2192 buy Soakum Lighting System (card returned, space now free)",
+            "Next $50 \u2192 buy Slambang Trolley (free)",
+            "Next $50 \u2192 buy P.D.Q. R.R. (free)",
+            "Next $50 \u2192 buy Gee Whiz R.R. (free)",
+            "Continue until all railroads free",
+            "Next $50 \u2192 FREE COLLEGE on Lord Blueblood's Estate (jail penalty annulled)",
+            "Next $50 \u2192 FREE COLLEGE on Hogg's Game Preserves (jail penalty annulled)",
+            "Each subsequent $50 \u2192 wages raised $10 (from $100 \u2192 $110 \u2192 $120 etc.)"
+          ],
+          "rule7": "After first college: landing on college space \u2192 take blue Education card. 4 Education cards \u2192 exchange for Professor (worth 100 points).",
+          "rule8": "Poor House eliminated. Can't afford move \u2192 place token on any Natural Opportunity inner space (behind where throw would land). Before next throw: collect wages from that space, pay rent to Treasury, then throw and move out to re-entry space."
+        }
+      },
+      "currency": [
+        {
+          "denomination": 1,
+          "colour": "white",
+          "notes": "outline only"
+        },
+        {
+          "denomination": 5,
+          "colour": "red"
+        },
+        {
+          "denomination": 10,
+          "colour": "grey"
+        },
+        {
+          "denomination": 50,
+          "colour": "yellow"
+        },
+        {
+          "denomination": 100,
+          "colour": "green"
+        }
+      ],
+      "boardCentre": {
+        "top": "MISCELLANEOUS (money pile area)",
+        "bottom": "PUBLIC TREASURY / MONEY DENOMINATIONS"
+      },
+      "cards": {
+        "green": {
+          "type": "Title Deeds",
+          "count": 24,
+          "contents": "21 lot deeds + 2 franchise charters (Soakum Lighting, Slambang Trolley) + 1 Broker's License. Each shows property name + For Sale price + Land Rent.",
+          "when": "Dealt at game start, shuffled. Players choose which to buy at marked price."
+        },
+        "red": {
+          "type": "Chance",
+          "count": "unknown (claimed 13)",
+          "contents": "Individual card texts unknown. Directions to follow.",
+          "when": "Draw on CHANCE space (pos 22 or 37), follow directions, return to pack."
+        },
+        "purple": {
+          "type": "Luxury",
+          "count": "unknown",
+          "contents": "Named luxuries (e.g. 'A Summer at the Seashore'). Each worth 100 points.",
+          "when": "Draw on LUXURY space (pos 39). Keep permanently."
+        },
+        "blue": {
+          "type": "Education",
+          "count": "unknown (need 4 per Professor)",
+          "contents": "Marked 'Education'. 4 exchanged for 1 Professor card (worth 100 points).",
+          "when": "Single Tax only. Taken when landing on FREE COLLEGE spaces (pos 4 or 30, after colleges erected)."
+        },
+        "freeCollege": {
+          "type": "Token",
+          "count": 2,
+          "contents": "FREE COLLEGE markers",
+          "when": "Single Tax Rule 6c: placed on Lord Blueblood's Estate (pos 30) then Hogg's Game Preserves (pos 4) as Public Treasury accumulates $50 increments."
+        },
+        "house": {
+          "type": "House cards",
+          "count": "unknown",
+          "contents": "Coloured to match player checkers",
+          "when": "Purchased for $100 (paid to Miscellaneous pile) during player's turn. Placed on owned lot."
+        }
+      },
+      "houses": {
+        "maxPerProperty": 3,
+        "houseRent": 10,
+        "landRentDoubling": "Railroads divide board into 8 sections. When ALL lots in a section have at least N houses each, land rent on every lot in that section is doubled per level (1h=2x, 2h=4x, 3h=8x).",
+        "totalRent": "land rent (with section multiplier) + $10 per house on that lot",
+        "colours": "Match player checkers (red, green, yellow, blue)",
+        "progressiveTax": [
+          {
+            "housesOnBoard": 10,
+            "tax": 20,
+            "notes": "Taxes (blue spaces) doubled"
+          },
+          {
+            "housesOnBoard": 25,
+            "tax": 40,
+            "notes": "Taxes doubled again (limit)"
+          }
+        ]
+      },
+      "setup": {
+        "players": "2-4",
+        "startingCash": {
+          "2": 600,
+          "3": 500,
+          "4": 400
+        },
+        "beginnerHand": "$325 in property value + $75 cash (pre-made balanced hands)",
+        "propertyDeal": "Shuffle 24 green cards, deal one at a time to the left until all dealt. Each player then chooses which dealt cards to BUY at marked price (paid to Public Treasury). Unpurchased cards returned to pack.",
+        "firstPlayer": "Determined by throwing dice.",
+        "dice": "2d6"
+      },
+      "movement": {
+        "direction": "Counter-clockwise from Mother Earth. Between two Chance spaces, player may move in EITHER direction (forward or backward).",
+        "wages": "Reaching or passing Mother Earth = $100 wages from Miscellaneous pile.",
+        "doubles": "Throwing doubles = 'official pass' on railroad. May JUMP 9 spaces between next two corners. Optional \u2014 can choose straight move instead. Cannot use pass if count exhausted at/before a corner.",
+        "multipleOccupancy": "Two or more checkers may occupy same space, each paying what the space calls for."
+      },
+      "spaceRules": {
+        "lots": "Owner collects land rent + house rent ($10/house). Unowned: player stopping may buy at For Sale price, but other players may outbid. Highest bidder MUST take it at their bid price. First player has first option if willing to match highest bid. If nobody buys, land rent paid to Public Treasury.",
+        "railroads": "Fare $5 base. Monopoly: 2 RRs=$10, 3 RRs=$20, 4 RRs=$50. TRUST: if 2 players own all 4 RRs, they may pool interests and charge $40 per RR space, splitting profits.",
+        "franchises": "Fee $5 base. Same purchase/bidding rules as lots. Municipal cinch (own both Soakum + Slambang) = $25 instead of $5.",
+        "necessities": "Pay $10 tax to Public Treasury (doubled to $20 at 10 houses on board, $40 at 25 houses).",
+        "speculation": "Player MAY REFUSE to move here (stay where they are). If they play: ownership of Speculation card determined per Rule 7 bidding. Pay $10 ante to Broker (or Miscellaneous if no Broker). Roll 2d6: doubles=$100, 11=$90, 10=$80, 9=$70, 8=$60, 7=$50, 6=$40, 5=$30. Pay 10% of winnings to Broker. Roll 3 or 4: speculator wins nothing, Broker goes to Jail, card returns to pack. Winnings from Miscellaneous pile.",
+        "luxury": "Pay $75 to Miscellaneous pile, draw purple card (keep, worth 100 points, may sell later). Cannot afford: move BACKWARD from space last occupied (not from Luxury). Must pay whatever the backward destination calls for.",
+        "chance": "Draw from red pack, follow directions, return card to pack. Also: Chance spaces are directional boundaries for movement.",
+        "jail": "Enter via No Trespassing spaces (Hogg's pos 4, Lord Blueblood's pos 30). Remain until next turn. Then: pay $50 fine to Public Treasury OR throw doubles ('serve time') to leave free. Cannot miss more than 3 turns if sufficient property to realize fine. On exit, begin counting from space immediately in front of Jail (Shelter, pos 11).",
+        "centralPark": "Free / no payment required.",
+        "poorHouse": "If player cannot pay expenses AND cannot borrow/sell/mortgage, go to Poor House. Remain until next turn, then throw and move out if can afford the move.",
+        "motherEarth": "Collect $100 wages from Miscellaneous pile when reaching or passing. Next player to the left acts as board representative for paying wages/making change."
+      },
+      "propertyRules": {
+        "buying": "For Sale price is minimum. Other players may outbid. Highest bidder MUST take at their bid. Player who landed has first option to match. Cards bought from pack cannot go for less than original price, but can be bid up. After game begins, player-to-player prices set by demand.",
+        "selling": "All cards in use may be bought, sold, mortgaged or traded at pleasure of players.",
+        "mortgaging": "Borrow from another player. Must give mortgage on property or wages if demanded. Terms (repayment, interest) negotiated between players. Track on paper.",
+        "broker": "1 of the 24 green cards. Holder collects $10 ante + 10% of winnings from Speculation space.",
+        "emergencies": "Any situation not covered by rules settled among players. Players may do anything not conflicting with rules."
+      },
+      "scoring": {
+        "endCondition": "Game ends when one player receives wages 5 times. Players may prolong at pleasure \u2014 agree to stop e.g. at next double thrown by any player.",
+        "winner": "Player with most wealth: cash + cards + houses. Every card and every house = 100 points.",
+        "monarchVariant": "To prove land monopolist controls everything: give 1 player all land, others all other advantages. Each starts with $100. Landlord gets no wages. Play under normal rules."
+      },
+      "boardNumbers": {
+        "outside": "Cumulative position numbers for counting dice moves. E.g. throw 6 = space 6 (THE PIKE). Next throw 8, add 6+8=14 = BEGGARMAN'S COURT. Add or subtract depending on direction.",
+        "insideEdge": "Rule reference numbers (3-13) indicating which rule applies to that space type. E.g. 7=Land Rent rule, 4=Taxes, 5=Trespassing, 8=Speculation, 9=Franchises, 11=Chances, 13=Luxury."
+      }
+    },
+    "1932-prosperity": {
+      "title": "The Landlord's Game and Prosperity",
+      "year": 1932,
+      "patent": "US 1,509,312",
+      "designer": "Elizabeth Magie Phillips",
+      "publisher": "Adgame Company (Inc.), Washington, D.C.",
+      "direction": "clockwise",
+      "totalSpaces": 36,
+      "corners": 4,
+      "spacesPerSide": [
+        8,
+        8,
+        8,
+        8
+      ],
+      "notes": "Dual-game board (Landlord's Game + Prosperity, opposite directions). 3 corners are railroads, 1 is Wages. 8 spaces per side.",
+      "spaces": [
+        {
+          "pos": 1,
+          "name": "WAGES",
+          "type": "corner",
+          "side": "corner",
+          "notes": "Labor Applied To Land Produces WAGES $400. Stop Here. Number 11."
+        },
+        {
+          "pos": 2,
+          "name": "JAIL",
+          "type": "jail",
+          "side": "right",
+          "notes": "Number 9"
+        },
+        {
+          "pos": 3,
+          "name": "WAYBACK",
+          "type": "lot",
+          "side": "right",
+          "rent": 25
+        },
+        {
+          "pos": 4,
+          "name": "LONELY LANE",
+          "type": "lot",
+          "side": "right",
+          "rent": 25
+        },
+        {
+          "pos": 5,
+          "name": "CROSSROADS",
+          "type": "lot",
+          "side": "right",
+          "rent": 25
+        },
+        {
+          "pos": 6,
+          "name": "JAYTOWN",
+          "type": "lot",
+          "side": "right",
+          "rent": 25
+        },
+        {
+          "pos": 7,
+          "name": "TAXES",
+          "type": "taxes",
+          "side": "right",
+          "tax": 10,
+          "notes": "Personal Property"
+        },
+        {
+          "pos": 8,
+          "name": "REAL ESTATE",
+          "type": "broker",
+          "side": "right",
+          "notes": "Claude Hopper"
+        },
+        {
+          "pos": 9,
+          "name": "BOOMTOWN",
+          "type": "lot",
+          "side": "right",
+          "rent": 25
+        },
+        {
+          "pos": 10,
+          "name": "LICKETY CUT R.R.",
+          "type": "corner",
+          "side": "corner",
+          "fare": 100,
+          "notes": "Interstate Public Utility"
+        },
+        {
+          "pos": 11,
+          "name": "POVERTY PLACE",
+          "type": "lot",
+          "side": "bottom",
+          "rent": 50
+        },
+        {
+          "pos": 12,
+          "name": "GOAT ALLEY",
+          "type": "lot",
+          "side": "bottom",
+          "rent": 50
+        },
+        {
+          "pos": 13,
+          "name": "SLAMBANG TROLLEY",
+          "type": "franchise",
+          "side": "bottom",
+          "fare": 50
+        },
+        {
+          "pos": 14,
+          "name": "RICKETY ROW",
+          "type": "lot",
+          "side": "bottom",
+          "rent": 50
+        },
+        {
+          "pos": 15,
+          "name": "LAND TAXES",
+          "type": "taxes",
+          "side": "bottom",
+          "tax": 10
+        },
+        {
+          "pos": 16,
+          "name": "HELL'S HALF ACRE",
+          "type": "lot",
+          "side": "bottom",
+          "rent": 50
+        },
+        {
+          "pos": 17,
+          "name": "REAL ESTATE",
+          "type": "broker",
+          "side": "bottom",
+          "notes": "L.B. Sharp"
+        },
+        {
+          "pos": 18,
+          "name": "THE BOWERY",
+          "type": "lot",
+          "side": "bottom",
+          "rent": 50
+        },
+        {
+          "pos": 19,
+          "name": "GEE WHIZ R.R.",
+          "type": "corner",
+          "side": "corner",
+          "fare": 100,
+          "notes": "Interstate Public Utility"
+        },
+        {
+          "pos": 20,
+          "name": "PROGRESS PARK",
+          "type": "lot",
+          "side": "left",
+          "rent": 25
+        },
+        {
+          "pos": 21,
+          "name": "GEORGE STREET",
+          "type": "lot",
+          "side": "left",
+          "rent": 25
+        },
+        {
+          "pos": 22,
+          "name": "SOAKUM LIGHTING SYSTEM",
+          "type": "franchise",
+          "side": "left",
+          "price": 50,
+          "notes": "Local Public Utility"
+        },
+        {
+          "pos": 23,
+          "name": "JOHNSON ROAD",
+          "type": "lot",
+          "side": "left",
+          "rent": 25
+        },
+        {
+          "pos": 24,
+          "name": "IMPROVEMENT TAXES",
+          "type": "taxes",
+          "side": "left",
+          "tax": 25
+        },
+        {
+          "pos": 25,
+          "name": "POST AVENUE",
+          "type": "lot",
+          "side": "left",
+          "rent": 25
+        },
+        {
+          "pos": 26,
+          "name": "REAL ESTATE",
+          "type": "broker",
+          "side": "left",
+          "notes": "Grubalt & Holdup Improvement Co."
+        },
+        {
+          "pos": 27,
+          "name": "PUBLIC HIGHWAY",
+          "type": "lot",
+          "side": "left",
+          "rent": 75
+        },
+        {
+          "pos": 28,
+          "name": "P.D.Q. R.R.",
+          "type": "corner",
+          "side": "corner",
+          "fare": 100,
+          "notes": "Interstate Public Utility"
+        },
+        {
+          "pos": 29,
+          "name": "BROADWAY",
+          "type": "lot",
+          "side": "top",
+          "rent": 100
+        },
+        {
+          "pos": 30,
+          "name": "LORD BLUEBLOOD'S ESTATE",
+          "type": "go-to-jail",
+          "side": "top",
+          "notes": "No Trespassing / Go To Jail"
+        },
+        {
+          "pos": 31,
+          "name": "FIFTH AVENUE",
+          "type": "lot",
+          "side": "top",
+          "rent": 100
+        },
+        {
+          "pos": 32,
+          "name": "TING-A-LING TELEPHONE CO.",
+          "type": "franchise",
+          "side": "top",
+          "price": 50,
+          "notes": "Local Public Utility"
+        },
+        {
+          "pos": 33,
+          "name": "THE LOOP",
+          "type": "lot",
+          "side": "top",
+          "rent": 100
+        },
+        {
+          "pos": 34,
+          "name": "LA SWELLE HOTEL",
+          "type": "luxury",
+          "side": "top",
+          "tax": 25,
+          "notes": "$25 A Day"
+        },
+        {
+          "pos": 35,
+          "name": "LAKE SHORE DRIVE",
+          "type": "lot",
+          "side": "top",
+          "rent": 100
+        },
+        {
+          "pos": 36,
+          "name": "EASY STREET",
+          "type": "lot",
+          "side": "top",
+          "rent": 100
+        }
+      ],
+      "components": {
+        "cards": {
+          "total": 42,
+          "green": {
+            "count": 20,
+            "type": "Land In Use",
+            "notes": "Title deeds for 20 green board spaces. Shows property name + land rent."
+          },
+          "orange": {
+            "count": 3,
+            "type": "Local Public Utilities",
+            "notes": "Slambang Trolley, Soakum Lighting System, Ting-a-Ling Telephone Co."
+          },
+          "red": {
+            "count": 3,
+            "type": "Interstate Public Utilities (Railroads)",
+            "notes": "Lickety-Cut R.R., Gee Whiz R.R., + 1 illegible R.R. Correspond to red-bordered corner spaces."
+          },
+          "yellow": {
+            "count": 16,
+            "type": "Idle Land",
+            "notes": "Held out of use for speculation only. 15 worth $200 each + 1 Gold Mine worth $500. No corresponding board spaces. Bought/sold at Real Estate office spaces."
+          }
+        },
+        "improvementTags": {
+          "count": 40,
+          "cost": 300,
+          "rentAddition": 100
+        },
+        "noTrespassingSigns": {
+          "count": 4
+        },
+        "forSaleSign": {
+          "count": 1
+        },
+        "checkers": {
+          "count": 4
+        },
+        "chanceCube": {
+          "count": 1,
+          "notes": "Special die with faces 5, 10, 15, 20, 25, 30. Thrown when player rolls doubles."
+        },
+        "dice": {
+          "count": 2,
+          "notes": "1 pair + 1 dice box"
+        },
+        "money": {
+          "total": 6600,
+          "pieces": [
+            {
+              "count": 8,
+              "colour": "red",
+              "denomination": 500,
+              "subtotal": 4000
+            },
+            {
+              "count": 17,
+              "colour": "green",
+              "denomination": 100,
+              "subtotal": 1700
+            },
+            {
+              "count": 13,
+              "colour": "yellow",
+              "denomination": 50,
+              "subtotal": 650
+            },
+            {
+              "count": 21,
+              "colour": "blue",
+              "denomination": 10,
+              "subtotal": 210
+            },
+            {
+              "count": 8,
+              "colour": "pink",
+              "denomination": 5,
+              "subtotal": 40
+            }
+          ]
+        }
+      },
+      "setup": {
+        "players": 4,
+        "startingCash": 500,
+        "cardDeal": "42 cards shuffled, dealt one at a time to all 4 players until each has 8 cards. Remainder placed in middle of board with 'For Sale' sign on top.",
+        "initialEquipment": "Each player also receives: 1 checker, 1 Improvement tag, 1 No Trespassing sign (tags same colour as checker).",
+        "startPosition": "All checkers placed on Wages corner (JAIL/WAGES space).",
+        "firstPlayer": "Dice thrown, highest winning.",
+        "dice": "2d6 + Chance cube (on doubles)"
+      },
+      "movement": {
+        "direction": "Clockwise (to the left from Wages corner).",
+        "counting": "Count Jail space 1, Wayback 2, etc. Follow rule applying to space landed on.",
+        "doubles": "Throwing doubles: complete normal move transaction, THEN throw Chance cube and follow its face.",
+        "railroadJump": "After paying railroad fare, player may move to any space 8 or fewer spaces ahead, either forward or backward."
+      },
+      "chanceCube": {
+        "trigger": "Thrown after doubles, after completing normal move transaction.",
+        "faces": [
+          {
+            "value": 5,
+            "effect": "Caught robbing a hen-roost \u2014 go to Jail"
+          },
+          {
+            "value": 10,
+            "effect": "Caught robbing the public \u2014 take $200 from the board"
+          },
+          {
+            "value": 15,
+            "effect": "Draw a card from the board (For Sale pile)"
+          },
+          {
+            "value": 20,
+            "effect": "Take an Improvement tag from the board"
+          },
+          {
+            "value": 25,
+            "effect": "Loss by fire \u2014 return to board your nearest Improvement tag"
+          },
+          {
+            "value": 30,
+            "effect": "A judgment against you \u2014 pay $200 to next player on your left"
+          }
+        ],
+        "notes": "Faces may be replaced by gains/losses at players' pleasure. Cube runs 5 to 30, increasing 5 per face."
+      },
+      "spaceRules": {
+        "landInUse": "Pay land rent to owner. If owner, take rent from board. If For Sale (card still on board), highest bidder takes card. Player landing has first option at highest bid.",
+        "localPublicUtility": "Pay $50 to owner. If owner, take $50 from board. Monopoly (own all 3): rates raised to $100 each.",
+        "railroad": "Pay $100 fare to owner (corner spaces). If owner, take from board. Monopoly (own all 3): fare = $200 each. After paying, may jump 8 spaces forward or backward.",
+        "realEstate": "Player may sell to the board any/all Idle Land cards they hold ($200 each, Gold Mine $500). Or may buy Idle Land from board ($100 each) \u2014 draw blindly if Gold Mine among them. Cannot buy and sell same turn.",
+        "taxes": {
+          "personalProperty": "$10 on every $100 cash held (under $100 exempt)",
+          "landTaxes": "$10 on every Land card (green or yellow) held",
+          "improvementTaxes": "$25 on every Improvement tag + every Railroad card (orange) + every Public Utility card in possession"
+        },
+        "lordBlueblood": "No Trespassing. Go to Jail.",
+        "jail": "Pay $50 fine and throw 6 or more to leave. Until then, remain.",
+        "laSwelleHotel": "Pay $25 if possessing $2000+ in cash. If under $2000, throw dice again and move backward.",
+        "wages": "Collect $400 from board. If reaching this space by exact count, receive $500 instead."
+      },
+      "propertyRules": {
+        "noTrespassingSigns": "Player may place on any green (Land In Use) space they own, sending any other player who lands there to Jail. When 4+ No Trespassing signs on one side of board, land rent on that whole side is doubled.",
+        "improvements": "Buy from board at $300 each, place on any owned green space. Collect $100 rent per Improvement in addition to land rent. Once placed, cannot be removed except by fire (Chance cube 25) \u2014 changes colour with ownership.",
+        "buying": "All cards may be bought, sold, or traded between players at any time during a player's turn. Preferably done in regular turn order.",
+        "idleLand": "Yellow cards \u2014 no corresponding board space. Held for speculation. Sold at Real Estate offices for $200 each (Gold Mine $500)."
+      },
+      "scoring": {
+        "endCondition": "First player to accumulate $3000 in cash wins. Limit may be raised if players agree.",
+        "incomeStreams": "Land rent, improvements rent, railroad fares, utility fees, wages ($400/$500), Idle Land sales, Chance cube gains."
+      },
+      "innerSpaces": [
+        {
+          "name": "For Sale / Land in Use",
+          "type": "land-in-use",
+          "location": "top-left",
+          "notes": "General Land Office"
+        },
+        {
+          "name": "For Sale / Idle Land",
+          "type": "idle-land",
+          "location": "bottom-left",
+          "notes": "General Land Office"
+        },
+        {
+          "name": "General Fund",
+          "type": "general-fund",
+          "location": "top-right",
+          "notes": "Public Treasury"
+        },
+        {
+          "name": "Prosperity Land Rent Fund",
+          "type": "rent-fund",
+          "location": "bottom-right",
+          "notes": "Public Treasury"
+        }
+      ]
+    }
+  }
+}
