@@ -324,6 +324,8 @@ function buildRenderOpts(resolved) {
     opts.hexFrame = render.frame || topo.shape || null
     if (resolved._hexGrid) {
       opts.hexGrid = resolved._hexGrid
+    } else if (topo.grid) {
+      opts.hexGrid = topo.grid.map(c => ({ q: c[0], r: c[1] }))
     } else if (topo.shape === 'triangular' && topo.sideLength) {
       opts.hexGrid = generateTriangularHexGrid(topo.sideLength)
     } else if (topo.shape === 'hexagonal' && topo.radius) {
