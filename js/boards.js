@@ -818,6 +818,8 @@ async function render() {
     }
     const target = document.getElementById('board-svg')
     await renderFromResolved(resolved, target)
+    target.classList.add('active')
+    document.getElementById('board-empty').style.display = 'none'
     requestAnimationFrame(fitToView)
   } catch (e) {
     showSvg('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="80"><text x="200" y="40" text-anchor="middle" font-size="12" fill="#f44">' + e.message + '</text></svg>')
