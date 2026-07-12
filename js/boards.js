@@ -789,7 +789,7 @@ export function renderMultiBoard(config, game) {
     }
 
     // Use consolidated grid renderer per layer
-    const layerSvg = renderConsolidated(layerConfig)
+    const layerSvg = renderBoard(layerConfig)
     // Extract inner SVG content (strip outer <svg> and </svg> tags)
     const innerStart = layerSvg.indexOf('>') + 1
     const innerEnd = layerSvg.lastIndexOf('</svg>')
@@ -820,6 +820,7 @@ async function render() {
     await renderFromResolved(resolved, target)
     target.classList.add('active')
     document.getElementById('board-empty').style.display = 'none'
+    showInfo({ label: resolved.meta?.label, family: state.game, variant: state.variant })
     requestAnimationFrame(fitToView)
   } catch (e) {
     showSvg('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="80"><text x="200" y="40" text-anchor="middle" font-size="12" fill="#f44">' + e.message + '</text></svg>')
@@ -940,7 +941,7 @@ function renderHexGameConsolidated(game, variantDef) {
     },
   }
 
-  const svg = renderConsolidatedHex(config)
+  const svg = renderBoard(config)
   showSvg(svg)
   showInfo({
     hexGame: game.hexGame,
