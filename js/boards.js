@@ -820,7 +820,6 @@ async function render() {
     await renderFromResolved(resolved, target)
     target.classList.add('active')
     document.getElementById('board-empty').style.display = 'none'
-    showInfo({ label: resolved.meta?.label, family: state.game, variant: state.variant })
     requestAnimationFrame(fitToView)
   } catch (e) {
     showSvg('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="80"><text x="200" y="40" text-anchor="middle" font-size="12" fill="#f44">' + e.message + '</text></svg>')
@@ -1782,7 +1781,7 @@ function showInfo(cfg) {
     if (cfg.boardStyle) rows.push(`<div class="info-row"><span class="info-label">Board</span><span class="info-value">${cfg.boardStyle}</span></div>`)
     if (cfg.rows) rows.push(`<div class="info-row"><span class="info-label">Size</span><span class="info-value">${cfg.rows}×${cfg.cols}</span></div>`)
     if (cfg.rings) rows.push(`<div class="info-row"><span class="info-label">Rings</span><span class="info-value">${cfg.rings}</span></div>`)
-    const displayPieceSet = cfg.pieceSetOverride || cfg.pieceSet4 || (game && game.pieceSet)
+    const displayPieceSet = cfg.pieceSetOverride || cfg.pieceSet4 || (cfg.pieceSet)
     if (displayPieceSet) rows.push(`<div class="info-row"><span class="info-label">Pieces</span><span class="info-value">${displayPieceSet}</span></div>`)
     if (cfg.fen) rows.push(`<div class="info-row info-row--block"><span class="info-label">Setup</span><span class="info-value info-value--fen">${cfg.fen}</span></div>`)
     else if (cfg.setup) rows.push(`<div class="info-row info-row--block"><span class="info-label">Setup</span><span class="info-value info-value--fen">${cfg.setup}</span></div>`)
