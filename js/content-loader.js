@@ -42,7 +42,9 @@ function resolveContentPath(source, basePath) {
   if (source.startsWith('http://') || source.startsWith('https://')) {
     return source
   }
-  // Relative path — resolve against basePath
+  if (source.endsWith('.json') && !source.includes('/')) {
+    return '../data/' + source
+  }
   const base = basePath?.endsWith('/') ? basePath : (basePath || '') + '/'
   return base + source
 }
