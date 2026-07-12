@@ -258,6 +258,25 @@ const xiangqi = {
     const gx = ox + inset, gy = oy + inset
     const parts = []
     parts.push(`<rect x="${ox}" y="${oy}" width="${gridW + inset * 2}" height="${gridH + inset * 2}" fill="${colors.board}"/>`)
+    if (opts.zones) {
+      for (const [, zone] of Object.entries(opts.zones)) {
+        if (!zone || !zone.cells || !zone.cells.length) continue
+        const fill = zone.fill || '#6b9fd4'
+        const opacity = zone.opacity || 0.4
+        const clusters = clusterZoneCells(zone.cells)
+        for (const cluster of clusters) {
+          const cRows = cluster.map(c => c[0])
+          const cCols = cluster.map(c => c[1])
+          const minR = Math.min(...cRows), maxR = Math.max(...cRows)
+          const minC = Math.min(...cCols), maxC = Math.max(...cCols)
+          const zx = gx + minC * tileSize - tileSize * 0.5
+          const zy = gy + minR * tileSize - tileSize * 0.5
+          const zw = (maxC - minC + 1) * tileSize
+          const zh = (maxR - minR + 1) * tileSize
+          parts.push(`<rect x="${zx}" y="${zy}" width="${zw}" height="${zh}" fill="${fill}" opacity="${opacity}" rx="4"/>`)
+        }
+      }
+    }
     parts.push(`<rect x="${ox}" y="${oy}" width="${gridW + inset * 2}" height="${gridH + inset * 2}" fill="none" stroke="${colors.gridLine}" stroke-width="2"/>`)
     parts.push(`<g stroke="${colors.gridLine}" stroke-width="1">`)
     if (river) {
@@ -2129,6 +2148,32 @@ const landlords = {
     if (current) lines.push(current)
     return lines
   },
+}
+
+// ─── ZONE CLUSTERING ────────────────────────────────────────────────────────
+
+function clusterZoneCells(cells) {
+  if (!cells.length) return []
+  const key = (r, c) => `${r},${c}`
+  const set = new Set(cells.map(([r, c]) => key(r, c)))
+  const visited = new Set()
+  const clusters = []
+  for (const [r, c] of cells) {
+    const k = key(r, c)
+    if (visited.has(k)) continue
+    const cluster = []
+    const queue = [[r, c]]
+    while (queue.length) {
+      const [cr, cc] = queue.pop()
+      const ck = key(cr, cc)
+      if (visited.has(ck) || !set.has(ck)) continue
+      visited.add(ck)
+      cluster.push([cr, cc])
+      queue.push([cr - 1, cc], [cr + 1, cc], [cr, cc - 1], [cr, cc + 1])
+    }
+    if (cluster.length) clusters.push(cluster)
+  }
+  return clusters
 }
 
 // ─── PROVIDER REGISTRY ──────────────────────────────────────────────────────

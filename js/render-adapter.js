@@ -108,7 +108,7 @@ function resolveBoardStyle(resolved) {
   switch (topo.type) {
     case 'grid': {
       if (layout === 'intersections') {
-        if (render.decorations?.some(d => d.type === 'gap')) return 'xiangqi'
+        if (cellColor === 'xiangqi' || render.decorations?.some(d => d.type === 'gap')) return 'xiangqi'
         if (render.decorations?.some(d => d.type === 'markers' && d.style === 'dot' && d.auto === 'shogi-hoshi')) return 'shogi'
         if (render.decorations?.some(d => d.type === 'arcs')) return 'surakarta'
         if (render.decorations?.some(d => d.type === 'diagonals' && d.pattern === 'alternating')) return 'alquerque'
@@ -317,9 +317,19 @@ function buildRenderOpts(resolved) {
       opts.cellMap = buildCrossMap(opts.rows, opts.cols, render.castles || [])
     }
 
-    // Provider-specific flags derived from decorations
+    // Provider-specific flags derived from decorations/options
     if (boardStyle === 'xiangqi') {
-      opts.river = render.decorations?.some(d => d.type === 'gap') || false
+      if (render.river !== undefined) {
+        opts.river = render.river
+      } else {
+        opts.river = render.decorations?.some(d => d.type === 'gap') || false
+      }
+      if (render.palace !== undefined) {
+        opts.palace = render.palace
+      }
+      if (render.zones) {
+        opts.zones = render.zones
+      }
     }
   }
 

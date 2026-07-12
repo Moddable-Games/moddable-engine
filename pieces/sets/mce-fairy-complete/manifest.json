@@ -36,6 +36,12 @@
     "wV": { "source": "playstrategy-mono", "file": "eagle.svg" },
     "bV": { "source": "playstrategy-mono", "file": "eagle.svg" },
     "wZ": { "source": "wikimedia-standard", "file": "Chess_Zlt45.svg" },
-    "bZ": { "source": "wikimedia-standard", "file": "Chess_Zdt45.svg" }
+    "bZ": { "source": "wikimedia-standard", "file": "Chess_Zdt45.svg" },
+    "wF": { "source": "wikimedia-fairy", "file": "White_ferz.svg" },
+    "bF": { "source": "wikimedia-fairy", "file": "Black_ferz.svg" },
+    "wW": { "source": "wikimedia-fairy", "file": "Black_wazir.svg" },
+    "bW": { "source": "wikimedia-fairy", "file": "Black_wazir.svg" },
+    "wE": { "source": "wikimedia-fairy", "file": "White_alfil.svg" },
+    "bE": { "source": "wikimedia-fairy", "file": "Black_alfil.svg" }
   }
 }
