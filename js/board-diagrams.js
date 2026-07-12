@@ -852,6 +852,7 @@ function computeHexBorderEdges(hexes, size, flat, oX, oY, scale) {
   return edges
 }
 
+
 // ─── HEX PROVIDER (ported from moddable-hexmaps/js/hex-math.js + hex-svg.js) ─
 
 function axialToPixelPointy(q, r, size) {
@@ -939,8 +940,16 @@ const hex = {
     if (!frame) {
       parts.push(`<rect x="${ox}" y="${oy}" width="${layout.boardW}" height="${layout.boardH}" fill="${colors.background}" rx="6"/>`)
     } else {
-      const borderEdges = computeHexBorderEdges(hexes, size, flat, oX, oY, 1.05)
       const borderColor = colors.border || '#6b4226'
+      parts.push(`<g fill="${borderColor}">`)
+      for (const h of hexes) {
+        const p = flat ? axialToPixelFlat(h.q, h.r, size) : axialToPixelPointy(h.q, h.r, size)
+        const cx = oX + p.x, cy = oY + p.y
+        const corners = hexCorners(cx, cy, size * 1.08, flat)
+        parts.push(`<polygon points="${corners.map(c => `${c.x.toFixed(2)},${c.y.toFixed(2)}`).join(' ')}"/>`)
+      }
+      parts.push('</g>')
+      const borderEdges = computeHexBorderEdges(hexes, size, flat, oX, oY, 1.05)
       parts.push(`<g fill="none" stroke="${borderColor}" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">`)
       for (const [a, b] of borderEdges) {
         parts.push(`<line x1="${a.x.toFixed(2)}" y1="${a.y.toFixed(2)}" x2="${b.x.toFixed(2)}" y2="${b.y.toFixed(2)}"/>`)
