@@ -3207,7 +3207,7 @@ export function renderMultiBoard(config, game) {
   const innerPad = 24
   const boardW = cols * ts + innerPad * 2
   const boardH = rows * ts + innerPad * 2
-  const pad = 24
+  const pad = 4
 
   let totalW, totalH
   if (layout === 'horizontal') {
