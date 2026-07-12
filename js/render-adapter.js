@@ -67,7 +67,7 @@ function buildPieceImages(pieceSetId, gallery, fenOverrides, skipFenMap) {
   }
 
   for (const [pieceId, entry] of Object.entries(setDef.pieces || {})) {
-    const path = resolvePieceEntry(pieceId, entry, pieceSetId)
+    const path = resolvePieceEntry(pieceId, entry, pieceSetId, setDef.baseSet || null)
     if (path) images[pieceId] = path
     if (typeof entry === 'object' && entry.surface) surfaceMap[pieceId] = entry.surface
   }
@@ -85,8 +85,11 @@ function buildPieceImages(pieceSetId, gallery, fenOverrides, skipFenMap) {
   return { images, surfaceMap, surface }
 }
 
-function resolvePieceEntry(pieceId, entry, setId) {
-  if (typeof entry === 'string') return `../pieces/sets/${setId}/${entry}`
+function resolvePieceEntry(pieceId, entry, setId, baseSetId) {
+  if (typeof entry === 'string') {
+    const dir = baseSetId || setId
+    return `../pieces/sets/${dir}/${entry}`
+  }
   if (entry && entry.source && entry.file) return `../pieces/sets/${entry.source}/${entry.file}`
   return null
 }
