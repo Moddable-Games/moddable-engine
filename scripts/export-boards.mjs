@@ -102,7 +102,9 @@ for (const family of families) {
       if (!rawSvg) { skipped++; continue }
 
       // Embed external piece images inline so SVGs are self-contained
-      const svg = embedPieceImages(rawSvg)
+      const pieceSetId = resolved.pieces?.set
+      const setDef = pieceSetId ? gallery.find(s => s.id === pieceSetId) : null
+      const svg = embedPieceImages(rawSvg, setDef)
 
       const diagramDir = resolve(GAMES_DIR, family, 'diagrams', 'svg')
       mkdirSync(diagramDir, { recursive: true })
@@ -148,35 +150,47 @@ function stripSvgBloat(svgContent) {
   return s.trim()
 }
 
-function embedPieceImages(svg) {
+function embedPieceImages(svg, setDef) {
   const imagePattern = /<image\s+href="([^"]+)"\s+x="([^"]+)"\s+y="([^"]+)"\s+width="([^"]+)"\s+height="([^"]+)"[^/>]*\/>/g
-  const usedPaths = new Map()
+  const owners = setDef?.owners || null
+  const FEN4_OWNERS = { r: 'red', b: 'blue', y: 'yellow', g: 'green' }
+  const hrefToSymbol = new Map()
 
   let match
   while ((match = imagePattern.exec(svg)) !== null) {
     const href = match[1]
-    if (!usedPaths.has(href)) {
-      const parts = href.split('/')
+    if (!hrefToSymbol.has(href)) {
+      const cleanHref = href.split('#')[0]
+      const fragment = href.includes('#') ? href.split('#')[1] : null
+      const parts = cleanHref.split('/')
       const filename = parts[parts.length - 1].replace('.svg', '')
       const setName = parts.length >= 2 ? parts[parts.length - 2] : 'unknown'
-      usedPaths.set(href, `piece-${setName}-${filename}`)
+      const symbolId = fragment ? `piece-${setName}-${fragment}` : `piece-${setName}-${filename}`
+      hrefToSymbol.set(href, symbolId)
     }
   }
 
-  if (usedPaths.size === 0) return svg
+  if (hrefToSymbol.size === 0) return svg
 
   const defs = []
-  for (const [href, symbolId] of usedPaths) {
-    const filePath = href.startsWith('../pieces/')
-      ? resolve(ENGINE_ROOT, href.replace('../', ''))
-      : href.startsWith('pieces/')
-        ? resolve(ENGINE_ROOT, href)
+  const fileCache = new Map()
+  for (const [href, symbolId] of hrefToSymbol) {
+    const cleanHref = href.split('#')[0]
+    const fragment = href.includes('#') ? href.split('#')[1] : null
+    const filePath = cleanHref.startsWith('../pieces/')
+      ? resolve(ENGINE_ROOT, cleanHref.replace('../', ''))
+      : cleanHref.startsWith('pieces/')
+        ? resolve(ENGINE_ROOT, cleanHref)
         : null
     if (!filePath || !existsSync(filePath)) continue
 
-    let content = readFileSync(filePath, 'utf8')
-    content = content.replace(/<\?xml[^>]*\?>\s*/, '').replace(/<!DOCTYPE[^>]*>\s*/, '').trim()
-    content = content.replace(/xlink:href/g, 'href')
+    let content = fileCache.get(filePath)
+    if (!content) {
+      content = readFileSync(filePath, 'utf8')
+      content = content.replace(/<\?xml[^>]*\?>\s*/, '').replace(/<!DOCTYPE[^>]*>\s*/, '').trim()
+      content = content.replace(/xlink:href/g, 'href')
+      fileCache.set(filePath, content)
+    }
     const svgTag = content.match(/<svg[^>]*>/)?.[0] || ''
     const vbMatch = svgTag.match(/viewBox="([^"]+)"/)
     let vb
@@ -189,19 +203,32 @@ function embedPieceImages(svg) {
     }
     let inner = content.replace(/<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '').trim()
     inner = stripSvgBloat(inner)
+
+    // Apply owner recolouring for virtual sets (4-player chess etc.)
+    if (owners && fragment) {
+      const prefix = fragment[0]
+      const ownerName = FEN4_OWNERS[prefix]
+      if (ownerName && owners[ownerName]) {
+        const fill = owners[ownerName].fill
+        inner = inner.replace(/fill:#fff\b/gi, `fill:${fill}`)
+        inner = inner.replace(/fill:\s*#ffffff\b/gi, `fill:${fill}`)
+        inner = inner.replace(/fill="white"/gi, `fill="${fill}"`)
+        inner = inner.replace(/fill="#fff"/gi, `fill="${fill}"`)
+        inner = inner.replace(/fill="#ffffff"/gi, `fill="${fill}"`)
+      }
+    }
+
     defs.push(`<symbol id="${symbolId}" viewBox="${vb}">${inner}</symbol>`)
   }
 
   if (defs.length === 0) return svg
 
-  // Replace <image> with <use>
   let result = svg.replace(imagePattern, (full, href, x, y, w, h) => {
-    const symbolId = usedPaths.get(href)
+    const symbolId = hrefToSymbol.get(href)
     if (!symbolId) return full
     return `<use href="#${symbolId}" x="${x}" y="${y}" width="${w}" height="${h}"/>`
   })
 
-  // Insert defs
   const existingDefs = result.indexOf('<defs>')
   if (existingDefs !== -1) {
     result = result.replace('<defs>', `<defs>\n${defs.join('\n')}`)

@@ -88,6 +88,9 @@ function buildPieceImages(pieceSetId, gallery, fenOverrides, skipFenMap) {
 function resolvePieceEntry(pieceId, entry, setId, baseSetId) {
   if (typeof entry === 'string') {
     const dir = baseSetId || setId
+    if (baseSetId) {
+      return `../pieces/sets/${dir}/${entry}#${pieceId}`
+    }
     return `../pieces/sets/${dir}/${entry}`
   }
   if (entry && entry.source && entry.file) return `../pieces/sets/${entry.source}/${entry.file}`
