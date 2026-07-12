@@ -356,6 +356,8 @@ function buildRenderOpts(resolved) {
       opts.hexColorFn = tricolorFn
     } else if (render.cellColor === 'rings') {
       opts.hexColorFn = ringColorFn
+    } else if (render.cellColor === 'terrain') {
+      opts.hexTypes = true
     }
     // Hex position (map of "q,r" → piece)
     if (resolved._hexPosition) {
@@ -367,6 +369,15 @@ function buildRenderOpts(resolved) {
     }
     if (resolved._centreMarker) opts.centreMarker = resolved._centreMarker
     else if (render.centreMarker) opts.centreMarker = render.centreMarker
+
+    if (opts.hexTypes && opts.hexPosition) {
+      opts.hexGrid = Object.entries(opts.hexPosition).map(([key, val]) => {
+        const [q, r] = key.split(',').map(Number)
+        const type = typeof val === 'string' ? val : val?.type || val?.piece || null
+        return { q, r, type }
+      })
+      opts.colors = { ...opts.colors, ...TERRAIN_COLORS }
+    }
   }
 
   // Track
@@ -783,6 +794,11 @@ function tricolorFn(hex, colors) {
 function ringColorFn(hex, colors) {
   const ring = Math.max(Math.abs(hex.q), Math.abs(hex.r), Math.abs(hex.q + hex.r))
   return ring % 2 === 0 ? colors.darkHex : colors.lightHex
+}
+
+const TERRAIN_COLORS = {
+  water: '#2196F3', trees: '#4CAF50', mount: '#795548',
+  grass: '#8BC34A', sand: '#FFC107', base: '#F44336',
 }
 
 function parseFen4(fen4, rows, cols) {
