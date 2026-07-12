@@ -5,6 +5,7 @@ import { renderRpgProvider } from './rpg-provider.js'
 import { renderFromResolved, loadGalleryIndex as loadAdapterGallery, setDeckRenderer, setMahjongRenderer, setTableauRenderer, setMultiBoardRenderer } from './render-adapter.js'
 import { resolveSurface } from './surface-resolver.js'
 import { resolve as cascadeResolve } from './cascade-resolver.js'
+import { loadVariant } from './schema-loader.js'
 
 setDeckRenderer(renderDeckSvg)
 setMahjongRenderer(renderMahjongSvg)
@@ -495,7 +496,7 @@ function buildFanoronaPosition(rows, cols) {
 
 let state = readStateFromURL()
 let galleryIndex = null
-let renderMode = 'legacy'
+
 const boardDataCache = {}
 
 function readStateFromURL() {
@@ -519,8 +520,16 @@ function pushState() {
   history.replaceState(null, '', '?' + params.toString())
 }
 
+let gamesIndex = {}
+
 async function init() {
   galleryIndex = await fetch('../pieces/gallery-index.json').then(r => r.json()).catch(e => { console.error('Gallery load failed:', e); return null })
+  const manifest = await fetch('../../moddable-rules/diagrams-manifest.json').then(r => r.json()).catch(e => { console.error('Manifest load failed:', e); return {} })
+  for (const key of Object.keys(manifest)) {
+    const [family, variant] = key.split('/')
+    if (!gamesIndex[family]) gamesIndex[family] = []
+    gamesIndex[family].push(variant)
+  }
   populateGames()
   populateVariants()
   bindControls()
@@ -530,11 +539,11 @@ async function init() {
 function populateGames() {
   const select = document.getElementById('game-select')
   select.innerHTML = ''
-  const sorted = Object.entries(GAMES).sort((a, b) => a[1].label.localeCompare(b[1].label))
-  for (const [id, game] of sorted) {
+  const sorted = Object.keys(gamesIndex).sort()
+  for (const id of sorted) {
     const opt = document.createElement('option')
     opt.value = id
-    opt.textContent = game.label
+    opt.textContent = id.replace(/-/g, ' ')
     select.appendChild(opt)
   }
   select.value = state.game
@@ -543,12 +552,12 @@ function populateGames() {
 function populateVariants() {
   const select = document.getElementById('variant-select')
   select.innerHTML = ''
-  const game = GAMES[state.game]
-  if (!game) return
-  for (const [id, v] of Object.entries(game.variants)) {
+  const variants = gamesIndex[state.game]
+  if (!variants) return
+  for (const id of variants) {
     const opt = document.createElement('option')
     opt.value = id
-    opt.textContent = v.static ? `${v.label} [static]` : v.label
+    opt.textContent = id.replace(/-/g, ' ')
     select.appendChild(opt)
   }
   select.value = state.variant
@@ -556,32 +565,18 @@ function populateVariants() {
 }
 
 function updateCoverage() {
-  const game = GAMES[state.game]
-  if (!game) return
-  const variants = Object.values(game.variants)
-  const dynamic = variants.filter(v => !v.static).length
-  const total = variants.length
+  const variants = gamesIndex[state.game]
+  if (!variants) return
   const el = document.getElementById('coverage-info')
-  if (el) el.textContent = `${dynamic}/${total} dynamic`
+  if (el) el.textContent = `${variants.length} variants`
 }
 
 function bindControls() {
-  const modeToggle = document.getElementById('render-mode-toggle')
-  if (modeToggle) {
-    modeToggle.addEventListener('click', e => {
-      const btn = e.target.closest('.mode-btn')
-      if (!btn) return
-      renderMode = btn.dataset.mode
-      modeToggle.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'))
-      btn.classList.add('active')
-      render()
-    })
-  }
 
   document.getElementById('game-select').addEventListener('change', e => {
     state.game = e.target.value
-    const game = GAMES[state.game]
-    state.variant = Object.keys(game.variants)[0]
+    const variants = gamesIndex[state.game]
+    state.variant = variants ? variants[0] : ''
     populateVariants()
     pushState()
     render()
@@ -636,7 +631,7 @@ function exportSvg() {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `${state.game}-${state.variant}-${renderMode}.svg`
+  a.download = `${state.game}-${state.variant}.svg`
   a.click()
   URL.revokeObjectURL(url)
 }
@@ -683,7 +678,7 @@ async function exportPng() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${state.game}-${state.variant}-${renderMode}.png`
+      a.download = `${state.game}-${state.variant}.png`
       a.click()
       URL.revokeObjectURL(url)
     }, 'image/png')
@@ -809,384 +804,24 @@ export function renderMultiBoard(config, game) {
   return parts.join('\n')
 }
 
-async function renderSchemaMode(game, variantDef) {
-  // Games with separate rendering pipelines or no renderer — leave legacy in place
-  if (game.hexGame || game.rpgGame || variantDef.static || game.noRenderer || variantDef.noRenderer) {
-    return
-  }
-
-  // Load board data if needed (landlords, econopoly)
-  if (game.needsBoardData && !boardDataCache[game.needsBoardData]) {
-    try {
-      const resp = await fetch(`../data/${game.needsBoardData}`)
-      if (resp.ok) boardDataCache[game.needsBoardData] = await resp.json()
-    } catch { /* continue without data */ }
-  }
-  const augmented = { ...variantDef }
-  if (game.needsBoardData) augmented.boardData = boardDataCache[game.needsBoardData] || null
-
-  // Build runtime positions (handicap, presets, fanorona, draughts)
-  if (game.hasHandicap && state.handicap > 0) {
-    augmented._position = buildGoHandicap(state.handicap, augmented.rows || 19)
-  }
-  if (augmented.goPreset) {
-    augmented._position = buildGoPreset(augmented.goPreset, augmented.rows || 19)
-  }
-  if (augmented.fanoronaSetup) {
-    augmented._position = buildFanoronaPosition(augmented.rows || 5, augmented.cols || 9)
-  }
-  if (augmented.draughtsSetup) {
-    augmented._position = parseDraughtsFen(
-      buildDraughtsFenFromSetup(augmented.rows, augmented.cols, augmented.draughtsSetup),
-      augmented.rows, augmented.cols
-    )
-  }
-  if (augmented.asaltoSetup) {
-    const pos = {}
-    if (augmented.asaltoSetup.officers) for (const idx of augmented.asaltoSetup.officers) pos[`n${idx + 1}`] = { type: 'officer' }
-    if (augmented.asaltoSetup.soldiers) for (const idx of augmented.asaltoSetup.soldiers) pos[`n${idx + 1}`] = { type: 'soldier' }
-    augmented._position = pos
-  }
-  if (augmented.fen4) {
-    augmented._position = fen4ToPosition(augmented.fen4, augmented.rows || 14, augmented.cols || 14)
-  }
-
-  const schema = reverseAdapt(augmented, game, state.game, { players: state.players, seed: state.seed })
-  const surface = resolveSurface(schema.surface)
-  const { resolved, errors } = cascadeResolve({
-    surface,
-    family: schema.family,
-    variant: schema.variant,
-  })
-
-  if (errors.length > 0) {
-    showSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="100"><rect width="400" height="100" fill="#1a1a2e" rx="8"/><text x="200" y="50" text-anchor="middle" font-size="12" fill="#f44" font-family="system-ui">${errors.join('; ')}</text></svg>`)
-    return
-  }
-
-  const target = document.getElementById('board-svg')
-  await renderFromResolved(resolved, target)
-  requestAnimationFrame(fitToView)
-}
-
 async function render() {
-  const game = GAMES[state.game]
-  if (!game) return
-  let variantDef = game.variants[state.variant]
-  if (!variantDef) return
+  if (!state.game || !state.variant) return
+  const basePath = '../../moddable-rules/games/'
+  const familyPath = state.game + '/content/rulebook.md'
+  const variantPath = state.game + '/content/variants/' + state.variant + '.md'
 
-
-  const handicapGroup = document.getElementById('handicap-group')
-  const hexStyleGroup = document.getElementById('hex-style-group')
-  const hexSeedGroup = document.getElementById('hex-seed-group')
-
-  if (game.hasHandicap) {
-    handicapGroup.style.display = ''
-    document.getElementById('handicap-select').value = state.handicap || 0
-  } else {
-    handicapGroup.style.display = 'none'
-  }
-
-  const hexPlayersGroup = document.getElementById('hex-players-group')
-
-  if (game.hexGame) {
-    hexStyleGroup.style.display = ''
-    hexSeedGroup.style.display = ''
-    document.getElementById('hex-style-select').value = state.style || 'classic'
-    document.getElementById('hex-seed-input').value = state.seed || ''
-    const gameConfig = getGameConfig(game.hexGame)
-    if (gameConfig && gameConfig.styles) {
-      const styleSelect = document.getElementById('hex-style-select')
-      const needed = gameConfig.styles.filter(s => s !== 'realistic')
-      const currentOpts = [...styleSelect.options].map(o => o.value)
-      if (currentOpts.join() !== needed.join()) {
-        styleSelect.innerHTML = ''
-        for (const s of needed) {
-          const opt = document.createElement('option')
-          opt.value = s
-          opt.textContent = s === 'classic' ? 'Classic (flat colour)' : s.charAt(0).toUpperCase() + s.slice(1)
-          styleSelect.appendChild(opt)
-        }
-        if (!needed.includes(state.style)) state.style = 'classic'
-        styleSelect.value = state.style || 'classic'
-      }
-    }
-    if (gameConfig && gameConfig.playerCounts) {
-      const variantDef = game.variants[state.variant]
-      const size = variantDef.hexSize || gameConfig.defaultSize
-      const counts = gameConfig.playerCounts(size)
-      if (counts && counts.length > 1) {
-        hexPlayersGroup.style.display = ''
-        const playersSelect = document.getElementById('hex-players-select')
-        playersSelect.innerHTML = ''
-        for (const c of counts) {
-          const opt = document.createElement('option')
-          opt.value = c
-          opt.textContent = c === 0 ? 'None (empty map)' : `${c} players`
-          playersSelect.appendChild(opt)
-        }
-        playersSelect.value = state.players || 0
-      } else {
-        hexPlayersGroup.style.display = 'none'
-      }
-    } else {
-      hexPlayersGroup.style.display = 'none'
-    }
-  } else if (game.deckGame) {
-    hexStyleGroup.style.display = 'none'
-    hexSeedGroup.style.display = ''
-    document.getElementById('hex-seed-input').value = state.seed || ''
-    const deckConfig = getDeckConfig(game.deckGame)
-    const deckVariantKey = variantDef.deckVariant
-    const dealSpec = deckConfig?.games[deckVariantKey]
-    if (dealSpec && dealSpec.minPlayers < dealSpec.maxPlayers) {
-      hexPlayersGroup.style.display = ''
-      const playersSelect = document.getElementById('hex-players-select')
-      const needed = []
-      for (let p = dealSpec.minPlayers; p <= dealSpec.maxPlayers; p++) needed.push(p)
-      const currentOpts = [...playersSelect.options].map(o => parseInt(o.value))
-      if (currentOpts.join() !== needed.join()) {
-        playersSelect.innerHTML = ''
-        for (const p of needed) {
-          const opt = document.createElement('option')
-          opt.value = p
-          opt.textContent = `${p} players`
-          playersSelect.appendChild(opt)
-        }
-      }
-      if (!state.players || state.players < dealSpec.minPlayers || state.players > dealSpec.maxPlayers) {
-        state.players = dealSpec.defaultPlayers
-      }
-      playersSelect.value = state.players
-    } else {
-      hexPlayersGroup.style.display = 'none'
-      if (dealSpec) state.players = dealSpec.defaultPlayers
-    }
-  } else {
-    hexStyleGroup.style.display = 'none'
-    hexSeedGroup.style.display = 'none'
-    hexPlayersGroup.style.display = 'none'
-  }
-
-  if (variantDef.static) {
-    loadStaticSvg(state.game, state.variant, variantDef)
-    return
-  }
-
-  if (game.rpgGame) {
-    renderRpgProvider(state.game)
-    showInfo(variantDef)
-    return
-  }
-
-  if (variantDef.noRenderer || game.noRenderer) {
-    showSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="400" height="200" fill="#1a1a2e" rx="8"/><text x="200" y="85" text-anchor="middle" font-size="16" fill="#888" font-family="system-ui">No renderer yet</text><text x="200" y="115" text-anchor="middle" font-size="12" fill="#555" font-family="system-ui">Needs table topology (issue #8)</text></svg>`)
-    showInfo(variantDef)
-    return
-  }
-
-  if (game.needsBoardData) {
-    if (renderMode === 'consolidated' && (game.buildLayout || variantDef.buildLayout)) {
-      // Fall through — boardData loaded async below, buildLayout produces layout config
-      if (!boardDataCache[game.needsBoardData]) {
-        try {
-          const resp = await fetch(`../data/${game.needsBoardData}`)
-          if (resp.ok) boardDataCache[game.needsBoardData] = await resp.json()
-        } catch { /* continue */ }
-      }
-      variantDef = { ...variantDef, boardData: boardDataCache[game.needsBoardData] || null }
-    } else if (renderMode === 'consolidated') {
-      showNotImplemented(variantDef.boardStyle || 'boardData'); return
-    } else {
-      loadBoardDataAndRender(game, variantDef)
+  try {
+    const { resolved, errors } = await loadVariant({ familyPath, variantPath, basePath })
+    if (errors && errors.length > 0) {
+      showSvg('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="80"><text x="200" y="40" text-anchor="middle" font-size="12" fill="#f44">' + errors.join('; ') + '</text></svg>')
       return
     }
-  }
-
-  if (game.deckGame) {
-    renderDeckGame(game, variantDef)
-    return
-  }
-
-  if (game.hexGame) {
-    if (renderMode === 'consolidated') {
-      renderHexGameConsolidated(game, variantDef)
-      return
-    }
-    renderHexGame(game, variantDef)
-    return
-  }
-
-  const config = { ...variantDef }
-
-  // Build position from FEN4 (4-player) — piece images loaded async
-  if (config.fen4) {
-    config.position = fen4ToPosition(config.fen4, config.rows, config.cols)
-    config.getOwner = fen4GetOwner
-    loadRecolouredPieces(config, galleryIndex).then(() => {
-      let svg
-      if (renderMode === 'consolidated' && isGridProvider(config)) {
-        svg = renderConsolidated(config)
-      } else if (renderMode === 'consolidated' && isHexProvider(config)) {
-        svg = renderConsolidatedHex(config)
-      }
-      if (!svg) svg = renderBoard(config)
-      showSvg(svg)
-      showInfo(config)
-      bindBoardHover(config)
-      requestAnimationFrame(fitToView)
-    })
-    return
-  } else if (config.fen) {
-    config.position = fenToPosition(config.fen, config.rows, config.cols)
-  }
-
-  // Build position from draughts-vocabulary FEN (setup notation spec)
-  // Mancala and backgammon handle pieces internally via their providers
-  if (config.setup && config.boardStyle !== 'mancala' && config.boardStyle !== 'backgammon') {
-    const vocab = (state.game === 'reversi') ? REVERSI_VOCABULARY
-      : (state.game === 'surakarta') ? STONE_VOCABULARY
-      : (state.game === 'tafl') ? TAFL_VOCABULARY
-      : DRAUGHTS_VOCABULARY
-    config.position = parseDraughtsFen(config.setup, config.rows, config.cols, vocab)
-  }
-
-  // Parse mancala setup into pit seed counts for the provider
-  if (config.setup && config.boardStyle === 'mancala') {
-    config.parsedSetup = parseMancalaSetup(config.setup, config.pitsPerSide, config.boardRows || 2)
-  }
-
-  // Parse backgammon setup into point counts for the provider
-  if (config.setup && config.boardStyle === 'backgammon') {
-    config.parsedSetup = parseBackgammonSetup(config.setup)
-  }
-
-  // Build draughts position (legacy — will be replaced by setup FEN)
-  if (config.draughtsSetup) {
-    config.position = parseDraughtsFen(
-      buildDraughtsFenFromSetup(config.rows, config.cols, config.draughtsSetup),
-      config.rows, config.cols
-    )
-  }
-
-  // Build Go handicap position
-  if (game.hasHandicap && state.handicap > 0) {
-    config.position = buildGoHandicap(state.handicap, config.rows)
-    config.goHandicap = state.handicap
-  }
-
-  // Build Go preset positions (sunjang, tibetan)
-  if (config.goPreset) {
-    config.position = buildGoPreset(config.goPreset, config.rows)
-  }
-
-  // Build fanorona position
-  if (config.fanoronaSetup) {
-    config.position = buildFanoronaPosition(config.rows, config.cols)
-  }
-
-  // Build Asalto position from node indices
-  if (config.asaltoSetup) {
-    const pos = {}
-    const setup = config.asaltoSetup
-    if (setup.officers) for (const idx of setup.officers) pos[`n${idx + 1}`] = { type: 'officer' }
-    if (setup.soldiers) for (const idx of setup.soldiers) pos[`n${idx + 1}`] = { type: 'soldier' }
-    config.position = pos
-    // Generate setup notation: node-per-row, O=officer S=soldier .=empty
-    const gridDef = config.asaltoGrid || { rows: [[2,3,4],[2,3,4],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[2,3,4],[2,3,4]] }
-    const rowStrs = []
-    let nodeIdx = 0
-    for (const rowCols of gridDef.rows) {
-      let row = ''
-      for (let c = 0; c < rowCols.length; c++) {
-        const p = pos[`n${nodeIdx + 1}`]
-        row += p ? (p.type === 'officer' ? 'O' : 'S') : '.'
-        nodeIdx++
-      }
-      rowStrs.push(row)
-    }
-    config.asaltoNotation = rowStrs.join('/')
-  }
-
-  // Pass node names from game definition into config for hover display
-  if (game.nodeNames) config.nodeNames = game.nodeNames
-
-  // Build piece image paths and surface map
-  const effectivePieceSet = config.pieceSetOverride || game.pieceSet
-  if (effectivePieceSet) {
-    const built = buildPieceImages(effectivePieceSet, galleryIndex, state.game, state.variant)
-    config.pieceImages = built.images
-    if (built.surface) config.pieceSurface = built.surface
-    if (Object.keys(built.surfaceMap).length) config.pieceSurfaceMap = built.surfaceMap
-  }
-
-  // Multi-board rendering (Alice Chess, Gygax Chess)
-  if (config.layers) {
-    const svg = renderMultiBoard(config, game)
-    // Build per-layer positions for hover
-    const layerPositions = (config.layers.fens || []).map(fen => fen ? fenToPosition(fen, config.rows, config.cols) : {})
-    config.layerPositions = layerPositions
-    config.position = Object.assign({}, ...layerPositions)
-    showSvg(svg)
-    showInfo(config)
-    bindBoardHover(config)
+    const target = document.getElementById('board-svg')
+    await renderFromResolved(resolved, target)
     requestAnimationFrame(fitToView)
-    return
+  } catch (e) {
+    showSvg('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="80"><text x="200" y="40" text-anchor="middle" font-size="12" fill="#f44">' + e.message + '</text></svg>')
   }
-
-  // Build layout from variant or family declaration
-  const layoutBuilder = config.buildLayout || game.buildLayout
-  if (layoutBuilder && !config.layout) {
-    config.layout = layoutBuilder(config.rows || 8, config.cols || 8, config.tileSize || 56, config.colors || {}, config)
-  }
-
-  // Stern-halma: build position from filledArms + layout nodes (consolidated mode only)
-  if (renderMode === 'consolidated' && config.filledArms && config.layout && config.layout.nodes && !config.position) {
-    const armOrder = ['N', 'NE', 'SE', 'S', 'SW', 'NW']
-    const armKeys = ['red-circle', 'blue-circle', 'green-circle', 'black-circle', 'purple-circle', 'brown-circle']
-    const pos = {}
-    for (const armName of config.filledArms) {
-      const colorIdx = armOrder.indexOf(armName)
-      const key = armKeys[colorIdx]
-      for (const node of config.layout.nodes) {
-        if (node.arm === armName) pos[node.id] = key
-      }
-    }
-    config.position = pos
-  }
-
-  let svg
-  if (renderMode === 'consolidated') {
-    if (isGridProvider(config)) {
-      svg = renderConsolidated(config)
-    } else if (isHexProvider(config)) {
-      svg = renderConsolidatedHex(config)
-    } else if (isGraphProvider(config)) {
-      svg = renderConsolidatedGraph(config)
-    } else if (isPitProvider(config)) {
-      svg = renderConsolidatedPit(config)
-    } else if (isTrackProvider(config)) {
-      svg = renderConsolidatedTrack(config)
-    }
-    if (!svg) {
-      svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="400" height="200" fill="#1a1a2e" rx="8"/><text x="200" y="80" text-anchor="middle" font-size="14" fill="#e8a030" font-family="system-ui">Final mode — not yet implemented</text><text x="200" y="110" text-anchor="middle" font-size="12" fill="#888" font-family="system-ui">Provider: ${config.boardStyle || 'unknown'}</text><text x="200" y="135" text-anchor="middle" font-size="11" fill="#555" font-family="system-ui">Switch to Original to view</text></svg>`
-    }
-  } else {
-    svg = renderBoard(config)
-  }
-  showSvg(svg)
-  showInfo(config)
-  if (config.overlays) {
-    const overlaySquares = {}
-    for (const overlay of config.overlays) {
-      if (overlay.path) {
-        for (const sq of overlay.path) overlaySquares[sq] = overlay.type || 'overlay'
-      }
-    }
-    config._overlaySquares = overlaySquares
-  }
-  bindBoardHover(config)
-  requestAnimationFrame(fitToView)
 }
 
 function renderHexGame(game, variantDef) {
@@ -1920,7 +1555,7 @@ async function loadStaticSvg(gameId, variantId, variantDef) {
     if (resp.ok) {
       const svg = await resp.text()
       showSvg(svg)
-      showInfo({ ...variantDef, renderMode: 'static', svgPath: path })
+      showInfo({ ...variantDef, svgPath: path })
     } else {
       showStaticPlaceholder(variantDef, path)
     }
@@ -2133,7 +1768,7 @@ function bindHexHover(gameConfig) {
 
 function showInfo(cfg) {
   const info = document.getElementById('derived-info')
-  const game = GAMES[state.game]
+  const variants = gamesIndex[state.game]
   const rows = []
   const mode = cfg.static ? 'static' : 'dynamic'
   rows.push(`<div class="info-row"><span class="info-label">Render</span><span class="info-value info-badge info-badge--${mode}">${mode}</span></div>`)
@@ -2188,4 +1823,4 @@ if (document.getElementById('game-select')) {
   document.addEventListener('DOMContentLoaded', init)
 }
 
-export { buildDraughtsFenFromSetup, parseDraughtsFen, buildGoHandicap, buildGoPreset, buildFanoronaPosition, fen4ToPosition }
+export { buildDraughtsFenFromSetup, parseDraughtsFen, buildGoHandicap, buildFanoronaPosition, fen4ToPosition }
