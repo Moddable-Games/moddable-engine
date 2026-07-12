@@ -958,6 +958,9 @@ export async function renderFromResolved(resolved, container) {
   if (gallery && gallery.length > 0) {
     attachPieceImages(opts, resolved, gallery)
   }
+  if (resolved._recolouredPieceImages) {
+    opts.pieceImages = { ...opts.pieceImages, ...resolved._recolouredPieceImages }
+  }
 
   let svgString
   if (opts.layers && _renderMultiBoard) {

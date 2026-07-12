@@ -818,7 +818,11 @@ async function render() {
     }
     const target = document.getElementById('board-svg')
     if (resolved.players && resolved.players.length > 2 && resolved.pieces?.set) {
-      await loadRecolouredPieces({ pieceSet4: resolved.pieces.set, players: resolved.players }, galleryIndex)
+      const recolourConfig = { pieceSet4: resolved.pieces.set }
+      await loadRecolouredPieces(recolourConfig, galleryIndex)
+      if (recolourConfig.pieceImages) {
+        resolved._recolouredPieceImages = recolourConfig.pieceImages
+      }
     }
     await renderFromResolved(resolved, target)
     target.classList.add('active')
