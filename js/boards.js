@@ -824,10 +824,10 @@ async function render() {
         resolved._recolouredPieceImages = recolourConfig.pieceImages
       }
     }
-    await renderFromResolved(resolved, target)
+    const opts = await renderFromResolved(resolved, target)
     target.classList.add('active')
     document.getElementById('board-empty').style.display = 'none'
-    bindBoardHover({ position: resolved._position || {}, setup: resolved.setup })
+    if (opts) bindBoardHover(opts)
     const topo = resolved.topology || {}
     const render = resolved.render || {}
     showInfo({
