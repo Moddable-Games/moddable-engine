@@ -269,10 +269,11 @@ const xiangqi = {
           const cCols = cluster.map(c => c[1])
           const minR = Math.min(...cRows), maxR = Math.max(...cRows)
           const minC = Math.min(...cCols), maxC = Math.max(...cCols)
-          const zx = gx + minC * tileSize
-          const zy = gy + minR * tileSize
-          const zw = (maxC - minC) * tileSize
-          const zh = (maxR - minR) * tileSize
+          const half = tileSize * 0.5
+          const zx = gx + minC * tileSize - half
+          const zy = gy + minR * tileSize - half
+          const zw = (maxC - minC + 1) * tileSize
+          const zh = (maxR - minR + 1) * tileSize
           parts.push(`<rect x="${zx}" y="${zy}" width="${zw}" height="${zh}" fill="${fill}" opacity="${opacity}"/>`)
         }
       }
