@@ -827,7 +827,14 @@ async function render() {
     const opts = await renderFromResolved(resolved, target)
     target.classList.add('active')
     document.getElementById('board-empty').style.display = 'none'
-    if (opts) bindBoardHover(opts)
+    if (opts) {
+      if (opts.layers && opts.layers.fens) {
+        opts.layerPositions = opts.layers.fens.map(fen =>
+          fenToPosition(fen, opts.rows || 8, opts.cols || 8)
+        )
+      }
+      bindBoardHover(opts)
+    }
     const topo = resolved.topology || {}
     const render = resolved.render || {}
     showInfo({
