@@ -138,8 +138,8 @@ export async function loadVariant({ familyPath, variantPath, basePath }) {
   // Run cascade
   const { resolved, errors } = cascadeResolve({
     surface,
-    family: { engine: familyFm.engine || {}, meta: familyFm.meta || {} },
-    variant: { engine: variantFm.engine || {}, meta: variantFm.meta || {} },
+    family: { engine: familyFm.engine || {}, meta: { label: familyFm.title || '' } },
+    variant: { engine: variantFm.engine || {}, meta: { label: variantFm.title || variantFm.slug || '' } },
   })
 
   if (errors.length > 0) {
