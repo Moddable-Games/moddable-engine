@@ -817,9 +817,21 @@ async function render() {
       return
     }
     const target = document.getElementById('board-svg')
+    if (resolved.players && resolved.players.length > 2 && resolved.pieces?.set) {
+      await loadRecolouredPieces({ pieceSet4: resolved.pieces.set, players: resolved.players }, galleryIndex)
+    }
     await renderFromResolved(resolved, target)
     target.classList.add('active')
     document.getElementById('board-empty').style.display = 'none'
+    const topo = resolved.topology || {}
+    const render = resolved.render || {}
+    showInfo({
+      boardStyle: render.cellColor || topo.type,
+      rows: topo.rows, cols: topo.cols, rings: topo.radius,
+      pieceSet: resolved.pieces?.set,
+      setup: resolved.setup,
+      variantDesc: resolved.meta?.label,
+    })
     requestAnimationFrame(fitToView)
   } catch (e) {
     showSvg('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="80"><text x="200" y="40" text-anchor="middle" font-size="12" fill="#f44">' + e.message + '</text></svg>')
