@@ -3220,7 +3220,10 @@ export function renderMultiBoard(config, game) {
 
   const parts = []
   parts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalW} ${totalH}" width="${totalW}" height="${totalH}">`)
-  parts.push(`<rect width="${totalW}" height="${totalH}" fill="#1a1a2e" rx="6"/>`)
+  const bgColor = config.background || 'transparent'
+  if (bgColor !== 'transparent') {
+    parts.push(`<rect width="${totalW}" height="${totalH}" fill="${bgColor}" rx="6"/>`)
+  }
 
   for (let i = 0; i < count; i++) {
     let ox, oy
@@ -3235,7 +3238,8 @@ export function renderMultiBoard(config, game) {
     // Layer label
     const labelX = ox + boardW / 2
     const labelY = oy - 4
-    parts.push(`<text x="${labelX}" y="${labelY}" text-anchor="middle" font-size="11" fill="#aaa" font-family="system-ui">${labels[i] || 'Board ' + (i + 1)}</text>`)
+    const labelColor = bgColor === 'transparent' ? '#333' : '#aaa'
+    parts.push(`<text x="${labelX}" y="${labelY}" text-anchor="middle" font-size="11" fill="${labelColor}" font-family="system-ui">${labels[i] || 'Board ' + (i + 1)}</text>`)
 
     // Build per-layer config and render through consolidated pipeline
     const boardColors = layerColors && layerColors[i]
