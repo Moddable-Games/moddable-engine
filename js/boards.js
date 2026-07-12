@@ -3204,8 +3204,9 @@ export function renderMultiBoard(config, game) {
   const ts = config.tileSize || 34
   const rows = config.rows || 8
   const cols = config.cols || 8
-  const boardW = cols * ts
-  const boardH = rows * ts
+  const innerPad = 24
+  const boardW = cols * ts + innerPad * 2
+  const boardH = rows * ts + innerPad * 2
   const pad = 24
 
   let totalW, totalH
