@@ -20,11 +20,22 @@ const ENGINE_ROOT = resolve(__dirname, '..')
 const RULES_ROOT = process.env.RULES_ROOT || resolve(ENGINE_ROOT, '../moddable-rules')
 const GAMES_DIR = resolve(RULES_ROOT, 'games')
 
+// DOM stubs for boards.js module-level references
+const stubEl = () => ({ style: {}, innerHTML: '', value: '', appendChild: () => {}, addEventListener: () => {}, querySelectorAll: () => [], querySelector: () => null, classList: { add: () => {}, remove: () => {}, toggle: () => {}, contains: () => false }, setAttribute: () => {}, getAttribute: () => null, dataset: {}, options: [], getBoundingClientRect: () => ({}) })
+globalThis.document = { getElementById: () => stubEl(), createElement: () => stubEl(), createElementNS: () => stubEl(), querySelector: () => null, querySelectorAll: () => [], addEventListener: () => {} }
+globalThis.window = { location: { search: '' }, addEventListener: () => {} }
+globalThis.fetch = () => Promise.resolve({ ok: true, json: () => Promise.resolve([]) })
+globalThis.requestAnimationFrame = () => {}
+globalThis.URLSearchParams = class { get() { return null } }
+globalThis.IntersectionObserver = class { observe() {} disconnect() {} }
+
 import { resolveSurface } from '../js/surface-resolver.js'
 import { resolve as cascadeResolve } from '../js/cascade-resolver.js'
 import { buildRenderOpts, attachPieceImages } from '../js/render-adapter.js'
 import { renderBoard } from '../js/board-diagrams.js'
 import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
+
+const { renderMultiBoard } = await import('../js/boards.js')
 
 const gallery = JSON.parse(readFileSync(resolve(ENGINE_ROOT, 'pieces/gallery-index.json'), 'utf8'))
 
@@ -98,7 +109,12 @@ for (const family of families) {
       if (!opts) { skipped++; continue }
       attachPieceImages(opts, resolved, gallery)
 
-      const rawSvg = renderBoard(opts)
+      let rawSvg
+      if (opts.layers) {
+        rawSvg = renderMultiBoard(opts)
+      } else {
+        rawSvg = renderBoard(opts)
+      }
       if (!rawSvg) { skipped++; continue }
 
       // Embed external piece images inline so SVGs are self-contained

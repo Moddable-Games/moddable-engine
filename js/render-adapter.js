@@ -428,6 +428,15 @@ function buildRenderOpts(resolved) {
   // Layers (multi-board)
   if (render.layers) {
     opts.layers = render.layers
+  } else if ((topo.layers || topo.boards) && Array.isArray(resolved.setup)) {
+    const count = topo.layers || topo.boards
+    opts.layers = {
+      count,
+      layout: count <= 2 ? 'horizontal' : 'vertical',
+      labels: topo.layer_labels || [],
+      fens: resolved.setup,
+      ...(render.layerColors && { colors: render.layerColors }),
+    }
   }
 
   // Overlays (rivers, borders, paths drawn over the board)
