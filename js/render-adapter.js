@@ -356,6 +356,7 @@ function buildRenderOpts(resolved) {
       opts.hexPosition = parseHexPositionString(resolved.setup)
     }
     if (resolved._centreMarker) opts.centreMarker = resolved._centreMarker
+    else if (render.centreMarker) opts.centreMarker = render.centreMarker
   }
 
   // Track
@@ -407,6 +408,17 @@ function buildRenderOpts(resolved) {
       opts.holeSpacing = render.cellSize || 30
       // Setup.arms → filledArms
       if (resolved.setup?.arms) opts.filledArms = resolved.setup.arms
+    }
+    if (boardStyle === 'asalto') {
+      if (topo.params?.rows) {
+        opts.asaltoGrid = {
+          rows: topo.params.rows,
+          fortressRows: topo.params.fortressRows || 2,
+          ...(topo.params.fortressCols && { fortressCols: topo.params.fortressCols }),
+          ...(topo.params.fortressExtraRow !== undefined && { fortressExtraRow: topo.params.fortressExtraRow }),
+          ...(topo.params.extraNodes && { extraNodes: topo.params.extraNodes }),
+        }
+      }
     }
     if (boardStyle === 'morris') {
       opts.boardSize = render.canvasSize || 320
