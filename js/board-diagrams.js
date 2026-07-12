@@ -269,12 +269,10 @@ const xiangqi = {
           const cCols = cluster.map(c => c[1])
           const minR = Math.min(...cRows), maxR = Math.max(...cRows)
           const minC = Math.min(...cCols), maxC = Math.max(...cCols)
-          let zx = gx + minC * tileSize
-          let zy = gy + minR * tileSize
-          let zw = Math.max((maxC - minC) * tileSize, tileSize)
-          let zh = Math.max((maxR - minR) * tileSize, tileSize)
-          if (zy + zh > gy + gridH + inset) { zy = gy + gridH + inset - zh }
-          if (zx + zw > gx + gridW + inset) { zx = gx + gridW + inset - zw }
+          const zx = gx + minC * tileSize
+          const zy = gy + minR * tileSize
+          const zw = Math.max((maxC - minC) * tileSize, tileSize)
+          const zh = Math.max((maxR - minR) * tileSize, tileSize)
           parts.push(`<rect x="${zx}" y="${zy}" width="${zw}" height="${zh}" fill="${fill}" opacity="${opacity}"/>`)
         }
       }
