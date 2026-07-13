@@ -302,6 +302,14 @@ function buildRenderOpts(resolved) {
     showLabels: render.labels !== false,
   }
 
+  // Pass ops + render params through when present (bypasses provider rendering in board-diagrams)
+  if (render.ops && !render.zones && !resolved._cellMap && topo.layout !== 'cross') {
+    opts.ops = render.ops
+    opts.inset = render.inset
+    opts.insetFactor = render.insetFactor
+    opts.idStyle = render.idStyle
+    opts.layout = topo.layout
+  }
 
   // Grid-based
   if (topo.type === 'grid') {

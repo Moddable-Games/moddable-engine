@@ -65,6 +65,7 @@ export function renderMultiBoard(config, game) {
       colors: boardColors,
       position,
       layers: undefined,
+      ops: undefined,
     }
 
     // Use consolidated grid renderer per layer

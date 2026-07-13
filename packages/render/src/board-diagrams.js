@@ -3,6 +3,9 @@
 
 import { renderSurfaceSVG } from './piece-surface.js'
 import { gridStyles } from './grid-board-styles.js'
+import { renderGridLayout } from '../../topology-grid/src/topology-grid.js'
+import { elementsToFragment } from './serialize-layout.js'
+import { produceLayout } from '../../schema/src/produce-layout.js'
 import { nyout as nyoutProvider, morris as morrisProvider, asalto as asaltoProvider, sternHalma as sternHalmaProvider } from '../../topology-graph/src/providers.js'
 import { hex as hexProvider } from '../../topology-hex/src/providers.js'
 import { mancala as mancalaProvider } from '../../topology-pit/src/providers.js'
@@ -102,7 +105,18 @@ export function renderBoard(opts) {
   }
 
   const ctx = { rows, cols, tileSize, ox, oy, colors, opts, boardW, boardH }
-  parts.push(provider.render(ctx))
+  if (opts.ops && gridStyles[boardStyle] && !opts.layers && !opts.cellMap) {
+    const engine = {
+      topology: { type: 'grid', rows, cols, layout: opts.layout || (provider.positionType === 'intersection' ? 'intersections' : 'cells') },
+      surface: { colors },
+      render: { cellSize: tileSize, labels: showLabels, inset: opts.inset, insetFactor: opts.insetFactor, idStyle: opts.idStyle || provider.labelStyle, ops: opts.ops },
+    }
+    const result = produceLayout(engine)
+    const layout = renderGridLayout(rows, cols, result.config)
+    parts.push(elementsToFragment(layout.elements))
+  } else {
+    parts.push(provider.render(ctx))
+  }
 
   if (opts.overlays && opts.overlays.length > 0) {
     parts.push(renderOverlays(opts.overlays, ctx))
