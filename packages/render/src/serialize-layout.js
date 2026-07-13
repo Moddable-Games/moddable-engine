@@ -81,15 +81,16 @@ export function elementToSvg(el) {
   const attrStr = Object.entries(attrs)
     .map(([k, v]) => `${k}="${esc(String(v))}"`)
     .join(' ')
+  const open = attrStr ? `<${tag} ${attrStr}` : `<${tag}`
 
   if (text != null) {
-    return `<${tag} ${attrStr}>${esc(String(text))}</${tag}>`
+    return `${open}>${esc(String(text))}</${tag}>`
   }
   if (children && children.length > 0) {
     const inner = children.map(c => elementToSvg(c)).join('')
-    return `<${tag} ${attrStr}>${inner}</${tag}>`
+    return `${open}>${inner}</${tag}>`
   }
-  return `<${tag} ${attrStr}/>`
+  return `${open}/>`
 }
 
 function esc(v) {
