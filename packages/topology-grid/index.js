@@ -1,1 +1,1 @@
-export { createGridTopology, schema } from './src/topology-grid.js'
+export { createGridTopology, schema, renderGridLayout, algebraicId, goId, clusterCells } from './src/topology-grid.js'

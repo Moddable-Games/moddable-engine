@@ -17,7 +17,7 @@
  * scripts/snapshot-boards.mjs --diff (284 boards).
  */
 
-import { renderGridLayout } from '../../topology-grid/src/render-layout.js'
+import { renderGridLayout } from '../../topology-grid/src/topology-grid.js'
 import { elementsToFragment } from './serialize-layout.js'
 
 // ─── Game data (→ frontmatter) ──────────────────────────────────────────────
