@@ -105,6 +105,21 @@ function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabel
   return { type: 'grid', rows, cols, config }
 }
 
+function buildCrossMapOps(rows, cols, castles) {
+  const grid = Array.from({ length: rows }, () => Array(cols).fill(null))
+  const midR = Math.floor(rows / 2)
+  const midC = Math.floor(cols / 2)
+  const armWidth = 3
+  const half = Math.floor(armWidth / 2)
+  for (let r = 0; r < midR - half; r++) for (let c = midC - half; c <= midC + half; c++) grid[r][c] = 'floor'
+  for (let r = midR + half + 1; r < rows; r++) for (let c = midC - half; c <= midC + half; c++) grid[r][c] = 'floor'
+  for (let c = 0; c < midC - half; c++) for (let r = midR - half; r <= midR + half; r++) grid[r][c] = 'floor'
+  for (let c = midC + half + 1; c < cols; c++) for (let r = midR - half; r <= midR + half; r++) grid[r][c] = 'floor'
+  for (let r = midR - half; r <= midR + half; r++) for (let c = midC - half; c <= midC + half; c++) grid[r][c] = 'home'
+  for (const [r, c] of castles) if (r >= 0 && r < rows && c >= 0 && c < cols) grid[r][c] = 'castle'
+  return grid
+}
+
 function buildOpsCellMap(zones, rows, cols, defaultFill) {
   const map = Array.from({ length: rows }, () => Array(cols).fill(defaultFill))
   if (!zones) return map
@@ -238,6 +253,41 @@ function translateOp(decl, ctx) {
       if (decl.pattern === 'uniform') {
         const fill = colors[decl.fill] || decl.fill
         return { op: 'cells', interactive: decl.interactive !== false, fill: () => fill }
+      }
+      if (decl.pattern === 'cross') {
+        const light = colors[decl.light] || decl.light
+        const dark = colors[decl.dark] || decl.dark
+        const map = buildCrossMapOps(rows, cols, decl.castles || [])
+        const typeColors = {}
+        const typeStrokes = {}
+        if (decl.typeColors) for (const [t, v] of Object.entries(decl.typeColors)) typeColors[t] = colors[v] || v
+        if (decl.typeStrokes) for (const [t, v] of Object.entries(decl.typeStrokes)) typeStrokes[t] = colors[v] || v
+        const decorationDefs = decl.decorations || {}
+        const result = { op: 'cells', interactive: true }
+        result.fill = (r, c) => {
+          const cell = map[r] && map[r][c]
+          if (!cell) return null
+          const fill = typeColors[cell] || ((r + c) % 2 === 0 ? light : dark)
+          const stroke = typeStrokes[cell] || null
+          return { fill, stroke: stroke || 'rgba(0,0,0,0.15)', strokeWidth: stroke ? 2 : 1, type: cell }
+        }
+        if (Object.keys(decorationDefs).length > 0) {
+          result.decorations = (r, c, cx, cy, ts) => {
+            const cell = map[r] && map[r][c]
+            if (!cell || !decorationDefs[cell]) return null
+            const def = decorationDefs[cell]
+            if (def === 'castle-x') {
+              const d = ts * 0.3
+              const xStroke = colors[decl.castleXColor] || decl.castleXColor || '#fff8f0'
+              return [
+                { tag: 'line', attrs: { x1: cx - d, y1: cy - d, x2: cx + d, y2: cy + d, stroke: xStroke, 'stroke-width': 1.5, 'stroke-linecap': 'round' } },
+                { tag: 'line', attrs: { x1: cx + d, y1: cy - d, x2: cx - d, y2: cy + d, stroke: xStroke, 'stroke-width': 1.5, 'stroke-linecap': 'round' } },
+              ]
+            }
+            return null
+          }
+        }
+        return result
       }
       if (decl.pattern === 'cellMap') {
         const light = colors[decl.light] || decl.light

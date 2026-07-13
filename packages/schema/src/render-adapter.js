@@ -303,8 +303,8 @@ function buildRenderOpts(resolved) {
   }
 
   // Pass ops + render params through when present (bypasses provider rendering in board-diagrams)
-  const opsHandleZones = render.ops && render.ops.some(o => o.pattern === 'cellMap')
-  if (render.ops && !resolved._cellMap && topo.layout !== 'cross' && (!render.zones || opsHandleZones)) {
+  const opsHandleZones = render.ops && render.ops.some(o => o.pattern === 'cellMap' || o.pattern === 'cross')
+  if (render.ops && !resolved._cellMap && (topo.layout !== 'cross' || opsHandleZones) && (!render.zones || opsHandleZones)) {
     opts.ops = render.ops
     opts.inset = render.inset
     opts.insetFactor = render.insetFactor
