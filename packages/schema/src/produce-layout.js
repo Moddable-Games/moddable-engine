@@ -105,6 +105,25 @@ function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabel
   return { type: 'grid', rows, cols, config }
 }
 
+function buildOpsCellMap(zones, rows, cols, defaultFill) {
+  const map = Array.from({ length: rows }, () => Array(cols).fill(defaultFill))
+  if (!zones) return map
+  if (zones.voids) {
+    for (const [r, c] of zones.voids) {
+      if (r >= 0 && r < rows && c >= 0 && c < cols) map[r][c] = null
+    }
+  }
+  if (zones.cells) {
+    for (const def of zones.cells) {
+      const positions = Array.isArray(def.at[0]) ? def.at : [def.at]
+      for (const [r, c] of positions) {
+        if (r >= 0 && r < rows && c >= 0 && c < cols) map[r][c] = def.type
+      }
+    }
+  }
+  return map
+}
+
 const AUTO_STAR_POINTS = {
   9:  [[2,2],[2,6],[4,4],[6,2],[6,6]],
   13: [[3,3],[3,9],[6,6],[9,3],[9,9]],
@@ -219,6 +238,64 @@ function translateOp(decl, ctx) {
       if (decl.pattern === 'uniform') {
         const fill = colors[decl.fill] || decl.fill
         return { op: 'cells', interactive: decl.interactive !== false, fill: () => fill }
+      }
+      if (decl.pattern === 'cellMap') {
+        const light = colors[decl.light] || decl.light
+        const dark = colors[decl.dark] || decl.dark
+        const voidFill = colors[decl.voidFill] || decl.voidFill || 'transparent'
+        const map = buildOpsCellMap(decl.zones, rows, cols, decl.defaultFill || 'floor')
+        const typeColors = {}
+        const typeStrokes = {}
+        if (decl.typeColors) {
+          for (const [type, val] of Object.entries(decl.typeColors)) {
+            typeColors[type] = colors[val] || val
+          }
+        }
+        if (decl.typeStrokes) {
+          for (const [type, val] of Object.entries(decl.typeStrokes)) {
+            typeStrokes[type] = colors[val] || val
+          }
+        }
+        const decorationDefs = decl.decorations || {}
+        const result = { op: 'cells', interactive: true }
+        result.fill = (r, c) => {
+          const cell = map[r] && map[r][c]
+          if (!cell) return null
+          const fill = typeColors[cell] || ((r + c) % 2 === 0 ? light : dark)
+          const stroke = typeStrokes[cell] || null
+          return { fill, stroke: stroke || 'rgba(0,0,0,0.15)', strokeWidth: stroke ? 2 : 1, type: cell }
+        }
+        if (Object.keys(decorationDefs).length > 0) {
+          result.decorations = (r, c, cx, cy, ts) => {
+            const cell = map[r] && map[r][c]
+            if (!cell || !decorationDefs[cell]) return null
+            const def = decorationDefs[cell]
+            if (def === 'castle-x') {
+              const d = ts * 0.3
+              const xStroke = colors[decl.castleXColor] || decl.castleXColor || '#fff8f0'
+              return [
+                { tag: 'line', attrs: { x1: cx - d, y1: cy - d, x2: cx + d, y2: cy + d, stroke: xStroke, 'stroke-width': 1.5, 'stroke-linecap': 'round' } },
+                { tag: 'line', attrs: { x1: cx + d, y1: cy - d, x2: cx - d, y2: cy + d, stroke: xStroke, 'stroke-width': 1.5, 'stroke-linecap': 'round' } },
+              ]
+            }
+            if (def === 'rosette') {
+              const s = ts * 0.25
+              return [
+                { tag: 'circle', attrs: { cx, cy, r: s * 0.42, fill: '#8b3a3a' } },
+                { tag: 'circle', attrs: { cx, cy: cy - s, r: s * 0.25, fill: '#8b3a3a' } },
+                { tag: 'circle', attrs: { cx, cy: cy + s, r: s * 0.25, fill: '#8b3a3a' } },
+                { tag: 'circle', attrs: { cx: cx - s, cy, r: s * 0.25, fill: '#8b3a3a' } },
+                { tag: 'circle', attrs: { cx: cx + s, cy, r: s * 0.25, fill: '#8b3a3a' } },
+                { tag: 'circle', attrs: { cx: cx - s * 0.7, cy: cy - s * 0.7, r: s * 0.17, fill: '#a04848' } },
+                { tag: 'circle', attrs: { cx: cx + s * 0.7, cy: cy - s * 0.7, r: s * 0.17, fill: '#a04848' } },
+                { tag: 'circle', attrs: { cx: cx - s * 0.7, cy: cy + s * 0.7, r: s * 0.17, fill: '#a04848' } },
+                { tag: 'circle', attrs: { cx: cx + s * 0.7, cy: cy + s * 0.7, r: s * 0.17, fill: '#a04848' } },
+              ]
+            }
+            return null
+          }
+        }
+        return result
       }
       return decl
     }
