@@ -85,6 +85,16 @@ function resolvePieceEntry(pieceId, entry, setId, baseSetId) {
 
 // --- Board style mapping ---
 
+const GRID_STYLES = new Set(['checkered', 'mono-grid', 'go', 'xiangqi', 'shogi', 'surakarta', 'alquerque'])
+
+function isStyleCompatible(style, topoType) {
+  if (GRID_STYLES.has(style)) return topoType === 'grid'
+  if (style === 'hex') return topoType === 'hex'
+  if (style === 'backgammon' || style === 'landlords') return topoType === 'track'
+  if (style === 'mancala') return topoType === 'pit'
+  return topoType === 'graph'
+}
+
 function resolveBoardStyle(resolved) {
   const topo = resolved.topology || {}
   const render = resolved.render || {}
@@ -93,15 +103,18 @@ function resolveBoardStyle(resolved) {
 
   switch (topo.type) {
     case 'grid': {
+      if (render.boardStyle && isStyleCompatible(render.boardStyle, 'grid') && (
+        (layout === 'intersections' && render.boardStyle !== 'checkered' && render.boardStyle !== 'mono-grid') ||
+        (layout !== 'intersections' && (render.boardStyle === 'checkered' || render.boardStyle === 'mono-grid'))
+      )) return render.boardStyle
       if (layout === 'intersections') {
         if (cellColor === 'xiangqi' || render.decorations?.some(d => d.type === 'gap')) return 'xiangqi'
-        if (render.decorations?.some(d => d.type === 'markers' && d.style === 'dot' && d.auto === 'shogi-hoshi')) return 'shogi'
+        if (render.decorations?.some(d => d.type === 'markers' && (d.auto === 'shogi-hoshi' || (d.at && render.boardStyle === 'shogi')))) return 'shogi'
         if (render.decorations?.some(d => d.type === 'arcs')) return 'surakarta'
         if (render.decorations?.some(d => d.type === 'diagonals' && d.pattern === 'alternating')) return 'alquerque'
         return 'go'
       }
       if (render.decorations?.some(d => d.type === 'diagonals' && d.pattern === 'alternating')) return 'alquerque'
-      // cellMap games use 'checkered' provider (it handles both checkered and cellMap modes)
       if (resolved._cellMap) return 'checkered'
       if (cellColor === 'uniform' || cellColor === 'none') return 'mono-grid'
       return 'checkered'
@@ -264,8 +277,9 @@ function buildRenderOpts(resolved) {
   const render = resolved.render || {}
   const surface = resolved.surface || {}
 
-  // Use passthrough boardStyle from reverse adapter if available (round-trip proof)
-  const boardStyle = resolved._boardStyle || resolveBoardStyle(resolved)
+  // Use passthrough from reverse adapter, infer from topology/decorations, or explicit fallback
+  const inferredStyle = resolveBoardStyle(resolved)
+  const boardStyle = resolved._boardStyle || inferredStyle
   if (!boardStyle) return null
 
   // If raw colours passed through from reverse adapter, use them directly.
