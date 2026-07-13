@@ -12,7 +12,17 @@
  *
  * Moved verbatim from js/board-diagrams.js — these are the canonical renderers
  * that produce the published rulebook SVGs.
+ *
+ * Shared drawing primitives (identical loops formerly copy-pasted between
+ * providers) live in draw.js — extraction contract is byte-identical output.
  */
+
+import {
+  algebraicId, goId,
+  drawBackground,
+  drawIntersectionGridLines, drawIntersectionGridLinesAttr, drawTileGridLines,
+  drawHitTargetCircles, drawHitTargetRects,
+} from './draw.js'
 
 export const checkered = {
   name: 'checkered',
@@ -28,11 +38,11 @@ export const checkered = {
     const cellMap = opts.cellMap || null
     const parts = []
     if (cellMap) {
-      parts.push(`<rect x="${ox}" y="${oy}" width="${cols * tileSize}" height="${rows * tileSize}" fill="${colors.voidFill}"/>`)
+      drawBackground(parts, { x: ox, y: oy, width: cols * tileSize, height: rows * tileSize, fill: colors.voidFill })
     }
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
-        const sq = String.fromCharCode(97 + c) + (rows - r)
+        const sq = algebraicId(r, c, rows)
         if (cellMap) {
           const cell = cellMap[r] && cellMap[r][c]
           if (!cell) continue
@@ -87,21 +97,10 @@ export const monoGrid = {
   render(ctx) {
     const { rows, cols, tileSize, ox, oy, colors } = ctx
     const bw = cols * tileSize, bh = rows * tileSize
-    const parts = [`<rect x="${ox}" y="${oy}" width="${bw}" height="${bh}" fill="${colors.monoSquare}"/>`]
-    for (let c = 0; c <= cols; c++) {
-      const x = ox + c * tileSize
-      parts.push(`<line x1="${x}" y1="${oy}" x2="${x}" y2="${oy + bh}" stroke="${colors.gridLine}" stroke-width="1.5"/>`)
-    }
-    for (let r = 0; r <= rows; r++) {
-      const y = oy + r * tileSize
-      parts.push(`<line x1="${ox}" y1="${y}" x2="${ox + bw}" y2="${y}" stroke="${colors.gridLine}" stroke-width="1.5"/>`)
-    }
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const sq = String.fromCharCode(97 + c) + (rows - r)
-        parts.push(`<rect x="${ox + c * tileSize}" y="${oy + r * tileSize}" width="${tileSize}" height="${tileSize}" fill="transparent" data-sq="${sq}" class="board-cell"/>`)
-      }
-    }
+    const parts = []
+    drawBackground(parts, { x: ox, y: oy, width: bw, height: bh, fill: colors.monoSquare })
+    drawTileGridLines(parts, { ox, oy, rows, cols, tileSize, color: colors.gridLine, width: 1.5 })
+    drawHitTargetRects(parts, { ox, oy, rows, cols, tileSize })
     return parts.join('')
   },
 }
@@ -135,18 +134,9 @@ export const go = {
     const boardW = gridW + inset * 2, boardH = gridH + inset * 2
     const gx = ox + inset, gy = oy + inset
     const parts = []
-    parts.push(`<rect x="${ox}" y="${oy}" width="${boardW}" height="${boardH}" fill="${colors.woodLight}"/>`)
-    parts.push(`<rect x="${gx}" y="${gy}" width="${gridW}" height="${gridH}" fill="${colors.woodDark}" rx="2"/>`)
-    parts.push(`<g stroke="${colors.gridLine}" stroke-width="0.8">`)
-    for (let r = 0; r < rows; r++) {
-      const y = gy + r * tileSize
-      parts.push(`<line x1="${gx}" y1="${y}" x2="${gx + gridW}" y2="${y}"/>`)
-    }
-    for (let c = 0; c < cols; c++) {
-      const x = gx + c * tileSize
-      parts.push(`<line x1="${x}" y1="${gy}" x2="${x}" y2="${gy + gridH}"/>`)
-    }
-    parts.push('</g>')
+    drawBackground(parts, { x: ox, y: oy, width: boardW, height: boardH, fill: colors.woodLight })
+    drawBackground(parts, { x: gx, y: gy, width: gridW, height: gridH, fill: colors.woodDark, rx: 2 })
+    drawIntersectionGridLines(parts, { gx, gy, gridW, gridH, rows, cols, tileSize, color: colors.gridLine, width: 0.8 })
     const stars = STAR_POINTS[rows] || []
     if (stars.length > 0) {
       parts.push(`<g fill="${colors.starPoint}">`)
@@ -155,15 +145,7 @@ export const go = {
       }
       parts.push('</g>')
     }
-    const GO_LETTERS = 'abcdefghjklmnopqrst'
-    parts.push('<g fill="transparent">')
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const sq = `${GO_LETTERS[c]}${rows - r}`
-        parts.push(`<circle cx="${gx + c * tileSize}" cy="${gy + r * tileSize}" r="${tileSize * 0.45}" class="board-cell" data-sq="${sq}"/>`)
-      }
-    }
-    parts.push('</g>')
+    drawHitTargetCircles(parts, { gx, gy, rows, cols, tileSize, radius: tileSize * 0.45, id: goId })
     return parts.join('')
   },
 }
@@ -198,16 +180,7 @@ export const surakarta = {
     parts.push(`<rect x="${ox + 6}" y="${oy + 6}" width="${boardW - 12}" height="${boardH - 12}" rx="5" fill="${colors.board}"/>`)
     parts.push(`<rect x="${ox + 10}" y="${oy + 10}" width="${boardW - 20}" height="${boardH - 20}" rx="3" fill="${colors.boardInner}"/>`)
 
-    parts.push(`<g stroke="${colors.gridLine}" stroke-width="1.5">`)
-    for (let r = 0; r < rows; r++) {
-      const y = gy + r * tileSize
-      parts.push(`<line x1="${gx}" y1="${y}" x2="${gx + gridW}" y2="${y}"/>`)
-    }
-    for (let c = 0; c < cols; c++) {
-      const x = gx + c * tileSize
-      parts.push(`<line x1="${x}" y1="${gy}" x2="${x}" y2="${gy + gridH}"/>`)
-    }
-    parts.push('</g>')
+    drawIntersectionGridLines(parts, { gx, gy, gridW, gridH, rows, cols, tileSize, color: colors.gridLine, width: 1.5 })
 
     const innerR = tileSize
     const outerR = tileSize * 2
@@ -232,15 +205,7 @@ export const surakarta = {
     }
     parts.push('</g>')
 
-    const GO_LETTERS = 'abcdefghjklmnopqrst'
-    parts.push('<g fill="transparent">')
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const sq = `${GO_LETTERS[c]}${rows - r}`
-        parts.push(`<circle cx="${gx + c * tileSize}" cy="${gy + r * tileSize}" r="${tileSize * 0.45}" class="board-cell" data-sq="${sq}"/>`)
-      }
-    }
-    parts.push('</g>')
+    drawHitTargetCircles(parts, { gx, gy, rows, cols, tileSize, radius: tileSize * 0.45, id: goId })
     return parts.join('')
   },
 }
@@ -290,7 +255,7 @@ export const xiangqi = {
     const gridW = (cols - 1) * tileSize, gridH = (rows - 1) * tileSize
     const gx = ox + inset, gy = oy + inset
     const parts = []
-    parts.push(`<rect x="${ox}" y="${oy}" width="${gridW + inset * 2}" height="${gridH + inset * 2}" fill="${colors.board}"/>`)
+    drawBackground(parts, { x: ox, y: oy, width: gridW + inset * 2, height: gridH + inset * 2, fill: colors.board })
     if (opts.zones) {
       for (const [, zone] of Object.entries(opts.zones)) {
         if (!zone || !zone.cells || !zone.cells.length) continue
@@ -311,8 +276,8 @@ export const xiangqi = {
       }
     }
     parts.push(`<rect x="${ox}" y="${oy}" width="${gridW + inset * 2}" height="${gridH + inset * 2}" fill="none" stroke="${colors.gridLine}" stroke-width="2"/>`)
-    parts.push(`<g stroke="${colors.gridLine}" stroke-width="1">`)
     if (river) {
+      parts.push(`<g stroke="${colors.gridLine}" stroke-width="1">`)
       const riverTop = opts.riverRows ? opts.riverRows[0] : Math.floor(rows / 2) - 1
       const riverBot = opts.riverRows ? opts.riverRows[1] : Math.floor(rows / 2)
       for (let r = 0; r < rows; r++) {
@@ -332,11 +297,10 @@ export const xiangqi = {
           parts.push(`<line x1="${x}" y1="${ry2}" x2="${x}" y2="${gy + gridH}"/>`)
         }
       }
+      parts.push('</g>')
     } else {
-      for (let r = 0; r < rows; r++) parts.push(`<line x1="${gx}" y1="${gy + r * tileSize}" x2="${gx + gridW}" y2="${gy + r * tileSize}"/>`)
-      for (let c = 0; c < cols; c++) parts.push(`<line x1="${gx + c * tileSize}" y1="${gy}" x2="${gx + c * tileSize}" y2="${gy + gridH}"/>`)
+      drawIntersectionGridLines(parts, { gx, gy, gridW, gridH, rows, cols, tileSize, color: colors.gridLine, width: 1 })
     }
-    parts.push('</g>')
     if (opts.palace !== false) {
       const mid = Math.floor(cols / 2)
       const palaceLeft = opts.palaceCols ? opts.palaceCols[0] : mid - 1
@@ -361,15 +325,7 @@ export const xiangqi = {
       parts.push(`<text x="${gx + gridW * 0.25}" y="${rmid + riverFontSize * 0.35}" text-anchor="middle" font-size="${riverFontSize}" font-family="serif" pointer-events="none" fill="${colors.riverText}">楚 河</text>`)
       parts.push(`<text x="${gx + gridW * 0.75}" y="${rmid + riverFontSize * 0.35}" text-anchor="middle" font-size="${riverFontSize}" font-family="serif" pointer-events="none" fill="${colors.riverText}">漢 界</text>`)
     }
-    parts.push('<g fill="transparent">')
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const sq = `${String.fromCharCode(97 + c)}${rows - r}`
-        const ix = gx + c * tileSize, iy = gy + r * tileSize
-        parts.push(`<circle cx="${ix}" cy="${iy}" r="${tileSize * 0.4}" class="board-cell" data-sq="${sq}"/>`)
-      }
-    }
-    parts.push('</g>')
+    drawHitTargetCircles(parts, { gx, gy, rows, cols, tileSize, radius: tileSize * 0.4, id: algebraicId })
     return parts.join('')
   },
 }
@@ -396,29 +352,19 @@ export const shogi = {
     const inset = 20, gridW = (cols - 1) * tileSize, gridH = (rows - 1) * tileSize
     const gx = ox + inset, gy = oy + inset
     const parts = []
-    parts.push(`<rect x="${ox}" y="${oy}" width="${gridW + inset * 2}" height="${gridH + inset * 2}" fill="${colors.board}"/>`)
+    drawBackground(parts, { x: ox, y: oy, width: gridW + inset * 2, height: gridH + inset * 2, fill: colors.board })
     parts.push(`<rect x="${ox}" y="${oy}" width="${gridW + inset * 2}" height="${gridH + inset * 2}" fill="none" stroke="${colors.boardBorder}" stroke-width="2"/>`)
     if (rows === 9) {
       parts.push(`<rect x="${gx}" y="${gy}" width="${gridW}" height="${2 * tileSize}" fill="${colors.promotionZone}"/>`)
       parts.push(`<rect x="${gx}" y="${gy + 6 * tileSize}" width="${gridW}" height="${2 * tileSize}" fill="${colors.promotionZone}"/>`)
     }
-    parts.push(`<g stroke="${colors.gridLine}" stroke-width="0.8">`)
-    for (let r = 0; r < rows; r++) parts.push(`<line x1="${gx}" y1="${gy + r * tileSize}" x2="${gx + gridW}" y2="${gy + r * tileSize}"/>`)
-    for (let c = 0; c < cols; c++) parts.push(`<line x1="${gx + c * tileSize}" y1="${gy}" x2="${gx + c * tileSize}" y2="${gy + gridH}"/>`)
-    parts.push('</g>')
+    drawIntersectionGridLines(parts, { gx, gy, gridW, gridH, rows, cols, tileSize, color: colors.gridLine, width: 0.8 })
     if (rows === 9 && cols === 9) {
       parts.push(`<g fill="${colors.hoshi}">`)
       for (const [r, c] of HOSHI_9) parts.push(`<circle cx="${gx + c * tileSize}" cy="${gy + r * tileSize}" r="3"/>`)
       parts.push('</g>')
     }
-    parts.push('<g fill="transparent">')
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const sq = `${String.fromCharCode(97 + c)}${rows - r}`
-        parts.push(`<circle cx="${gx + c * tileSize}" cy="${gy + r * tileSize}" r="${tileSize * 0.4}" class="board-cell" data-sq="${sq}"/>`)
-      }
-    }
-    parts.push('</g>')
+    drawHitTargetCircles(parts, { gx, gy, rows, cols, tileSize, radius: tileSize * 0.4, id: algebraicId })
     return parts.join('')
   },
 }
@@ -443,9 +389,8 @@ export const alquerque = {
     const gridW = (cols - 1) * tileSize, gridH = (rows - 1) * tileSize
     const gx = ox + inset, gy = oy + inset
     const parts = []
-    parts.push(`<rect x="${ox}" y="${oy}" width="${gridW + inset * 2}" height="${gridH + inset * 2}" fill="${colors.monoSquare}" rx="4"/>`)
-    for (let r = 0; r < rows; r++) parts.push(`<line x1="${gx}" y1="${gy + r * tileSize}" x2="${gx + gridW}" y2="${gy + r * tileSize}" stroke="${colors.gridLine}" stroke-width="2"/>`)
-    for (let c = 0; c < cols; c++) parts.push(`<line x1="${gx + c * tileSize}" y1="${gy}" x2="${gx + c * tileSize}" y2="${gy + gridH}" stroke="${colors.gridLine}" stroke-width="2"/>`)
+    drawBackground(parts, { x: ox, y: oy, width: gridW + inset * 2, height: gridH + inset * 2, fill: colors.monoSquare, rx: 4 })
+    drawIntersectionGridLinesAttr(parts, { gx, gy, gridW, gridH, rows, cols, tileSize, color: colors.gridLine, width: 2 })
     for (let r = 0; r < rows - 1; r++) {
       for (let c = 0; c < cols - 1; c++) {
         if ((r + c) % 2 !== 0) continue
@@ -457,7 +402,7 @@ export const alquerque = {
     }
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
-        const sq = String.fromCharCode(97 + c) + (rows - r)
+        const sq = algebraicId(r, c, rows)
         parts.push(`<circle cx="${gx + c * tileSize}" cy="${gy + r * tileSize}" r="3" fill="${colors.gridLine}"/>`)
         parts.push(`<circle cx="${gx + c * tileSize}" cy="${gy + r * tileSize}" r="${tileSize * 0.4}" fill="transparent" class="board-cell" data-sq="${sq}"/>`)
       }
