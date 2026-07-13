@@ -36,8 +36,8 @@ function produceGridLayout(topo, colors, render) {
   const positionType = isIntersection ? 'intersection' : 'square'
   const showLabels = render.labels !== false
 
-  if (render.boardStyle) {
-    return produceGridOps(rows, cols, cellSize, positionType, showLabels, colors, render, topo)
+  if (render.ops) {
+    return produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabels, colors, render)
   }
 
   const inset = isIntersection ? Math.round(cellSize * 0.5) : 0
@@ -71,10 +71,9 @@ function produceGridLayout(topo, colors, render) {
   return { type: 'grid', rows, cols, config: layout }
 }
 
-function produceGridOps(rows, cols, cellSize, positionType, showLabels, colors, render, topo) {
-  const style = render.boardStyle
+function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabels, colors, render) {
   const isIntersection = positionType === 'intersection'
-  const inset = GRID_STYLE_INSETS[style] ? GRID_STYLE_INSETS[style](cellSize) : (isIntersection ? Math.round(cellSize * 0.5) : 0)
+  const inset = render.inset != null ? render.inset : (isIntersection ? Math.round(cellSize * 0.5) : 0)
   const gridW = isIntersection ? (cols - 1) * cellSize : cols * cellSize
   const gridH = isIntersection ? (rows - 1) * cellSize : rows * cellSize
   const pad = showLabels ? 24 : 0
@@ -82,29 +81,99 @@ function produceGridOps(rows, cols, cellSize, positionType, showLabels, colors, 
   const gx = ox + (isIntersection ? inset : 0)
   const gy = oy + (isIntersection ? inset : 0)
 
-  const ops = GRID_STYLE_OPS[style]
-    ? GRID_STYLE_OPS[style]({ rows, cols, cellSize, colors, render, topo, inset, gridW, gridH, ox, oy, gx, gy })
-    : []
+  const boardW = gridW + (isIntersection ? inset * 2 : 0)
+  const boardH = gridH + (isIntersection ? inset * 2 : 0)
+  const idStyle = render.idStyle || 'algebraic'
+
+  const ops = render.ops.map(decl => translateOp(decl, { rows, cols, cellSize, colors, inset, gridW, gridH, boardW, boardH, ox, oy, gx, gy, idStyle }))
 
   const config = {
     tileSize: cellSize,
     positionType,
     inset,
     origin: { x: ox, y: oy },
-    size: { width: gridW + (isIntersection ? inset * 2 : 0) + pad * 2, height: gridH + (isIntersection ? inset * 2 : 0) + pad * 2 },
+    size: { width: boardW + pad * 2, height: boardH + pad * 2 },
     ops,
     labels: showLabels ? {
       show: true,
       color: colors.labelText || colors.stroke || '#555',
       fontSize: 10,
       fontFamily: 'monospace',
-      alphabet: style === 'go' ? null : null,
     } : null,
   }
 
   return { type: 'grid', rows, cols, config }
 }
 
+const AUTO_STAR_POINTS = {
+  9:  [[2,2],[2,6],[4,4],[6,2],[6,6]],
+  13: [[3,3],[3,9],[6,6],[9,3],[9,9]],
+  19: [[3,3],[3,9],[3,15],[9,3],[9,9],[9,15],[15,3],[15,9],[15,15]],
+}
+
+function translateOp(decl, ctx) {
+  const { rows, cols, cellSize, colors, inset, gridW, gridH, boardW, boardH, ox, oy, gx, gy, idStyle } = ctx
+
+  switch (decl.op) {
+    case 'rect': {
+      const fill = colors[decl.fill] || decl.fill
+      const attrs = {}
+      if (decl.scope === 'board') {
+        Object.assign(attrs, { x: ox, y: oy, width: boardW, height: boardH })
+      } else if (decl.scope === 'grid') {
+        Object.assign(attrs, { x: gx, y: gy, width: gridW, height: gridH })
+      } else {
+        Object.assign(attrs, { x: decl.x ?? ox, y: decl.y ?? oy, width: decl.width ?? boardW, height: decl.height ?? boardH })
+      }
+      attrs.fill = fill
+      if (decl.rx != null) attrs.rx = decl.rx
+      if (decl.stroke) attrs.stroke = colors[decl.stroke] || decl.stroke
+      if (decl['stroke-width'] != null) attrs['stroke-width'] = decl['stroke-width']
+      return { op: 'rect', attrs }
+    }
+    case 'grid-lines':
+      return {
+        op: 'grid-lines',
+        grouped: decl.grouped || false,
+        order: decl.order || 'hv',
+        color: colors[decl.color] || decl.color,
+        width: decl.width,
+        ...(decl.skipRows ? { skipRows: decl.skipRows } : {}),
+        ...(decl.appendRows ? { appendRows: decl.appendRows } : {}),
+        ...(decl.split ? { split: decl.split } : {}),
+      }
+    case 'markers': {
+      let items = decl.at
+      if (items === 'auto-star-points') items = AUTO_STAR_POINTS[rows] || []
+      if (decl.allCells) {
+        return { op: 'markers', grouped: decl.grouped || false, groupFill: colors[decl.fill] || decl.fill, allCells: true, radius: decl.radius }
+      }
+      return { op: 'markers', grouped: decl.grouped || false, groupFill: colors[decl.fill] || decl.fill, items: items || [], radius: decl.radius }
+    }
+    case 'hit-targets': {
+      const result = { op: 'hit-targets', grouped: decl.grouped || false, radius: decl.radiusFactor ? cellSize * decl.radiusFactor : (decl.radius || cellSize * 0.4), idStyle }
+      if (decl.shape) result.shape = decl.shape
+      return result
+    }
+    case 'diagonals':
+      return {
+        op: 'diagonals',
+        predicate: decl.pattern === 'alternating' ? (r, c) => (r + c) % 2 === 0 : decl.predicate,
+        color: colors[decl.color] || decl.color,
+        width: decl.width,
+      }
+    case 'texts':
+      return { op: 'texts', items: (decl.items || []).map(t => ({ attrs: { ...t.attrs, fill: colors[t.attrs?.fill] || t.attrs?.fill }, text: t.text })) }
+    case 'group':
+      return { op: 'group', attrs: decl.attrs, children: decl.children }
+    case 'cells':
+      return decl
+    default:
+      return decl
+  }
+}
+
+// Legacy dispatch kept below — remove once all families use render.ops
 const GRID_STYLE_INSETS = {
   checkered: () => 0,
   'mono-grid': () => 0,
