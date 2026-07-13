@@ -175,10 +175,41 @@ function translateOp(decl, ctx) {
         color: colors[decl.color] || decl.color,
         width: decl.width,
       }
-    case 'texts':
+    case 'texts': {
+      if (decl.river) {
+        const rt = decl.river.rows[0], rb = decl.river.rows[1]
+        const rty1 = gy + rt * cellSize, rty2 = gy + rb * cellSize
+        const rmid = (rty1 + rty2) / 2
+        const fs = Math.min(cellSize * 0.45, 14)
+        const fill = colors[decl.river.fill] || decl.river.fill || colors.stroke
+        return { op: 'texts', items: decl.river.texts.map((text, i) => ({
+          attrs: { x: gx + gridW * (i === 0 ? 0.25 : 0.75), y: rmid + fs * 0.35, 'text-anchor': 'middle', 'font-size': fs, 'font-family': 'serif', 'pointer-events': 'none', fill },
+          text,
+        })) }
+      }
       return { op: 'texts', items: (decl.items || []).map(t => ({ attrs: { ...t.attrs, fill: colors[t.attrs?.fill] || t.attrs?.fill }, text: t.text })) }
-    case 'group':
-      return { op: 'group', attrs: decl.attrs, children: decl.children }
+    }
+    case 'group': {
+      let children = decl.children
+      if (decl.palace) {
+        const pl = gx + decl.palace.cols[0] * cellSize
+        const pr = gx + decl.palace.cols[1] * cellSize
+        const palaceRows = decl.palace.rows || 2
+        children = [
+          { tag: 'line', attrs: { x1: pl, y1: gy, x2: pr, y2: gy + palaceRows * cellSize } },
+          { tag: 'line', attrs: { x1: pr, y1: gy, x2: pl, y2: gy + palaceRows * cellSize } },
+          { tag: 'line', attrs: { x1: pl, y1: gy + (rows - 1 - palaceRows) * cellSize, x2: pr, y2: gy + (rows - 1) * cellSize } },
+          { tag: 'line', attrs: { x1: pr, y1: gy + (rows - 1 - palaceRows) * cellSize, x2: pl, y2: gy + (rows - 1) * cellSize } },
+        ]
+      }
+      const attrs = { ...(decl.attrs || {}) }
+      if (decl.stroke) attrs.stroke = colors[decl.stroke] || decl.stroke
+      if (decl['stroke-width'] != null) attrs['stroke-width'] = decl['stroke-width']
+      if (decl['stroke-dasharray']) attrs['stroke-dasharray'] = decl['stroke-dasharray']
+      if (decl.fill) attrs.fill = colors[decl.fill] || decl.fill
+      if (decl['stroke-linecap']) attrs['stroke-linecap'] = decl['stroke-linecap']
+      return { op: 'group', attrs, children }
+    }
     case 'cells': {
       if (decl.pattern === 'checkered') {
         const light = colors[decl.light] || decl.light
