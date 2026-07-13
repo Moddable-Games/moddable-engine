@@ -303,7 +303,8 @@ function buildRenderOpts(resolved) {
   }
 
   // Pass ops + render params through when present (bypasses provider rendering in board-diagrams)
-  if (render.ops && !render.zones && !resolved._cellMap && topo.layout !== 'cross') {
+  const opsHandleZones = render.ops && render.ops.some(o => o.pattern === 'cellMap')
+  if (render.ops && !resolved._cellMap && topo.layout !== 'cross' && (!render.zones || opsHandleZones)) {
     opts.ops = render.ops
     opts.inset = render.inset
     opts.insetFactor = render.insetFactor
@@ -317,8 +318,10 @@ function buildRenderOpts(resolved) {
     opts.cols = topo.cols || 8
     opts.tileSize = render.cellSize || 40
 
-    // Zone map for checkered provider
-    if (resolved._cellMap) {
+    // Zone map for checkered provider (skip when ops handle it)
+    if (opts.ops && opsHandleZones) {
+      // ops handle zones internally
+    } else if (resolved._cellMap) {
       opts.cellMap = resolved._cellMap
     } else if (render.zones) {
       opts.cellMap = buildCellMap(render.zones, opts.rows, opts.cols)
