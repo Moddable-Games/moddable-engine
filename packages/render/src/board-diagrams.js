@@ -2,21 +2,22 @@
 // Produces identical output to the published rulebook SVGs.
 
 import { renderSurfaceSVG } from './piece-surface.js'
-import { checkered as checkeredProvider, monoGrid as monoGridProvider, go as goProvider, surakarta as surakartaProvider, xiangqi as xiangqiProvider, shogi as shogiProvider, alquerque as alquerqueProvider } from '../../topology-grid/src/providers.js'
+import { gridStyles } from './grid-board-styles.js'
 import { nyout as nyoutProvider, morris as morrisProvider, asalto as asaltoProvider, sternHalma as sternHalmaProvider } from '../../topology-graph/src/providers.js'
 import { hex as hexProvider } from '../../topology-hex/src/providers.js'
 import { mancala as mancalaProvider } from '../../topology-pit/src/providers.js'
 import { backgammon as backgammonProvider, landlords as landlordsProvider } from '../../topology-track/src/providers.js'
 
-// ─── GRID PROVIDERS (moved to packages/topology-grid/src/providers.js) ──────
+// ─── GRID STYLES — one render pipeline (topology-grid renderGridLayout), ────
+// game data declared in grid-board-styles.js configs. No per-style renderers.
 
-const checkered = checkeredProvider
-const monoGrid = monoGridProvider
-const go = goProvider
-const surakarta = surakartaProvider
-const xiangqi = xiangqiProvider
-const shogi = shogiProvider
-const alquerque = alquerqueProvider
+const checkered = gridStyles.checkered
+const monoGrid = gridStyles['mono-grid']
+const go = gridStyles.go
+const surakarta = gridStyles.surakarta
+const xiangqi = gridStyles.xiangqi
+const shogi = gridStyles.shogi
+const alquerque = gridStyles.alquerque
 
 // ─── GRAPH PROVIDERS (moved to packages/topology-graph/src/providers.js) ────
 

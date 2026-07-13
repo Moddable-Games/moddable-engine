@@ -70,7 +70,12 @@ export function serializeLayout(layout, opts = {}) {
   return parts.join('\n')
 }
 
-function elementToSvg(el) {
+/** Serialize a list of structured elements to an SVG fragment string (no joins). */
+export function elementsToFragment(elements) {
+  return elements.map(elementToSvg).join('')
+}
+
+export function elementToSvg(el) {
   if (!el || !el.tag) return ''
   const { tag, attrs = {}, text, children } = el
   const attrStr = Object.entries(attrs)
