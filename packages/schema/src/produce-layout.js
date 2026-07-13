@@ -73,7 +73,7 @@ function produceGridLayout(topo, colors, render) {
 
 function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabels, colors, render) {
   const isIntersection = positionType === 'intersection'
-  const inset = render.inset != null ? render.inset : (isIntersection ? Math.round(cellSize * 0.5) : 0)
+  const inset = render.insetFactor != null ? cellSize * render.insetFactor : (render.inset != null ? render.inset : (isIntersection ? Math.round(cellSize * 0.5) : 0))
   const gridW = isIntersection ? (cols - 1) * cellSize : cols * cellSize
   const gridH = isIntersection ? (rows - 1) * cellSize : rows * cellSize
   const pad = showLabels ? 24 : 0
@@ -116,17 +116,23 @@ function translateOp(decl, ctx) {
 
   switch (decl.op) {
     case 'rect': {
-      const fill = colors[decl.fill] || decl.fill
+      const fill = decl.fill === 'none' ? 'none' : (colors[decl.fill] || decl.fill)
       const attrs = {}
       if (decl.scope === 'board') {
         Object.assign(attrs, { x: ox, y: oy, width: boardW, height: boardH })
+        attrs.fill = fill
+        if (decl.rx != null) attrs.rx = decl.rx
       } else if (decl.scope === 'grid') {
-        Object.assign(attrs, { x: gx, y: gy, width: gridW, height: gridH })
+        const offY = (decl.rowOffset || 0) * cellSize
+        const h = decl.rowSpan ? decl.rowSpan * cellSize : gridH
+        Object.assign(attrs, { x: gx, y: gy + offY, width: gridW, height: h })
+        attrs.fill = fill
+        if (decl.rx != null) attrs.rx = decl.rx
       } else {
         Object.assign(attrs, { x: decl.x ?? ox, y: decl.y ?? oy, width: decl.width ?? boardW, height: decl.height ?? boardH })
+        if (decl.rx != null) attrs.rx = decl.rx
+        attrs.fill = fill
       }
-      attrs.fill = fill
-      if (decl.rx != null) attrs.rx = decl.rx
       if (decl.stroke) attrs.stroke = colors[decl.stroke] || decl.stroke
       if (decl['stroke-width'] != null) attrs['stroke-width'] = decl['stroke-width']
       return { op: 'rect', attrs }
@@ -145,10 +151,17 @@ function translateOp(decl, ctx) {
     case 'markers': {
       let items = decl.at
       if (items === 'auto-star-points') items = AUTO_STAR_POINTS[rows] || []
-      if (decl.allCells) {
-        return { op: 'markers', grouped: decl.grouped || false, groupFill: colors[decl.fill] || decl.fill, allCells: true, radius: decl.radius }
+      const fill = colors[decl.fill] || decl.fill
+      const result = { op: 'markers', radius: decl.radius }
+      if (decl.grouped) { result.grouped = true; result.groupFill = fill }
+      else if (fill) { result.itemFill = fill }
+      if (decl.allCells) result.allCells = true
+      else result.items = items || []
+      if (decl.hits) {
+        const hitRadius = decl.hits.radiusFactor ? cellSize * decl.hits.radiusFactor : decl.hits.radius
+        result.hits = { radius: hitRadius, idStyle: decl.hits.idStyle || idStyle }
       }
-      return { op: 'markers', grouped: decl.grouped || false, groupFill: colors[decl.fill] || decl.fill, items: items || [], radius: decl.radius }
+      return result
     }
     case 'hit-targets': {
       const result = { op: 'hit-targets', grouped: decl.grouped || false, radius: decl.radiusFactor ? cellSize * decl.radiusFactor : (decl.radius || cellSize * 0.4), idStyle }
@@ -166,8 +179,18 @@ function translateOp(decl, ctx) {
       return { op: 'texts', items: (decl.items || []).map(t => ({ attrs: { ...t.attrs, fill: colors[t.attrs?.fill] || t.attrs?.fill }, text: t.text })) }
     case 'group':
       return { op: 'group', attrs: decl.attrs, children: decl.children }
-    case 'cells':
+    case 'cells': {
+      if (decl.pattern === 'checkered') {
+        const light = colors[decl.light] || decl.light
+        const dark = colors[decl.dark] || decl.dark
+        return { op: 'cells', interactive: decl.interactive !== false, fill: (r, c) => (r + c) % 2 === 0 ? light : dark }
+      }
+      if (decl.pattern === 'uniform') {
+        const fill = colors[decl.fill] || decl.fill
+        return { op: 'cells', interactive: decl.interactive !== false, fill: () => fill }
+      }
       return decl
+    }
     default:
       return decl
   }
