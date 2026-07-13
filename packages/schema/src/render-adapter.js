@@ -302,6 +302,7 @@ function buildRenderOpts(resolved) {
     showLabels: render.labels !== false,
   }
 
+
   // Grid-based
   if (topo.type === 'grid') {
     opts.rows = topo.rows || 8
