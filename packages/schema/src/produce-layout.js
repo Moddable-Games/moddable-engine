@@ -436,9 +436,38 @@ function surakartaArcElements(gx, gy, tileSize, rows, cols, colors) {
 }
 
 
+function tricolorFn(hex, colors) {
+  const mod = (((hex.q - hex.r) % 3) + 3) % 3
+  const light = colors.lightHex || colors['cell-light']
+  const mid = colors.midHex || colors['cell-mid']
+  const dark = colors.darkHex || colors['cell-dark']
+  return mod === 0 ? light : mod === 1 ? mid : dark
+}
+
+function ringColorFn(hex, colors) {
+  const ring = Math.max(Math.abs(hex.q), Math.abs(hex.r), Math.abs(hex.q + hex.r))
+  const light = colors.lightHex || colors['cell-light']
+  const dark = colors.darkHex || colors['cell-dark']
+  return ring % 2 === 0 ? dark : light
+}
+
 function produceHexLayout(topo, colors, render) {
   if (render._hexes || render._hexRadius != null || (render._hexRows && render._hexCols)) return hexBoardOps(colors, render)
   return produceHexLegacy(topo, colors, render)
+}
+
+function produceHexDirect(topo, colors, render) {
+  const derived = { ...render }
+  if (topo.radius != null) derived._hexRadius = topo.radius
+  else if (topo.rows && topo.cols) { derived._hexRows = topo.rows; derived._hexCols = topo.cols }
+  else if (topo.grid) derived._hexes = topo.grid.map(c => Array.isArray(c) ? { q: c[0], r: c[1] } : c)
+  if (topo.orientation === 'flat') derived._flat = true
+  if (render.frame || topo.shape) derived._frame = render.frame || topo.shape
+  if (render.cellColor === 'tricolor') derived._colorFn = tricolorFn
+  else if (render.cellColor === 'rings') derived._colorFn = ringColorFn
+  else if (render.cellColor === 'terrain') derived._hexTypes = true
+  if (render.centreMarker) derived._centreMarker = render.centreMarker
+  return hexBoardOps(colors, derived)
 }
 
 // --- Hex board ops builder (studio path) ---
@@ -565,7 +594,10 @@ function hexBoardOps(colors, render) {
       fill = colors[h.type]
     } else {
       const s = h.q + h.r
-      fill = s % 3 === 0 ? colors.lightHex : s % 3 === 1 ? colors.darkHex : colors.midHex
+      const light = colors.lightHex || colors['cell-light']
+      const dark = colors.darkHex || colors['cell-dark']
+      const mid = colors.midHex || colors['cell-mid']
+      fill = s % 3 === 0 ? light : s % 3 === 1 ? dark : mid
     }
 
     el('polygon', { points, fill, stroke: colors.stroke, 'stroke-width': 1, 'data-sq': `${h.q},${h.r}`, class: 'board-cell' })
