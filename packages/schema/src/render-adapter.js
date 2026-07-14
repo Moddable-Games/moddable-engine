@@ -198,11 +198,12 @@ function mapColorsForProvider(boardStyle, surface) {
       }
     case 'hex':
       return {
-        lightHex: c['cell-light'] || '#f0d9b5',
-        darkHex: c['cell-dark'] || '#b58863',
-        midHex: c['cell-mid'] || '#d4a76a',
-        stroke: c.stroke || 'rgba(0,0,0,0.2)',
-        background: c.background || '#2c2c2c',
+        lightHex: c.lightHex || c['cell-light'],
+        darkHex: c.darkHex || c['cell-dark'],
+        midHex: c.midHex || c['cell-mid'],
+        stroke: c.stroke,
+        background: c.background,
+        border: c.border,
       }
     case 'mancala':
       return {

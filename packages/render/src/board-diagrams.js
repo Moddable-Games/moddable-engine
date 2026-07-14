@@ -1,5 +1,5 @@
 // Board diagram generator — renders all board topologies via the ops pipeline.
-// Grid styles produce ops from produceLayout(); other topologies use providers.
+// All topologies route through produceLayout() → renderXLayout().
 
 import { renderSurfaceSVG } from './piece-surface.js'
 import { renderGridLayout } from '../../topology-grid/src/topology-grid.js'
@@ -17,13 +17,11 @@ const GRID_STYLES = new Set(['checkered', 'mono-grid', 'go', 'xiangqi', 'shogi',
 // ─── GRAPH STYLES (handled entirely by produceLayout + renderGraphLayout) ───
 
 const GRAPH_STYLES = new Set(['morris', 'nyout', 'asalto', 'stern-halma'])
-const GRAPH_DEFAULT_COLORS = {}
 const GRAPH_STRUCTURE = { morris: 'concentric-rings', nyout: 'perimeter-cross', asalto: 'grid-cross', 'stern-halma': 'star' }
 
 // ─── PIT STYLES (handled entirely by produceLayout + renderPitLayout) ───────
 
 const PIT_STYLES = new Set(['mancala'])
-const PIT_DEFAULT_COLORS = {}
 
 // ─── TRACK STYLES (handled entirely by produceLayout + renderTrackLayout) ───
 
@@ -34,19 +32,11 @@ const TRACK_STYLE_NAME = { backgammon: 'triangular-points', landlords: 'perimete
 
 const HEX_STYLES = new Set(['hex'])
 
-// ─── NON-PIPELINE PROVIDER REGISTRY (empty — all topologies on the pipeline) ─
-
-const PROVIDERS = {}
 
 // ─── RENDERER (ported from moddable-chess/js/svg-renderer.js) ───────────────
 
 function esc(v) { return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') }
 
-function algToRC(alg, rows, skipI) {
-  const file = alg.charCodeAt(0) - 97
-  const col = (skipI && file > 8) ? file - 1 : file
-  return [rows - parseInt(alg.slice(1), 10), col]
-}
 
 function renderOverlays(overlays, ctx) {
   const { rows, tileSize, ox, oy } = ctx
@@ -66,7 +56,6 @@ function renderOverlays(overlays, ctx) {
 
 const GRID_LABEL_STYLE = { checkered: 'algebraic', 'mono-grid': 'algebraic', go: 'go', xiangqi: 'none', shogi: 'none', surakarta: 'algebraic', alquerque: 'algebraic' }
 const GRID_POSITION_TYPE = { checkered: 'square', 'mono-grid': 'square', go: 'intersection', xiangqi: 'intersection', shogi: 'intersection', surakarta: 'intersection', alquerque: 'intersection' }
-const GRID_DEFAULT_COLORS = {}
 
 function mapToSchemaColors(boardStyle, colors) {
   switch (boardStyle) {
@@ -97,9 +86,7 @@ export function renderBoard(opts) {
   const isPit = PIT_STYLES.has(boardStyle)
   const isTrack = TRACK_STYLES.has(boardStyle)
   const isHex = HEX_STYLES.has(boardStyle)
-  const isPipeline = isGrid || isGraph || isPit || isTrack || isHex
-  const provider = isPipeline ? null : PROVIDERS[boardStyle]
-  if (!isPipeline && !provider) return `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="60"><text x="100" y="35" text-anchor="middle" font-size="12" fill="#888">Unknown: "${boardStyle}"</text></svg>`
+  if (!isGrid && !isGraph && !isPit && !isTrack && !isHex) return `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="60"><text x="100" y="35" text-anchor="middle" font-size="12" fill="#888">Unknown: "${boardStyle}"</text></svg>`
 
   const rows = opts.rows || 8
   const cols = opts.cols || 8
@@ -108,10 +95,9 @@ export function renderBoard(opts) {
   const showLabels = opts.showLabels !== false
   const title = opts.title || null
 
-  const defaultColors = isGrid ? (GRID_DEFAULT_COLORS[boardStyle] || {}) : isGraph ? (GRAPH_DEFAULT_COLORS[boardStyle] || {}) : (isPit || isTrack || isHex) ? {} : (provider.defaultColors || {})
-  const colors = { ...defaultColors, ...(opts.colors || {}) }
+  const colors = { ...(opts.colors || {}) }
 
-  const labelStyle = isGrid ? GRID_LABEL_STYLE[boardStyle] : ((isGraph || isPit || isTrack || isHex) ? 'none' : (provider.labelStyle || 'algebraic'))
+  const labelStyle = isGrid ? GRID_LABEL_STYLE[boardStyle] : 'none'
   const effectiveLabels = showLabels && labelStyle !== 'none'
 
   const STYLE_TO_CELLCOLOR = { checkered: 'checkered', 'mono-grid': 'uniform', go: 'uniform', xiangqi: 'xiangqi', shogi: 'uniform', surakarta: 'uniform', alquerque: 'uniform' }
@@ -191,12 +177,10 @@ export function renderBoard(opts) {
   }
 
   const pipelineLayout = gridLayout || graphLayout || pitLayout || trackLayout || hexLayout
-  const W = pipelineLayout ? pipelineLayout.width : (() => { const l = provider.computeLayout({ rows, cols, tileSize, ...opts }); return l.boardW + (effectiveLabels ? 48 : 0) })()
-  const H = pipelineLayout ? pipelineLayout.height : (() => { const l = provider.computeLayout({ rows, cols, tileSize, ...opts }); return l.boardH + (effectiveLabels ? 48 : 0) })()
+  if (!pipelineLayout) return `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="60"><text x="100" y="35" text-anchor="middle" font-size="12" fill="#888">No layout for "${boardStyle}"</text></svg>`
 
-  const layout = pipelineLayout ? null : provider.computeLayout({ rows, cols, tileSize, ...opts })
-  const boardW = pipelineLayout ? W : layout.boardW
-  const boardH = pipelineLayout ? H : layout.boardH
+  const W = pipelineLayout.width
+  const H = pipelineLayout.height
   const pad = effectiveLabels ? 24 : 0
   const ox = pad, oy = pad
 
@@ -209,33 +193,23 @@ export function renderBoard(opts) {
     parts.push(collectDefs(position, opts.pieceDefs))
   }
 
-  const ctx = { rows, cols, tileSize, ox, oy, colors, opts, boardW, boardH }
-  if (pipelineLayout) {
-    parts.push(elementsToFragment(pipelineLayout.elements))
-  } else {
-    parts.push(provider.render(ctx))
-  }
+  parts.push(elementsToFragment(pipelineLayout.elements))
 
   if (opts.overlays && opts.overlays.length > 0) {
+    const ctx = { rows, cols, tileSize, ox, oy, colors, opts, boardW: W, boardH: H }
     parts.push(renderOverlays(opts.overlays, ctx))
   }
 
   if (position && Object.keys(position).length > 0) {
-    if (graphLayout || pitLayout || trackLayout || hexLayout) {
-      parts.push(`<g pointer-events="none"></g>`)
-    } else if (gridLayout) {
+    if (gridLayout) {
       parts.push(`<g pointer-events="none">${renderPiecesFromCells(position, gridLayout.cells, tileSize, opts, colors)}</g>`)
     } else {
-      parts.push(`<g pointer-events="none">${renderPieces(position, provider, ctx, colors)}</g>`)
+      parts.push(`<g pointer-events="none"></g>`)
     }
   }
 
-  if (gridLayout) {
-    if (gridLayout.labels.length > 0) {
-      parts.push(gridLayout.labels.map(lbl => elementToSvg(lbl)).join(''))
-    }
-  } else if (showLabels && labelStyle !== 'none') {
-    parts.push(renderLabels(ctx, colors, provider))
+  if (gridLayout && gridLayout.labels.length > 0) {
+    parts.push(gridLayout.labels.map(lbl => elementToSvg(lbl)).join(''))
   }
 
   parts.push('</svg>')
@@ -327,62 +301,6 @@ function renderPiecesFromCells(position, cells, tileSize, opts, colors) {
   return parts.join('')
 }
 
-function getPixelPos(r, c, provider, ctx) {
-  if (provider.getIntersection) return provider.getIntersection(r, c, ctx)
-  const { tileSize, ox, oy } = ctx
-  return { x: ox + c * tileSize + tileSize / 2, y: oy + r * tileSize + tileSize / 2 }
-}
-
-function renderPieces(position, provider, ctx, colors) {
-  const { rows, cols, tileSize, opts } = ctx
-  const pieceImages = opts.pieceImages || {}
-  const skipI = provider.labelStyle === 'go'
-  const parts = []
-  for (const [alg, raw] of Object.entries(position)) {
-    const [r, c] = algToRC(alg, rows, skipI)
-    if (r < 0 || r >= rows || c < 0 || c >= cols) continue
-    const piece = typeof raw === 'object' ? raw : { type: String(raw) }
-    const pos = getPixelPos(r, c, provider, ctx)
-
-    // Build lookup key: for typed pieces (stone/man/king/piece) use color prefix
-    const colorPrefix = piece.color === 'white' ? 'w' : 'b'
-    const imageKey = (piece.type === 'stone') ? colorPrefix + 'S'
-      : (piece.type === 'man') ? colorPrefix + 'M'
-      : (piece.type === 'king') ? colorPrefix + 'K'
-      : (piece.type === 'piece') ? colorPrefix + 'P'
-      : piece.type
-
-    if (pieceImages[imageKey]) {
-      const x = pos.x - tileSize / 2, y = pos.y - tileSize / 2
-      const surfaceMap = opts.pieceSurfaceMap || {}
-      const hasSurface = opts.pieceBorders || surfaceMap[imageKey]
-      const rotations = opts.pieceRotations
-      const rot = rotations && opts.getOwner ? rotations[opts.getOwner(piece.type)] : 0
-      if (hasSurface) {
-        const isUpper = piece.type === piece.type.toUpperCase()
-        const owner = opts.getOwner ? opts.getOwner(piece.type) : (isUpper ? 'white' : 'black')
-        const surface = opts.pieceSurface && opts.pieceSurface.owners && opts.pieceSurface.owners[owner]
-        const ownerColors = surface || { fill: opts.pieceBorders && opts.pieceBorders[owner] || '#888', stroke: 'rgba(0,0,0,0.3)' }
-        parts.push(renderSurfaceSVG('disc', pos.x, pos.y, tileSize, ownerColors, pieceImages[imageKey]))
-      } else if (rot) {
-        parts.push(`<g transform="rotate(${rot} ${pos.x} ${pos.y})"><image href="${pieceImages[imageKey]}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" pointer-events="none"/></g>`)
-      } else {
-        parts.push(`<image href="${pieceImages[imageKey]}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" pointer-events="none"/>`)
-      }
-    } else if (piece.type === 'stone') {
-      parts.push(drawStone(piece, pos.x, pos.y, tileSize * 0.42, colors))
-    } else if (piece.type === 'man' || piece.type === 'king') {
-      parts.push(drawDraughtsPiece(piece, pos.x, pos.y, tileSize * 0.38, colors))
-    } else if (pieceImages[piece.type]) {
-      const x = pos.x - tileSize / 2, y = pos.y - tileSize / 2
-      parts.push(`<image href="${pieceImages[piece.type]}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" pointer-events="none"/>`)
-    } else if (opts.pieceDefs && opts.pieceDefs[piece.type]) {
-      const x = pos.x - tileSize / 2, y = pos.y - tileSize / 2
-      parts.push(`<use href="#piece-${piece.type}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}"/>`)
-    }
-  }
-  return parts.join('')
-}
 
 function collectDefs(position, pieceDefs) {
   if (!pieceDefs) return ''
@@ -418,34 +336,3 @@ function drawDraughtsPiece(piece, cx, cy, r, C) {
   return svg
 }
 
-// ─── LABELS ─────────────────────────────────────────────────────────────────
-
-function renderLabels(ctx, colors, provider) {
-  const { rows, cols, tileSize, ox, oy, boardH } = ctx
-  const labelStyle = provider.labelStyle || 'algebraic'
-  const pad = 24, fs = Math.min(13, pad * 0.55)
-  const parts = []
-  const bottomY = oy + boardH + pad * 0.65
-
-  if (labelStyle === 'go') {
-    const GO = 'ABCDEFGHJKLMNOPQRST'
-    for (let c = 0; c < cols; c++) {
-      const pos = getPixelPos(0, c, provider, ctx)
-      parts.push(`<text x="${pos.x}" y="${bottomY}" text-anchor="middle" font-size="${fs}" fill="${esc(colors.labelText || '#5a4020')}" font-family="sans-serif">${GO[c]}</text>`)
-    }
-    for (let r = 0; r < rows; r++) {
-      const pos = getPixelPos(r, 0, provider, ctx)
-      parts.push(`<text x="${pad * 0.5}" y="${pos.y + fs * 0.35}" text-anchor="middle" font-size="${fs}" fill="${esc(colors.labelText || '#5a4020')}" font-family="sans-serif">${rows - r}</text>`)
-    }
-  } else {
-    for (let c = 0; c < cols; c++) {
-      const pos = getPixelPos(0, c, provider, ctx)
-      parts.push(`<text x="${pos.x}" y="${bottomY}" text-anchor="middle" font-size="${fs}" fill="${esc(colors.labelText || '#5c3a1e')}" font-family="monospace">${String.fromCharCode(97 + c)}</text>`)
-    }
-    for (let r = 0; r < rows; r++) {
-      const pos = getPixelPos(r, 0, provider, ctx)
-      parts.push(`<text x="${pad * 0.5}" y="${pos.y + fs * 0.35}" text-anchor="middle" font-size="${fs}" fill="${esc(colors.labelText || '#5c3a1e')}" font-family="monospace">${rows - r}</text>`)
-    }
-  }
-  return parts.join('')
-}

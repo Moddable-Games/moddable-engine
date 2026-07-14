@@ -539,7 +539,7 @@ function hexBoardOps(colors, render) {
   if (!frame) {
     els.push({ op: 'element', tag: 'rect', attrs: { x: 0, y: 0, width: boardW, height: boardH, fill: colors.background, rx: 6 } })
   } else {
-    const borderColor = colors.border || '#6b4226'
+    const borderColor = colors.border
     const fillPolys = []
     for (const h of hexes) {
       const p = flat ? axialToPixelFlat(h.q, h.r, size) : axialToPixelPointy(h.q, h.r, size)
