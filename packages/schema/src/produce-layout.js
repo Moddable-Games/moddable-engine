@@ -524,33 +524,213 @@ function produceTrackLayout(topo, colors, render) {
 }
 
 function producePitLayout(topo, colors, render) {
-  const cols = topo.cols || 6
-  const rows = topo.rows || 2
-  const stores = topo.stores !== false
+  return producePitOps(topo, colors, render)
+}
 
-  return {
-    type: 'pit',
-    config: {
-      colors: {
-        boardOuter: colors['board-outer'] || colors['cell-dark'] || '#7A5A32',
-        boardInner: colors['board-inner'] || colors['cell-light'] || '#9B7740',
-        border: colors.stroke || '#3A2515',
-        pit: colors.pit || colors.background || '#4E3320',
-        pitStroke: colors['pit-stroke'] || colors.stroke || '#3A2515',
-        seed: colors.seed || '#C8B898',
-        seedStroke: colors['seed-stroke'] || '#8A7A5A',
-      },
-      pitRadius: render.pitRadius || 22,
-      storeRx: render.storeSize?.[0] || 24,
-      storeRy: render.storeSize?.[1] || 50,
-      cornerRadius: render.cornerRadius || 22,
-      boardRows: rows,
-      seedsPerPit: 4,
-      markers: render.markers || [],
-    },
-    cols,
-    stores,
+// --- Pit (mancala) ops builder ---
+//
+// Emits the full drawing program for renderPitLayout() from resolved
+// frontmatter. Geometry is a verbatim move from the historical mancala
+// provider — byte-identity contract (attribute order, element order).
+// Colors arrive under provider names (via mapColorsForProvider) with
+// frontmatter as the sole source of truth.
+//
+// Frontmatter fields consumed: topology.rows/cols/stores,
+// render.cellSize (pit radius), render.boardShape, render.cornerRadius,
+// render.markers, render.pitCurve, render.storeSize [rx, ry],
+// render._parsedSetup / _seedsPerPit / _pieceImages (runtime pass-through).
+
+function producePitOps(topo, colors, render) {
+  const pitsPerSide = topo.cols || 6
+  const boardRows = topo.rows || 2
+  const hasStores = topo.stores !== false
+  const pitRadius = render.cellSize || 22
+  const storeRx = render.storeSize?.[0] || 24
+  const storeRy = render.storeSize?.[1] || 50
+  const boardShape = render.boardShape || 'rect'
+  const rx = render.cornerRadius || 22
+  const pitCurve = render.pitCurve || 0
+  const markerSet = new Set(render.markers || [])
+  const parsedSetup = render._parsedSetup || null
+  const seedsPerPit = render._seedsPerPit || 4
+  const pieceImages = render._pieceImages || null
+  const seedRadius = Math.min(4.5, pitRadius * 0.2)
+
+  const els = []
+  const el = (tag, attrs) => els.push({ op: 'element', tag, attrs })
+
+  const seeds = (cx, cy, count) => {
+    if (count <= 0) return
+    if (pieceImages && pieceImages[String(count)]) {
+      const size = pitRadius * 1.6
+      el('image', { href: pieceImages[String(count)], x: cx - size / 2, y: cy - size / 2, width: size, height: size, 'pointer-events': 'none' })
+      return
+    }
+    for (const [sx, sy] of seedLayout(count, seedRadius)) {
+      el('circle', { cx: cx + sx, cy: cy + sy, r: seedRadius, fill: colors.seed, stroke: colors.seedStroke, 'stroke-width': 0.5 })
+    }
   }
+
+  const marker = (cx, cy) => {
+    el('circle', { cx, cy, r: pitRadius - 8, fill: 'none', stroke: colors.marker, 'stroke-width': 2, 'stroke-dasharray': '4,3' })
+  }
+
+  const pit = (cx, cy, idx) => {
+    el('circle', { cx, cy, r: pitRadius, fill: colors.pit, stroke: colors.pitStroke, 'stroke-width': 1.5, class: 'board-cell', 'data-sq': `pit-${idx}` })
+  }
+
+  const store = (cx, cy, sq) => {
+    el('ellipse', { cx, cy, rx: storeRx, ry: storeRy, fill: colors.pit, stroke: colors.pitStroke, 'stroke-width': 1.5, class: 'board-cell', 'data-sq': sq })
+  }
+
+  const seedCountAt = (idx) => (parsedSetup && parsedSetup.pits) ? parsedSetup.pits[idx] : seedsPerPit
+
+  if (boardShape === 'ellipse') {
+    const pitSpacing = pitRadius * 2.96
+    const pitSpan = (pitsPerSide - 1) * pitSpacing
+    const rowOffset = pitRadius * 2
+    const storeGap = 2
+    const storeCenterOffset = hasStores ? pitSpan / 2 + pitRadius + storeGap + storeRx : 0
+    const outerRx = (hasStores ? storeCenterOffset + storeRx : pitSpan / 2 + pitRadius) + pitRadius * 2.67
+    const outerRy = rowOffset + pitRadius * 2.22
+    const boardW = Math.round(2 * (outerRx + pitRadius * 0.67))
+    const boardH = Math.round(2 * (outerRy + pitRadius * 0.78))
+    const cx = boardW / 2, cy = boardH / 2
+
+    el('ellipse', { cx, cy, rx: outerRx, ry: outerRy, fill: colors.boardOuter })
+    el('ellipse', { cx, cy, rx: outerRx - 8, ry: outerRy - 8, fill: colors.boardInner })
+
+    if (hasStores) {
+      store(cx - storeCenterOffset, cy, 'store-1')
+      store(cx + storeCenterOffset, cy, 'store-0')
+    }
+
+    const topCy = cy - rowOffset
+    const botCy = cy + rowOffset
+    for (let i = 0; i < pitsPerSide; i++) {
+      const px = cx + (i - (pitsPerSide - 1) / 2) * pitSpacing
+      let topY = topCy, botY = botCy
+      if (pitCurve) {
+        const t = (i - (pitsPerSide - 1) / 2) / ((pitsPerSide - 1) / 2)
+        const curveOffset = pitCurve * t * t
+        topY += curveOffset
+        botY -= curveOffset
+      }
+      const topIdx = pitsPerSide - 1 - i
+      const botIdx = i
+      pit(px, topY, topIdx)
+      pit(px, botY, pitsPerSide + botIdx)
+      if (markerSet.has(topIdx)) marker(px, topY)
+      if (markerSet.has(pitsPerSide + botIdx)) marker(px, botY)
+      seeds(px, topY, seedCountAt(topIdx))
+      seeds(px, botY, seedCountAt(pitsPerSide + botIdx))
+    }
+
+    return { type: 'pit', config: { ops: els, width: boardW, height: boardH } }
+  }
+
+  const pad = render.padEdge || pitRadius * 1.65
+  const frameInset = 16
+  const interRow = pitRadius * 2.4
+  const divGap = boardRows === 4 ? pitRadius * 2.7 : 0
+  const contentH = boardRows === 4 ? interRow * 2 + divGap : interRow * (boardRows - 1)
+  const boardH = contentH + pad * 2 + frameInset * 2
+  const storeWidth = hasStores ? storeRx * 2 + 16 : 0
+  const pitsAreaWidth = pitsPerSide * (pitRadius * 2 + 10)
+  const boardW = storeWidth * 2 + pitsAreaWidth + pad * 2 + frameInset * 2
+
+  const bx = frameInset / 2, by = frameInset / 2
+  const bw = boardW - frameInset, bh = boardH - frameInset
+
+  el('rect', { x: bx, y: by, width: bw, height: bh, rx, ry: rx, fill: colors.boardOuter })
+  el('rect', { x: bx + 6, y: by + 6, width: bw - 12, height: bh - 12, rx: rx - 4, ry: rx - 4, fill: colors.boardInner })
+  if (colors.border) {
+    const attrs = { x: bx + 12, y: by + 12, width: bw - 24, height: bh - 24, rx: rx - 8, ry: rx - 8, fill: 'none', stroke: colors.border, 'stroke-width': 1.5 }
+    if (colors.borderDash) attrs['stroke-dasharray'] = colors.borderDash
+    el('rect', attrs)
+  }
+
+  if (hasStores) {
+    const storeCy = boardH / 2
+    store(frameInset + storeWidth / 2, storeCy, 'store-1')
+    store(boardW - frameInset - storeWidth / 2, storeCy, 'store-0')
+  }
+
+  const pitsLeftEdge = frameInset + (hasStores ? storeWidth : 0) + pad
+  const pitsRightEdge = boardW - frameInset - (hasStores ? storeWidth : 0) - pad
+  const pitsAvailWidth = pitsRightEdge - pitsLeftEdge
+  const pitSpacing = pitsPerSide > 1 ? pitsAvailWidth / (pitsPerSide - 1) : 0
+
+  const topPitCenter = frameInset + pad
+  const botPitCenter = boardH - frameInset - pad
+  const rowCenters = []
+  if (boardRows === 2) {
+    rowCenters.push(topPitCenter, botPitCenter)
+  } else if (boardRows === 4) {
+    rowCenters.push(topPitCenter, topPitCenter + interRow, botPitCenter - interRow, botPitCenter)
+  }
+
+  for (let row = 0; row < boardRows; row++) {
+    const isTopHalf = row < boardRows / 2
+    const baseCy = rowCenters[row]
+    for (let i = 0; i < pitsPerSide; i++) {
+      const displayIdx = isTopHalf ? (pitsPerSide - 1 - i) : i
+      const pitIdx = row * pitsPerSide + displayIdx
+      const cx = pitsLeftEdge + i * pitSpacing
+      let cy = baseCy
+      if (pitCurve) {
+        const t = (i - (pitsPerSide - 1) / 2) / ((pitsPerSide - 1) / 2)
+        const curveOffset = pitCurve * t * t
+        cy += isTopHalf ? curveOffset : -curveOffset
+      }
+      pit(cx, cy, pitIdx)
+      if (markerSet.has(pitIdx)) marker(cx, cy)
+      seeds(cx, cy, seedCountAt(pitIdx))
+    }
+  }
+
+  if (boardRows === 4) {
+    const divY = boardH / 2
+    el('line', { x1: pitsLeftEdge - pitRadius, y1: divY, x2: pitsLeftEdge + (pitsPerSide - 1) * pitSpacing + pitRadius, y2: divY, stroke: colors.boardOuter, 'stroke-width': 2.5, 'stroke-dasharray': '6,4' })
+  }
+
+  return { type: 'pit', config: { ops: els, width: boardW, height: boardH } }
+}
+
+// Seed packing geometry (drawing-layout data factory, game-agnostic)
+function seedLayout(count, r) {
+  if (count <= 0) return []
+  const gap = r * 2.5
+  if (count === 1) return [[0, 0]]
+  if (count === 2) return [[-gap / 2, 0], [gap / 2, 0]]
+  if (count === 3) return [[0, -gap / 2], [-gap / 2, gap / 2], [gap / 2, gap / 2]]
+  if (count === 4) return [[-gap / 2, -gap / 2], [gap / 2, -gap / 2], [-gap / 2, gap / 2], [gap / 2, gap / 2]]
+  if (count <= 6) {
+    const top = Math.ceil(count / 2)
+    const bot = count - top
+    const result = []
+    for (let i = 0; i < top; i++) result.push([(i - (top - 1) / 2) * gap, -gap / 2])
+    for (let i = 0; i < bot; i++) result.push([(i - (bot - 1) / 2) * gap, gap / 2])
+    return result
+  }
+  if (count <= 9) {
+    const rows = [Math.ceil(count / 3), Math.ceil((count - Math.ceil(count / 3)) / 2), count - Math.ceil(count / 3) - Math.ceil((count - Math.ceil(count / 3)) / 2)]
+    const result = []
+    for (let ri = 0; ri < 3; ri++) {
+      const n = rows[ri]
+      for (let i = 0; i < n; i++) result.push([(i - (n - 1) / 2) * gap, (ri - 1) * gap])
+    }
+    return result
+  }
+  const result = []
+  const side = Math.ceil(Math.sqrt(count))
+  for (let i = 0; i < count; i++) {
+    const row = Math.floor(i / side)
+    const col = i % side
+    const rowCount = (row < Math.floor(count / side)) ? side : count % side || side
+    result.push([(col - (rowCount - 1) / 2) * gap * 0.8, (row - (Math.ceil(count / side) - 1) / 2) * gap * 0.8])
+  }
+  return result
 }
 
 function produceGraphLayout(topo, colors, render) {

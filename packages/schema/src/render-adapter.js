@@ -206,13 +206,15 @@ function mapColorsForProvider(boardStyle, surface) {
       }
     case 'mancala':
       return {
-        boardOuter: c['board-outer'] || '#7A5A32',
-        boardInner: c['board-inner'] || '#9B7740',
-        pit: c.pit || '#4E3320',
-        pitStroke: c['pit-stroke'] || '#3A2515',
-        seed: c.seed || '#C8B898',
-        seedStroke: c['seed-stroke'] || '#8A7A5A',
-        background: c.background || '#4E3320',
+        boardOuter: c['board-outer'],
+        boardInner: c['board-inner'],
+        pit: c.pit,
+        pitStroke: c['pit-stroke'],
+        seed: c.seed,
+        seedStroke: c['seed-stroke'],
+        marker: c.marker,
+        border: c.border,
+        borderDash: c['border-dash'],
       }
     case 'backgammon':
       return {
