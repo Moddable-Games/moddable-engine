@@ -249,7 +249,7 @@ describe('produceLayout', () => {
   })
 
   describe('graph topology', () => {
-    test('morris — concentric rings structure', () => {
+    test('morris — concentric rings structure produces ops', () => {
       const engine = {
         topology: { type: 'graph', structure: 'concentric-rings', params: { rings: 3, midpoints: true } },
         surface: 'slate',
@@ -257,26 +257,24 @@ describe('produceLayout', () => {
       }
       const result = produceLayout(engine)
       expect(result.type).toBe('graph')
-      expect(result.config.structure).toBe('concentric-rings')
-      expect(result.config.params).toEqual({ rings: 3, midpoints: true })
-      expect(result.config.nodeRadius).toBe(7)
-      expect(result.config.edgeStyle.stroke).toBe('rgba(0,0,0,0.3)')
+      expect(result.config.ops).toBeDefined()
+      expect(result.config.ops.length).toBeGreaterThan(0)
+      expect(result.config.width).toBe(320)
+      expect(result.config.height).toBe(320)
+      expect(result.config.ops[0].op).toBe('rect')
     })
 
-    test('explicit nodes/edges', () => {
+    test('nyout — perimeter-cross structure produces ops', () => {
       const engine = {
-        topology: {
-          type: 'graph',
-          nodes: [{ id: 'a', x: 10, y: 10 }, { id: 'b', x: 100, y: 100 }],
-          edges: [{ from: 'a', to: 'b' }],
-        },
-        surface: 'slate',
+        topology: { type: 'graph', structure: 'perimeter-cross' },
+        surface: {},
         render: {},
       }
       const result = produceLayout(engine)
       expect(result.type).toBe('graph')
-      expect(result.config.nodes).toHaveLength(2)
-      expect(result.config.edges).toHaveLength(1)
+      expect(result.config.ops.length).toBe(3)
+      expect(result.config.ops[1].op).toBe('edges')
+      expect(result.config.ops[2].op).toBe('nodes')
     })
   })
 
