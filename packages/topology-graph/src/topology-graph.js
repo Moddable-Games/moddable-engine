@@ -487,6 +487,7 @@ export function createGraphTopology(config) {
   }
 
   function renderLayout(config = {}) {
+    if (config.ops) return renderGraphLayout(config)
     const {
       nodes: inputNodes,
       edges: inputEdges,
@@ -631,6 +632,91 @@ export function createGraphTopology(config) {
     serializePosition,
     parsePosition,
   }
+}
+
+// ─── Graph render pipeline — ONE parametric renderer for every graph board (#18) ───
+//
+// The notation is an ordered list of drawing ops. The pipeline walks the list
+// once and emits structured SVG elements. It never branches on game, variant,
+// or board style — needing a new branch here means the consolidation has
+// failed; extend the op vocabulary parametrically instead.
+//
+// Graph ops work in ABSOLUTE coordinates (nodes carry x/y — structure
+// generators are data factories living at the bridge/frontmatter layer):
+//   rect      — raw rect, attrs in given (insertion) order
+//   element   — raw element (polygon, defs, text, ...), children supported
+//   elements  — list of raw elements
+//   group     — <g attrs>children</g> (empty attrs → bare <g>)
+//   edges     — <g attrs> with one line per node-index pair
+//   nodes     — per node: dot circle (+ optional interleaved hit-target
+//               circle with id/data-type/extra attrs), optionally grouped
+//
+// Attribute order is insertion order — part of the byte-identity contract
+// (snapshot suite must stay byte-identical). Game data (station positions,
+// ring geometry, fortress shapes, arm polygons) NEVER lives here — it
+// arrives inside ops from the bridge today, from frontmatter via produce()
+// later.
+
+export function renderGraphLayout(config = {}) {
+  const elements = []
+  const cells = []
+  for (const op of config.ops || []) {
+    GRAPH_OP_HANDLERS[op.op](op, elements, cells)
+  }
+  return { width: config.width || 0, height: config.height || 0, elements, cells, labels: [], defs: [] }
+}
+
+const GRAPH_OP_HANDLERS = {
+
+  rect(op, elements) {
+    elements.push({ tag: 'rect', attrs: op.attrs })
+  },
+
+  element(op, elements) {
+    elements.push({ tag: op.tag, attrs: op.attrs, text: op.text, children: op.children })
+  },
+
+  elements(op, elements) {
+    for (const el of op.items) elements.push(el)
+  },
+
+  group(op, elements) {
+    elements.push({ tag: 'g', attrs: op.attrs, children: op.children })
+  },
+
+  edges(op, elements) {
+    const children = []
+    for (const [a, b] of op.pairs) {
+      children.push({ tag: 'line', attrs: { x1: op.nodes[a].x, y1: op.nodes[a].y, x2: op.nodes[b].x, y2: op.nodes[b].y } })
+    }
+    elements.push({ tag: 'g', attrs: op.attrs, children })
+  },
+
+  nodes(op, elements, cells) {
+    const resolve = (v, node, i) => typeof v === 'function' ? v(node, i) : v
+    const children = []
+    for (let i = 0; i < op.items.length; i++) {
+      const node = op.items[i]
+      const dotAttrs = { cx: node.x, cy: node.y, r: resolve(op.dot.radius, node, i) }
+      if (op.dot.fill !== undefined) dotAttrs.fill = resolve(op.dot.fill, node, i)
+      children.push({ tag: 'circle', attrs: dotAttrs })
+      if (op.hit) {
+        const sq = resolve(op.hit.id, node, i)
+        const attrs = { cx: node.x, cy: node.y, r: resolve(op.hit.radius, node, i), fill: 'transparent', class: 'board-cell', 'data-sq': sq, 'data-type': resolve(op.hit.dataType, node, i) }
+        if (op.hit.extraAttrs) {
+          const extra = resolve(op.hit.extraAttrs, node, i)
+          if (extra) Object.assign(attrs, extra)
+        }
+        children.push({ tag: 'circle', attrs })
+        cells.push({ id: sq, x: node.x, y: node.y })
+      }
+    }
+    if (op.group) {
+      elements.push({ tag: 'g', attrs: op.group, children })
+    } else {
+      for (const el of children) elements.push(el)
+    }
+  },
 }
 
 function circularLayout(nodes, width, height) {

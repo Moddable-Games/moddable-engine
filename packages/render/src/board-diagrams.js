@@ -5,7 +5,7 @@ import { renderSurfaceSVG } from './piece-surface.js'
 import { renderGridLayout } from '../../topology-grid/src/topology-grid.js'
 import { elementsToFragment, elementToSvg } from './serialize-layout.js'
 import { produceLayout } from '../../schema/src/produce-layout.js'
-import { nyout, morris, asalto, sternHalma } from '../../topology-graph/src/providers.js'
+import { graphStyles } from './graph-board-styles.js'
 import { hex } from '../../topology-hex/src/providers.js'
 import { mancala } from '../../topology-pit/src/providers.js'
 import { backgammon, landlords } from '../../topology-track/src/providers.js'
@@ -13,6 +13,13 @@ import { backgammon, landlords } from '../../topology-track/src/providers.js'
 // ─── GRID STYLES (handled entirely by produceLayout + renderGridLayout) ─────
 
 const GRID_STYLES = new Set(['checkered', 'mono-grid', 'go', 'xiangqi', 'shogi', 'surakarta', 'alquerque'])
+
+// ─── GRAPH STYLES (consolidated into graph-board-styles.js) ─────────────────
+
+const nyout = graphStyles.nyout
+const morris = graphStyles.morris
+const asalto = graphStyles.asalto
+const sternHalma = graphStyles['stern-halma']
 
 // ─── NON-GRID PROVIDER REGISTRY ────────────────────────────────────────────
 
