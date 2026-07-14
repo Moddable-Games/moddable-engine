@@ -17,12 +17,7 @@ const GRID_STYLES = new Set(['checkered', 'mono-grid', 'go', 'xiangqi', 'shogi',
 // ─── GRAPH STYLES (handled entirely by produceLayout + renderGraphLayout) ───
 
 const GRAPH_STYLES = new Set(['morris', 'nyout', 'asalto', 'stern-halma'])
-const GRAPH_DEFAULT_COLORS = {
-  nyout: { background: '#f5e6c8', line: '#4a3520', point: '#4a3520', junction: '#c0622f', centre: '#8b1a1a' },
-  morris: { background: '#f5e6c8', line: '#4a3520', point: '#4a3520' },
-  asalto: { background: '#f5e6c8', line: '#2a2a2a', point: '#2a2a2a', fortress: 'rgba(40,80,180,0.15)', fortressBorder: '#3355aa' },
-  'stern-halma': { boardBody: '#4a3728', boardRim: '#5c4636', boardFelt: '#2d5c3d', centre: '#e8dcc8', outline: '#6b5a40', armN: '#f2e8d4', armNE: '#d4e4f0', armSE: '#e8d8ec', armS: '#f2e8d4', armSW: '#d4e4f0', armNW: '#e8d8ec', hole: '#3a2c1c' },
-}
+const GRAPH_DEFAULT_COLORS = {}
 const GRAPH_STRUCTURE = { morris: 'concentric-rings', nyout: 'perimeter-cross', asalto: 'grid-cross', 'stern-halma': 'star' }
 
 // ─── NON-GRID/GRAPH PROVIDER REGISTRY ───────────────────────────────────────
@@ -57,15 +52,7 @@ function renderOverlays(overlays, ctx) {
 
 const GRID_LABEL_STYLE = { checkered: 'algebraic', 'mono-grid': 'algebraic', go: 'go', xiangqi: 'none', shogi: 'none', surakarta: 'algebraic', alquerque: 'algebraic' }
 const GRID_POSITION_TYPE = { checkered: 'square', 'mono-grid': 'square', go: 'intersection', xiangqi: 'intersection', shogi: 'intersection', surakarta: 'intersection', alquerque: 'intersection' }
-const GRID_DEFAULT_COLORS = {
-  checkered: { lightSquare: '#f0d9b5', darkSquare: '#b58863', voidFill: 'transparent' },
-  'mono-grid': { monoSquare: '#d9b483', gridLine: '#8b6914' },
-  go: { woodLight: '#dcb35c', woodDark: '#d4a843', gridLine: '#3d2b1a', labelText: '#5a4020', starPoint: '#3d2b1a' },
-  surakarta: { frame: '#5a3e28', board: '#c8a872', boardInner: '#d4b896', gridLine: '#6b4a30', dotFill: '#4a3320', innerArc: '#6b4a30', outerArc: '#6b4a30' },
-  xiangqi: { board: '#f5deb3', gridLine: '#4a3520', river: '#f5deb3', riverText: '#4a3520', palace: '#4a3520', labelText: '#4a3520' },
-  shogi: { board: '#e8c97a', boardBorder: '#8b6914', gridLine: '#6b4e1a', hoshi: '#6b4e1a', promotionZone: 'rgba(180, 60, 40, 0.08)', labelText: '#5a4020' },
-  alquerque: { monoSquare: '#d9b483', gridLine: '#8b6914' },
-}
+const GRID_DEFAULT_COLORS = {}
 
 function mapToSchemaColors(boardStyle, colors) {
   switch (boardStyle) {

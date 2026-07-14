@@ -237,13 +237,28 @@ function mapColorsForProvider(boardStyle, surface) {
         centre: c['cell-light'] || '#e8dcc8',
         outline: c.stroke || '#6b5a40',
         hole: c['cell-dark'] || '#3a2c1c',
+        armN: c.armN || '#f2e8d4',
+        armNE: c.armNE || '#d4e4f0',
+        armSE: c.armSE || '#e8d8ec',
+        armS: c.armS || '#f2e8d4',
+        armSW: c.armSW || '#d4e4f0',
+        armNW: c.armNW || '#e8d8ec',
       }
     case 'nyout':
-    case 'asalto':
       return {
         background: c.background || '#f5e6c8',
         line: c.stroke || '#4a3520',
         point: c.stroke || '#4a3520',
+        junction: c.junction || '#c0622f',
+        centre: c.centre || '#8b1a1a',
+      }
+    case 'asalto':
+      return {
+        background: c.background || '#f5e6c8',
+        line: c.stroke || '#2a2a2a',
+        point: c.stroke || '#2a2a2a',
+        fortress: c.fortress || 'rgba(40,80,180,0.15)',
+        fortressBorder: c.fortressBorder || '#3355aa',
       }
     case 'landlords':
       return {
@@ -256,14 +271,18 @@ function mapColorsForProvider(boardStyle, surface) {
       }
     case 'surakarta':
       return {
-        board: c['cell-light'] || '#d9c5a0',
-        gridLine: c.stroke || '#8b7355',
-        arcStroke: c.stroke || '#8b7355',
+        frame: c['board-outer'] || '#5a3e28',
+        board: c['cell-light'] || '#c8a872',
+        boardInner: c['board-inner'] || '#d4b896',
+        gridLine: c.stroke || '#6b4a30',
+        dotFill: c.dotFill || '#4a3320',
+        innerArc: c.innerArc || c.stroke || '#6b4a30',
+        outerArc: c.outerArc || c.stroke || '#6b4a30',
       }
     case 'alquerque':
       return {
-        board: c['cell-light'] || '#d9c5a0',
-        gridLine: c.stroke || '#8b7355',
+        monoSquare: c['cell-light'] || '#d9b483',
+        gridLine: c.stroke || '#8b6914',
       }
     default:
       return { ...c }
@@ -282,18 +301,11 @@ function buildRenderOpts(resolved) {
   const boardStyle = resolved._boardStyle || inferredStyle
   if (!boardStyle) return null
 
-  // If raw colours passed through from reverse adapter, use them directly.
-  // If _useProviderDefaults flag set, pass empty — provider uses its own defaults.
-  // Otherwise map schema surface colours to provider keys.
   let colors
   if (surface?._rawColors) {
     colors = surface._rawColors
-  } else if (surface?._useProviderDefaults) {
-    colors = {}
-  } else if (surface?.colors && Object.keys(surface.colors).length > 0) {
-    colors = mapColorsForProvider(boardStyle, surface)
   } else {
-    colors = {}
+    colors = mapColorsForProvider(boardStyle, surface)
   }
 
   const opts = {
