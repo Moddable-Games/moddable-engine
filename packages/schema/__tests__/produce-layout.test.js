@@ -217,7 +217,7 @@ describe('produceLayout', () => {
   })
 
   describe('pit topology', () => {
-    test('mancala — standard 2-row 6-pit', () => {
+    test('mancala — standard 2-row 6-pit produces ops', () => {
       const engine = {
         topology: { type: 'pit', rows: 2, cols: 6, stores: true },
         surface: 'earth',
@@ -225,26 +225,42 @@ describe('produceLayout', () => {
       }
       const result = produceLayout(engine)
       expect(result.type).toBe('pit')
-      expect(result.cols).toBe(6)
-      expect(result.stores).toBe(true)
-      expect(result.config.pitRadius).toBe(22)
-      expect(result.config.colors.boardOuter).toBe('#7A5A32')
-      expect(result.config.colors.seed).toBe('#C8B898')
-      expect(result.config.boardRows).toBe(2)
+      expect(Array.isArray(result.config.ops)).toBe(true)
+      expect(result.config.width).toBeGreaterThan(0)
+      expect(result.config.height).toBeGreaterThan(0)
+      // 2 board rects + 2 stores + 12 pits + seeds
+      const pits = result.config.ops.filter(o => o.attrs && String(o.attrs['data-sq'] || '').startsWith('pit-'))
+      const stores = result.config.ops.filter(o => o.attrs && String(o.attrs['data-sq'] || '').startsWith('store-'))
+      expect(pits.length).toBe(12)
+      expect(stores.length).toBe(2)
     })
 
-    test('4-row pit board', () => {
+    test('4-row pit board without stores produces ops + divider', () => {
       const engine = {
         topology: { type: 'pit', rows: 4, cols: 8, stores: false },
         surface: 'earth',
-        render: { pitRadius: 18, cornerRadius: 14 },
+        render: { cellSize: 18, cornerRadius: 14 },
       }
       const result = produceLayout(engine)
-      expect(result.cols).toBe(8)
-      expect(result.stores).toBe(false)
-      expect(result.config.boardRows).toBe(4)
-      expect(result.config.pitRadius).toBe(18)
-      expect(result.config.cornerRadius).toBe(14)
+      const pits = result.config.ops.filter(o => o.attrs && String(o.attrs['data-sq'] || '').startsWith('pit-'))
+      const stores = result.config.ops.filter(o => o.attrs && String(o.attrs['data-sq'] || '').startsWith('store-'))
+      const dividers = result.config.ops.filter(o => o.tag === 'line')
+      expect(pits.length).toBe(32)
+      expect(stores.length).toBe(0)
+      expect(dividers.length).toBe(1)
+    })
+
+    test('ellipse pit board (congkak-style) produces ops', () => {
+      const engine = {
+        topology: { type: 'pit', cols: 7 },
+        surface: 'earth',
+        render: { cellSize: 18, boardShape: 'ellipse', storeSize: [20, 38], pitCurve: 4 },
+      }
+      const result = produceLayout(engine)
+      const ellipses = result.config.ops.filter(o => o.tag === 'ellipse')
+      const pits = result.config.ops.filter(o => o.attrs && String(o.attrs['data-sq'] || '').startsWith('pit-'))
+      expect(ellipses.length).toBe(4) // 2 board + 2 stores
+      expect(pits.length).toBe(14)
     })
   })
 

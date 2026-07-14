@@ -477,3 +477,46 @@ export function createPitTopology(config) {
     players,
   }
 }
+
+// ─── Pit render pipeline — ONE parametric renderer for every pit board (#18) ───
+//
+// The notation is an ordered list of drawing ops (raw elements — pit boards
+// are fully data-driven: producePitLayout computes all geometry from resolved
+// frontmatter). The pipeline walks the list once, emits structured SVG
+// elements, and collects interactive cells from data-sq attributes. It never
+// branches on game or variant. Attribute order is insertion order — part of
+// the byte-identity contract (snapshot suite must stay byte-identical).
+// Game data (pit counts, store sizes, seed setups, colours) NEVER lives
+// here — it arrives inside ops from produce-layout / frontmatter.
+
+export function renderPitLayout(config = {}) {
+  const elements = []
+  const cells = []
+  for (const op of config.ops || []) {
+    PIT_OP_HANDLERS[op.op](op, elements, cells)
+  }
+  return { width: config.width || 0, height: config.height || 0, elements, cells, labels: [], defs: [] }
+}
+
+const PIT_OP_HANDLERS = {
+
+  element(op, elements, cells) {
+    elements.push({ tag: op.tag, attrs: op.attrs, text: op.text, children: op.children })
+    if (op.attrs && op.attrs['data-sq'] !== undefined) {
+      cells.push({ id: op.attrs['data-sq'], x: op.attrs.cx, y: op.attrs.cy })
+    }
+  },
+
+  elements(op, elements, cells) {
+    for (const item of op.items) {
+      elements.push(item)
+      if (item.attrs && item.attrs['data-sq'] !== undefined) {
+        cells.push({ id: item.attrs['data-sq'], x: item.attrs.cx, y: item.attrs.cy })
+      }
+    }
+  },
+
+  group(op, elements) {
+    elements.push({ tag: 'g', attrs: op.attrs, children: op.children })
+  },
+}
