@@ -437,6 +437,165 @@ function surakartaArcElements(gx, gy, tileSize, rows, cols, colors) {
 
 
 function produceHexLayout(topo, colors, render) {
+  if (render._hexes || render._hexRadius != null || (render._hexRows && render._hexCols)) return hexBoardOps(colors, render)
+  return produceHexLegacy(topo, colors, render)
+}
+
+// --- Hex board ops builder (studio path) ---
+//
+// Verbatim geometry from the historical hex provider — byte-identity
+// contract. Colour strategy functions, frames, centre markers, and piece
+// positions arrive as resolved parameters. Runtime pass-through fields:
+// render._hexes | _hexRadius | _hexRows/_hexCols (cell set),
+// render._colorFn, _hexTypes, _frame, _flat, _centreMarker,
+// render._position ("q,r" → piece), _pieceImages.
+
+const HEX_EDGE_NEIGHBOURS = [[1, 0], [0, 1], [-1, 1], [-1, 0], [0, -1], [1, -1]]
+
+function axialToPixelPointy(q, r, size) {
+  return { x: size * (Math.sqrt(3) * q + Math.sqrt(3) / 2 * r), y: size * (3 / 2 * r) }
+}
+
+function axialToPixelFlat(q, r, size) {
+  return { x: size * (3 / 2 * q), y: size * (Math.sqrt(3) / 2 * q + Math.sqrt(3) * r) }
+}
+
+function hexCorners(cx, cy, size, flat) {
+  const corners = []
+  for (let i = 0; i < 6; i++) {
+    const deg = flat ? 60 * i : 60 * i - 30
+    const rad = Math.PI / 180 * deg
+    corners.push({ x: cx + size * Math.cos(rad), y: cy + size * Math.sin(rad) })
+  }
+  return corners
+}
+
+function hexGridCells(radius) {
+  const hexes = []
+  for (let q = -radius; q <= radius; q++) {
+    const r1 = Math.max(-radius, -q - radius)
+    const r2 = Math.min(radius, -q + radius)
+    for (let r = r1; r <= r2; r++) {
+      hexes.push({ q, r })
+    }
+  }
+  return hexes
+}
+
+function hexRhombusCells(rows, cols) {
+  const hexes = []
+  for (let r = 0; r < rows; r++) {
+    for (let q = 0; q < cols; q++) {
+      hexes.push({ q, r })
+    }
+  }
+  return hexes
+}
+
+function hexBorderEdges(hexes, size, flat, oX, oY, scale) {
+  const set = new Set(hexes.map(h => `${h.q},${h.r}`))
+  const edges = []
+  for (const h of hexes) {
+    const p = flat ? axialToPixelFlat(h.q, h.r, size) : axialToPixelPointy(h.q, h.r, size)
+    const cx = oX + p.x, cy = oY + p.y
+    const corners = hexCorners(cx, cy, size * scale, flat)
+    for (let i = 0; i < 6; i++) {
+      const [dq, dr] = HEX_EDGE_NEIGHBOURS[i]
+      const nKey = `${h.q + dq},${h.r + dr}`
+      if (!set.has(nKey)) {
+        edges.push([corners[i], corners[(i + 1) % 6]])
+      }
+    }
+  }
+  return edges
+}
+
+function hexBoardOps(colors, render) {
+  const hexes = render._hexes || (render._hexRadius != null ? hexGridCells(render._hexRadius) : hexRhombusCells(render._hexRows, render._hexCols))
+  const size = render.cellSize || 30
+  const flat = render._flat || false
+  const scale = render._scale || 0.95
+  const frame = render._frame || null
+  const hexColorFn = render._colorFn || null
+  const hexTypes = render._hexTypes || null
+  const pad = frame ? size * 1.8 : size + 10
+
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
+  for (const h of hexes) {
+    const p = flat ? axialToPixelFlat(h.q, h.r, size) : axialToPixelPointy(h.q, h.r, size)
+    if (p.x < minX) minX = p.x
+    if (p.x > maxX) maxX = p.x
+    if (p.y < minY) minY = p.y
+    if (p.y > maxY) maxY = p.y
+  }
+  const boardW = (maxX - minX) + pad * 2
+  const boardH = (maxY - minY) + pad * 2
+  const oX = -minX + pad
+  const oY = -minY + pad
+
+  const els = []
+  const el = (tag, attrs, text) => els.push({ op: 'element', tag, attrs, text })
+
+  if (!frame) {
+    els.push({ op: 'element', tag: 'rect', attrs: { x: 0, y: 0, width: boardW, height: boardH, fill: colors.background, rx: 6 } })
+  } else {
+    const borderColor = colors.border || '#6b4226'
+    const fillPolys = []
+    for (const h of hexes) {
+      const p = flat ? axialToPixelFlat(h.q, h.r, size) : axialToPixelPointy(h.q, h.r, size)
+      const corners = hexCorners(oX + p.x, oY + p.y, size * 1.08, flat)
+      fillPolys.push({ tag: 'polygon', attrs: { points: corners.map(c => `${c.x.toFixed(2)},${c.y.toFixed(2)}`).join(' ') } })
+    }
+    els.push({ op: 'element', tag: 'g', attrs: { fill: borderColor }, children: fillPolys })
+    const borderLines = hexBorderEdges(hexes, size, flat, oX, oY, 1.05).map(([a, b]) => (
+      { tag: 'line', attrs: { x1: a.x.toFixed(2), y1: a.y.toFixed(2), x2: b.x.toFixed(2), y2: b.y.toFixed(2) } }
+    ))
+    els.push({ op: 'element', tag: 'g', attrs: { fill: 'none', stroke: borderColor, 'stroke-width': 14, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, children: borderLines })
+  }
+
+  for (const h of hexes) {
+    const p = flat ? axialToPixelFlat(h.q, h.r, size) : axialToPixelPointy(h.q, h.r, size)
+    const corners = hexCorners(oX + p.x, oY + p.y, size * scale, flat)
+    const points = corners.map(c => `${c.x.toFixed(2)},${c.y.toFixed(2)}`).join(' ')
+
+    let fill
+    if (hexColorFn) {
+      fill = hexColorFn(h, colors)
+    } else if (hexTypes && h.type && colors[h.type]) {
+      fill = colors[h.type]
+    } else {
+      const s = h.q + h.r
+      fill = s % 3 === 0 ? colors.lightHex : s % 3 === 1 ? colors.darkHex : colors.midHex
+    }
+
+    el('polygon', { points, fill, stroke: colors.stroke, 'stroke-width': 1, 'data-sq': `${h.q},${h.r}`, class: 'board-cell' })
+  }
+
+  if (render._centreMarker) {
+    const p = flat ? axialToPixelFlat(0, 0, size) : axialToPixelPointy(0, 0, size)
+    el('text', { x: oX + p.x, y: oY + p.y + size * 0.3, 'text-anchor': 'middle', 'font-size': size * 0.8, fill: 'rgba(255,200,50,0.85)', 'pointer-events': 'none' }, render._centreMarker)
+  }
+
+  if (render._position && render._pieceImages) {
+    const pieces = []
+    for (const [key, piece] of Object.entries(render._position)) {
+      const [q, r] = key.split(',').map(Number)
+      const p = flat ? axialToPixelFlat(q, r, size) : axialToPixelPointy(q, r, size)
+      const cx = oX + p.x, cy = oY + p.y
+      const pieceId = typeof piece === 'string' ? piece : piece.type
+      const imgPath = render._pieceImages[pieceId]
+      if (imgPath) {
+        const ps = size * 1.6
+        pieces.push({ tag: 'image', attrs: { href: imgPath, x: (cx - ps / 2).toFixed(1), y: (cy - ps / 2).toFixed(1), width: ps.toFixed(1), height: ps.toFixed(1) } })
+      }
+    }
+    els.push({ op: 'element', tag: 'g', attrs: { 'pointer-events': 'none' }, children: pieces })
+  }
+
+  return { type: 'hex', config: { ops: els, width: boardW, height: boardH } }
+}
+
+function produceHexLegacy(topo, colors, render) {
   const cellSize = render.cellSize || 20
   const orientation = render.orientation || topo.orientation || 'pointy'
   const scale = 0.95
