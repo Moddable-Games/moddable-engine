@@ -95,6 +95,22 @@ function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabel
     return [result]
   })
 
+  // Append decoration ops from render.decorations (markers, tints, arcs, paths)
+  if (render.decorations && render.decorations.length > 0) {
+    const cellDecs = produceDecorations(render.decorations, colors, rows, cols, cellSize)
+    if (cellDecs) ops.push({ op: 'cell-decorations', fn: cellDecs })
+    const diags = produceDiagonals(render.decorations, colors)
+    if (diags) ops.push({ op: 'diagonals', predicate: diags.predicate, forward: diags.forward, backward: diags.backward, color: diags.color || colors.stroke || '#333', width: diags.width || 1.5 })
+    const topo = { rows, cols, layout: isIntersection ? 'intersections' : 'cells' }
+    const paths = producePaths(render.decorations, topo, cellSize)
+    for (const p of paths) ops.push({ op: 'element', tag: 'path', attrs: { d: p.d, fill: p.fill || 'none', stroke: p.stroke, 'stroke-width': p.strokeWidth || 2.5, 'stroke-linecap': p.linecap || 'round' } })
+    const markers = produceMarkers(render.decorations, topo)
+    if (markers.length) {
+      const markerFill = render.decorations.find(d => d.type === 'markers')?.fill
+      ops.push({ op: 'markers', items: markers, radius: 3, itemFill: (markerFill && colors[markerFill]) || colors.stroke || '#333' })
+    }
+  }
+
   const goStyle = idStyle === 'go'
   const GO_ALPHABET = 'ABCDEFGHJKLMNOPQRST'
   const fs = Math.min(13, pad * 0.55)
