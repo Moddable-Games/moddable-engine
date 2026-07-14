@@ -225,40 +225,40 @@ function mapColorsForProvider(boardStyle, surface) {
       }
     case 'morris':
       return {
-        background: c.background || '#f5e6c8',
-        line: c.stroke || '#4a3520',
-        point: c.stroke || '#4a3520',
+        background: c.background,
+        line: c.line || c.stroke,
+        point: c.point || c.stroke,
       }
     case 'stern-halma':
       return {
-        boardBody: c['board-outer'] || '#4a3728',
-        boardRim: c['board-inner'] || '#5c4636',
-        boardFelt: c.background || '#2d5c3d',
-        centre: c['cell-light'] || '#e8dcc8',
-        outline: c.stroke || '#6b5a40',
-        hole: c['cell-dark'] || '#3a2c1c',
-        armN: c.armN || '#f2e8d4',
-        armNE: c.armNE || '#d4e4f0',
-        armSE: c.armSE || '#e8d8ec',
-        armS: c.armS || '#f2e8d4',
-        armSW: c.armSW || '#d4e4f0',
-        armNW: c.armNW || '#e8d8ec',
+        boardBody: c.boardBody || c['board-outer'],
+        boardRim: c.boardRim || c['board-inner'],
+        boardFelt: c.boardFelt || c.background,
+        centre: c.centre || c['cell-light'],
+        outline: c.outline || c.stroke,
+        hole: c.hole || c['cell-dark'],
+        armN: c.armN,
+        armNE: c.armNE,
+        armSE: c.armSE,
+        armS: c.armS,
+        armSW: c.armSW,
+        armNW: c.armNW,
       }
     case 'nyout':
       return {
-        background: c.background || '#f5e6c8',
-        line: c.stroke || '#4a3520',
-        point: c.stroke || '#4a3520',
-        junction: c.junction || '#c0622f',
-        centre: c.centre || '#8b1a1a',
+        background: c.background,
+        line: c.line || c.stroke,
+        point: c.point || c.stroke,
+        junction: c.junction,
+        centre: c.centre,
       }
     case 'asalto':
       return {
-        background: c.background || '#f5e6c8',
-        line: c.stroke || '#2a2a2a',
-        point: c.stroke || '#2a2a2a',
-        fortress: c.fortress || 'rgba(40,80,180,0.15)',
-        fortressBorder: c.fortressBorder || '#3355aa',
+        background: c.background,
+        line: c.line || c.stroke,
+        point: c.point || c.stroke,
+        fortress: c.fortress,
+        fortressBorder: c.fortressBorder,
       }
     case 'landlords':
       return {
