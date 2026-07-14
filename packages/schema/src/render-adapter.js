@@ -218,12 +218,10 @@ function mapColorsForProvider(boardStyle, surface) {
       }
     case 'backgammon':
       return {
-        frame: c['board-outer'] || '#3d2b1f',
-        felt: c['cell-light'] || '#1a5c3a',
-        pointA: c['cell-dark'] || '#c47e3b',
-        pointB: c['cell-mid'] || '#8b2500',
-        dark: '#333', darkStroke: '#111', darkRing: '#555',
-        light: '#eee', lightStroke: '#999', lightRing: '#ccc',
+        frame: c['board-outer'],
+        felt: c.felt,
+        pointA: c['point-a'],
+        pointB: c['point-b'],
       }
     case 'morris':
       return {
@@ -408,6 +406,7 @@ function buildRenderOpts(resolved) {
   // Track
   if (topo.type === 'track') {
     opts.positions = topo.positions || 24
+    if (render.overflow) opts.overflow = render.overflow
     if (boardStyle === 'landlords') {
       if (resolved._boardData) opts.boardData = resolved._boardData
       else if (resolved.content?.data) opts.boardData = resolved.content.data

@@ -5,10 +5,10 @@ import { renderSurfaceSVG } from './piece-surface.js'
 import { renderGridLayout } from '../../topology-grid/src/topology-grid.js'
 import { renderGraphLayout } from '../../topology-graph/src/topology-graph.js'
 import { renderPitLayout } from '../../topology-pit/src/topology-pit.js'
+import { renderTrackLayout } from '../../topology-track/src/topology-track.js'
 import { elementsToFragment, elementToSvg } from './serialize-layout.js'
 import { produceLayout } from '../../schema/src/produce-layout.js'
 import { hex } from '../../topology-hex/src/providers.js'
-import { backgammon, landlords } from '../../topology-track/src/providers.js'
 
 // ─── GRID STYLES (handled entirely by produceLayout + renderGridLayout) ─────
 
@@ -25,9 +25,14 @@ const GRAPH_STRUCTURE = { morris: 'concentric-rings', nyout: 'perimeter-cross', 
 const PIT_STYLES = new Set(['mancala'])
 const PIT_DEFAULT_COLORS = {}
 
+// ─── TRACK STYLES (handled entirely by produceLayout + renderTrackLayout) ───
+
+const TRACK_STYLES = new Set(['backgammon', 'landlords'])
+const TRACK_STYLE_NAME = { backgammon: 'triangular-points', landlords: 'perimeter' }
+
 // ─── NON-PIPELINE PROVIDER REGISTRY ─────────────────────────────────────────
 
-const PROVIDERS = { hex, backgammon, landlords }
+const PROVIDERS = { hex }
 
 // ─── RENDERER (ported from moddable-chess/js/svg-renderer.js) ───────────────
 
@@ -86,7 +91,8 @@ export function renderBoard(opts) {
   const isGrid = GRID_STYLES.has(boardStyle)
   const isGraph = GRAPH_STYLES.has(boardStyle)
   const isPit = PIT_STYLES.has(boardStyle)
-  const isPipeline = isGrid || isGraph || isPit
+  const isTrack = TRACK_STYLES.has(boardStyle)
+  const isPipeline = isGrid || isGraph || isPit || isTrack
   const provider = isPipeline ? null : PROVIDERS[boardStyle]
   if (!isPipeline && !provider) return `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="60"><text x="100" y="35" text-anchor="middle" font-size="12" fill="#888">Unknown: "${boardStyle}"</text></svg>`
 
@@ -97,10 +103,10 @@ export function renderBoard(opts) {
   const showLabels = opts.showLabels !== false
   const title = opts.title || null
 
-  const defaultColors = isGrid ? (GRID_DEFAULT_COLORS[boardStyle] || {}) : isGraph ? (GRAPH_DEFAULT_COLORS[boardStyle] || {}) : isPit ? (PIT_DEFAULT_COLORS[boardStyle] || {}) : (provider.defaultColors || {})
+  const defaultColors = isGrid ? (GRID_DEFAULT_COLORS[boardStyle] || {}) : isGraph ? (GRAPH_DEFAULT_COLORS[boardStyle] || {}) : (isPit || isTrack) ? {} : (provider.defaultColors || {})
   const colors = { ...defaultColors, ...(opts.colors || {}) }
 
-  const labelStyle = isGrid ? GRID_LABEL_STYLE[boardStyle] : ((isGraph || isPit) ? 'none' : (provider.labelStyle || 'algebraic'))
+  const labelStyle = isGrid ? GRID_LABEL_STYLE[boardStyle] : ((isGraph || isPit || isTrack) ? 'none' : (provider.labelStyle || 'algebraic'))
   const effectiveLabels = showLabels && labelStyle !== 'none'
 
   const STYLE_TO_CELLCOLOR = { checkered: 'checkered', 'mono-grid': 'uniform', go: 'uniform', xiangqi: 'xiangqi', shogi: 'uniform', surakarta: 'uniform', alquerque: 'uniform' }
@@ -108,6 +114,7 @@ export function renderBoard(opts) {
   let gridLayout = null
   let graphLayout = null
   let pitLayout = null
+  let trackLayout = null
   if (isGrid) {
     const posType = GRID_POSITION_TYPE[boardStyle]
     const cellColor = STYLE_TO_CELLCOLOR[boardStyle] || 'checkered'
@@ -143,9 +150,22 @@ export function renderBoard(opts) {
     }
     const result = produceLayout(engine)
     if (result) pitLayout = renderPitLayout(result.config)
+  } else if (isTrack) {
+    const engine = {
+      topology: { type: 'track', positions: opts.positions || 24 },
+      surface: { colors },
+      render: {
+        trackStyle: TRACK_STYLE_NAME[boardStyle],
+        spaceWidth: opts.spaceWidth, cornerSize: opts.cornerSize,
+        _parsedSetup: opts.parsedSetup, _pieceImages: opts.pieceImages,
+        _boardData: opts.boardData, _board: opts.variant,
+      },
+    }
+    const result = produceLayout(engine)
+    if (result) trackLayout = renderTrackLayout(result.config)
   }
 
-  const pipelineLayout = gridLayout || graphLayout || pitLayout
+  const pipelineLayout = gridLayout || graphLayout || pitLayout || trackLayout
   const W = pipelineLayout ? pipelineLayout.width : (() => { const l = provider.computeLayout({ rows, cols, tileSize, ...opts }); return l.boardW + (effectiveLabels ? 48 : 0) })()
   const H = pipelineLayout ? pipelineLayout.height : (() => { const l = provider.computeLayout({ rows, cols, tileSize, ...opts }); return l.boardH + (effectiveLabels ? 48 : 0) })()
 
@@ -156,7 +176,7 @@ export function renderBoard(opts) {
   const ox = pad, oy = pad
 
   const parts = []
-  const overflow = (opts.variant === '1904-patent' && boardStyle === 'landlords') ? ' style="overflow:visible"' : ''
+  const overflow = opts.overflow === 'visible' ? ' style="overflow:visible"' : ''
   parts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"${overflow}>`)
   if (title) parts.push(`<title>${esc(title)}</title>`)
 
@@ -176,7 +196,7 @@ export function renderBoard(opts) {
   }
 
   if (position && Object.keys(position).length > 0) {
-    if (graphLayout || pitLayout) {
+    if (graphLayout || pitLayout || trackLayout) {
       parts.push(`<g pointer-events="none"></g>`)
     } else if (gridLayout) {
       parts.push(`<g pointer-events="none">${renderPiecesFromCells(position, gridLayout.cells, tileSize, opts, colors)}</g>`)
