@@ -57,26 +57,6 @@ function renderOverlays(overlays, ctx) {
 const GRID_LABEL_STYLE = { checkered: 'algebraic', 'mono-grid': 'algebraic', go: 'go', xiangqi: 'none', shogi: 'none', surakarta: 'algebraic', alquerque: 'algebraic' }
 const GRID_POSITION_TYPE = { checkered: 'square', 'mono-grid': 'square', go: 'intersection', xiangqi: 'intersection', shogi: 'intersection', surakarta: 'intersection', alquerque: 'intersection' }
 
-function mapToSchemaColors(boardStyle, colors) {
-  switch (boardStyle) {
-    case 'checkered':
-      return { 'cell-light': colors.lightSquare, 'cell-dark': colors.darkSquare, stroke: colors.stroke, voidFill: colors.voidFill, ...colors }
-    case 'mono-grid':
-      return { 'cell-light': colors.monoSquare, stroke: colors.gridLine, ...colors }
-    case 'go':
-      return { 'cell-light': colors.woodLight, 'cell-dark': colors.woodDark, stroke: colors.gridLine, labelText: colors.labelText, starPoint: colors.starPoint, ...colors }
-    case 'xiangqi':
-      return { 'cell-light': colors.board, stroke: colors.gridLine, river: colors.river, labelText: colors.labelText, ...colors }
-    case 'shogi':
-      return { 'cell-light': colors.board, 'cell-dark': colors.boardBorder, stroke: colors.gridLine, hoshi: colors.hoshi, promotion: colors.promotionZone, labelText: colors.labelText, ...colors }
-    case 'surakarta':
-      return { 'cell-light': colors.board || colors.boardInner, background: colors.frame, stroke: colors.gridLine, innerArc: colors.innerArc, outerArc: colors.outerArc, dotFill: colors.dotFill, ...colors }
-    case 'alquerque':
-      return { 'cell-light': colors.monoSquare, stroke: colors.gridLine, ...colors }
-    default:
-      return colors
-  }
-}
 
 export function renderBoard(opts) {
   opts = opts || {}
@@ -110,7 +90,7 @@ export function renderBoard(opts) {
   if (isGrid) {
     const posType = GRID_POSITION_TYPE[boardStyle]
     const cellColor = STYLE_TO_CELLCOLOR[boardStyle] || 'checkered'
-    const surfaceColors = opts.ops ? colors : mapToSchemaColors(boardStyle, colors)
+    const surfaceColors = colors
     const engine = {
       topology: { type: 'grid', rows, cols, layout: posType === 'intersection' ? 'intersections' : 'cells' },
       surface: { colors: surfaceColors },
@@ -161,6 +141,7 @@ export function renderBoard(opts) {
       surface: { colors },
       render: {
         cellSize: opts.hexSize || opts.tileSize || 30,
+        cellColor: opts.hexCellColor,
         _hexes: opts.hexGrid, _hexRadius: opts.hexRadius,
         _hexRows: opts.hexRows, _hexCols: opts.hexCols,
         _flat: opts.flat, _scale: opts.hexScale, _frame: opts.hexFrame,

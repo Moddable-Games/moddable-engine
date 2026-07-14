@@ -1,12 +1,10 @@
 /**
- * Render Adapter — translates a resolved cascade object into opts for renderBoard().
- *
- * This is the bridge between the new pipeline (schema-driven) and the existing
- * board-diagrams.js providers (pixel-perfect rendering). The providers stay as-is;
- * only the config source changes from boards.js GAMES object to frontmatter cascade.
+ * Render Adapter — translates a resolved cascade object into the flat opts
+ * shape that renderBoard() consumes. Scheduled for deletion once renderBoard
+ * accepts the resolved cascade directly (topology → produceLayout → SVG).
  */
 
-import { renderBoard, fenToPosition } from '../../render/src/board-diagrams.js'
+import { fenToPosition } from '../../render/src/board-diagrams.js'
 import { getDeckConfig, createDeck, shuffle, deal, layoutTable } from '../../component-deck/index.js'
 
 let _renderDeckSvg = null
@@ -115,7 +113,6 @@ function resolveBoardStyle(resolved) {
         return 'go'
       }
       if (render.decorations?.some(d => d.type === 'diagonals' && d.pattern === 'alternating')) return 'alquerque'
-      if (resolved._cellMap) return 'checkered'
       if (cellColor === 'uniform' || cellColor === 'none') return 'mono-grid'
       return 'checkered'
     }
@@ -139,156 +136,6 @@ function resolveBoardStyle(resolved) {
   }
 }
 
-// --- Colour key translation ---
-// Surface uses semantic names (cell-light, cell-dark, cell-mid, stroke, background)
-// Providers use their own key names (lightSquare, darkSquare, lightHex, etc.)
-
-function mapColorsForProvider(boardStyle, surface) {
-  const c = surface?.colors || {}
-
-  switch (boardStyle) {
-    case 'checkered': {
-      const result = {
-        lightSquare: c.lightSquare || c['cell-light'] || '#f0d9b5',
-        darkSquare: c.darkSquare || c['cell-dark'] || '#b58863',
-        voidFill: c.voidFill || c['void'] || 'transparent',
-        castleX: c.castleX || c['castle-x'] || '#fff8f0',
-      }
-      // Pass through all cell-type colours + their stroke variants
-      for (const [key, val] of Object.entries(c)) {
-        if (key.endsWith('-stroke')) {
-          const base = key.slice(0, -7)
-          result[base + 'Stroke'] = val
-        } else if (!key.includes('-') && key !== 'void' && key !== 'stroke') {
-          result[key] = val
-        }
-      }
-      return result
-    }
-    case 'mono-grid':
-      return {
-        monoSquare: c.monoSquare || c['cell-light'] || '#d9b483',
-        gridLine: c.gridLine || c.stroke || '#8b6914',
-      }
-    case 'go':
-      return {
-        woodLight: c.woodLight || c['cell-light'],
-        woodDark: c.woodDark || c['cell-dark'],
-        gridLine: c.gridLine || c.stroke,
-        labelText: c.labelText || c.stroke,
-        starPoint: c.starPoint || c.stroke,
-      }
-    case 'xiangqi':
-      return {
-        board: c.board || c['cell-light'],
-        gridLine: c.gridLine || c.stroke,
-        river: c.river || c['cell-light'],
-        riverText: c.riverText || c.stroke,
-        palace: c.palace || c.stroke,
-        labelText: c.labelText || c.stroke,
-      }
-    case 'shogi':
-      return {
-        board: c.board || c['cell-light'],
-        boardBorder: c.boardBorder || c['cell-dark'],
-        gridLine: c.gridLine || c.stroke,
-        hoshi: c.hoshi || c.stroke,
-        promotionZone: c.promotionZone || c.promotion,
-        labelText: c.labelText || c.stroke,
-      }
-    case 'hex':
-      return {
-        lightHex: c.lightHex || c['cell-light'],
-        darkHex: c.darkHex || c['cell-dark'],
-        midHex: c.midHex || c['cell-mid'],
-        stroke: c.stroke,
-        background: c.background,
-        border: c.border,
-      }
-    case 'mancala':
-      return {
-        boardOuter: c['board-outer'],
-        boardInner: c['board-inner'],
-        pit: c.pit,
-        pitStroke: c['pit-stroke'],
-        seed: c.seed,
-        seedStroke: c['seed-stroke'],
-        marker: c.marker,
-        border: c.border,
-        borderDash: c['border-dash'],
-      }
-    case 'backgammon':
-      return {
-        frame: c['board-outer'],
-        felt: c.felt,
-        pointA: c['point-a'],
-        pointB: c['point-b'],
-      }
-    case 'morris':
-      return {
-        background: c.background,
-        line: c.line || c.stroke,
-        point: c.point || c.stroke,
-      }
-    case 'stern-halma':
-      return {
-        boardBody: c.boardBody || c['board-outer'],
-        boardRim: c.boardRim || c['board-inner'],
-        boardFelt: c.boardFelt || c.background,
-        centre: c.centre || c['cell-light'],
-        outline: c.outline || c.stroke,
-        hole: c.hole || c['cell-dark'],
-        armN: c.armN,
-        armNE: c.armNE,
-        armSE: c.armSE,
-        armS: c.armS,
-        armSW: c.armSW,
-        armNW: c.armNW,
-      }
-    case 'nyout':
-      return {
-        background: c.background,
-        line: c.line || c.stroke,
-        point: c.point || c.stroke,
-        junction: c.junction,
-        centre: c.centre,
-      }
-    case 'asalto':
-      return {
-        background: c.background,
-        line: c.line || c.stroke,
-        point: c.point || c.stroke,
-        fortress: c.fortress,
-        fortressBorder: c.fortressBorder,
-      }
-    case 'landlords':
-      return {
-        background: c.background || '#f5f0e8',
-        stroke: c.stroke || '#8b7355',
-        ...(c.lot && { lot: c.lot }),
-        ...(c.railroad && { railroad: c.railroad }),
-        ...(c.franchise && { franchise: c.franchise }),
-        ...(c.corner && { corner: c.corner }),
-      }
-    case 'surakarta':
-      return {
-        frame: c.frame || c['board-outer'],
-        board: c.board || c['cell-light'],
-        boardInner: c.boardInner || c['board-inner'],
-        gridLine: c.gridLine || c.stroke,
-        dotFill: c.dotFill || c.stroke,
-        innerArc: c.innerArc || c.stroke,
-        outerArc: c.outerArc || c.stroke,
-      }
-    case 'alquerque':
-      return {
-        monoSquare: c['cell-light'] || '#d9b483',
-        gridLine: c.stroke || '#8b6914',
-      }
-    default:
-      return { ...c }
-  }
-}
 
 // --- Build opts from resolved object ---
 
@@ -297,17 +144,10 @@ function buildRenderOpts(resolved) {
   const render = resolved.render || {}
   const surface = resolved.surface || {}
 
-  // Use passthrough from reverse adapter, infer from topology/decorations, or explicit fallback
-  const inferredStyle = resolveBoardStyle(resolved)
-  const boardStyle = resolved._boardStyle || inferredStyle
+  const boardStyle = resolveBoardStyle(resolved)
   if (!boardStyle) return null
 
-  let colors
-  if (surface?._rawColors) {
-    colors = surface._rawColors
-  } else {
-    colors = mapColorsForProvider(boardStyle, surface)
-  }
+  const colors = surface?.colors || {}
 
   const opts = {
     boardStyle,
@@ -333,9 +173,7 @@ function buildRenderOpts(resolved) {
     opts.tileSize = render.cellSize || 40
 
     // Zone map (cellMap) — built from zones/cross layout for the ops pipeline
-    if (resolved._cellMap) {
-      opts.cellMap = resolved._cellMap
-    } else if (render.zones) {
+    if (render.zones) {
       opts.cellMap = buildCellMap(render.zones, opts.rows, opts.cols)
     } else if (topo.layout === 'cross') {
       opts.cellMap = buildCrossMap(opts.rows, opts.cols, render.castles || [])
@@ -362,9 +200,7 @@ function buildRenderOpts(resolved) {
     opts.flat = topo.orientation === 'flat'
     opts.hexSize = render.cellSize || 20
     opts.hexFrame = render.frame || topo.shape || null
-    if (resolved._hexGrid) {
-      opts.hexGrid = resolved._hexGrid
-    } else if (topo.grid) {
+    if (topo.grid) {
       opts.hexGrid = topo.grid.map(c => ({ q: c[0], r: c[1] }))
     } else if (topo.shape === 'triangular' && topo.sideLength) {
       opts.hexGrid = generateTriangularHexGrid(topo.sideLength)
@@ -374,33 +210,21 @@ function buildRenderOpts(resolved) {
       opts.hexRows = topo.rows
       opts.hexCols = topo.cols
     }
-    if (resolved._hexColorFn) {
-      opts.hexColorFn = resolved._hexColorFn
-    } else if (render.cellColor === 'tricolor') {
-      opts.hexColorFn = tricolorFn
-    } else if (render.cellColor === 'rings') {
-      opts.hexColorFn = ringColorFn
-    } else if (render.cellColor === 'terrain') {
-      opts.hexTypes = true
-    }
+    if (render.cellColor) opts.hexCellColor = render.cellColor
     // Hex position (map of "q,r" → piece)
-    if (resolved._hexPosition) {
-      opts.hexPosition = resolved._hexPosition
-    } else if (resolved.setup && typeof resolved.setup === 'object' && !Array.isArray(resolved.setup)) {
+    if (resolved.setup && typeof resolved.setup === 'object' && !Array.isArray(resolved.setup)) {
       opts.hexPosition = resolved.setup
     } else if (resolved.setup && typeof resolved.setup === 'string' && resolved.setup.includes(',') && resolved.setup.includes(':')) {
       opts.hexPosition = parseHexPositionString(resolved.setup)
     }
-    if (resolved._centreMarker) opts.centreMarker = resolved._centreMarker
-    else if (render.centreMarker) opts.centreMarker = render.centreMarker
+    if (render.centreMarker) opts.centreMarker = render.centreMarker
 
-    if (opts.hexTypes && opts.hexPosition) {
+    if (render.cellColor === 'terrain' && opts.hexPosition) {
       opts.hexGrid = Object.entries(opts.hexPosition).map(([key, val]) => {
         const [q, r] = key.split(',').map(Number)
         const type = typeof val === 'string' ? val : val?.type || val?.piece || null
         return { q, r, type }
       })
-      opts.colors = { ...opts.colors, ...TERRAIN_COLORS }
     }
   }
 
@@ -409,10 +233,8 @@ function buildRenderOpts(resolved) {
     opts.positions = topo.positions || 24
     if (render.overflow) opts.overflow = render.overflow
     if (boardStyle === 'landlords') {
-      if (resolved._boardData) opts.boardData = resolved._boardData
-      else if (resolved.content?.data) opts.boardData = resolved.content.data
-      if (resolved._variant) opts.variant = resolved._variant
-      else if (resolved.content?.board) opts.variant = resolved.content.board
+      if (resolved.content?.data) opts.boardData = resolved.content.data
+      if (resolved.content?.board) opts.variant = resolved.content.board
     }
     if (boardStyle === 'backgammon' && resolved.setup && typeof resolved.setup === 'string') {
       opts.parsedSetup = parseBackgammonSetup(resolved.setup)
@@ -491,10 +313,7 @@ function buildRenderOpts(resolved) {
   }
 
   // Position/setup
-  if (resolved._position) {
-    // Pre-built runtime position (handicap, fanorona, go presets)
-    opts.position = resolved._position
-  } else if (Array.isArray(resolved.setup)) {
+  if (Array.isArray(resolved.setup)) {
     // Multi-board array-FEN — render first board only for diagrams
     const firstBoard = resolved.setup[0]
     if (firstBoard && typeof firstBoard === 'string' && firstBoard.includes('/')) {
@@ -639,28 +458,20 @@ function renderDeckFromResolved(resolved) {
   const deckConfig = getDeckConfig(deckType)
   if (!deckConfig) return null
 
-  // Use runtime state if available (live UI selections), else fall back to setup data
-  const rt = resolved._runtimeState || {}
-  const players = rt.players || setup.players || 2
-  const seed = rt.seed || setup.seed || 42
+  const players = setup.players || 2
+  const seed = setup.seed || 42
 
-  // Use passthrough deckVariant if available, otherwise try to match
-  const deckVariant = resolved._deckVariant
   let dealSpec = null
-  if (deckVariant && deckConfig.games?.[deckVariant]) {
-    dealSpec = deckConfig.games[deckVariant]
-  } else {
-    const gameKeys = Object.keys(deckConfig.games || {})
-    for (const key of gameKeys) {
-      const spec = deckConfig.games[key]
-      if (spec.perPlayer === setup.deal || spec.defaultPlayers === players) {
-        dealSpec = spec
-        break
-      }
+  const gameKeys = Object.keys(deckConfig.games || {})
+  for (const key of gameKeys) {
+    const spec = deckConfig.games[key]
+    if (spec.perPlayer === setup.deal || spec.defaultPlayers === players) {
+      dealSpec = spec
+      break
     }
-    if (!dealSpec && gameKeys.length > 0) {
-      dealSpec = deckConfig.games[gameKeys[0]]
-    }
+  }
+  if (!dealSpec && gameKeys.length > 0) {
+    dealSpec = deckConfig.games[gameKeys[0]]
   }
   if (!dealSpec) return null
 
@@ -808,23 +619,6 @@ function parsePitSetup(setup) {
   return { pits, stores }
 }
 
-// --- Hex tricolor helper ---
-// Matches the glinskiColor function signature: (hex, colors) → fill string
-
-function tricolorFn(hex, colors) {
-  const mod = (((hex.q - hex.r) % 3) + 3) % 3
-  return mod === 0 ? colors.lightHex : mod === 1 ? colors.midHex : colors.darkHex
-}
-
-function ringColorFn(hex, colors) {
-  const ring = Math.max(Math.abs(hex.q), Math.abs(hex.r), Math.abs(hex.q + hex.r))
-  return ring % 2 === 0 ? colors.darkHex : colors.lightHex
-}
-
-const TERRAIN_COLORS = {
-  water: '#2196F3', trees: '#4CAF50', mount: '#795548',
-  grass: '#8BC34A', sand: '#FFC107', base: '#F44336',
-}
 
 function parseFen4(fen4, rows, cols) {
   const position = {}
@@ -947,4 +741,4 @@ function parseGraphSetup(setup) {
 
 export function getMultiBoardRenderer() { return _renderMultiBoard }
 
-export { resolveBoardStyle, mapColorsForProvider, buildRenderOpts, attachPieceImages, buildPieceImages, renderDeckFromResolved }
+export { buildRenderOpts, attachPieceImages, buildPieceImages, renderDeckFromResolved }

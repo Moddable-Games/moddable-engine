@@ -124,7 +124,7 @@ function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabel
     ops,
     labels: showLabels ? {
       show: true,
-      color: goStyle ? (colors.labelText || '#5a4020') : (colors.labelText || colors.stroke || '#5c3a1e'),
+      color: goStyle ? (colors['label-text'] || '#5a4020') : (colors['label-text'] || '#5c3a1e'),
       fontSize: fs,
       fontFamily: goStyle ? 'sans-serif' : 'monospace',
       alphabet: goStyle ? GO_ALPHABET.slice(0, cols) : null,
@@ -288,7 +288,7 @@ function translateOp(decl, ctx) {
         const dark = colors[decl.dark] || decl.dark
         const { cellMap } = ctx
         if (cellMap) {
-          const voidFill = colors.voidFill || 'transparent'
+          const voidFill = colors['void-fill'] || 'transparent'
           return {
             op: 'cells',
             interactive: true,
@@ -297,7 +297,7 @@ function translateOp(decl, ctx) {
               const cell = cellMap[r] && cellMap[r][c]
               if (!cell) return null
               const fill = (typeof cell === 'string' && colors[cell]) ? colors[cell] : (r + c) % 2 === 0 ? light : dark
-              const stroke = (typeof cell === 'string' && colors[cell + 'Stroke']) ? colors[cell + 'Stroke'] : null
+              const stroke = (typeof cell === 'string' && colors[cell + '-stroke']) ? colors[cell + '-stroke'] : null
               return { fill, stroke: stroke || 'rgba(0,0,0,0.15)', strokeWidth: stroke ? 2 : 1, type: cell }
             },
             decorations(r, c, cx, cy, ts) {
@@ -318,7 +318,7 @@ function translateOp(decl, ctx) {
               }
               if (cell === 'castle') {
                 const d = ts * 0.3
-                const xStroke = colors.castleX || '#fff8f0'
+                const xStroke = colors['castle-x'] || '#fff8f0'
                 return [
                   { tag: 'line', attrs: { x1: cx - d, y1: cy - d, x2: cx + d, y2: cy + d, stroke: xStroke, 'stroke-width': 1.5, 'stroke-linecap': 'round' } },
                   { tag: 'line', attrs: { x1: cx + d, y1: cy - d, x2: cx - d, y2: cy + d, stroke: xStroke, 'stroke-width': 1.5, 'stroke-linecap': 'round' } },
@@ -440,30 +440,30 @@ function surakartaArcElements(gx, gy, tileSize, rows, cols, colors) {
   const ix = (i) => gx + i * tileSize
   const iy = (i) => gy + i * tileSize
   return [
-    { tag: 'path', attrs: { d: `M ${ix(1)},${iy(0)} A ${innerR},${innerR} 0 1,0 ${ix(0)},${iy(1)}`, stroke: colors.innerArc || '#6b4a30' } },
-    { tag: 'path', attrs: { d: `M ${ix(cols - 2)},${iy(0)} A ${innerR},${innerR} 0 1,1 ${ix(cols - 1)},${iy(1)}`, stroke: colors.innerArc || '#6b4a30' } },
-    { tag: 'path', attrs: { d: `M ${ix(0)},${iy(rows - 2)} A ${innerR},${innerR} 0 1,0 ${ix(1)},${iy(rows - 1)}`, stroke: colors.innerArc || '#6b4a30' } },
-    { tag: 'path', attrs: { d: `M ${ix(cols - 1)},${iy(rows - 2)} A ${innerR},${innerR} 0 1,1 ${ix(cols - 2)},${iy(rows - 1)}`, stroke: colors.innerArc || '#6b4a30' } },
-    { tag: 'path', attrs: { d: `M ${ix(2)},${iy(0)} A ${outerR},${outerR} 0 1,0 ${ix(0)},${iy(2)}`, stroke: colors.outerArc || '#6b4a30' } },
-    { tag: 'path', attrs: { d: `M ${ix(cols - 3)},${iy(0)} A ${outerR},${outerR} 0 1,1 ${ix(cols - 1)},${iy(2)}`, stroke: colors.outerArc || '#6b4a30' } },
-    { tag: 'path', attrs: { d: `M ${ix(0)},${iy(rows - 3)} A ${outerR},${outerR} 0 1,0 ${ix(2)},${iy(rows - 1)}`, stroke: colors.outerArc || '#6b4a30' } },
-    { tag: 'path', attrs: { d: `M ${ix(cols - 1)},${iy(rows - 3)} A ${outerR},${outerR} 0 1,1 ${ix(cols - 3)},${iy(rows - 1)}`, stroke: colors.outerArc || '#6b4a30' } },
+    { tag: 'path', attrs: { d: `M ${ix(1)},${iy(0)} A ${innerR},${innerR} 0 1,0 ${ix(0)},${iy(1)}`, stroke: colors['inner-arc'] || '#6b4a30' } },
+    { tag: 'path', attrs: { d: `M ${ix(cols - 2)},${iy(0)} A ${innerR},${innerR} 0 1,1 ${ix(cols - 1)},${iy(1)}`, stroke: colors['inner-arc'] || '#6b4a30' } },
+    { tag: 'path', attrs: { d: `M ${ix(0)},${iy(rows - 2)} A ${innerR},${innerR} 0 1,0 ${ix(1)},${iy(rows - 1)}`, stroke: colors['inner-arc'] || '#6b4a30' } },
+    { tag: 'path', attrs: { d: `M ${ix(cols - 1)},${iy(rows - 2)} A ${innerR},${innerR} 0 1,1 ${ix(cols - 2)},${iy(rows - 1)}`, stroke: colors['inner-arc'] || '#6b4a30' } },
+    { tag: 'path', attrs: { d: `M ${ix(2)},${iy(0)} A ${outerR},${outerR} 0 1,0 ${ix(0)},${iy(2)}`, stroke: colors['outer-arc'] || '#6b4a30' } },
+    { tag: 'path', attrs: { d: `M ${ix(cols - 3)},${iy(0)} A ${outerR},${outerR} 0 1,1 ${ix(cols - 1)},${iy(2)}`, stroke: colors['outer-arc'] || '#6b4a30' } },
+    { tag: 'path', attrs: { d: `M ${ix(0)},${iy(rows - 3)} A ${outerR},${outerR} 0 1,0 ${ix(2)},${iy(rows - 1)}`, stroke: colors['outer-arc'] || '#6b4a30' } },
+    { tag: 'path', attrs: { d: `M ${ix(cols - 1)},${iy(rows - 3)} A ${outerR},${outerR} 0 1,1 ${ix(cols - 3)},${iy(rows - 1)}`, stroke: colors['outer-arc'] || '#6b4a30' } },
   ]
 }
 
 
 function tricolorFn(hex, colors) {
   const mod = (((hex.q - hex.r) % 3) + 3) % 3
-  const light = colors.lightHex || colors['cell-light']
-  const mid = colors.midHex || colors['cell-mid']
-  const dark = colors.darkHex || colors['cell-dark']
+  const light = colors['cell-light']
+  const mid = colors['cell-mid']
+  const dark = colors['cell-dark']
   return mod === 0 ? light : mod === 1 ? mid : dark
 }
 
 function ringColorFn(hex, colors) {
   const ring = Math.max(Math.abs(hex.q), Math.abs(hex.r), Math.abs(hex.q + hex.r))
-  const light = colors.lightHex || colors['cell-light']
-  const dark = colors.darkHex || colors['cell-dark']
+  const light = colors['cell-light']
+  const dark = colors['cell-dark']
   return ring % 2 === 0 ? dark : light
 }
 
@@ -561,8 +561,10 @@ function hexBoardOps(colors, render) {
   const flat = render._flat || false
   const scale = render._scale || 0.95
   const frame = render._frame || null
-  const hexColorFn = render._colorFn || null
-  const hexTypes = render._hexTypes || null
+  let hexColorFn = render._colorFn || null
+  if (!hexColorFn && render.cellColor === 'tricolor') hexColorFn = tricolorFn
+  else if (!hexColorFn && render.cellColor === 'rings') hexColorFn = ringColorFn
+  const hexTypes = render._hexTypes || (render.cellColor === 'terrain')
   const pad = frame ? size * 1.8 : size + 10
 
   let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
@@ -610,9 +612,9 @@ function hexBoardOps(colors, render) {
       fill = colors[h.type]
     } else {
       const s = h.q + h.r
-      const light = colors.lightHex || colors['cell-light']
-      const dark = colors.darkHex || colors['cell-dark']
-      const mid = colors.midHex || colors['cell-mid']
+      const light = colors['cell-light']
+      const dark = colors['cell-dark']
+      const mid = colors['cell-mid']
       fill = s % 3 === 0 ? light : s % 3 === 1 ? dark : mid
     }
 
@@ -691,9 +693,9 @@ function produceTrackLayout(topo, colors, render) {
 // --- Track: backgammon (triangular-points) ops builder ---
 //
 // Verbatim geometry from the historical backgammon provider — byte-identity
-// contract. Colors arrive under provider names (frame, felt, pointA, pointB)
-// via mapColorsForProvider; frontmatter is the sole source. Checker face
-// colours are fixed piece styling (annotated → piece-theme later).
+// contract. Colors arrive from frontmatter (frame, felt, point-a, point-b)
+// and are normalized to camelCase. Checker face colours are fixed piece
+// styling (annotated → piece-theme later).
 // Runtime pass-through: render._parsedSetup {dark[], light[]}, _pieceImages.
 
 function backgammonOps(colors, render) {
@@ -709,10 +711,10 @@ function backgammonOps(colors, render) {
   const els = []
   const el = (tag, attrs, text) => els.push({ op: 'element', tag, attrs, text })
 
-  el('rect', { x: 0, y: 0, width: boardW, height: boardH, rx: 6, ry: 6, fill: colors.frame })
+  el('rect', { x: 0, y: 0, width: boardW, height: boardH, rx: 6, ry: 6, fill: colors['board-outer'] || colors.frame })
   el('rect', { x: frameW, y: frameW, width: panelW, height: panelH, fill: colors.felt })
   el('rect', { x: frameW + panelW + barW, y: frameW, width: panelW, height: panelH, fill: colors.felt })
-  el('rect', { x: frameW + panelW, y: 0, width: barW, height: boardH, fill: colors.frame })
+  el('rect', { x: frameW + panelW, y: 0, width: barW, height: boardH, fill: colors['board-outer'] || colors.frame })
 
   const bottomBase = boardH - frameW
   const topBase = frameW
@@ -730,7 +732,7 @@ function backgammonOps(colors, render) {
     const quadrant = Math.floor(i / 6)
     const posInQuad = i % 6
     const isBottom = quadrant === 0 || quadrant === 1
-    const ptColor = ((posInQuad % 2 === 0) === isBottom) ? colors.pointA : colors.pointB
+    const ptColor = ((posInQuad % 2 === 0) === isBottom) ? colors['point-a'] : colors['point-b']
     const lx = pointX(i)
     const x1 = lx, x2 = lx + pointW, tipX = lx + pointW / 2
     if (isBottom) {
@@ -1333,8 +1335,8 @@ function producePitLayout(topo, colors, render) {
 // Emits the full drawing program for renderPitLayout() from resolved
 // frontmatter. Geometry is a verbatim move from the historical mancala
 // provider — byte-identity contract (attribute order, element order).
-// Colors arrive under provider names (via mapColorsForProvider) with
-// frontmatter as the sole source of truth.
+// Colors arrive from frontmatter and are normalized to camelCase by
+// produceLayout.
 //
 // Frontmatter fields consumed: topology.rows/cols/stores,
 // render.cellSize (pit radius), render.boardShape, render.cornerRadius,
@@ -1368,7 +1370,7 @@ function producePitOps(topo, colors, render) {
       return
     }
     for (const [sx, sy] of seedLayout(count, seedRadius)) {
-      el('circle', { cx: cx + sx, cy: cy + sy, r: seedRadius, fill: colors.seed, stroke: colors.seedStroke, 'stroke-width': 0.5 })
+      el('circle', { cx: cx + sx, cy: cy + sy, r: seedRadius, fill: colors.seed, stroke: colors['seed-stroke'], 'stroke-width': 0.5 })
     }
   }
 
@@ -1377,11 +1379,11 @@ function producePitOps(topo, colors, render) {
   }
 
   const pit = (cx, cy, idx) => {
-    el('circle', { cx, cy, r: pitRadius, fill: colors.pit, stroke: colors.pitStroke, 'stroke-width': 1.5, class: 'board-cell', 'data-sq': `pit-${idx}` })
+    el('circle', { cx, cy, r: pitRadius, fill: colors.pit, stroke: colors['pit-stroke'], 'stroke-width': 1.5, class: 'board-cell', 'data-sq': `pit-${idx}` })
   }
 
   const store = (cx, cy, sq) => {
-    el('ellipse', { cx, cy, rx: storeRx, ry: storeRy, fill: colors.pit, stroke: colors.pitStroke, 'stroke-width': 1.5, class: 'board-cell', 'data-sq': sq })
+    el('ellipse', { cx, cy, rx: storeRx, ry: storeRy, fill: colors.pit, stroke: colors['pit-stroke'], 'stroke-width': 1.5, class: 'board-cell', 'data-sq': sq })
   }
 
   const seedCountAt = (idx) => (parsedSetup && parsedSetup.pits) ? parsedSetup.pits[idx] : seedsPerPit
@@ -1398,8 +1400,8 @@ function producePitOps(topo, colors, render) {
     const boardH = Math.round(2 * (outerRy + pitRadius * 0.78))
     const cx = boardW / 2, cy = boardH / 2
 
-    el('ellipse', { cx, cy, rx: outerRx, ry: outerRy, fill: colors.boardOuter })
-    el('ellipse', { cx, cy, rx: outerRx - 8, ry: outerRy - 8, fill: colors.boardInner })
+    el('ellipse', { cx, cy, rx: outerRx, ry: outerRy, fill: colors['board-outer'] })
+    el('ellipse', { cx, cy, rx: outerRx - 8, ry: outerRy - 8, fill: colors['board-inner'] })
 
     if (hasStores) {
       store(cx - storeCenterOffset, cy, 'store-1')
@@ -1443,11 +1445,11 @@ function producePitOps(topo, colors, render) {
   const bx = frameInset / 2, by = frameInset / 2
   const bw = boardW - frameInset, bh = boardH - frameInset
 
-  el('rect', { x: bx, y: by, width: bw, height: bh, rx, ry: rx, fill: colors.boardOuter })
-  el('rect', { x: bx + 6, y: by + 6, width: bw - 12, height: bh - 12, rx: rx - 4, ry: rx - 4, fill: colors.boardInner })
+  el('rect', { x: bx, y: by, width: bw, height: bh, rx, ry: rx, fill: colors['board-outer'] })
+  el('rect', { x: bx + 6, y: by + 6, width: bw - 12, height: bh - 12, rx: rx - 4, ry: rx - 4, fill: colors['board-inner'] })
   if (colors.border) {
     const attrs = { x: bx + 12, y: by + 12, width: bw - 24, height: bh - 24, rx: rx - 8, ry: rx - 8, fill: 'none', stroke: colors.border, 'stroke-width': 1.5 }
-    if (colors.borderDash) attrs['stroke-dasharray'] = colors.borderDash
+    if (colors['border-dash']) attrs['stroke-dasharray'] = colors['border-dash']
     el('rect', attrs)
   }
 
@@ -1492,7 +1494,7 @@ function producePitOps(topo, colors, render) {
 
   if (boardRows === 4) {
     const divY = boardH / 2
-    el('line', { x1: pitsLeftEdge - pitRadius, y1: divY, x2: pitsLeftEdge + (pitsPerSide - 1) * pitSpacing + pitRadius, y2: divY, stroke: colors.boardOuter, 'stroke-width': 2.5, 'stroke-dasharray': '6,4' })
+    el('line', { x1: pitsLeftEdge - pitRadius, y1: divY, x2: pitsLeftEdge + (pitsPerSide - 1) * pitSpacing + pitRadius, y2: divY, stroke: colors['board-outer'], 'stroke-width': 2.5, 'stroke-dasharray': '6,4' })
   }
 
   return { type: 'pit', config: { ops: els, width: boardW, height: boardH } }
@@ -1753,7 +1755,7 @@ function asaltoFortressElements(nodes, fortressNodes, nodeMap, gridDef, colors) 
       }
     }
   }
-  parts.push({ tag: 'rect', attrs: { x: bx, y: by, width: bw, height: bh, fill: 'none', stroke: colors.fortressBorder, 'stroke-width': 2 } })
+  parts.push({ tag: 'rect', attrs: { x: bx, y: by, width: bw, height: bh, fill: 'none', stroke: colors['fortress-border'], 'stroke-width': 2 } })
   return parts
 }
 
@@ -1825,9 +1827,9 @@ function produceSternHalmaLayout(colors, render, _unused) {
   }
   const ops = [
     { op: 'element', tag: 'defs', children: [{ tag: 'filter', attrs: { id: 'board-shadow', x: '-5%', y: '-3%', width: '110%', height: '110%' }, children: [{ tag: 'feDropShadow', attrs: { dx: 0, dy: 4, stdDeviation: 6, 'flood-color': 'rgba(0,0,0,0.35)' } }] }] },
-    { op: 'rect', attrs: { x: ox, y: oy, width: boardW, height: boardH, fill: colors.boardBody, rx: 18, filter: 'url(#board-shadow)' } },
-    { op: 'rect', attrs: { x: ox + 3, y: oy + 3, width: boardW - 6, height: boardH - 6, fill: colors.boardRim, rx: 15 } },
-    { op: 'rect', attrs: { x: ox + rim, y: oy + rim, width: innerW, height: innerH, fill: colors.boardFelt, rx: 6 } },
+    { op: 'rect', attrs: { x: ox, y: oy, width: boardW, height: boardH, fill: colors['board-body'], rx: 18, filter: 'url(#board-shadow)' } },
+    { op: 'rect', attrs: { x: ox + 3, y: oy + 3, width: boardW - 6, height: boardH - 6, fill: colors['board-rim'], rx: 15 } },
+    { op: 'rect', attrs: { x: ox + rim, y: oy + rim, width: innerW, height: innerH, fill: colors['board-felt'], rx: 6 } },
     { op: 'element', tag: 'polygon', attrs: { points: hex.map(v => `${v.x},${v.y}`).join(' '), fill: colors.centre } },
     { op: 'elements', items: armPolys },
     { op: 'element', tag: 'polygon', attrs: { points: `${tips[0].x},${tips[0].y} ${tips[4].x},${tips[4].y} ${tips[2].x},${tips[2].y}`, fill: 'none', stroke: colors.outline, 'stroke-width': 1.5 } },

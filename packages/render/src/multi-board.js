@@ -53,18 +53,19 @@ export function renderMultiBoard(config, game) {
     parts.push(`<text x="${labelX}" y="${labelY}" text-anchor="middle" font-size="11" fill="${labelColor}" font-family="system-ui">${labels[i] || 'Board ' + (i + 1)}</text>`)
 
     // Build per-layer config and render through consolidated pipeline
-    const boardColors = layerColors && layerColors[i]
-      ? { lightSquare: layerColors[i].lightSquare || '#f0d9b5', darkSquare: layerColors[i].darkSquare || '#b58863' }
+    const lc = layerColors && layerColors[i]
+    const boardColors = lc
+      ? { 'cell-light': lc['cell-light'] || lc.lightSquare || '#f0d9b5', 'cell-dark': lc['cell-dark'] || lc.darkSquare || '#b58863' }
       : config.colors || {}
     const fen = fens && fens[i]
     const position = fen ? fenToPosition(fen, rows, cols) : {}
 
     // Rewrite ops with per-layer colors (checkered light/dark substitution)
     let layerOps = config.ops
-    if (layerOps && layerColors && layerColors[i]) {
+    if (layerOps && lc) {
       layerOps = layerOps.map(op => {
         if (op.op === 'cells' && op.pattern === 'checkered') {
-          return { ...op, light: boardColors.lightSquare, dark: boardColors.darkSquare }
+          return { ...op, light: boardColors['cell-light'], dark: boardColors['cell-dark'] }
         }
         return op
       })
