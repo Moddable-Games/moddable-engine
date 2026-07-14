@@ -59,13 +59,24 @@ export function renderMultiBoard(config, game) {
     const fen = fens && fens[i]
     const position = fen ? fenToPosition(fen, rows, cols) : {}
 
+    // Rewrite ops with per-layer colors (checkered light/dark substitution)
+    let layerOps = config.ops
+    if (layerOps && layerColors && layerColors[i]) {
+      layerOps = layerOps.map(op => {
+        if (op.op === 'cells' && op.pattern === 'checkered') {
+          return { ...op, light: boardColors.lightSquare, dark: boardColors.darkSquare }
+        }
+        return op
+      })
+    }
+
     const layerConfig = {
       ...config,
       rows, cols, tileSize: ts,
       colors: boardColors,
       position,
       layers: undefined,
-      ops: undefined,
+      ops: layerOps,
     }
 
     // Use consolidated grid renderer per layer

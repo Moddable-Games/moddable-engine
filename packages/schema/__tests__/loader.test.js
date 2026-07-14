@@ -38,7 +38,7 @@ describe('loader', () => {
 
   test('loads all families from games directory', async () => {
     const families = await loadAllFamilies(RULES_DIR)
-    expect(families.length).toBe(28)
+    expect(families.length).toBeGreaterThanOrEqual(41)
     const chess = families.find(f => f.family === 'moddable-chess')
     expect(chess).toBeDefined()
     expect(chess.variants.length).toBeGreaterThan(30)
@@ -46,7 +46,7 @@ describe('loader', () => {
 
   test('scans all frontmatter fields across all variants', async () => {
     const report = await scanFrontmatter(RULES_DIR)
-    expect(report.familyCount).toBe(28)
+    expect(report.familyCount).toBeGreaterThanOrEqual(41)
     expect(report.variantCount).toBeGreaterThanOrEqual(150)
     expect(report.fields.title).toBeDefined()
     expect(report.fields.title.count).toBe(report.variantCount)

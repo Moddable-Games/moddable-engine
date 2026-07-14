@@ -20,7 +20,7 @@ describe('inferTopology', () => {
 
   test('infers pit from pits board string', () => {
     const result = inferTopology({ board: '2×6 pits' }, { topologySchemas: ALL_TOPOLOGIES })
-    expect(result).toEqual({ type: 'pit', pitsPerSide: 6 })
+    expect(result).toEqual({ type: 'pit', cols: 6 })
   })
 
   test('infers track from point board string', () => {

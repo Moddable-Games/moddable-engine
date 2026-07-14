@@ -85,7 +85,19 @@ function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabel
   const boardH = gridH + (isIntersection ? inset * 2 : 0)
   const idStyle = render.idStyle || 'algebraic'
 
-  const ops = render.ops.map(decl => translateOp(decl, { rows, cols, cellSize, colors, inset, gridW, gridH, boardW, boardH, ox, oy, gx, gy, idStyle }))
+  const ops = render.ops.flatMap(decl => {
+    const result = translateOp(decl, { rows, cols, cellSize, colors, inset, gridW, gridH, boardW, boardH, ox, oy, gx, gy, idStyle, cellMap: render.cellMap })
+    if (result._prefixRect) {
+      const prefix = result._prefixRect
+      delete result._prefixRect
+      return [prefix, result]
+    }
+    return [result]
+  })
+
+  const goStyle = idStyle === 'go'
+  const GO_ALPHABET = 'ABCDEFGHJKLMNOPQRST'
+  const fs = Math.min(13, pad * 0.55)
 
   const config = {
     tileSize: cellSize,
@@ -96,9 +108,11 @@ function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabel
     ops,
     labels: showLabels ? {
       show: true,
-      color: colors.labelText || colors.stroke || '#555',
-      fontSize: 10,
-      fontFamily: 'monospace',
+      color: goStyle ? (colors.labelText || '#5a4020') : (colors.labelText || colors.stroke || '#5c3a1e'),
+      fontSize: fs,
+      fontFamily: goStyle ? 'sans-serif' : 'monospace',
+      alphabet: goStyle ? GO_ALPHABET.slice(0, cols) : null,
+      offsetBaseline: true,
     } : null,
   }
 
@@ -163,7 +177,12 @@ function translateOp(decl, ctx) {
         attrs.fill = fill
         if (decl.rx != null) attrs.rx = decl.rx
       } else {
-        Object.assign(attrs, { x: decl.x ?? ox, y: decl.y ?? oy, width: decl.width ?? boardW, height: decl.height ?? boardH })
+        // Resolve relative positioning: x/y offset from ox/oy, negative width/height from boardW/boardH
+        const rx = decl.x != null ? ox + decl.x : ox
+        const ry = decl.y != null ? oy + decl.y : oy
+        const rw = decl.width != null ? (decl.width < 0 ? boardW + decl.width : decl.width) : boardW
+        const rh = decl.height != null ? (decl.height < 0 ? boardH + decl.height : decl.height) : boardH
+        Object.assign(attrs, { x: rx, y: ry, width: rw, height: rh })
         if (decl.rx != null) attrs.rx = decl.rx
         attrs.fill = fill
       }
@@ -236,11 +255,14 @@ function translateOp(decl, ctx) {
           { tag: 'line', attrs: { x1: pr, y1: gy + (rows - 1 - palaceRows) * cellSize, x2: pl, y2: gy + (rows - 1) * cellSize } },
         ]
       }
+      if (children === 'arcs') {
+        children = surakartaArcElements(gx, gy, cellSize, rows, cols, colors)
+      }
       const attrs = { ...(decl.attrs || {}) }
+      if (decl.fill) attrs.fill = colors[decl.fill] || decl.fill
       if (decl.stroke) attrs.stroke = colors[decl.stroke] || decl.stroke
       if (decl['stroke-width'] != null) attrs['stroke-width'] = decl['stroke-width']
       if (decl['stroke-dasharray']) attrs['stroke-dasharray'] = decl['stroke-dasharray']
-      if (decl.fill) attrs.fill = colors[decl.fill] || decl.fill
       if (decl['stroke-linecap']) attrs['stroke-linecap'] = decl['stroke-linecap']
       return { op: 'group', attrs, children }
     }
@@ -248,6 +270,48 @@ function translateOp(decl, ctx) {
       if (decl.pattern === 'checkered') {
         const light = colors[decl.light] || decl.light
         const dark = colors[decl.dark] || decl.dark
+        const { cellMap } = ctx
+        if (cellMap) {
+          const voidFill = colors.voidFill || 'transparent'
+          return {
+            op: 'cells',
+            interactive: true,
+            _prefixRect: { op: 'rect', attrs: { x: ox, y: oy, width: cols * cellSize, height: rows * cellSize, fill: voidFill } },
+            fill(r, c) {
+              const cell = cellMap[r] && cellMap[r][c]
+              if (!cell) return null
+              const fill = (typeof cell === 'string' && colors[cell]) ? colors[cell] : (r + c) % 2 === 0 ? light : dark
+              const stroke = (typeof cell === 'string' && colors[cell + 'Stroke']) ? colors[cell + 'Stroke'] : null
+              return { fill, stroke: stroke || 'rgba(0,0,0,0.15)', strokeWidth: stroke ? 2 : 1, type: cell }
+            },
+            decorations(r, c, cx, cy, ts) {
+              const cell = cellMap[r] && cellMap[r][c]
+              if (cell === 'rosette') {
+                const s = ts * 0.25
+                return [
+                  { tag: 'circle', attrs: { cx, cy, r: s * 0.42, fill: '#8b3a3a' } },
+                  { tag: 'circle', attrs: { cx, cy: cy - s, r: s * 0.25, fill: '#8b3a3a' } },
+                  { tag: 'circle', attrs: { cx, cy: cy + s, r: s * 0.25, fill: '#8b3a3a' } },
+                  { tag: 'circle', attrs: { cx: cx - s, cy, r: s * 0.25, fill: '#8b3a3a' } },
+                  { tag: 'circle', attrs: { cx: cx + s, cy, r: s * 0.25, fill: '#8b3a3a' } },
+                  { tag: 'circle', attrs: { cx: cx - s * 0.7, cy: cy - s * 0.7, r: s * 0.17, fill: '#a04848' } },
+                  { tag: 'circle', attrs: { cx: cx + s * 0.7, cy: cy - s * 0.7, r: s * 0.17, fill: '#a04848' } },
+                  { tag: 'circle', attrs: { cx: cx - s * 0.7, cy: cy + s * 0.7, r: s * 0.17, fill: '#a04848' } },
+                  { tag: 'circle', attrs: { cx: cx + s * 0.7, cy: cy + s * 0.7, r: s * 0.17, fill: '#a04848' } },
+                ]
+              }
+              if (cell === 'castle') {
+                const d = ts * 0.3
+                const xStroke = colors.castleX || '#fff8f0'
+                return [
+                  { tag: 'line', attrs: { x1: cx - d, y1: cy - d, x2: cx + d, y2: cy + d, stroke: xStroke, 'stroke-width': 1.5, 'stroke-linecap': 'round' } },
+                  { tag: 'line', attrs: { x1: cx + d, y1: cy - d, x2: cx - d, y2: cy + d, stroke: xStroke, 'stroke-width': 1.5, 'stroke-linecap': 'round' } },
+                ]
+              }
+              return null
+            },
+          }
+        }
         return { op: 'cells', interactive: decl.interactive !== false, fill: (r, c) => (r + c) % 2 === 0 ? light : dark }
       }
       if (decl.pattern === 'uniform') {
@@ -354,148 +418,6 @@ function translateOp(decl, ctx) {
   }
 }
 
-// Legacy dispatch kept below — remove once all families use render.ops
-const GRID_STYLE_INSETS = {
-  checkered: () => 0,
-  'mono-grid': () => 0,
-  go: () => 15,
-  surakarta: (ts) => Math.round(ts * 2.3),
-  xiangqi: () => 20,
-  shogi: () => 20,
-  alquerque: (ts) => Math.round(ts * 0.5),
-}
-
-const GRID_STYLE_OPS = {
-  checkered({ rows, cols, cellSize, colors, render }) {
-    const light = colors.lightSquare || colors['cell-light'] || '#f0d9b5'
-    const dark = colors.darkSquare || colors['cell-dark'] || '#b58863'
-    return [
-      { op: 'cells', interactive: true, fill: (r, c) => (r + c) % 2 === 0 ? light : dark },
-    ]
-  },
-
-  'mono-grid'({ rows, cols, cellSize, colors, ox, oy }) {
-    const fill = colors.monoSquare || colors['cell-light'] || '#d9b483'
-    const line = colors.gridLine || colors.stroke || '#8b6914'
-    return [
-      { op: 'rect', attrs: { x: ox, y: oy, width: cols * cellSize, height: rows * cellSize, fill } },
-      { op: 'grid-lines', grouped: false, order: 'vh', color: line, width: 1.5 },
-      { op: 'hit-targets', shape: 'rect', idStyle: 'algebraic' },
-    ]
-  },
-
-  go({ rows, cols, cellSize, colors, inset, gridW, gridH, ox, oy, gx, gy, render, topo }) {
-    const starPoints = produceStarPointsFromDecorations(render.decorations, rows)
-    return [
-      { op: 'rect', attrs: { x: ox, y: oy, width: gridW + inset * 2, height: gridH + inset * 2, fill: colors.woodLight || '#dcb35c' } },
-      { op: 'rect', attrs: { x: gx, y: gy, width: gridW, height: gridH, fill: colors.woodDark || '#d4a843', rx: 2 } },
-      { op: 'grid-lines', grouped: true, order: 'hv', color: colors.gridLine || '#3d2b1a', width: 0.8 },
-      { op: 'markers', grouped: true, groupFill: colors.starPoint || '#3d2b1a', items: starPoints, radius: 3 },
-      { op: 'hit-targets', grouped: true, radius: cellSize * 0.45, idStyle: 'go' },
-    ]
-  },
-
-  shogi({ rows, cols, cellSize, colors, inset, gridW, gridH, ox, oy, gx, gy, render }) {
-    const hoshi = produceMarkerPositions(render.decorations)
-    const ops = []
-    ops.push({ op: 'rect', attrs: { x: ox, y: oy, width: gridW + inset * 2, height: gridH + inset * 2, fill: colors.board || '#e8c97a' } })
-    ops.push({ op: 'rect', attrs: { x: ox, y: oy, width: gridW + inset * 2, height: gridH + inset * 2, fill: 'none', stroke: colors.boardBorder || '#8b6914', 'stroke-width': 2 } })
-    if (rows === 9) {
-      ops.push({ op: 'rect', attrs: { x: gx, y: gy, width: gridW, height: 2 * cellSize, fill: colors.promotionZone || 'rgba(180, 60, 40, 0.08)' } })
-      ops.push({ op: 'rect', attrs: { x: gx, y: gy + 6 * cellSize, width: gridW, height: 2 * cellSize, fill: colors.promotionZone || 'rgba(180, 60, 40, 0.08)' } })
-    }
-    ops.push({ op: 'grid-lines', grouped: true, order: 'hv', color: colors.gridLine || '#6b4e1a', width: 0.8 })
-    ops.push({ op: 'markers', grouped: true, groupFill: colors.hoshi || '#6b4e1a', items: hoshi, radius: 3 })
-    ops.push({ op: 'hit-targets', grouped: true, radius: cellSize * 0.4, idStyle: 'algebraic' })
-    return ops
-  },
-
-  xiangqi({ rows, cols, cellSize, colors, inset, gridW, gridH, ox, oy, gx, gy, render }) {
-    const river = render.river === true
-    const ops = []
-    ops.push({ op: 'rect', attrs: { x: ox, y: oy, width: gridW + inset * 2, height: gridH + inset * 2, fill: colors.board || '#f5deb3' } })
-    ops.push({ op: 'rect', attrs: { x: ox, y: oy, width: gridW + inset * 2, height: gridH + inset * 2, fill: 'none', stroke: colors.gridLine || '#4a3520', 'stroke-width': 2 } })
-    if (river) {
-      const rt = render.decorations?.find(d => d.type === 'gap')?.rows?.[0] ?? Math.floor(rows / 2) - 1
-      const rb = render.decorations?.find(d => d.type === 'gap')?.rows?.[1] ?? Math.floor(rows / 2)
-      ops.push({ op: 'grid-lines', grouped: true, order: 'hv', color: colors.gridLine || '#4a3520', width: 1, skipRows: [rt, rb], appendRows: [rt, rb], split: { topRow: rt, bottomRow: rb, edgeCols: [0, cols - 1] } })
-    } else {
-      ops.push({ op: 'grid-lines', grouped: true, order: 'hv', color: colors.gridLine || '#4a3520', width: 1 })
-    }
-    if (render.palace !== false) {
-      const mid = Math.floor(cols / 2)
-      const palaceLeft = mid - 1, palaceRight = mid + 1, palaceRows = 2
-      const pl = gx + palaceLeft * cellSize, pr = gx + palaceRight * cellSize
-      const children = [
-        { tag: 'line', attrs: { x1: pl, y1: gy, x2: pr, y2: gy + palaceRows * cellSize } },
-        { tag: 'line', attrs: { x1: pr, y1: gy, x2: pl, y2: gy + palaceRows * cellSize } },
-        { tag: 'line', attrs: { x1: pl, y1: gy + (rows - 1 - palaceRows) * cellSize, x2: pr, y2: gy + (rows - 1) * cellSize } },
-        { tag: 'line', attrs: { x1: pr, y1: gy + (rows - 1 - palaceRows) * cellSize, x2: pl, y2: gy + (rows - 1) * cellSize } },
-      ]
-      ops.push({ op: 'group', attrs: { stroke: colors.palace || '#4a3520', 'stroke-width': 0.8, 'stroke-dasharray': '4,3' }, children })
-    }
-    if (river) {
-      const rt = render.decorations?.find(d => d.type === 'gap')?.rows?.[0] ?? Math.floor(rows / 2) - 1
-      const rb = render.decorations?.find(d => d.type === 'gap')?.rows?.[1] ?? Math.floor(rows / 2)
-      const rty1 = gy + rt * cellSize, rty2 = gy + rb * cellSize
-      const rmid = (rty1 + rty2) / 2
-      const fs = Math.min(cellSize * 0.45, 14)
-      ops.push({ op: 'texts', items: [
-        { attrs: { x: gx + gridW * 0.25, y: rmid + fs * 0.35, 'text-anchor': 'middle', 'font-size': fs, 'font-family': 'serif', 'pointer-events': 'none', fill: colors.riverText || '#4a3520' }, text: '楚 河' },
-        { attrs: { x: gx + gridW * 0.75, y: rmid + fs * 0.35, 'text-anchor': 'middle', 'font-size': fs, 'font-family': 'serif', 'pointer-events': 'none', fill: colors.riverText || '#4a3520' }, text: '漢 界' },
-      ] })
-    }
-    ops.push({ op: 'hit-targets', grouped: true, radius: cellSize * 0.4, idStyle: 'algebraic' })
-    return ops
-  },
-
-  surakarta({ rows, cols, cellSize, colors, inset, gridW, gridH, ox, oy, gx, gy, render }) {
-    const boardW = gridW + inset * 2, boardH = gridH + inset * 2
-    const arcs = surakartaArcElements(gx, gy, cellSize, rows, cols, colors)
-    return [
-      { op: 'rect', attrs: { x: ox, y: oy, width: boardW, height: boardH, rx: 8, fill: colors.frame || '#5a3e28' } },
-      { op: 'rect', attrs: { x: ox + 6, y: oy + 6, width: boardW - 12, height: boardH - 12, rx: 5, fill: colors.board || '#c8a872' } },
-      { op: 'rect', attrs: { x: ox + 10, y: oy + 10, width: boardW - 20, height: boardH - 20, rx: 3, fill: colors.boardInner || '#d4b896' } },
-      { op: 'grid-lines', grouped: true, order: 'hv', color: colors.gridLine || '#6b4a30', width: 1.5 },
-      { op: 'group', attrs: { fill: 'none', 'stroke-width': 2.5, 'stroke-linecap': 'round' }, children: arcs },
-      { op: 'markers', grouped: true, groupFill: colors.dotFill || '#4a3320', allCells: true, radius: 3.5 },
-      { op: 'hit-targets', grouped: true, radius: cellSize * 0.45, idStyle: 'go' },
-    ]
-  },
-
-  alquerque({ rows, cols, cellSize, colors, inset, gridW, gridH, ox, oy }) {
-    return [
-      { op: 'rect', attrs: { x: ox, y: oy, width: gridW + inset * 2, height: gridH + inset * 2, fill: colors.monoSquare || '#d9b483', rx: 4 } },
-      { op: 'grid-lines', grouped: false, order: 'hv', color: colors.gridLine || '#8b6914', width: 2 },
-      { op: 'diagonals', predicate: (r, c) => (r + c) % 2 === 0, color: colors.gridLine || '#8b6914', width: 1.5 },
-      { op: 'markers', allCells: true, radius: 3, itemFill: colors.gridLine || '#8b6914', hits: { radius: cellSize * 0.4, idStyle: 'algebraic' } },
-    ]
-  },
-}
-
-function produceStarPointsFromDecorations(decorations, rows) {
-  if (!decorations || !Array.isArray(decorations)) return STUDIO_STAR_POINTS[rows] || []
-  const markerDec = decorations.find(d => d.type === 'markers')
-  if (!markerDec) return STUDIO_STAR_POINTS[rows] || []
-  if (markerDec.at) return markerDec.at
-  if (markerDec.auto === 'star-points') return STUDIO_STAR_POINTS[rows] || []
-  return []
-}
-
-function produceMarkerPositions(decorations) {
-  if (!decorations || !Array.isArray(decorations)) return []
-  const markerDec = decorations.find(d => d.type === 'markers')
-  if (!markerDec) return []
-  if (markerDec.at) return markerDec.at
-  return []
-}
-
-const STUDIO_STAR_POINTS = {
-  9:  [[2,2],[2,6],[4,4],[6,2],[6,6]],
-  13: [[3,3],[3,9],[6,6],[9,3],[9,9]],
-  19: [[3,3],[3,9],[3,15],[9,3],[9,9],[9,15],[15,3],[15,9],[15,15]],
-}
-
 function surakartaArcElements(gx, gy, tileSize, rows, cols, colors) {
   const innerR = tileSize
   const outerR = tileSize * 2
@@ -512,6 +434,7 @@ function surakartaArcElements(gx, gy, tileSize, rows, cols, colors) {
     { tag: 'path', attrs: { d: `M ${ix(cols - 1)},${iy(rows - 3)} A ${outerR},${outerR} 0 1,1 ${ix(cols - 3)},${iy(rows - 1)}`, stroke: colors.outerArc || '#6b4a30' } },
   ]
 }
+
 
 function produceHexLayout(topo, colors, render) {
   const cellSize = render.cellSize || 20

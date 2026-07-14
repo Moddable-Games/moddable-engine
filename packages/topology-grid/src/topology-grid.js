@@ -551,7 +551,10 @@ export function renderGridLayout(rows, cols, config = {}) {
       labels.push({ tag: 'text', attrs: { x: posX(c), y: bottomY, 'text-anchor': 'middle', 'font-size': lc.fontSize, fill: lc.color, 'font-family': lc.fontFamily }, text })
     }
     for (let r = 0; r < rows; r++) {
-      labels.push({ tag: 'text', attrs: { x: leftX, y: posY(r), 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': lc.fontSize, fill: lc.color, 'font-family': lc.fontFamily }, text: String(rows - r) })
+      const rowY = lc.offsetBaseline ? posY(r) + lc.fontSize * 0.35 : posY(r)
+      const rowAttrs = { x: leftX, y: rowY, 'text-anchor': 'middle', 'font-size': lc.fontSize, fill: lc.color, 'font-family': lc.fontFamily }
+      if (!lc.offsetBaseline) rowAttrs['dominant-baseline'] = 'central'
+      labels.push({ tag: 'text', attrs: rowAttrs, text: String(rows - r) })
     }
   }
 

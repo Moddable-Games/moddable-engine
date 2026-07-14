@@ -1,50 +1,22 @@
-// Board diagram generator — direct port of moddable-chess/js/svg-renderer.js + providers.
-// Produces identical output to the published rulebook SVGs.
+// Board diagram generator — renders all board topologies via the ops pipeline.
+// Grid styles produce ops from produceLayout(); other topologies use providers.
 
 import { renderSurfaceSVG } from './piece-surface.js'
-import { gridStyles } from './grid-board-styles.js'
 import { renderGridLayout } from '../../topology-grid/src/topology-grid.js'
-import { elementsToFragment } from './serialize-layout.js'
+import { elementsToFragment, elementToSvg } from './serialize-layout.js'
 import { produceLayout } from '../../schema/src/produce-layout.js'
-import { nyout as nyoutProvider, morris as morrisProvider, asalto as asaltoProvider, sternHalma as sternHalmaProvider } from '../../topology-graph/src/providers.js'
-import { hex as hexProvider } from '../../topology-hex/src/providers.js'
-import { mancala as mancalaProvider } from '../../topology-pit/src/providers.js'
-import { backgammon as backgammonProvider, landlords as landlordsProvider } from '../../topology-track/src/providers.js'
+import { nyout, morris, asalto, sternHalma } from '../../topology-graph/src/providers.js'
+import { hex } from '../../topology-hex/src/providers.js'
+import { mancala } from '../../topology-pit/src/providers.js'
+import { backgammon, landlords } from '../../topology-track/src/providers.js'
 
-// ─── GRID STYLES — one render pipeline (topology-grid renderGridLayout), ────
-// game data declared in grid-board-styles.js configs. No per-style renderers.
+// ─── GRID STYLES (handled entirely by produceLayout + renderGridLayout) ─────
 
-const checkered = gridStyles.checkered
-const monoGrid = gridStyles['mono-grid']
-const go = gridStyles.go
-const surakarta = gridStyles.surakarta
-const xiangqi = gridStyles.xiangqi
-const shogi = gridStyles.shogi
-const alquerque = gridStyles.alquerque
+const GRID_STYLES = new Set(['checkered', 'mono-grid', 'go', 'xiangqi', 'shogi', 'surakarta', 'alquerque'])
 
-// ─── GRAPH PROVIDERS (moved to packages/topology-graph/src/providers.js) ────
+// ─── NON-GRID PROVIDER REGISTRY ────────────────────────────────────────────
 
-const nyout = nyoutProvider
-const morris = morrisProvider
-const asalto = asaltoProvider
-const sternHalma = sternHalmaProvider
-
-// ─── HEX PROVIDER (moved to packages/topology-hex/src/providers.js) ─────────
-
-const hex = hexProvider
-
-// ─── PIT PROVIDER (moved to packages/topology-pit/src/providers.js) ──────────
-
-const mancala = mancalaProvider
-
-// ─── TRACK PROVIDERS (moved to packages/topology-track/src/providers.js) ─────
-
-const backgammon = backgammonProvider
-const landlords = landlordsProvider
-
-// ─── PROVIDER REGISTRY ──────────────────────────────────────────────────────
-
-const PROVIDERS = { checkered, 'mono-grid': monoGrid, go, surakarta, xiangqi, shogi, nyout, morris, asalto, alquerque, hex, mancala, backgammon, 'stern-halma': sternHalma, landlords }
+const PROVIDERS = { nyout, morris, asalto, hex, mancala, backgammon, 'stern-halma': sternHalma, landlords }
 
 // ─── RENDERER (ported from moddable-chess/js/svg-renderer.js) ───────────────
 
@@ -72,11 +44,45 @@ function renderOverlays(overlays, ctx) {
   return parts.join('')
 }
 
+const GRID_LABEL_STYLE = { checkered: 'algebraic', 'mono-grid': 'algebraic', go: 'go', xiangqi: 'none', shogi: 'none', surakarta: 'algebraic', alquerque: 'algebraic' }
+const GRID_POSITION_TYPE = { checkered: 'square', 'mono-grid': 'square', go: 'intersection', xiangqi: 'intersection', shogi: 'intersection', surakarta: 'intersection', alquerque: 'intersection' }
+const GRID_DEFAULT_COLORS = {
+  checkered: { lightSquare: '#f0d9b5', darkSquare: '#b58863', voidFill: 'transparent' },
+  'mono-grid': { monoSquare: '#d9b483', gridLine: '#8b6914' },
+  go: { woodLight: '#dcb35c', woodDark: '#d4a843', gridLine: '#3d2b1a', labelText: '#5a4020', starPoint: '#3d2b1a' },
+  surakarta: { frame: '#5a3e28', board: '#c8a872', boardInner: '#d4b896', gridLine: '#6b4a30', dotFill: '#4a3320', innerArc: '#6b4a30', outerArc: '#6b4a30' },
+  xiangqi: { board: '#f5deb3', gridLine: '#4a3520', river: '#f5deb3', riverText: '#4a3520', palace: '#4a3520', labelText: '#4a3520' },
+  shogi: { board: '#e8c97a', boardBorder: '#8b6914', gridLine: '#6b4e1a', hoshi: '#6b4e1a', promotionZone: 'rgba(180, 60, 40, 0.08)', labelText: '#5a4020' },
+  alquerque: { monoSquare: '#d9b483', gridLine: '#8b6914' },
+}
+
+function mapToSchemaColors(boardStyle, colors) {
+  switch (boardStyle) {
+    case 'checkered':
+      return { 'cell-light': colors.lightSquare, 'cell-dark': colors.darkSquare, stroke: colors.stroke, voidFill: colors.voidFill, ...colors }
+    case 'mono-grid':
+      return { 'cell-light': colors.monoSquare, stroke: colors.gridLine, ...colors }
+    case 'go':
+      return { 'cell-light': colors.woodLight, 'cell-dark': colors.woodDark, stroke: colors.gridLine, labelText: colors.labelText, starPoint: colors.starPoint, ...colors }
+    case 'xiangqi':
+      return { 'cell-light': colors.board, stroke: colors.gridLine, river: colors.river, labelText: colors.labelText, ...colors }
+    case 'shogi':
+      return { 'cell-light': colors.board, 'cell-dark': colors.boardBorder, stroke: colors.gridLine, hoshi: colors.hoshi, promotion: colors.promotionZone, labelText: colors.labelText, ...colors }
+    case 'surakarta':
+      return { 'cell-light': colors.board || colors.boardInner, background: colors.frame, stroke: colors.gridLine, innerArc: colors.innerArc, outerArc: colors.outerArc, dotFill: colors.dotFill, ...colors }
+    case 'alquerque':
+      return { 'cell-light': colors.monoSquare, stroke: colors.gridLine, ...colors }
+    default:
+      return colors
+  }
+}
+
 export function renderBoard(opts) {
   opts = opts || {}
   const boardStyle = opts.boardStyle || 'checkered'
-  const provider = PROVIDERS[boardStyle]
-  if (!provider) return `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="60"><text x="100" y="35" text-anchor="middle" font-size="12" fill="#888">Unknown: "${boardStyle}"</text></svg>`
+  const isGrid = GRID_STYLES.has(boardStyle)
+  const provider = isGrid ? null : PROVIDERS[boardStyle]
+  if (!isGrid && !provider) return `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="60"><text x="100" y="35" text-anchor="middle" font-size="12" fill="#888">Unknown: "${boardStyle}"</text></svg>`
 
   const rows = opts.rows || 8
   const cols = opts.cols || 8
@@ -85,14 +91,35 @@ export function renderBoard(opts) {
   const showLabels = opts.showLabels !== false
   const title = opts.title || null
 
-  const providerColors = provider.defaultColors || {}
-  const colors = { ...providerColors, ...(opts.colors || {}) }
+  const defaultColors = isGrid ? (GRID_DEFAULT_COLORS[boardStyle] || {}) : (provider.defaultColors || {})
+  const colors = { ...defaultColors, ...(opts.colors || {}) }
 
-  const layout = provider.computeLayout({ rows, cols, tileSize, ...opts })
-  const boardW = layout.boardW, boardH = layout.boardH
-  const labelStyle = provider.labelStyle || 'algebraic'
-  const pad = (showLabels && labelStyle !== 'none') ? 24 : 0
-  const W = boardW + pad * 2, H = boardH + pad * 2
+  const labelStyle = isGrid ? GRID_LABEL_STYLE[boardStyle] : (provider.labelStyle || 'algebraic')
+  const effectiveLabels = showLabels && labelStyle !== 'none'
+
+  const STYLE_TO_CELLCOLOR = { checkered: 'checkered', 'mono-grid': 'uniform', go: 'uniform', xiangqi: 'xiangqi', shogi: 'uniform', surakarta: 'uniform', alquerque: 'uniform' }
+
+  let gridLayout = null
+  if (isGrid) {
+    const posType = GRID_POSITION_TYPE[boardStyle]
+    const cellColor = STYLE_TO_CELLCOLOR[boardStyle] || 'checkered'
+    const surfaceColors = opts.ops ? colors : mapToSchemaColors(boardStyle, colors)
+    const engine = {
+      topology: { type: 'grid', rows, cols, layout: posType === 'intersection' ? 'intersections' : 'cells' },
+      surface: { colors: surfaceColors },
+      render: { cellSize: tileSize, cellColor, labels: effectiveLabels, inset: opts.inset, insetFactor: opts.insetFactor, idStyle: opts.idStyle || labelStyle, ops: opts.ops, boardStyle, decorations: opts.decorations, river: opts.river, palace: opts.palace, zones: opts.zones, cellMap: opts.cellMap },
+    }
+    const result = produceLayout(engine)
+    if (result) gridLayout = renderGridLayout(rows, cols, result.config)
+  }
+
+  const W = gridLayout ? gridLayout.width : (() => { const l = provider.computeLayout({ rows, cols, tileSize, ...opts }); return l.boardW + (effectiveLabels ? 48 : 0) })()
+  const H = gridLayout ? gridLayout.height : (() => { const l = provider.computeLayout({ rows, cols, tileSize, ...opts }); return l.boardH + (effectiveLabels ? 48 : 0) })()
+
+  const layout = gridLayout ? null : provider.computeLayout({ rows, cols, tileSize, ...opts })
+  const boardW = gridLayout ? (W - (effectiveLabels ? 48 : 0)) : layout.boardW
+  const boardH = gridLayout ? (H - (effectiveLabels ? 48 : 0)) : layout.boardH
+  const pad = effectiveLabels ? 24 : 0
   const ox = pad, oy = pad
 
   const parts = []
@@ -105,15 +132,8 @@ export function renderBoard(opts) {
   }
 
   const ctx = { rows, cols, tileSize, ox, oy, colors, opts, boardW, boardH }
-  if (opts.ops && gridStyles[boardStyle] && !opts.layers && !opts.cellMap) {
-    const engine = {
-      topology: { type: 'grid', rows, cols, layout: opts.layout || (provider.positionType === 'intersection' ? 'intersections' : 'cells') },
-      surface: { colors },
-      render: { cellSize: tileSize, labels: showLabels, inset: opts.inset, insetFactor: opts.insetFactor, idStyle: opts.idStyle || provider.labelStyle, ops: opts.ops },
-    }
-    const result = produceLayout(engine)
-    const layout = renderGridLayout(rows, cols, result.config)
-    parts.push(elementsToFragment(layout.elements))
+  if (gridLayout) {
+    parts.push(elementsToFragment(gridLayout.elements))
   } else {
     parts.push(provider.render(ctx))
   }
@@ -123,10 +143,18 @@ export function renderBoard(opts) {
   }
 
   if (position && Object.keys(position).length > 0) {
-    parts.push(`<g pointer-events="none">${renderPieces(position, provider, ctx, colors)}</g>`)
+    if (gridLayout) {
+      parts.push(`<g pointer-events="none">${renderPiecesFromCells(position, gridLayout.cells, tileSize, opts, colors)}</g>`)
+    } else {
+      parts.push(`<g pointer-events="none">${renderPieces(position, provider, ctx, colors)}</g>`)
+    }
   }
 
-  if (showLabels && labelStyle !== 'none') {
+  if (gridLayout) {
+    if (gridLayout.labels.length > 0) {
+      parts.push(gridLayout.labels.map(lbl => elementToSvg(lbl)).join(''))
+    }
+  } else if (showLabels && labelStyle !== 'none') {
     parts.push(renderLabels(ctx, colors, provider))
   }
 
@@ -169,6 +197,55 @@ export function fenToPosition(fen, rows, cols) {
 }
 
 // ─── PIECE RENDERING ────────────────────────────────────────────────────────
+
+function renderPiecesFromCells(position, cells, tileSize, opts, colors) {
+  const pieceImages = opts.pieceImages || {}
+  const cellMap = new Map(cells.map(c => [c.id, c]))
+  const parts = []
+  for (const [alg, raw] of Object.entries(position)) {
+    const cell = cellMap.get(alg)
+    if (!cell) continue
+    const pos = { x: cell.x, y: cell.y }
+    const piece = typeof raw === 'object' ? raw : { type: String(raw) }
+
+    const colorPrefix = piece.color === 'white' ? 'w' : 'b'
+    const imageKey = (piece.type === 'stone') ? colorPrefix + 'S'
+      : (piece.type === 'man') ? colorPrefix + 'M'
+      : (piece.type === 'king') ? colorPrefix + 'K'
+      : (piece.type === 'piece') ? colorPrefix + 'P'
+      : piece.type
+
+    if (pieceImages[imageKey]) {
+      const x = pos.x - tileSize / 2, y = pos.y - tileSize / 2
+      const surfaceMap = opts.pieceSurfaceMap || {}
+      const hasSurface = opts.pieceBorders || surfaceMap[imageKey]
+      const rotations = opts.pieceRotations
+      const rot = rotations && opts.getOwner ? rotations[opts.getOwner(piece.type)] : 0
+      if (hasSurface) {
+        const isUpper = piece.type === piece.type.toUpperCase()
+        const owner = opts.getOwner ? opts.getOwner(piece.type) : (isUpper ? 'white' : 'black')
+        const surface = opts.pieceSurface && opts.pieceSurface.owners && opts.pieceSurface.owners[owner]
+        const ownerColors = surface || { fill: opts.pieceBorders && opts.pieceBorders[owner] || '#888', stroke: 'rgba(0,0,0,0.3)' }
+        parts.push(renderSurfaceSVG('disc', pos.x, pos.y, tileSize, ownerColors, pieceImages[imageKey]))
+      } else if (rot) {
+        parts.push(`<g transform="rotate(${rot} ${pos.x} ${pos.y})"><image href="${pieceImages[imageKey]}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" pointer-events="none"/></g>`)
+      } else {
+        parts.push(`<image href="${pieceImages[imageKey]}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" pointer-events="none"/>`)
+      }
+    } else if (piece.type === 'stone') {
+      parts.push(drawStone(piece, pos.x, pos.y, tileSize * 0.42, colors))
+    } else if (piece.type === 'man' || piece.type === 'king') {
+      parts.push(drawDraughtsPiece(piece, pos.x, pos.y, tileSize * 0.38, colors))
+    } else if (pieceImages[piece.type]) {
+      const x = pos.x - tileSize / 2, y = pos.y - tileSize / 2
+      parts.push(`<image href="${pieceImages[piece.type]}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" pointer-events="none"/>`)
+    } else if (opts.pieceDefs && opts.pieceDefs[piece.type]) {
+      const x = pos.x - tileSize / 2, y = pos.y - tileSize / 2
+      parts.push(`<use href="#piece-${piece.type}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}"/>`)
+    }
+  }
+  return parts.join('')
+}
 
 function getPixelPos(r, c, provider, ctx) {
   if (provider.getIntersection) return provider.getIntersection(r, c, ctx)
