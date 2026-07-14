@@ -149,10 +149,10 @@ function mapColorsForProvider(boardStyle, surface) {
   switch (boardStyle) {
     case 'checkered': {
       const result = {
-        lightSquare: c['cell-light'] || '#f0d9b5',
-        darkSquare: c['cell-dark'] || '#b58863',
-        voidFill: c['void'] || 'transparent',
-        castleX: c['castle-x'] || '#fff8f0',
+        lightSquare: c.lightSquare || c['cell-light'] || '#f0d9b5',
+        darkSquare: c.darkSquare || c['cell-dark'] || '#b58863',
+        voidFill: c.voidFill || c['void'] || 'transparent',
+        castleX: c.castleX || c['castle-x'] || '#fff8f0',
       }
       // Pass through all cell-type colours + their stroke variants
       for (const [key, val] of Object.entries(c)) {
@@ -167,34 +167,34 @@ function mapColorsForProvider(boardStyle, surface) {
     }
     case 'mono-grid':
       return {
-        monoSquare: c['cell-light'] || '#d9b483',
-        gridLine: c.stroke || '#8b6914',
+        monoSquare: c.monoSquare || c['cell-light'] || '#d9b483',
+        gridLine: c.gridLine || c.stroke || '#8b6914',
       }
     case 'go':
       return {
-        woodLight: c['cell-light'] || '#dcb35c',
-        woodDark: c['cell-dark'] || '#d4a843',
-        gridLine: c.stroke || '#3d2b1a',
-        labelText: c.stroke || '#5a4020',
-        starPoint: c.stroke || '#3d2b1a',
+        woodLight: c.woodLight || c['cell-light'],
+        woodDark: c.woodDark || c['cell-dark'],
+        gridLine: c.gridLine || c.stroke,
+        labelText: c.labelText || c.stroke,
+        starPoint: c.starPoint || c.stroke,
       }
     case 'xiangqi':
       return {
-        board: c['cell-light'] || '#f5deb3',
-        gridLine: c.stroke || '#4a3520',
-        river: c.river || c['cell-light'] || '#f5deb3',
-        riverText: c.stroke || '#4a3520',
-        palace: c.stroke || '#4a3520',
-        labelText: c.stroke || '#5a4020',
+        board: c.board || c['cell-light'],
+        gridLine: c.gridLine || c.stroke,
+        river: c.river || c['cell-light'],
+        riverText: c.riverText || c.stroke,
+        palace: c.palace || c.stroke,
+        labelText: c.labelText || c.stroke,
       }
     case 'shogi':
       return {
-        board: c['cell-light'] || '#e8c97a',
-        boardBorder: c['cell-dark'] || '#8b6914',
-        gridLine: c.stroke || '#6b4e1a',
-        hoshi: c.stroke || '#6b4e1a',
-        promotionZone: c.promotion || 'rgba(180, 60, 40, 0.08)',
-        labelText: c.stroke || '#5a4020',
+        board: c.board || c['cell-light'],
+        boardBorder: c.boardBorder || c['cell-dark'],
+        gridLine: c.gridLine || c.stroke,
+        hoshi: c.hoshi || c.stroke,
+        promotionZone: c.promotionZone || c.promotion,
+        labelText: c.labelText || c.stroke,
       }
     case 'hex':
       return {
@@ -272,13 +272,13 @@ function mapColorsForProvider(boardStyle, surface) {
       }
     case 'surakarta':
       return {
-        frame: c['board-outer'] || '#5a3e28',
-        board: c['cell-light'] || '#c8a872',
-        boardInner: c['board-inner'] || '#d4b896',
-        gridLine: c.stroke || '#6b4a30',
-        dotFill: c.dotFill || '#4a3320',
-        innerArc: c.innerArc || c.stroke || '#6b4a30',
-        outerArc: c.outerArc || c.stroke || '#6b4a30',
+        frame: c.frame || c['board-outer'],
+        board: c.board || c['cell-light'],
+        boardInner: c.boardInner || c['board-inner'],
+        gridLine: c.gridLine || c.stroke,
+        dotFill: c.dotFill || c.stroke,
+        innerArc: c.innerArc || c.stroke,
+        outerArc: c.outerArc || c.stroke,
       }
     case 'alquerque':
       return {
