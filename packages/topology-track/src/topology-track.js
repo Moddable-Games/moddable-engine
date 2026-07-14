@@ -734,3 +734,45 @@ export function createTrackTopology(config) {
     parsePosition,
   }
 }
+
+// ─── Track render pipeline — ONE parametric renderer for every track board (#18) ───
+//
+// The notation is an ordered list of drawing ops (raw elements — track boards
+// are fully data-driven: produceTrackLayout computes all geometry from
+// resolved frontmatter + board data). The pipeline walks the list once,
+// emits structured SVG elements, and collects interactive cells from
+// data-sq attributes. It never branches on game or variant. Attribute order
+// is insertion order — part of the byte-identity contract. Game data (point
+// counts, board themes, space texts, checker setups) NEVER lives here.
+
+export function renderTrackLayout(config = {}) {
+  const elements = []
+  const cells = []
+  for (const op of config.ops || []) {
+    TRACK_OP_HANDLERS[op.op](op, elements, cells)
+  }
+  return { width: config.width || 0, height: config.height || 0, elements, cells, labels: [], defs: [] }
+}
+
+const TRACK_OP_HANDLERS = {
+
+  element(op, elements, cells) {
+    elements.push({ tag: op.tag, attrs: op.attrs, text: op.text, children: op.children })
+    if (op.attrs && op.attrs['data-sq'] !== undefined) {
+      cells.push({ id: op.attrs['data-sq'], x: op.attrs.cx, y: op.attrs.cy })
+    }
+  },
+
+  elements(op, elements, cells) {
+    for (const item of op.items) {
+      elements.push(item)
+      if (item.attrs && item.attrs['data-sq'] !== undefined) {
+        cells.push({ id: item.attrs['data-sq'], x: item.attrs.cx, y: item.attrs.cy })
+      }
+    }
+  },
+
+  group(op, elements) {
+    elements.push({ tag: 'g', attrs: op.attrs, children: op.children })
+  },
+}

@@ -187,7 +187,7 @@ describe('produceLayout', () => {
   })
 
   describe('track topology', () => {
-    test('backgammon — triangular points', () => {
+    test('backgammon — triangular points produces ops', () => {
       const engine = {
         topology: { type: 'track', positions: 24 },
         surface: 'parchment',
@@ -196,23 +196,59 @@ describe('produceLayout', () => {
       const result = produceLayout(engine)
       expect(result.type).toBe('track')
       expect(result.config.style).toBe('points')
-      expect(result.config.frameW).toBe(16)
-      expect(result.config.barW).toBe(24)
-      expect(result.config.pointW).toBe(32)
-      expect(result.config.boardH).toBe(320)
+      expect(Array.isArray(result.config.ops)).toBe(true)
+      const points = result.config.ops.filter(o => o.attrs && String(o.attrs['data-sq'] || '').startsWith('point-'))
+      expect(points.length).toBe(24)
+      expect(result.config.height).toBe(320)
+      expect(result.config.width).toBe(16 * 2 + 32 * 6 * 2 + 24)
     })
 
-    test('perimeter — landlords style', () => {
+    test('backgammon — checker stacks from parsed setup', () => {
+      const engine = {
+        topology: { type: 'track', positions: 24 },
+        surface: 'parchment',
+        render: { trackStyle: 'triangular-points', _parsedSetup: { dark: { 0: 2 }, light: { 23: 7 } } },
+      }
+      const result = produceLayout(engine)
+      const circles = result.config.ops.filter(o => o.tag === 'circle')
+      const overflowTexts = result.config.ops.filter(o => o.tag === 'text')
+      expect(circles.length).toBe(2 + 5) // 2 dark + 5 shown of 7 light
+      expect(overflowTexts.length).toBe(1) // overflow count on the 7-stack
+    })
+
+    test('perimeter — landlords produces ops from board data', () => {
+      const engine = {
+        topology: { type: 'track', positions: 40 },
+        surface: 'parchment',
+        render: {
+          trackStyle: 'perimeter',
+          _board: 'test-board',
+          _boardData: { boards: { 'test-board': { totalSpaces: 8, spaces: [
+            { pos: 0, side: 'corner', name: 'GO', type: 'corner' },
+            { pos: 1, side: 'bottom', name: 'A', type: 'lot' },
+            { pos: 2, side: 'corner', name: 'JAIL', type: 'corner' },
+            { pos: 3, side: 'left', name: 'B', type: 'lot' },
+            { pos: 4, side: 'corner', name: 'FREE', type: 'corner' },
+            { pos: 5, side: 'top', name: 'C', type: 'lot' },
+            { pos: 6, side: 'corner', name: 'GTJ', type: 'corner' },
+            { pos: 7, side: 'right', name: 'D', type: 'lot' },
+          ] } } },
+        },
+      }
+      const result = produceLayout(engine)
+      expect(result.config.style).toBe('perimeter')
+      const cells = result.config.ops.filter(o => o.attrs && String(o.attrs['data-sq'] || '').startsWith('pos-'))
+      expect(cells.length).toBe(8) // 4 corners + 4 side spaces
+    })
+
+    test('perimeter — no board data fallback', () => {
       const engine = {
         topology: { type: 'track', positions: 40 },
         surface: 'parchment',
         render: { trackStyle: 'perimeter' },
       }
       const result = produceLayout(engine)
-      expect(result.type).toBe('track')
-      expect(result.config.style).toBe('perimeter')
-      expect(result.config.totalSpaces).toBe(40)
-      expect(result.config.corners).toBe(4)
+      expect(result.config.ops.length).toBe(2) // fallback rect + message
     })
   })
 
