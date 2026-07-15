@@ -1,10 +1,10 @@
 import { createSimulator } from '../src/simulator.js'
 import { createMinimax, DIFFICULTIES } from '../src/minimax.js'
 import { createMCTS } from '../src/mcts.js'
-import { createReversiPlugin } from '../../plugin-reversi/src/reversi-plugin.js'
-import { createGoPlugin } from '../../plugin-go/src/go-plugin.js'
-import { createMancalaPlugin } from '../../plugin-mancala/src/mancala-plugin.js'
-import { createDraughtsPlugin } from '../../plugin-draughts/src/draughts-plugin.js'
+import { createReversiPlugin } from '../../plugins/reversi/src/reversi-plugin.js'
+import { createGoPlugin } from '../../plugins/go/src/go-plugin.js'
+import { createMancalaPlugin } from '../../plugins/mancala/src/mancala-plugin.js'
+import { createDraughtsPlugin } from '../../plugins/draughts/src/draughts-plugin.js'
 
 function request() { return null }
 
