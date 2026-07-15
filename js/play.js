@@ -363,8 +363,16 @@ async function inlineExternalImages(svgEl) {
   await Promise.all(promises)
 }
 
+function resetSidebarControls() {
+  document.getElementById('handicap-group').style.display = 'none'
+  document.getElementById('hex-style-group').style.display = 'none'
+  document.getElementById('hex-players-group').style.display = 'none'
+  document.getElementById('hex-seed-group').style.display = 'none'
+}
+
 async function render() {
   if (!state.game || !state.variant) return
+  resetSidebarControls()
 
   const entry = manifestIndex[`${state.game}/${state.variant}`]
 
@@ -448,11 +456,13 @@ function renderHexGenerator(entry) {
   const annotations = result.annotations || null
   const style = state.style || (gameConfig.styles && gameConfig.styles[0]) || 'classic'
 
+  const colors = gameConfig.getColors ? gameConfig.getColors(style) : {}
+
   const svgOpts = {
     size: 30,
     orientation: gameConfig.orientation || 'pointy',
     bgColor: '#1a1a2e',
-    style,
+    colors,
   }
 
   const svg = annotations
