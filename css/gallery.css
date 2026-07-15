@@ -2,7 +2,7 @@
   padding: 140px 32px 40px;
   text-align: center;
 }
-.gallery-hero-content { max-width: 600px; margin: 0 auto; }
+.gallery-hero-content { max-width: 980px; margin: 0 auto; }
 .gallery-hero-content .hero-title,
 .gallery-hero-content .hero-lede { text-wrap: balance; }
 

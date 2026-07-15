@@ -2,7 +2,7 @@
   padding: 140px 32px 40px;
   text-align: center;
 }
-.boards-hero-content { max-width: 640px; margin: 0 auto; }
+.boards-hero-content { max-width: 980px; margin: 0 auto; }
 .boards-hero-content .hero-title,
 .boards-hero-content .hero-lede { text-wrap: balance; }
 
