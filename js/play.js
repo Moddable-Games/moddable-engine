@@ -174,9 +174,12 @@ const RULES_BASE = location.hostname === 'engine.moddable.games'
 
 async function init() {
   galleryIndex = await fetch('../pieces/gallery-index.json').then(r => r.json()).catch(e => { console.error('Gallery load failed:', e); return null })
-  const manifest = await fetch(RULES_BASE + 'diagrams-manifest.json').then(r => r.json()).catch(e => { console.error('Manifest load failed:', e); return {} })
-  for (const key of Object.keys(manifest)) {
-    const [family, variant] = key.split('/')
+  const manifest = await fetch(RULES_BASE + 'diagrams-manifest.json').then(r => r.json()).catch(e => { console.error('Manifest load failed:', e); return [] })
+  const entries = Array.isArray(manifest) ? manifest : Object.entries(manifest).map(([k, v]) => ({ family: k.split('/')[0], variant: k.split('/')[1], ...v }))
+  for (const entry of entries) {
+    const family = entry.family
+    const variant = entry.variant
+    if (!family || !variant) continue
     if (!gamesIndex[family]) gamesIndex[family] = []
     gamesIndex[family].push(variant)
   }
