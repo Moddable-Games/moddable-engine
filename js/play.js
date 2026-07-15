@@ -501,7 +501,7 @@ function renderHexGenerator(entry) {
     return
   }
 
-  const size = gameConfig.defaultSize || 5
+  const size = entry.generatorSize || gameConfig.defaultSize || 5
   const manifestCounts = parsePlayerCounts(entry.players)
   const defaultPlayers = gameConfig.defaultPlayers || (manifestCounts.length ? manifestCounts[0] : 2)
   const players = state.players || defaultPlayers
