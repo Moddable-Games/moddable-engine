@@ -519,6 +519,16 @@ function renderComponentGame(entry) {
     return
   }
 
+  if (dealSpec.playerCounts || dealSpec.defaultPlayers) {
+    const playerGroup = document.getElementById('hex-players-group')
+    const playerSelect = document.getElementById('hex-players-select')
+    const counts = dealSpec.playerCounts || Array.from({ length: 8 }, (_, i) => i + 2)
+    const current = state.players || dealSpec.defaultPlayers || counts[0]
+    playerSelect.innerHTML = counts.map(n => `<option value="${n}"${n === current ? ' selected' : ''}>${n} players</option>`).join('')
+    playerGroup.style.display = ''
+  }
+  document.getElementById('hex-seed-group').style.display = ''
+
   renderDeckGame({ deckGame: deckType }, variantDef)
 }
 
