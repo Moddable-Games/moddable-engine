@@ -502,7 +502,9 @@ function renderHexGenerator(entry) {
   }
 
   const size = gameConfig.defaultSize || 5
-  const players = state.players || gameConfig.defaultPlayers || 4
+  const manifestCounts = parsePlayerCounts(entry.players)
+  const defaultPlayers = gameConfig.defaultPlayers || (manifestCounts.length ? manifestCounts[0] : 2)
+  const players = state.players || defaultPlayers
   const seed = state.seed
   const rng = createSeededRng(seed)
   const result = gameConfig.generate(size, players, seed, rng)
@@ -530,9 +532,11 @@ function renderHexGenerator(entry) {
 
   const playerSelect = document.getElementById('hex-players-select')
   const playerGroup = document.getElementById('hex-players-group')
-  if (gameConfig.playerCounts) {
-    const counts = gameConfig.playerCounts()
-    playerSelect.innerHTML = counts.map(n => `<option value="${n}"${n === players ? ' selected' : ''}>${n} players</option>`).join('')
+  const pCounts = gameConfig.playerCounts
+    ? gameConfig.playerCounts(size)
+    : parsePlayerCounts(entry.players)
+  if (pCounts && pCounts.length > 1) {
+    playerSelect.innerHTML = pCounts.map(n => `<option value="${n}"${n === players ? ' selected' : ''}>${n} players</option>`).join('')
     playerGroup.style.display = ''
   } else {
     playerGroup.style.display = 'none'
