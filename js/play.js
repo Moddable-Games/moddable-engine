@@ -365,6 +365,15 @@ async function inlineExternalImages(svgEl) {
 
 async function render() {
   if (!state.game || !state.variant) return
+
+  const entry = manifestIndex[`${state.game}/${state.variant}`]
+
+  if (entry && entry.topology === 'cards') {
+    renderComponentGame(entry)
+    updateRulesLink()
+    return
+  }
+
   const basePath = RULES_BASE + 'games/'
   const familyPath = state.game + '/content/rulebook.md'
   const variantPath = state.game + '/content/variants/' + state.variant + '.md'
@@ -408,6 +417,41 @@ async function render() {
   } catch (e) {
     showSvg('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="80"><text x="200" y="40" text-anchor="middle" font-size="12" fill="#f44">' + e.message + '</text></svg>')
   }
+}
+
+function renderComponentGame(entry) {
+  const deckType = entry.deckType || entry.family
+  const deckConfig = getDeckConfig(deckType)
+  if (!deckConfig) {
+    showSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="400" height="200" fill="#1a1a2e" rx="8"/><text x="200" y="100" text-anchor="middle" font-size="14" fill="#888" font-family="system-ui">Component game: ${entry.variantTitle}</text></svg>`)
+    return
+  }
+
+  const variantDef = {
+    deckVariant: entry.variant,
+    label: entry.variantTitle,
+  }
+
+  const dealSpec = deckConfig.games?.[entry.variant]
+  if (!dealSpec) {
+    const target = document.getElementById('board-svg')
+    const svg = renderDeckFromResolved({
+      topology: { type: 'none' },
+      components: { deck: { type: deckType } },
+      meta: { label: entry.variantTitle, category: 'card' },
+    })
+    if (svg) {
+      target.innerHTML = svg
+      target.classList.add('active')
+      document.getElementById('board-empty').style.display = 'none'
+      bindDeckHover()
+    } else {
+      showSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="400" height="200" fill="#1a1a2e" rx="8"/><text x="200" y="100" text-anchor="middle" font-size="14" fill="#888" font-family="system-ui">${entry.variantTitle} (${deckType})</text></svg>`)
+    }
+    return
+  }
+
+  renderDeckGame({ deckGame: deckType }, variantDef)
 }
 
 function updateRulesLink() {

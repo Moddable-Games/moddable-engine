@@ -15,6 +15,9 @@
   min-height: calc(100vh - 320px);
   border-top: 1px solid var(--border-subtle);
 }
+.site-header + .boards-app {
+  margin-top: 64px;
+}
 
 .boards-sidebar {
   border-right: 1px solid var(--border-subtle);
