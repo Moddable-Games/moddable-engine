@@ -230,7 +230,7 @@
 }
 
 @media (max-width: 768px) {
-  .docs-layout { flex-direction: column; padding: 0 16px; }
+  .docs-layout { flex-direction: column; padding: 0 16px; margin-top: 70px; }
   .docs-toc-toggle { display: block; margin-bottom: 12px; }
   .docs-toc {
     display: none;
