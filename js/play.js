@@ -363,6 +363,30 @@ async function inlineExternalImages(svgEl) {
   await Promise.all(promises)
 }
 
+function applyHandicapStones(fen, positions, rows, cols) {
+  const board = Array.from({ length: rows }, () => Array(cols).fill(null))
+  for (const pos of positions) {
+    const [r, c] = pos.split(',').map(Number)
+    if (r >= 0 && r < rows && c >= 0 && c < cols) board[r][c] = 'X'
+  }
+  const fenRows = []
+  for (let r = 0; r < rows; r++) {
+    let row = ''
+    let empty = 0
+    for (let c = 0; c < cols; c++) {
+      if (board[r][c]) {
+        if (empty > 0) { row += empty; empty = 0 }
+        row += board[r][c]
+      } else {
+        empty++
+      }
+    }
+    if (empty > 0) row += empty
+    fenRows.push(row)
+  }
+  return fenRows.join('/')
+}
+
 function parsePlayerCounts(str) {
   if (!str) return [2, 3, 4]
   const s = String(str).replace(/[–—]/g, '-')
@@ -407,6 +431,14 @@ async function render() {
     return
   }
 
+  if (entry && entry.handicaps) {
+    const hGroup = document.getElementById('handicap-group')
+    const hSelect = document.getElementById('handicap-select')
+    hGroup.style.display = ''
+    const range = entry.handicaps.range || []
+    hSelect.innerHTML = '<option value="0">None</option>' + range.map(n => `<option value="${n}"${n === state.handicap ? ' selected' : ''}>${n} stones</option>`).join('')
+  }
+
   const basePath = RULES_BASE + 'games/'
   const familyPath = state.game + '/content/rulebook.md'
   const variantPath = state.game + '/content/variants/' + state.variant + '.md'
@@ -417,6 +449,15 @@ async function render() {
       showSvg('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="80"><text x="200" y="40" text-anchor="middle" font-size="12" fill="#f44">' + errors.join('; ') + '</text></svg>')
       return
     }
+
+    if (state.handicap > 0 && entry && entry.handicaps) {
+      const positions = entry.handicaps.positions || []
+      const stones = positions.slice(0, state.handicap)
+      const rows = resolved.topology?.rows || 19
+      const cols = resolved.topology?.cols || 19
+      resolved.setup = applyHandicapStones(resolved.setup || '', stones, rows, cols)
+    }
+
     const target = document.getElementById('board-svg')
     if (resolved.players && resolved.players.length > 2 && resolved.pieces?.set) {
       const recolourConfig = { pieceSet4: resolved.pieces.set }

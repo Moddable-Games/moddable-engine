@@ -271,8 +271,10 @@ export function renderMahjongSvg(dealResult, opts) {
   }
 
   const playerLabels = ['South (you)', 'East', 'North', 'West']
-  for (let p = 0; p < 4; p++) {
+  const numPlayers = Math.min(4, dealResult.hands.length)
+  for (let p = 0; p < numPlayers; p++) {
     const hand = dealResult.hands[p]
+    if (!hand) continue
     const faceUp = p === 0
     const label = playerLabels[p]
     const zoneDesc = faceUp ? `${label} — ${hand.length} tiles (visible)` : `${label} — ${hand.length} tiles (hidden)`
