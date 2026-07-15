@@ -103,6 +103,13 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Changelog
 
+#### 2026-07-15
+- Production readiness: dev/main branch strategy, CNAME (engine.moddable.games)
+- Added version system (version.txt + bump.sh) with cache-busting on all CSS/JS refs
+- Added OG images and full meta tags (og: + twitter:card) for all 13 pages
+- Added sitemap.xml, robots.txt, favicon.svg, .nojekyll
+- Blueprint-aesthetic OG image generator (scripts/gen-og.py) matching moddable-rules style
+
 #### 2026-07-08
 - RPG provider: DOM-based search + card table for D&D 5e and Ironsworn
 - Colour-coded categories, universal cross-category search, rules.moddable.games links
