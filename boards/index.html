@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Board Studio — Moddable Engine</title>
-<meta name="description" content="Browse and verify board diagrams for all published game variants from rules.moddable.games.">
+<title>Board Gallery — Moddable Engine</title>
+<meta name="description" content="Browse, preview, and download board diagrams for every game variant. SVG and PNG export for all boards.">
 <meta name="theme-color" content="#0a0d2a">
 <meta name="base-path" content="..">
 <link rel="stylesheet" href="../css/home.css">
-<link rel="stylesheet" href="../css/boards.css">
+<link rel="stylesheet" href="../css/gallery.css">
 </head>
 <body>
 
@@ -19,7 +19,7 @@
       <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
     </a>
     <nav class="header-nav">
-      <a href="../play/" class="nav-link nav-link--soon">Play</a>
+      <a href="../play/" class="nav-link">Play</a>
       <a href="./" class="nav-link nav-link--active">Boards</a>
       <a href="../pieces/" class="nav-link">Pieces</a>
       <a href="../tiles/" class="nav-link">Tiles</a>
@@ -29,87 +29,54 @@
   </div>
 </header>
 
-<section class="boards-hero">
-  <div class="boards-hero-content">
-    <div class="hero-eyebrow">Board Studio</div>
-    <h1 class="hero-title">Every published game</h1>
-    <p class="hero-lede">Select any game from the Moddable Rules collection. Verify the engine produces the same board diagram as the published rulebook.</p>
+<section class="gallery-hero">
+  <div class="gallery-hero-content">
+    <div class="hero-eyebrow">Board Gallery</div>
+    <h1 class="hero-title">Every board. Every variant.</h1>
+    <p class="hero-lede" id="gallery-intro">Loading...</p>
   </div>
 </section>
 
-<div class="boards-app">
-  <aside class="boards-sidebar">
-    <div class="sidebar-panel active" id="panel-generate">
-      <div class="control-group">
-        <label class="control-label">Game</label>
-        <select id="game-select"></select>
-      </div>
-
-      <div class="control-group">
-        <label class="control-label">Variant <span id="coverage-info" class="coverage-badge"></span></label>
-        <select id="variant-select"></select>
-      </div>
-
-      <div class="control-group" id="handicap-group" style="display:none">
-        <label class="control-label">Handicap</label>
-        <select id="handicap-select">
-          <option value="0">None</option>
-          <option value="2">2 stones</option>
-          <option value="3">3 stones</option>
-          <option value="4">4 stones</option>
-          <option value="5">5 stones</option>
-          <option value="6">6 stones</option>
-          <option value="7">7 stones</option>
-          <option value="8">8 stones</option>
-          <option value="9">9 stones</option>
+<section class="gallery-controls">
+  <div class="controls-inner">
+    <div class="control-row">
+      <label class="control-group">
+        <span class="control-label">Search</span>
+        <input type="text" id="search-input" placeholder="chess, hex, mancala...">
+      </label>
+      <label class="control-group">
+        <span class="control-label">Family</span>
+        <select id="family-filter">
+          <option value="all">All families</option>
         </select>
-      </div>
-
-      <div class="control-group" id="hex-style-group" style="display:none">
-        <label class="control-label">Tile Style</label>
-        <select id="hex-style-select">
-          <option value="classic">Classic (flat colour)</option>
-          <option value="artistic">Artistic</option>
-          <option value="kenney">Kenney</option>
+      </label>
+      <label class="control-group">
+        <span class="control-label">Topology</span>
+        <select id="topology-filter">
+          <option value="all">All topologies</option>
+          <option value="grid">Grid</option>
+          <option value="hex">Hex</option>
+          <option value="graph">Graph</option>
+          <option value="track">Track</option>
+          <option value="pit">Pit</option>
         </select>
-      </div>
-
-      <div class="control-group" id="hex-players-group" style="display:none">
-        <label class="control-label">Players</label>
-        <select id="hex-players-select"></select>
-      </div>
-
-      <div class="control-group" id="hex-seed-group" style="display:none">
-        <label class="control-label">Seed</label>
-        <div class="control-row">
-          <input type="text" id="hex-seed-input" placeholder="Random seed">
-          <button class="btn btn-outline" id="hex-reseed-btn" title="New seed">&#x21bb;</button>
-        </div>
-      </div>
-
-      <div id="derived-info" class="derived-info"></div>
-
-      <div class="control-group">
-        <label class="control-label">Export</label>
-        <div class="control-row">
-          <button class="btn btn-outline" id="export-svg-btn">SVG</button>
-          <button class="btn btn-outline" id="export-png-btn">PNG</button>
-        </div>
-      </div>
+      </label>
+      <label class="control-group">
+        <span class="control-label">Size</span>
+        <select id="size-select">
+          <option value="160">Small</option>
+          <option value="240" selected>Medium</option>
+          <option value="360">Large</option>
+        </select>
+      </label>
     </div>
-  </aside>
+    <div class="gallery-stats" id="gallery-stats"></div>
+  </div>
+</section>
 
-  <main class="boards-canvas">
-    <div class="canvas-viewport" id="board-viewport">
-      <div class="canvas-empty" id="board-empty">
-        <div class="empty-icon">&#x2B22;</div>
-        <p>Select a game to render its board</p>
-      </div>
-      <div class="canvas-svg" id="board-svg"></div>
-    </div>
-    <div class="hex-info-bar" id="hex-info-bar">Hover over a hex</div>
-  </main>
-</div>
+<section class="gallery-body">
+  <div id="gallery-container"></div>
+</section>
 
 <footer class="site-footer">
   <div class="footer-inner">
@@ -118,6 +85,6 @@
   </div>
 </footer>
 
-<script type="module" src="../js/boards.js?v=9"></script>
+<script type="module" src="../js/board-gallery.js"></script>
 </body>
 </html>

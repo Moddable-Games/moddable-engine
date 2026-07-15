@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Play — Moddable Engine</title>
+<meta name="description" content="Interactive board rendering for all published game variants. Select any game, see its board rendered live.">
+<meta name="theme-color" content="#0a0d2a">
+<meta name="base-path" content="..">
+<link rel="stylesheet" href="../css/home.css">
+<link rel="stylesheet" href="../css/boards.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="./" class="nav-link nav-link--active">Play</a>
+      <a href="../boards/" class="nav-link">Boards</a>
+      <a href="../pieces/" class="nav-link">Pieces</a>
+      <a href="../tiles/" class="nav-link">Tiles</a>
+      <a href="../docs/" class="nav-link nav-link--soon">Docs</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<section class="boards-hero">
+  <div class="boards-hero-content">
+    <div class="hero-eyebrow">Play</div>
+    <h1 class="hero-title">Every published game</h1>
+    <p class="hero-lede">Select any game from the Moddable Rules collection. Interactive board rendering with live piece placement and hover info.</p>
+  </div>
+</section>
+
+<div class="boards-app">
+  <aside class="boards-sidebar">
+    <div class="sidebar-panel active" id="panel-generate">
+      <div class="control-group">
+        <label class="control-label">Game</label>
+        <select id="game-select"></select>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">Variant <span id="coverage-info" class="coverage-badge"></span></label>
+        <select id="variant-select"></select>
+      </div>
+
+      <div class="control-group" id="handicap-group" style="display:none">
+        <label class="control-label">Handicap</label>
+        <select id="handicap-select">
+          <option value="0">None</option>
+          <option value="2">2 stones</option>
+          <option value="3">3 stones</option>
+          <option value="4">4 stones</option>
+          <option value="5">5 stones</option>
+          <option value="6">6 stones</option>
+          <option value="7">7 stones</option>
+          <option value="8">8 stones</option>
+          <option value="9">9 stones</option>
+        </select>
+      </div>
+
+      <div class="control-group" id="hex-style-group" style="display:none">
+        <label class="control-label">Tile Style</label>
+        <select id="hex-style-select">
+          <option value="classic">Classic (flat colour)</option>
+          <option value="artistic">Artistic</option>
+          <option value="kenney">Kenney</option>
+        </select>
+      </div>
+
+      <div class="control-group" id="hex-players-group" style="display:none">
+        <label class="control-label">Players</label>
+        <select id="hex-players-select"></select>
+      </div>
+
+      <div class="control-group" id="hex-seed-group" style="display:none">
+        <label class="control-label">Seed</label>
+        <div class="control-row">
+          <input type="text" id="hex-seed-input" placeholder="Random seed">
+          <button class="btn btn-outline" id="hex-reseed-btn" title="New seed">&#x21bb;</button>
+        </div>
+      </div>
+
+      <div id="derived-info" class="derived-info"></div>
+
+      <div class="control-group">
+        <label class="control-label">Export</label>
+        <div class="control-row">
+          <button class="btn btn-outline" id="export-svg-btn">SVG</button>
+          <button class="btn btn-outline" id="export-png-btn">PNG</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="boards-canvas">
+    <div class="canvas-viewport" id="board-viewport">
+      <div class="canvas-empty" id="board-empty">
+        <div class="empty-icon">&#x2B22;</div>
+        <p>Select a game to render its board</p>
+      </div>
+      <div class="canvas-svg" id="board-svg"></div>
+    </div>
+    <div class="hex-info-bar" id="hex-info-bar">Hover over a hex</div>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="footer-brand">moddable.engine</p>
+    <p class="footer-sub">Part of <a href="https://moddable.games" target="_blank" rel="noopener">Moddable.Games</a></p>
+  </div>
+</footer>
+
+<script type="module" src="../js/boards.js?v=9"></script>
+</body>
+</html>

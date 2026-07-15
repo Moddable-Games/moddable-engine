@@ -1,0 +1,2274 @@
+[
+  {
+    "family": "agon",
+    "familyTitle": "Agon",
+    "variant": "standard",
+    "variantTitle": "Agon (Standard)",
+    "topology": "hex",
+    "svg": "../snapshots/agon--standard.svg"
+  },
+  {
+    "family": "asalto",
+    "familyTitle": "Asalto",
+    "variant": "royal-garrison",
+    "variantTitle": "Royal Garrison",
+    "topology": "graph",
+    "svg": "../snapshots/asalto--royal-garrison.svg"
+  },
+  {
+    "family": "asalto",
+    "familyTitle": "Asalto",
+    "variant": "standard",
+    "variantTitle": "Asalto (Standard)",
+    "topology": "graph",
+    "svg": "../snapshots/asalto--standard.svg"
+  },
+  {
+    "family": "backgammon",
+    "familyTitle": "Backgammon — Official Rulebook",
+    "variant": "acey-deucey",
+    "variantTitle": "Acey-Deucey",
+    "topology": "track",
+    "svg": "../snapshots/backgammon--acey-deucey.svg"
+  },
+  {
+    "family": "backgammon",
+    "familyTitle": "Backgammon — Official Rulebook",
+    "variant": "chouette",
+    "variantTitle": "Chouette",
+    "topology": "track",
+    "svg": "../snapshots/backgammon--chouette.svg"
+  },
+  {
+    "family": "backgammon",
+    "familyTitle": "Backgammon — Official Rulebook",
+    "variant": "fevga",
+    "variantTitle": "Fevga",
+    "topology": "track",
+    "svg": "../snapshots/backgammon--fevga.svg"
+  },
+  {
+    "family": "backgammon",
+    "familyTitle": "Backgammon — Official Rulebook",
+    "variant": "hypergammon",
+    "variantTitle": "Hypergammon",
+    "topology": "track",
+    "svg": "../snapshots/backgammon--hypergammon.svg"
+  },
+  {
+    "family": "backgammon",
+    "familyTitle": "Backgammon — Official Rulebook",
+    "variant": "nackgammon",
+    "variantTitle": "Nackgammon",
+    "topology": "track",
+    "svg": "../snapshots/backgammon--nackgammon.svg"
+  },
+  {
+    "family": "backgammon",
+    "familyTitle": "Backgammon — Official Rulebook",
+    "variant": "nardi",
+    "variantTitle": "Nardi",
+    "topology": "track",
+    "svg": "../snapshots/backgammon--nardi.svg"
+  },
+  {
+    "family": "backgammon",
+    "familyTitle": "Backgammon — Official Rulebook",
+    "variant": "plakoto",
+    "variantTitle": "Plakoto",
+    "topology": "track",
+    "svg": "../snapshots/backgammon--plakoto.svg"
+  },
+  {
+    "family": "backgammon",
+    "familyTitle": "Backgammon — Official Rulebook",
+    "variant": "standard",
+    "variantTitle": "Standard Backgammon",
+    "topology": "track",
+    "svg": "../snapshots/backgammon--standard.svg"
+  },
+  {
+    "family": "chaupar",
+    "familyTitle": "Chaupar — Official Rulebook",
+    "variant": "standard",
+    "variantTitle": "Chaupar (Standard)",
+    "topology": "grid",
+    "svg": "../snapshots/chaupar--standard.svg"
+  },
+  {
+    "family": "dou-shou-qi",
+    "familyTitle": "Dou Shou Qi (斗兽棋 / Jungle)",
+    "variant": "standard",
+    "variantTitle": "Dou Shou Qi (Standard)",
+    "topology": "grid",
+    "svg": "../snapshots/dou-shou-qi--standard.svg"
+  },
+  {
+    "family": "draughts",
+    "familyTitle": "Draughts — Official Rulebook",
+    "variant": "alquerque",
+    "variantTitle": "Alquerque",
+    "topology": "grid",
+    "svg": "../snapshots/draughts--alquerque.svg"
+  },
+  {
+    "family": "draughts",
+    "familyTitle": "Draughts — Official Rulebook",
+    "variant": "bashni",
+    "variantTitle": "Bashni",
+    "topology": "grid",
+    "svg": "../snapshots/draughts--bashni.svg"
+  },
+  {
+    "family": "draughts",
+    "familyTitle": "Draughts — Official Rulebook",
+    "variant": "brazilian",
+    "variantTitle": "Brazilian Draughts",
+    "topology": "grid",
+    "svg": "../snapshots/draughts--brazilian.svg"
+  },
+  {
+    "family": "draughts",
+    "familyTitle": "Draughts — Official Rulebook",
+    "variant": "canadian",
+    "variantTitle": "Canadian Draughts",
+    "topology": "grid",
+    "svg": "../snapshots/draughts--canadian.svg"
+  },
+  {
+    "family": "draughts",
+    "familyTitle": "Draughts — Official Rulebook",
+    "variant": "czech",
+    "variantTitle": "Czech Draughts",
+    "topology": "grid",
+    "svg": "../snapshots/draughts--czech.svg"
+  },
+  {
+    "family": "draughts",
+    "familyTitle": "Draughts — Official Rulebook",
+    "variant": "dameo",
+    "variantTitle": "Dameo",
+    "topology": "grid",
+    "svg": "../snapshots/draughts--dameo.svg"
+  },
+  {
+    "family": "draughts",
+    "familyTitle": "Draughts — Official Rulebook",
+    "variant": "diagonal",
+    "variantTitle": "Diagonal Draughts",
+    "topology": "grid",
+    "svg": "../snapshots/draughts--diagonal.svg"
+  },
+  {
+    "family": "draughts",
+    "familyTitle": "Draughts — Official Rulebook",
+    "variant": "english",
+    "variantTitle": "English Draughts",
+    "topology": "grid",
+    "svg": "../snapshots/draughts--english.svg"
+  },
+  {
+    "family": "draughts",
+    "familyTitle": "Draughts — Official Rulebook",
+    "variant": "frisian",
+    "variantTitle": "Frisian Draughts",
+    "topology": "grid",
+    "svg": "../snapshots/draughts--frisian.svg"
+  },
+  {
+    "family": "draughts",
+    "familyTitle": "Draughts — Official Rulebook",
+    "variant": "german",
+    "variantTitle": "German Draughts",
+    "topology": "grid",
+    "svg": "../snapshots/draughts--german.svg"
+  },
+  {
+    "family": "draughts",
+    "familyTitle": "Draughts — Official Rulebook",
+    "variant": "ghanaian",
+    "variantTitle": "Ghanaian Draughts",
+    "topology": "grid",
+    "svg": "../snapshots/draughts--ghanaian.svg"
+  },
+  {
+    "family": "draughts",
+    "familyTitle": "Draughts — Official Rulebook",
+    "variant": "international",
+    "variantTitle": "International Draughts",
+    "topology": "grid",
+    "svg": "../snapshots/draughts--international.svg"
+  },
+  {
+    "family": "draughts",
+    "familyTitle": "Draughts — Official Rulebook",
+    "variant": "italian",
+    "variantTitle": "Italian Draughts",
+    "topology": "grid",
+    "svg": "../snapshots/draughts--italian.svg"
+  },
+  {
+    "family": "draughts",
+    "familyTitle": "Draughts — Official Rulebook",
+    "variant": "lasca",
+    "variantTitle": "Lasca",
+    "topology": "grid",
+    "svg": "../snapshots/draughts--lasca.svg"
+  },
+  {
+    "family": "draughts",
+    "familyTitle": "Draughts — Official Rulebook",
+    "variant": "pool",
+    "variantTitle": "Pool Checkers",
+    "topology": "grid",
+    "svg": "../snapshots/draughts--pool.svg"
+  },
+  {
+    "family": "draughts",
+    "familyTitle": "Draughts — Official Rulebook",
+    "variant": "russian",
+    "variantTitle": "Russian Draughts",
+    "topology": "grid",
+    "svg": "../snapshots/draughts--russian.svg"
+  },
+  {
+    "family": "draughts",
+    "familyTitle": "Draughts — Official Rulebook",
+    "variant": "spanish",
+    "variantTitle": "Spanish Draughts",
+    "topology": "grid",
+    "svg": "../snapshots/draughts--spanish.svg"
+  },
+  {
+    "family": "draughts",
+    "familyTitle": "Draughts — Official Rulebook",
+    "variant": "spantsiretti",
+    "variantTitle": "Spantsiretti",
+    "topology": "grid",
+    "svg": "../snapshots/draughts--spantsiretti.svg"
+  },
+  {
+    "family": "draughts",
+    "familyTitle": "Draughts — Official Rulebook",
+    "variant": "thai",
+    "variantTitle": "Thai Draughts",
+    "topology": "grid",
+    "svg": "../snapshots/draughts--thai.svg"
+  },
+  {
+    "family": "draughts",
+    "familyTitle": "Draughts — Official Rulebook",
+    "variant": "turkish-draughts",
+    "variantTitle": "Turkish Draughts",
+    "topology": "grid",
+    "svg": "../snapshots/draughts--turkish-draughts.svg"
+  },
+  {
+    "family": "dungeon-chess",
+    "familyTitle": "Dungeon Chess — Official Rulebook",
+    "variant": "compact",
+    "variantTitle": "Dungeon Chess (Compact Skirmish (10×10))",
+    "topology": "grid",
+    "svg": "../snapshots/dungeon-chess--compact.svg"
+  },
+  {
+    "family": "dungeon-chess",
+    "familyTitle": "Dungeon Chess — Official Rulebook",
+    "variant": "four-player",
+    "variantTitle": "Dungeon Chess (Four Player (20×20))",
+    "topology": "grid",
+    "svg": "../snapshots/dungeon-chess--four-player.svg"
+  },
+  {
+    "family": "dungeon-chess",
+    "familyTitle": "Dungeon Chess — Official Rulebook",
+    "variant": "two-player",
+    "variantTitle": "Dungeon Chess (Two Player (20×8))",
+    "topology": "grid",
+    "svg": "../snapshots/dungeon-chess--two-player.svg"
+  },
+  {
+    "family": "econopoly",
+    "familyTitle": "Econopoly — Official Rulebook",
+    "variant": "standard",
+    "variantTitle": "Econopoly (Standard)",
+    "topology": "track",
+    "svg": "../snapshots/econopoly--standard.svg"
+  },
+  {
+    "family": "fanorona",
+    "familyTitle": "Fanorona — Official Rulebook",
+    "variant": "standard",
+    "variantTitle": "Fanorona (Standard)",
+    "topology": "grid",
+    "svg": "../snapshots/fanorona--standard.svg"
+  },
+  {
+    "family": "go",
+    "familyTitle": "Go — Official Rulebook",
+    "variant": "13x13",
+    "variantTitle": "13×13 Go",
+    "topology": "grid",
+    "svg": "../snapshots/go--13x13.svg"
+  },
+  {
+    "family": "go",
+    "familyTitle": "Go — Official Rulebook",
+    "variant": "9x9",
+    "variantTitle": "9×9 Go",
+    "topology": "grid",
+    "svg": "../snapshots/go--9x9.svg"
+  },
+  {
+    "family": "go",
+    "familyTitle": "Go — Official Rulebook",
+    "variant": "capture-go",
+    "variantTitle": "Capture Go",
+    "topology": "grid",
+    "svg": "../snapshots/go--capture-go.svg"
+  },
+  {
+    "family": "go",
+    "familyTitle": "Go — Official Rulebook",
+    "variant": "gomoku",
+    "variantTitle": "Gomoku",
+    "topology": "grid",
+    "svg": "../snapshots/go--gomoku.svg"
+  },
+  {
+    "family": "go",
+    "familyTitle": "Go — Official Rulebook",
+    "variant": "ninuki-renju",
+    "variantTitle": "Ninuki-Renju",
+    "topology": "grid",
+    "svg": "../snapshots/go--ninuki-renju.svg"
+  },
+  {
+    "family": "go",
+    "familyTitle": "Go — Official Rulebook",
+    "variant": "one-colour",
+    "variantTitle": "One-Colour Go",
+    "topology": "grid",
+    "svg": "../snapshots/go--one-colour.svg"
+  },
+  {
+    "family": "go",
+    "familyTitle": "Go — Official Rulebook",
+    "variant": "phantom-go",
+    "variantTitle": "Phantom Go",
+    "topology": "grid",
+    "svg": "../snapshots/go--phantom-go.svg"
+  },
+  {
+    "family": "go",
+    "familyTitle": "Go — Official Rulebook",
+    "variant": "rengo",
+    "variantTitle": "Rengo",
+    "topology": "grid",
+    "svg": "../snapshots/go--rengo.svg"
+  },
+  {
+    "family": "go",
+    "familyTitle": "Go — Official Rulebook",
+    "variant": "renju",
+    "variantTitle": "Renju",
+    "topology": "grid",
+    "svg": "../snapshots/go--renju.svg"
+  },
+  {
+    "family": "go",
+    "familyTitle": "Go — Official Rulebook",
+    "variant": "standard",
+    "variantTitle": "Standard Go (19×19)",
+    "topology": "grid",
+    "svg": "../snapshots/go--standard.svg"
+  },
+  {
+    "family": "go",
+    "familyTitle": "Go — Official Rulebook",
+    "variant": "stoical",
+    "variantTitle": "Stoical Go",
+    "topology": "grid",
+    "svg": "../snapshots/go--stoical.svg"
+  },
+  {
+    "family": "go",
+    "familyTitle": "Go — Official Rulebook",
+    "variant": "sunjang",
+    "variantTitle": "Sunjang Baduk",
+    "topology": "grid",
+    "svg": "../snapshots/go--sunjang.svg"
+  },
+  {
+    "family": "go",
+    "familyTitle": "Go — Official Rulebook",
+    "variant": "tibetan",
+    "variantTitle": "Tibetan Go",
+    "topology": "grid",
+    "svg": "../snapshots/go--tibetan.svg"
+  },
+  {
+    "family": "go",
+    "familyTitle": "Go — Official Rulebook",
+    "variant": "toroidal-go",
+    "variantTitle": "Toroidal Go",
+    "topology": "grid",
+    "svg": "../snapshots/go--toroidal-go.svg"
+  },
+  {
+    "family": "halma",
+    "familyTitle": "Halma — Official Rulebook",
+    "variant": "standard-2p",
+    "variantTitle": "Standard 2-Player Halma",
+    "topology": "grid",
+    "svg": "../snapshots/halma--standard-2p.svg"
+  },
+  {
+    "family": "halma",
+    "familyTitle": "Halma — Official Rulebook",
+    "variant": "standard-4p",
+    "variantTitle": "Standard 4-Player Halma",
+    "topology": "grid",
+    "svg": "../snapshots/halma--standard-4p.svg"
+  },
+  {
+    "family": "hex",
+    "familyTitle": "Hex — Official Rulebook",
+    "variant": "13x13",
+    "variantTitle": "Hex (13×13)",
+    "topology": "hex",
+    "svg": "../snapshots/hex--13x13.svg"
+  },
+  {
+    "family": "hex",
+    "familyTitle": "Hex — Official Rulebook",
+    "variant": "14x14",
+    "variantTitle": "Hex (14×14)",
+    "topology": "hex",
+    "svg": "../snapshots/hex--14x14.svg"
+  },
+  {
+    "family": "hex",
+    "familyTitle": "Hex — Official Rulebook",
+    "variant": "19x19",
+    "variantTitle": "Hex (19×19)",
+    "topology": "hex",
+    "svg": "../snapshots/hex--19x19.svg"
+  },
+  {
+    "family": "hex",
+    "familyTitle": "Hex — Official Rulebook",
+    "variant": "9x9",
+    "variantTitle": "Hex (9×9)",
+    "topology": "hex",
+    "svg": "../snapshots/hex--9x9.svg"
+  },
+  {
+    "family": "hex",
+    "familyTitle": "Hex — Official Rulebook",
+    "variant": "standard",
+    "variantTitle": "Hex (11×11)",
+    "topology": "hex",
+    "svg": "../snapshots/hex--standard.svg"
+  },
+  {
+    "family": "hex",
+    "familyTitle": "Hex — Official Rulebook",
+    "variant": "y-game",
+    "variantTitle": "Y",
+    "topology": "hex",
+    "svg": "../snapshots/hex--y-game.svg"
+  },
+  {
+    "family": "hex",
+    "familyTitle": "Hex — Official Rulebook",
+    "variant": "y-large",
+    "variantTitle": "Y (Large — 15)",
+    "topology": "hex",
+    "svg": "../snapshots/hex--y-large.svg"
+  },
+  {
+    "family": "hex",
+    "familyTitle": "Hex — Official Rulebook",
+    "variant": "y-small",
+    "variantTitle": "Y (Small — 9)",
+    "topology": "hex",
+    "svg": "../snapshots/hex--y-small.svg"
+  },
+  {
+    "family": "landlords-game",
+    "familyTitle": "The Landlord's Game — Official Rulebook",
+    "variant": "1904-original",
+    "variantTitle": "1904 Original",
+    "topology": "track",
+    "svg": "../snapshots/landlords-game--1904-original.svg"
+  },
+  {
+    "family": "landlords-game",
+    "familyTitle": "The Landlord's Game — Official Rulebook",
+    "variant": "1906-commercial",
+    "variantTitle": "1906 Commercial Edition",
+    "topology": "track",
+    "svg": "../snapshots/landlords-game--1906-commercial.svg"
+  },
+  {
+    "family": "landlords-game",
+    "familyTitle": "The Landlord's Game — Official Rulebook",
+    "variant": "monarch-of-the-world",
+    "variantTitle": "Monarch of the World",
+    "topology": "track",
+    "svg": "../snapshots/landlords-game--monarch-of-the-world.svg"
+  },
+  {
+    "family": "landlords-game",
+    "familyTitle": "The Landlord's Game — Official Rulebook",
+    "variant": "prosperity",
+    "variantTitle": "Prosperity",
+    "topology": "track",
+    "svg": "../snapshots/landlords-game--prosperity.svg"
+  },
+  {
+    "family": "landlords-game",
+    "familyTitle": "The Landlord's Game — Official Rulebook",
+    "variant": "single-tax",
+    "variantTitle": "Single Tax",
+    "topology": "track",
+    "svg": "../snapshots/landlords-game--single-tax.svg"
+  },
+  {
+    "family": "lattaque",
+    "familyTitle": "L'Attaque",
+    "variant": "aviation",
+    "variantTitle": "Aviation",
+    "topology": "grid",
+    "svg": "../snapshots/lattaque--aviation.svg"
+  },
+  {
+    "family": "lattaque",
+    "familyTitle": "L'Attaque",
+    "variant": "dover-patrol",
+    "variantTitle": "Dover Patrol",
+    "topology": "grid",
+    "svg": "../snapshots/lattaque--dover-patrol.svg"
+  },
+  {
+    "family": "lattaque",
+    "familyTitle": "L'Attaque",
+    "variant": "standard",
+    "variantTitle": "L'Attaque (Standard)",
+    "topology": "grid",
+    "svg": "../snapshots/lattaque--standard.svg"
+  },
+  {
+    "family": "lattaque",
+    "familyTitle": "L'Attaque",
+    "variant": "tri-tactics",
+    "variantTitle": "Tri-Tactics",
+    "topology": "grid",
+    "svg": "../snapshots/lattaque--tri-tactics.svg"
+  },
+  {
+    "family": "mancala",
+    "familyTitle": "Mancala — Official Rulebook",
+    "variant": "ayo",
+    "variantTitle": "Ayo",
+    "topology": "pit",
+    "svg": "../snapshots/mancala--ayo.svg"
+  },
+  {
+    "family": "mancala",
+    "familyTitle": "Mancala — Official Rulebook",
+    "variant": "bao",
+    "variantTitle": "Bao",
+    "topology": "pit",
+    "svg": "../snapshots/mancala--bao.svg"
+  },
+  {
+    "family": "mancala",
+    "familyTitle": "Mancala — Official Rulebook",
+    "variant": "congkak",
+    "variantTitle": "Congkak",
+    "topology": "pit",
+    "svg": "../snapshots/mancala--congkak.svg"
+  },
+  {
+    "family": "mancala",
+    "familyTitle": "Mancala — Official Rulebook",
+    "variant": "kalah",
+    "variantTitle": "Kalah",
+    "topology": "pit",
+    "svg": "../snapshots/mancala--kalah.svg"
+  },
+  {
+    "family": "mancala",
+    "familyTitle": "Mancala — Official Rulebook",
+    "variant": "oware",
+    "variantTitle": "Oware",
+    "topology": "pit",
+    "svg": "../snapshots/mancala--oware.svg"
+  },
+  {
+    "family": "mancala",
+    "familyTitle": "Mancala — Official Rulebook",
+    "variant": "pallanguzhi",
+    "variantTitle": "Pallanguzhi",
+    "topology": "pit",
+    "svg": "../snapshots/mancala--pallanguzhi.svg"
+  },
+  {
+    "family": "mancala",
+    "familyTitle": "Mancala — Official Rulebook",
+    "variant": "sungka",
+    "variantTitle": "Sungka",
+    "topology": "pit",
+    "svg": "../snapshots/mancala--sungka.svg"
+  },
+  {
+    "family": "mancala",
+    "familyTitle": "Mancala — Official Rulebook",
+    "variant": "toguz-korgool",
+    "variantTitle": "Toguz Korgool",
+    "topology": "pit",
+    "svg": "../snapshots/mancala--toguz-korgool.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "absorption",
+    "variantTitle": "Absorption Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--absorption.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "alice",
+    "variantTitle": "Alice Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--alice.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "almost-chess",
+    "variantTitle": "Almost Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--almost-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "amazon-chess",
+    "variantTitle": "Amazon Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--amazon-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "andernach",
+    "variantTitle": "Andernach Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--andernach.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "anti-king-chess-2",
+    "variantTitle": "Anti-King Chess II",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--anti-king-chess-2.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "antichess",
+    "variantTitle": "Antichess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--antichess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "archchess",
+    "variantTitle": "Archchess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--archchess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "asean",
+    "variantTitle": "ASEAN Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--asean.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "atomic",
+    "variantTitle": "Atomic Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--atomic.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "avalanche",
+    "variantTitle": "Avalanche Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--avalanche.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "balbos-chess",
+    "variantTitle": "Balbo's Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--balbos-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "benedict",
+    "variantTitle": "Benedict Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--benedict.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "berolina-chess",
+    "variantTitle": "Berolina Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--berolina-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "berserk",
+    "variantTitle": "Berserk Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--berserk.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "birds-chess",
+    "variantTitle": "Bird's Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--birds-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "blind-chess",
+    "variantTitle": "Blind Chess (Banqi)",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--blind-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "breakthrough",
+    "variantTitle": "Breakthrough",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--breakthrough.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "brusky",
+    "variantTitle": "Brusky's Hexagonal Chess",
+    "topology": "hex",
+    "svg": "../snapshots/moddable-chess--brusky.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "capablanca",
+    "variantTitle": "Capablanca Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--capablanca.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "carrera",
+    "variantTitle": "Carrera's Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--carrera.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "centennial-chess",
+    "variantTitle": "Centennial Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--centennial-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "chak",
+    "variantTitle": "Chak",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--chak.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "chancellor-chess",
+    "variantTitle": "Chancellor Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--chancellor-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "chaturanga",
+    "variantTitle": "Chaturanga",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--chaturanga.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "checkless",
+    "variantTitle": "Checkless Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--checkless.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "chennis",
+    "variantTitle": "Chennis",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--chennis.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "chigorin",
+    "variantTitle": "Chigorin",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--chigorin.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "citadel-chess",
+    "variantTitle": "Citadel Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--citadel-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "codrus",
+    "variantTitle": "Codrus",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--codrus.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "congo",
+    "variantTitle": "Congo",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--congo.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "courier",
+    "variantTitle": "Courier Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--courier.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "crazy-38s",
+    "variantTitle": "Crazy 38's",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--crazy-38s.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "crazyhouse",
+    "variantTitle": "Crazyhouse",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--crazyhouse.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "cylinder-chess",
+    "variantTitle": "Cylinder Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--cylinder-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "dark-chess",
+    "variantTitle": "Dark Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--dark-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "de-vasa",
+    "variantTitle": "De Vasa's Hexagonal Chess",
+    "topology": "hex",
+    "svg": "../snapshots/moddable-chess--de-vasa.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "delirious-bughouse",
+    "variantTitle": "Delirious Bughouse",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--delirious-bughouse.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "diana",
+    "variantTitle": "Diana Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--diana.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "dice-chess",
+    "variantTitle": "Dice Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--dice-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "displacement-chess",
+    "variantTitle": "Displacement Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--displacement-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "djambi",
+    "variantTitle": "Djambi",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--djambi.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "dragon-chess",
+    "variantTitle": "Dragon Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--dragon-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "duck-chess",
+    "variantTitle": "Duck Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--duck-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "einstein-chess",
+    "variantTitle": "Einstein Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--einstein-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "empire",
+    "variantTitle": "Empire Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--empire.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "endgame-chess",
+    "variantTitle": "Endgame Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--endgame-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "extinction",
+    "variantTitle": "Extinction Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--extinction.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "fanorona-chess",
+    "variantTitle": "Fanorona Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--fanorona-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "fischer-random",
+    "variantTitle": "Fischer Random (Chess960)",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--fischer-random.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "five-check",
+    "variantTitle": "Five-Check",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--five-check.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "flip-chess",
+    "variantTitle": "Flip Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--flip-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "fog-of-war",
+    "variantTitle": "Fog of War Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--fog-of-war.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "four-handed-chess",
+    "variantTitle": "Four-Handed Chess (Chaturaji)",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--four-handed-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "giveaway",
+    "variantTitle": "Giveaway",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--giveaway.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "glinski",
+    "variantTitle": "Glinski's Hexagonal Chess",
+    "topology": "hex",
+    "svg": "../snapshots/moddable-chess--glinski.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "grand",
+    "variantTitle": "Grand Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--grand.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "grande-acedrex",
+    "variantTitle": "Grande Acedrex",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--grande-acedrex.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "grasshopper",
+    "variantTitle": "Standard Grasshopper Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--grasshopper.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "grid-chess",
+    "variantTitle": "Grid Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--grid-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "gustav-iii-chess",
+    "variantTitle": "Gustav III's Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--gustav-iii-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "gygax",
+    "variantTitle": "Gygax Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--gygax.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "half-chess",
+    "variantTitle": "Half Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--half-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "hexapawn",
+    "variantTitle": "Hexapawn",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--hexapawn.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "hole-chess",
+    "variantTitle": "Hole Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--hole-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "hoppel-poppel",
+    "variantTitle": "Hoppel-Poppel",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--hoppel-poppel.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "horde",
+    "variantTitle": "Horde Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--horde.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "hostage-chess",
+    "variantTitle": "Hostage Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--hostage-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "immunization-chess",
+    "variantTitle": "Immunization Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--immunization-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "janus",
+    "variantTitle": "Janus Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--janus.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "khans-chess",
+    "variantTitle": "Khan's Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--khans-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "king-of-the-hill",
+    "variantTitle": "King of the Hill",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--king-of-the-hill.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "knightmate",
+    "variantTitle": "Knightmate",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--knightmate.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "kriegspiel",
+    "variantTitle": "Kriegspiel",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--kriegspiel.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "legan-chess",
+    "variantTitle": "Legan Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--legan-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "los-alamos",
+    "variantTitle": "Los Alamos",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--los-alamos.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "los-alamos-vierschach",
+    "variantTitle": "Los Alamos Vierschach",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--los-alamos-vierschach.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "madrasi",
+    "variantTitle": "Madrasi Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--madrasi.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "maharaja",
+    "variantTitle": "Maharaja & Sepoys",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--maharaja.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "makpong",
+    "variantTitle": "Makpong",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--makpong.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "makruk",
+    "variantTitle": "Makruk",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--makruk.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "mansindam",
+    "variantTitle": "Mansindam (Pantheon Tale)",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--mansindam.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "marseillais",
+    "variantTitle": "Marseillais Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--marseillais.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "mccooey",
+    "variantTitle": "McCooey's Hexagonal Chess",
+    "topology": "hex",
+    "svg": "../snapshots/moddable-chess--mccooey.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "medusa-chess",
+    "variantTitle": "Medusa Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--medusa-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "metamachy",
+    "variantTitle": "Metamachy",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--metamachy.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "mini-hexchess",
+    "variantTitle": "Mini Hexchess",
+    "topology": "hex",
+    "svg": "../snapshots/moddable-chess--mini-hexchess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "minichess",
+    "variantTitle": "Minichess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--minichess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "monster-chess",
+    "variantTitle": "Monster Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--monster-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "nightrider",
+    "variantTitle": "Standard Nightrider Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--nightrider.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "no-castling",
+    "variantTitle": "No Castling Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--no-castling.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "no-retreat",
+    "variantTitle": "No Retreat",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--no-retreat.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "oblong-chess",
+    "variantTitle": "Oblong Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--oblong-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "omega-chess",
+    "variantTitle": "Omega Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--omega-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "omnicide",
+    "variantTitle": "Omnicide",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--omnicide.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "orda-chess",
+    "variantTitle": "Orda Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--orda-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "orda-mirror",
+    "variantTitle": "Orda Mirror",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--orda-mirror.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "ouk-chaktrang",
+    "variantTitle": "Ouk Chaktrang (Cambodian Chess)",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--ouk-chaktrang.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "patrol",
+    "variantTitle": "Patrol Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--patrol.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "pawns-only",
+    "variantTitle": "Pawns Only",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--pawns-only.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "peasants-revolt",
+    "variantTitle": "Peasants' Revolt",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--peasants-revolt.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "petty",
+    "variantTitle": "Petty Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--petty.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "placement-chess",
+    "variantTitle": "Placement Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--placement-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "pocket-knight",
+    "variantTitle": "Pocket Knight Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--pocket-knight.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "poison-chess",
+    "variantTitle": "Poison Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--poison-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "progressive",
+    "variantTitle": "Progressive",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--progressive.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "racing-kings",
+    "variantTitle": "Racing Kings",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--racing-kings.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "recruitment-chess",
+    "variantTitle": "Recruitment Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--recruitment-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "rifle",
+    "variantTitle": "Rifle Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--rifle.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "romanchenkos-chess",
+    "variantTitle": "Romanchenko's Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--romanchenkos-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "s-chess",
+    "variantTitle": "S-Chess (Seirawan Chess)",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--s-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "san-kwo-ki",
+    "variantTitle": "San-kwo-k'i",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--san-kwo-ki.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "senterej",
+    "variantTitle": "Senterej",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--senterej.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "shafran",
+    "variantTitle": "Shafran's Hexagonal Chess",
+    "topology": "hex",
+    "svg": "../snapshots/moddable-chess--shafran.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "shako",
+    "variantTitle": "Shako",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--shako.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "shatar",
+    "variantTitle": "Shatar",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--shatar.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "shatranj",
+    "variantTitle": "Shatranj",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--shatranj.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "shatranj-kamil",
+    "variantTitle": "Shatranj Kamil",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--shatranj-kamil.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "shinobi",
+    "variantTitle": "Shinobi Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--shinobi.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "shinobiplus",
+    "variantTitle": "Shinobi+",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--shinobiplus.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "shogun",
+    "variantTitle": "Shogun Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--shogun.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "single-check",
+    "variantTitle": "Single-Check",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--single-check.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "sittuyin",
+    "variantTitle": "Sittuyin",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--sittuyin.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "spartan",
+    "variantTitle": "Spartan Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--spartan.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "stalemate-wins",
+    "variantTitle": "Stalemate Wins",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--stalemate-wins.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "standard",
+    "variantTitle": "Standard Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--standard.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "stupidhouse",
+    "variantTitle": "Stupidhouse",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--stupidhouse.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "suicide-chess",
+    "variantTitle": "Suicide Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--suicide-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "synochess",
+    "variantTitle": "Synochess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--synochess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "tamerlane",
+    "variantTitle": "Tamerlane Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--tamerlane.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "tandem-chess",
+    "variantTitle": "Tandem Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--tandem-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "teleport-chess",
+    "variantTitle": "Teleportation Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--teleport-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "three-check",
+    "variantTitle": "Three-Check",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--three-check.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "torpedo",
+    "variantTitle": "Torpedo Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--torpedo.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "turkish-great-chess-ii",
+    "variantTitle": "Turkish Great Chess II (Atranj)",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--turkish-great-chess-ii.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "turkish-great-chess-iii",
+    "variantTitle": "Turkish Great Chess III",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--turkish-great-chess-iii.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "turkish-great-chess-iv",
+    "variantTitle": "Turkish Great Chess IV",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--turkish-great-chess-iv.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "ultima",
+    "variantTitle": "Ultima (Baroque Chess)",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--ultima.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "upside-down",
+    "variantTitle": "Upside-Down",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--upside-down.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "vierschach",
+    "variantTitle": "Vierschach",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--vierschach.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "weak",
+    "variantTitle": "Weak!",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--weak.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "wildebeest",
+    "variantTitle": "Standard Wildebeest Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--wildebeest.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "xiang-fu",
+    "variantTitle": "Xiang Fu",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--xiang-fu.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "yalta-chess",
+    "variantTitle": "Yalta Chess",
+    "topology": "grid",
+    "svg": "../snapshots/moddable-chess--yalta-chess.svg"
+  },
+  {
+    "family": "morris",
+    "familyTitle": "Nine Men's Morris — Official Rulebook",
+    "variant": "lasker-morris",
+    "variantTitle": "Lasker Morris",
+    "topology": "graph",
+    "svg": "../snapshots/morris--lasker-morris.svg"
+  },
+  {
+    "family": "morris",
+    "familyTitle": "Nine Men's Morris — Official Rulebook",
+    "variant": "morabaraba",
+    "variantTitle": "Morabaraba",
+    "topology": "graph",
+    "svg": "../snapshots/morris--morabaraba.svg"
+  },
+  {
+    "family": "morris",
+    "familyTitle": "Nine Men's Morris — Official Rulebook",
+    "variant": "nine-mens-morris",
+    "variantTitle": "Nine Men's Morris",
+    "topology": "graph",
+    "svg": "../snapshots/morris--nine-mens-morris.svg"
+  },
+  {
+    "family": "morris",
+    "familyTitle": "Nine Men's Morris — Official Rulebook",
+    "variant": "shax",
+    "variantTitle": "Shax",
+    "topology": "graph",
+    "svg": "../snapshots/morris--shax.svg"
+  },
+  {
+    "family": "morris",
+    "familyTitle": "Nine Men's Morris — Official Rulebook",
+    "variant": "six-mens-morris",
+    "variantTitle": "Six Men's Morris",
+    "topology": "graph",
+    "svg": "../snapshots/morris--six-mens-morris.svg"
+  },
+  {
+    "family": "morris",
+    "familyTitle": "Nine Men's Morris — Official Rulebook",
+    "variant": "three-mens-morris",
+    "variantTitle": "Three Men's Morris",
+    "topology": "graph",
+    "svg": "../snapshots/morris--three-mens-morris.svg"
+  },
+  {
+    "family": "morris",
+    "familyTitle": "Nine Men's Morris — Official Rulebook",
+    "variant": "twelve-mens-morris",
+    "variantTitle": "Twelve Men's Morris",
+    "topology": "graph",
+    "svg": "../snapshots/morris--twelve-mens-morris.svg"
+  },
+  {
+    "family": "nukes",
+    "familyTitle": "Nukes: Official Rulebook",
+    "variant": "asymmetric-powers",
+    "variantTitle": "Nukes: Asymmetric Powers",
+    "topology": "hex",
+    "svg": "../snapshots/nukes--asymmetric-powers.svg"
+  },
+  {
+    "family": "nukes",
+    "familyTitle": "Nukes: Official Rulebook",
+    "variant": "fallout",
+    "variantTitle": "Nukes: Fallout",
+    "topology": "hex",
+    "svg": "../snapshots/nukes--fallout.svg"
+  },
+  {
+    "family": "nukes",
+    "familyTitle": "Nukes: Official Rulebook",
+    "variant": "siege",
+    "variantTitle": "Nukes: Siege",
+    "topology": "hex",
+    "svg": "../snapshots/nukes--siege.svg"
+  },
+  {
+    "family": "nukes",
+    "familyTitle": "Nukes: Official Rulebook",
+    "variant": "standard",
+    "variantTitle": "Nukes: Standard",
+    "topology": "hex",
+    "svg": "../snapshots/nukes--standard.svg"
+  },
+  {
+    "family": "nyout",
+    "familyTitle": "Nyout (유놓이 / Yut Nori)",
+    "variant": "standard",
+    "variantTitle": "Nyout (Standard)",
+    "topology": "graph",
+    "svg": "../snapshots/nyout--standard.svg"
+  },
+  {
+    "family": "pachisi",
+    "familyTitle": "Pachisi — Official Rulebook",
+    "variant": "seven-shell",
+    "variantTitle": "Seven-Shell Pachisi",
+    "topology": "grid",
+    "svg": "../snapshots/pachisi--seven-shell.svg"
+  },
+  {
+    "family": "pachisi",
+    "familyTitle": "Pachisi — Official Rulebook",
+    "variant": "standard",
+    "variantTitle": "Pachisi (Standard)",
+    "topology": "grid",
+    "svg": "../snapshots/pachisi--standard.svg"
+  },
+  {
+    "family": "pachisi",
+    "familyTitle": "Pachisi — Official Rulebook",
+    "variant": "two-player",
+    "variantTitle": "2-Player Pachisi",
+    "topology": "grid",
+    "svg": "../snapshots/pachisi--two-player.svg"
+  },
+  {
+    "family": "reversi",
+    "familyTitle": "Reversi — Official Rulebook",
+    "variant": "anti-reversi",
+    "variantTitle": "Anti-Reversi",
+    "topology": "grid",
+    "svg": "../snapshots/reversi--anti-reversi.svg"
+  },
+  {
+    "family": "reversi",
+    "familyTitle": "Reversi — Official Rulebook",
+    "variant": "six-by-six",
+    "variantTitle": "Six-by-Six Reversi",
+    "topology": "grid",
+    "svg": "../snapshots/reversi--six-by-six.svg"
+  },
+  {
+    "family": "reversi",
+    "familyTitle": "Reversi — Official Rulebook",
+    "variant": "standard",
+    "variantTitle": "Standard Reversi",
+    "topology": "grid",
+    "svg": "../snapshots/reversi--standard.svg"
+  },
+  {
+    "family": "royal-ur",
+    "familyTitle": "Royal Game of Ur — Official Rulebook",
+    "variant": "standard",
+    "variantTitle": "Royal Game of Ur (Standard)",
+    "topology": "grid",
+    "svg": "../snapshots/royal-ur--standard.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "annan-shogi",
+    "variantTitle": "Annan Shogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--annan-shogi.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "cannon-shogi",
+    "variantTitle": "Cannon Shogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--cannon-shogi.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "chu-shogi",
+    "variantTitle": "Chu Shogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--chu-shogi.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "dai-shogi",
+    "variantTitle": "Dai Shogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--dai-shogi.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "dobutsu",
+    "variantTitle": "Dobutsu Shogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--dobutsu.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "four-player-shogi",
+    "variantTitle": "Four Player Shogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--four-player-shogi.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "gorogoro-plus",
+    "variantTitle": "Gorogoro+",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--gorogoro-plus.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "hasami-shogi",
+    "variantTitle": "Hasami Shogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--hasami-shogi.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "heian-shogi",
+    "variantTitle": "Heian Shogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--heian-shogi.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "hex-shogi-91",
+    "variantTitle": "Hex Shogi 91",
+    "topology": "hex",
+    "svg": "../snapshots/shogi--hex-shogi-91.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "judkins-shogi",
+    "variantTitle": "Judkins' Shogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--judkins-shogi.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "kyoto-shogi",
+    "variantTitle": "Kyoto Shogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--kyoto-shogi.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "maka-dai-dai-shogi",
+    "variantTitle": "Maka-Dai-Dai Shogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--maka-dai-dai-shogi.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "minishogi",
+    "variantTitle": "Minishogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--minishogi.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "mortal-shogi",
+    "variantTitle": "Mortal Shogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--mortal-shogi.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "sankaku-shogi",
+    "variantTitle": "Sankaku Shogi",
+    "topology": "triangular",
+    "svg": "../snapshots/shogi--sankaku-shogi.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "sho-shogi",
+    "variantTitle": "Sho Shogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--sho-shogi.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "standard",
+    "variantTitle": "Standard Shogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--standard.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "tai-shogi",
+    "variantTitle": "Tai Shogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--tai-shogi.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "taikyoku-shogi",
+    "variantTitle": "Taikyoku Shogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--taikyoku-shogi.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "tenjiku-shogi",
+    "variantTitle": "Tenjiku Shogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--tenjiku-shogi.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "tori-shogi",
+    "variantTitle": "Tori Shogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--tori-shogi.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "wa-shogi",
+    "variantTitle": "Wa Shogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--wa-shogi.svg"
+  },
+  {
+    "family": "shogi",
+    "familyTitle": "Shogi — Official Rulebook",
+    "variant": "yari-shogi",
+    "variantTitle": "Yari Shogi",
+    "topology": "grid",
+    "svg": "../snapshots/shogi--yari-shogi.svg"
+  },
+  {
+    "family": "stern-halma",
+    "familyTitle": "Stern-Halma — Official Rulebook",
+    "variant": "standard-2p",
+    "variantTitle": "Standard 2-Player Stern-Halma",
+    "topology": "graph",
+    "svg": "../snapshots/stern-halma--standard-2p.svg"
+  },
+  {
+    "family": "stern-halma",
+    "familyTitle": "Stern-Halma — Official Rulebook",
+    "variant": "standard-3p",
+    "variantTitle": "Standard 3-Player Stern-Halma",
+    "topology": "graph",
+    "svg": "../snapshots/stern-halma--standard-3p.svg"
+  },
+  {
+    "family": "stern-halma",
+    "familyTitle": "Stern-Halma — Official Rulebook",
+    "variant": "standard-4p",
+    "variantTitle": "Standard 4-Player Stern-Halma",
+    "topology": "graph",
+    "svg": "../snapshots/stern-halma--standard-4p.svg"
+  },
+  {
+    "family": "stern-halma",
+    "familyTitle": "Stern-Halma — Official Rulebook",
+    "variant": "standard-6p",
+    "variantTitle": "Standard 6-Player Stern-Halma",
+    "topology": "graph",
+    "svg": "../snapshots/stern-halma--standard-6p.svg"
+  },
+  {
+    "family": "stern-halma",
+    "familyTitle": "Stern-Halma — Official Rulebook",
+    "variant": "super-chinese-checkers",
+    "variantTitle": "Super Chinese Checkers",
+    "topology": "graph",
+    "svg": "../snapshots/stern-halma--super-chinese-checkers.svg"
+  },
+  {
+    "family": "surakarta",
+    "familyTitle": "Surakarta — Official Rulebook",
+    "variant": "standard",
+    "variantTitle": "Surakarta (Standard)",
+    "topology": "grid",
+    "svg": "../snapshots/surakarta--standard.svg"
+  },
+  {
+    "family": "tafl",
+    "familyTitle": "Tafl",
+    "variant": "brandubh",
+    "variantTitle": "Brandubh",
+    "topology": "grid",
+    "svg": "../snapshots/tafl--brandubh.svg"
+  },
+  {
+    "family": "tafl",
+    "familyTitle": "Tafl",
+    "variant": "hnefatafl",
+    "variantTitle": "Hnefatafl",
+    "topology": "grid",
+    "svg": "../snapshots/tafl--hnefatafl.svg"
+  },
+  {
+    "family": "tafl",
+    "familyTitle": "Tafl",
+    "variant": "standard",
+    "variantTitle": "Tablut",
+    "topology": "grid",
+    "svg": "../snapshots/tafl--standard.svg"
+  },
+  {
+    "family": "tafl",
+    "familyTitle": "Tafl",
+    "variant": "tawlbwrdd",
+    "variantTitle": "Tawlbwrdd",
+    "topology": "grid",
+    "svg": "../snapshots/tafl--tawlbwrdd.svg"
+  },
+  {
+    "family": "xiangqi",
+    "familyTitle": "Xiangqi — Official Rulebook",
+    "variant": "janggi",
+    "variantTitle": "Janggi",
+    "topology": "grid",
+    "svg": "../snapshots/xiangqi--janggi.svg"
+  },
+  {
+    "family": "xiangqi",
+    "familyTitle": "Xiangqi — Official Rulebook",
+    "variant": "jieqi",
+    "variantTitle": "Jieqi",
+    "topology": "grid",
+    "svg": "../snapshots/xiangqi--jieqi.svg"
+  },
+  {
+    "family": "xiangqi",
+    "familyTitle": "Xiangqi — Official Rulebook",
+    "variant": "manchu-plus",
+    "variantTitle": "Manchu+",
+    "topology": "grid",
+    "svg": "../snapshots/xiangqi--manchu-plus.svg"
+  },
+  {
+    "family": "xiangqi",
+    "familyTitle": "Xiangqi — Official Rulebook",
+    "variant": "minixiangqi",
+    "variantTitle": "Minixiangqi",
+    "topology": "grid",
+    "svg": "../snapshots/xiangqi--minixiangqi.svg"
+  },
+  {
+    "family": "xiangqi",
+    "familyTitle": "Xiangqi — Official Rulebook",
+    "variant": "quang-trung",
+    "variantTitle": "Quang Trung Chess",
+    "topology": "grid",
+    "svg": "../snapshots/xiangqi--quang-trung.svg"
+  },
+  {
+    "family": "xiangqi",
+    "familyTitle": "Xiangqi — Official Rulebook",
+    "variant": "standard",
+    "variantTitle": "Standard Xiangqi",
+    "topology": "grid",
+    "svg": "../snapshots/xiangqi--standard.svg"
+  },
+  {
+    "family": "xiangqi",
+    "familyTitle": "Xiangqi — Official Rulebook",
+    "variant": "xiangqi-42",
+    "variantTitle": "Xiangqi 42",
+    "topology": "grid",
+    "svg": "../snapshots/xiangqi--xiangqi-42.svg"
+  },
+  {
+    "family": "xiangqi",
+    "familyTitle": "Xiangqi — Official Rulebook",
+    "variant": "yang-qi",
+    "variantTitle": "Yáng Qí",
+    "topology": "grid",
+    "svg": "../snapshots/xiangqi--yang-qi.svg"
+  }
+]

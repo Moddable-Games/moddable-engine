@@ -216,9 +216,90 @@
   vertical-align: middle;
 }
 
+/* --- Board gallery --- */
+
+.board-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 0 24px;
+}
+.board-card {
+  background: #1a1a2e;
+  border: 1px solid #2a2a4a;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.board-card:hover {
+  border-color: #4a4a8a;
+}
+.board-card-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0f0f1e;
+  padding: 12px;
+  margin: 0 auto;
+}
+.board-card-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.board-card-info {
+  padding: 10px 12px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.board-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e0e0e0;
+  text-transform: capitalize;
+}
+.board-card-family {
+  font-size: 11px;
+  color: #888;
+  text-transform: capitalize;
+}
+.board-card-topo {
+  font-size: 10px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.board-card-actions {
+  padding: 6px 12px 10px;
+  display: flex;
+  gap: 6px;
+}
+.btn-icon {
+  font-size: 10px;
+  padding: 3px 8px;
+  background: rgba(100, 100, 200, 0.1);
+  border: 1px solid rgba(100, 100, 200, 0.3);
+  border-radius: 4px;
+  color: #aaa;
+  cursor: pointer;
+  font-weight: 500;
+}
+.btn-icon:hover {
+  background: rgba(100, 100, 200, 0.2);
+  color: #fff;
+}
+.gallery-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  font-size: 14px;
+}
+
 @media (max-width: 768px) {
   .control-row { flex-direction: column; gap: 10px; }
   .control-group input, .control-group select { min-width: 100%; }
   .gallery-body { padding: 16px; }
   .piece-grid { gap: 2px; }
+  .board-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; padding: 0 12px; }
 }
