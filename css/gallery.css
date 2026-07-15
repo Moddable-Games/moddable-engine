@@ -176,6 +176,15 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.piece-cell-actions {
+  display: none;
+  gap: 4px;
+  margin-top: 4px;
+}
+.piece-cell:hover .piece-cell-actions {
+  display: flex;
+  justify-content: center;
+}
 .label-set {
   font-size: 9px;
   padding: 1px 4px;

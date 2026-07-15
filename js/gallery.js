@@ -293,6 +293,13 @@ function createPieceCell(set, entry, opts) {
   label.textContent = key
   cell.appendChild(label)
 
+  const actions = document.createElement('div')
+  actions.className = 'piece-cell-actions'
+  actions.innerHTML = `<button class="btn-icon" data-action="svg" title="Download SVG">SVG</button><button class="btn-icon" data-action="png" title="Download PNG">PNG</button>`
+  cell.appendChild(actions)
+  cell.dataset.filename = `${sourceSetId}-${key}`
+  cell.dataset.src = img.src || `${SETS_BASE}/${sourceSetId}/${file}`
+
   return cell
 }
 
@@ -323,6 +330,56 @@ function bindControls() {
       setFilter.appendChild(opt)
     }
   })
+
+  document.getElementById('gallery-container').addEventListener('click', e => {
+    const btn = e.target.closest('[data-action]')
+    if (!btn) return
+    const cell = btn.closest('.piece-cell')
+    if (!cell) return
+    const filename = cell.dataset.filename
+    const src = cell.dataset.src
+    if (!src) return
+    if (btn.dataset.action === 'svg') downloadPieceSvg(src, filename)
+    if (btn.dataset.action === 'png') downloadPiecePng(src, filename)
+  })
+}
+
+async function downloadPieceSvg(src, filename) {
+  if (src.startsWith('data:')) {
+    const svg = decodeURIComponent(src.replace('data:image/svg+xml,', ''))
+    const blob = new Blob([svg], { type: 'image/svg+xml' })
+    triggerDownload(blob, `${filename}.svg`)
+  } else {
+    const res = await fetch(src)
+    const svg = await res.text()
+    const blob = new Blob([svg], { type: 'image/svg+xml' })
+    triggerDownload(blob, `${filename}.svg`)
+  }
+}
+
+async function downloadPiecePng(src, filename) {
+  const size = parseInt(document.getElementById('size-select').value) || 56
+  const scale = 2
+  const canvas = document.createElement('canvas')
+  canvas.width = size * scale
+  canvas.height = size * scale
+  const ctx = canvas.getContext('2d')
+  const img = new Image()
+  img.crossOrigin = 'anonymous'
+  img.onload = () => {
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+    canvas.toBlob(blob => triggerDownload(blob, `${filename}.png`), 'image/png')
+  }
+  img.src = src
+}
+
+function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 function capitalise(str) {

@@ -54,6 +54,50 @@ function bindControls() {
   document.getElementById('set-filter').addEventListener('change', render)
   document.getElementById('bg-select').addEventListener('change', render)
   document.getElementById('size-select').addEventListener('change', onSizeChange)
+
+  document.getElementById('gallery-container').addEventListener('click', e => {
+    const btn = e.target.closest('[data-action]')
+    if (!btn) return
+    const cell = btn.closest('.piece-cell')
+    if (!cell) return
+    const filename = cell.dataset.filename
+    const src = cell.dataset.src
+    if (!src) return
+    if (btn.dataset.action === 'svg') downloadSvg(src, filename)
+    if (btn.dataset.action === 'png') downloadPng(src, filename)
+  })
+}
+
+async function downloadSvg(src, filename) {
+  const res = await fetch(src)
+  const svg = await res.text()
+  const blob = new Blob([svg], { type: 'image/svg+xml' })
+  triggerDownload(blob, `${filename}.svg`)
+}
+
+async function downloadPng(src, filename) {
+  const size = parseInt(document.getElementById('size-select').value) || 56
+  const scale = 2
+  const canvas = document.createElement('canvas')
+  canvas.width = size * scale
+  canvas.height = size * scale
+  const ctx = canvas.getContext('2d')
+  const img = new Image()
+  img.crossOrigin = 'anonymous'
+  img.onload = () => {
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+    canvas.toBlob(blob => triggerDownload(blob, `${filename}.png`), 'image/png')
+  }
+  img.src = src
+}
+
+function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 function onSizeChange() {
@@ -117,9 +161,10 @@ function render() {
     html += `<div class="piece-grid">`
     tileEntries.forEach(([key, file]) => {
       const src = `${SETS_BASE}/${set.id}/${file}`
-      html += `<div class="piece-cell bg-${bg} shape-${set.shape}">`
+      html += `<div class="piece-cell bg-${bg} shape-${set.shape}" data-filename="${set.id}-${key}" data-src="${src}">`
       html += `<img src="${src}" alt="${key}" loading="lazy">`
       html += `<span class="piece-label">${key}</span>`
+      html += `<div class="piece-cell-actions"><button class="btn-icon" data-action="svg" title="Download SVG">SVG</button><button class="btn-icon" data-action="png" title="Download PNG">PNG</button></div>`
       html += `</div>`
     })
     html += `</div></div>`
