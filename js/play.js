@@ -908,15 +908,14 @@ function showInfo(cfg) {
 
 function fitToView() {
   const svg = document.querySelector('#board-svg svg')
-  const container = document.querySelector('.canvas-svg.active')
-  if (!svg || !container) return
-  const sw = parseFloat(svg.getAttribute('width'))
-  const sh = parseFloat(svg.getAttribute('height'))
-  const cw = container.clientWidth - 48
-  const ch = container.clientHeight - 48
-  if (!sw || !sh || !cw || !ch) return
-  const scale = Math.min(cw / sw, ch / sh)
-  svg.style.transform = `scale(${scale})`
+  if (!svg) return
+  svg.style.transform = ''
+  svg.style.width = '100%'
+  svg.style.height = 'auto'
+  svg.style.maxHeight = 'calc(100vh - 200px)'
+  svg.style.objectFit = 'contain'
+  svg.style.display = 'block'
+  svg.style.margin = '0 auto'
 }
 
 if (document.getElementById('game-select')) {
