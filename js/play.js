@@ -363,6 +363,19 @@ async function inlineExternalImages(svgEl) {
   await Promise.all(promises)
 }
 
+function parsePlayerCounts(str) {
+  if (!str) return [2, 3, 4]
+  const s = String(str).replace(/[–—]/g, '-')
+  const range = s.match(/(\d+)\s*-\s*(\d+)/)
+  if (range) {
+    const min = parseInt(range[1]), max = parseInt(range[2])
+    return Array.from({ length: max - min + 1 }, (_, i) => min + i)
+  }
+  const single = parseInt(s)
+  if (!isNaN(single)) return [single]
+  return [2, 3, 4]
+}
+
 function resetSidebarControls() {
   document.getElementById('handicap-group').style.display = 'none'
   document.getElementById('hex-style-group').style.display = 'none'
@@ -519,13 +532,15 @@ function renderComponentGame(entry) {
     return
   }
 
-  if (dealSpec.playerCounts || dealSpec.defaultPlayers) {
-    const playerGroup = document.getElementById('hex-players-group')
-    const playerSelect = document.getElementById('hex-players-select')
-    const counts = dealSpec.playerCounts || Array.from({ length: 8 }, (_, i) => i + 2)
+  const playerGroup = document.getElementById('hex-players-group')
+  const playerSelect = document.getElementById('hex-players-select')
+  const counts = parsePlayerCounts(entry.players)
+  if (counts.length > 1) {
     const current = state.players || dealSpec.defaultPlayers || counts[0]
     playerSelect.innerHTML = counts.map(n => `<option value="${n}"${n === current ? ' selected' : ''}>${n} players</option>`).join('')
     playerGroup.style.display = ''
+  } else if (counts.length === 1) {
+    state.players = counts[0]
   }
   document.getElementById('hex-seed-group').style.display = ''
 
