@@ -7,7 +7,7 @@
 <meta name="description" content="Browseable tile gallery for hex, square, and rectangle game tiles. Terrain, mahjong, star systems, and more across 12 sets.">
 <meta property="og:title" content="Tile Gallery — Moddable Engine">
 <meta property="og:description" content="Browseable tile gallery for hex, square, and rectangle game tiles. Terrain, mahjong, star systems, and more across 12 sets.">
-<meta property="og:image" content="https://engine.moddable.games/og/tiles.png?v=1.0.3">
+<meta property="og:image" content="https://engine.moddable.games/og/tiles.png?v=1.0.4">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:url" content="https://engine.moddable.games/tiles/">
@@ -16,13 +16,13 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Tile Gallery — Moddable Engine">
 <meta name="twitter:description" content="Browseable tile gallery for hex, square, and rectangle game tiles. Terrain, mahjong, star systems, and more across 12 sets.">
-<meta name="twitter:image" content="https://engine.moddable.games/og/tiles.png?v=1.0.3">
+<meta name="twitter:image" content="https://engine.moddable.games/og/tiles.png?v=1.0.4">
 <meta name="theme-color" content="#0a0d2a">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <meta name="base-path" content="..">
-<link rel="stylesheet" href="../css/home.css?v=1.0.3">
-<link rel="stylesheet" href="../css/gallery.css?v=1.0.3">
-<link rel="stylesheet" href="../css/tiles.css?v=1.0.3">
+<link rel="stylesheet" href="../css/home.css?v=1.0.4">
+<link rel="stylesheet" href="../css/gallery.css?v=1.0.4">
+<link rel="stylesheet" href="../css/tiles.css?v=1.0.4">
 </head>
 <body>
 
@@ -55,6 +55,7 @@
 
 <section class="gallery-controls">
   <div class="controls-inner">
+    <button class="filters-toggle" onclick="this.classList.toggle('active');this.nextElementSibling.classList.toggle('open')">Filters</button>
     <div class="control-row">
       <label class="control-group">
         <span class="control-label">Search</span>
@@ -124,6 +125,6 @@
   </div>
 </footer>
 
-<script type="module" src="../js/tiles.js?v=1.0.3"></script>
+<script type="module" src="../js/tiles.js?v=1.0.4"></script>
 </body>
 </html>
