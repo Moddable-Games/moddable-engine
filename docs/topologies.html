@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Topologies — Moddable Engine</title>
+<meta name="theme-color" content="#0a0d2a">
+<link rel="stylesheet" href="../css/home.css">
+<link rel="stylesheet" href="../css/docs.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../play/" class="nav-link">Play</a>
+      <a href="../create/" class="nav-link">Create</a>
+      <a href="../boards/" class="nav-link">Boards</a>
+      <a href="../pieces/" class="nav-link">Pieces</a>
+      <a href="../tiles/" class="nav-link">Tiles</a>
+      <a href="./" class="nav-link nav-link--active">Docs</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="docs-layout">
+<nav class="docs-toc">
+  <div class="docs-toc-title">Pages</div>
+  <ul class="docs-toc-list">
+    <li><a href="./">Overview</a></li>
+    <li><a href="frontmatter.html">Frontmatter</a></li>
+    <li><a href="topologies.html" class="active">Topologies</a></li>
+    <li><a href="surfaces.html">Surfaces</a></li>
+    <li><a href="pieces.html">Piece Sets</a></li>
+    <li><a href="plugins.html">Plugins</a></li>
+    <li><a href="render-pipeline.html">Render Pipeline</a></li>
+  </ul>
+  <div class="docs-toc-title" style="margin-top:20px">On this page</div>
+  <ul class="docs-toc-list">
+    <li><a href="#principle">The universal adapter</a></li>
+    <li><a href="#grid">Grid</a></li>
+    <li><a href="#hex">Hex</a></li>
+    <li><a href="#track">Track</a></li>
+    <li><a href="#pit">Pit</a></li>
+    <li><a href="#graph">Graph</a></li>
+    <li><a href="#registry">Registry</a></li>
+  </ul>
+</nav>
+<div class="docs-body">
+
+  <h1>Topologies</h1>
+  <p class="docs-lede">The five spatial structures that underpin every board game in the engine.</p>
+
+  <h2 id="principle">The universal adapter</h2>
+  <p>Topologies are the engine's defining architectural insight. Every package above topologies defines a contract (movement rays, adjacency, layout). Topologies implement that contract. The consuming package never knows which topology it's using.</p>
+  <p>This means a piece movement rule written for grid automatically works on hex if both implement the same traversal contract. New topologies auto-work with all existing higher packages.</p>
+
+  <h2 id="grid">Grid</h2>
+  <p>Rectangular boards with cells addressed by algebraic notation (a1, b2, etc.).</p>
+  <p><strong>Games:</strong> Chess (75 variants), Draughts (20), Go (14), Xiangqi (8), Shogi (25), Reversi, Tafl, Dou Shou Qi.</p>
+  <p><strong>Layouts:</strong></p>
+  <ul>
+    <li><code>cells</code> — pieces occupy squares (chess, draughts)</li>
+    <li><code>intersections</code> — pieces on line crossings (go, xiangqi, shogi)</li>
+    <li><code>cross</code> — cross-shaped subset of grid (pachisi, chaupar)</li>
+  </ul>
+  <p><strong>Coordinates:</strong> Algebraic — <code>a1</code> (bottom-left) to <code>h8</code> (top-right for 8x8).</p>
+  <pre><code>topology:
+  type: grid
+  rows: 8
+  cols: 8
+  layout: cells    # or intersections, cross</code></pre>
+
+  <h2 id="hex">Hex</h2>
+  <p>Hexagonal boards using axial coordinates (q, r).</p>
+  <p><strong>Games:</strong> Hex, Y, Nukes, Glinski Chess, McCooey Chess, Hex Shogi.</p>
+  <p><strong>Shapes:</strong></p>
+  <ul>
+    <li><code>hexagonal</code> — regular hexagonal board defined by radius</li>
+    <li><code>triangular</code> — triangular board defined by side length</li>
+    <li>Rectangular — defined by rows + cols</li>
+    <li>Explicit — array of [q, r] coordinate pairs</li>
+  </ul>
+  <p><strong>Coordinates:</strong> Axial — <code>q,r</code> pairs (e.g. <code>0,0</code> is centre, <code>1,-1</code> is adjacent).</p>
+  <pre><code>topology:
+  type: hex
+  shape: hexagonal
+  radius: 5
+  orientation: pointy   # or flat</code></pre>
+
+  <h2 id="track">Track</h2>
+  <p>Linear or circuit paths with numbered positions.</p>
+  <p><strong>Games:</strong> Backgammon (8 variants), Landlord's Game (5 editions), Royal Ur.</p>
+  <p><strong>Coordinates:</strong> Zero-indexed position numbers — <code>0</code> to <code>positions-1</code>.</p>
+  <pre><code>topology:
+  type: track
+  positions: 24</code></pre>
+
+  <h2 id="pit">Pit</h2>
+  <p>Mancala-family sowing layouts with pits and optional stores.</p>
+  <p><strong>Games:</strong> Kalah, Oware, Bao, Congkak, Pallanguzhi, Toguz Korgool, Sungka, Ayo.</p>
+  <p><strong>Coordinates:</strong> <code>pit-0</code> to <code>pit-N</code> (playing pits), <code>store-0</code>, <code>store-1</code> (end stores).</p>
+  <pre><code>topology:
+  type: pit
+  cols: 6          # pits per side
+  rows: 2          # sides (default 2)
+  stores: true     # end stores (default true)</code></pre>
+
+  <h2 id="graph">Graph</h2>
+  <p>Arbitrary node-edge structures for boards that aren't regular grids.</p>
+  <p><strong>Games:</strong> Morris (7 variants), Stern-Halma (5), Nyout, Asalto.</p>
+  <p><strong>Structures:</strong></p>
+  <ul>
+    <li><code>concentric-rings</code> — Morris boards (2-4 rings with midpoint connections)</li>
+    <li><code>star</code> — Chinese Checkers / Stern-Halma (6-pointed star)</li>
+    <li><code>perimeter-cross</code> — Nyout (circular with cross shortcuts)</li>
+    <li><code>grid-cross</code> — Asalto (grid with fortress extension)</li>
+  </ul>
+  <p><strong>Coordinates:</strong> Node IDs — <code>n0</code>, <code>n1</code>, etc. (auto-generated) or custom IDs from explicit node definitions.</p>
+  <pre><code>topology:
+  type: graph
+  structure: concentric-rings
+  params:
+    rings: 3
+    midpoints: true</code></pre>
+
+  <h2 id="registry">Registry</h2>
+  <p>Topologies are registered at <code>packages/topologies/registry.js</code>. All 5 built-in types auto-register when <code>packages/topologies/index.js</code> is imported. Custom topologies can be added at runtime:</p>
+  <pre><code>import { register } from 'packages/topologies/registry.js'
+
+register('triangular', {
+  factory: (config) => createTriangularTopology(config),
+  schema: { type: 'triangular', required: ['sideLength'] }
+})</code></pre>
+
+</div>
+</div>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="footer-brand">moddable.engine</p>
+    <p class="footer-sub">Part of <a href="https://moddable.games" target="_blank" rel="noopener">Moddable.Games</a></p>
+  </div>
+</footer>
+</body>
+</html>

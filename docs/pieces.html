@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Piece Sets — Moddable Engine</title>
+<meta name="theme-color" content="#0a0d2a">
+<link rel="stylesheet" href="../css/home.css">
+<link rel="stylesheet" href="../css/docs.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../play/" class="nav-link">Play</a>
+      <a href="../create/" class="nav-link">Create</a>
+      <a href="../boards/" class="nav-link">Boards</a>
+      <a href="../pieces/" class="nav-link">Pieces</a>
+      <a href="../tiles/" class="nav-link">Tiles</a>
+      <a href="./" class="nav-link nav-link--active">Docs</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="docs-layout">
+<nav class="docs-toc">
+  <div class="docs-toc-title">Pages</div>
+  <ul class="docs-toc-list">
+    <li><a href="./">Overview</a></li>
+    <li><a href="frontmatter.html">Frontmatter</a></li>
+    <li><a href="topologies.html">Topologies</a></li>
+    <li><a href="surfaces.html">Surfaces</a></li>
+    <li><a href="pieces.html" class="active">Piece Sets</a></li>
+    <li><a href="plugins.html">Plugins</a></li>
+    <li><a href="render-pipeline.html">Render Pipeline</a></li>
+  </ul>
+  <div class="docs-toc-title" style="margin-top:20px">On this page</div>
+  <ul class="docs-toc-list">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#frontmatter">Frontmatter usage</a></li>
+    <li><a href="#manifest">Gallery manifest</a></li>
+    <li><a href="#virtual">Virtual sets</a></li>
+    <li><a href="#surface">Surface rendering</a></li>
+    <li><a href="#adding">Adding a new set</a></li>
+  </ul>
+</nav>
+<div class="docs-body">
+
+  <h1>Piece Sets</h1>
+  <p class="docs-lede">SVG piece artwork organised into sets by game family. 112 sets, recolorable, composable via extends and virtual manifests.</p>
+
+  <h2 id="overview">Overview</h2>
+  <p>Piece sets live in <code>pieces/sets/</code>. Each set is a directory of SVG files plus an entry in <code>pieces/gallery-index.json</code>. The engine resolves piece references from frontmatter to SVG paths at render time.</p>
+
+  <h2 id="frontmatter">Frontmatter usage</h2>
+  <pre><code>pieces:
+  set: mce-chess              # set ID from gallery-index.json
+  borders:                    # optional owner-coloured disc backgrounds
+    white: "#1565c0"
+    black: "#c62828"
+  vocabulary:                 # custom FEN char → piece type mapping
+    O: { type: stone, color: white }
+    X: { type: stone, color: black }
+  fenMap:                     # override default FEN char → piece ID
+    G: wG
+    g: bG</code></pre>
+
+  <h2 id="manifest">Gallery manifest</h2>
+  <p>Each entry in <code>pieces/gallery-index.json</code>:</p>
+  <pre><code>{
+  "id": "mce-chess",
+  "name": "MCE Chess",
+  "family": "chess",
+  "author": "Moddable Games",
+  "license": "CC BY-SA 4.0",
+  "playable": true,
+  "pieces": {
+    "wK": "wK.svg",
+    "wQ": "wQ.svg",
+    "bK": "bK.svg",
+    ...
+  }
+}</code></pre>
+  <p>Keys in <code>pieces</code> are piece IDs (matched by FEN mapping). Values are filenames relative to <code>pieces/sets/{id}/</code>.</p>
+
+  <h2 id="virtual">Virtual sets</h2>
+  <p>Virtual sets compose pieces from multiple sources without duplicating SVG files:</p>
+  <pre><code>{
+  "id": "mce-4player",
+  "virtual": true,
+  "extends": "mce-chess",
+  "baseSet": "mce-chess",
+  "recolorable": true,
+  "recolourMatch": "#fff",
+  "owners": {
+    "red": { "fill": "#e53935" },
+    "blue": { "fill": "#1e88e5" },
+    "yellow": { "fill": "#fdd835" },
+    "green": { "fill": "#43a047" }
+  },
+  "pieces": {
+    "rK": "wK.svg",
+    "bK": "wK.svg",
+    ...
+  }
+}</code></pre>
+  <p>At render time, the white fill in the base SVG is replaced with the owner colour.</p>
+
+  <h2 id="surface">Surface rendering</h2>
+  <p>Some games (go, draughts, dou shou qi) render pieces on coloured disc backgrounds. This is controlled by the <code>surface</code> field on the set:</p>
+  <pre><code>{
+  "id": "playstrategy-go-classic",
+  "surface": {
+    "type": "disc",
+    "owners": {
+      "white": { "fill": "#f5f5f5", "stroke": "#333" },
+      "black": { "fill": "#1c1c1c", "stroke": "#666" }
+    }
+  }
+}</code></pre>
+  <p>Individual pieces can also declare surface rendering via the <code>surface</code> property in the pieces map.</p>
+
+  <h2 id="adding">Adding a new set</h2>
+  <ol>
+    <li>Create <code>pieces/sets/my-set/</code> directory</li>
+    <li>Add SVG files (one per piece, named by piece ID)</li>
+    <li>Add an entry to <code>pieces/gallery-index.json</code></li>
+    <li>Reference with <code>pieces.set: my-set</code> in frontmatter</li>
+  </ol>
+  <div class="docs-note">SVGs should have a square viewBox (typically <code>0 0 45 45</code>) and no embedded fonts or external references.</div>
+
+</div>
+</div>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="footer-brand">moddable.engine</p>
+    <p class="footer-sub">Part of <a href="https://moddable.games" target="_blank" rel="noopener">Moddable.Games</a></p>
+  </div>
+</footer>
+</body>
+</html>

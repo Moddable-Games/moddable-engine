@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Surfaces — Moddable Engine</title>
+<meta name="theme-color" content="#0a0d2a">
+<link rel="stylesheet" href="../css/home.css">
+<link rel="stylesheet" href="../css/docs.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../play/" class="nav-link">Play</a>
+      <a href="../create/" class="nav-link">Create</a>
+      <a href="../boards/" class="nav-link">Boards</a>
+      <a href="../pieces/" class="nav-link">Pieces</a>
+      <a href="../tiles/" class="nav-link">Tiles</a>
+      <a href="./" class="nav-link nav-link--active">Docs</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="docs-layout">
+<nav class="docs-toc">
+  <div class="docs-toc-title">Pages</div>
+  <ul class="docs-toc-list">
+    <li><a href="./">Overview</a></li>
+    <li><a href="frontmatter.html">Frontmatter</a></li>
+    <li><a href="topologies.html">Topologies</a></li>
+    <li><a href="surfaces.html" class="active">Surfaces</a></li>
+    <li><a href="pieces.html">Piece Sets</a></li>
+    <li><a href="plugins.html">Plugins</a></li>
+    <li><a href="render-pipeline.html">Render Pipeline</a></li>
+  </ul>
+  <div class="docs-toc-title" style="margin-top:20px">On this page</div>
+  <ul class="docs-toc-list">
+    <li><a href="#what">What surfaces provide</a></li>
+    <li><a href="#named">Named surfaces</a></li>
+    <li><a href="#inline">Inline colours</a></li>
+    <li><a href="#color-keys">Colour keys</a></li>
+    <li><a href="#cascade">Cascade behaviour</a></li>
+  </ul>
+</nav>
+<div class="docs-body">
+
+  <h1>Surfaces</h1>
+  <p class="docs-lede">Board colour palettes. A surface provides the default colours consumed by the render pipeline.</p>
+
+  <h2 id="what">What surfaces provide</h2>
+  <p>A surface is a named colour palette. It defines the fills for light and dark cells, grid lines, borders, and backgrounds. The render pipeline reads these colours when drawing the board.</p>
+  <p>Surfaces are the lowest layer in the cascade: surface defaults can be overridden by family-level colours, which can be overridden by variant-level colours.</p>
+
+  <h2 id="named">Named surfaces</h2>
+  <p>Reference by string in frontmatter:</p>
+  <pre><code>surface: parchment</code></pre>
+  <table class="docs-table">
+    <thead><tr><th>Name</th><th>Light cell</th><th>Dark cell</th><th>Character</th></tr></thead>
+    <tbody>
+      <tr><td><code>wood-classic</code></td><td>#f0d9b5</td><td>#b58863</td><td>Traditional chess wood</td></tr>
+      <tr><td><code>wood-light</code></td><td>#dcb35c</td><td>#c8a43c</td><td>Go/shogi board wood</td></tr>
+      <tr><td><code>felt-green</code></td><td>#4a7c59</td><td>#3d6b4a</td><td>Card table baize</td></tr>
+      <tr><td><code>parchment</code></td><td>#d9c5a0</td><td>#c4b088</td><td>Aged paper</td></tr>
+      <tr><td><code>earth</code></td><td>#9B7740</td><td>#7A5A32</td><td>Terracotta/clay</td></tr>
+      <tr><td><code>slate</code></td><td>#6B7B8F</td><td>#4A5A6B</td><td>Cool grey stone</td></tr>
+      <tr><td><code>jungle</code></td><td>#5B8C5A</td><td>#3D6B3C</td><td>Deep tropical green</td></tr>
+      <tr><td><code>military</code></td><td>#7B8B6F</td><td>#5A6B4F</td><td>Olive/khaki tactical</td></tr>
+      <tr><td><code>cosmic</code></td><td>#2A2A4A</td><td>#1A1A3A</td><td>Dark space</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="inline">Inline colours</h2>
+  <p>Define colours directly in frontmatter when no named surface fits:</p>
+  <pre><code>surface:
+  colors:
+    cell-light: "#dcb35c"
+    cell-dark: "#d4a843"
+    stroke: "#3d2b1a"
+    background: "#2c2c2c"</code></pre>
+
+  <h2 id="color-keys">Colour keys</h2>
+  <table class="docs-table">
+    <thead><tr><th>Key</th><th>Used for</th></tr></thead>
+    <tbody>
+      <tr><td><code>cell-light</code></td><td>Light squares / primary cell fill</td></tr>
+      <tr><td><code>cell-dark</code></td><td>Dark squares / alternating cell fill</td></tr>
+      <tr><td><code>cell-mid</code></td><td>Third colour for 3-colour patterns</td></tr>
+      <tr><td><code>stroke</code></td><td>Grid lines, borders</td></tr>
+      <tr><td><code>background</code></td><td>Board background / frame</td></tr>
+      <tr><td><code>floor</code></td><td>Playable area fill (pachisi, asalto)</td></tr>
+      <tr><td><code>floor-stroke</code></td><td>Playable area border</td></tr>
+      <tr><td><code>whitePieceFill</code></td><td>Fallback fill for white stone pieces</td></tr>
+      <tr><td><code>blackPieceFill</code></td><td>Fallback fill for black stone pieces</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="cascade">Cascade behaviour</h2>
+  <p>The cascade resolver merges colours in order: <strong>named surface → family engine.surface → variant engine.surface</strong>. A variant only needs to specify the colours it changes:</p>
+  <pre><code># Family (rulebook.md) — uses named surface
+engine:
+  surface: parchment
+
+# Variant — overrides just the dark cell colour
+engine:
+  surface:
+    colors:
+      cell-dark: "#8B0000"</code></pre>
+  <p>The variant inherits all parchment colours but replaces <code>cell-dark</code> with dark red.</p>
+
+</div>
+</div>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="footer-brand">moddable.engine</p>
+    <p class="footer-sub">Part of <a href="https://moddable.games" target="_blank" rel="noopener">Moddable.Games</a></p>
+  </div>
+</footer>
+</body>
+</html>
