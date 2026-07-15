@@ -1,10 +1,10 @@
 :root {
-  --docs-bg: #f8f7f3;
-  --docs-ink: #1a1c22;
-  --docs-muted: #555;
-  --docs-hairline: #e6e3d8;
-  --docs-accent: #2563eb;
-  --docs-accent-bg: rgba(37, 99, 235, 0.06);
+  --docs-bg: #0a0d2a;
+  --docs-ink: #e0e0e8;
+  --docs-muted: #9a9ab0;
+  --docs-hairline: rgba(255,255,255,0.08);
+  --docs-accent: #6fb5ff;
+  --docs-accent-bg: rgba(111, 181, 255, 0.08);
   --docs-code-bg: #0f1219;
   --docs-sidebar-w: 220px;
 }
@@ -32,7 +32,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(0,0,0,0.4);
+  color: var(--docs-muted);
   margin-bottom: 12px;
 }
 
@@ -46,7 +46,7 @@
 .docs-toc-list a {
   display: block;
   font-size: 12px;
-  color: rgba(0,0,0,0.55);
+  color: var(--docs-muted);
   text-decoration: none;
   padding: 5px 10px;
   border-radius: 4px;
@@ -118,7 +118,7 @@
 .docs-body code {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 0.85em;
-  background: rgba(0,0,0,0.05);
+  background: rgba(255,255,255,0.06);
   padding: 2px 6px;
   border-radius: 4px;
 }
@@ -153,7 +153,7 @@
   text-align: left;
   font-weight: 600;
   padding: 8px 12px;
-  background: rgba(0,0,0,0.03);
+  background: rgba(255,255,255,0.03);
   border-bottom: 1px solid var(--docs-hairline);
 }
 
@@ -189,7 +189,7 @@
   border-radius: 4px;
   text-decoration: none;
   color: var(--docs-muted);
-  background: rgba(0,0,0,0.03);
+  background: rgba(255,255,255,0.03);
   border: 1px solid var(--docs-hairline);
   transition: all 120ms;
 }
