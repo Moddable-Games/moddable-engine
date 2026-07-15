@@ -326,21 +326,7 @@ export function renderMahjongSvg(dealResult, opts) {
   parts.push(`<text x="${w / 2}" y="${h - 6}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.3)" font-family="system-ui">${deckConfig.label} · ${variantDef.label} · seed: ${seed}</text>`)
   parts.push('</svg>')
 
-  const svg = parts.join('\n')
-  if (opts._returnOnly) return svg
-  showSvg(svg)
-  showInfo({
-    deckType,
-    seed,
-    players: 4,
-    label: variantDef.label,
-    setupDesc: variantDef.setupDesc,
-    variantDesc: variantDef.variantDesc,
-    wall: `${wallTiles} tiles (${totalStacks} stacks), break at stack ${breakPoint + 1}`,
-    tilesPerHand: dealResult.hands[0]?.length || 0,
-  })
-  bindDeckHover()
-  requestAnimationFrame(fitToView)
+  return parts.join('\n')
 }
 
 export function renderTableauSvg(dealResult, opts) {
@@ -432,20 +418,6 @@ export function renderTableauSvg(dealResult, opts) {
   parts.push(`<text x="${w / 2}" y="${h - 6}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.3)" font-family="system-ui">${deckConfig.label} · ${variantDef.label} · seed: ${seed}</text>`)
   parts.push('</svg>')
 
-  const svg = parts.join('\n')
-  if (opts._returnOnly) return svg
-  showSvg(svg)
-  showInfo({
-    deckType,
-    seed,
-    players: 1,
-    label: variantDef.label,
-    setupDesc: variantDef.setupDesc,
-    variantDesc: variantDef.variantDesc,
-    tableau: dealResult.tableau.map(col => col.length).join(', '),
-    drawPile: dealResult.drawPile.length,
-  })
-  bindDeckHover()
-  requestAnimationFrame(fitToView)
+  return parts.join('\n')
 }
 

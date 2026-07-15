@@ -595,12 +595,18 @@ function renderDeckGame(game, variantDef) {
   }
 
   if (dealResult.layout === 'tableau') {
-    renderTableauSvg(dealResult, { deckType, deckConfig, variantDef, seed })
+    const svg = renderTableauSvg(dealResult, { deckType, deckConfig, variantDef, seed })
+    showSvg(svg)
+    bindDeckHover()
+    requestAnimationFrame(fitToView)
     return
   }
 
   if (activeDealSpec.layout === 'mahjong-wall') {
-    renderMahjongSvg(dealResult, { deckType, deckConfig, variantDef, seed, tileSet: activeDealSpec.tileSet || 'mahjong-regular' })
+    const svg = renderMahjongSvg(dealResult, { deckType, deckConfig, variantDef, seed, tileSet: activeDealSpec.tileSet || 'mahjong-regular' })
+    showSvg(svg)
+    bindDeckHover()
+    requestAnimationFrame(fitToView)
     return
   }
 
