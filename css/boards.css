@@ -320,6 +320,34 @@
   word-break: break-all;
 }
 
+.piece-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.piece-btn {
+  width: 32px;
+  height: 32px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.piece-btn:hover {
+  border-color: var(--cosmic-glow);
+  color: var(--text-primary);
+}
+.piece-btn.active {
+  background: var(--cosmic-bright);
+  border-color: var(--cosmic-glow);
+  color: #fff;
+}
+
 @media (max-width: 900px) {
   .boards-app {
     grid-template-columns: 1fr;
