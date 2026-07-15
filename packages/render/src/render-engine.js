@@ -252,6 +252,8 @@ export function renderFromEngine(resolved, opts = {}) {
 
 // --- Position parsing ---
 
+const GO_ALPHA = 'abcdefghjklmnopqrst'
+
 function parsePosition(resolved, topo) {
   const setup = resolved.setup
   if (!setup) return {}
@@ -260,11 +262,18 @@ function parsePosition(resolved, topo) {
   const rows = topo.rows || 8
   const cols = topo.cols || 8
   const vocabulary = resolved.pieces?.vocabulary
+  const render = resolved.render || {}
+  const idStyle = render.idStyle
+
+  const parseFen = (fen) => {
+    if (vocabulary) return parseVocabularyFen(fen, rows, cols, vocabulary, idStyle === 'go' ? GO_ALPHA : null)
+    return fenToPosition(fen, rows, cols, idStyle === 'go' ? GO_ALPHA : null)
+  }
 
   if (Array.isArray(setup)) {
     const first = setup[0]
     if (first && typeof first === 'string' && first.includes('/')) {
-      return vocabulary ? parseVocabularyFen(first, rows, cols, vocabulary) : fenToPosition(first, rows, cols)
+      return parseFen(first)
     }
     return {}
   }
@@ -272,7 +281,7 @@ function parsePosition(resolved, topo) {
   if (typeof setup === 'string' && setup.includes('/')) {
     if (setup.includes(',') && setup.match(/[yrgb][A-Z]/)) return parseFen4(setup, rows, cols)
     if (setup.includes('[')) return parseSfenToPosition(setup, rows, cols)
-    return vocabulary ? parseVocabularyFen(setup, rows, cols, vocabulary) : fenToPosition(setup, rows, cols)
+    return parseFen(setup)
   }
 
   if (topo.type === 'graph' && typeof setup === 'string' && setup.includes(':')) {
@@ -382,7 +391,7 @@ function renderOverlays(overlays, ctx) {
 
 // --- Setup parsers ---
 
-export function fenToPosition(fen, rows, cols) {
+export function fenToPosition(fen, rows, cols, alphabet) {
   const positionPart = fen.split(' ')[0]
   const ranks = positionPart.split('/')
   const position = {}
@@ -399,12 +408,12 @@ export function fenToPosition(fen, rows, cols) {
         const close = rank.indexOf(']', i)
         if (close === -1) { i++; continue }
         const code = rank.slice(i + 1, close)
-        const file = String.fromCharCode(97 + c)
+        const file = alphabet ? alphabet[c] : String.fromCharCode(97 + c)
         const rankNum = rows - r
         position[`${file}${rankNum}`] = code
         c++; i = close + 1
       } else {
-        const file = String.fromCharCode(97 + c)
+        const file = alphabet ? alphabet[c] : String.fromCharCode(97 + c)
         const rankNum = rows - r
         position[`${file}${rankNum}`] = ch
         c++; i++
@@ -414,7 +423,7 @@ export function fenToPosition(fen, rows, cols) {
   return position
 }
 
-function parseVocabularyFen(fen, rows, cols, vocabulary) {
+function parseVocabularyFen(fen, rows, cols, vocabulary, alphabet) {
   const position = {}
   const ranks = fen.split('/')
   for (let r = 0; r < ranks.length && r < rows; r++) {
@@ -427,7 +436,7 @@ function parseVocabularyFen(fen, rows, cols, vocabulary) {
         if (next >= '0' && next <= '9') { c += parseInt(ch + next); i += 2 }
         else { c += parseInt(ch); i++ }
       } else {
-        const file = String.fromCharCode(97 + c)
+        const file = alphabet ? alphabet[c] : String.fromCharCode(97 + c)
         const rankNum = rows - r
         const vocabEntry = vocabulary[ch]
         if (vocabEntry) {
