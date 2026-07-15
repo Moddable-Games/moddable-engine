@@ -68,6 +68,7 @@ a { color: inherit; text-decoration: none; }
 .brand-icon {
   font-size: 22px;
   color: var(--cosmic-glow);
+  margin-top: -5px;
 }
 .brand-text {
   font-family: var(--font-display);
