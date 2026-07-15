@@ -1,0 +1,213 @@
+:root {
+  --docs-bg: #f8f7f3;
+  --docs-ink: #1a1c22;
+  --docs-muted: #555;
+  --docs-hairline: #e6e3d8;
+  --docs-accent: #2563eb;
+  --docs-accent-bg: rgba(37, 99, 235, 0.06);
+  --docs-code-bg: #0f1219;
+  --docs-sidebar-w: 220px;
+}
+
+.docs-layout {
+  display: flex;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.docs-toc {
+  width: var(--docs-sidebar-w);
+  flex-shrink: 0;
+  padding: 32px 0;
+  position: sticky;
+  top: 60px;
+  height: fit-content;
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+}
+
+.docs-toc-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.4);
+  margin-bottom: 12px;
+}
+
+.docs-toc-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.docs-toc-list a {
+  display: block;
+  font-size: 12px;
+  color: rgba(0,0,0,0.55);
+  text-decoration: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  border-left: 2px solid transparent;
+  transition: all 120ms;
+}
+
+.docs-toc-list a:hover {
+  color: var(--docs-ink);
+  background: var(--docs-accent-bg);
+}
+
+.docs-toc-list a.active {
+  color: var(--docs-accent);
+  border-left-color: var(--docs-accent);
+  background: var(--docs-accent-bg);
+  font-weight: 600;
+}
+
+.docs-toc-list a.toc-h3 {
+  padding-left: 20px;
+  font-size: 11px;
+}
+
+.docs-body {
+  flex: 1;
+  min-width: 0;
+  padding: 48px 0 80px 48px;
+  color: var(--docs-ink);
+  line-height: 1.7;
+}
+
+.docs-body h1 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.docs-body .docs-lede {
+  font-size: 1.05rem;
+  color: var(--docs-muted);
+  margin-bottom: 32px;
+}
+
+.docs-body h2 {
+  font-size: 1.35rem;
+  margin: 40px 0 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--docs-hairline);
+  font-weight: 700;
+}
+
+.docs-body h2:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.docs-body h3 {
+  font-size: 1.05rem;
+  margin: 28px 0 8px;
+  color: var(--docs-accent);
+  font-weight: 600;
+}
+
+.docs-body p { margin-bottom: 14px; }
+.docs-body ul, .docs-body ol { margin: 0 0 16px 20px; }
+.docs-body li { margin-bottom: 6px; }
+.docs-body code {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.85em;
+  background: rgba(0,0,0,0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.docs-body pre {
+  background: var(--docs-code-bg);
+  color: rgba(255,255,255,0.88);
+  border-radius: 8px;
+  padding: 18px 22px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-x: auto;
+  margin: 12px 0 20px;
+}
+
+.docs-body pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+.docs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  margin: 12px 0 24px;
+}
+
+.docs-table th {
+  text-align: left;
+  font-weight: 600;
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.03);
+  border-bottom: 1px solid var(--docs-hairline);
+}
+
+.docs-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--docs-hairline);
+  vertical-align: top;
+}
+
+.docs-table code {
+  font-size: 0.82em;
+}
+
+.docs-note {
+  background: var(--docs-accent-bg);
+  border-left: 3px solid var(--docs-accent);
+  padding: 12px 16px;
+  margin: 16px 0;
+  border-radius: 0 6px 6px 0;
+  font-size: 0.9rem;
+}
+
+.docs-nav {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.docs-nav a {
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 4px;
+  text-decoration: none;
+  color: var(--docs-muted);
+  background: rgba(0,0,0,0.03);
+  border: 1px solid var(--docs-hairline);
+  transition: all 120ms;
+}
+
+.docs-nav a:hover {
+  background: var(--docs-accent-bg);
+  color: var(--docs-accent);
+  border-color: var(--docs-accent);
+}
+
+.docs-nav a.active {
+  background: var(--docs-accent);
+  color: #fff;
+  border-color: var(--docs-accent);
+}
+
+@media (max-width: 768px) {
+  .docs-layout { flex-direction: column; padding: 0 16px; }
+  .docs-toc { display: none; }
+  .docs-body { padding: 24px 0 60px; }
+}

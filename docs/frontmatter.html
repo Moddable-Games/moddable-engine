@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frontmatter Schema — Moddable Engine</title>
+<meta name="description" content="How to write engine: blocks in game variant frontmatter.">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="stylesheet" href="../css/home.css">
+<link rel="stylesheet" href="../css/docs.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../play/" class="nav-link">Play</a>
+      <a href="../boards/" class="nav-link">Boards</a>
+      <a href="../pieces/" class="nav-link">Pieces</a>
+      <a href="../tiles/" class="nav-link">Tiles</a>
+      <a href="./" class="nav-link nav-link--active">Docs</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<div class="docs-layout">
+<nav class="docs-toc">
+  <div class="docs-toc-title">Frontmatter</div>
+  <ul class="docs-toc-list">
+    <li><a href="#engine-block">The engine: block</a></li>
+    <li><a href="#topology" class="toc-h3">topology</a></li>
+    <li><a href="#surface" class="toc-h3">surface</a></li>
+    <li><a href="#render" class="toc-h3">render</a></li>
+    <li><a href="#setup" class="toc-h3">setup</a></li>
+    <li><a href="#pieces" class="toc-h3">pieces</a></li>
+    <li><a href="#topology-types">Topology types</a></li>
+    <li><a href="#topo-grid" class="toc-h3">grid</a></li>
+    <li><a href="#topo-hex" class="toc-h3">hex</a></li>
+    <li><a href="#topo-track" class="toc-h3">track</a></li>
+    <li><a href="#topo-pit" class="toc-h3">pit</a></li>
+    <li><a href="#topo-graph" class="toc-h3">graph</a></li>
+    <li><a href="#surfaces">Surfaces</a></li>
+    <li><a href="#setup-notation">Setup notation</a></li>
+    <li><a href="#cascade">Cascade resolution</a></li>
+    <li><a href="#examples">Complete examples</a></li>
+  </ul>
+</nav>
+<div class="docs-body">
+
+  <h1>Frontmatter Schema</h1>
+  <p class="docs-lede">How to write the <code>engine:</code> block that defines a game variant. This is the primary interface for adding new games to the engine.</p>
+
+  <h2 id="engine-block">The engine: block</h2>
+  <p>Every game variant in moddable-rules has a Markdown file with YAML frontmatter. The <code>engine:</code> block tells the engine everything it needs to render the board and (eventually) play the game.</p>
+
+  <pre><code>---
+title: My Variant
+engine:
+  topology:
+    type: grid
+    rows: 8
+    cols: 8
+  surface: parchment
+  render:
+    cellColor: checkered
+    labels: true
+  setup: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
+  pieces:
+    set: mce-chess
+  players: [white, black]
+---</code></pre>
+
+  <h3 id="topology">topology</h3>
+  <p>Defines the spatial structure. Required for any game with a board. The <code>type</code> field determines which topology is used and what other fields are valid.</p>
+
+  <h3 id="surface">surface</h3>
+  <p>Visual theme. Either a named string (<code>parchment</code>, <code>slate</code>, etc.) or an inline object with custom colours.</p>
+
+  <h3 id="render">render</h3>
+  <p>Controls how the board is drawn: cell colouring, labels, decorations, coordinate style, and the ops pipeline.</p>
+
+  <h3 id="setup">setup</h3>
+  <p>Initial position. Format depends on topology type (FEN for grids, coordinate pairs for hex, etc.).</p>
+
+  <h3 id="pieces">pieces</h3>
+  <p>Which piece set to use and optional configuration (borders, vocabulary mapping, FEN overrides).</p>
+
+  <h2 id="topology-types">Topology types</h2>
+
+  <h3 id="topo-grid">grid</h3>
+  <p>Rectangular boards. Chess, draughts, go, xiangqi, shogi, pachisi.</p>
+  <table class="docs-table">
+    <thead><tr><th>Field</th><th>Required</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>type</code></td><td>Yes</td><td>Must be <code>grid</code></td></tr>
+      <tr><td><code>rows</code></td><td>Yes</td><td>Number of rows</td></tr>
+      <tr><td><code>cols</code></td><td>Yes</td><td>Number of columns</td></tr>
+      <tr><td><code>layout</code></td><td>No</td><td><code>cells</code> (default), <code>intersections</code>, or <code>cross</code></td></tr>
+      <tr><td><code>layers</code></td><td>No</td><td>Number of boards for multi-board games (Alice Chess)</td></tr>
+      <tr><td><code>layer_labels</code></td><td>No</td><td>Array of board names (<code>[Board A, Board B]</code>)</td></tr>
+    </tbody>
+  </table>
+  <div class="docs-note"><code>cells</code> = pieces on squares (chess). <code>intersections</code> = pieces on line crossings (go, xiangqi). <code>cross</code> = pachisi-shaped cross pattern.</div>
+
+  <h3 id="topo-hex">hex</h3>
+  <p>Hexagonal boards. Hex, nukes, hex-chess variants.</p>
+  <table class="docs-table">
+    <thead><tr><th>Field</th><th>Required</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>type</code></td><td>Yes</td><td>Must be <code>hex</code></td></tr>
+      <tr><td><code>shape</code></td><td>No</td><td><code>hexagonal</code> or <code>triangular</code></td></tr>
+      <tr><td><code>radius</code></td><td>No</td><td>Hex radius (for hexagonal shape)</td></tr>
+      <tr><td><code>rows</code> / <code>cols</code></td><td>No</td><td>Rectangular hex grid dimensions</td></tr>
+      <tr><td><code>grid</code></td><td>No</td><td>Explicit array of <code>[q, r]</code> coordinates</td></tr>
+      <tr><td><code>orientation</code></td><td>No</td><td><code>pointy</code> (default) or <code>flat</code></td></tr>
+      <tr><td><code>sideLength</code></td><td>No</td><td>For triangular shape</td></tr>
+    </tbody>
+  </table>
+  <div class="docs-note">Provide one of: <code>shape</code> + <code>radius</code>, or <code>rows</code> + <code>cols</code>, or explicit <code>grid</code> array.</div>
+
+  <h3 id="topo-track">track</h3>
+  <p>Linear paths. Backgammon, Landlord's Game.</p>
+  <table class="docs-table">
+    <thead><tr><th>Field</th><th>Required</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>type</code></td><td>Yes</td><td>Must be <code>track</code></td></tr>
+      <tr><td><code>positions</code></td><td>Yes</td><td>Number of positions on the track</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="topo-pit">pit</h3>
+  <p>Mancala-family sowing games.</p>
+  <table class="docs-table">
+    <thead><tr><th>Field</th><th>Required</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>type</code></td><td>Yes</td><td>Must be <code>pit</code></td></tr>
+      <tr><td><code>cols</code></td><td>Yes</td><td>Pits per side</td></tr>
+      <tr><td><code>rows</code></td><td>No</td><td>Number of rows (default 2)</td></tr>
+      <tr><td><code>stores</code></td><td>No</td><td>Whether end stores exist (default true)</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="topo-graph">graph</h3>
+  <p>Arbitrary node-edge structures. Morris, stern-halma, nyout, asalto.</p>
+  <table class="docs-table">
+    <thead><tr><th>Field</th><th>Required</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>type</code></td><td>Yes</td><td>Must be <code>graph</code></td></tr>
+      <tr><td><code>structure</code></td><td>Yes</td><td><code>concentric-rings</code>, <code>perimeter-cross</code>, <code>grid-cross</code>, or <code>star</code></td></tr>
+      <tr><td><code>params</code></td><td>No</td><td>Structure-specific: <code>rings</code>, <code>midpoints</code>, <code>diagonals</code></td></tr>
+      <tr><td><code>nodes</code></td><td>No</td><td>Explicit node definitions (for custom graphs)</td></tr>
+      <tr><td><code>edges</code></td><td>No</td><td>Explicit edge definitions</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="surfaces">Surfaces</h2>
+  <p>A surface provides default colours for the board. Reference by name or define inline.</p>
+
+  <pre><code># Named surface
+surface: parchment
+
+# Inline colours
+surface:
+  colors:
+    cell-light: "#dcb35c"
+    cell-dark: "#d4a843"
+    stroke: "#3d2b1a"
+    background: "#2c2c2c"</code></pre>
+
+  <p>Available named surfaces:</p>
+  <table class="docs-table">
+    <thead><tr><th>Name</th><th>Character</th></tr></thead>
+    <tbody>
+      <tr><td><code>wood-classic</code></td><td>Traditional wood tones (chess default)</td></tr>
+      <tr><td><code>wood-light</code></td><td>Lighter wood (go boards)</td></tr>
+      <tr><td><code>felt-green</code></td><td>Green baize (card table)</td></tr>
+      <tr><td><code>parchment</code></td><td>Aged paper</td></tr>
+      <tr><td><code>earth</code></td><td>Brown/terracotta</td></tr>
+      <tr><td><code>slate</code></td><td>Cool grey stone</td></tr>
+      <tr><td><code>jungle</code></td><td>Deep greens</td></tr>
+      <tr><td><code>military</code></td><td>Olive/khaki tactical</td></tr>
+      <tr><td><code>cosmic</code></td><td>Dark space theme</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="setup-notation">Setup notation</h2>
+  <p>Each topology type has its own notation for initial positions.</p>
+
+  <h3>Grid — FEN</h3>
+  <pre><code># Standard chess
+setup: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
+
+# Multi-board (Alice Chess) — array of FENs
+setup:
+  - rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
+  - 8/8/8/8/8/8/8/8
+
+# 4-player (comma-separated, colour-prefixed)
+setup: rR,rN,rB,rQ,rK,rB,rN,rR/rP,rP,rP,rP,...
+
+# Large shogi (bracket notation for multi-char pieces)
+setup: [ln][kn][ph][ig][fk]...</code></pre>
+
+  <h3>Hex — coordinate pairs</h3>
+  <pre><code># q,r:piece format
+setup: "0,0:mount,0,1:grass,1,0:grass,-1,0:base"</code></pre>
+
+  <h3>Track — position:count+owner</h3>
+  <pre><code># Backgammon: position:countOwner pairs
+setup: "0:2W,5:5B,7:3B,11:5W,12:5B,16:3W,18:5W,23:2B"</code></pre>
+
+  <h3>Pit — semicolon-separated counts</h3>
+  <pre><code># Format: south-pits;south-store;north-pits;north-store
+setup: "4,4,4,4,4,4;0;4,4,4,4,4,4;0"</code></pre>
+
+  <h3>Graph — node:piece pairs</h3>
+  <pre><code># Morris/Halma: empty string means no initial pieces
+setup: ""
+
+# With pieces placed
+setup: "n1:W,n4:B,n7:W"</code></pre>
+
+  <h2 id="cascade">Cascade resolution</h2>
+  <p>Game definitions use inheritance. The family rulebook provides defaults, and each variant overrides only what differs.</p>
+
+  <pre><code># Family rulebook.md — shared by all variants
+engine:
+  topology:
+    type: grid
+    rows: 8
+    cols: 8
+  surface: wood-classic
+  render:
+    cellColor: checkered
+    labels: true
+    ops:
+      - op: cells
+        pattern: checkered
+      - op: border
+  pieces:
+    set: mce-chess
+
+# Variant (e.g. capablanca.md) — only overrides what changes
+engine:
+  topology:
+    cols: 10
+  setup: rnabqkbanr/pppppppppp/10/10/10/10/PPPPPPPPPP/RNABQKBANR</code></pre>
+
+  <p>The cascade resolver deep-merges: <strong>surface defaults → family engine → variant engine</strong>. Variants inherit everything from the family and only specify differences.</p>
+
+  <h2 id="examples">Complete examples</h2>
+
+  <h3>Chess variant (grid)</h3>
+  <pre><code>---
+title: Capablanca Chess
+engine:
+  topology:
+    type: grid
+    rows: 8
+    cols: 10
+  setup: rnabqkbanr/pppppppppp/10/10/10/10/PPPPPPPPPP/RNABQKBANR
+  pieces:
+    set: mce-chess
+---</code></pre>
+
+  <h3>Hex game (hex)</h3>
+  <pre><code>---
+title: "Nukes: Standard"
+engine:
+  topology:
+    type: hex
+    shape: hexagonal
+    radius: 3
+    orientation: pointy
+  players: [player1, player2]
+  render:
+    cellSize: 24
+    cellColor: terrain
+    frame: true
+  setup: "0,0:mount,0,1:grass,1,0:grass,1,-1:trees"
+---</code></pre>
+
+  <h3>Mancala variant (pit)</h3>
+  <pre><code>---
+title: Oware
+engine:
+  topology:
+    type: pit
+    cols: 6
+    stores: false
+  players: [south, north]
+  render:
+    cellSize: 24
+  setup: "4,4,4,4,4,4;0;4,4,4,4,4,4;0"
+---</code></pre>
+
+</div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="footer-brand">moddable.engine</p>
+    <p class="footer-sub">Part of <a href="https://moddable.games" target="_blank" rel="noopener">Moddable.Games</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

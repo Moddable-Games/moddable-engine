@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentation — Moddable Engine</title>
+<meta name="description" content="How to define games, configure boards, and extend the engine.">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="stylesheet" href="../css/home.css">
+<link rel="stylesheet" href="../css/docs.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../play/" class="nav-link">Play</a>
+      <a href="../boards/" class="nav-link">Boards</a>
+      <a href="../pieces/" class="nav-link">Pieces</a>
+      <a href="../tiles/" class="nav-link">Tiles</a>
+      <a href="./" class="nav-link nav-link--active">Docs</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<div class="docs-layout">
+<nav class="docs-toc">
+  <div class="docs-toc-title">Documentation</div>
+  <ul class="docs-toc-list">
+    <li><a href="./" class="active">Overview</a></li>
+    <li><a href="frontmatter.html">Frontmatter Schema</a></li>
+    <li><a href="topologies.html">Topologies</a></li>
+    <li><a href="surfaces.html">Surfaces</a></li>
+    <li><a href="pieces.html">Piece Sets</a></li>
+    <li><a href="plugins.html">Plugins</a></li>
+    <li><a href="render-pipeline.html">Render Pipeline</a></li>
+  </ul>
+</nav>
+<div class="docs-body">
+
+  <h1>Documentation</h1>
+  <p class="docs-lede">Everything you need to add new games, configure board rendering, and extend the engine with new topologies or plugins.</p>
+
+  <h2 id="what-is-this">What is Moddable Engine</h2>
+  <p>A universal game engine where games are <strong>configuration files</strong>, not code. Any game expressible as a combination of topology, rules, pieces, and setup can be defined entirely in YAML frontmatter. The engine handles rendering, move validation, state management, and AI.</p>
+
+  <h2 id="how-games-are-defined">How games are defined</h2>
+  <p>Every game variant lives as a Markdown file in <code>moddable-rules</code> with an <code>engine:</code> block in its YAML frontmatter. This block tells the engine everything it needs: what topology to use, how to render the board, where pieces start, and what rules apply.</p>
+
+  <pre><code>---
+title: Standard Chess
+engine:
+  topology:
+    type: grid
+    rows: 8
+    cols: 8
+  surface: parchment
+  render:
+    cellColor: checkered
+    labels: true
+    ops:
+      - op: cells
+        pattern: checkered
+  setup: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
+  pieces:
+    set: mce-chess
+---</code></pre>
+
+  <p>The engine reads this frontmatter, resolves it through a cascade (surface defaults, family defaults, variant overrides), and produces a complete game definition or rendered board diagram.</p>
+
+  <h2 id="architecture">Architecture at a glance</h2>
+  <p>The engine is organised into layers. Each layer depends only on the layers below it.</p>
+
+  <pre><code>┌─────────────────────────────────────────────┐
+│  Frontmatter (YAML in moddable-rules)       │  ← game definitions
+├─────────────────────────────────────────────┤
+│  Schema (parse, validate, produce, cascade) │  ← turns YAML into objects
+├─────────────────────────────────────────────┤
+│  Plugins (chess, go, mancala, ...)          │  ← game-specific logic
+│  Topologies (grid, hex, track, pit, graph)  │  ← spatial structure
+│  Rules (castling, capture, turn-flow, ...)  │  ← composable behaviours
+├─────────────────────────────────────────────┤
+│  Core (state, events, pipeline, registry)   │  ← micro-kernel
+└─────────────────────────────────────────────┘</code></pre>
+
+  <h2 id="key-concepts">Key concepts</h2>
+  <ul>
+    <li><strong>Topologies are the universal adapter.</strong> Every package above topologies defines a contract. Topologies implement it. Higher packages never know which topology they consume.</li>
+    <li><strong>Five resource types:</strong> topology (spatial), component (operational), rule (behavioural), theme (visual), setup (initial state).</li>
+    <li><strong>No game names in source.</strong> Core, render, schema, and topology code never reference specific games.</li>
+    <li><strong>Moves are opaque.</strong> Core passes moves to plugins without inspecting contents.</li>
+    <li><strong>Rules compose.</strong> Parametric, topology-agnostic rules that combine freely (castling + check + promotion = chess endgame).</li>
+  </ul>
+
+  <h2 id="guides">Guides</h2>
+  <table class="docs-table">
+    <thead>
+      <tr><th>Guide</th><th>Audience</th><th>Covers</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a href="frontmatter.html">Frontmatter Schema</a></td>
+        <td>Game authors</td>
+        <td>Writing engine: blocks, topology options, render config, setup notation</td>
+      </tr>
+      <tr>
+        <td><a href="topologies.html">Topologies</a></td>
+        <td>Game authors / Engine devs</td>
+        <td>Grid, hex, track, pit, graph — fields, defaults, coordinate systems</td>
+      </tr>
+      <tr>
+        <td><a href="surfaces.html">Surfaces</a></td>
+        <td>Game authors</td>
+        <td>Named surfaces (parchment, slate, etc.), colour customisation</td>
+      </tr>
+      <tr>
+        <td><a href="pieces.html">Piece Sets</a></td>
+        <td>Game authors / Artists</td>
+        <td>Gallery index format, virtual sets, extends, surface rendering</td>
+      </tr>
+      <tr>
+        <td><a href="plugins.html">Plugins</a></td>
+        <td>Engine devs</td>
+        <td>Plugin structure, hooks, registry, adding new game families</td>
+      </tr>
+      <tr>
+        <td><a href="render-pipeline.html">Render Pipeline</a></td>
+        <td>Engine devs</td>
+        <td>Frontmatter → cascade → produceLayout → topology renderer → SVG</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="current-coverage">Current coverage</h2>
+  <p>The engine currently handles board rendering for <strong>284 game variants</strong> across <strong>42 families</strong> and <strong>5 topology types</strong>. Play (move execution, AI) is architecturally complete but not yet wired to the frontend.</p>
+
+  <table class="docs-table">
+    <thead>
+      <tr><th>Component</th><th>Status</th><th>Tests</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Schema (parse, validate, produce)</td><td>Complete</td><td>113</td></tr>
+      <tr><td>Core (state, pipeline, events)</td><td>Complete</td><td>157</td></tr>
+      <tr><td>Topologies (5 types)</td><td>Complete</td><td>165</td></tr>
+      <tr><td>Plugins (13 families)</td><td>Complete</td><td>375</td></tr>
+      <tr><td>Rules (composable, parametric)</td><td>Complete</td><td>118</td></tr>
+      <tr><td>Render (SVG generation)</td><td>Complete</td><td>34</td></tr>
+      <tr><td>Board diagrams (284 variants)</td><td>Complete</td><td>284 snapshots</td></tr>
+      <tr><td>Play (frontend integration)</td><td>In progress</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+</div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="footer-brand">moddable.engine</p>
+    <p class="footer-sub">Part of <a href="https://moddable.games" target="_blank" rel="noopener">Moddable.Games</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
