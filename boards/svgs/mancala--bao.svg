@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 498 248" width="498" height="248">
+<defs>
+<symbol id="piece-playstrategy-oware-2" viewBox="0 0 144 144"><title>seeds-2</title>
+    <defs>
+        <filter x="-22.2%" y="-26.1%" width="144.4%" height="152.2%" filterUnits="objectBoundingBox" id="filter-1">
+            <feGaussianBlur stdDeviation="2" in="SourceGraphic"></feGaussianBlur>
+        </filter>
+        <radialGradient cx="46.387808%" cy="46.387808%" fx="46.387808%" fy="46.387808%" r="46.1573049%" gradientTransform="translate(0.463878,0.463878),scale(0.851852,1.000000),rotate(90.000000),translate(-0.463878,-0.463878)" id="radialGradient-2">
+            <stop stop-color="#FFFFFF" stop-opacity="0.1" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.0858890035" offset="63.5889013%"></stop>
+            <stop stop-color="#000000" stop-opacity="0.08" offset="100%"></stop>
+        </radialGradient>
+        <ellipse id="path-3" cx="13.5" cy="11.5" rx="13.5" ry="11.5"></ellipse>
+        <filter x="-34.6%" y="-38.6%" width="169.2%" height="177.3%" filterUnits="objectBoundingBox" id="filter-4">
+            <feGaussianBlur stdDeviation="2" in="SourceGraphic"></feGaussianBlur>
+        </filter>
+        <filter x="-22.2%" y="-26.1%" width="144.4%" height="152.2%" filterUnits="objectBoundingBox" id="filter-5">
+            <feGaussianBlur stdDeviation="2" in="SourceGraphic"></feGaussianBlur>
+        </filter>
+        <ellipse id="path-6" cx="13.5" cy="11.5" rx="13.5" ry="11.5"></ellipse>
+        <filter x="-34.6%" y="-38.6%" width="169.2%" height="177.3%" filterUnits="objectBoundingBox" id="filter-7">
+            <feGaussianBlur stdDeviation="2" in="SourceGraphic"></feGaussianBlur>
+        </filter>
+    </defs>
+    <g id="seeds-2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group" transform="translate(38.000000, 43.000000)">
+            <g>
+                <ellipse id="shadow" fill="#000000" opacity="0.4" style="mix-blend-mode: multiply;" filter="url(#filter-1)" cx="18.5" cy="19.0828118" rx="13.5" ry="11.5"></ellipse>
+                <g id="colour---blue" transform="translate(6.000000, 6.582812)">
+                    <use fill="#257989" href="#path-3"></use>
+                    <use fill="url(#radialGradient-2)" href="#path-3"></use>
+                </g>
+                <ellipse id="gradient" fill="url(#radialGradient-2)" cx="19.5" cy="18.0828118" rx="13.5" ry="11.5"></ellipse>
+                <path d="M12.5948736,25.0350541 C11.3899054,18.6960045 12.8422208,14.1754906 16.9518199,11.4735124 C21.0614189,8.7715343 25.2518379,8.85187883 29.5230768,11.714546 C25.6309065,10.7024657 21.7895756,11.6688261 17.999084,14.6136272 C14.2085923,17.5584284 12.4071889,21.0322373 12.5948736,25.0350541 Z" id="glow" fill="#FFFFFF" filter="url(#filter-4)" transform="translate(20.854074, 17.270301) rotate(-300.000000) translate(-20.854074, -17.270301) "></path>
+            </g>
+            <g transform="translate(28.000000, 22.000000)">
+                <ellipse id="shadow" fill="#000000" opacity="0.4" style="mix-blend-mode: multiply;" filter="url(#filter-5)" cx="18.5" cy="19.0828118" rx="13.5" ry="11.5"></ellipse>
+                <g id="colour---blue" transform="translate(6.000000, 6.582812)">
+                    <use fill="#257989" href="#path-6"></use>
+                    <use fill="url(#radialGradient-2)" href="#path-6"></use>
+                </g>
+                <ellipse id="gradient" fill="url(#radialGradient-2)" cx="19.5" cy="18.0828118" rx="13.5" ry="11.5"></ellipse>
+                <path d="M12.5948736,25.0350541 C11.3899054,18.6960045 12.8422208,14.1754906 16.9518199,11.4735124 C21.0614189,8.7715343 25.2518379,8.85187883 29.5230768,11.714546 C25.6309065,10.7024657 21.7895756,11.6688261 17.999084,14.6136272 C14.2085923,17.5584284 12.4071889,21.0322373 12.5948736,25.0350541 Z" id="glow" fill="#FFFFFF" filter="url(#filter-7)" transform="translate(20.854074, 17.270301) rotate(-300.000000) translate(-20.854074, -17.270301) "></path>
+            </g>
+        </g>
+        <rect id="Rectangle" x="0" y="0" width="144" height="144" rx="72"></rect>
+    </g></symbol>
+</defs>
+<rect x="8" y="8" width="482" height="232" rx="22" ry="22" fill="#7A5A32"/><rect x="14" y="14" width="470" height="220" rx="18" ry="18" fill="#9B7740"/><circle cx="49" cy="49" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-7"/><circle cx="106.14285714285714" cy="49" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-6"/><circle cx="163.28571428571428" cy="49" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-5"/><circle cx="220.42857142857144" cy="49" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-4"/><circle cx="277.57142857142856" cy="49" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-3"/><circle cx="334.7142857142857" cy="49" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-2"/><circle cx="391.8571428571429" cy="49" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-1"/><circle cx="449" cy="49" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-0"/><circle cx="49" cy="97" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-15"/><use href="#piece-playstrategy-oware-2" x="33" y="81" width="32" height="32"/><circle cx="106.14285714285714" cy="97" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-14"/><use href="#piece-playstrategy-oware-2" x="90.14285714285714" y="81" width="32" height="32"/><circle cx="163.28571428571428" cy="97" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-13"/><use href="#piece-playstrategy-oware-2" x="147.28571428571428" y="81" width="32" height="32"/><circle cx="220.42857142857144" cy="97" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-12"/><use href="#piece-playstrategy-oware-2" x="204.42857142857144" y="81" width="32" height="32"/><circle cx="277.57142857142856" cy="97" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-11"/><use href="#piece-playstrategy-oware-2" x="261.57142857142856" y="81" width="32" height="32"/><circle cx="334.7142857142857" cy="97" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-10"/><use href="#piece-playstrategy-oware-2" x="318.7142857142857" y="81" width="32" height="32"/><circle cx="391.8571428571429" cy="97" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-9"/><use href="#piece-playstrategy-oware-2" x="375.8571428571429" y="81" width="32" height="32"/><circle cx="449" cy="97" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-8"/><use href="#piece-playstrategy-oware-2" x="433" y="81" width="32" height="32"/><circle cx="49" cy="151" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-16"/><use href="#piece-playstrategy-oware-2" x="33" y="135" width="32" height="32"/><circle cx="106.14285714285714" cy="151" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-17"/><use href="#piece-playstrategy-oware-2" x="90.14285714285714" y="135" width="32" height="32"/><circle cx="163.28571428571428" cy="151" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-18"/><use href="#piece-playstrategy-oware-2" x="147.28571428571428" y="135" width="32" height="32"/><circle cx="220.42857142857144" cy="151" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-19"/><use href="#piece-playstrategy-oware-2" x="204.42857142857144" y="135" width="32" height="32"/><circle cx="277.57142857142856" cy="151" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-20"/><use href="#piece-playstrategy-oware-2" x="261.57142857142856" y="135" width="32" height="32"/><circle cx="334.7142857142857" cy="151" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-21"/><use href="#piece-playstrategy-oware-2" x="318.7142857142857" y="135" width="32" height="32"/><circle cx="391.8571428571429" cy="151" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-22"/><use href="#piece-playstrategy-oware-2" x="375.8571428571429" y="135" width="32" height="32"/><circle cx="449" cy="151" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-23"/><use href="#piece-playstrategy-oware-2" x="433" y="135" width="32" height="32"/><circle cx="49" cy="199" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-24"/><circle cx="106.14285714285714" cy="199" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-25"/><circle cx="163.28571428571428" cy="199" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-26"/><circle cx="220.42857142857144" cy="199" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-27"/><circle cx="277.57142857142856" cy="199" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-28"/><circle cx="334.7142857142857" cy="199" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-29"/><circle cx="391.8571428571429" cy="199" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-30"/><circle cx="449" cy="199" r="20" fill="#4E3320" stroke="#3A2515" stroke-width="1.5" class="board-cell" data-sq="pit-31"/><line x1="29" y1="124" x2="469" y2="124" stroke="#7A5A32" stroke-width="2.5" stroke-dasharray="6,4"/>
+</svg>

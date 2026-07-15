@@ -5,7 +5,7 @@
     "variant": "standard",
     "variantTitle": "Agon (Standard)",
     "topology": "hex",
-    "svg": "../snapshots/agon--standard.svg"
+    "svg": "svgs/agon--standard.svg"
   },
   {
     "family": "asalto",
@@ -13,7 +13,7 @@
     "variant": "royal-garrison",
     "variantTitle": "Royal Garrison",
     "topology": "graph",
-    "svg": "../snapshots/asalto--royal-garrison.svg"
+    "svg": "svgs/asalto--royal-garrison.svg"
   },
   {
     "family": "asalto",
@@ -21,7 +21,7 @@
     "variant": "standard",
     "variantTitle": "Asalto (Standard)",
     "topology": "graph",
-    "svg": "../snapshots/asalto--standard.svg"
+    "svg": "svgs/asalto--standard.svg"
   },
   {
     "family": "backgammon",
@@ -29,7 +29,7 @@
     "variant": "acey-deucey",
     "variantTitle": "Acey-Deucey",
     "topology": "track",
-    "svg": "../snapshots/backgammon--acey-deucey.svg"
+    "svg": "svgs/backgammon--acey-deucey.svg"
   },
   {
     "family": "backgammon",
@@ -37,7 +37,7 @@
     "variant": "chouette",
     "variantTitle": "Chouette",
     "topology": "track",
-    "svg": "../snapshots/backgammon--chouette.svg"
+    "svg": "svgs/backgammon--chouette.svg"
   },
   {
     "family": "backgammon",
@@ -45,7 +45,7 @@
     "variant": "fevga",
     "variantTitle": "Fevga",
     "topology": "track",
-    "svg": "../snapshots/backgammon--fevga.svg"
+    "svg": "svgs/backgammon--fevga.svg"
   },
   {
     "family": "backgammon",
@@ -53,7 +53,7 @@
     "variant": "hypergammon",
     "variantTitle": "Hypergammon",
     "topology": "track",
-    "svg": "../snapshots/backgammon--hypergammon.svg"
+    "svg": "svgs/backgammon--hypergammon.svg"
   },
   {
     "family": "backgammon",
@@ -61,7 +61,7 @@
     "variant": "nackgammon",
     "variantTitle": "Nackgammon",
     "topology": "track",
-    "svg": "../snapshots/backgammon--nackgammon.svg"
+    "svg": "svgs/backgammon--nackgammon.svg"
   },
   {
     "family": "backgammon",
@@ -69,7 +69,7 @@
     "variant": "nardi",
     "variantTitle": "Nardi",
     "topology": "track",
-    "svg": "../snapshots/backgammon--nardi.svg"
+    "svg": "svgs/backgammon--nardi.svg"
   },
   {
     "family": "backgammon",
@@ -77,7 +77,7 @@
     "variant": "plakoto",
     "variantTitle": "Plakoto",
     "topology": "track",
-    "svg": "../snapshots/backgammon--plakoto.svg"
+    "svg": "svgs/backgammon--plakoto.svg"
   },
   {
     "family": "backgammon",
@@ -85,7 +85,7 @@
     "variant": "standard",
     "variantTitle": "Standard Backgammon",
     "topology": "track",
-    "svg": "../snapshots/backgammon--standard.svg"
+    "svg": "svgs/backgammon--standard.svg"
   },
   {
     "family": "chaupar",
@@ -93,7 +93,7 @@
     "variant": "standard",
     "variantTitle": "Chaupar (Standard)",
     "topology": "grid",
-    "svg": "../snapshots/chaupar--standard.svg"
+    "svg": "svgs/chaupar--standard.svg"
   },
   {
     "family": "dou-shou-qi",
@@ -101,7 +101,7 @@
     "variant": "standard",
     "variantTitle": "Dou Shou Qi (Standard)",
     "topology": "grid",
-    "svg": "../snapshots/dou-shou-qi--standard.svg"
+    "svg": "svgs/dou-shou-qi--standard.svg"
   },
   {
     "family": "draughts",
@@ -109,7 +109,7 @@
     "variant": "alquerque",
     "variantTitle": "Alquerque",
     "topology": "grid",
-    "svg": "../snapshots/draughts--alquerque.svg"
+    "svg": "svgs/draughts--alquerque.svg"
   },
   {
     "family": "draughts",
@@ -117,7 +117,7 @@
     "variant": "bashni",
     "variantTitle": "Bashni",
     "topology": "grid",
-    "svg": "../snapshots/draughts--bashni.svg"
+    "svg": "svgs/draughts--bashni.svg"
   },
   {
     "family": "draughts",
@@ -125,7 +125,7 @@
     "variant": "brazilian",
     "variantTitle": "Brazilian Draughts",
     "topology": "grid",
-    "svg": "../snapshots/draughts--brazilian.svg"
+    "svg": "svgs/draughts--brazilian.svg"
   },
   {
     "family": "draughts",
@@ -133,7 +133,7 @@
     "variant": "canadian",
     "variantTitle": "Canadian Draughts",
     "topology": "grid",
-    "svg": "../snapshots/draughts--canadian.svg"
+    "svg": "svgs/draughts--canadian.svg"
   },
   {
     "family": "draughts",
@@ -141,7 +141,7 @@
     "variant": "czech",
     "variantTitle": "Czech Draughts",
     "topology": "grid",
-    "svg": "../snapshots/draughts--czech.svg"
+    "svg": "svgs/draughts--czech.svg"
   },
   {
     "family": "draughts",
@@ -149,7 +149,7 @@
     "variant": "dameo",
     "variantTitle": "Dameo",
     "topology": "grid",
-    "svg": "../snapshots/draughts--dameo.svg"
+    "svg": "svgs/draughts--dameo.svg"
   },
   {
     "family": "draughts",
@@ -157,7 +157,7 @@
     "variant": "diagonal",
     "variantTitle": "Diagonal Draughts",
     "topology": "grid",
-    "svg": "../snapshots/draughts--diagonal.svg"
+    "svg": "svgs/draughts--diagonal.svg"
   },
   {
     "family": "draughts",
@@ -165,7 +165,7 @@
     "variant": "english",
     "variantTitle": "English Draughts",
     "topology": "grid",
-    "svg": "../snapshots/draughts--english.svg"
+    "svg": "svgs/draughts--english.svg"
   },
   {
     "family": "draughts",
@@ -173,7 +173,7 @@
     "variant": "frisian",
     "variantTitle": "Frisian Draughts",
     "topology": "grid",
-    "svg": "../snapshots/draughts--frisian.svg"
+    "svg": "svgs/draughts--frisian.svg"
   },
   {
     "family": "draughts",
@@ -181,7 +181,7 @@
     "variant": "german",
     "variantTitle": "German Draughts",
     "topology": "grid",
-    "svg": "../snapshots/draughts--german.svg"
+    "svg": "svgs/draughts--german.svg"
   },
   {
     "family": "draughts",
@@ -189,7 +189,7 @@
     "variant": "ghanaian",
     "variantTitle": "Ghanaian Draughts",
     "topology": "grid",
-    "svg": "../snapshots/draughts--ghanaian.svg"
+    "svg": "svgs/draughts--ghanaian.svg"
   },
   {
     "family": "draughts",
@@ -197,7 +197,7 @@
     "variant": "international",
     "variantTitle": "International Draughts",
     "topology": "grid",
-    "svg": "../snapshots/draughts--international.svg"
+    "svg": "svgs/draughts--international.svg"
   },
   {
     "family": "draughts",
@@ -205,7 +205,7 @@
     "variant": "italian",
     "variantTitle": "Italian Draughts",
     "topology": "grid",
-    "svg": "../snapshots/draughts--italian.svg"
+    "svg": "svgs/draughts--italian.svg"
   },
   {
     "family": "draughts",
@@ -213,7 +213,7 @@
     "variant": "lasca",
     "variantTitle": "Lasca",
     "topology": "grid",
-    "svg": "../snapshots/draughts--lasca.svg"
+    "svg": "svgs/draughts--lasca.svg"
   },
   {
     "family": "draughts",
@@ -221,7 +221,7 @@
     "variant": "pool",
     "variantTitle": "Pool Checkers",
     "topology": "grid",
-    "svg": "../snapshots/draughts--pool.svg"
+    "svg": "svgs/draughts--pool.svg"
   },
   {
     "family": "draughts",
@@ -229,7 +229,7 @@
     "variant": "russian",
     "variantTitle": "Russian Draughts",
     "topology": "grid",
-    "svg": "../snapshots/draughts--russian.svg"
+    "svg": "svgs/draughts--russian.svg"
   },
   {
     "family": "draughts",
@@ -237,7 +237,7 @@
     "variant": "spanish",
     "variantTitle": "Spanish Draughts",
     "topology": "grid",
-    "svg": "../snapshots/draughts--spanish.svg"
+    "svg": "svgs/draughts--spanish.svg"
   },
   {
     "family": "draughts",
@@ -245,7 +245,7 @@
     "variant": "spantsiretti",
     "variantTitle": "Spantsiretti",
     "topology": "grid",
-    "svg": "../snapshots/draughts--spantsiretti.svg"
+    "svg": "svgs/draughts--spantsiretti.svg"
   },
   {
     "family": "draughts",
@@ -253,7 +253,7 @@
     "variant": "thai",
     "variantTitle": "Thai Draughts",
     "topology": "grid",
-    "svg": "../snapshots/draughts--thai.svg"
+    "svg": "svgs/draughts--thai.svg"
   },
   {
     "family": "draughts",
@@ -261,7 +261,7 @@
     "variant": "turkish-draughts",
     "variantTitle": "Turkish Draughts",
     "topology": "grid",
-    "svg": "../snapshots/draughts--turkish-draughts.svg"
+    "svg": "svgs/draughts--turkish-draughts.svg"
   },
   {
     "family": "dungeon-chess",
@@ -269,7 +269,7 @@
     "variant": "compact",
     "variantTitle": "Dungeon Chess (Compact Skirmish (10×10))",
     "topology": "grid",
-    "svg": "../snapshots/dungeon-chess--compact.svg"
+    "svg": "svgs/dungeon-chess--compact.svg"
   },
   {
     "family": "dungeon-chess",
@@ -277,7 +277,7 @@
     "variant": "four-player",
     "variantTitle": "Dungeon Chess (Four Player (20×20))",
     "topology": "grid",
-    "svg": "../snapshots/dungeon-chess--four-player.svg"
+    "svg": "svgs/dungeon-chess--four-player.svg"
   },
   {
     "family": "dungeon-chess",
@@ -285,7 +285,7 @@
     "variant": "two-player",
     "variantTitle": "Dungeon Chess (Two Player (20×8))",
     "topology": "grid",
-    "svg": "../snapshots/dungeon-chess--two-player.svg"
+    "svg": "svgs/dungeon-chess--two-player.svg"
   },
   {
     "family": "econopoly",
@@ -293,7 +293,7 @@
     "variant": "standard",
     "variantTitle": "Econopoly (Standard)",
     "topology": "track",
-    "svg": "../snapshots/econopoly--standard.svg"
+    "svg": "svgs/econopoly--standard.svg"
   },
   {
     "family": "fanorona",
@@ -301,7 +301,7 @@
     "variant": "standard",
     "variantTitle": "Fanorona (Standard)",
     "topology": "grid",
-    "svg": "../snapshots/fanorona--standard.svg"
+    "svg": "svgs/fanorona--standard.svg"
   },
   {
     "family": "go",
@@ -309,7 +309,7 @@
     "variant": "13x13",
     "variantTitle": "13×13 Go",
     "topology": "grid",
-    "svg": "../snapshots/go--13x13.svg"
+    "svg": "svgs/go--13x13.svg"
   },
   {
     "family": "go",
@@ -317,7 +317,7 @@
     "variant": "9x9",
     "variantTitle": "9×9 Go",
     "topology": "grid",
-    "svg": "../snapshots/go--9x9.svg"
+    "svg": "svgs/go--9x9.svg"
   },
   {
     "family": "go",
@@ -325,7 +325,7 @@
     "variant": "capture-go",
     "variantTitle": "Capture Go",
     "topology": "grid",
-    "svg": "../snapshots/go--capture-go.svg"
+    "svg": "svgs/go--capture-go.svg"
   },
   {
     "family": "go",
@@ -333,7 +333,7 @@
     "variant": "gomoku",
     "variantTitle": "Gomoku",
     "topology": "grid",
-    "svg": "../snapshots/go--gomoku.svg"
+    "svg": "svgs/go--gomoku.svg"
   },
   {
     "family": "go",
@@ -341,7 +341,7 @@
     "variant": "ninuki-renju",
     "variantTitle": "Ninuki-Renju",
     "topology": "grid",
-    "svg": "../snapshots/go--ninuki-renju.svg"
+    "svg": "svgs/go--ninuki-renju.svg"
   },
   {
     "family": "go",
@@ -349,7 +349,7 @@
     "variant": "one-colour",
     "variantTitle": "One-Colour Go",
     "topology": "grid",
-    "svg": "../snapshots/go--one-colour.svg"
+    "svg": "svgs/go--one-colour.svg"
   },
   {
     "family": "go",
@@ -357,7 +357,7 @@
     "variant": "phantom-go",
     "variantTitle": "Phantom Go",
     "topology": "grid",
-    "svg": "../snapshots/go--phantom-go.svg"
+    "svg": "svgs/go--phantom-go.svg"
   },
   {
     "family": "go",
@@ -365,7 +365,7 @@
     "variant": "rengo",
     "variantTitle": "Rengo",
     "topology": "grid",
-    "svg": "../snapshots/go--rengo.svg"
+    "svg": "svgs/go--rengo.svg"
   },
   {
     "family": "go",
@@ -373,7 +373,7 @@
     "variant": "renju",
     "variantTitle": "Renju",
     "topology": "grid",
-    "svg": "../snapshots/go--renju.svg"
+    "svg": "svgs/go--renju.svg"
   },
   {
     "family": "go",
@@ -381,7 +381,7 @@
     "variant": "standard",
     "variantTitle": "Standard Go (19×19)",
     "topology": "grid",
-    "svg": "../snapshots/go--standard.svg"
+    "svg": "svgs/go--standard.svg"
   },
   {
     "family": "go",
@@ -389,7 +389,7 @@
     "variant": "stoical",
     "variantTitle": "Stoical Go",
     "topology": "grid",
-    "svg": "../snapshots/go--stoical.svg"
+    "svg": "svgs/go--stoical.svg"
   },
   {
     "family": "go",
@@ -397,7 +397,7 @@
     "variant": "sunjang",
     "variantTitle": "Sunjang Baduk",
     "topology": "grid",
-    "svg": "../snapshots/go--sunjang.svg"
+    "svg": "svgs/go--sunjang.svg"
   },
   {
     "family": "go",
@@ -405,7 +405,7 @@
     "variant": "tibetan",
     "variantTitle": "Tibetan Go",
     "topology": "grid",
-    "svg": "../snapshots/go--tibetan.svg"
+    "svg": "svgs/go--tibetan.svg"
   },
   {
     "family": "go",
@@ -413,7 +413,7 @@
     "variant": "toroidal-go",
     "variantTitle": "Toroidal Go",
     "topology": "grid",
-    "svg": "../snapshots/go--toroidal-go.svg"
+    "svg": "svgs/go--toroidal-go.svg"
   },
   {
     "family": "halma",
@@ -421,7 +421,7 @@
     "variant": "standard-2p",
     "variantTitle": "Standard 2-Player Halma",
     "topology": "grid",
-    "svg": "../snapshots/halma--standard-2p.svg"
+    "svg": "svgs/halma--standard-2p.svg"
   },
   {
     "family": "halma",
@@ -429,7 +429,7 @@
     "variant": "standard-4p",
     "variantTitle": "Standard 4-Player Halma",
     "topology": "grid",
-    "svg": "../snapshots/halma--standard-4p.svg"
+    "svg": "svgs/halma--standard-4p.svg"
   },
   {
     "family": "hex",
@@ -437,7 +437,7 @@
     "variant": "13x13",
     "variantTitle": "Hex (13×13)",
     "topology": "hex",
-    "svg": "../snapshots/hex--13x13.svg"
+    "svg": "svgs/hex--13x13.svg"
   },
   {
     "family": "hex",
@@ -445,7 +445,7 @@
     "variant": "14x14",
     "variantTitle": "Hex (14×14)",
     "topology": "hex",
-    "svg": "../snapshots/hex--14x14.svg"
+    "svg": "svgs/hex--14x14.svg"
   },
   {
     "family": "hex",
@@ -453,7 +453,7 @@
     "variant": "19x19",
     "variantTitle": "Hex (19×19)",
     "topology": "hex",
-    "svg": "../snapshots/hex--19x19.svg"
+    "svg": "svgs/hex--19x19.svg"
   },
   {
     "family": "hex",
@@ -461,7 +461,7 @@
     "variant": "9x9",
     "variantTitle": "Hex (9×9)",
     "topology": "hex",
-    "svg": "../snapshots/hex--9x9.svg"
+    "svg": "svgs/hex--9x9.svg"
   },
   {
     "family": "hex",
@@ -469,7 +469,7 @@
     "variant": "standard",
     "variantTitle": "Hex (11×11)",
     "topology": "hex",
-    "svg": "../snapshots/hex--standard.svg"
+    "svg": "svgs/hex--standard.svg"
   },
   {
     "family": "hex",
@@ -477,7 +477,7 @@
     "variant": "y-game",
     "variantTitle": "Y",
     "topology": "hex",
-    "svg": "../snapshots/hex--y-game.svg"
+    "svg": "svgs/hex--y-game.svg"
   },
   {
     "family": "hex",
@@ -485,7 +485,7 @@
     "variant": "y-large",
     "variantTitle": "Y (Large — 15)",
     "topology": "hex",
-    "svg": "../snapshots/hex--y-large.svg"
+    "svg": "svgs/hex--y-large.svg"
   },
   {
     "family": "hex",
@@ -493,7 +493,7 @@
     "variant": "y-small",
     "variantTitle": "Y (Small — 9)",
     "topology": "hex",
-    "svg": "../snapshots/hex--y-small.svg"
+    "svg": "svgs/hex--y-small.svg"
   },
   {
     "family": "landlords-game",
@@ -501,7 +501,7 @@
     "variant": "1904-original",
     "variantTitle": "1904 Original",
     "topology": "track",
-    "svg": "../snapshots/landlords-game--1904-original.svg"
+    "svg": "svgs/landlords-game--1904-original.svg"
   },
   {
     "family": "landlords-game",
@@ -509,7 +509,7 @@
     "variant": "1906-commercial",
     "variantTitle": "1906 Commercial Edition",
     "topology": "track",
-    "svg": "../snapshots/landlords-game--1906-commercial.svg"
+    "svg": "svgs/landlords-game--1906-commercial.svg"
   },
   {
     "family": "landlords-game",
@@ -517,7 +517,7 @@
     "variant": "monarch-of-the-world",
     "variantTitle": "Monarch of the World",
     "topology": "track",
-    "svg": "../snapshots/landlords-game--monarch-of-the-world.svg"
+    "svg": "svgs/landlords-game--monarch-of-the-world.svg"
   },
   {
     "family": "landlords-game",
@@ -525,7 +525,7 @@
     "variant": "prosperity",
     "variantTitle": "Prosperity",
     "topology": "track",
-    "svg": "../snapshots/landlords-game--prosperity.svg"
+    "svg": "svgs/landlords-game--prosperity.svg"
   },
   {
     "family": "landlords-game",
@@ -533,7 +533,7 @@
     "variant": "single-tax",
     "variantTitle": "Single Tax",
     "topology": "track",
-    "svg": "../snapshots/landlords-game--single-tax.svg"
+    "svg": "svgs/landlords-game--single-tax.svg"
   },
   {
     "family": "lattaque",
@@ -541,7 +541,7 @@
     "variant": "aviation",
     "variantTitle": "Aviation",
     "topology": "grid",
-    "svg": "../snapshots/lattaque--aviation.svg"
+    "svg": "svgs/lattaque--aviation.svg"
   },
   {
     "family": "lattaque",
@@ -549,7 +549,7 @@
     "variant": "dover-patrol",
     "variantTitle": "Dover Patrol",
     "topology": "grid",
-    "svg": "../snapshots/lattaque--dover-patrol.svg"
+    "svg": "svgs/lattaque--dover-patrol.svg"
   },
   {
     "family": "lattaque",
@@ -557,7 +557,7 @@
     "variant": "standard",
     "variantTitle": "L'Attaque (Standard)",
     "topology": "grid",
-    "svg": "../snapshots/lattaque--standard.svg"
+    "svg": "svgs/lattaque--standard.svg"
   },
   {
     "family": "lattaque",
@@ -565,7 +565,7 @@
     "variant": "tri-tactics",
     "variantTitle": "Tri-Tactics",
     "topology": "grid",
-    "svg": "../snapshots/lattaque--tri-tactics.svg"
+    "svg": "svgs/lattaque--tri-tactics.svg"
   },
   {
     "family": "mancala",
@@ -573,7 +573,7 @@
     "variant": "ayo",
     "variantTitle": "Ayo",
     "topology": "pit",
-    "svg": "../snapshots/mancala--ayo.svg"
+    "svg": "svgs/mancala--ayo.svg"
   },
   {
     "family": "mancala",
@@ -581,7 +581,7 @@
     "variant": "bao",
     "variantTitle": "Bao",
     "topology": "pit",
-    "svg": "../snapshots/mancala--bao.svg"
+    "svg": "svgs/mancala--bao.svg"
   },
   {
     "family": "mancala",
@@ -589,7 +589,7 @@
     "variant": "congkak",
     "variantTitle": "Congkak",
     "topology": "pit",
-    "svg": "../snapshots/mancala--congkak.svg"
+    "svg": "svgs/mancala--congkak.svg"
   },
   {
     "family": "mancala",
@@ -597,7 +597,7 @@
     "variant": "kalah",
     "variantTitle": "Kalah",
     "topology": "pit",
-    "svg": "../snapshots/mancala--kalah.svg"
+    "svg": "svgs/mancala--kalah.svg"
   },
   {
     "family": "mancala",
@@ -605,7 +605,7 @@
     "variant": "oware",
     "variantTitle": "Oware",
     "topology": "pit",
-    "svg": "../snapshots/mancala--oware.svg"
+    "svg": "svgs/mancala--oware.svg"
   },
   {
     "family": "mancala",
@@ -613,7 +613,7 @@
     "variant": "pallanguzhi",
     "variantTitle": "Pallanguzhi",
     "topology": "pit",
-    "svg": "../snapshots/mancala--pallanguzhi.svg"
+    "svg": "svgs/mancala--pallanguzhi.svg"
   },
   {
     "family": "mancala",
@@ -621,7 +621,7 @@
     "variant": "sungka",
     "variantTitle": "Sungka",
     "topology": "pit",
-    "svg": "../snapshots/mancala--sungka.svg"
+    "svg": "svgs/mancala--sungka.svg"
   },
   {
     "family": "mancala",
@@ -629,7 +629,7 @@
     "variant": "toguz-korgool",
     "variantTitle": "Toguz Korgool",
     "topology": "pit",
-    "svg": "../snapshots/mancala--toguz-korgool.svg"
+    "svg": "svgs/mancala--toguz-korgool.svg"
   },
   {
     "family": "moddable-chess",
@@ -637,7 +637,7 @@
     "variant": "absorption",
     "variantTitle": "Absorption Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--absorption.svg"
+    "svg": "svgs/moddable-chess--absorption.svg"
   },
   {
     "family": "moddable-chess",
@@ -645,7 +645,7 @@
     "variant": "alice",
     "variantTitle": "Alice Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--alice.svg"
+    "svg": "svgs/moddable-chess--alice.svg"
   },
   {
     "family": "moddable-chess",
@@ -653,7 +653,7 @@
     "variant": "almost-chess",
     "variantTitle": "Almost Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--almost-chess.svg"
+    "svg": "svgs/moddable-chess--almost-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -661,7 +661,7 @@
     "variant": "amazon-chess",
     "variantTitle": "Amazon Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--amazon-chess.svg"
+    "svg": "svgs/moddable-chess--amazon-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -669,7 +669,7 @@
     "variant": "andernach",
     "variantTitle": "Andernach Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--andernach.svg"
+    "svg": "svgs/moddable-chess--andernach.svg"
   },
   {
     "family": "moddable-chess",
@@ -677,7 +677,7 @@
     "variant": "anti-king-chess-2",
     "variantTitle": "Anti-King Chess II",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--anti-king-chess-2.svg"
+    "svg": "svgs/moddable-chess--anti-king-chess-2.svg"
   },
   {
     "family": "moddable-chess",
@@ -685,7 +685,7 @@
     "variant": "antichess",
     "variantTitle": "Antichess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--antichess.svg"
+    "svg": "svgs/moddable-chess--antichess.svg"
   },
   {
     "family": "moddable-chess",
@@ -693,7 +693,7 @@
     "variant": "archchess",
     "variantTitle": "Archchess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--archchess.svg"
+    "svg": "svgs/moddable-chess--archchess.svg"
   },
   {
     "family": "moddable-chess",
@@ -701,7 +701,7 @@
     "variant": "asean",
     "variantTitle": "ASEAN Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--asean.svg"
+    "svg": "svgs/moddable-chess--asean.svg"
   },
   {
     "family": "moddable-chess",
@@ -709,7 +709,7 @@
     "variant": "atomic",
     "variantTitle": "Atomic Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--atomic.svg"
+    "svg": "svgs/moddable-chess--atomic.svg"
   },
   {
     "family": "moddable-chess",
@@ -717,7 +717,7 @@
     "variant": "avalanche",
     "variantTitle": "Avalanche Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--avalanche.svg"
+    "svg": "svgs/moddable-chess--avalanche.svg"
   },
   {
     "family": "moddable-chess",
@@ -725,7 +725,7 @@
     "variant": "balbos-chess",
     "variantTitle": "Balbo's Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--balbos-chess.svg"
+    "svg": "svgs/moddable-chess--balbos-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -733,7 +733,7 @@
     "variant": "benedict",
     "variantTitle": "Benedict Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--benedict.svg"
+    "svg": "svgs/moddable-chess--benedict.svg"
   },
   {
     "family": "moddable-chess",
@@ -741,7 +741,7 @@
     "variant": "berolina-chess",
     "variantTitle": "Berolina Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--berolina-chess.svg"
+    "svg": "svgs/moddable-chess--berolina-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -749,7 +749,7 @@
     "variant": "berserk",
     "variantTitle": "Berserk Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--berserk.svg"
+    "svg": "svgs/moddable-chess--berserk.svg"
   },
   {
     "family": "moddable-chess",
@@ -757,7 +757,7 @@
     "variant": "birds-chess",
     "variantTitle": "Bird's Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--birds-chess.svg"
+    "svg": "svgs/moddable-chess--birds-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -765,7 +765,7 @@
     "variant": "blind-chess",
     "variantTitle": "Blind Chess (Banqi)",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--blind-chess.svg"
+    "svg": "svgs/moddable-chess--blind-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -773,7 +773,7 @@
     "variant": "breakthrough",
     "variantTitle": "Breakthrough",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--breakthrough.svg"
+    "svg": "svgs/moddable-chess--breakthrough.svg"
   },
   {
     "family": "moddable-chess",
@@ -781,7 +781,7 @@
     "variant": "brusky",
     "variantTitle": "Brusky's Hexagonal Chess",
     "topology": "hex",
-    "svg": "../snapshots/moddable-chess--brusky.svg"
+    "svg": "svgs/moddable-chess--brusky.svg"
   },
   {
     "family": "moddable-chess",
@@ -789,7 +789,7 @@
     "variant": "capablanca",
     "variantTitle": "Capablanca Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--capablanca.svg"
+    "svg": "svgs/moddable-chess--capablanca.svg"
   },
   {
     "family": "moddable-chess",
@@ -797,7 +797,7 @@
     "variant": "carrera",
     "variantTitle": "Carrera's Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--carrera.svg"
+    "svg": "svgs/moddable-chess--carrera.svg"
   },
   {
     "family": "moddable-chess",
@@ -805,7 +805,7 @@
     "variant": "centennial-chess",
     "variantTitle": "Centennial Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--centennial-chess.svg"
+    "svg": "svgs/moddable-chess--centennial-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -813,7 +813,7 @@
     "variant": "chak",
     "variantTitle": "Chak",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--chak.svg"
+    "svg": "svgs/moddable-chess--chak.svg"
   },
   {
     "family": "moddable-chess",
@@ -821,7 +821,7 @@
     "variant": "chancellor-chess",
     "variantTitle": "Chancellor Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--chancellor-chess.svg"
+    "svg": "svgs/moddable-chess--chancellor-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -829,7 +829,7 @@
     "variant": "chaturanga",
     "variantTitle": "Chaturanga",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--chaturanga.svg"
+    "svg": "svgs/moddable-chess--chaturanga.svg"
   },
   {
     "family": "moddable-chess",
@@ -837,7 +837,7 @@
     "variant": "checkless",
     "variantTitle": "Checkless Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--checkless.svg"
+    "svg": "svgs/moddable-chess--checkless.svg"
   },
   {
     "family": "moddable-chess",
@@ -845,7 +845,7 @@
     "variant": "chennis",
     "variantTitle": "Chennis",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--chennis.svg"
+    "svg": "svgs/moddable-chess--chennis.svg"
   },
   {
     "family": "moddable-chess",
@@ -853,7 +853,7 @@
     "variant": "chigorin",
     "variantTitle": "Chigorin",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--chigorin.svg"
+    "svg": "svgs/moddable-chess--chigorin.svg"
   },
   {
     "family": "moddable-chess",
@@ -861,7 +861,7 @@
     "variant": "citadel-chess",
     "variantTitle": "Citadel Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--citadel-chess.svg"
+    "svg": "svgs/moddable-chess--citadel-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -869,7 +869,7 @@
     "variant": "codrus",
     "variantTitle": "Codrus",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--codrus.svg"
+    "svg": "svgs/moddable-chess--codrus.svg"
   },
   {
     "family": "moddable-chess",
@@ -877,7 +877,7 @@
     "variant": "congo",
     "variantTitle": "Congo",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--congo.svg"
+    "svg": "svgs/moddable-chess--congo.svg"
   },
   {
     "family": "moddable-chess",
@@ -885,7 +885,7 @@
     "variant": "courier",
     "variantTitle": "Courier Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--courier.svg"
+    "svg": "svgs/moddable-chess--courier.svg"
   },
   {
     "family": "moddable-chess",
@@ -893,7 +893,7 @@
     "variant": "crazy-38s",
     "variantTitle": "Crazy 38's",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--crazy-38s.svg"
+    "svg": "svgs/moddable-chess--crazy-38s.svg"
   },
   {
     "family": "moddable-chess",
@@ -901,7 +901,7 @@
     "variant": "crazyhouse",
     "variantTitle": "Crazyhouse",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--crazyhouse.svg"
+    "svg": "svgs/moddable-chess--crazyhouse.svg"
   },
   {
     "family": "moddable-chess",
@@ -909,7 +909,7 @@
     "variant": "cylinder-chess",
     "variantTitle": "Cylinder Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--cylinder-chess.svg"
+    "svg": "svgs/moddable-chess--cylinder-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -917,7 +917,7 @@
     "variant": "dark-chess",
     "variantTitle": "Dark Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--dark-chess.svg"
+    "svg": "svgs/moddable-chess--dark-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -925,7 +925,7 @@
     "variant": "de-vasa",
     "variantTitle": "De Vasa's Hexagonal Chess",
     "topology": "hex",
-    "svg": "../snapshots/moddable-chess--de-vasa.svg"
+    "svg": "svgs/moddable-chess--de-vasa.svg"
   },
   {
     "family": "moddable-chess",
@@ -933,7 +933,7 @@
     "variant": "delirious-bughouse",
     "variantTitle": "Delirious Bughouse",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--delirious-bughouse.svg"
+    "svg": "svgs/moddable-chess--delirious-bughouse.svg"
   },
   {
     "family": "moddable-chess",
@@ -941,7 +941,7 @@
     "variant": "diana",
     "variantTitle": "Diana Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--diana.svg"
+    "svg": "svgs/moddable-chess--diana.svg"
   },
   {
     "family": "moddable-chess",
@@ -949,7 +949,7 @@
     "variant": "dice-chess",
     "variantTitle": "Dice Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--dice-chess.svg"
+    "svg": "svgs/moddable-chess--dice-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -957,7 +957,7 @@
     "variant": "displacement-chess",
     "variantTitle": "Displacement Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--displacement-chess.svg"
+    "svg": "svgs/moddable-chess--displacement-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -965,7 +965,7 @@
     "variant": "djambi",
     "variantTitle": "Djambi",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--djambi.svg"
+    "svg": "svgs/moddable-chess--djambi.svg"
   },
   {
     "family": "moddable-chess",
@@ -973,7 +973,7 @@
     "variant": "dragon-chess",
     "variantTitle": "Dragon Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--dragon-chess.svg"
+    "svg": "svgs/moddable-chess--dragon-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -981,7 +981,7 @@
     "variant": "duck-chess",
     "variantTitle": "Duck Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--duck-chess.svg"
+    "svg": "svgs/moddable-chess--duck-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -989,7 +989,7 @@
     "variant": "einstein-chess",
     "variantTitle": "Einstein Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--einstein-chess.svg"
+    "svg": "svgs/moddable-chess--einstein-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -997,7 +997,7 @@
     "variant": "empire",
     "variantTitle": "Empire Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--empire.svg"
+    "svg": "svgs/moddable-chess--empire.svg"
   },
   {
     "family": "moddable-chess",
@@ -1005,7 +1005,7 @@
     "variant": "endgame-chess",
     "variantTitle": "Endgame Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--endgame-chess.svg"
+    "svg": "svgs/moddable-chess--endgame-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1013,7 +1013,7 @@
     "variant": "extinction",
     "variantTitle": "Extinction Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--extinction.svg"
+    "svg": "svgs/moddable-chess--extinction.svg"
   },
   {
     "family": "moddable-chess",
@@ -1021,7 +1021,7 @@
     "variant": "fanorona-chess",
     "variantTitle": "Fanorona Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--fanorona-chess.svg"
+    "svg": "svgs/moddable-chess--fanorona-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1029,7 +1029,7 @@
     "variant": "fischer-random",
     "variantTitle": "Fischer Random (Chess960)",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--fischer-random.svg"
+    "svg": "svgs/moddable-chess--fischer-random.svg"
   },
   {
     "family": "moddable-chess",
@@ -1037,7 +1037,7 @@
     "variant": "five-check",
     "variantTitle": "Five-Check",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--five-check.svg"
+    "svg": "svgs/moddable-chess--five-check.svg"
   },
   {
     "family": "moddable-chess",
@@ -1045,7 +1045,7 @@
     "variant": "flip-chess",
     "variantTitle": "Flip Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--flip-chess.svg"
+    "svg": "svgs/moddable-chess--flip-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1053,7 +1053,7 @@
     "variant": "fog-of-war",
     "variantTitle": "Fog of War Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--fog-of-war.svg"
+    "svg": "svgs/moddable-chess--fog-of-war.svg"
   },
   {
     "family": "moddable-chess",
@@ -1061,7 +1061,7 @@
     "variant": "four-handed-chess",
     "variantTitle": "Four-Handed Chess (Chaturaji)",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--four-handed-chess.svg"
+    "svg": "svgs/moddable-chess--four-handed-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1069,7 +1069,7 @@
     "variant": "giveaway",
     "variantTitle": "Giveaway",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--giveaway.svg"
+    "svg": "svgs/moddable-chess--giveaway.svg"
   },
   {
     "family": "moddable-chess",
@@ -1077,7 +1077,7 @@
     "variant": "glinski",
     "variantTitle": "Glinski's Hexagonal Chess",
     "topology": "hex",
-    "svg": "../snapshots/moddable-chess--glinski.svg"
+    "svg": "svgs/moddable-chess--glinski.svg"
   },
   {
     "family": "moddable-chess",
@@ -1085,7 +1085,7 @@
     "variant": "grand",
     "variantTitle": "Grand Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--grand.svg"
+    "svg": "svgs/moddable-chess--grand.svg"
   },
   {
     "family": "moddable-chess",
@@ -1093,7 +1093,7 @@
     "variant": "grande-acedrex",
     "variantTitle": "Grande Acedrex",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--grande-acedrex.svg"
+    "svg": "svgs/moddable-chess--grande-acedrex.svg"
   },
   {
     "family": "moddable-chess",
@@ -1101,7 +1101,7 @@
     "variant": "grasshopper",
     "variantTitle": "Standard Grasshopper Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--grasshopper.svg"
+    "svg": "svgs/moddable-chess--grasshopper.svg"
   },
   {
     "family": "moddable-chess",
@@ -1109,7 +1109,7 @@
     "variant": "grid-chess",
     "variantTitle": "Grid Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--grid-chess.svg"
+    "svg": "svgs/moddable-chess--grid-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1117,7 +1117,7 @@
     "variant": "gustav-iii-chess",
     "variantTitle": "Gustav III's Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--gustav-iii-chess.svg"
+    "svg": "svgs/moddable-chess--gustav-iii-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1125,7 +1125,7 @@
     "variant": "gygax",
     "variantTitle": "Gygax Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--gygax.svg"
+    "svg": "svgs/moddable-chess--gygax.svg"
   },
   {
     "family": "moddable-chess",
@@ -1133,7 +1133,7 @@
     "variant": "half-chess",
     "variantTitle": "Half Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--half-chess.svg"
+    "svg": "svgs/moddable-chess--half-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1141,7 +1141,7 @@
     "variant": "hexapawn",
     "variantTitle": "Hexapawn",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--hexapawn.svg"
+    "svg": "svgs/moddable-chess--hexapawn.svg"
   },
   {
     "family": "moddable-chess",
@@ -1149,7 +1149,7 @@
     "variant": "hole-chess",
     "variantTitle": "Hole Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--hole-chess.svg"
+    "svg": "svgs/moddable-chess--hole-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1157,7 +1157,7 @@
     "variant": "hoppel-poppel",
     "variantTitle": "Hoppel-Poppel",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--hoppel-poppel.svg"
+    "svg": "svgs/moddable-chess--hoppel-poppel.svg"
   },
   {
     "family": "moddable-chess",
@@ -1165,7 +1165,7 @@
     "variant": "horde",
     "variantTitle": "Horde Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--horde.svg"
+    "svg": "svgs/moddable-chess--horde.svg"
   },
   {
     "family": "moddable-chess",
@@ -1173,7 +1173,7 @@
     "variant": "hostage-chess",
     "variantTitle": "Hostage Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--hostage-chess.svg"
+    "svg": "svgs/moddable-chess--hostage-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1181,7 +1181,7 @@
     "variant": "immunization-chess",
     "variantTitle": "Immunization Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--immunization-chess.svg"
+    "svg": "svgs/moddable-chess--immunization-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1189,7 +1189,7 @@
     "variant": "janus",
     "variantTitle": "Janus Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--janus.svg"
+    "svg": "svgs/moddable-chess--janus.svg"
   },
   {
     "family": "moddable-chess",
@@ -1197,7 +1197,7 @@
     "variant": "khans-chess",
     "variantTitle": "Khan's Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--khans-chess.svg"
+    "svg": "svgs/moddable-chess--khans-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1205,7 +1205,7 @@
     "variant": "king-of-the-hill",
     "variantTitle": "King of the Hill",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--king-of-the-hill.svg"
+    "svg": "svgs/moddable-chess--king-of-the-hill.svg"
   },
   {
     "family": "moddable-chess",
@@ -1213,7 +1213,7 @@
     "variant": "knightmate",
     "variantTitle": "Knightmate",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--knightmate.svg"
+    "svg": "svgs/moddable-chess--knightmate.svg"
   },
   {
     "family": "moddable-chess",
@@ -1221,7 +1221,7 @@
     "variant": "kriegspiel",
     "variantTitle": "Kriegspiel",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--kriegspiel.svg"
+    "svg": "svgs/moddable-chess--kriegspiel.svg"
   },
   {
     "family": "moddable-chess",
@@ -1229,7 +1229,7 @@
     "variant": "legan-chess",
     "variantTitle": "Legan Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--legan-chess.svg"
+    "svg": "svgs/moddable-chess--legan-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1237,7 +1237,7 @@
     "variant": "los-alamos",
     "variantTitle": "Los Alamos",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--los-alamos.svg"
+    "svg": "svgs/moddable-chess--los-alamos.svg"
   },
   {
     "family": "moddable-chess",
@@ -1245,7 +1245,7 @@
     "variant": "los-alamos-vierschach",
     "variantTitle": "Los Alamos Vierschach",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--los-alamos-vierschach.svg"
+    "svg": "svgs/moddable-chess--los-alamos-vierschach.svg"
   },
   {
     "family": "moddable-chess",
@@ -1253,7 +1253,7 @@
     "variant": "madrasi",
     "variantTitle": "Madrasi Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--madrasi.svg"
+    "svg": "svgs/moddable-chess--madrasi.svg"
   },
   {
     "family": "moddable-chess",
@@ -1261,7 +1261,7 @@
     "variant": "maharaja",
     "variantTitle": "Maharaja & Sepoys",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--maharaja.svg"
+    "svg": "svgs/moddable-chess--maharaja.svg"
   },
   {
     "family": "moddable-chess",
@@ -1269,7 +1269,7 @@
     "variant": "makpong",
     "variantTitle": "Makpong",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--makpong.svg"
+    "svg": "svgs/moddable-chess--makpong.svg"
   },
   {
     "family": "moddable-chess",
@@ -1277,7 +1277,7 @@
     "variant": "makruk",
     "variantTitle": "Makruk",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--makruk.svg"
+    "svg": "svgs/moddable-chess--makruk.svg"
   },
   {
     "family": "moddable-chess",
@@ -1285,7 +1285,7 @@
     "variant": "mansindam",
     "variantTitle": "Mansindam (Pantheon Tale)",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--mansindam.svg"
+    "svg": "svgs/moddable-chess--mansindam.svg"
   },
   {
     "family": "moddable-chess",
@@ -1293,7 +1293,7 @@
     "variant": "marseillais",
     "variantTitle": "Marseillais Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--marseillais.svg"
+    "svg": "svgs/moddable-chess--marseillais.svg"
   },
   {
     "family": "moddable-chess",
@@ -1301,7 +1301,7 @@
     "variant": "mccooey",
     "variantTitle": "McCooey's Hexagonal Chess",
     "topology": "hex",
-    "svg": "../snapshots/moddable-chess--mccooey.svg"
+    "svg": "svgs/moddable-chess--mccooey.svg"
   },
   {
     "family": "moddable-chess",
@@ -1309,7 +1309,7 @@
     "variant": "medusa-chess",
     "variantTitle": "Medusa Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--medusa-chess.svg"
+    "svg": "svgs/moddable-chess--medusa-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1317,7 +1317,7 @@
     "variant": "metamachy",
     "variantTitle": "Metamachy",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--metamachy.svg"
+    "svg": "svgs/moddable-chess--metamachy.svg"
   },
   {
     "family": "moddable-chess",
@@ -1325,7 +1325,7 @@
     "variant": "mini-hexchess",
     "variantTitle": "Mini Hexchess",
     "topology": "hex",
-    "svg": "../snapshots/moddable-chess--mini-hexchess.svg"
+    "svg": "svgs/moddable-chess--mini-hexchess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1333,7 +1333,7 @@
     "variant": "minichess",
     "variantTitle": "Minichess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--minichess.svg"
+    "svg": "svgs/moddable-chess--minichess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1341,7 +1341,7 @@
     "variant": "monster-chess",
     "variantTitle": "Monster Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--monster-chess.svg"
+    "svg": "svgs/moddable-chess--monster-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1349,7 +1349,7 @@
     "variant": "nightrider",
     "variantTitle": "Standard Nightrider Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--nightrider.svg"
+    "svg": "svgs/moddable-chess--nightrider.svg"
   },
   {
     "family": "moddable-chess",
@@ -1357,7 +1357,7 @@
     "variant": "no-castling",
     "variantTitle": "No Castling Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--no-castling.svg"
+    "svg": "svgs/moddable-chess--no-castling.svg"
   },
   {
     "family": "moddable-chess",
@@ -1365,7 +1365,7 @@
     "variant": "no-retreat",
     "variantTitle": "No Retreat",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--no-retreat.svg"
+    "svg": "svgs/moddable-chess--no-retreat.svg"
   },
   {
     "family": "moddable-chess",
@@ -1373,7 +1373,7 @@
     "variant": "oblong-chess",
     "variantTitle": "Oblong Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--oblong-chess.svg"
+    "svg": "svgs/moddable-chess--oblong-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1381,7 +1381,7 @@
     "variant": "omega-chess",
     "variantTitle": "Omega Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--omega-chess.svg"
+    "svg": "svgs/moddable-chess--omega-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1389,7 +1389,7 @@
     "variant": "omnicide",
     "variantTitle": "Omnicide",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--omnicide.svg"
+    "svg": "svgs/moddable-chess--omnicide.svg"
   },
   {
     "family": "moddable-chess",
@@ -1397,7 +1397,7 @@
     "variant": "orda-chess",
     "variantTitle": "Orda Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--orda-chess.svg"
+    "svg": "svgs/moddable-chess--orda-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1405,7 +1405,7 @@
     "variant": "orda-mirror",
     "variantTitle": "Orda Mirror",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--orda-mirror.svg"
+    "svg": "svgs/moddable-chess--orda-mirror.svg"
   },
   {
     "family": "moddable-chess",
@@ -1413,7 +1413,7 @@
     "variant": "ouk-chaktrang",
     "variantTitle": "Ouk Chaktrang (Cambodian Chess)",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--ouk-chaktrang.svg"
+    "svg": "svgs/moddable-chess--ouk-chaktrang.svg"
   },
   {
     "family": "moddable-chess",
@@ -1421,7 +1421,7 @@
     "variant": "patrol",
     "variantTitle": "Patrol Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--patrol.svg"
+    "svg": "svgs/moddable-chess--patrol.svg"
   },
   {
     "family": "moddable-chess",
@@ -1429,7 +1429,7 @@
     "variant": "pawns-only",
     "variantTitle": "Pawns Only",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--pawns-only.svg"
+    "svg": "svgs/moddable-chess--pawns-only.svg"
   },
   {
     "family": "moddable-chess",
@@ -1437,7 +1437,7 @@
     "variant": "peasants-revolt",
     "variantTitle": "Peasants' Revolt",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--peasants-revolt.svg"
+    "svg": "svgs/moddable-chess--peasants-revolt.svg"
   },
   {
     "family": "moddable-chess",
@@ -1445,7 +1445,7 @@
     "variant": "petty",
     "variantTitle": "Petty Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--petty.svg"
+    "svg": "svgs/moddable-chess--petty.svg"
   },
   {
     "family": "moddable-chess",
@@ -1453,7 +1453,7 @@
     "variant": "placement-chess",
     "variantTitle": "Placement Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--placement-chess.svg"
+    "svg": "svgs/moddable-chess--placement-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1461,7 +1461,7 @@
     "variant": "pocket-knight",
     "variantTitle": "Pocket Knight Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--pocket-knight.svg"
+    "svg": "svgs/moddable-chess--pocket-knight.svg"
   },
   {
     "family": "moddable-chess",
@@ -1469,7 +1469,7 @@
     "variant": "poison-chess",
     "variantTitle": "Poison Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--poison-chess.svg"
+    "svg": "svgs/moddable-chess--poison-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1477,7 +1477,7 @@
     "variant": "progressive",
     "variantTitle": "Progressive",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--progressive.svg"
+    "svg": "svgs/moddable-chess--progressive.svg"
   },
   {
     "family": "moddable-chess",
@@ -1485,7 +1485,7 @@
     "variant": "racing-kings",
     "variantTitle": "Racing Kings",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--racing-kings.svg"
+    "svg": "svgs/moddable-chess--racing-kings.svg"
   },
   {
     "family": "moddable-chess",
@@ -1493,7 +1493,7 @@
     "variant": "recruitment-chess",
     "variantTitle": "Recruitment Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--recruitment-chess.svg"
+    "svg": "svgs/moddable-chess--recruitment-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1501,7 +1501,7 @@
     "variant": "rifle",
     "variantTitle": "Rifle Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--rifle.svg"
+    "svg": "svgs/moddable-chess--rifle.svg"
   },
   {
     "family": "moddable-chess",
@@ -1509,7 +1509,7 @@
     "variant": "romanchenkos-chess",
     "variantTitle": "Romanchenko's Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--romanchenkos-chess.svg"
+    "svg": "svgs/moddable-chess--romanchenkos-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1517,7 +1517,7 @@
     "variant": "s-chess",
     "variantTitle": "S-Chess (Seirawan Chess)",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--s-chess.svg"
+    "svg": "svgs/moddable-chess--s-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1525,7 +1525,7 @@
     "variant": "san-kwo-ki",
     "variantTitle": "San-kwo-k'i",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--san-kwo-ki.svg"
+    "svg": "svgs/moddable-chess--san-kwo-ki.svg"
   },
   {
     "family": "moddable-chess",
@@ -1533,7 +1533,7 @@
     "variant": "senterej",
     "variantTitle": "Senterej",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--senterej.svg"
+    "svg": "svgs/moddable-chess--senterej.svg"
   },
   {
     "family": "moddable-chess",
@@ -1541,7 +1541,7 @@
     "variant": "shafran",
     "variantTitle": "Shafran's Hexagonal Chess",
     "topology": "hex",
-    "svg": "../snapshots/moddable-chess--shafran.svg"
+    "svg": "svgs/moddable-chess--shafran.svg"
   },
   {
     "family": "moddable-chess",
@@ -1549,7 +1549,7 @@
     "variant": "shako",
     "variantTitle": "Shako",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--shako.svg"
+    "svg": "svgs/moddable-chess--shako.svg"
   },
   {
     "family": "moddable-chess",
@@ -1557,7 +1557,7 @@
     "variant": "shatar",
     "variantTitle": "Shatar",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--shatar.svg"
+    "svg": "svgs/moddable-chess--shatar.svg"
   },
   {
     "family": "moddable-chess",
@@ -1565,7 +1565,7 @@
     "variant": "shatranj",
     "variantTitle": "Shatranj",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--shatranj.svg"
+    "svg": "svgs/moddable-chess--shatranj.svg"
   },
   {
     "family": "moddable-chess",
@@ -1573,7 +1573,7 @@
     "variant": "shatranj-kamil",
     "variantTitle": "Shatranj Kamil",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--shatranj-kamil.svg"
+    "svg": "svgs/moddable-chess--shatranj-kamil.svg"
   },
   {
     "family": "moddable-chess",
@@ -1581,7 +1581,7 @@
     "variant": "shinobi",
     "variantTitle": "Shinobi Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--shinobi.svg"
+    "svg": "svgs/moddable-chess--shinobi.svg"
   },
   {
     "family": "moddable-chess",
@@ -1589,7 +1589,7 @@
     "variant": "shinobiplus",
     "variantTitle": "Shinobi+",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--shinobiplus.svg"
+    "svg": "svgs/moddable-chess--shinobiplus.svg"
   },
   {
     "family": "moddable-chess",
@@ -1597,7 +1597,7 @@
     "variant": "shogun",
     "variantTitle": "Shogun Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--shogun.svg"
+    "svg": "svgs/moddable-chess--shogun.svg"
   },
   {
     "family": "moddable-chess",
@@ -1605,7 +1605,7 @@
     "variant": "single-check",
     "variantTitle": "Single-Check",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--single-check.svg"
+    "svg": "svgs/moddable-chess--single-check.svg"
   },
   {
     "family": "moddable-chess",
@@ -1613,7 +1613,7 @@
     "variant": "sittuyin",
     "variantTitle": "Sittuyin",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--sittuyin.svg"
+    "svg": "svgs/moddable-chess--sittuyin.svg"
   },
   {
     "family": "moddable-chess",
@@ -1621,7 +1621,7 @@
     "variant": "spartan",
     "variantTitle": "Spartan Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--spartan.svg"
+    "svg": "svgs/moddable-chess--spartan.svg"
   },
   {
     "family": "moddable-chess",
@@ -1629,7 +1629,7 @@
     "variant": "stalemate-wins",
     "variantTitle": "Stalemate Wins",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--stalemate-wins.svg"
+    "svg": "svgs/moddable-chess--stalemate-wins.svg"
   },
   {
     "family": "moddable-chess",
@@ -1637,7 +1637,7 @@
     "variant": "standard",
     "variantTitle": "Standard Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--standard.svg"
+    "svg": "svgs/moddable-chess--standard.svg"
   },
   {
     "family": "moddable-chess",
@@ -1645,7 +1645,7 @@
     "variant": "stupidhouse",
     "variantTitle": "Stupidhouse",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--stupidhouse.svg"
+    "svg": "svgs/moddable-chess--stupidhouse.svg"
   },
   {
     "family": "moddable-chess",
@@ -1653,7 +1653,7 @@
     "variant": "suicide-chess",
     "variantTitle": "Suicide Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--suicide-chess.svg"
+    "svg": "svgs/moddable-chess--suicide-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1661,7 +1661,7 @@
     "variant": "synochess",
     "variantTitle": "Synochess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--synochess.svg"
+    "svg": "svgs/moddable-chess--synochess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1669,7 +1669,7 @@
     "variant": "tamerlane",
     "variantTitle": "Tamerlane Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--tamerlane.svg"
+    "svg": "svgs/moddable-chess--tamerlane.svg"
   },
   {
     "family": "moddable-chess",
@@ -1677,7 +1677,7 @@
     "variant": "tandem-chess",
     "variantTitle": "Tandem Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--tandem-chess.svg"
+    "svg": "svgs/moddable-chess--tandem-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1685,7 +1685,7 @@
     "variant": "teleport-chess",
     "variantTitle": "Teleportation Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--teleport-chess.svg"
+    "svg": "svgs/moddable-chess--teleport-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1693,7 +1693,7 @@
     "variant": "three-check",
     "variantTitle": "Three-Check",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--three-check.svg"
+    "svg": "svgs/moddable-chess--three-check.svg"
   },
   {
     "family": "moddable-chess",
@@ -1701,7 +1701,7 @@
     "variant": "torpedo",
     "variantTitle": "Torpedo Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--torpedo.svg"
+    "svg": "svgs/moddable-chess--torpedo.svg"
   },
   {
     "family": "moddable-chess",
@@ -1709,7 +1709,7 @@
     "variant": "turkish-great-chess-ii",
     "variantTitle": "Turkish Great Chess II (Atranj)",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--turkish-great-chess-ii.svg"
+    "svg": "svgs/moddable-chess--turkish-great-chess-ii.svg"
   },
   {
     "family": "moddable-chess",
@@ -1717,7 +1717,7 @@
     "variant": "turkish-great-chess-iii",
     "variantTitle": "Turkish Great Chess III",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--turkish-great-chess-iii.svg"
+    "svg": "svgs/moddable-chess--turkish-great-chess-iii.svg"
   },
   {
     "family": "moddable-chess",
@@ -1725,7 +1725,7 @@
     "variant": "turkish-great-chess-iv",
     "variantTitle": "Turkish Great Chess IV",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--turkish-great-chess-iv.svg"
+    "svg": "svgs/moddable-chess--turkish-great-chess-iv.svg"
   },
   {
     "family": "moddable-chess",
@@ -1733,7 +1733,7 @@
     "variant": "ultima",
     "variantTitle": "Ultima (Baroque Chess)",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--ultima.svg"
+    "svg": "svgs/moddable-chess--ultima.svg"
   },
   {
     "family": "moddable-chess",
@@ -1741,7 +1741,7 @@
     "variant": "upside-down",
     "variantTitle": "Upside-Down",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--upside-down.svg"
+    "svg": "svgs/moddable-chess--upside-down.svg"
   },
   {
     "family": "moddable-chess",
@@ -1749,7 +1749,7 @@
     "variant": "vierschach",
     "variantTitle": "Vierschach",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--vierschach.svg"
+    "svg": "svgs/moddable-chess--vierschach.svg"
   },
   {
     "family": "moddable-chess",
@@ -1757,7 +1757,7 @@
     "variant": "weak",
     "variantTitle": "Weak!",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--weak.svg"
+    "svg": "svgs/moddable-chess--weak.svg"
   },
   {
     "family": "moddable-chess",
@@ -1765,7 +1765,7 @@
     "variant": "wildebeest",
     "variantTitle": "Standard Wildebeest Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--wildebeest.svg"
+    "svg": "svgs/moddable-chess--wildebeest.svg"
   },
   {
     "family": "moddable-chess",
@@ -1773,7 +1773,7 @@
     "variant": "xiang-fu",
     "variantTitle": "Xiang Fu",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--xiang-fu.svg"
+    "svg": "svgs/moddable-chess--xiang-fu.svg"
   },
   {
     "family": "moddable-chess",
@@ -1781,7 +1781,7 @@
     "variant": "yalta-chess",
     "variantTitle": "Yalta Chess",
     "topology": "grid",
-    "svg": "../snapshots/moddable-chess--yalta-chess.svg"
+    "svg": "svgs/moddable-chess--yalta-chess.svg"
   },
   {
     "family": "morris",
@@ -1789,7 +1789,7 @@
     "variant": "lasker-morris",
     "variantTitle": "Lasker Morris",
     "topology": "graph",
-    "svg": "../snapshots/morris--lasker-morris.svg"
+    "svg": "svgs/morris--lasker-morris.svg"
   },
   {
     "family": "morris",
@@ -1797,7 +1797,7 @@
     "variant": "morabaraba",
     "variantTitle": "Morabaraba",
     "topology": "graph",
-    "svg": "../snapshots/morris--morabaraba.svg"
+    "svg": "svgs/morris--morabaraba.svg"
   },
   {
     "family": "morris",
@@ -1805,7 +1805,7 @@
     "variant": "nine-mens-morris",
     "variantTitle": "Nine Men's Morris",
     "topology": "graph",
-    "svg": "../snapshots/morris--nine-mens-morris.svg"
+    "svg": "svgs/morris--nine-mens-morris.svg"
   },
   {
     "family": "morris",
@@ -1813,7 +1813,7 @@
     "variant": "shax",
     "variantTitle": "Shax",
     "topology": "graph",
-    "svg": "../snapshots/morris--shax.svg"
+    "svg": "svgs/morris--shax.svg"
   },
   {
     "family": "morris",
@@ -1821,7 +1821,7 @@
     "variant": "six-mens-morris",
     "variantTitle": "Six Men's Morris",
     "topology": "graph",
-    "svg": "../snapshots/morris--six-mens-morris.svg"
+    "svg": "svgs/morris--six-mens-morris.svg"
   },
   {
     "family": "morris",
@@ -1829,7 +1829,7 @@
     "variant": "three-mens-morris",
     "variantTitle": "Three Men's Morris",
     "topology": "graph",
-    "svg": "../snapshots/morris--three-mens-morris.svg"
+    "svg": "svgs/morris--three-mens-morris.svg"
   },
   {
     "family": "morris",
@@ -1837,7 +1837,7 @@
     "variant": "twelve-mens-morris",
     "variantTitle": "Twelve Men's Morris",
     "topology": "graph",
-    "svg": "../snapshots/morris--twelve-mens-morris.svg"
+    "svg": "svgs/morris--twelve-mens-morris.svg"
   },
   {
     "family": "nukes",
@@ -1845,7 +1845,7 @@
     "variant": "asymmetric-powers",
     "variantTitle": "Nukes: Asymmetric Powers",
     "topology": "hex",
-    "svg": "../snapshots/nukes--asymmetric-powers.svg"
+    "svg": "svgs/nukes--asymmetric-powers.svg"
   },
   {
     "family": "nukes",
@@ -1853,7 +1853,7 @@
     "variant": "fallout",
     "variantTitle": "Nukes: Fallout",
     "topology": "hex",
-    "svg": "../snapshots/nukes--fallout.svg"
+    "svg": "svgs/nukes--fallout.svg"
   },
   {
     "family": "nukes",
@@ -1861,7 +1861,7 @@
     "variant": "siege",
     "variantTitle": "Nukes: Siege",
     "topology": "hex",
-    "svg": "../snapshots/nukes--siege.svg"
+    "svg": "svgs/nukes--siege.svg"
   },
   {
     "family": "nukes",
@@ -1869,7 +1869,7 @@
     "variant": "standard",
     "variantTitle": "Nukes: Standard",
     "topology": "hex",
-    "svg": "../snapshots/nukes--standard.svg"
+    "svg": "svgs/nukes--standard.svg"
   },
   {
     "family": "nyout",
@@ -1877,7 +1877,7 @@
     "variant": "standard",
     "variantTitle": "Nyout (Standard)",
     "topology": "graph",
-    "svg": "../snapshots/nyout--standard.svg"
+    "svg": "svgs/nyout--standard.svg"
   },
   {
     "family": "pachisi",
@@ -1885,7 +1885,7 @@
     "variant": "seven-shell",
     "variantTitle": "Seven-Shell Pachisi",
     "topology": "grid",
-    "svg": "../snapshots/pachisi--seven-shell.svg"
+    "svg": "svgs/pachisi--seven-shell.svg"
   },
   {
     "family": "pachisi",
@@ -1893,7 +1893,7 @@
     "variant": "standard",
     "variantTitle": "Pachisi (Standard)",
     "topology": "grid",
-    "svg": "../snapshots/pachisi--standard.svg"
+    "svg": "svgs/pachisi--standard.svg"
   },
   {
     "family": "pachisi",
@@ -1901,7 +1901,7 @@
     "variant": "two-player",
     "variantTitle": "2-Player Pachisi",
     "topology": "grid",
-    "svg": "../snapshots/pachisi--two-player.svg"
+    "svg": "svgs/pachisi--two-player.svg"
   },
   {
     "family": "reversi",
@@ -1909,7 +1909,7 @@
     "variant": "anti-reversi",
     "variantTitle": "Anti-Reversi",
     "topology": "grid",
-    "svg": "../snapshots/reversi--anti-reversi.svg"
+    "svg": "svgs/reversi--anti-reversi.svg"
   },
   {
     "family": "reversi",
@@ -1917,7 +1917,7 @@
     "variant": "six-by-six",
     "variantTitle": "Six-by-Six Reversi",
     "topology": "grid",
-    "svg": "../snapshots/reversi--six-by-six.svg"
+    "svg": "svgs/reversi--six-by-six.svg"
   },
   {
     "family": "reversi",
@@ -1925,7 +1925,7 @@
     "variant": "standard",
     "variantTitle": "Standard Reversi",
     "topology": "grid",
-    "svg": "../snapshots/reversi--standard.svg"
+    "svg": "svgs/reversi--standard.svg"
   },
   {
     "family": "royal-ur",
@@ -1933,7 +1933,7 @@
     "variant": "standard",
     "variantTitle": "Royal Game of Ur (Standard)",
     "topology": "grid",
-    "svg": "../snapshots/royal-ur--standard.svg"
+    "svg": "svgs/royal-ur--standard.svg"
   },
   {
     "family": "shogi",
@@ -1941,7 +1941,7 @@
     "variant": "annan-shogi",
     "variantTitle": "Annan Shogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--annan-shogi.svg"
+    "svg": "svgs/shogi--annan-shogi.svg"
   },
   {
     "family": "shogi",
@@ -1949,7 +1949,7 @@
     "variant": "cannon-shogi",
     "variantTitle": "Cannon Shogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--cannon-shogi.svg"
+    "svg": "svgs/shogi--cannon-shogi.svg"
   },
   {
     "family": "shogi",
@@ -1957,7 +1957,7 @@
     "variant": "chu-shogi",
     "variantTitle": "Chu Shogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--chu-shogi.svg"
+    "svg": "svgs/shogi--chu-shogi.svg"
   },
   {
     "family": "shogi",
@@ -1965,7 +1965,7 @@
     "variant": "dai-shogi",
     "variantTitle": "Dai Shogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--dai-shogi.svg"
+    "svg": "svgs/shogi--dai-shogi.svg"
   },
   {
     "family": "shogi",
@@ -1973,7 +1973,7 @@
     "variant": "dobutsu",
     "variantTitle": "Dobutsu Shogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--dobutsu.svg"
+    "svg": "svgs/shogi--dobutsu.svg"
   },
   {
     "family": "shogi",
@@ -1981,7 +1981,7 @@
     "variant": "four-player-shogi",
     "variantTitle": "Four Player Shogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--four-player-shogi.svg"
+    "svg": "svgs/shogi--four-player-shogi.svg"
   },
   {
     "family": "shogi",
@@ -1989,7 +1989,7 @@
     "variant": "gorogoro-plus",
     "variantTitle": "Gorogoro+",
     "topology": "grid",
-    "svg": "../snapshots/shogi--gorogoro-plus.svg"
+    "svg": "svgs/shogi--gorogoro-plus.svg"
   },
   {
     "family": "shogi",
@@ -1997,7 +1997,7 @@
     "variant": "hasami-shogi",
     "variantTitle": "Hasami Shogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--hasami-shogi.svg"
+    "svg": "svgs/shogi--hasami-shogi.svg"
   },
   {
     "family": "shogi",
@@ -2005,7 +2005,7 @@
     "variant": "heian-shogi",
     "variantTitle": "Heian Shogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--heian-shogi.svg"
+    "svg": "svgs/shogi--heian-shogi.svg"
   },
   {
     "family": "shogi",
@@ -2013,7 +2013,7 @@
     "variant": "hex-shogi-91",
     "variantTitle": "Hex Shogi 91",
     "topology": "hex",
-    "svg": "../snapshots/shogi--hex-shogi-91.svg"
+    "svg": "svgs/shogi--hex-shogi-91.svg"
   },
   {
     "family": "shogi",
@@ -2021,7 +2021,7 @@
     "variant": "judkins-shogi",
     "variantTitle": "Judkins' Shogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--judkins-shogi.svg"
+    "svg": "svgs/shogi--judkins-shogi.svg"
   },
   {
     "family": "shogi",
@@ -2029,7 +2029,7 @@
     "variant": "kyoto-shogi",
     "variantTitle": "Kyoto Shogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--kyoto-shogi.svg"
+    "svg": "svgs/shogi--kyoto-shogi.svg"
   },
   {
     "family": "shogi",
@@ -2037,7 +2037,7 @@
     "variant": "maka-dai-dai-shogi",
     "variantTitle": "Maka-Dai-Dai Shogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--maka-dai-dai-shogi.svg"
+    "svg": "svgs/shogi--maka-dai-dai-shogi.svg"
   },
   {
     "family": "shogi",
@@ -2045,7 +2045,7 @@
     "variant": "minishogi",
     "variantTitle": "Minishogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--minishogi.svg"
+    "svg": "svgs/shogi--minishogi.svg"
   },
   {
     "family": "shogi",
@@ -2053,7 +2053,7 @@
     "variant": "mortal-shogi",
     "variantTitle": "Mortal Shogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--mortal-shogi.svg"
+    "svg": "svgs/shogi--mortal-shogi.svg"
   },
   {
     "family": "shogi",
@@ -2061,7 +2061,7 @@
     "variant": "sankaku-shogi",
     "variantTitle": "Sankaku Shogi",
     "topology": "triangular",
-    "svg": "../snapshots/shogi--sankaku-shogi.svg"
+    "svg": "svgs/shogi--sankaku-shogi.svg"
   },
   {
     "family": "shogi",
@@ -2069,7 +2069,7 @@
     "variant": "sho-shogi",
     "variantTitle": "Sho Shogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--sho-shogi.svg"
+    "svg": "svgs/shogi--sho-shogi.svg"
   },
   {
     "family": "shogi",
@@ -2077,7 +2077,7 @@
     "variant": "standard",
     "variantTitle": "Standard Shogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--standard.svg"
+    "svg": "svgs/shogi--standard.svg"
   },
   {
     "family": "shogi",
@@ -2085,7 +2085,7 @@
     "variant": "tai-shogi",
     "variantTitle": "Tai Shogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--tai-shogi.svg"
+    "svg": "svgs/shogi--tai-shogi.svg"
   },
   {
     "family": "shogi",
@@ -2093,7 +2093,7 @@
     "variant": "taikyoku-shogi",
     "variantTitle": "Taikyoku Shogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--taikyoku-shogi.svg"
+    "svg": "svgs/shogi--taikyoku-shogi.svg"
   },
   {
     "family": "shogi",
@@ -2101,7 +2101,7 @@
     "variant": "tenjiku-shogi",
     "variantTitle": "Tenjiku Shogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--tenjiku-shogi.svg"
+    "svg": "svgs/shogi--tenjiku-shogi.svg"
   },
   {
     "family": "shogi",
@@ -2109,7 +2109,7 @@
     "variant": "tori-shogi",
     "variantTitle": "Tori Shogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--tori-shogi.svg"
+    "svg": "svgs/shogi--tori-shogi.svg"
   },
   {
     "family": "shogi",
@@ -2117,7 +2117,7 @@
     "variant": "wa-shogi",
     "variantTitle": "Wa Shogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--wa-shogi.svg"
+    "svg": "svgs/shogi--wa-shogi.svg"
   },
   {
     "family": "shogi",
@@ -2125,7 +2125,7 @@
     "variant": "yari-shogi",
     "variantTitle": "Yari Shogi",
     "topology": "grid",
-    "svg": "../snapshots/shogi--yari-shogi.svg"
+    "svg": "svgs/shogi--yari-shogi.svg"
   },
   {
     "family": "stern-halma",
@@ -2133,7 +2133,7 @@
     "variant": "standard-2p",
     "variantTitle": "Standard 2-Player Stern-Halma",
     "topology": "graph",
-    "svg": "../snapshots/stern-halma--standard-2p.svg"
+    "svg": "svgs/stern-halma--standard-2p.svg"
   },
   {
     "family": "stern-halma",
@@ -2141,7 +2141,7 @@
     "variant": "standard-3p",
     "variantTitle": "Standard 3-Player Stern-Halma",
     "topology": "graph",
-    "svg": "../snapshots/stern-halma--standard-3p.svg"
+    "svg": "svgs/stern-halma--standard-3p.svg"
   },
   {
     "family": "stern-halma",
@@ -2149,7 +2149,7 @@
     "variant": "standard-4p",
     "variantTitle": "Standard 4-Player Stern-Halma",
     "topology": "graph",
-    "svg": "../snapshots/stern-halma--standard-4p.svg"
+    "svg": "svgs/stern-halma--standard-4p.svg"
   },
   {
     "family": "stern-halma",
@@ -2157,7 +2157,7 @@
     "variant": "standard-6p",
     "variantTitle": "Standard 6-Player Stern-Halma",
     "topology": "graph",
-    "svg": "../snapshots/stern-halma--standard-6p.svg"
+    "svg": "svgs/stern-halma--standard-6p.svg"
   },
   {
     "family": "stern-halma",
@@ -2165,7 +2165,7 @@
     "variant": "super-chinese-checkers",
     "variantTitle": "Super Chinese Checkers",
     "topology": "graph",
-    "svg": "../snapshots/stern-halma--super-chinese-checkers.svg"
+    "svg": "svgs/stern-halma--super-chinese-checkers.svg"
   },
   {
     "family": "surakarta",
@@ -2173,7 +2173,7 @@
     "variant": "standard",
     "variantTitle": "Surakarta (Standard)",
     "topology": "grid",
-    "svg": "../snapshots/surakarta--standard.svg"
+    "svg": "svgs/surakarta--standard.svg"
   },
   {
     "family": "tafl",
@@ -2181,7 +2181,7 @@
     "variant": "brandubh",
     "variantTitle": "Brandubh",
     "topology": "grid",
-    "svg": "../snapshots/tafl--brandubh.svg"
+    "svg": "svgs/tafl--brandubh.svg"
   },
   {
     "family": "tafl",
@@ -2189,7 +2189,7 @@
     "variant": "hnefatafl",
     "variantTitle": "Hnefatafl",
     "topology": "grid",
-    "svg": "../snapshots/tafl--hnefatafl.svg"
+    "svg": "svgs/tafl--hnefatafl.svg"
   },
   {
     "family": "tafl",
@@ -2197,7 +2197,7 @@
     "variant": "standard",
     "variantTitle": "Tablut",
     "topology": "grid",
-    "svg": "../snapshots/tafl--standard.svg"
+    "svg": "svgs/tafl--standard.svg"
   },
   {
     "family": "tafl",
@@ -2205,7 +2205,7 @@
     "variant": "tawlbwrdd",
     "variantTitle": "Tawlbwrdd",
     "topology": "grid",
-    "svg": "../snapshots/tafl--tawlbwrdd.svg"
+    "svg": "svgs/tafl--tawlbwrdd.svg"
   },
   {
     "family": "xiangqi",
@@ -2213,7 +2213,7 @@
     "variant": "janggi",
     "variantTitle": "Janggi",
     "topology": "grid",
-    "svg": "../snapshots/xiangqi--janggi.svg"
+    "svg": "svgs/xiangqi--janggi.svg"
   },
   {
     "family": "xiangqi",
@@ -2221,7 +2221,7 @@
     "variant": "jieqi",
     "variantTitle": "Jieqi",
     "topology": "grid",
-    "svg": "../snapshots/xiangqi--jieqi.svg"
+    "svg": "svgs/xiangqi--jieqi.svg"
   },
   {
     "family": "xiangqi",
@@ -2229,7 +2229,7 @@
     "variant": "manchu-plus",
     "variantTitle": "Manchu+",
     "topology": "grid",
-    "svg": "../snapshots/xiangqi--manchu-plus.svg"
+    "svg": "svgs/xiangqi--manchu-plus.svg"
   },
   {
     "family": "xiangqi",
@@ -2237,7 +2237,7 @@
     "variant": "minixiangqi",
     "variantTitle": "Minixiangqi",
     "topology": "grid",
-    "svg": "../snapshots/xiangqi--minixiangqi.svg"
+    "svg": "svgs/xiangqi--minixiangqi.svg"
   },
   {
     "family": "xiangqi",
@@ -2245,7 +2245,7 @@
     "variant": "quang-trung",
     "variantTitle": "Quang Trung Chess",
     "topology": "grid",
-    "svg": "../snapshots/xiangqi--quang-trung.svg"
+    "svg": "svgs/xiangqi--quang-trung.svg"
   },
   {
     "family": "xiangqi",
@@ -2253,7 +2253,7 @@
     "variant": "standard",
     "variantTitle": "Standard Xiangqi",
     "topology": "grid",
-    "svg": "../snapshots/xiangqi--standard.svg"
+    "svg": "svgs/xiangqi--standard.svg"
   },
   {
     "family": "xiangqi",
@@ -2261,7 +2261,7 @@
     "variant": "xiangqi-42",
     "variantTitle": "Xiangqi 42",
     "topology": "grid",
-    "svg": "../snapshots/xiangqi--xiangqi-42.svg"
+    "svg": "svgs/xiangqi--xiangqi-42.svg"
   },
   {
     "family": "xiangqi",
@@ -2269,6 +2269,6 @@
     "variant": "yang-qi",
     "variantTitle": "Yáng Qí",
     "topology": "grid",
-    "svg": "../snapshots/xiangqi--yang-qi.svg"
+    "svg": "svgs/xiangqi--yang-qi.svg"
   }
 ]
