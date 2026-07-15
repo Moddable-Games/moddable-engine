@@ -367,7 +367,7 @@ function applyHandicapStones(fen, positions, rows, cols) {
   const board = Array.from({ length: rows }, () => Array(cols).fill(null))
   for (const pos of positions) {
     const [r, c] = pos.split(',').map(Number)
-    if (r >= 0 && r < rows && c >= 0 && c < cols) board[r][c] = 'X'
+    if (r >= 0 && r < rows && c >= 0 && c < cols) board[r][c] = 'b'
   }
   const fenRows = []
   for (let r = 0; r < rows; r++) {
