@@ -41,7 +41,7 @@ function getItemLink(gameKey, cat, item) {
 const RPG_CONFIGS = {
   'dnd-5e': {
     label: 'D&D 5e SRD',
-    dataPath: '/MODDABLE/moddable-rules/games/dnd-5e/data/',
+    dataPath: (location.hostname === 'engine.moddable.games' ? 'https://rules.moddable.games/' : '/MODDABLE/moddable-rules/') + 'games/dnd-5e/data/',
     categories: [
       { id: 'spells', label: 'Spells', file: 'spells.json', searchFields: ['name', 'school.name'], tagField: 'level', tagPrefix: 'Lvl ' },
       { id: 'monsters', label: 'Monsters', file: 'monsters.json', searchFields: ['name', 'type'], tagField: 'challenge_rating', tagPrefix: 'CR ' },
@@ -55,7 +55,7 @@ const RPG_CONFIGS = {
   },
   ironsworn: {
     label: 'Ironsworn',
-    dataPath: '/MODDABLE/moddable-rules/games/ironsworn/oracles/',
+    dataPath: (location.hostname === 'engine.moddable.games' ? 'https://rules.moddable.games/' : '/MODDABLE/moddable-rules/') + 'games/ironsworn/oracles/',
     categories: [
       { id: 'action', label: 'Action', file: 'action.json', isOracle: true },
       { id: 'theme', label: 'Theme', file: 'theme.json', isOracle: true },
