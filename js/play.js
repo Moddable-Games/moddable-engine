@@ -167,6 +167,7 @@ function pushState() {
 }
 
 let gamesIndex = {}
+let manifestIndex = {}
 
 const RULES_BASE = location.hostname === 'engine.moddable.games'
   ? 'https://rules.moddable.games/'
@@ -182,6 +183,7 @@ async function init() {
     if (!family || !variant) continue
     if (!gamesIndex[family]) gamesIndex[family] = []
     gamesIndex[family].push(variant)
+    manifestIndex[`${family}/${variant}`] = entry
   }
   populateGames()
   populateVariants()
@@ -411,7 +413,14 @@ async function render() {
 function updateRulesLink() {
   const link = document.getElementById('rules-link-btn')
   if (!link) return
-  link.href = `https://rules.moddable.games/${state.game}/variants/${state.variant}/`
+  const entry = manifestIndex[`${state.game}/${state.variant}`]
+  if (entry && entry.rulesUrl) {
+    link.href = 'https://rules.moddable.games/' + entry.rulesUrl
+    link.style.display = ''
+  } else {
+    link.href = `https://rules.moddable.games/${state.game}/variants/${state.variant}/`
+    link.style.display = ''
+  }
 }
 
 function renderDeckGame(game, variantDef) {
