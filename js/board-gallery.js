@@ -2,7 +2,7 @@ const base = document.querySelector('meta[name="base-path"]')?.content || ''
 const INDEX_PATH = `${base}/boards/board-index.json`
 
 let BOARDS = []
-let state = { search: '', family: 'all', topology: 'all', size: 240 }
+let state = { search: '', family: 'all', topology: 'all', size: '240' }
 
 async function init() {
   const res = await fetch(INDEX_PATH)
@@ -57,11 +57,15 @@ function render() {
   }
 
   const size = state.size
+  const isFull = size === 'full'
+  const gridClass = isFull ? 'board-grid board-grid--full' : 'board-grid'
+  const previewStyle = isFull ? '' : `max-width:${size}px`
+
   const cards = filtered.map(b => {
     const title = b.variantTitle || b.variant
     const family = b.familyTitle || b.family
     return `<div class="board-card" data-family="${b.family}" data-variant="${b.variant}">
-      <div class="board-card-preview" style="width:${size}px;height:${size}px">
+      <div class="board-card-preview" style="${previewStyle}">
         <img src="${b.svg}" alt="${family} — ${title}" loading="lazy">
       </div>
       <div class="board-card-info">
@@ -76,7 +80,8 @@ function render() {
     </div>`
   })
 
-  container.innerHTML = `<div class="board-grid">${cards.join('')}</div>`
+  const gridStyle = isFull ? '' : `style="grid-template-columns:repeat(auto-fill, minmax(${parseInt(size) + 24}px, 1fr))"`
+  container.innerHTML = `<div class="${gridClass}" ${gridStyle}>${cards.join('')}</div>`
 }
 
 function bindControls() {
@@ -93,7 +98,7 @@ function bindControls() {
     render()
   })
   document.getElementById('size-select').addEventListener('change', e => {
-    state.size = parseInt(e.target.value)
+    state.size = e.target.value
     render()
   })
 

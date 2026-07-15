@@ -224,6 +224,11 @@
   gap: 20px;
   padding: 0 24px;
 }
+.board-grid--full {
+  grid-template-columns: 1fr;
+  max-width: 900px;
+  margin: 0 auto;
+}
 .board-card {
   background: #1a1a2e;
   border: 1px solid #2a2a4a;
@@ -243,9 +248,9 @@
   margin: 0 auto;
 }
 .board-card-preview img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+  display: block;
+  width: 100%;
+  height: auto;
 }
 .board-card-info {
   padding: 10px 12px 6px;
