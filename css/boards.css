@@ -207,16 +207,45 @@
 }
 
 .hex-info-bar {
-  display: none;
-  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 16px;
   font-size: 12px;
   font-family: var(--font-mono);
   color: var(--text-secondary);
   background: var(--bg-section);
   border-top: 1px solid var(--border-subtle);
+  min-height: 34px;
 }
-.hex-info-bar.active {
-  display: block;
+.info-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.info-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: 16px;
+}
+.info-btn {
+  font-size: 11px;
+  font-family: var(--font-body);
+  padding: 3px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-decoration: none;
+  line-height: 1.4;
+  transition: border-color 0.15s, color 0.15s;
+}
+.info-btn:hover {
+  border-color: var(--cosmic-glow);
+  color: var(--cosmic-glow);
 }
 
 .hex-cell {

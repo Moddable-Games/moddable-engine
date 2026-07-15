@@ -104,13 +104,6 @@
 
       <div id="derived-info" class="derived-info"></div>
 
-      <div class="control-group">
-        <label class="control-label">Export</label>
-        <div class="control-row">
-          <button class="btn btn-outline" id="export-svg-btn">SVG</button>
-          <button class="btn btn-outline" id="export-png-btn">PNG</button>
-        </div>
-      </div>
     </div>
   </aside>
 
@@ -122,7 +115,14 @@
       </div>
       <div class="canvas-svg" id="board-svg"></div>
     </div>
-    <div class="hex-info-bar" id="hex-info-bar">Hover over a hex</div>
+    <div class="hex-info-bar" id="hex-info-bar">
+      <span class="info-text" id="info-text">Hover over a cell</span>
+      <span class="info-actions">
+        <a class="info-btn" id="rules-link-btn" href="#" target="_blank" rel="noopener">Rules</a>
+        <button class="info-btn" id="bar-svg-btn">SVG</button>
+        <button class="info-btn" id="bar-png-btn">PNG</button>
+      </span>
+    </div>
   </main>
 </div>
 

@@ -271,8 +271,8 @@ function bindControls() {
   })
   window.addEventListener('resize', () => requestAnimationFrame(fitToView))
 
-  document.getElementById('export-svg-btn').addEventListener('click', exportSvg)
-  document.getElementById('export-png-btn').addEventListener('click', exportPng)
+  document.getElementById('bar-svg-btn').addEventListener('click', exportSvg)
+  document.getElementById('bar-png-btn').addEventListener('click', exportPng)
 }
 
 function exportSvg() {
@@ -402,9 +402,16 @@ async function render() {
       variantDesc: resolved.meta?.label,
     })
     requestAnimationFrame(fitToView)
+    updateRulesLink()
   } catch (e) {
     showSvg('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="80"><text x="200" y="40" text-anchor="middle" font-size="12" fill="#f44">' + e.message + '</text></svg>')
   }
+}
+
+function updateRulesLink() {
+  const link = document.getElementById('rules-link-btn')
+  if (!link) return
+  link.href = `https://rules.moddable.games/${state.game}/variants/${state.variant}/`
 }
 
 function renderDeckGame(game, variantDef) {
@@ -520,25 +527,24 @@ function encodeDeckState(dealResult, deckType, seed, players) {
 }
 
 function bindDeckHover() {
-  const infoBar = document.getElementById('hex-info-bar')
+  const infoText = document.getElementById('info-text')
   const svgContainer = document.getElementById('board-svg')
-  infoBar.classList.add('active')
-  infoBar.textContent = 'Hover over a card or zone'
+  infoText.textContent = 'Hover over a card or zone'
 
   svgContainer.addEventListener('mouseover', e => {
     const card = e.target.closest('[data-card]')
     const zone = e.target.closest('[data-zone]')
     if (card && zone) {
-      infoBar.textContent = `${card.dataset.card} · ${zone.dataset.zone}`
+      infoText.textContent = `${card.dataset.card} · ${zone.dataset.zone}`
     } else if (card) {
-      infoBar.textContent = card.dataset.card
+      infoText.textContent = card.dataset.card
     } else if (zone) {
-      infoBar.textContent = zone.dataset.zone
+      infoText.textContent = zone.dataset.zone
     }
   })
 
   svgContainer.addEventListener('mouseleave', () => {
-    infoBar.textContent = 'Hover over a card or zone'
+    infoText.textContent = 'Hover over a card or zone'
   })
 }
 
@@ -551,10 +557,9 @@ function showSvg(svg) {
 }
 
 function bindBoardHover(config) {
-  const infoBar = document.getElementById('hex-info-bar')
+  const infoText = document.getElementById('info-text')
   const svgContainer = document.getElementById('board-svg')
-  infoBar.classList.add('active')
-  infoBar.textContent = 'Hover over a cell'
+  infoText.textContent = 'Hover over a cell'
 
   const position = config.position || config.hexPosition || {}
   const parsedSetup = config.parsedSetup || null
@@ -689,19 +694,18 @@ function bindBoardHover(config) {
       }
     }
     if (text.length > 90) text = text.slice(0, 87) + '...'
-    infoBar.textContent = text
+    infoText.textContent = text
   })
 
   svgContainer.addEventListener('mouseleave', () => {
-    infoBar.textContent = 'Hover over a cell'
+    infoText.textContent = 'Hover over a cell'
   })
 }
 
 function bindHexHover(gameConfig) {
-  const infoBar = document.getElementById('hex-info-bar')
+  const infoText = document.getElementById('info-text')
   const svgContainer = document.getElementById('board-svg')
-  infoBar.classList.add('active')
-  infoBar.textContent = 'Hover over a hex'
+  infoText.textContent = 'Hover over a hex'
 
   const descs = gameConfig.getDescriptions ? gameConfig.getDescriptions() : null
 
@@ -723,11 +727,11 @@ function bindHexHover(gameConfig) {
     } else if (type) {
       text += ` — ${type}`
     }
-    infoBar.textContent = text
+    infoText.textContent = text
   })
 
   svgContainer.addEventListener('mouseleave', () => {
-    infoBar.textContent = 'Hover over a hex'
+    infoText.textContent = 'Hover over a hex'
   })
 }
 
