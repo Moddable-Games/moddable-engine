@@ -31,11 +31,8 @@ globalThis.IntersectionObserver = class { observe() {} disconnect() {} }
 
 import { resolveSurface } from '../packages/schema/src/surfaces.js'
 import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolver.js'
-import { buildRenderOpts, attachPieceImages } from '../packages/schema/src/render-adapter.js'
-import { renderBoard } from '../packages/render/src/board-diagrams.js'
 import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
-
-import { renderMultiBoard } from '../packages/render/src/multi-board.js'
+import { renderFromEngine, attachPieceImages } from '../packages/render/src/render-engine.js'
 
 const gallery = JSON.parse(readFileSync(resolve(ENGINE_ROOT, 'pieces/gallery-index.json'), 'utf8'))
 
@@ -105,16 +102,12 @@ for (const family of families) {
         if (existsSync(dp)) resolved.content.data = JSON.parse(readFileSync(dp, 'utf8'))
       }
 
-      const opts = buildRenderOpts(resolved)
-      if (!opts) { skipped++; continue }
-      attachPieceImages(opts, resolved, gallery)
-
-      let rawSvg
-      if (opts.layers) {
-        rawSvg = renderMultiBoard(opts)
-      } else {
-        rawSvg = renderBoard(opts)
-      }
+      const pieceResult = attachPieceImages(resolved, gallery)
+      const rawSvg = renderFromEngine(resolved, {
+        pieceImages: pieceResult.images || {},
+        pieceSurfaceMap: pieceResult.surfaceMap || {},
+        pieceSurface: pieceResult.surface || null,
+      })
       if (!rawSvg) { skipped++; continue }
 
       // Embed external piece images inline so SVGs are self-contained

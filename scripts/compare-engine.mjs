@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 /**
- * Snapshot board SVGs — captures the current board-diagrams.js output as reference.
+ * Compare renderFromEngine output vs saved snapshots.
  *
- * These snapshots are the acceptance test for provider migration:
- * after moving providers into topology packages, the output must be byte-identical.
+ * Identifies which variants differ when rendered through the new engine path
+ * (render-engine.js) vs the legacy path (render-adapter → board-diagrams).
  *
  * Usage:
- *   node scripts/snapshot-boards.mjs              # report count
- *   node scripts/snapshot-boards.mjs --capture    # save all SVGs to snapshots/
- *   node scripts/snapshot-boards.mjs --diff       # compare current output vs saved snapshots
+ *   node scripts/compare-engine.mjs                # full report
+ *   node scripts/compare-engine.mjs chess          # single family
+ *   node scripts/compare-engine.mjs --verbose      # show first diff chars
  */
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'fs'
+import { readFileSync, existsSync, readdirSync } from 'fs'
 import { resolve, dirname, basename } from 'path'
 import { fileURLToPath } from 'url'
 
@@ -21,7 +21,7 @@ const RULES_ROOT = process.env.RULES_ROOT || resolve(ENGINE_ROOT, '../moddable-r
 const GAMES_DIR = resolve(RULES_ROOT, 'games')
 const SNAP_DIR = resolve(ENGINE_ROOT, 'snapshots')
 
-// DOM stubs for boards.js module-level references
+// DOM stubs
 const stubEl = () => ({ style: {}, innerHTML: '', value: '', appendChild: () => {}, addEventListener: () => {}, querySelectorAll: () => [], querySelector: () => null, classList: { add: () => {}, remove: () => {}, toggle: () => {}, contains: () => false }, setAttribute: () => {}, getAttribute: () => null, dataset: {}, options: [], getBoundingClientRect: () => ({}) })
 globalThis.document = { getElementById: () => stubEl(), createElement: () => stubEl(), createElementNS: () => stubEl(), querySelector: () => null, querySelectorAll: () => [], addEventListener: () => {} }
 globalThis.window = { location: { search: '' }, addEventListener: () => {} }
@@ -38,8 +38,6 @@ import { renderFromEngine, attachPieceImages } from '../packages/render/src/rend
 const gallery = JSON.parse(readFileSync(resolve(ENGINE_ROOT, 'pieces/gallery-index.json'), 'utf8'))
 
 const args = process.argv.slice(2)
-const doCapture = args.includes('--capture')
-const doDiff = args.includes('--diff')
 const verbose = args.includes('--verbose')
 const familyFilter = args.filter(a => !a.startsWith('--'))[0] || null
 
@@ -50,8 +48,8 @@ if (!existsSync(GAMES_DIR)) {
 
 const TYPE_NORMALIZE = { hexagonal: 'hex', triangular: 'hex' }
 
-let count = 0, captured = 0, skipped = 0, errors = 0
-let identical = 0, different = 0, missing = 0
+let identical = 0, different = 0, skipped = 0, errors = 0, noSnap = 0
+const diffs = []
 
 const families = readdirSync(GAMES_DIR).filter(f => {
   if (familyFilter && !f.includes(familyFilter)) return false
@@ -78,9 +76,6 @@ for (const family of families) {
     const topo = variantEngine?.topology || familyEngine?.topology
     if (!topo?.type) { skipped++; continue }
 
-    count++
-    if (!doCapture && !doDiff) continue
-
     try {
       const normType = TYPE_NORMALIZE[topo.type] || topo.type
       const normFam = familyEngine && familyEngine.topology
@@ -104,48 +99,51 @@ for (const family of families) {
         if (existsSync(dp)) resolved.content.data = JSON.parse(readFileSync(dp, 'utf8'))
       }
 
+      // Build piece images
       const pieceResult = attachPieceImages(resolved, gallery)
-      const svg = renderFromEngine(resolved, {
+      const engineOpts = {
         pieceImages: pieceResult.images || {},
         pieceSurfaceMap: pieceResult.surfaceMap || {},
         pieceSurface: pieceResult.surface || null,
-      })
+      }
+
+      const svg = renderFromEngine(resolved, engineOpts)
       if (!svg) { skipped++; continue }
 
       const snapPath = resolve(SNAP_DIR, `${family}--${slug}.svg`)
+      if (!existsSync(snapPath)) { noSnap++; continue }
 
-      if (doCapture) {
-        writeFileSync(snapPath, svg)
-        captured++
-        if (verbose) console.log(`  ✓ ${family}/${slug}`)
-      }
-
-      if (doDiff) {
-        if (!existsSync(snapPath)) {
-          missing++
-          if (verbose) console.log(`  ? ${family}/${slug} (no snapshot)`)
-        } else {
-          const saved = readFileSync(snapPath, 'utf8')
-          if (saved === svg) {
-            identical++
-          } else {
-            different++
-            console.log(`  ✗ ${family}/${slug} DIFFERS`)
-          }
+      const saved = readFileSync(snapPath, 'utf8')
+      if (saved === svg) {
+        identical++
+      } else {
+        different++
+        let detail = ''
+        if (verbose) {
+          // Find first diff position
+          let pos = 0
+          while (pos < saved.length && pos < svg.length && saved[pos] === svg[pos]) pos++
+          const ctx = 60
+          detail = `\n    expected: ...${saved.slice(Math.max(0, pos - 20), pos + ctx)}...`
+          detail += `\n    got:      ...${svg.slice(Math.max(0, pos - 20), pos + ctx)}...`
         }
+        diffs.push(`  ✗ ${family}/${slug}${detail}`)
       }
     } catch (e) {
-      console.error(`  ✗ ${family}/${slug}: ${e.message}`)
       errors++
+      diffs.push(`  ✗ ${family}/${slug}: ERROR — ${e.message}`)
     }
   }
 }
 
-if (!doCapture && !doDiff) {
-  console.log(`${count} renderable variants. Use --capture to save snapshots, --diff to compare.`)
-} else if (doCapture) {
-  console.log(`Captured: ${captured}, skipped: ${skipped}, errors: ${errors}`)
-} else if (doDiff) {
-  console.log(`\nResults: ${identical} identical, ${different} different, ${missing} no snapshot, ${errors} errors`)
-  if (different > 0) process.exit(1)
+console.log(`\nrender-engine vs snapshots:`)
+console.log(`  ${identical} identical`)
+console.log(`  ${different} different`)
+console.log(`  ${errors} errors`)
+console.log(`  ${noSnap} no snapshot`)
+console.log(`  ${skipped} skipped (no engine block)\n`)
+
+if (diffs.length > 0) {
+  console.log('Failures:')
+  for (const d of diffs) console.log(d)
 }

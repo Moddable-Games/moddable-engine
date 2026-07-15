@@ -1,10 +1,9 @@
-import { renderBoard, fenToPosition } from '../packages/render/src/board-diagrams.js'
-import { renderMultiBoard } from '../packages/render/src/multi-board.js'
+import { renderFromEngine, attachPieceImages, fenToPosition } from '../packages/render/src/render-engine.js'
 import { getGameConfig, getAllGames, HexSvg, createSeededRng } from '../packages/hex-generators/index.js'
 import { getDeckConfig, getRegisteredDecks, createDeck, shuffle, deal, layoutTable } from '../packages/component-deck/index.js'
 import { renderDeckSvg, renderMahjongSvg, renderTableauSvg } from '../packages/component-deck/src/renderers.js'
 import { renderRpgProvider } from './rpg-provider.js'
-import { buildRenderOpts, attachPieceImages, renderDeckFromResolved, setDeckRenderer, setMahjongRenderer, setTableauRenderer, setMultiBoardRenderer, getMultiBoardRenderer } from '../packages/schema/src/render-adapter.js'
+import { renderDeckFromResolved, setDeckRenderer, setMahjongRenderer, setTableauRenderer } from '../packages/component-deck/src/render-from-resolved.js'
 
 let galleryIndex = null
 async function loadGalleryIndex(basePath = '../pieces/') {
@@ -26,14 +25,34 @@ async function renderFromResolved(resolved, container) {
     container.innerHTML = `<div style="padding:20px;color:#aaa;text-align:center;font-family:system-ui"><p style="font-size:16px;margin-bottom:8px">${meta.label || 'Non-spatial game'}</p><p style="font-size:12px;color:#666">Category: ${meta.category || 'unknown'}</p></div>`
     return
   }
-  const opts = buildRenderOpts(resolved)
-  if (!opts) { container.innerHTML = '<p style="color:#f44">Cannot determine board style</p>'; return }
   const gallery = await loadGalleryIndex()
-  if (gallery && gallery.length > 0) attachPieceImages(opts, resolved, gallery)
-  if (resolved._recolouredPieceImages) opts.pieceImages = { ...opts.pieceImages, ...resolved._recolouredPieceImages }
-  const multiBoardFn = getMultiBoardRenderer()
-  container.innerHTML = (opts.layers && multiBoardFn) ? multiBoardFn(opts) : renderBoard(opts)
-  return opts
+  const pieceResult = gallery ? attachPieceImages(resolved, gallery) : { images: {}, surfaceMap: {}, surface: null }
+  let pieceImages = pieceResult.images || {}
+  if (resolved._recolouredPieceImages) pieceImages = { ...pieceImages, ...resolved._recolouredPieceImages }
+  const svg = renderFromEngine(resolved, {
+    pieceImages,
+    pieceSurfaceMap: pieceResult.surfaceMap || {},
+    pieceSurface: pieceResult.surface || null,
+  })
+  if (!svg) { container.innerHTML = '<p style="color:#f44">Cannot determine board style</p>'; return }
+  container.innerHTML = svg
+  const render = resolved.render || {}
+  return {
+    position: {},
+    pieceImages,
+    rows: topo.rows,
+    cols: topo.cols,
+    parsedSetup: render._parsedSetup,
+    boardData: resolved.content?.data,
+    variant: resolved.content?.board,
+    hexPosition: render._position,
+    centreMarker: render.centreMarker || render._centreMarker,
+    filledArms: render._filledArms || resolved.setup?.arms,
+    layers: topo.layers || topo.boards ? {
+      fens: Array.isArray(resolved.setup) ? resolved.setup : [],
+      labels: topo.layer_labels || [],
+    } : null,
+  }
 }
 import { resolveSurface } from '../packages/schema/src/surfaces.js'
 import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolver.js'
@@ -74,7 +93,6 @@ async function loadVariant({ familyPath, variantPath, basePath }) {
 setDeckRenderer(renderDeckSvg)
 setMahjongRenderer(renderMahjongSvg)
 setTableauRenderer(renderTableauSvg)
-setMultiBoardRenderer(renderMultiBoard)
 
 
 

@@ -14,7 +14,6 @@ import { renderTrackLayout } from '../../topology-track/src/topology-track.js'
 import { renderHexLayout } from '../../topology-hex/src/topology-hex.js'
 import { elementsToFragment, elementToSvg } from './serialize-layout.js'
 import { renderSurfaceSVG } from './piece-surface.js'
-import { fenToPosition } from './board-diagrams.js'
 
 const RENDER_FN = { grid: renderGridLayout, graph: renderGraphLayout, pit: renderPitLayout, track: renderTrackLayout, hex: renderHexLayout }
 
@@ -91,8 +90,35 @@ export function renderFromEngine(resolved, opts = {}) {
   const topo = resolved.topology || {}
   if (!topo.type) return null
 
-  const render = resolved.render || {}
+  // Clone render to prevent mutation leaking across calls (shared family references)
+  const render = { ...(resolved.render || {}) }
+  resolved = { ...resolved, render }
   const surface = resolved.surface || {}
+
+  // Multi-board: composite multiple boards
+  let layers = render.layers || null
+  if (!layers && (topo.layers || topo.boards) && Array.isArray(resolved.setup)) {
+    const count = topo.layers || topo.boards
+    layers = {
+      count,
+      layout: count <= 2 ? 'horizontal' : 'vertical',
+      labels: topo.layer_labels || [],
+      fens: resolved.setup,
+      ...(render.layerColors && { colors: render.layerColors }),
+    }
+  }
+  if (layers) {
+    return renderMultiBoards(resolved, layers, opts)
+  }
+
+  // Suppress labels for board styles that never show them (matching legacy behaviour)
+  if (topo.type === 'grid' && topo.layout === 'intersections') {
+    const bs = render.boardStyle
+    const cc = render.cellColor
+    if (bs === 'xiangqi' || bs === 'shogi' || cc === 'xiangqi' || cc === 'shogi') {
+      render.labels = false
+    }
+  }
 
   // Build cellMap from zones if needed (non-ops grid path)
   if (topo.type === 'grid' && !render.cellMap && render.zones) {
@@ -119,6 +145,10 @@ export function renderFromEngine(resolved, opts = {}) {
     else if (topo.shape === 'triangular' && topo.sideLength) render._hexes = generateTriangularHexGrid(topo.sideLength)
     else if (topo.shape === 'hexagonal' && topo.radius) render._hexRadius = topo.radius
     else if (topo.rows && topo.cols) { render._hexRows = topo.rows; render._hexCols = topo.cols }
+  }
+
+  // Hex: frame/flat/marker apply regardless of how _hexes was derived
+  if (topo.type === 'hex') {
     if (topo.orientation === 'flat') render._flat = true
     if (render.frame || topo.shape) render._frame = render.frame || topo.shape
     if (render.centreMarker) render._centreMarker = render.centreMarker
@@ -138,11 +168,11 @@ export function renderFromEngine(resolved, opts = {}) {
   if (Object.keys(pieceImages).length > 0) render._pieceImages = pieceImages
 
   // Parse setup for topologies that render it internally
-  if (topo.type === 'pit' && resolved.setup && typeof resolved.setup === 'string' && !render._parsedSetup) {
+  if (topo.type === 'pit' && resolved.setup && typeof resolved.setup === 'string') {
     render._parsedSetup = parsePitSetup(resolved.setup)
     render._seedsPerPit = render._parsedSetup.pits[0] || 4
   }
-  if (topo.type === 'track' && resolved.setup && typeof resolved.setup === 'string' && !render._parsedSetup) {
+  if (topo.type === 'track' && resolved.setup && typeof resolved.setup === 'string') {
     render._parsedSetup = parseBackgammonSetup(resolved.setup)
   }
   if (topo.type === 'graph' && resolved.setup) {
@@ -174,6 +204,12 @@ export function renderFromEngine(resolved, opts = {}) {
   // Parse setup → position (grid/graph only; hex/pit/track handle internally)
   const position = parsePosition(resolved, topo)
 
+  // Detect FEN4 for getOwner (4-player piece rotation)
+  let getOwner = opts.getOwner || null
+  if (!getOwner && typeof resolved.setup === 'string' && resolved.setup.includes(',') && resolved.setup.match(/[yrgb][A-Z]/)) {
+    getOwner = fen4GetOwner
+  }
+
   // Piece images (for grid piece rendering in SVG assembly)
   const pieceSurfaceMap = opts.pieceSurfaceMap || {}
   const pieceSurface = opts.pieceSurface || null
@@ -198,9 +234,12 @@ export function renderFromEngine(resolved, opts = {}) {
     parts.push(renderOverlays(render.overlays, ctx))
   }
 
-  if (position && Object.keys(position).length > 0 && layout.cells) {
+  if (topo.type === 'grid' && position && Object.keys(position).length > 0 && layout.cells) {
     const tileSize = render.cellSize || 40
-    parts.push(`<g pointer-events="none">${renderPiecesFromCells(position, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: resolved.pieceRotations, getOwner: opts.getOwner, pieceDefs: opts.pieceDefs })}</g>`)
+    const colors = surface.colors || {}
+    parts.push(`<g pointer-events="none">${renderPiecesFromCells(position, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: resolved.pieceRotations, getOwner, pieceDefs: opts.pieceDefs, colors })}</g>`)
+  } else if (position && Object.keys(position).length > 0) {
+    parts.push(`<g pointer-events="none"></g>`)
   }
 
   if (layout.labels && layout.labels.length > 0) {
@@ -278,6 +317,10 @@ function renderPiecesFromCells(position, cells, tileSize, opts) {
       } else {
         parts.push(`<image href="${pieceImages[imageKey]}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" pointer-events="none"/>`)
       }
+    } else if (piece.type === 'stone') {
+      parts.push(drawStone(piece, pos.x, pos.y, tileSize * 0.42, opts.colors || {}))
+    } else if (piece.type === 'man' || piece.type === 'king') {
+      parts.push(drawDraughtsPiece(piece, pos.x, pos.y, tileSize * 0.38, opts.colors || {}))
     } else if (pieceImages[piece.type]) {
       const x = pos.x - tileSize / 2, y = pos.y - tileSize / 2
       parts.push(`<image href="${pieceImages[piece.type]}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" pointer-events="none"/>`)
@@ -287,6 +330,24 @@ function renderPiecesFromCells(position, cells, tileSize, opts) {
     }
   }
   return parts.join('')
+}
+
+function drawStone(piece, cx, cy, r, C) {
+  const isW = piece.color === 'white'
+  const fill = isW ? (C.whitePieceFill || '#fff') : (C.blackPieceFill || '#1c1c1c')
+  const stroke = isW ? (C.whitePieceStroke || '#333') : (C.blackPieceStroke || '#888')
+  return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>`
+}
+
+function drawDraughtsPiece(piece, cx, cy, r, C) {
+  const isW = piece.color === 'white'
+  const fill = isW ? '#fff' : '#333'
+  const stroke = isW ? '#333' : '#111'
+  const inner = isW ? '#ccc' : '#555'
+  let svg = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>`
+  svg += `<circle cx="${cx}" cy="${cy}" r="${r * 0.64}" fill="none" stroke="${inner}" stroke-width="1"/>`
+  if (piece.type === 'king') svg += `<circle cx="${cx}" cy="${cy}" r="${r * 0.4}" fill="none" stroke="${inner}" stroke-width="1.5"/>`
+  return svg
 }
 
 function collectDefs(position, pieceDefs) {
@@ -319,7 +380,39 @@ function renderOverlays(overlays, ctx) {
   return parts.join('')
 }
 
-// --- Setup parsers (moved from render-adapter) ---
+// --- Setup parsers ---
+
+export function fenToPosition(fen, rows, cols) {
+  const positionPart = fen.split(' ')[0]
+  const ranks = positionPart.split('/')
+  const position = {}
+  for (let r = 0; r < ranks.length; r++) {
+    let c = 0, i = 0
+    const rank = ranks[r]
+    while (i < rank.length) {
+      const ch = rank[i]
+      if (ch >= '1' && ch <= '9') {
+        const next = rank[i + 1]
+        if (next >= '0' && next <= '9') { c += parseInt(ch + next); i += 2 }
+        else { c += parseInt(ch); i++ }
+      } else if (ch === '[') {
+        const close = rank.indexOf(']', i)
+        if (close === -1) { i++; continue }
+        const code = rank.slice(i + 1, close)
+        const file = String.fromCharCode(97 + c)
+        const rankNum = rows - r
+        position[`${file}${rankNum}`] = code
+        c++; i = close + 1
+      } else {
+        const file = String.fromCharCode(97 + c)
+        const rankNum = rows - r
+        position[`${file}${rankNum}`] = ch
+        c++; i++
+      }
+    }
+  }
+  return position
+}
 
 function parseVocabularyFen(fen, rows, cols, vocabulary) {
   const position = {}
@@ -362,6 +455,12 @@ function parseFen4(fen4, rows, cols) {
     }
   }
   return position
+}
+
+const FEN4_OWNERS = { r: 'red', b: 'blue', y: 'yellow', g: 'green' }
+function fen4GetOwner(pieceType) {
+  if (pieceType.length >= 2) return FEN4_OWNERS[pieceType[0]] || 'white'
+  return pieceType === pieceType.toUpperCase() ? 'white' : 'black'
 }
 
 function parseSfenToPosition(fen, rows, cols) {
@@ -450,7 +549,7 @@ function generateTriangularHexGrid(sideLength) {
   return hexes
 }
 
-// --- Zone map builders (moved from render-adapter) ---
+// --- Zone map builders ---
 
 function buildCellMap(zones, rows, cols) {
   if (!zones) return null
@@ -493,4 +592,89 @@ function buildCrossMap(rows, cols, castles) {
     if (r >= 0 && r < rows && c >= 0 && c < cols) grid[r][c] = 'castle'
   }
   return grid
+}
+
+// --- Multi-board compositor ---
+
+function renderMultiBoards(resolved, layers, opts) {
+  const topo = resolved.topology || {}
+  const render = resolved.render || {}
+  const surface = resolved.surface || {}
+  const { count, layout, labels, fens, colors: layerColors } = layers
+
+  const gap = layout === 'horizontal' ? 20 : 12
+  const labelH = 18
+  const ts = render.cellSize || 40
+  const rows = topo.rows || 8
+  const cols = topo.cols || 8
+  const innerPad = 24
+  const boardW = cols * ts + innerPad * 2
+  const boardH = rows * ts + innerPad * 2
+  const pad = 4
+
+  let totalW, totalH
+  if (layout === 'horizontal') {
+    totalW = count * boardW + (count - 1) * gap + pad * 2
+    totalH = boardH + pad * 2 + labelH
+  } else {
+    totalW = boardW + pad * 2
+    totalH = count * (boardH + labelH) + (count - 1) * gap + pad * 2
+  }
+
+  const parts = []
+  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalW} ${totalH}" width="${totalW}" height="${totalH}">`)
+
+  for (let i = 0; i < count; i++) {
+    let ox, oy
+    if (layout === 'horizontal') {
+      ox = pad + i * (boardW + gap)
+      oy = pad + labelH
+    } else {
+      ox = pad
+      oy = pad + i * (boardH + labelH + gap)
+    }
+
+    const labelX = ox + boardW / 2
+    const labelY = oy - 4
+    parts.push(`<text x="${labelX}" y="${labelY}" text-anchor="middle" font-size="11" fill="#333" font-family="system-ui">${labels[i] || 'Board ' + (i + 1)}</text>`)
+
+    const lc = layerColors && layerColors[i]
+    const boardColors = lc
+      ? { ...surface.colors, 'cell-light': lc['cell-light'] || lc.lightSquare || '#f0d9b5', 'cell-dark': lc['cell-dark'] || lc.darkSquare || '#b58863' }
+      : surface.colors || {}
+
+    const fen = fens && fens[i]
+
+    let layerOps = render.ops
+    if (layerOps && lc) {
+      layerOps = layerOps.map(op => {
+        if (op.op === 'cells' && op.pattern === 'checkered') {
+          return { ...op, light: boardColors['cell-light'], dark: boardColors['cell-dark'] }
+        }
+        return op
+      })
+    }
+
+    const layerResolved = {
+      topology: { type: 'grid', rows, cols, layout: topo.layout },
+      surface: { colors: boardColors },
+      render: { cellSize: ts, ops: layerOps, labels: render.labels, inset: render.inset, insetFactor: render.insetFactor, idStyle: render.idStyle },
+      setup: fen || null,
+      pieces: resolved.pieces,
+    }
+
+    const layerSvg = renderFromEngine(layerResolved, opts)
+    if (!layerSvg) continue
+
+    const innerStart = layerSvg.indexOf('>') + 1
+    const innerEnd = layerSvg.lastIndexOf('</svg>')
+    const innerContent = layerSvg.slice(innerStart, innerEnd)
+
+    parts.push(`<g transform="translate(${ox},${oy})" data-layer="${i}">`)
+    parts.push(innerContent)
+    parts.push('</g>')
+  }
+
+  parts.push('</svg>')
+  return parts.join('\n')
 }
