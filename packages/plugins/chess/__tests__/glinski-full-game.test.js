@@ -1,6 +1,6 @@
 import { createChessPlugin } from '../index.js'
 import { createGameFromDefinition } from '../../../game/index.js'
-import { createHexTopology } from '../../../topology-hex/index.js'
+import { createHexTopology } from '../../../topologies/hex/index.js'
 
 const HEX_KNIGHT_OFFSETS = [
   { q: 2, r: -1 }, { q: 1, r: -2 }, { q: -1, r: -1 },

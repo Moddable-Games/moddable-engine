@@ -1,5 +1,5 @@
 import { rider, leaper, compose, divergent, fromConfig, OFFSETS } from '../index.js'
-import { createGridTopology } from '../../topology-grid/index.js'
+import { createGridTopology } from '../../topologies/grid/index.js'
 
 const topology = createGridTopology({ rows: 8, cols: 8 })
 

@@ -1,9 +1,9 @@
 import { inferTopology, inferPlayers, inferEngineBlock, generateEngineFrontmatter } from '../src/infer.js'
-import { schema as gridSchema } from '../../topology-grid/src/topology-grid.js'
-import { schema as hexSchema } from '../../topology-hex/src/topology-hex.js'
-import { schema as trackSchema } from '../../topology-track/src/topology-track.js'
-import { schema as pitSchema } from '../../topology-pit/src/topology-pit.js'
-import { schema as graphSchema } from '../../topology-graph/src/topology-graph.js'
+import { schema as gridSchema } from '../../topologies/grid/src/topology-grid.js'
+import { schema as hexSchema } from '../../topologies/hex/src/topology-hex.js'
+import { schema as trackSchema } from '../../topologies/track/src/topology-track.js'
+import { schema as pitSchema } from '../../topologies/pit/src/topology-pit.js'
+import { schema as graphSchema } from '../../topologies/graph/src/topology-graph.js'
 
 const ALL_TOPOLOGIES = [pitSchema, trackSchema, hexSchema, graphSchema, gridSchema]
 

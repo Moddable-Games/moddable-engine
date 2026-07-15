@@ -1,5 +1,5 @@
 import { createGameFromDefinition } from '../../../game/index.js'
-import { createHexTopology } from '../../../topology-hex/index.js'
+import { createHexTopology } from '../../../topologies/hex/index.js'
 import { createHexPlugin } from '../index.js'
 import { createThemeResolver } from '../../../board-theme/index.js'
 import { createPieceResolver } from '../../../piece-theme/index.js'

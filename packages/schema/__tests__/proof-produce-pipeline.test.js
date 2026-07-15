@@ -6,10 +6,10 @@
  */
 
 import { produce } from '../src/produce.js'
-import { createGridTopology } from '../../topology-grid/src/topology-grid.js'
-import { createHexTopology } from '../../topology-hex/src/topology-hex.js'
-import { createPitTopology } from '../../topology-pit/src/topology-pit.js'
-import { createGraphTopology } from '../../topology-graph/src/topology-graph.js'
+import { createGridTopology } from '../../topologies/grid/src/topology-grid.js'
+import { createHexTopology } from '../../topologies/hex/src/topology-hex.js'
+import { createPitTopology } from '../../topologies/pit/src/topology-pit.js'
+import { createGraphTopology } from '../../topologies/graph/src/topology-graph.js'
 import { serializeLayout } from '../../render/src/serialize-layout.js'
 
 describe('proof: produce → renderLayout → SVG', () => {

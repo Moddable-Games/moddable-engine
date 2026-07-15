@@ -1,5 +1,5 @@
 import { createGameFromDefinition } from '../../../game/index.js'
-import { createGridTopology } from '../../../topology-grid/index.js'
+import { createGridTopology } from '../../../topologies/grid/index.js'
 import { createGoPlugin } from '../index.js'
 import { createThemeResolver } from '../../../board-theme/index.js'
 import { createPieceResolver } from '../../../piece-theme/index.js'

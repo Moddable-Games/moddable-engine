@@ -1,11 +1,11 @@
 import { createGridTopology } from '../src/topology-grid.js'
-import { jump } from '../../piece-behaviour/src/movement-primitives.js'
-import { createRegistry } from '../../core/src/plugin-registry.js'
-import { createStore } from '../../core/src/state-store.js'
-import { createHistory } from '../../core/src/history.js'
-import { createPlayerSystem } from '../../core/src/player-system.js'
-import { createEventBus } from '../../core/src/event-bus.js'
-import { createPipeline } from '../../core/src/move-pipeline.js'
+import { jump } from '../../../piece-behaviour/src/movement-primitives.js'
+import { createRegistry } from '../../../core/src/plugin-registry.js'
+import { createStore } from '../../../core/src/state-store.js'
+import { createHistory } from '../../../core/src/history.js'
+import { createPlayerSystem } from '../../../core/src/player-system.js'
+import { createEventBus } from '../../../core/src/event-bus.js'
+import { createPipeline } from '../../../core/src/move-pipeline.js'
 
 const topology = createGridTopology({ rows: 8, cols: 8 })
 

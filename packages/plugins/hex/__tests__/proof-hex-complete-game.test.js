@@ -1,6 +1,6 @@
 import { createHexPlugin } from '../index.js'
 import { createGameFromDefinition } from '../../../game/index.js'
-import { createHexTopology } from '../../../topology-hex/index.js'
+import { createHexTopology } from '../../../topologies/hex/index.js'
 
 describe('proof: Hex complete games', () => {
   function createHexGame(size = 5, variantConfig = {}) {

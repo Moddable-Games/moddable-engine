@@ -1,6 +1,6 @@
 import { createChessPlugin } from '../index.js'
 import { createGameFromDefinition } from '../../../game/index.js'
-import { createGridTopology } from '../../../topology-grid/index.js'
+import { createGridTopology } from '../../../topologies/grid/index.js'
 
 function createChessGame(pluginConfig = {}, variantConfig = {}) {
   return createGameFromDefinition(

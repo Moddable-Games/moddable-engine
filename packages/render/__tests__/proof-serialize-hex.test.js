@@ -1,4 +1,4 @@
-import { createHexTopology } from '../../topology-hex/src/topology-hex.js'
+import { createHexTopology } from '../../topologies/hex/src/topology-hex.js'
 import { serializeLayout } from '../src/serialize-layout.js'
 
 describe('hex render pipeline proof', () => {

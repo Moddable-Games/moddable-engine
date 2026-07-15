@@ -1,8 +1,8 @@
 import { createBoardRenderer } from '../src/board-renderer.js'
 import { createBoard, builtinBoards } from '../../surface/index.js'
-import { createGridTopology } from '../../topology-grid/src/topology-grid.js'
-import { createTrackTopology } from '../../topology-track/src/topology-track.js'
-import { createPitTopology } from '../../topology-pit/src/topology-pit.js'
+import { createGridTopology } from '../../topologies/grid/src/topology-grid.js'
+import { createTrackTopology } from '../../topologies/track/src/topology-track.js'
+import { createPitTopology } from '../../topologies/pit/src/topology-pit.js'
 
 describe('proof: board + topology composition matches rulebook patterns', () => {
   const renderer = createBoardRenderer({ padding: 24 })

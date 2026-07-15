@@ -1,5 +1,5 @@
-import { createHexTopology } from '../../../topology-hex/index.js'
-import { createGridTopology } from '../../../topology-grid/index.js'
+import { createHexTopology } from '../../../topologies/hex/index.js'
+import { createGridTopology } from '../../../topologies/grid/index.js'
 import { bindTraversal } from '../../../core/src/bind-traversal.js'
 import { rider, leaper, compose } from '../../../piece-behaviour/index.js'
 

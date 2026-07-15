@@ -5,7 +5,7 @@ import { createEnPassantRule } from '../src/rules/en-passant.js'
 import { createAttackDetectionRule } from '../src/rules/attack-detection.js'
 import { createCheckRule } from '../src/rules/check.js'
 import { createPromotionRule } from '../src/rules/promotion.js'
-import { createGridTopology } from '../../topology-grid/index.js'
+import { createGridTopology } from '../../topologies/grid/index.js'
 
 const STANDARD_PIECES = {
   king:   { type: 'rider', dirs: 'all', maxSteps: 1, royal: true },

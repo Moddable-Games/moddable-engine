@@ -1,4 +1,4 @@
-import { createGridTopology } from '../../topology-grid/src/topology-grid.js'
+import { createGridTopology } from '../../topologies/grid/src/topology-grid.js'
 import { serializeLayout } from '../src/serialize-layout.js'
 
 describe('proof: renderLayout → serializeLayout produces valid SVG', () => {

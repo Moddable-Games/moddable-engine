@@ -1,5 +1,5 @@
 import { createGameFromDefinition } from '../../../game/index.js'
-import { createPitTopology } from '../../../topology-pit/index.js'
+import { createPitTopology } from '../../../topologies/pit/index.js'
 import { createMancalaPlugin } from '../index.js'
 import { createThemeResolver } from '../../../board-theme/index.js'
 import { createBoardRenderer } from '../../../render/index.js'

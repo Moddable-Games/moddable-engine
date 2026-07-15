@@ -1,10 +1,10 @@
 import { createGame } from '../src/game-factory.js'
 import { createGameFromDefinition } from '../src/create-game.js'
 import { createTopologyRegistry } from '../src/topology-registry.js'
-import { createGridTopology } from '../../topology-grid/src/topology-grid.js'
-import { createPitTopology } from '../../topology-pit/src/topology-pit.js'
-import { createHexTopology } from '../../topology-hex/src/topology-hex.js'
-import { createGraphTopology } from '../../topology-graph/src/topology-graph.js'
+import { createGridTopology } from '../../topologies/grid/src/topology-grid.js'
+import { createPitTopology } from '../../topologies/pit/src/topology-pit.js'
+import { createHexTopology } from '../../topologies/hex/src/topology-hex.js'
+import { createGraphTopology } from '../../topologies/graph/src/topology-graph.js'
 
 const chessPlugin = {
   sliceName: 'chess',

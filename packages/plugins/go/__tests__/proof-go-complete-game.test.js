@@ -1,6 +1,6 @@
 import { createGoPlugin } from '../index.js'
 import { createGameFromDefinition } from '../../../game/index.js'
-import { createGridTopology } from '../../../topology-grid/index.js'
+import { createGridTopology } from '../../../topologies/grid/index.js'
 
 describe('proof: Go complete games', () => {
   function createGoGame(size = 9, variantConfig = {}) {

@@ -1,6 +1,6 @@
 import { createMancalaPlugin } from '../index.js'
 import { createGameFromDefinition } from '../../../game/index.js'
-import { createPitTopology } from '../../../topology-pit/index.js'
+import { createPitTopology } from '../../../topologies/pit/index.js'
 
 describe('proof: Mancala complete games', () => {
   function createMancalaGame(variantConfig = {}) {

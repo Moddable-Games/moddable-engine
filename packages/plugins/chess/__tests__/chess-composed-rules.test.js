@@ -1,6 +1,6 @@
 import { createChessPlugin } from '../index.js'
 import { createGameFromDefinition } from '../../../game/index.js'
-import { createGridTopology } from '../../../topology-grid/index.js'
+import { createGridTopology } from '../../../topologies/grid/index.js'
 import { createAttackDetectionRule } from '../../../rule/src/rules/attack-detection.js'
 import { createCheckRule } from '../../../rule/src/rules/check.js'
 import { createCheckmateRule } from '../../../rule/src/rules/checkmate.js'

@@ -1,7 +1,7 @@
 import { createGridTopology } from '../index.js'
-import { createHexTopology } from '../../topology-hex/index.js'
-import { slide, leap } from '../../piece-behaviour/index.js'
-import { bindTraversal } from '../../core/src/bind-traversal.js'
+import { createHexTopology } from '../../hex/index.js'
+import { slide, leap } from '../../../piece-behaviour/index.js'
+import { bindTraversal } from '../../../core/src/bind-traversal.js'
 
 /**
  * Proof: the same piece movement logic works on different topologies.

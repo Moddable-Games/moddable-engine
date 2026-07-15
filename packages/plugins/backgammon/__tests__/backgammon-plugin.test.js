@@ -1,6 +1,6 @@
 import { createBackgammonPlugin } from '../index.js'
 import { createGameFromDefinition } from '../../../game/index.js'
-import { createTrackTopology } from '../../../topology-track/index.js'
+import { createTrackTopology } from '../../../topologies/track/index.js'
 import { createThemeResolver } from '../../../board-theme/index.js'
 import { createStandardDice } from '../../../component-dice/index.js'
 import { createRegistry } from '../../../core/src/plugin-registry.js'

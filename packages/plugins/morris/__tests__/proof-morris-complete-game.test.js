@@ -1,6 +1,6 @@
 import { createMorrisPlugin } from '../index.js'
 import { createGameFromDefinition } from '../../../game/index.js'
-import { createGraphTopology } from '../../../topology-graph/index.js'
+import { createGraphTopology } from '../../../topologies/graph/index.js'
 
 const NODES = [
   'a1', 'a4', 'a7', 'b2', 'b4', 'b6', 'c3', 'c4', 'c5',

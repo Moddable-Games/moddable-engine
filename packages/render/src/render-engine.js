@@ -7,11 +7,11 @@
  */
 
 import { produceLayout } from '../../schema/src/produce-layout.js'
-import { renderGridLayout } from '../../topology-grid/src/topology-grid.js'
-import { renderGraphLayout } from '../../topology-graph/src/topology-graph.js'
-import { renderPitLayout } from '../../topology-pit/src/topology-pit.js'
-import { renderTrackLayout } from '../../topology-track/src/topology-track.js'
-import { renderHexLayout } from '../../topology-hex/src/topology-hex.js'
+import { renderGridLayout } from '../../topologies/grid/src/topology-grid.js'
+import { renderGraphLayout } from '../../topologies/graph/src/topology-graph.js'
+import { renderPitLayout } from '../../topologies/pit/src/topology-pit.js'
+import { renderTrackLayout } from '../../topologies/track/src/topology-track.js'
+import { renderHexLayout } from '../../topologies/hex/src/topology-hex.js'
 import { elementsToFragment, elementToSvg } from './serialize-layout.js'
 import { renderSurfaceSVG } from './piece-surface.js'
 

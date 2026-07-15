@@ -1,6 +1,6 @@
 import { floodFill, getGroup, hasPath, findPatterns } from '../src/traversal.js'
 import { bindTraversal } from '../src/bind-traversal.js'
-import { createGridTopology } from '../../topology-grid/index.js'
+import { createGridTopology } from '../../topologies/grid/index.js'
 
 describe('traversal algorithms', () => {
   describe('floodFill', () => {

@@ -1,5 +1,5 @@
 import { slide, leap, jump, custodian } from '../src/movement-primitives.js'
-import { createGridTopology } from '../../topology-grid/src/topology-grid.js'
+import { createGridTopology } from '../../topologies/grid/src/topology-grid.js'
 
 const ORTHOGONAL = [[-1, 0], [1, 0], [0, -1], [0, 1]]
 const DIAGONAL = [[-1, -1], [-1, 1], [1, -1], [1, 1]]

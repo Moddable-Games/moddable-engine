@@ -1,5 +1,5 @@
 import { createGameFromDefinition } from '../../../game/index.js'
-import { createGraphTopology } from '../../../topology-graph/index.js'
+import { createGraphTopology } from '../../../topologies/graph/index.js'
 import { createMorrisPlugin } from '../index.js'
 import { createThemeResolver } from '../../../board-theme/index.js'
 import { createBoardRenderer } from '../../../render/index.js'
