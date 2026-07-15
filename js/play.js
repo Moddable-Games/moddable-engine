@@ -374,6 +374,18 @@ async function render() {
     return
   }
 
+  if (entry && entry.reason === 'hex-generator') {
+    renderHexGenerator(entry)
+    updateRulesLink()
+    return
+  }
+
+  if (entry && entry.reason === 'rpg-provider') {
+    renderRpgProvider(state.game)
+    updateRulesLink()
+    return
+  }
+
   const basePath = RULES_BASE + 'games/'
   const familyPath = state.game + '/content/rulebook.md'
   const variantPath = state.game + '/content/variants/' + state.variant + '.md'
@@ -417,6 +429,52 @@ async function render() {
   } catch (e) {
     showSvg('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="80"><text x="200" y="40" text-anchor="middle" font-size="12" fill="#f44">' + e.message + '</text></svg>')
   }
+}
+
+function renderHexGenerator(entry) {
+  const gameKey = entry.generator || entry.family
+  const gameConfig = getGameConfig(gameKey)
+  if (!gameConfig) {
+    showSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="80"><text x="200" y="40" text-anchor="middle" font-size="12" fill="#f44">Unknown hex generator: ${gameKey}</text></svg>`)
+    return
+  }
+
+  const size = gameConfig.defaultSize || 5
+  const players = state.players || gameConfig.defaultPlayers || 4
+  const seed = state.seed
+  const rng = createSeededRng(seed)
+  const result = gameConfig.generate(size, players, seed, rng)
+  const hexes = result.hexes || result
+  const annotations = result.annotations || null
+  const style = state.style || (gameConfig.styles && gameConfig.styles[0]) || 'classic'
+
+  const svgOpts = {
+    size: 30,
+    orientation: gameConfig.orientation || 'pointy',
+    bgColor: '#1a1a2e',
+    style,
+  }
+
+  const svg = annotations
+    ? HexSvg.toAnnotatedSVG(hexes, annotations, svgOpts)
+    : HexSvg.toSVG(hexes, svgOpts)
+
+  showSvg(svg)
+  bindHexHover(gameConfig)
+  showInfo({ hexGame: gameKey, hexCount: hexes.length, seed, players })
+  requestAnimationFrame(fitToView)
+
+  const playerSelect = document.getElementById('hex-players-select')
+  const playerGroup = document.getElementById('hex-players-group')
+  if (gameConfig.playerCounts) {
+    const counts = gameConfig.playerCounts()
+    playerSelect.innerHTML = counts.map(n => `<option value="${n}"${n === players ? ' selected' : ''}>${n} players</option>`).join('')
+    playerGroup.style.display = ''
+  } else {
+    playerGroup.style.display = 'none'
+  }
+  document.getElementById('hex-style-group').style.display = gameConfig.styles ? '' : 'none'
+  document.getElementById('hex-seed-group').style.display = ''
 }
 
 function renderComponentGame(entry) {
