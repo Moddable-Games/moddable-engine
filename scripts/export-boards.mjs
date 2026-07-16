@@ -46,23 +46,7 @@ if (!existsSync(GAMES_DIR)) {
   process.exit(1)
 }
 
-// Types that are mechanically a rows x cols grid for static-diagram purposes.
-// Wrap-around connectivity (cylinder/torus/mobius/klein-bottle/spherical) only
-// affects movement rules, not the flat layout getLayout()/renderLayout() produce,
-// so these all render correctly through the existing 'grid' provider today.
-// 'hexagonal'/'triangular' route to the standard hex grid. Y-trisected hex
-// boards (Yalta Chess, San-kwo-k'i) are deliberately NOT aliased here — a
-// standard hex grid would produce the wrong shape for those; they wait for
-// a dedicated hex-trisection provider (engine#26).
-const TYPE_NORMALIZE = {
-  hexagonal: 'hex',
-  triangular: 'hex',
-  cylinder: 'grid',
-  torus: 'grid',
-  mobius: 'grid',
-  'klein-bottle': 'grid',
-  spherical: 'grid',
-}
+const TYPE_NORMALIZE = { hexagonal: 'hex', triangular: 'hex' }
 
 let exported = 0, skipped = 0, errors = 0
 
