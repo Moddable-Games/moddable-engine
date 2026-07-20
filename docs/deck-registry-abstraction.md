@@ -104,7 +104,7 @@ export function getLayout(config) {
 |------|-------------|-------|
 | `radial` | Players around a circular table | poker, hearts, big2, blackjack |
 | `tableau` | Columns + foundations + stock | klondike, freecell, spider |
-| `mahjong-wall` | 4-wall square with hands | riichi, hong-kong |
+| `wall` | 4-wall square with hands | riichi, hong-kong |
 | `linear` | Single row (solitaire variants) | war |
 
 ### Frontmatter (source of truth)
@@ -158,7 +158,7 @@ engine:
       type: mahjong-136
   topology:
     type: tableau
-    layout: mahjong-wall
+    layout: wall
   deal:
     minPlayers: 4
     maxPlayers: 4
@@ -193,7 +193,7 @@ New package: `packages/topology-tableau/`
 Implements the topology contract:
 - `schema` object with type, required, parseBoard, matchBoard
 - `getLayout(config)` → returns positioned cells for the table
-- Layout algorithms: radial, tableau, mahjong-wall (extracted from existing
+- Layout algorithms: radial, tableau, wall (extracted from existing
   `layout.js` and `renderers.js`)
 
 This is NOT new logic — it's relocating existing layout code from
@@ -221,7 +221,7 @@ Full mapping:
 | `standard-52.js` → `games.poker` | `standard-52/games/poker/standard.md` | radial |
 | `standard-52.js` → `games.big2` | `standard-52/games/big2/standard.md` | radial |
 | `standard-52.js` → `games.klondike` | `standard-52/games/klondike/standard.md` | tableau |
-| `mahjong-136.js` → `games.riichi` | `mahjong/games/riichi/standard.md` | mahjong-wall |
+| `mahjong-136.js` → `games.riichi` | `mahjong/games/riichi/standard.md` | wall |
 | (all 28 existing + 12 new) | (all 40 variant files) | (per game) |
 
 Variants not currently in the engine registry (12 total — crazy-eights, war,
@@ -310,7 +310,7 @@ For each of the 28 currently-working component games:
 
 - No auto-generation of deal specs from variant prose. Each is authored by hand.
 - No new rendering code. The existing layout algorithms (radial, tableau,
-  mahjong-wall) are moved into topology-tableau, not rewritten.
+  wall) are moved into topology-tableau, not rewritten.
 - No changes to shuffle/deal/deck-ops. Only the SOURCE of the deal spec and
   the CONSUMER of the layout change.
 - No "card game special mode" in the compositor. The compositor already renders
@@ -345,4 +345,4 @@ For each of the 28 currently-working component games:
 | double-six-dominoes | chickenfoot | perPlayer varies by count (15/11/9/7) |
 | flower-48 | go-stop | perPlayer: 7, community: 6 |
 | bavarian-32 | schafkopf | perPlayer: 8 |
-| mahjong | american-classic | perPlayer: 13, flowers: 8, layout: mahjong-wall |
+| mahjong | american-classic | perPlayer: 13, flowers: 8, layout: wall |
