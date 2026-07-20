@@ -426,7 +426,7 @@ async function render() {
   }
 
   if (entry && entry.reason === 'rpg-provider') {
-    renderRpgProvider(state.game)
+    await renderRpgProvider(state.game)
     updateRulesLink()
     return
   }
