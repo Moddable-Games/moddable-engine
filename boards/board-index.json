@@ -786,6 +786,14 @@
   {
     "family": "moddable-chess",
     "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "byzantine-chess",
+    "variantTitle": "Byzantine Chess",
+    "topology": "grid",
+    "svg": "svgs/moddable-chess--byzantine-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
     "variant": "capablanca",
     "variantTitle": "Capablanca Chess",
     "topology": "grid",
@@ -858,6 +866,14 @@
   {
     "family": "moddable-chess",
     "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "circular-chess",
+    "variantTitle": "Circular Chess",
+    "topology": "grid",
+    "svg": "svgs/moddable-chess--circular-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
     "variant": "citadel-chess",
     "variantTitle": "Citadel Chess",
     "topology": "grid",
@@ -910,6 +926,14 @@
     "variantTitle": "Cylinder Chess",
     "topology": "grid",
     "svg": "svgs/moddable-chess--cylinder-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "cylindrical-chess",
+    "variantTitle": "Cylindrical Chess",
+    "topology": "grid",
+    "svg": "svgs/moddable-chess--cylindrical-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1210,6 +1234,14 @@
   {
     "family": "moddable-chess",
     "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "klein-bottle-chess",
+    "variantTitle": "Klein Bottle Chess",
+    "topology": "grid",
+    "svg": "svgs/moddable-chess--klein-bottle-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
     "variant": "knightmate",
     "variantTitle": "Knightmate",
     "topology": "grid",
@@ -1334,6 +1366,14 @@
     "variantTitle": "Minichess",
     "topology": "grid",
     "svg": "svgs/moddable-chess--minichess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "mobius-strip-chess",
+    "variantTitle": "Möbius Strip Chess",
+    "topology": "grid",
+    "svg": "svgs/moddable-chess--mobius-strip-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1490,6 +1530,14 @@
   {
     "family": "moddable-chess",
     "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "raumschach",
+    "variantTitle": "Raumschach",
+    "topology": "grid",
+    "svg": "svgs/moddable-chess--raumschach.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
     "variant": "recruitment-chess",
     "variantTitle": "Recruitment Chess",
     "topology": "grid",
@@ -1506,6 +1554,14 @@
   {
     "family": "moddable-chess",
     "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "rollerball",
+    "variantTitle": "Rollerball",
+    "topology": "grid",
+    "svg": "svgs/moddable-chess--rollerball.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
     "variant": "romanchenkos-chess",
     "variantTitle": "Romanchenko's Chess",
     "topology": "grid",
@@ -1518,14 +1574,6 @@
     "variantTitle": "S-Chess (Seirawan Chess)",
     "topology": "grid",
     "svg": "svgs/moddable-chess--s-chess.svg"
-  },
-  {
-    "family": "moddable-chess",
-    "familyTitle": "Moddable Chess — Official Rulebook",
-    "variant": "san-kwo-ki",
-    "variantTitle": "San-kwo-k'i",
-    "topology": "grid",
-    "svg": "svgs/moddable-chess--san-kwo-ki.svg"
   },
   {
     "family": "moddable-chess",
@@ -1626,6 +1674,14 @@
   {
     "family": "moddable-chess",
     "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "spherical-chess",
+    "variantTitle": "Spherical Chess",
+    "topology": "grid",
+    "svg": "svgs/moddable-chess--spherical-chess.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
     "variant": "stalemate-wins",
     "variantTitle": "Stalemate Wins",
     "topology": "grid",
@@ -1694,6 +1750,22 @@
     "variantTitle": "Three-Check",
     "topology": "grid",
     "svg": "svgs/moddable-chess--three-check.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "toroidal-byzantine",
+    "variantTitle": "Toroidal Byzantine Chess",
+    "topology": "grid",
+    "svg": "svgs/moddable-chess--toroidal-byzantine.svg"
+  },
+  {
+    "family": "moddable-chess",
+    "familyTitle": "Moddable Chess — Official Rulebook",
+    "variant": "toroidal-chess",
+    "variantTitle": "Gadsden's Toroidal Chess",
+    "topology": "grid",
+    "svg": "svgs/moddable-chess--toroidal-chess.svg"
   },
   {
     "family": "moddable-chess",
@@ -1780,7 +1852,7 @@
     "familyTitle": "Moddable Chess — Official Rulebook",
     "variant": "yalta-chess",
     "variantTitle": "Yalta Chess",
-    "topology": "grid",
+    "topology": "hexagonal-trisection",
     "svg": "svgs/moddable-chess--yalta-chess.svg"
   },
   {

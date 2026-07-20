@@ -463,6 +463,7 @@
 .rpg-result-cat { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.7; }
 
 .rpg-no-results { color: #555; font-size: 13px; padding: 16px 0; text-align: center; }
+.rpg-results-hint { color: #666; font-size: 11px; padding: 6px 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06); }
 
 .rpg-table-label {
   padding: 8px 16px 4px;

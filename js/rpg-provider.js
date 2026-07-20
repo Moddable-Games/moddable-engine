@@ -14,26 +14,41 @@ const CAT_COLORS = {
   'pay-the-price': { accent: '#f39c12', bg: 'rgba(243,156,18,0.12)', border: 'rgba(243,156,18,0.35)' },
   'major-plot-twist': { accent: '#8e44ad', bg: 'rgba(142,68,173,0.12)', border: 'rgba(142,68,173,0.35)' },
   'challenge-rank': { accent: '#16a085', bg: 'rgba(22,160,133,0.12)', border: 'rgba(22,160,133,0.35)' },
+  'sf-core': { accent: '#5dade2', bg: 'rgba(93,173,226,0.12)', border: 'rgba(93,173,226,0.35)' },
+  'sf-characters': { accent: '#58d68d', bg: 'rgba(88,214,141,0.12)', border: 'rgba(88,214,141,0.35)' },
+  'sf-space': { accent: '#a569bd', bg: 'rgba(165,105,189,0.12)', border: 'rgba(165,105,189,0.35)' },
+  'sf-planets': { accent: '#f4d03f', bg: 'rgba(244,208,63,0.12)', border: 'rgba(244,208,63,0.35)' },
+  'sf-starships': { accent: '#eb984e', bg: 'rgba(235,152,78,0.12)', border: 'rgba(235,152,78,0.35)' },
+  'sf-creatures': { accent: '#e74c3c', bg: 'rgba(231,76,60,0.12)', border: 'rgba(231,76,60,0.35)' },
+  'sf-settlements': { accent: '#45b39d', bg: 'rgba(69,179,157,0.12)', border: 'rgba(69,179,157,0.35)' },
+  'sf-derelicts': { accent: '#7f8c8d', bg: 'rgba(127,140,141,0.12)', border: 'rgba(127,140,141,0.35)' },
+  'sf-factions': { accent: '#d4ac0d', bg: 'rgba(212,172,13,0.12)', border: 'rgba(212,172,13,0.35)' },
+  'sf-vaults': { accent: '#af7ac5', bg: 'rgba(175,122,197,0.12)', border: 'rgba(175,122,197,0.35)' },
+  'sf-misc': { accent: '#85929e', bg: 'rgba(133,146,158,0.12)', border: 'rgba(133,146,158,0.35)' },
+  'sf-moves': { accent: '#3498db', bg: 'rgba(52,152,219,0.12)', border: 'rgba(52,152,219,0.35)' },
 }
 
 function getItemLink(gameKey, cat, item) {
   if (gameKey === 'dnd-5e') {
     if (cat.id === 'spells') {
       const lvl = item.level === 0 ? 'cantrips' : `level-${item.level}`
-      return `${RULES_BASE}/dnd-5e/spells/${lvl}/`
+      return `${RULES_BASE}/dist/dnd-5e/spells/${lvl}/`
     }
     if (cat.id === 'monsters') {
       const first = (item.name || '').charAt(0).toLowerCase()
       const group = first <= 'c' ? 'a-c' : first <= 'f' ? 'd-f' : first <= 'i' ? 'g-i' : first <= 'l' ? 'j-l' : first <= 'o' ? 'm-o' : first <= 'r' ? 'p-r' : first <= 'u' ? 's-u' : 'v-z'
-      return `${RULES_BASE}/dnd-5e/monsters/${group}/`
+      return `${RULES_BASE}/dist/dnd-5e/monsters/${group}/`
     }
-    if (cat.id === 'classes') return `${RULES_BASE}/dnd-5e/classes/`
-    if (cat.id === 'magic-items') return `${RULES_BASE}/dnd-5e/magic-items/`
-    if (cat.id === 'races' || cat.id === 'conditions') return `${RULES_BASE}/dnd-5e/rules/`
-    return `${RULES_BASE}/dnd-5e/`
+    if (cat.id === 'classes') return `${RULES_BASE}/dist/dnd-5e/classes/`
+    if (cat.id === 'magic-items') return `${RULES_BASE}/dist/dnd-5e/magic-items/`
+    if (cat.id === 'races' || cat.id === 'conditions') return `${RULES_BASE}/dist/dnd-5e/rules/`
+    return `${RULES_BASE}/dist/dnd-5e/`
   }
   if (gameKey === 'ironsworn') {
-    return `${RULES_BASE}/ironsworn/`
+    return `${RULES_BASE}/dist/ironsworn/`
+  }
+  if (gameKey === 'starforged') {
+    return `${RULES_BASE}/dist/starforged/rules/oracles/`
   }
   return null
 }
@@ -65,6 +80,25 @@ const RPG_CONFIGS = {
       { id: 'challenge-rank', label: 'Challenge', file: 'challenge-rank.json', isOracle: true },
     ],
     renderCard: renderIronswornCard,
+  },
+  starforged: {
+    label: 'Starforged',
+    dataPath: (location.hostname === 'engine.moddable.games' ? 'https://rules.moddable.games/' : '/MODDABLE/moddable-rules/') + 'games/starforged/oracles/',
+    categories: [
+      { id: 'sf-core', label: 'Core', file: 'core.json', isOracle: true },
+      { id: 'sf-characters', label: 'Characters', file: 'characters.json', isOracle: true },
+      { id: 'sf-space', label: 'Space', file: 'space.json', isOracle: true },
+      { id: 'sf-planets', label: 'Planets', file: 'planets.json', isOracle: true },
+      { id: 'sf-starships', label: 'Starships', file: 'starships.json', isOracle: true },
+      { id: 'sf-creatures', label: 'Creatures', file: 'creatures.json', isOracle: true },
+      { id: 'sf-settlements', label: 'Settlements', file: 'settlements.json', isOracle: true },
+      { id: 'sf-derelicts', label: 'Derelicts', file: 'derelicts.json', isOracle: true },
+      { id: 'sf-factions', label: 'Factions', file: 'factions.json', isOracle: true },
+      { id: 'sf-vaults', label: 'Vaults', file: 'vaults.json', isOracle: true },
+      { id: 'sf-misc', label: 'Misc', file: 'misc.json', isOracle: true },
+      { id: 'sf-moves', label: 'Moves', file: 'move-oracles.json', isOracle: true },
+    ],
+    renderCard: renderStarforgedCard,
   },
 }
 
@@ -170,6 +204,7 @@ function renderResults() {
   const query = rpgState.searchQuery.toLowerCase().trim()
 
   let results = []
+  let totalCount = 0
 
   if (query) {
     for (const cat of config.categories) {
@@ -197,8 +232,10 @@ function renderResults() {
       const entries = data.flatMap(table =>
         (table.entries || []).map(e => ({ ...e, _tableName: table.name || table.id }))
       )
+      totalCount = entries.length
       results = entries.slice(0, 30).map(item => ({ item, cat }))
     } else {
+      totalCount = data.length
       results = data.slice(0, 30).map(item => ({ item, cat }))
     }
   }
@@ -209,6 +246,13 @@ function renderResults() {
   if (results.length === 0) {
     container.innerHTML = '<div class="rpg-no-results">No results</div>'
     return
+  }
+
+  if (!query && totalCount > results.length) {
+    const hint = document.createElement('div')
+    hint.className = 'rpg-results-hint'
+    hint.textContent = `Showing ${results.length} of ${totalCount} entries — search to filter`
+    container.appendChild(hint)
   }
 
   for (const { item, cat } of results) {
@@ -321,6 +365,16 @@ function renderIronswornCard(item, cat) {
     `<div class="rpg-card-title">${item.result || ''}</div>`,
     `<div class="rpg-card-meta">${item._tableName || cat.label} · Roll: ${range}</div>`,
   ]
+  return parts.join('')
+}
+
+function renderStarforgedCard(item, cat) {
+  const range = item.min === item.max ? `${item.min}` : `${item.min}-${item.max}`
+  const parts = [
+    `<div class="rpg-card-title">${item.result || ''}</div>`,
+    `<div class="rpg-card-meta">${item._tableName || cat.label} · Roll: ${range}</div>`,
+  ]
+  if (item.description) parts.push(`<div class="rpg-card-desc">${item.description}</div>`)
   return parts.join('')
 }
 
