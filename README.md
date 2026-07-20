@@ -8,7 +8,7 @@ Every game in the Moddable Games collection — from standard chess to Endless S
 
 ## Status
 
-**All classic game families implemented.** 13 plugins covering 154 variants across chess, go, draughts, reversi, mancala, backgammon, morris, hex, big 2, halma, shogi, xiangqi, and race games. Rules are a first-class resource type: parametric, composable, topology-agnostic. Shared rules (capture, promotion, repetition, turn-continuation) work across all families. 1095 tests across 87 suites, all passing.
+**All classic game families implemented.** 13 plugins covering 154 variants across chess, go, draughts, reversi, mancala, backgammon, morris, hex, big 2, halma, shogi, xiangqi, and race games. Rules are a first-class resource type: parametric, composable, topology-agnostic. Shared rules (capture, promotion, repetition, turn-continuation) work across all families. 1330 tests across 102 suites, all passing.
 
 Current milestone: **Full pipeline proof + AI adapter** — factory instantiates every variant from frontmatter config alone, then generic minimax/MCTS for pass-and-play and AI opponents.
 
@@ -102,6 +102,14 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ---
 
 ## Changelog
+
+#### 2026-07-20
+- Board gallery sync: 284 → 293 boards (10 new chess topology variants: circular, byzantine, cylindrical, spherical, mobius, klein-bottle, toroidal, toroidal-byzantine, raumschach, rollerball)
+- Added Starforged RPG with 12 oracle categories
+- RPG provider fully abstracted to manifest-driven architecture (issue #29): engine reads rpg-manifest.json from moddable-rules, no game knowledge in engine code
+- New modules: rpg-manifest-loader.js, rpg-card-renderer.js, rpg-link-resolver.js
+- Wrote topology-tableau + deal spec unified plan (issue #25, merging former #8)
+- Closed issues #1, #8, #29
 
 #### 2026-07-15
 - Production readiness: dev/main branch strategy, CNAME (engine.moddable.games)
