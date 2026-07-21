@@ -245,7 +245,11 @@ function renderWall(dealResult, deckType, deckConfig, seed, config) {
 
   const handSize = Math.max(...dealResult.hands.map(h => h.length))
   const handLen = handSize * step
-  const totalSize = Math.max(wallSquare + 140, handLen + 2 * (pad + tileH) + 40)
+  const halfSquare = wallSquare / 2
+  const inset = halfSquare + tileH
+  const minForWallClearance = 2 * (pad + tileH + inset + 10)
+  const minForHands = handLen + 2 * (pad + tileH) + 40
+  const totalSize = Math.max(minForWallClearance, minForHands)
   const w = totalSize + outerPad * 2
   const h = w
 
@@ -254,7 +258,6 @@ function renderWall(dealResult, deckType, deckConfig, seed, config) {
   els.push({ tag: 'rect', attrs: { x: outerPad, y: outerPad, width: totalSize, height: totalSize, fill: '#2d7a4f', rx: 12, stroke: '#1a4a2e', 'stroke-width': 2 } })
 
   const cx = totalSize / 2, cy = totalSize / 2
-  const halfSquare = wallSquare / 2
   const breakPoint = seed % totalStacks
   const windNames = ['South', 'East', 'North', 'West']
 
@@ -273,7 +276,6 @@ function renderWall(dealResult, deckType, deckConfig, seed, config) {
       const remaining = wallTiles - globalIdx * 2
       const height = Math.min(2, remaining)
       let tx, ty, rw, rh
-      const inset = halfSquare + tileH
       if (side === 0) { tx = cx - wallLen / 2 + i * step; ty = cy + inset - tileH; rw = tileW; rh = tileH }
       else if (side === 1) { tx = cx + inset - tileH; ty = cy + wallLen / 2 - (i + 1) * step; rw = tileH; rh = tileW }
       else if (side === 2) { tx = cx + wallLen / 2 - (i + 1) * step; ty = cy - inset; rw = tileW; rh = tileH }
