@@ -103,6 +103,17 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Changelog
 
+#### 2026-07-21
+- Implemented topology-tableau: card/dice/domino table layouts as a proper topology (issue #25)
+- 40 component game variants now render through the standard pipeline (no bespoke renderers)
+- Deal specs moved from hardcoded engine source to frontmatter in moddable-rules
+- Deleted renderers.js, render-from-resolved.js, layout.js, games:{} objects from all 6 deck files
+- Play page routes component games through frontmatter (same path as board games)
+- 40 self-contained SVGs added to boards gallery with embedded piece artwork
+- Snapshot pipeline expanded to cover content/games/ directory structure
+- 1367 tests across 104 suites, 332 snapshots byte-identical
+- Closed issue #25
+
 #### 2026-07-20
 - Board gallery sync: 284 → 293 boards (10 new chess topology variants: circular, byzantine, cylindrical, spherical, mobius, klein-bottle, toroidal, toroidal-byzantine, raumschach, rollerball)
 - Added Starforged RPG with 12 oracle categories
