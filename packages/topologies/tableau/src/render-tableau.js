@@ -245,8 +245,7 @@ function renderWall(dealResult, deckType, deckConfig, seed, config) {
 
   const handSize = Math.max(...dealResult.hands.map(h => h.length))
   const handLen = handSize * step
-  const handMargin = tileH + pad + 20
-  const totalSize = Math.max(wallSquare + handMargin * 2 + tileH * 2, handLen + 2 * (pad + tileH) + 40)
+  const totalSize = Math.max(wallSquare + 140, handLen + 2 * (pad + tileH) + 40)
   const w = totalSize + outerPad * 2
   const h = w
 
