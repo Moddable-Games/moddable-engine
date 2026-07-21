@@ -15,7 +15,7 @@ export function renderTableauLayout(config) {
   const colors = config.colors || {}
   const render = config.render || {}
 
-  const deckType = components.deck?.type || (components.dice ? 'standard-dice' : resolveTilesType(components.tiles))
+  const deckType = resolveDeckType(components)
   const deckConfig = deckType ? getDeckConfig(deckType) : null
 
   if (!deckConfig) {
@@ -234,7 +234,7 @@ function renderTableauSolitaire(dealResult, deckType, deckConfig, seed, config) 
 }
 
 function renderWall(dealResult, deckType, deckConfig, seed, config) {
-  const tileW = 30, tileH = 40, tileGap = 2, pad = 20, outerPad = 20
+  const tileW = 30, tileH = 40, tileGap = 2, stackOffset = 3, pad = 20, outerPad = 20
   const tileSet = config.deal?.tileSet || 'mahjong-regular'
   const wallTiles = dealResult.drawPile.length
   const totalStacks = Math.ceil(wallTiles / 2)
@@ -245,7 +245,8 @@ function renderWall(dealResult, deckType, deckConfig, seed, config) {
 
   const handSize = Math.max(...dealResult.hands.map(h => h.length))
   const handLen = handSize * step
-  const totalSize = Math.max(wallSquare + 140, handLen + 2 * (pad + tileH) + 40)
+  const handMargin = tileH + pad + 20
+  const totalSize = Math.max(wallSquare + handMargin * 2 + tileH * 2, handLen + 2 * (pad + tileH) + 40)
   const w = totalSize + outerPad * 2
   const h = w
 
@@ -506,4 +507,11 @@ function resolveTilesType(tiles) {
   if (tiles.type) return tiles.type
   if (tiles.total === 136 || tiles.total === 144 || tiles.total === 152) return 'mahjong-136'
   return null
+}
+
+function resolveDeckType(components) {
+  if (components.deck?.type) return components.deck.type
+  if (components.cards?.deck) return components.cards.deck
+  if (components.dice) return 'standard-dice'
+  return resolveTilesType(components.tiles)
 }
