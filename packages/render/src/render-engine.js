@@ -12,10 +12,11 @@ import { renderGraphLayout } from '../../topologies/graph/src/topology-graph.js'
 import { renderPitLayout } from '../../topologies/pit/src/topology-pit.js'
 import { renderTrackLayout } from '../../topologies/track/src/topology-track.js'
 import { renderHexLayout } from '../../topologies/hex/src/topology-hex.js'
+import { renderTableauLayout } from '../../topologies/tableau/src/render-tableau.js'
 import { elementsToFragment, elementToSvg } from './serialize-layout.js'
 import { renderSurfaceSVG } from './piece-surface.js'
 
-const RENDER_FN = { grid: renderGridLayout, graph: renderGraphLayout, pit: renderPitLayout, track: renderTrackLayout, hex: renderHexLayout }
+const RENDER_FN = { grid: renderGridLayout, graph: renderGraphLayout, pit: renderPitLayout, track: renderTrackLayout, hex: renderHexLayout, tableau: renderTableauLayout }
 
 // --- Piece image resolution ---
 

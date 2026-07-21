@@ -413,8 +413,8 @@ async function render() {
 
   const entry = manifestIndex[`${state.game}/${state.variant}`]
 
-  if (entry && entry.topology === 'cards') {
-    renderComponentGame(entry)
+  if (entry && entry.reason === 'component-game') {
+    renderComponentGameFromFrontmatter(entry)
     updateRulesLink()
     return
   }
@@ -543,6 +543,45 @@ function renderHexGenerator(entry) {
   }
   document.getElementById('hex-style-group').style.display = gameConfig.styles ? '' : 'none'
   document.getElementById('hex-seed-group').style.display = ''
+}
+
+async function renderComponentGameFromFrontmatter(entry) {
+  const basePath = RULES_BASE + 'games/'
+  const familyPath = state.game + '/content/rulebook.md'
+  const variantPath = state.game + '/content/games/' + state.variant + '/standard.md'
+
+  document.getElementById('hex-seed-group').style.display = ''
+
+  try {
+    const { resolved, errors } = await loadVariant({ familyPath, variantPath, basePath })
+    if (errors && errors.length > 0) {
+      showSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="80"><text x="200" y="40" text-anchor="middle" font-size="12" fill="#f44">${errors.join('; ')}</text></svg>`)
+      return
+    }
+
+    resolved.setup = { seed: state.seed || 42 }
+
+    const target = document.getElementById('board-svg')
+    await renderFromResolved(resolved, target)
+    target.classList.add('active')
+    document.getElementById('board-empty').style.display = 'none'
+    bindDeckHover()
+    const deal = resolved.deal || {}
+    showInfo({
+      deckType: resolved.components?.deck?.type || entry.deckType,
+      gameKey: state.variant,
+      seed: state.seed,
+      players: deal.defaultPlayers || 4,
+      cardsPerHand: deal.perPlayer === 'all' ? '(all)' : (deal.perPlayer || 0),
+      community: deal.community || 0,
+      drawPile: '',
+      label: entry.variantTitle,
+    })
+    requestAnimationFrame(fitToView)
+  } catch (e) {
+    showSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="100"><rect width="600" height="100" fill="#1a1a2e" rx="8"/><text x="300" y="35" text-anchor="middle" font-size="13" fill="#f44" font-family="system-ui">New pipeline failed: ${e.message}</text><text x="300" y="60" text-anchor="middle" font-size="11" fill="#888" font-family="system-ui">${state.game}/${state.variant}</text></svg>`)
+    console.error('tableau pipeline error:', e)
+  }
 }
 
 function renderComponentGame(entry) {

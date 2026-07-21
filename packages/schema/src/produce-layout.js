@@ -24,6 +24,7 @@ export function produceLayout(engine) {
     case 'track': return produceTrackLayout(topo, colors, render)
     case 'pit': return producePitLayout(topo, colors, render)
     case 'graph': return produceGraphLayout(topo, colors, render)
+    case 'tableau': return produceTableauLayout(topo, colors, render, engine)
     default: return null
   }
 }
@@ -1534,6 +1535,11 @@ function seedLayout(count, r) {
     result.push([(col - (rowCount - 1) / 2) * gap * 0.8, (row - (Math.ceil(count / side) - 1) / 2) * gap * 0.8])
   }
   return result
+}
+
+function produceTableauLayout(topo, colors, render, engine) {
+  const config = { ...topo, colors, render, deal: engine?.deal, components: engine?.components, meta: engine?.meta, seed: engine?.setup?.seed || 42 }
+  return { type: 'tableau', config }
 }
 
 function produceGraphLayout(topo, colors, render) {
