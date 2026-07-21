@@ -88,6 +88,22 @@
     "svg": "svgs/backgammon--standard.svg"
   },
   {
+    "family": "bavarian-32",
+    "familyTitle": "Bavarian 32-Card Deck",
+    "variant": "schafkopf",
+    "variantTitle": "Schafkopf",
+    "topology": "tableau",
+    "svg": "svgs/bavarian-32--schafkopf.svg"
+  },
+  {
+    "family": "bavarian-32",
+    "familyTitle": "Bavarian 32-Card Deck",
+    "variant": "skat",
+    "variantTitle": "Skat",
+    "topology": "tableau",
+    "svg": "svgs/bavarian-32--skat.svg"
+  },
+  {
     "family": "chaupar",
     "familyTitle": "Chaupar — Official Rulebook",
     "variant": "standard",
@@ -102,6 +118,38 @@
     "variantTitle": "Dou Shou Qi (Standard)",
     "topology": "grid",
     "svg": "svgs/dou-shou-qi--standard.svg"
+  },
+  {
+    "family": "double-six-dominoes",
+    "familyTitle": "Double-Six Dominoes",
+    "variant": "all-fives",
+    "variantTitle": "All Fives",
+    "topology": "tableau",
+    "svg": "svgs/double-six-dominoes--all-fives.svg"
+  },
+  {
+    "family": "double-six-dominoes",
+    "familyTitle": "Double-Six Dominoes",
+    "variant": "block",
+    "variantTitle": "Block",
+    "topology": "tableau",
+    "svg": "svgs/double-six-dominoes--block.svg"
+  },
+  {
+    "family": "double-six-dominoes",
+    "familyTitle": "Double-Six Dominoes",
+    "variant": "chickenfoot",
+    "variantTitle": "Chickenfoot",
+    "topology": "tableau",
+    "svg": "svgs/double-six-dominoes--chickenfoot.svg"
+  },
+  {
+    "family": "double-six-dominoes",
+    "familyTitle": "Double-Six Dominoes",
+    "variant": "mexican-train",
+    "variantTitle": "Mexican Train",
+    "topology": "tableau",
+    "svg": "svgs/double-six-dominoes--mexican-train.svg"
   },
   {
     "family": "draughts",
@@ -302,6 +350,38 @@
     "variantTitle": "Fanorona (Standard)",
     "topology": "grid",
     "svg": "svgs/fanorona--standard.svg"
+  },
+  {
+    "family": "flower-48",
+    "familyTitle": "Hanafuda (Flower Cards)",
+    "variant": "go-stop",
+    "variantTitle": "Go Stop",
+    "topology": "tableau",
+    "svg": "svgs/flower-48--go-stop.svg"
+  },
+  {
+    "family": "flower-48",
+    "familyTitle": "Hanafuda (Flower Cards)",
+    "variant": "hana-awase",
+    "variantTitle": "Hana Awase",
+    "topology": "tableau",
+    "svg": "svgs/flower-48--hana-awase.svg"
+  },
+  {
+    "family": "flower-48",
+    "familyTitle": "Hanafuda (Flower Cards)",
+    "variant": "koi-koi",
+    "variantTitle": "Koi Koi",
+    "topology": "tableau",
+    "svg": "svgs/flower-48--koi-koi.svg"
+  },
+  {
+    "family": "flower-48",
+    "familyTitle": "Hanafuda (Flower Cards)",
+    "variant": "oicho-kabu",
+    "variantTitle": "Oicho Kabu",
+    "topology": "tableau",
+    "svg": "svgs/flower-48--oicho-kabu.svg"
   },
   {
     "family": "go",
@@ -566,6 +646,46 @@
     "variantTitle": "Tri-Tactics",
     "topology": "grid",
     "svg": "svgs/lattaque--tri-tactics.svg"
+  },
+  {
+    "family": "mahjong",
+    "familyTitle": "Mahjong",
+    "variant": "american-classic",
+    "variantTitle": "American Classic",
+    "topology": "tableau",
+    "svg": "svgs/mahjong--american-classic.svg"
+  },
+  {
+    "family": "mahjong",
+    "familyTitle": "Mahjong",
+    "variant": "hong-kong",
+    "variantTitle": "Hong Kong",
+    "topology": "tableau",
+    "svg": "svgs/mahjong--hong-kong.svg"
+  },
+  {
+    "family": "mahjong",
+    "familyTitle": "Mahjong",
+    "variant": "riichi",
+    "variantTitle": "Riichi",
+    "topology": "tableau",
+    "svg": "svgs/mahjong--riichi.svg"
+  },
+  {
+    "family": "mahjong",
+    "familyTitle": "Mahjong",
+    "variant": "taiwanese",
+    "variantTitle": "Taiwanese",
+    "topology": "tableau",
+    "svg": "svgs/mahjong--taiwanese.svg"
+  },
+  {
+    "family": "mahjong",
+    "familyTitle": "Mahjong",
+    "variant": "zung-jung",
+    "variantTitle": "Zung Jung",
+    "topology": "tableau",
+    "svg": "svgs/mahjong--zung-jung.svg"
   },
   {
     "family": "mancala",
@@ -2198,6 +2318,206 @@
     "variantTitle": "Yari Shogi",
     "topology": "grid",
     "svg": "svgs/shogi--yari-shogi.svg"
+  },
+  {
+    "family": "standard-52",
+    "familyTitle": "Standard 52-Card Deck",
+    "variant": "big2",
+    "variantTitle": "Big2",
+    "topology": "tableau",
+    "svg": "svgs/standard-52--big2.svg"
+  },
+  {
+    "family": "standard-52",
+    "familyTitle": "Standard 52-Card Deck",
+    "variant": "blackjack",
+    "variantTitle": "Blackjack",
+    "topology": "tableau",
+    "svg": "svgs/standard-52--blackjack.svg"
+  },
+  {
+    "family": "standard-52",
+    "familyTitle": "Standard 52-Card Deck",
+    "variant": "bridge",
+    "variantTitle": "Bridge",
+    "topology": "tableau",
+    "svg": "svgs/standard-52--bridge.svg"
+  },
+  {
+    "family": "standard-52",
+    "familyTitle": "Standard 52-Card Deck",
+    "variant": "canasta",
+    "variantTitle": "Canasta",
+    "topology": "tableau",
+    "svg": "svgs/standard-52--canasta.svg"
+  },
+  {
+    "family": "standard-52",
+    "familyTitle": "Standard 52-Card Deck",
+    "variant": "crazy-eights",
+    "variantTitle": "Crazy Eights",
+    "topology": "tableau",
+    "svg": "svgs/standard-52--crazy-eights.svg"
+  },
+  {
+    "family": "standard-52",
+    "familyTitle": "Standard 52-Card Deck",
+    "variant": "cribbage",
+    "variantTitle": "Cribbage",
+    "topology": "tableau",
+    "svg": "svgs/standard-52--cribbage.svg"
+  },
+  {
+    "family": "standard-52",
+    "familyTitle": "Standard 52-Card Deck",
+    "variant": "cribbage-four-player",
+    "variantTitle": "Cribbage Four Player",
+    "topology": "tableau",
+    "svg": "svgs/standard-52--cribbage-four-player.svg"
+  },
+  {
+    "family": "standard-52",
+    "familyTitle": "Standard 52-Card Deck",
+    "variant": "cribbage-three-player",
+    "variantTitle": "Cribbage Three Player",
+    "topology": "tableau",
+    "svg": "svgs/standard-52--cribbage-three-player.svg"
+  },
+  {
+    "family": "standard-52",
+    "familyTitle": "Standard 52-Card Deck",
+    "variant": "euchre",
+    "variantTitle": "Euchre",
+    "topology": "tableau",
+    "svg": "svgs/standard-52--euchre.svg"
+  },
+  {
+    "family": "standard-52",
+    "familyTitle": "Standard 52-Card Deck",
+    "variant": "freecell",
+    "variantTitle": "Freecell",
+    "topology": "tableau",
+    "svg": "svgs/standard-52--freecell.svg"
+  },
+  {
+    "family": "standard-52",
+    "familyTitle": "Standard 52-Card Deck",
+    "variant": "gin-rummy",
+    "variantTitle": "Gin Rummy",
+    "topology": "tableau",
+    "svg": "svgs/standard-52--gin-rummy.svg"
+  },
+  {
+    "family": "standard-52",
+    "familyTitle": "Standard 52-Card Deck",
+    "variant": "hearts",
+    "variantTitle": "Hearts",
+    "topology": "tableau",
+    "svg": "svgs/standard-52--hearts.svg"
+  },
+  {
+    "family": "standard-52",
+    "familyTitle": "Standard 52-Card Deck",
+    "variant": "klondike",
+    "variantTitle": "Klondike",
+    "topology": "tableau",
+    "svg": "svgs/standard-52--klondike.svg"
+  },
+  {
+    "family": "standard-52",
+    "familyTitle": "Standard 52-Card Deck",
+    "variant": "poker",
+    "variantTitle": "Poker",
+    "topology": "tableau",
+    "svg": "svgs/standard-52--poker.svg"
+  },
+  {
+    "family": "standard-52",
+    "familyTitle": "Standard 52-Card Deck",
+    "variant": "president",
+    "variantTitle": "President",
+    "topology": "tableau",
+    "svg": "svgs/standard-52--president.svg"
+  },
+  {
+    "family": "standard-52",
+    "familyTitle": "Standard 52-Card Deck",
+    "variant": "rummy",
+    "variantTitle": "Rummy",
+    "topology": "tableau",
+    "svg": "svgs/standard-52--rummy.svg"
+  },
+  {
+    "family": "standard-52",
+    "familyTitle": "Standard 52-Card Deck",
+    "variant": "spades",
+    "variantTitle": "Spades",
+    "topology": "tableau",
+    "svg": "svgs/standard-52--spades.svg"
+  },
+  {
+    "family": "standard-52",
+    "familyTitle": "Standard 52-Card Deck",
+    "variant": "spider-solitaire",
+    "variantTitle": "Spider Solitaire",
+    "topology": "tableau",
+    "svg": "svgs/standard-52--spider-solitaire.svg"
+  },
+  {
+    "family": "standard-52",
+    "familyTitle": "Standard 52-Card Deck",
+    "variant": "war",
+    "variantTitle": "War",
+    "topology": "tableau",
+    "svg": "svgs/standard-52--war.svg"
+  },
+  {
+    "family": "standard-52",
+    "familyTitle": "Standard 52-Card Deck",
+    "variant": "whist",
+    "variantTitle": "Whist",
+    "topology": "tableau",
+    "svg": "svgs/standard-52--whist.svg"
+  },
+  {
+    "family": "standard-dice",
+    "familyTitle": "Standard Dice",
+    "variant": "bunco",
+    "variantTitle": "Bunco",
+    "topology": "tableau",
+    "svg": "svgs/standard-dice--bunco.svg"
+  },
+  {
+    "family": "standard-dice",
+    "familyTitle": "Standard Dice",
+    "variant": "craps",
+    "variantTitle": "Craps",
+    "topology": "tableau",
+    "svg": "svgs/standard-dice--craps.svg"
+  },
+  {
+    "family": "standard-dice",
+    "familyTitle": "Standard Dice",
+    "variant": "farkle",
+    "variantTitle": "Farkle",
+    "topology": "tableau",
+    "svg": "svgs/standard-dice--farkle.svg"
+  },
+  {
+    "family": "standard-dice",
+    "familyTitle": "Standard Dice",
+    "variant": "liars-dice",
+    "variantTitle": "Liars Dice",
+    "topology": "tableau",
+    "svg": "svgs/standard-dice--liars-dice.svg"
+  },
+  {
+    "family": "standard-dice",
+    "familyTitle": "Standard Dice",
+    "variant": "yahtzee",
+    "variantTitle": "Yahtzee",
+    "topology": "tableau",
+    "svg": "svgs/standard-dice--yahtzee.svg"
   },
   {
     "family": "stern-halma",
