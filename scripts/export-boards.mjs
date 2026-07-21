@@ -64,11 +64,30 @@ for (const family of families) {
   }
 
   const varDir = resolve(GAMES_DIR, family, 'content', 'variants')
-  if (!existsSync(varDir)) continue
+  const gamesDir = resolve(GAMES_DIR, family, 'content', 'games')
 
-  for (const file of readdirSync(varDir).filter(f => f.endsWith('.md'))) {
-    const slug = basename(file, '.md')
-    const { meta } = parseFrontmatter(readFileSync(resolve(varDir, file), 'utf8'))
+  const variantFiles = []
+  if (existsSync(varDir)) {
+    for (const file of readdirSync(varDir).filter(f => f.endsWith('.md'))) {
+      variantFiles.push({ slug: basename(file, '.md'), path: resolve(varDir, file) })
+    }
+  }
+  if (existsSync(gamesDir)) {
+    for (const gameDir of readdirSync(gamesDir)) {
+      const stdPath = resolve(gamesDir, gameDir, 'standard.md')
+      if (existsSync(stdPath)) variantFiles.push({ slug: gameDir, path: stdPath })
+      const dirPath = resolve(gamesDir, gameDir)
+      if (existsSync(dirPath)) {
+        for (const alt of readdirSync(dirPath).filter(f => f.endsWith('.md') && f !== 'standard.md')) {
+          variantFiles.push({ slug: `${gameDir}-${basename(alt, '.md')}`, path: resolve(dirPath, alt) })
+        }
+      }
+    }
+  }
+  if (variantFiles.length === 0) continue
+
+  for (const { slug, path: variantPath } of variantFiles) {
+    const { meta } = parseFrontmatter(readFileSync(variantPath, 'utf8'))
     const variantEngine = meta.engine
 
     if (!variantEngine && !familyEngine) { skipped++; continue }

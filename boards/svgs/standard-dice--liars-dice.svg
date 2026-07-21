@@ -1,3 +1,92 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 735.9797974644666 543.9797974644666" width="735.9797974644666" height="543.9797974644666">
-<rect x="0" y="0" width="735.9797974644666" height="543.9797974644666" fill="#1b5e3a" rx="16"/><rect x="20" y="20" width="695.9797974644666" height="503.9797974644666" fill="#2d7a4f" rx="12" stroke="#1a4a2e" stroke-width="2"/><g class="hand" data-zone="Player 1 — 5 cards (visible)"><g data-card="2"><image href="../pieces/sets/playstrategy-backgammon/wdicefive.svg" x="239.9898987322333" y="50" width="48" height="48" preserveAspectRatio="xMidYMid meet"/></g><g data-card="6"><image href="../pieces/sets/playstrategy-backgammon/wdiceone.svg" x="291.9898987322333" y="50" width="48" height="48" preserveAspectRatio="xMidYMid meet"/></g><g data-card="6"><image href="../pieces/sets/playstrategy-backgammon/wdicetwo.svg" x="343.9898987322333" y="50" width="48" height="48" preserveAspectRatio="xMidYMid meet"/></g><g data-card="2"><image href="../pieces/sets/playstrategy-backgammon/wdicesix.svg" x="395.9898987322333" y="50" width="48" height="48" preserveAspectRatio="xMidYMid meet"/></g><g data-card="2"><image href="../pieces/sets/playstrategy-backgammon/wdicethree.svg" x="447.9898987322333" y="50" width="48" height="48" preserveAspectRatio="xMidYMid meet"/></g></g><text x="367.9898987322333" y="44" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.6)" font-family="system-ui">Player 1 (5)</text><g class="hand" data-zone="Player 2 — 5 cards (hidden)"><rect x="437.9797974644666" y="247.9898987322333" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="489.9797974644666" y="247.9898987322333" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="541.9797974644666" y="247.9898987322333" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="593.9797974644666" y="247.9898987322333" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="645.9797974644666" y="247.9898987322333" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/></g><text x="565.9797974644666" y="241.9898987322333" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.6)" font-family="system-ui">Player 2 (5)</text><g class="hand" data-zone="Player 3 — 5 cards (hidden)"><rect x="239.9898987322333" y="445.9797974644666" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="291.9898987322333" y="445.9797974644666" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="343.9898987322333" y="445.9797974644666" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="395.9898987322333" y="445.9797974644666" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="447.9898987322333" y="445.9797974644666" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/></g><text x="367.9898987322333" y="507.9797974644666" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.6)" font-family="system-ui">Player 3 (5)</text><g class="hand" data-zone="Player 4 — 5 cards (hidden)"><rect x="42" y="247.9898987322333" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="94" y="247.9898987322333" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="146" y="247.9898987322333" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="198" y="247.9898987322333" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="250" y="247.9898987322333" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/></g><text x="170" y="241.9898987322333" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.6)" font-family="system-ui">Player 4 (5)</text><text x="367.9898987322333" y="537.9797974644666" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.3)" font-family="system-ui">Standard Dice · seed: 42</text>
+<defs>
+<symbol id="piece-playstrategy-backgammon-wdicefive" viewBox="0 0 87 87"><image id="image0" width="87" height="87" x="0" y="0"
+    href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFcAAABXCAMAAABGFileAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
+AAB6JQAAgIMAAPn/AACA6QAAdTAAAOpgAAA6mAAAF2+SX8VGAAAAn1BMVEX///9BQUNBQUNBQUNB
+QUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNFRUempaHm5N3z8OmmpKGgnpzv
+7OW3tbF/fn1XV1hJSUtdXF24trK6uLRaWlrx7ueTkpBVVFVUVFWzsq6zsa18e3p7enlXVldGRkhK
+SktcW1zu6+STkY+Mi4mMiom5t7NEREahn5zn5N7///9UuppcAAAAEHRSTlMABm7H8xvP0Adt+fjR
+b8v03bb1CgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfoAgcLOi4k
+/mTBAAABwklEQVRYw+3ZbU/CMBQF4LHxqiJ3UEXQAVMURFGR///fZDrYoL2jJ7ksxPR+PnmybO1O
+mnqem2wqflAliakGfiVja3UR9G/qtd3TSrJEjWbqtojCbk9JTK8bErVSNyC6EVGTuSUKUveCSOZp
+f5+Y6DJ1N+9EjFVqo5Xp9u8Gw/D+YRD1LQxT2OyOxtvlMh4dZY1hkzuJ8wsxnhSqTNjkxvsrPC50
+mbDBjQ63TlTAcmHd7T8eRp/4j8eGdXeq7/Vn1mXDuvuiR2esy4Z1d65H56zLhnX3VY+GrMuGdXeB
+uAt79w15D2y4vO92qnVmWOrvrMuGqbR9rNRyP7lURcOETe7kI5/8PPKfNIfJ+F//yn7VkTo2xjAx
+PTSdDVer4Wxq1UOGMJXbm//Eta9/yAXqH3Ch+gdcqP7tXei3Ye9C9Q+40G8ZcKEaAVyo/gEXqn/A
+heofcKH6P4Pvdqp1BtX/GexjsP4BF6p/wIXqH3KB+sdc+ynZdedu5c7d7tydd9252527y9jH7tzt
+zt3JSN8HVFNX9P7iO7u/8JP7lrWIuk7uW/zUbTZIcq6290Oy91mN3X2W51Xa1x0RtHPdzt2/ufF+
+AHQX65PfLFE5AAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDI0LTAyLTA3VDExOjU4OjQ2KzAwOjAwHPPk
+8wAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyNC0wMi0wN1QxMTo1ODo0NiswMDowMG2uXE8AAAAodEVY
+dGRhdGU6dGltZXN0YW1wADIwMjQtMDItMDdUMTE6NTg6NDYrMDA6MDA6u32QAAAAAElFTkSuQmCC" /></symbol>
+<symbol id="piece-playstrategy-backgammon-wdiceone" viewBox="0 0 87 87"><image id="image0" width="87" height="87" x="0" y="0"
+    href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFcAAABXCAMAAABGFileAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
+AAB6JQAAgIMAAPn/AACA6QAAdTAAAOpgAAA6mAAAF2+SX8VGAAAAn1BMVEX///9BQUNBQUNBQUNB
+QUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNFRUempaHm5N3z8OmmpKGgnpzv
+7OW3tbF/fn1XV1hJSUtdXF24trK6uLRaWlrx7ueTkpBVVFVUVFWzsq6zsa18e3p7enlXVldGRkhK
+SktcW1zu6+STkY+Mi4mMiom5t7NEREahn5zn5N7///9UuppcAAAAEHRSTlMABm7H8xvP0Adt+fjR
+b8v03bb1CgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfoAgcLOi29
+9zV7AAABM0lEQVRYw+3ZW2+CQBAF4OWiaOtl0KlbaVGsKF6qrfX//zehXQWlSWNy9qlznsmXzcIu
+kxylJGUc1/MJEd9znZJtNCHoT5qNy2qRLFHQMm6bKBwMGZHhICRqG9cjeoKoRUZEnnEfiDCr/V4x
+0aNx8z2Bscy5Jq644oorrrjiimvR1c/jKHx5Hcca6k6m52lxOsG5yaw6h84SlHvF5jDIjW8n5xji
+6rdbd64Rblof9RcId1l3M4S7qrsrhLuuuyHC3Vhyt5b2wdZ7s/Wd/XIu3hGurXPMvLtmdwxyk32V
+/YDdk8yf5b0e//HoXS7rNIsOhyhLsf+hOyKuuOKKK6644v4HF90H+MaF9hdfZX/hFn3LEaIei77F
+NW4rIGQ6534I22cFlz5LKafb60PQfq9b6d8k6gQjG+8DH2pNzQAAACV0RVh0ZGF0ZTpjcmVhdGUA
+MjAyNC0wMi0wN1QxMTo1ODo0NSswMDowMC0b/m4AAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjQtMDIt
+MDdUMTE6NTg6NDUrMDA6MDBcRkbSAAAAKHRFWHRkYXRlOnRpbWVzdGFtcAAyMDI0LTAyLTA3VDEx
+OjU4OjQ1KzAwOjAwC1NnDQAAAABJRU5ErkJggg==" /></symbol>
+<symbol id="piece-playstrategy-backgammon-wdicetwo" viewBox="0 0 87 87"><image id="image0" width="87" height="87" x="0" y="0"
+    href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFcAAABXCAMAAABGFileAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
+AAB6JQAAgIMAAPn/AACA6QAAdTAAAOpgAAA6mAAAF2+SX8VGAAAAn1BMVEX///9BQUNBQUNBQUNB
+QUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNFRUempaHm5N3z8OmmpKGgnpzv
+7OW3tbF/fn1XV1hJSUtdXF24trK6uLRaWlrx7ueTkpBVVFVUVFWzsq6zsa18e3p7enlXVldGRkhK
+SktcW1zu6+STkY+Mi4mMiom5t7NEREahn5zn5N7///9UuppcAAAAEHRSTlMABm7H8xvP0Adt+fjR
+b8v03bb1CgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfoAgcLOi4k
+/mTBAAABgUlEQVRYw+3Z3VLCMBAF4P5BQQW2EK1UC0WrRRAVef93s9VAodVkJjnxQrO3nfkmkzSb
+M7OOY6su1/MDQlTge27NdroQ9Ku6ncNqkSxR2ONunygaTxiiJuOIqM9dn+gSolZ1ReRz94wIs9rP
+FROdc7fcExjLWKlZ17r/1I2vp0l0cztNY6g7m++713yGc7PFcV9cZCj3hC1hkJs2O3kKceO7pnsf
+I9y8/fQ8INzHtlsg3GXbXSLcp7YbIdyVIXdtaB9MnZup/+ybe/GMcE3dY8Y2p+yGgdzs5Zh9hfVJ
+xt7qvp42Pmm5LM6LZLtNihz7DgnKuta17l93f863Wq4g32q4wnyr4QrzrborfheVXUm+VXYluUPZ
+leQkZVeSb5VdSb5VdleG3LWhfTB1bqb+M0m+VXZN3WNJvtVwhflWwxXmWy1XkG/1XPWyrnV/10XP
+AwLuQucX7/X8wqvmLTuIuqvmLR53eyEh62I/H8LOs8LDPMtx3MFwBEFHw8HR/M2W8wFdmO4n7jDm
+9gAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyNC0wMi0wN1QxMTo1ODo0NiswMDowMBzz5PMAAAAldEVY
+dGRhdGU6bW9kaWZ5ADIwMjQtMDItMDdUMTE6NTg6NDYrMDA6MDBtrlxPAAAAKHRFWHRkYXRlOnRp
+bWVzdGFtcAAyMDI0LTAyLTA3VDExOjU4OjQ2KzAwOjAwOrt9kAAAAABJRU5ErkJggg==" /></symbol>
+<symbol id="piece-playstrategy-backgammon-wdicesix" viewBox="0 0 87 87"><image id="image0" width="87" height="87" x="0" y="0"
+    href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFcAAABXCAMAAABGFileAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
+AAB6JQAAgIMAAPn/AACA6QAAdTAAAOpgAAA6mAAAF2+SX8VGAAAAn1BMVEX///9BQUNBQUNBQUNB
+QUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNFRUempaHm5N3z8OmmpKGgnpzv
+7OW3tbF/fn1XV1hJSUtdXF24trK6uLRaWlrx7ueTkpBVVFVUVFWzsq6zsa18e3p7enlXVldGRkhK
+SktcW1zu6+STkY+Mi4mMiom5t7NEREahn5zn5N7///9UuppcAAAAEHRSTlMABm7H8xvP0Adt+fjR
+b8v03bb1CgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfoAgcLOi9T
++VRXAAABd0lEQVRYw+2Zb1OCQBDG+adopS56RVIoFIVZVub3/25JHIJC212zDNO0z9tn9jcHu3fP
+izUMVinTsh2gkGNbZont9Umgufq9w2kpsQDuQHKHAN50Jig0m3oAQ8m1AS5JqJmuAGzJPQOgOe3X
+iQHOJXf/T8iwQuxpXXD963ng3dzOQ7+pGHFx7mJZjM1yIbRcjBvF1YGMIx0X48bHkx7ruAg3PL1C
+obqLcP2708p7X9XFuEn9zj+ouhj3sV6ZqroYd1WvXKm6GPepXumpuhh3jVauf819Rr8Ud7voW1tz
+1jD5L6puF/dYiM1x4UbHxbjRa7XwLdJxAX3X38uXOxRaLvyQQ0kabLdBmjTn0PcudJObf43LOS84
+53NxzufinG+3b5zzhTjny/ZwzudfynnMeZyL8zgX53G7feM8LsR5XLbn/+Ux9T7AkVzS/cVHub+w
+sn3LjoS6y/YtluQOXKDURbEfot1nuYd9lmGYo/GEBDoZjyr7N5bxCbBM6reT8XLRAAAAJXRFWHRk
+YXRlOmNyZWF0ZQAyMDI0LTAyLTA3VDExOjU4OjQ3KzAwOjAwuoTvRwAAACV0RVh0ZGF0ZTptb2Rp
+ZnkAMjAyNC0wMi0wN1QxMTo1ODo0NyswMDowMMvZV/sAAAAodEVYdGRhdGU6dGltZXN0YW1wADIw
+MjQtMDItMDdUMTE6NTg6NDcrMDA6MDCczHYkAAAAAElFTkSuQmCC" /></symbol>
+<symbol id="piece-playstrategy-backgammon-wdicethree" viewBox="0 0 87 87"><image id="image0" width="87" height="87" x="0" y="0"
+    href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFcAAABXCAMAAABGFileAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
+AAB6JQAAgIMAAPn/AACA6QAAdTAAAOpgAAA6mAAAF2+SX8VGAAAAn1BMVEX///9BQUNBQUNBQUNB
+QUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNFRUempaHm5N3z8OmmpKGgnpzv
+7OW3tbF/fn1XV1hJSUtdXF24trK6uLRaWlrx7ueTkpBVVFVUVFWzsq6zsa18e3p7enlXVldGRkhK
+SktcW1zu6+STkY+Mi4mMiom5t7NEREahn5zn5N7///9UuppcAAAAEHRSTlMABm7H8xvP0Adt+fjR
+b8v03bb1CgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfoAgcLOi4k
+/mTBAAABxUlEQVRYw+3Z3VLCQAwF4NLyqwIprFbQAkUUBFGR9383QQsF2p1JZk/UcchlL77Z2W5y
+LuJ558qq5AdlQlQ58EsZW6lC0O+qVvanRbJEtXrqNojCTtcgqtsJiRqpGxBdQ9Rt3RAFqXtBhDnt
+14mJLlN3cycw1piN9mfd6LbXD+/ue3EEdQfD3dsaDnDuKDl8tckI5SbH7ZCA3Pi0z2KIG41P3YcI
+4U7yg+ER4T7l3SnCneXdGcJ9zrshwp0ruQule9D6b1rvrKAvXhCuVh8bszxmlwbkjl4P2TfYnDTm
+PZvr8f4jwDXRZNpfrfrTCTaHCutfu0WBDnALA93ZtQS6s2sJdFfXNggcXWugO7rWQevoWoPB0bUG
+uqNrDXRHd67kLpTuQeu/ab0za6A7ulp9bA10Z9cS6M6uJdABbmGgI1xB/bArSF6JK0levitLXr4r
+S162K+xYritNXq4rnYhcVzrBua40ebmuNHm5rjR5ua40eX/7v2m9M2nycl2tPpYmL9+VJS/flSWv
+xJUkr8h1Ln0XvQ8opy50f/GR7S/87b5lDVHX232Ln7r1GiHrarcfwu6zavt9lueVmq02BG23mgf7
+t3N5n0q97Uv1FnpEAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDI0LTAyLTA3VDExOjU4OjQ2KzAwOjAw
+HPPk8wAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyNC0wMi0wN1QxMTo1ODo0NiswMDowMG2uXE8AAAAo
+dEVYdGRhdGU6dGltZXN0YW1wADIwMjQtMDItMDdUMTE6NTg6NDYrMDA6MDA6u32QAAAAAElFTkSu
+QmCC" /></symbol>
+</defs>
+<rect x="0" y="0" width="735.9797974644666" height="543.9797974644666" fill="#1b5e3a" rx="16"/><rect x="20" y="20" width="695.9797974644666" height="503.9797974644666" fill="#2d7a4f" rx="12" stroke="#1a4a2e" stroke-width="2"/><g class="hand" data-zone="Player 1 — 5 cards (visible)"><g data-card="2"><use href="#piece-playstrategy-backgammon-wdicefive" x="239.9898987322333" y="50" width="48" height="48"/></g><g data-card="6"><use href="#piece-playstrategy-backgammon-wdiceone" x="291.9898987322333" y="50" width="48" height="48"/></g><g data-card="6"><use href="#piece-playstrategy-backgammon-wdicetwo" x="343.9898987322333" y="50" width="48" height="48"/></g><g data-card="2"><use href="#piece-playstrategy-backgammon-wdicesix" x="395.9898987322333" y="50" width="48" height="48"/></g><g data-card="2"><use href="#piece-playstrategy-backgammon-wdicethree" x="447.9898987322333" y="50" width="48" height="48"/></g></g><text x="367.9898987322333" y="44" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.6)" font-family="system-ui">Player 1 (5)</text><g class="hand" data-zone="Player 2 — 5 cards (hidden)"><rect x="437.9797974644666" y="247.9898987322333" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="489.9797974644666" y="247.9898987322333" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="541.9797974644666" y="247.9898987322333" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="593.9797974644666" y="247.9898987322333" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="645.9797974644666" y="247.9898987322333" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/></g><text x="565.9797974644666" y="241.9898987322333" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.6)" font-family="system-ui">Player 2 (5)</text><g class="hand" data-zone="Player 3 — 5 cards (hidden)"><rect x="239.9898987322333" y="445.9797974644666" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="291.9898987322333" y="445.9797974644666" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="343.9898987322333" y="445.9797974644666" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="395.9898987322333" y="445.9797974644666" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="447.9898987322333" y="445.9797974644666" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/></g><text x="367.9898987322333" y="507.9797974644666" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.6)" font-family="system-ui">Player 3 (5)</text><g class="hand" data-zone="Player 4 — 5 cards (hidden)"><rect x="42" y="247.9898987322333" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="94" y="247.9898987322333" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="146" y="247.9898987322333" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="198" y="247.9898987322333" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/><rect x="250" y="247.9898987322333" width="48" height="48" fill="#2a3a6a" rx="3" stroke="#1a2a4a" stroke-width="1" data-card="Face down"/></g><text x="170" y="241.9898987322333" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.6)" font-family="system-ui">Player 4 (5)</text><text x="367.9898987322333" y="537.9797974644666" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.3)" font-family="system-ui">Standard Dice · seed: 42</text>
 </svg>

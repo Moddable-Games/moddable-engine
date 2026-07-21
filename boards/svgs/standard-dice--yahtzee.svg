@@ -1,3 +1,76 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 708" width="900" height="708">
-<rect x="0" y="0" width="900" height="708" fill="#1b5e3a" rx="16"/><rect x="20" y="20" width="860" height="668" fill="#2d7a4f" rx="12" stroke="#1a4a2e" stroke-width="2"/><g class="community" data-zone="Community / Field — 5 cards (face up)"><g data-card="5"><image href="../pieces/sets/playstrategy-backgammon/wdicefour.svg" x="322" y="330" width="48" height="48" preserveAspectRatio="xMidYMid meet"/></g><g data-card="5"><image href="../pieces/sets/playstrategy-backgammon/wdicesix.svg" x="374" y="330" width="48" height="48" preserveAspectRatio="xMidYMid meet"/></g><g data-card="1"><image href="../pieces/sets/playstrategy-backgammon/wdicethree.svg" x="426" y="330" width="48" height="48" preserveAspectRatio="xMidYMid meet"/></g><g data-card="1"><image href="../pieces/sets/playstrategy-backgammon/wdicefive.svg" x="478" y="330" width="48" height="48" preserveAspectRatio="xMidYMid meet"/></g><g data-card="1"><image href="../pieces/sets/playstrategy-backgammon/wdicefour.svg" x="530" y="330" width="48" height="48" preserveAspectRatio="xMidYMid meet"/></g></g><text x="450" y="392" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.5)" font-family="system-ui">Field (5)</text><text x="450" y="702" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.3)" font-family="system-ui">Standard Dice · seed: 42</text>
+<defs>
+<symbol id="piece-playstrategy-backgammon-wdicefour" viewBox="0 0 87 87"><image id="image0" width="87" height="87" x="0" y="0"
+    href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFcAAABXCAMAAABGFileAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
+AAB6JQAAgIMAAPn/AACA6QAAdTAAAOpgAAA6mAAAF2+SX8VGAAAAn1BMVEX///9BQUNBQUNBQUNB
+QUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNFRUempaHm5N3z8OmmpKGgnpzv
+7OW3tbF/fn1XV1hJSUtdXF24trK6uLRaWlrx7ueTkpBVVFVUVFWzsq6zsa18e3p7enlXVldGRkhK
+SktcW1zu6+STkY+Mi4mMiom5t7NEREahn5zn5N7///9UuppcAAAAEHRSTlMABm7H8xvP0Adt+fjR
+b8v03bb1CgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfoAgcLOi4k
+/mTBAAABgElEQVRYw+3Zf1OCQBAGYH4pWqmLXpEUikVhlpX5/b9bECAcsHczzWpT7f797jMMB3c3
+s4bBVZVp2Q5QlGNbZsX2+iRoXv3e4WkpWQB3ULhDAG86ExQ1m3oAw8K1AS5J1KyuAOzCPQOgedqv
+JwY4L9z0nZCxQqQau+z+rOtfzwPv5nYe+kg3HlC5i2W5iSwXnawigLvRqr49raKWqgzgrtSV9rVc
+ZQB1w+aGGjZYdQBz/btm2728NpoA5sbtE+BBcjUBzH1styWSqwlg7rrdtpZcTQBzn9ptnuRqApi7
+0bmb77nPuvegCZx63Y71nXV89i+SqwnAif9jIbZy11Y0SxnA3ei13vXWsU+qAqDY19+rbTsUXaUI
+gPIcipNgtwuSGD2H0AD8pfOYXXbZ/f0u36sF36vz4nt1XnyvPu668b26LL5XV2vD92p2/7tLPQ9w
+Cpd0fvFRzS+sbN6yJ1H32bzFKtyBC5R1Uc6HaOdZ7mGeZRjmaDwhQSfjUW3+xmV8Ajma7G++UWjM
+AAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDI0LTAyLTA3VDExOjU4OjQ2KzAwOjAwHPPk8wAAACV0RVh0
+ZGF0ZTptb2RpZnkAMjAyNC0wMi0wN1QxMTo1ODo0NiswMDowMG2uXE8AAAAodEVYdGRhdGU6dGlt
+ZXN0YW1wADIwMjQtMDItMDdUMTE6NTg6NDYrMDA6MDA6u32QAAAAAElFTkSuQmCC" /></symbol>
+<symbol id="piece-playstrategy-backgammon-wdicesix" viewBox="0 0 87 87"><image id="image0" width="87" height="87" x="0" y="0"
+    href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFcAAABXCAMAAABGFileAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
+AAB6JQAAgIMAAPn/AACA6QAAdTAAAOpgAAA6mAAAF2+SX8VGAAAAn1BMVEX///9BQUNBQUNBQUNB
+QUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNFRUempaHm5N3z8OmmpKGgnpzv
+7OW3tbF/fn1XV1hJSUtdXF24trK6uLRaWlrx7ueTkpBVVFVUVFWzsq6zsa18e3p7enlXVldGRkhK
+SktcW1zu6+STkY+Mi4mMiom5t7NEREahn5zn5N7///9UuppcAAAAEHRSTlMABm7H8xvP0Adt+fjR
+b8v03bb1CgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfoAgcLOi9T
++VRXAAABd0lEQVRYw+2Zb1OCQBDG+adopS56RVIoFIVZVub3/25JHIJC212zDNO0z9tn9jcHu3fP
+izUMVinTsh2gkGNbZont9Umgufq9w2kpsQDuQHKHAN50Jig0m3oAQ8m1AS5JqJmuAGzJPQOgOe3X
+iQHOJXf/T8iwQuxpXXD963ng3dzOQ7+pGHFx7mJZjM1yIbRcjBvF1YGMIx0X48bHkx7ruAg3PL1C
+obqLcP2708p7X9XFuEn9zj+ouhj3sV6ZqroYd1WvXKm6GPepXumpuhh3jVauf819Rr8Ud7voW1tz
+1jD5L6puF/dYiM1x4UbHxbjRa7XwLdJxAX3X38uXOxRaLvyQQ0kabLdBmjTn0PcudJObf43LOS84
+53NxzufinG+3b5zzhTjny/ZwzudfynnMeZyL8zgX53G7feM8LsR5XLbn/+Ux9T7AkVzS/cVHub+w
+sn3LjoS6y/YtluQOXKDURbEfot1nuYd9lmGYo/GEBDoZjyr7N5bxCbBM6reT8XLRAAAAJXRFWHRk
+YXRlOmNyZWF0ZQAyMDI0LTAyLTA3VDExOjU4OjQ3KzAwOjAwuoTvRwAAACV0RVh0ZGF0ZTptb2Rp
+ZnkAMjAyNC0wMi0wN1QxMTo1ODo0NyswMDowMMvZV/sAAAAodEVYdGRhdGU6dGltZXN0YW1wADIw
+MjQtMDItMDdUMTE6NTg6NDcrMDA6MDCczHYkAAAAAElFTkSuQmCC" /></symbol>
+<symbol id="piece-playstrategy-backgammon-wdicethree" viewBox="0 0 87 87"><image id="image0" width="87" height="87" x="0" y="0"
+    href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFcAAABXCAMAAABGFileAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
+AAB6JQAAgIMAAPn/AACA6QAAdTAAAOpgAAA6mAAAF2+SX8VGAAAAn1BMVEX///9BQUNBQUNBQUNB
+QUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNFRUempaHm5N3z8OmmpKGgnpzv
+7OW3tbF/fn1XV1hJSUtdXF24trK6uLRaWlrx7ueTkpBVVFVUVFWzsq6zsa18e3p7enlXVldGRkhK
+SktcW1zu6+STkY+Mi4mMiom5t7NEREahn5zn5N7///9UuppcAAAAEHRSTlMABm7H8xvP0Adt+fjR
+b8v03bb1CgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfoAgcLOi4k
+/mTBAAABxUlEQVRYw+3Z3VLCQAwF4NLyqwIprFbQAkUUBFGR9383QQsF2p1JZk/UcchlL77Z2W5y
+LuJ558qq5AdlQlQ58EsZW6lC0O+qVvanRbJEtXrqNojCTtcgqtsJiRqpGxBdQ9Rt3RAFqXtBhDnt
+14mJLlN3cycw1piN9mfd6LbXD+/ue3EEdQfD3dsaDnDuKDl8tckI5SbH7ZCA3Pi0z2KIG41P3YcI
+4U7yg+ER4T7l3SnCneXdGcJ9zrshwp0ruQule9D6b1rvrKAvXhCuVh8bszxmlwbkjl4P2TfYnDTm
+PZvr8f4jwDXRZNpfrfrTCTaHCutfu0WBDnALA93ZtQS6s2sJdFfXNggcXWugO7rWQevoWoPB0bUG
+uqNrDXRHd67kLpTuQeu/ab0za6A7ulp9bA10Z9cS6M6uJdABbmGgI1xB/bArSF6JK0levitLXr4r
+S162K+xYritNXq4rnYhcVzrBua40ebmuNHm5rjR5ua40eX/7v2m9M2nycl2tPpYmL9+VJS/flSWv
+xJUkr8h1Ln0XvQ8opy50f/GR7S/87b5lDVHX232Ln7r1GiHrarcfwu6zavt9lueVmq02BG23mgf7
+t3N5n0q97Uv1FnpEAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDI0LTAyLTA3VDExOjU4OjQ2KzAwOjAw
+HPPk8wAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyNC0wMi0wN1QxMTo1ODo0NiswMDowMG2uXE8AAAAo
+dEVYdGRhdGU6dGltZXN0YW1wADIwMjQtMDItMDdUMTE6NTg6NDYrMDA6MDA6u32QAAAAAElFTkSu
+QmCC" /></symbol>
+<symbol id="piece-playstrategy-backgammon-wdicefive" viewBox="0 0 87 87"><image id="image0" width="87" height="87" x="0" y="0"
+    href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFcAAABXCAMAAABGFileAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
+AAB6JQAAgIMAAPn/AACA6QAAdTAAAOpgAAA6mAAAF2+SX8VGAAAAn1BMVEX///9BQUNBQUNBQUNB
+QUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNBQUNFRUempaHm5N3z8OmmpKGgnpzv
+7OW3tbF/fn1XV1hJSUtdXF24trK6uLRaWlrx7ueTkpBVVFVUVFWzsq6zsa18e3p7enlXVldGRkhK
+SktcW1zu6+STkY+Mi4mMiom5t7NEREahn5zn5N7///9UuppcAAAAEHRSTlMABm7H8xvP0Adt+fjR
+b8v03bb1CgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfoAgcLOi4k
+/mTBAAABwklEQVRYw+3ZbU/CMBQF4LHxqiJ3UEXQAVMURFGR///fZDrYoL2jJ7ksxPR+PnmybO1O
+mnqem2wqflAliakGfiVja3UR9G/qtd3TSrJEjWbqtojCbk9JTK8bErVSNyC6EVGTuSUKUveCSOZp
+f5+Y6DJ1N+9EjFVqo5Xp9u8Gw/D+YRD1LQxT2OyOxtvlMh4dZY1hkzuJ8wsxnhSqTNjkxvsrPC50
+mbDBjQ63TlTAcmHd7T8eRp/4j8eGdXeq7/Vn1mXDuvuiR2esy4Z1d65H56zLhnX3VY+GrMuGdXeB
+uAt79w15D2y4vO92qnVmWOrvrMuGqbR9rNRyP7lURcOETe7kI5/8PPKfNIfJ+F//yn7VkTo2xjAx
+PTSdDVer4Wxq1UOGMJXbm//Eta9/yAXqH3Ch+gdcqP7tXei3Ye9C9Q+40G8ZcKEaAVyo/gEXqn/A
+heofcKH6P4Pvdqp1BtX/GexjsP4BF6p/wIXqH3KB+sdc+ynZdedu5c7d7tydd9252527y9jH7tzt
+zt3JSN8HVFNX9P7iO7u/8JP7lrWIuk7uW/zUbTZIcq6290Oy91mN3X2W51Xa1x0RtHPdzt2/ufF+
+AHQX65PfLFE5AAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDI0LTAyLTA3VDExOjU4OjQ2KzAwOjAwHPPk
+8wAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyNC0wMi0wN1QxMTo1ODo0NiswMDowMG2uXE8AAAAodEVY
+dGRhdGU6dGltZXN0YW1wADIwMjQtMDItMDdUMTE6NTg6NDYrMDA6MDA6u32QAAAAAElFTkSuQmCC" /></symbol>
+</defs>
+<rect x="0" y="0" width="900" height="708" fill="#1b5e3a" rx="16"/><rect x="20" y="20" width="860" height="668" fill="#2d7a4f" rx="12" stroke="#1a4a2e" stroke-width="2"/><g class="community" data-zone="Community / Field — 5 cards (face up)"><g data-card="5"><use href="#piece-playstrategy-backgammon-wdicefour" x="322" y="330" width="48" height="48"/></g><g data-card="5"><use href="#piece-playstrategy-backgammon-wdicesix" x="374" y="330" width="48" height="48"/></g><g data-card="1"><use href="#piece-playstrategy-backgammon-wdicethree" x="426" y="330" width="48" height="48"/></g><g data-card="1"><use href="#piece-playstrategy-backgammon-wdicefive" x="478" y="330" width="48" height="48"/></g><g data-card="1"><use href="#piece-playstrategy-backgammon-wdicefour" x="530" y="330" width="48" height="48"/></g></g><text x="450" y="392" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.5)" font-family="system-ui">Field (5)</text><text x="450" y="702" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.3)" font-family="system-ui">Standard Dice · seed: 42</text>
 </svg>
