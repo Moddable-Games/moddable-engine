@@ -1,5 +1,11 @@
 import { createDeck, shuffle, deal } from '../../../component-deck/src/deck-ops.js'
 import { getDeckConfig } from '../../../component-deck/src/deck-registry.js'
+import '../../../component-deck/src/decks/standard-52.js'
+import '../../../component-deck/src/decks/bavarian-32.js'
+import '../../../component-deck/src/decks/hanafuda-48.js'
+import '../../../component-deck/src/decks/mahjong-136.js'
+import '../../../component-deck/src/decks/dominoes-28.js'
+import '../../../component-deck/src/decks/standard-dice.js'
 
 export function renderTableauLayout(config) {
   const layout = config.layout || 'radial'
