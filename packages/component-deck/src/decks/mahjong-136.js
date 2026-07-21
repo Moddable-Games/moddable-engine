@@ -76,11 +76,4 @@ registerDeck('mahjong-136', {
 
     return tiles
   },
-
-  games: {
-    'hong-kong': { minPlayers: 4, maxPlayers: 4, defaultPlayers: 4, perPlayer: 13, community: 0, remainder: 'wall', flowers: 8, layout: 'mahjong-wall', tileSet: 'mahjong-planar' },
-    'riichi': { minPlayers: 4, maxPlayers: 4, defaultPlayers: 4, perPlayer: 13, community: 0, remainder: 'wall', layout: 'mahjong-wall', tileSet: 'mahjong-regular' },
-    'taiwanese': { minPlayers: 4, maxPlayers: 4, defaultPlayers: 4, perPlayer: 16, community: 0, remainder: 'wall', flowers: 8, layout: 'mahjong-wall', tileSet: 'mahjong-planar' },
-    'zung-jung': { minPlayers: 4, maxPlayers: 4, defaultPlayers: 4, perPlayer: 13, community: 0, remainder: 'wall', layout: 'mahjong-wall', tileSet: 'mahjong-regular' },
-  },
 })

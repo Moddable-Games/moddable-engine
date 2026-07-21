@@ -23,10 +23,4 @@ registerDeck('dominoes-28', {
     }
     return tiles
   },
-
-  games: {
-    'block': { minPlayers: 2, maxPlayers: 4, defaultPlayers: 2, perPlayer: 7, community: 0, remainder: 'boneyard' },
-    'all-fives': { minPlayers: 2, maxPlayers: 4, defaultPlayers: 2, perPlayer: 7, community: 0, remainder: 'boneyard' },
-    'mexican-train': { minPlayers: 2, maxPlayers: 8, defaultPlayers: 4, perPlayer: 10, community: 0, remainder: 'boneyard' },
-  },
 })

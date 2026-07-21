@@ -1,7 +1,6 @@
 export { createStandard52Deck, schema as standard52Schema } from './src/standard-52.js'
 export { getDeckConfig, getRegisteredDecks, getAllDecks } from './src/deck-registry.js'
 export { createDeck, shuffle, deal } from './src/deck-ops.js'
-export { layoutHand, layoutTable } from './src/layout.js'
 
 import './src/decks/standard-52.js'
 import './src/decks/bavarian-32.js'

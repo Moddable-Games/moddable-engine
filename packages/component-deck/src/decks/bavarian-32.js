@@ -26,10 +26,6 @@ registerDeck('bavarian-32', {
     }
     return cards
   },
-
-  games: {
-    'skat': { minPlayers: 3, maxPlayers: 3, defaultPlayers: 3, perPlayer: 10, community: 2, remainder: 'draw' },
-  },
 })
 
 function suitGlyph(s) {

@@ -1,9 +1,6 @@
 import { renderFromEngine, attachPieceImages, fenToPosition } from '../packages/render/src/render-engine.js'
 import { getGameConfig, getAllGames, HexSvg, createSeededRng } from '../packages/hex-generators/index.js'
-import { getDeckConfig, getRegisteredDecks, createDeck, shuffle, deal, layoutTable } from '../packages/component-deck/index.js'
-import { renderDeckSvg, renderMahjongSvg, renderTableauSvg } from '../packages/component-deck/src/renderers.js'
 import { renderRpgProvider } from './rpg-provider.js'
-import { renderDeckFromResolved, setDeckRenderer, setMahjongRenderer, setTableauRenderer } from '../packages/component-deck/src/render-from-resolved.js'
 
 let galleryIndex = null
 async function loadGalleryIndex(basePath = '../pieces/') {
@@ -16,12 +13,7 @@ async function loadGalleryIndex(basePath = '../pieces/') {
 async function renderFromResolved(resolved, container) {
   const topo = resolved.topology || {}
   if (topo.type === 'none' || !topo.type) {
-    const components = resolved.components || {}
     const meta = resolved.meta || {}
-    if (components.deck || components.dice) {
-      const svg = renderDeckFromResolved(resolved)
-      if (svg) { container.innerHTML = svg; return }
-    }
     container.innerHTML = `<div style="padding:20px;color:#aaa;text-align:center;font-family:system-ui"><p style="font-size:16px;margin-bottom:8px">${meta.label || 'Non-spatial game'}</p><p style="font-size:12px;color:#666">Category: ${meta.category || 'unknown'}</p></div>`
     return
   }
@@ -90,9 +82,6 @@ async function loadVariant({ familyPath, variantPath, basePath }) {
   return { resolved: final, errors: [] }
 }
 
-setDeckRenderer(renderDeckSvg)
-setMahjongRenderer(renderMahjongSvg)
-setTableauRenderer(renderTableauSvg)
 
 
 
@@ -584,53 +573,6 @@ async function renderComponentGameFromFrontmatter(entry) {
   }
 }
 
-function renderComponentGame(entry) {
-  const deckType = entry.deckType || entry.family
-  const deckConfig = getDeckConfig(deckType)
-  if (!deckConfig) {
-    showSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="400" height="200" fill="#1a1a2e" rx="8"/><text x="200" y="100" text-anchor="middle" font-size="14" fill="#888" font-family="system-ui">Component game: ${entry.variantTitle}</text></svg>`)
-    return
-  }
-
-  const variantDef = {
-    deckVariant: entry.variant,
-    label: entry.variantTitle,
-  }
-
-  const dealSpec = deckConfig.games?.[entry.variant]
-  if (!dealSpec) {
-    const target = document.getElementById('board-svg')
-    const svg = renderDeckFromResolved({
-      topology: { type: 'none' },
-      components: { deck: { type: deckType } },
-      meta: { label: entry.variantTitle, category: 'card' },
-    })
-    if (svg) {
-      target.innerHTML = svg
-      target.classList.add('active')
-      document.getElementById('board-empty').style.display = 'none'
-      bindDeckHover()
-    } else {
-      showSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="400" height="200" fill="#1a1a2e" rx="8"/><text x="200" y="100" text-anchor="middle" font-size="14" fill="#888" font-family="system-ui">${entry.variantTitle} (${deckType})</text></svg>`)
-    }
-    return
-  }
-
-  const playerGroup = document.getElementById('hex-players-group')
-  const playerSelect = document.getElementById('hex-players-select')
-  const counts = parsePlayerCounts(entry.players)
-  if (counts.length > 1) {
-    const current = state.players || dealSpec.defaultPlayers || counts[0]
-    playerSelect.innerHTML = counts.map(n => `<option value="${n}"${n === current ? ' selected' : ''}>${n} players</option>`).join('')
-    playerGroup.style.display = ''
-  } else if (counts.length === 1) {
-    state.players = counts[0]
-  }
-  document.getElementById('hex-seed-group').style.display = ''
-
-  renderDeckGame({ deckGame: deckType }, variantDef)
-}
-
 function updateRulesLink() {
   const link = document.getElementById('rules-link-btn')
   if (!link) return
@@ -642,124 +584,6 @@ function updateRulesLink() {
     link.href = `https://rules.moddable.games/${state.game}/variants/${state.variant}/`
     link.style.display = ''
   }
-}
-
-function renderDeckGame(game, variantDef) {
-  const deckType = game.deckGame
-  const deckConfig = getDeckConfig(deckType)
-  if (!deckConfig) {
-    showSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="400" height="200" fill="#1a1a2e" rx="8"/><text x="200" y="100" text-anchor="middle" font-size="14" fill="#888" font-family="system-ui">Unknown deck: "${deckType}"</text></svg>`)
-    return
-  }
-
-  const gameKey = variantDef.deckVariant
-  const dealSpec = deckConfig.games[gameKey]
-  if (!dealSpec) {
-    showSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="400" height="200" fill="#1a1a2e" rx="8"/><text x="200" y="100" text-anchor="middle" font-size="14" fill="#888" font-family="system-ui">No deal spec: "${gameKey}"</text></svg>`)
-    return
-  }
-
-  const seed = state.seed
-  const players = state.players || dealSpec.defaultPlayers
-  const activeDealSpec = { ...dealSpec, players }
-  const createOpts = deckType === 'standard-dice'
-    ? { count: (dealSpec.perPlayer || 0) * players + (dealSpec.community || 0) }
-    : dealSpec
-  const cards = createDeck(deckType, createOpts)
-  const shuffled = shuffle(cards, seed)
-  const dealResult = deal(shuffled, activeDealSpec)
-
-  if (deckType === 'standard-dice' && deckConfig.roll) {
-    for (let i = 0; i < dealResult.hands.length; i++) {
-      dealResult.hands[i] = deckConfig.roll(dealResult.hands[i], seed + i)
-    }
-    if (dealResult.community.length > 0) {
-      dealResult.community = deckConfig.roll(dealResult.community, seed + 99)
-    }
-  }
-
-  if (dealResult.layout === 'tableau') {
-    const svg = renderTableauSvg(dealResult, { deckType, deckConfig, variantDef, seed })
-    showSvg(svg)
-    bindDeckHover()
-    requestAnimationFrame(fitToView)
-    return
-  }
-
-  if (activeDealSpec.layout === 'mahjong-wall') {
-    const svg = renderMahjongSvg(dealResult, { deckType, deckConfig, variantDef, seed, tileSet: activeDealSpec.tileSet || 'mahjong-regular' })
-    showSvg(svg)
-    bindDeckHover()
-    requestAnimationFrame(fitToView)
-    return
-  }
-
-  const cardW = deckType === 'dominoes-28' ? 32 : deckType === 'standard-dice' ? 48 : 44
-  const cardH = deckType === 'dominoes-28' ? 60 : deckType === 'standard-dice' ? 48 : 64
-  const maxHand = Math.max(...dealResult.hands.map(h => h.length), dealResult.community.length)
-  const handWidth = maxHand * (cardW + 4)
-  const handHalfW = handWidth / 2
-  const handHalfH = cardH / 2
-  const separationNeeded = handWidth + 20
-  const minRingFromSeparation = separationNeeded / (2 * Math.sin(Math.PI / players))
-  const communityWidth = dealResult.community.length * (cardW + 4)
-  const hasDrawPile = dealResult.drawPile.length > 0
-  const drawPileWidth = hasDrawPile ? cardW + 8 : 0
-  const centreZoneHalfW = (communityWidth + drawPileWidth) / 2
-  const minRingFromCommunity = centreZoneHalfW + handHalfW + 20
-  const minRing = Math.max(minRingFromSeparation, minRingFromCommunity, 150)
-
-  const tableW = (minRing + handHalfW) * 2 + 40
-  const tableH = (minRing + handHalfH) * 2 + 60
-
-  const tableLayout = layoutTable(dealResult, {
-    players,
-    tableWidth: tableW,
-    tableHeight: tableH,
-    cardW,
-    cardH,
-    handStyle: 'spread',
-  })
-
-  const svg = renderDeckSvg(tableLayout, {
-    tableW, tableH, cardW, cardH,
-    deckLabel: deckConfig.label,
-    gameLabel: variantDef.label,
-    deckType,
-    seed,
-  })
-
-  const notation = encodeDeckState(dealResult, deckType, seed, players)
-
-  showSvg(svg)
-  showInfo({
-    deckType,
-    gameKey,
-    seed,
-    players,
-    cardsPerHand: dealResult.hands[0]?.length || 0,
-    community: dealResult.community.length,
-    drawPile: dealResult.drawPile.length,
-    label: variantDef.label,
-    setupDesc: variantDef.setupDesc,
-    variantDesc: variantDef.variantDesc,
-    deckNotation: notation,
-  })
-  bindDeckHover()
-  requestAnimationFrame(fitToView)
-}
-
-function encodeDeckState(dealResult, deckType, seed, players) {
-  const parts = [`${deckType}:${seed}:${players}`]
-  for (let i = 0; i < dealResult.hands.length; i++) {
-    const ids = dealResult.hands[i].map(c => c.id)
-    parts.push(`h${i}=${ids.join(',')}`)
-  }
-  if (dealResult.community.length > 0) {
-    parts.push(`f=${dealResult.community.map(c => c.id).join(',')}`)
-  }
-  parts.push(`d=${dealResult.drawPile.length}`)
-  return parts.join('|')
 }
 
 function bindDeckHover() {

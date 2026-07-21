@@ -24,10 +24,4 @@ registerDeck('standard-dice', {
       display: String((Math.abs(rng.next()) % die.faces) + 1),
     }))
   },
-
-  games: {
-    'yahtzee': { minPlayers: 1, maxPlayers: 4, defaultPlayers: 2, count: 5, perPlayer: 0, community: 5 },
-    'farkle': { minPlayers: 2, maxPlayers: 6, defaultPlayers: 4, count: 6, perPlayer: 0, community: 6 },
-    'liars-dice': { minPlayers: 2, maxPlayers: 6, defaultPlayers: 4, count: 5, perPlayer: 5, community: 0 },
-  },
 })
