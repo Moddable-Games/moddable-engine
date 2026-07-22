@@ -93,9 +93,17 @@ async function loadAllData(basePath) {
     try {
       const resp = await fetch(dataBase + cat.file)
       const json = await resp.json()
-      rpgState.data[cat.id] = manifest.dataType === 'oracle'
-        ? json.tables || [json]
-        : json
+      if (manifest.dataType === 'oracle' || manifest.dataType === 'table') {
+        const tables = json.tables || [json]
+        rpgState.data[cat.id] = tables.map(t => ({
+          ...t,
+          entries: (t.entries || []).map((e, i) =>
+            typeof e === 'string' ? { result: e, min: i + 1, max: i + 1, roll: i + 1 } : e
+          ),
+        }))
+      } else {
+        rpgState.data[cat.id] = Array.isArray(json) ? json : json.data || json.entries || []
+      }
     } catch {
       rpgState.data[cat.id] = []
     }
@@ -122,7 +130,7 @@ function renderResults() {
 
   const manifest = rpgState.manifest
   const query = rpgState.searchQuery.toLowerCase().trim()
-  const isOracle = manifest.dataType === 'oracle'
+  const isOracle = manifest.dataType === 'oracle' || manifest.dataType === 'table'
 
   let results = []
   let totalCount = 0
@@ -222,7 +230,7 @@ function renderTable() {
     card.style.borderColor = color.border
     card.style.background = color.bg
 
-    const isOracle = manifest.dataType === 'oracle'
+    const isOracle = manifest.dataType === 'oracle' || manifest.dataType === 'table'
     const cardItem = isOracle
       ? { ...entry.item, range: entry.item.min === entry.item.max ? `${entry.item.min}` : `${entry.item.min}-${entry.item.max}` }
       : entry.item
