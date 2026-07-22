@@ -1320,10 +1320,11 @@ The manifest declares the expected page count as a hint, not a hard limit:
 
 If content fits on fewer pages, fewer are produced. If it overflows, more are added. The renderer never truncates content to fit a page count.
 
-**Multi-page output:**
-- Play page: SVG pages shown with prev/next navigation (same as multi-board games)
-- Export: multi-page PDF via the same canvas pipeline boards use
-- moddable-rules: each page becomes a separate SVG for PDF pagination
+**Output is one SVG per page** — not one giant SVG that needs splitting:
+- Renderer produces an array of SVG elements: `[page1SVG, page2SVG, ...]`
+- Play page: shows pages with prev/next navigation (same as multi-board games)
+- Export: each SVG → PNG/PDF page via the same canvas pipeline boards use
+- moddable-rules: receives discrete page SVGs, drops them straight into PDF pagination
 
 Each section type has a render function:
 - `renderHeader(section, values, y)` → SVG group + height
@@ -1494,6 +1495,8 @@ The engine provides the SVG; moddable-rules build system handles pagination and 
 
 ## Remaining open questions
 
-1. **Asset data source** — Ironsworn/Starforged assets aren't currently in moddable-rules as structured JSON. Need to extract them (or find an SRD source) before seeded mode can pick and render full asset text.
-2. **Font sizing strategy** — when content is dense (BRP skills, D&D features), should the renderer auto-reduce font size to fit more per page, or maintain fixed sizing and just add pages?
-3. **Print margins** — should the SVG include print-safe margins (matching the PDF production rules), or should that be handled by the PDF build system when it paginates?
+None. All resolved:
+
+1. ~~Asset data source~~ — **RESOLVED.** Starforged assets already exist as structured JSON in `games/starforged/rules/assets/*.json` (full ability text, categories, conditions). Ironsworn assets exist in markdown (`content/rules/moves.md`) and need extracting to JSON in the same format — a moddable-rules data authoring task, not an engine concern.
+2. ~~Font sizing strategy~~ — **RESOLVED.** Fixed sizing, add pages. Sheets must be readable and clean. No auto-shrinking text to cram content. If BRP's 56 skills need 2 pages, they get 2 pages.
+3. ~~Print margins~~ — **RESOLVED.** Each SVG page includes print-safe margins (48px / 12mm). The renderer produces one SVG per page (not one giant SVG that needs splitting). moddable-rules PDF build system receives discrete page SVGs and paginates them directly — no splitting required.
