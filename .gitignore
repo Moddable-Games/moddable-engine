@@ -95,3 +95,6 @@ tags
 
 # SVG snapshots (provider migration acceptance tests)
 snapshots/
+
+# Export sync cache
+.export-cache.json

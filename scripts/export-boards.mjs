@@ -9,11 +9,14 @@
  *   node scripts/export-boards.mjs                  # report count
  *   node scripts/export-boards.mjs --export         # generate all
  *   node scripts/export-boards.mjs --export chess   # single family
+ *   node scripts/export-boards.mjs --sync           # export only changed variants
+ *   node scripts/export-boards.mjs --sync chess     # sync single family
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'fs'
 import { resolve, dirname, basename } from 'path'
 import { fileURLToPath } from 'url'
+import { createHash } from 'crypto'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ENGINE_ROOT = resolve(__dirname, '..')
@@ -37,9 +40,21 @@ import { renderFromEngine, attachPieceImages } from '../packages/render/src/rend
 const gallery = JSON.parse(readFileSync(resolve(ENGINE_ROOT, 'pieces/gallery-index.json'), 'utf8'))
 
 const args = process.argv.slice(2)
-const doExport = args.includes('--export')
+const doSync = args.includes('--sync')
+const doExport = args.includes('--export') || doSync
 const verbose = args.includes('--verbose')
 const familyFilter = args.filter(a => !a.startsWith('--'))[0] || null
+
+const CACHE_PATH = resolve(ENGINE_ROOT, '.export-cache.json')
+const cache = doSync && existsSync(CACHE_PATH)
+  ? JSON.parse(readFileSync(CACHE_PATH, 'utf8'))
+  : {}
+const newCache = {}
+
+function hashEngine(variantPath) {
+  const content = readFileSync(variantPath, 'utf8')
+  return createHash('sha256').update(content).digest('hex').slice(0, 16)
+}
 
 if (!existsSync(GAMES_DIR)) {
   console.error(`moddable-rules not found at ${RULES_ROOT}`)
@@ -48,7 +63,7 @@ if (!existsSync(GAMES_DIR)) {
 
 const TYPE_NORMALIZE = { hexagonal: 'hex', triangular: 'hex' }
 
-let exported = 0, skipped = 0, errors = 0
+let exported = 0, skipped = 0, errors = 0, unchanged = 0
 
 const families = readdirSync(GAMES_DIR).filter(f => {
   if (familyFilter && !f.includes(familyFilter)) return false
@@ -95,6 +110,16 @@ for (const family of families) {
     if (!topo?.type) { skipped++; continue }
 
     if (!doExport) { exported++; continue }
+
+    const cacheKey = `${family}/${slug}`
+    const hash = hashEngine(variantPath)
+    newCache[cacheKey] = hash
+
+    if (doSync && cache[cacheKey] === hash) {
+      unchanged++
+      if (verbose) console.log(`  = ${cacheKey} (unchanged)`)
+      continue
+    }
 
     try {
       // Normalize topology type
@@ -149,7 +174,10 @@ for (const family of families) {
 if (!doExport) {
   console.log(`${exported} renderable variants. Run with --export to generate.`)
 } else {
-  console.log(`Done: ${exported} exported, ${skipped} skipped, ${errors} errors`)
+  const parts = [`${exported} exported`, `${skipped} skipped`, `${errors} errors`]
+  if (doSync) parts.push(`${unchanged} unchanged`)
+  console.log(`Done: ${parts.join(', ')}`)
+  if (doSync) writeFileSync(CACHE_PATH, JSON.stringify(newCache, null, 2))
 }
 
 function stripSvgBloat(svgContent) {
