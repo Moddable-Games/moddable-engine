@@ -8,7 +8,7 @@ Every game in the Moddable Games collection — from standard chess to Endless S
 
 ## Status
 
-**All classic game families implemented.** 13 plugins covering 154 variants across chess, go, draughts, reversi, mancala, backgammon, morris, hex, big 2, halma, shogi, xiangqi, and race games. Rules are a first-class resource type: parametric, composable, topology-agnostic. Shared rules (capture, promotion, repetition, turn-continuation) work across all families. 1330 tests across 102 suites, all passing.
+**All classic game families implemented.** 13 plugins covering 154 variants across chess, go, draughts, reversi, mancala, backgammon, morris, hex, big 2, halma, shogi, xiangqi, and race games. Rules are a first-class resource type: parametric, composable, topology-agnostic. Shared rules (capture, promotion, repetition, turn-continuation) work across all families. 1367 tests across 104 suites, all passing.
 
 Current milestone: **Full pipeline proof + AI adapter** — factory instantiates every variant from frontmatter config alone, then generic minimax/MCTS for pass-and-play and AI opponents.
 
@@ -27,9 +27,11 @@ moddable-engine/
     topology-track/      ← linear/circuit paths
     topology-pit/        ← mancala pit-sow layouts
     topology-graph/      ← arbitrary node-edge + position notation
+    topology-tableau/    ← card table layouts (radial, tableau, wall, linear)
     piece-behaviour/     ← movement primitives + composable definitions (rider, leaper, compose, divergent)
     rule/                ← rule registry, composition engine, parametric rule implementations
     render/              ← topology-agnostic SVG board renderer
+    surface/             ← board as resource type (frame, surface, divider, generators, filters)
     schema/              ← frontmatter → game definitions
     game/                ← factory, topology registry, component registry, rule registry
     board-theme/         ← board visual treatment (resolver, builtins)
@@ -60,7 +62,7 @@ moddable-engine/
 | Layer | Package(s) | Purpose |
 |---|---|---|
 | 0 | `@moddable/core` | State, moves, players, history, events, RNG, timer, plugin registry |
-| 1 | `@moddable/topology-*` | Coordinate systems: grid, hex, track, pit, graph |
+| 1 | `@moddable/topology-*` | Coordinate systems: grid, hex, track, pit, graph, tableau |
 | 2 | `@moddable/piece-behaviour` | Movement primitives + composable piece definitions |
 | 2 | `@moddable/rule` | Rule registry, composition engine, parametric rules |
 | 3 | `@moddable/render` | Topology-agnostic SVG board renderer |
@@ -102,6 +104,12 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ---
 
 ## Changelog
+
+#### 2026-07-22
+- Added `--sync` mode to export-boards.mjs for incremental diagram export (hash-based staleness detection)
+- RPG character sheet renderer: Create, Blank, and Random modes with sidebar editing and import/export
+- Headless character sheet SVG generation via export-chargen.mjs
+- Closed issues #16 (cross-repo sync) and #33 (RPG manifest v2)
 
 #### 2026-07-21
 - Implemented topology-tableau: card/dice/domino table layouts as a proper topology (issue #25)
