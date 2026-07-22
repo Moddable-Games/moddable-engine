@@ -2,7 +2,7 @@ const manifestCache = {}
 
 export async function loadRpgManifest(gameKey, basePath) {
   if (manifestCache[gameKey]) return manifestCache[gameKey]
-  const url = `${basePath}games/${gameKey}/rpg-manifest.json`
+  const url = `${basePath}games/${gameKey}/rpg-manifest.json?t=${Date.now()}`
   try {
     const resp = await fetch(url)
     if (!resp.ok) return null

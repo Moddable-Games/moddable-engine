@@ -1,6 +1,7 @@
 import { renderFromEngine, attachPieceImages, fenToPosition } from '../packages/render/src/render-engine.js'
 import { getGameConfig, getAllGames, HexSvg, createSeededRng } from '../packages/hex-generators/index.js'
 import { renderRpgProvider } from './rpg-provider.js'
+import { renderChargenProvider } from './rpg-chargen.js'
 
 let galleryIndex = null
 async function loadGalleryIndex(basePath = '../pieces/') {
@@ -394,6 +395,7 @@ function resetSidebarControls() {
   document.getElementById('hex-style-group').style.display = 'none'
   document.getElementById('hex-players-group').style.display = 'none'
   document.getElementById('hex-seed-group').style.display = 'none'
+  document.getElementById('chargen-group').style.display = 'none'
 }
 
 async function render() {
@@ -416,6 +418,12 @@ async function render() {
 
   if (entry && entry.reason === 'rpg-provider') {
     await renderRpgProvider(state.game)
+    updateRulesLink()
+    return
+  }
+
+  if (entry && entry.reason === 'rpg-chargen') {
+    await renderChargenProvider(state.game)
     updateRulesLink()
     return
   }

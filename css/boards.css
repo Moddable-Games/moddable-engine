@@ -564,6 +564,226 @@
 }
 .rpg-card-link:hover { color: #bde; text-decoration: underline; }
 
+/* ─── Character Sheet (rpg-chargen) ─────────────────────────────────────── */
+.rpg-chargen { width: 100%; }
+.chargen-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  flex-wrap: wrap;
+}
+.chargen-mode {
+  display: flex;
+  gap: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle, #333);
+}
+.chargen-btn {
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: transparent;
+  color: #888;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.chargen-btn:hover { background: rgba(255,255,255,0.05); color: #ccc; }
+.chargen-btn--active {
+  background: var(--accent, #b48c50);
+  color: #fff;
+}
+.chargen-seed {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.chargen-seed-input {
+  width: 100px;
+  padding: 5px 8px;
+  font-size: 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-subtle, #333);
+  border-radius: 4px;
+  color: #ddd;
+}
+.chargen-reseed {
+  padding: 5px 8px;
+  font-size: 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-subtle, #333);
+  border-radius: 4px;
+  color: #aaa;
+  cursor: pointer;
+}
+.chargen-reseed:hover { color: #fff; background: rgba(255,255,255,0.1); }
+.chargen-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.chargen-prev, .chargen-next {
+  padding: 4px 10px;
+  font-size: 13px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-subtle, #333);
+  border-radius: 4px;
+  color: #aaa;
+  cursor: pointer;
+}
+.chargen-prev:hover:not(:disabled), .chargen-next:hover:not(:disabled) { color: #fff; }
+.chargen-prev:disabled, .chargen-next:disabled { opacity: 0.3; cursor: default; }
+.chargen-page-info { font-size: 12px; color: #888; }
+.chargen-sheet { margin-top: 8px; }
+.chargen-loading { color: #888; font-size: 13px; padding: 40px 0; text-align: center; }
+.chargen-error { color: #f66; font-size: 13px; padding: 40px 0; text-align: center; }
+
+/* ─── Chargen sidebar controls ─────────────────────────────────────────── */
+.chargen-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 8px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.chargen-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+.chargen-stat {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.chargen-stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #888;
+  min-width: 24px;
+}
+.chargen-stat input {
+  width: 36px;
+  padding: 3px 4px;
+  font-size: 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-subtle, #333);
+  border-radius: 3px;
+  color: #ddd;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+.chargen-stat input::-webkit-inner-spin-button,
+.chargen-stat input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.chargen-stat-minus, .chargen-stat-plus {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-subtle, #333);
+  border-radius: 3px;
+  color: #aaa;
+  cursor: pointer;
+}
+.chargen-stat-minus:hover, .chargen-stat-plus:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.1);
+}
+.chargen-roll-all {
+  font-size: 11px;
+  padding: 4px 8px;
+}
+.chargen-sub-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #888;
+  margin-top: 4px;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.chargen-fields textarea {
+  padding: 6px 8px;
+  font-size: 11px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-subtle, #333);
+  border-radius: 4px;
+  color: #ddd;
+  font-family: inherit;
+}
+.chargen-skills-list {
+  max-height: 180px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.chargen-skill-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.chargen-skill-name {
+  font-size: 10px;
+  color: #aaa;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chargen-skill-row input {
+  padding: 2px 4px;
+  font-size: 11px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-subtle, #333);
+  border-radius: 3px;
+  color: #ddd;
+}
+.chargen-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+.chargen-check {
+  font-size: 11px;
+  color: #aaa;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+.chargen-check input { cursor: pointer; }
+.chargen-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+.chargen-prev, .chargen-next {
+  padding: 5px 12px;
+  font-size: 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-subtle, #333);
+  border-radius: 4px;
+  color: #aaa;
+  cursor: pointer;
+}
+.chargen-prev:hover:not(:disabled), .chargen-next:hover:not(:disabled) { color: #fff; background: rgba(255,255,255,0.1); }
+.chargen-prev:disabled, .chargen-next:disabled { opacity: 0.3; cursor: default; }
+.chargen-page-info { font-size: 12px; color: #888; }
+
 .render-mode-toggle {
   display: flex;
   gap: 0;
