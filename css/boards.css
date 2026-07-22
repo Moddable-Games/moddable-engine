@@ -463,7 +463,20 @@
 .rpg-result-cat { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.7; }
 
 .rpg-no-results { color: #555; font-size: 13px; padding: 16px 0; text-align: center; }
-.rpg-results-hint { color: #666; font-size: 11px; padding: 6px 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.rpg-show-more {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-top: 4px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px;
+  color: #999;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.rpg-show-more:hover { background: rgba(255,255,255,0.08); color: #ccc; }
 
 .rpg-table-label {
   padding: 8px 16px 4px;

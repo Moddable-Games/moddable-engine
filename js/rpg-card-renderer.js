@@ -57,7 +57,9 @@ export function renderCard(item, category, manifest) {
 
   const parts = []
 
-  const title = fields.title ? getField(item, fields.title) || '' : ''
+  const title = fields.title
+    ? (fields.title.includes('{') ? interpolate(fields.title, item) : getField(item, fields.title) || '')
+    : ''
   if (title) parts.push(`<div class="rpg-card-title">${title}</div>`)
 
   if (fields.meta) {
@@ -89,6 +91,7 @@ export function renderCard(item, category, manifest) {
 }
 
 function getCardFields(category, manifest) {
+  if (category.cardFields) return category.cardFields
   const cf = manifest.cardFields
   if (!cf) return null
   if (cf[category.id]) return cf[category.id]
