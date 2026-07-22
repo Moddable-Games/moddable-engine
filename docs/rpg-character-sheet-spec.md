@@ -1281,49 +1281,182 @@ export async function renderCharacterSheet(gameKey, { mode, seed }) {
 }
 ```
 
-### SVG generation
+### Dice and RNG — existing modules
 
-The renderer produces an SVG element (portrait A4 ratio: 210x297 units, or landscape 297x210).
+The chargen renderer uses what already exists in the engine:
+
+- **PRNG:** `packages/core/src/xorshift.js` — `createSeededRng(seed)` returns an RNG instance with `.integer(min, max)` and `.unit()`. Same RNG used by board studio seed control. Deterministic output from a given seed.
+- **Dice component:** `packages/component-dice/src/standard-dice.js` — `createStandardDice({ count, faces })` with `.roll(rng)`, `.total(results)`, `.max(results)`, `.min(results)`.
+
+The chargen module adds a **dice expression parser** on top of these primitives (not a new RNG):
+
+```js
+import { createSeededRng } from '../packages/core/src/xorshift.js'
+import { createStandardDice } from '../packages/component-dice/src/standard-dice.js'
+
+function rollExpression(expr, rng) {
+  // Parses: "3d6", "4d6kh3", "3d6kl1", "2d6+6", "1d8"
+  // Uses createStandardDice for the roll, rng for randomness
+  // Returns: numeric result
+}
+```
+
+No new random number generator. No new dice module. Just a parser that composes existing primitives.
+
+### SVG generation — multi-page
+
+The renderer produces one or more SVG elements (portrait A4 ratio: 210x297 units, or landscape 297x210). Page count is determined by content — sections flow until a page is full, then overflow to the next page.
+
+**Page break logic:**
+1. Each section renderer returns its rendered height
+2. The orchestrator accumulates heights; when a section would exceed the page boundary, it starts a new page
+3. Sections can declare `"pageBreak": "before"` to force a new page (e.g. a full skill grid)
+4. Sections that are too tall to fit on one page (e.g. BRP's 56 skills) wrap across pages internally
+
+The manifest declares the expected page count as a hint, not a hard limit:
+```json
+{ "chargen": { "pages": 2, ... } }
+```
+
+If content fits on fewer pages, fewer are produced. If it overflows, more are added. The renderer never truncates content to fit a page count.
+
+**Multi-page output:**
+- Play page: SVG pages shown with prev/next navigation (same as multi-board games)
+- Export: multi-page PDF via the same canvas pipeline boards use
+- moddable-rules: each page becomes a separate SVG for PDF pagination
 
 Each section type has a render function:
-- `renderHeader(section, values, y)` → SVG group
-- `renderStats(section, values, y)` → SVG group
-- `renderTrack(section, values, y)` → SVG group
-- `renderInventory(section, values, y)` → SVG group
-- `renderList(section, values, y)` → SVG group
-- `renderProgress(section, values, y)` → SVG group
-- `renderSkills(section, values, y)` → SVG group
-- `renderNotes(section, values, y)` → SVG group
-- `renderAssets(section, values, y)` → SVG group
-- `renderChoices(section, values, y)` → SVG group
-
-Each returns its height so the next section knows where to start.
+- `renderHeader(section, values, y)` → SVG group + height
+- `renderStats(section, values, y)` → SVG group + height
+- `renderTrack(section, values, y)` → SVG group + height
+- `renderInventory(section, values, y)` → SVG group + height
+- `renderList(section, values, y)` → SVG group + height
+- `renderProgress(section, values, y)` → SVG group + height
+- `renderSkills(section, values, y)` → SVG group + height (may span pages)
+- `renderNotes(section, values, y)` → SVG group + height
+- `renderAssets(section, values, y)` → SVG group + height (full card detail)
+- `renderChoices(section, values, y)` → SVG group + height
 
 ### Blank mode
 
-All fields render as empty boxes, lines, or placeholder text. This produces a printable form players can fill in by hand.
+All fields render as empty boxes, lines, or placeholder text. This produces a printable form players can fill in by hand. Every section that would contain a value in seeded mode shows a labelled blank field of appropriate size.
 
 ### Seeded mode
 
 1. Parse the `chargen` block from the manifest
-2. Initialize RNG with the provided seed
+2. Initialize RNG with the provided seed via `createSeededRng(seed)`
 3. Resolve all `tables` references (fetch JSON from moddable-rules)
 4. Resolve `dependsOn` chains (e.g. background-names depends on which background was rolled)
-5. For each section, evaluate `gen` fields using dice roller + table picker
+5. For each section, evaluate `gen` fields using the expression parser + table picker
 6. Render SVG with filled values
-
-### Dice roller
-
-```js
-function rollDice(expr, rng) {
-  // Supports: NdX, NdXkh/klN, NdX+C, NdX-C
-  // rng: seeded PRNG (same as board studio uses)
-}
-```
 
 ### Export
 
 Same as board studio: SVG element → downloadable SVG, or via canvas → PNG/PDF.
+
+---
+
+## Self-contained sheets — no external lookups
+
+A character sheet must be **playable without referencing other materials**. This means:
+
+- Asset cards render their full ability text on the sheet, not "see asset deck"
+- Class moves/features include the mechanical text, not just the name
+- Spells include their effect description
+- Companion stats render inline (health meter, abilities)
+
+This makes sheets longer (hence multi-page support) but genuinely useful at the table. The manifest controls how much detail appears via `cardFields`-style templates that pull the relevant text from data files.
+
+If a section would make the sheet unwieldy (e.g. D&D's full 319-spell list), the manifest declares only what a character actually HAS (starting spells, chosen features). The seeded generator picks; the blank sheet shows empty slots for the player to fill.
+
+---
+
+## Conditional sections — declared in manifest, not hardcoded
+
+The engine has zero knowledge of what "spellcaster" means. Conditional sections are driven entirely by the manifest's `tables` and `dependsOn` mechanism:
+
+```json
+{
+  "type": "list",
+  "label": "Spells",
+  "count": 4,
+  "style": "lined",
+  "condition": { "field": "class.spellcasting", "exists": true },
+  "gen": "class-spells"
+}
+```
+
+- `condition.field` — a path into the resolved chargen state
+- `condition.exists` — show section only if the field is truthy
+- `condition.equals` — show section only if value matches
+
+In **blank mode**, conditional sections always render (the player may or may not be a caster — show the fields). In **seeded mode**, the generator resolves whether the condition is met based on earlier choices (e.g. did the class roll produce a spellcaster?) and omits sections that don't apply.
+
+The manifest in moddable-rules declares all conditions. The engine evaluates them generically. No class names, no game system logic in engine code.
+
+---
+
+## Sub-sheets and multi-board precedent
+
+Some games need multiple sheets per character:
+- Starforged: main character + starship + companion(s)
+- D&D 5e: main sheet + spell sheet (for casters)
+- BRP: main sheet + full skill sheet
+
+This follows the same pattern as multi-board games (Alice Chess has 2 boards, Gygax has 5). The manifest declares it:
+
+```json
+{
+  "chargen": {
+    "sheets": [
+      { "id": "main", "title": "Character", "sections": [...] },
+      { "id": "vehicle", "title": "Starship", "sections": [...], "condition": { "field": "assets", "contains": "Starship" } },
+      { "id": "companion", "title": "Companion", "sections": [...], "condition": { "field": "assets", "contains": "Companion" } }
+    ]
+  }
+}
+```
+
+If `sheets` is absent, `sections` at the top level is treated as a single sheet (backwards-compatible). If `sheets` is present, the renderer produces one multi-page document per sheet, navigable in the play page.
+
+The engine renders whatever sheets the manifest declares. It has no concept of "companion" or "starship" — those are just section titles and conditions.
+
+---
+
+## Theming — declared per game via manifest
+
+Visual styling is not hardcoded. Each game declares a theme in its manifest:
+
+```json
+{
+  "chargen": {
+    "theme": {
+      "family": "fantasy",
+      "accent": "#8d2e2e",
+      "background": "#faf6f0",
+      "font": "Rajdhani",
+      "headingFont": "Rajdhani",
+      "borderStyle": "ornate"
+    }
+  }
+}
+```
+
+Or reference a named theme from the engine's theme registry:
+
+```json
+{ "chargen": { "theme": "sci-fi-dark" } }
+```
+
+**Built-in theme families** (renderer provides these as defaults):
+- `fantasy` — parchment tones, serif headings, ornate borders (D&D, Cairn, Knave, DW, Maze Rats)
+- `sci-fi` — dark surface, monospace stats, neon accents (Starforged)
+- `modern` — clean white, sans-serif, minimal borders (BRP)
+- `mythic` — muted earth tones, runic decorations (Ironsworn)
+
+Games override individual properties as needed. The renderer applies theme values via CSS custom properties in the SVG — no game-specific rendering logic.
+
+Frontmatter in moddable-rules variant files can also override theme properties per variant (same cascade pattern as board themes: surface → family → variant).
 
 ---
 
@@ -1350,10 +1483,17 @@ The engine provides the SVG; moddable-rules build system handles pagination and 
 
 ---
 
-## Open questions
+## Resolved decisions
 
-1. **Multi-page sheets** — D&D 5e and BRP character sheets historically span 2+ pages. Should the renderer support page breaks, or constrain to single page with font size reduction?
-2. **Asset cards** — Ironsworn/Starforged assets are complex (3 abilities, conditions, controls). How much detail on the sheet vs. "see asset deck" reference?
-3. **Class-conditional sections** — D&D spellcasters need spell slot tracking; non-casters don't. Support conditional sections (`"if": "class.spellcasting"`) or keep sheets class-agnostic?
-4. **Companion/vehicle sub-sheets** — Starforged companions and vehicles have their own integrity meters. Inline on main sheet or separate?
-5. **Styling** — one universal style (parchment/fantasy), or per-game theming (sci-fi for Starforged, dark for Maze Rats)? Manifest could declare a `theme` field.
+1. **Multi-page sheets** — SUPPORTED. Renderer flows content across pages automatically. Manifest hints expected page count but doesn't cap it. BRP skills spanning 2 pages, D&D spell sheets, all handled by overflow logic.
+2. **Self-contained sheets** — NO external lookups. Asset abilities, move text, spell effects all render inline on the sheet. Makes sheets longer but genuinely playable at the table.
+3. **Conditional sections** — MANIFEST-DRIVEN. `condition` field on any section evaluates against resolved chargen state. Engine has zero game system knowledge. Blank mode shows all sections; seeded mode omits inapplicable ones.
+4. **Sub-sheets** — SUPPORTED via `sheets` array in manifest. Same pattern as multi-board games. Manifest declares; engine renders. No hardcoded companion/vehicle concepts.
+5. **Theming** — DECLARED per game in manifest. Built-in theme families (fantasy, sci-fi, modern, mythic) with per-game overrides. Frontmatter cascade (surface → family → variant) applies same as board themes.
+6. **Dice/RNG** — EXISTING MODULES. `packages/core/src/xorshift.js` for PRNG, `packages/component-dice/` for roll mechanics. Chargen adds only a dice expression parser on top.
+
+## Remaining open questions
+
+1. **Asset data source** — Ironsworn/Starforged assets aren't currently in moddable-rules as structured JSON. Need to extract them (or find an SRD source) before seeded mode can pick and render full asset text.
+2. **Font sizing strategy** — when content is dense (BRP skills, D&D features), should the renderer auto-reduce font size to fit more per page, or maintain fixed sizing and just add pages?
+3. **Print margins** — should the SVG include print-safe margins (matching the PDF production rules), or should that be handled by the PDF build system when it paginates?
