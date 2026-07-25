@@ -8,7 +8,7 @@ Every game in the Moddable Games collection — from standard chess to Endless S
 
 ## Status
 
-**All classic game families implemented.** 13 plugins covering 154 variants across chess, go, draughts, reversi, mancala, backgammon, morris, hex, big 2, halma, shogi, xiangqi, and race games. Rules are a first-class resource type: parametric, composable, topology-agnostic. Shared rules (capture, promotion, repetition, turn-continuation) work across all families. 1367 tests across 104 suites, all passing.
+**All classic game families implemented.** 13 plugins covering 154 variants across chess, go, draughts, reversi, mancala, backgammon, morris, hex, big 2, halma, shogi, xiangqi, and race games. Rules are a first-class resource type: parametric, composable, topology-agnostic. Shared rules (capture, promotion, repetition, turn-continuation) work across all families. 1405 tests across 106 suites, all passing.
 
 Current milestone: **Full pipeline proof + AI adapter** — factory instantiates every variant from frontmatter config alone, then generic minimax/MCTS for pass-and-play and AI opponents.
 
@@ -37,7 +37,9 @@ moddable-engine/
     board-theme/         ← board visual treatment (resolver, builtins)
     piece-theme/         ← piece visual treatment (resolver, recolour)
     component-deck/      ← standard 52-card deck
-    component-dice/      ← standard dice (roll, doubles, movesFromRoll)
+    component-dice/      ← standard dice (roll, doubles, movesFromRoll, expression parser, odds)
+    hex-generators/      ← hex map generation (Catan, Twilight, Colony, etc.)
+    rpg/                 ← RPG entity search, oracle rolls, card data, manifest loader
     plugin-go/           ← Go + atari-go
     plugin-hex/          ← Hex + swap rule
     plugin-mancala/      ← Kalah + Oware
@@ -104,6 +106,14 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ---
 
 ## Changelog
+
+#### 2026-07-25
+- Added static API page (`/api/`) with JSON endpoint documentation
+- Added llms.txt and .well-known/mcp.json for AI agent discoverability
+- New packages: `rpg` (entity search, oracle rolls, card data) and `hex-generators` (map generation)
+- Added `calculateOdds()` to component-dice for probability calculations
+- SDK-style exports map in package.json for programmatic consumers
+- API link added to site-wide navigation and footer across all pages
 
 #### 2026-07-22
 - Added `--sync` mode to export-boards.mjs for incremental diagram export (hash-based staleness detection)

@@ -1,11 +1,31 @@
 {
-  "name": "moddable-engine",
+  "name": "@moddable/engine",
   "private": true,
   "description": "Micro-kernel master engine for all Moddable Games titles",
   "type": "module",
   "workspaces": [
     "packages/*"
   ],
+  "exports": {
+    "./core": "./packages/core/index.js",
+    "./plugins": "./packages/plugins/index.js",
+    "./plugins/*": "./packages/plugins/*/index.js",
+    "./topologies": "./packages/topologies/index.js",
+    "./topologies/*": "./packages/topologies/*/index.js",
+    "./component-dice": "./packages/component-dice/index.js",
+    "./component-deck": "./packages/component-deck/index.js",
+    "./hex-generators": "./packages/hex-generators/index.js",
+    "./rpg": "./packages/rpg/index.js",
+    "./ai": "./packages/ai/index.js",
+    "./render": "./packages/render/index.js",
+    "./surface": "./packages/surface/index.js",
+    "./schema": "./packages/schema/index.js",
+    "./game": "./packages/game/index.js",
+    "./rule": "./packages/rule/index.js",
+    "./piece-behaviour": "./packages/piece-behaviour/index.js",
+    "./board-theme": "./packages/board-theme/index.js",
+    "./piece-theme": "./packages/piece-theme/index.js"
+  },
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "build": "npm run build --workspaces",

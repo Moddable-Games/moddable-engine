@@ -52,4 +52,16 @@
     <loc>https://engine.moddable.games/docs/render-pipeline.html</loc>
     <priority>0.7</priority>
   </url>
+  <url>
+    <loc>https://engine.moddable.games/llms.txt</loc>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/api/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/.well-known/mcp.json</loc>
+    <priority>0.3</priority>
+  </url>
 </urlset>

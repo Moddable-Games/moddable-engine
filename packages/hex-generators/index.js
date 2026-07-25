@@ -6,6 +6,7 @@ import './src/colony.js'
 import './src/twilight.js'
 
 export { getGameConfig, getRegisteredGames, getAllGames } from './src/game-registry.js'
+export { generateMap } from './src/generate-map.js'
 export { HexSvg } from './src/hex-svg.js'
 export { HexMath } from './src/hex-math.js'
 export { createSeededRng } from '../core/src/xorshift.js'

@@ -24,6 +24,7 @@ ACCENTS = {
     'pieces': {'primary': (194, 158, 96), 'secondary': (150, 120, 70)},
     'tiles': {'primary': (64, 160, 224), 'secondary': (40, 120, 180)},
     'docs': {'primary': (232, 228, 223), 'secondary': (138, 133, 126)},
+    'api': {'primary': (96, 200, 128), 'secondary': (60, 160, 96)},
 }
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -225,6 +226,7 @@ SCHEMATIC_MAP = {
     'pieces': draw_piece_schematic,
     'tiles': draw_hex_schematic,
     'docs': draw_doc_schematic,
+    'api': draw_topology_schematic,
 }
 
 
@@ -396,6 +398,13 @@ PAGES = [
         'eyebrow': 'Documentation',
         'title': 'Render Pipeline',
         'subtitle': 'Layer-compositing SVG renderer. Board, topology, pieces, highlights.',
+    },
+    {
+        'slug': 'api',
+        'type': 'api',
+        'eyebrow': 'Developer Resources',
+        'title': 'Static API',
+        'subtitle': 'JSON endpoints served from GitHub Pages. Piece sets, board diagrams, hex tiles, and chess puzzles.',
     },
 ]
 

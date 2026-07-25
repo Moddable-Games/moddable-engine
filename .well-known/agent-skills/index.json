@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+  "skills": [
+    {
+      "name": "moddable-engine-tools",
+      "type": "mcp",
+      "description": "Board game engine with piece sets, board layouts, tile galleries, and chess puzzles — accessible via MCP",
+      "url": "https://tools.moddable.games/mcp",
+      "documentation": "https://engine.moddable.games/llms.txt"
+    }
+  ]
+}

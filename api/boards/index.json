@@ -1,0 +1,1673 @@
+{
+  "meta": {
+    "count": 333,
+    "generated": "2026-07-25"
+  },
+  "boards": [
+    {
+      "id": "agon--standard",
+      "file": "agon--standard.svg",
+      "url": "/boards/svgs/agon--standard.svg"
+    },
+    {
+      "id": "asalto--royal-garrison",
+      "file": "asalto--royal-garrison.svg",
+      "url": "/boards/svgs/asalto--royal-garrison.svg"
+    },
+    {
+      "id": "asalto--standard",
+      "file": "asalto--standard.svg",
+      "url": "/boards/svgs/asalto--standard.svg"
+    },
+    {
+      "id": "backgammon--acey-deucey",
+      "file": "backgammon--acey-deucey.svg",
+      "url": "/boards/svgs/backgammon--acey-deucey.svg"
+    },
+    {
+      "id": "backgammon--chouette",
+      "file": "backgammon--chouette.svg",
+      "url": "/boards/svgs/backgammon--chouette.svg"
+    },
+    {
+      "id": "backgammon--fevga",
+      "file": "backgammon--fevga.svg",
+      "url": "/boards/svgs/backgammon--fevga.svg"
+    },
+    {
+      "id": "backgammon--hypergammon",
+      "file": "backgammon--hypergammon.svg",
+      "url": "/boards/svgs/backgammon--hypergammon.svg"
+    },
+    {
+      "id": "backgammon--nackgammon",
+      "file": "backgammon--nackgammon.svg",
+      "url": "/boards/svgs/backgammon--nackgammon.svg"
+    },
+    {
+      "id": "backgammon--nardi",
+      "file": "backgammon--nardi.svg",
+      "url": "/boards/svgs/backgammon--nardi.svg"
+    },
+    {
+      "id": "backgammon--plakoto",
+      "file": "backgammon--plakoto.svg",
+      "url": "/boards/svgs/backgammon--plakoto.svg"
+    },
+    {
+      "id": "backgammon--standard",
+      "file": "backgammon--standard.svg",
+      "url": "/boards/svgs/backgammon--standard.svg"
+    },
+    {
+      "id": "bavarian-32--schafkopf",
+      "file": "bavarian-32--schafkopf.svg",
+      "url": "/boards/svgs/bavarian-32--schafkopf.svg"
+    },
+    {
+      "id": "bavarian-32--skat",
+      "file": "bavarian-32--skat.svg",
+      "url": "/boards/svgs/bavarian-32--skat.svg"
+    },
+    {
+      "id": "chaupar--standard",
+      "file": "chaupar--standard.svg",
+      "url": "/boards/svgs/chaupar--standard.svg"
+    },
+    {
+      "id": "dou-shou-qi--standard",
+      "file": "dou-shou-qi--standard.svg",
+      "url": "/boards/svgs/dou-shou-qi--standard.svg"
+    },
+    {
+      "id": "double-six-dominoes--all-fives",
+      "file": "double-six-dominoes--all-fives.svg",
+      "url": "/boards/svgs/double-six-dominoes--all-fives.svg"
+    },
+    {
+      "id": "double-six-dominoes--block",
+      "file": "double-six-dominoes--block.svg",
+      "url": "/boards/svgs/double-six-dominoes--block.svg"
+    },
+    {
+      "id": "double-six-dominoes--chickenfoot",
+      "file": "double-six-dominoes--chickenfoot.svg",
+      "url": "/boards/svgs/double-six-dominoes--chickenfoot.svg"
+    },
+    {
+      "id": "double-six-dominoes--mexican-train",
+      "file": "double-six-dominoes--mexican-train.svg",
+      "url": "/boards/svgs/double-six-dominoes--mexican-train.svg"
+    },
+    {
+      "id": "draughts--alquerque",
+      "file": "draughts--alquerque.svg",
+      "url": "/boards/svgs/draughts--alquerque.svg"
+    },
+    {
+      "id": "draughts--bashni",
+      "file": "draughts--bashni.svg",
+      "url": "/boards/svgs/draughts--bashni.svg"
+    },
+    {
+      "id": "draughts--brazilian",
+      "file": "draughts--brazilian.svg",
+      "url": "/boards/svgs/draughts--brazilian.svg"
+    },
+    {
+      "id": "draughts--canadian",
+      "file": "draughts--canadian.svg",
+      "url": "/boards/svgs/draughts--canadian.svg"
+    },
+    {
+      "id": "draughts--czech",
+      "file": "draughts--czech.svg",
+      "url": "/boards/svgs/draughts--czech.svg"
+    },
+    {
+      "id": "draughts--dameo",
+      "file": "draughts--dameo.svg",
+      "url": "/boards/svgs/draughts--dameo.svg"
+    },
+    {
+      "id": "draughts--diagonal",
+      "file": "draughts--diagonal.svg",
+      "url": "/boards/svgs/draughts--diagonal.svg"
+    },
+    {
+      "id": "draughts--english",
+      "file": "draughts--english.svg",
+      "url": "/boards/svgs/draughts--english.svg"
+    },
+    {
+      "id": "draughts--frisian",
+      "file": "draughts--frisian.svg",
+      "url": "/boards/svgs/draughts--frisian.svg"
+    },
+    {
+      "id": "draughts--german",
+      "file": "draughts--german.svg",
+      "url": "/boards/svgs/draughts--german.svg"
+    },
+    {
+      "id": "draughts--ghanaian",
+      "file": "draughts--ghanaian.svg",
+      "url": "/boards/svgs/draughts--ghanaian.svg"
+    },
+    {
+      "id": "draughts--international",
+      "file": "draughts--international.svg",
+      "url": "/boards/svgs/draughts--international.svg"
+    },
+    {
+      "id": "draughts--italian",
+      "file": "draughts--italian.svg",
+      "url": "/boards/svgs/draughts--italian.svg"
+    },
+    {
+      "id": "draughts--lasca",
+      "file": "draughts--lasca.svg",
+      "url": "/boards/svgs/draughts--lasca.svg"
+    },
+    {
+      "id": "draughts--pool",
+      "file": "draughts--pool.svg",
+      "url": "/boards/svgs/draughts--pool.svg"
+    },
+    {
+      "id": "draughts--russian",
+      "file": "draughts--russian.svg",
+      "url": "/boards/svgs/draughts--russian.svg"
+    },
+    {
+      "id": "draughts--spanish",
+      "file": "draughts--spanish.svg",
+      "url": "/boards/svgs/draughts--spanish.svg"
+    },
+    {
+      "id": "draughts--spantsiretti",
+      "file": "draughts--spantsiretti.svg",
+      "url": "/boards/svgs/draughts--spantsiretti.svg"
+    },
+    {
+      "id": "draughts--thai",
+      "file": "draughts--thai.svg",
+      "url": "/boards/svgs/draughts--thai.svg"
+    },
+    {
+      "id": "draughts--turkish-draughts",
+      "file": "draughts--turkish-draughts.svg",
+      "url": "/boards/svgs/draughts--turkish-draughts.svg"
+    },
+    {
+      "id": "dungeon-chess--compact",
+      "file": "dungeon-chess--compact.svg",
+      "url": "/boards/svgs/dungeon-chess--compact.svg"
+    },
+    {
+      "id": "dungeon-chess--four-player",
+      "file": "dungeon-chess--four-player.svg",
+      "url": "/boards/svgs/dungeon-chess--four-player.svg"
+    },
+    {
+      "id": "dungeon-chess--two-player",
+      "file": "dungeon-chess--two-player.svg",
+      "url": "/boards/svgs/dungeon-chess--two-player.svg"
+    },
+    {
+      "id": "econopoly--standard",
+      "file": "econopoly--standard.svg",
+      "url": "/boards/svgs/econopoly--standard.svg"
+    },
+    {
+      "id": "fanorona--standard",
+      "file": "fanorona--standard.svg",
+      "url": "/boards/svgs/fanorona--standard.svg"
+    },
+    {
+      "id": "flower-48--go-stop",
+      "file": "flower-48--go-stop.svg",
+      "url": "/boards/svgs/flower-48--go-stop.svg"
+    },
+    {
+      "id": "flower-48--hana-awase",
+      "file": "flower-48--hana-awase.svg",
+      "url": "/boards/svgs/flower-48--hana-awase.svg"
+    },
+    {
+      "id": "flower-48--koi-koi",
+      "file": "flower-48--koi-koi.svg",
+      "url": "/boards/svgs/flower-48--koi-koi.svg"
+    },
+    {
+      "id": "flower-48--oicho-kabu",
+      "file": "flower-48--oicho-kabu.svg",
+      "url": "/boards/svgs/flower-48--oicho-kabu.svg"
+    },
+    {
+      "id": "go--13x13",
+      "file": "go--13x13.svg",
+      "url": "/boards/svgs/go--13x13.svg"
+    },
+    {
+      "id": "go--9x9",
+      "file": "go--9x9.svg",
+      "url": "/boards/svgs/go--9x9.svg"
+    },
+    {
+      "id": "go--capture-go",
+      "file": "go--capture-go.svg",
+      "url": "/boards/svgs/go--capture-go.svg"
+    },
+    {
+      "id": "go--gomoku",
+      "file": "go--gomoku.svg",
+      "url": "/boards/svgs/go--gomoku.svg"
+    },
+    {
+      "id": "go--ninuki-renju",
+      "file": "go--ninuki-renju.svg",
+      "url": "/boards/svgs/go--ninuki-renju.svg"
+    },
+    {
+      "id": "go--one-colour",
+      "file": "go--one-colour.svg",
+      "url": "/boards/svgs/go--one-colour.svg"
+    },
+    {
+      "id": "go--phantom-go",
+      "file": "go--phantom-go.svg",
+      "url": "/boards/svgs/go--phantom-go.svg"
+    },
+    {
+      "id": "go--rengo",
+      "file": "go--rengo.svg",
+      "url": "/boards/svgs/go--rengo.svg"
+    },
+    {
+      "id": "go--renju",
+      "file": "go--renju.svg",
+      "url": "/boards/svgs/go--renju.svg"
+    },
+    {
+      "id": "go--standard",
+      "file": "go--standard.svg",
+      "url": "/boards/svgs/go--standard.svg"
+    },
+    {
+      "id": "go--stoical",
+      "file": "go--stoical.svg",
+      "url": "/boards/svgs/go--stoical.svg"
+    },
+    {
+      "id": "go--sunjang",
+      "file": "go--sunjang.svg",
+      "url": "/boards/svgs/go--sunjang.svg"
+    },
+    {
+      "id": "go--tibetan",
+      "file": "go--tibetan.svg",
+      "url": "/boards/svgs/go--tibetan.svg"
+    },
+    {
+      "id": "go--toroidal-go",
+      "file": "go--toroidal-go.svg",
+      "url": "/boards/svgs/go--toroidal-go.svg"
+    },
+    {
+      "id": "halma--standard-2p",
+      "file": "halma--standard-2p.svg",
+      "url": "/boards/svgs/halma--standard-2p.svg"
+    },
+    {
+      "id": "halma--standard-4p",
+      "file": "halma--standard-4p.svg",
+      "url": "/boards/svgs/halma--standard-4p.svg"
+    },
+    {
+      "id": "hex--13x13",
+      "file": "hex--13x13.svg",
+      "url": "/boards/svgs/hex--13x13.svg"
+    },
+    {
+      "id": "hex--14x14",
+      "file": "hex--14x14.svg",
+      "url": "/boards/svgs/hex--14x14.svg"
+    },
+    {
+      "id": "hex--19x19",
+      "file": "hex--19x19.svg",
+      "url": "/boards/svgs/hex--19x19.svg"
+    },
+    {
+      "id": "hex--9x9",
+      "file": "hex--9x9.svg",
+      "url": "/boards/svgs/hex--9x9.svg"
+    },
+    {
+      "id": "hex--standard",
+      "file": "hex--standard.svg",
+      "url": "/boards/svgs/hex--standard.svg"
+    },
+    {
+      "id": "hex--y-game",
+      "file": "hex--y-game.svg",
+      "url": "/boards/svgs/hex--y-game.svg"
+    },
+    {
+      "id": "hex--y-large",
+      "file": "hex--y-large.svg",
+      "url": "/boards/svgs/hex--y-large.svg"
+    },
+    {
+      "id": "hex--y-small",
+      "file": "hex--y-small.svg",
+      "url": "/boards/svgs/hex--y-small.svg"
+    },
+    {
+      "id": "landlords-game--1904-original",
+      "file": "landlords-game--1904-original.svg",
+      "url": "/boards/svgs/landlords-game--1904-original.svg"
+    },
+    {
+      "id": "landlords-game--1906-commercial",
+      "file": "landlords-game--1906-commercial.svg",
+      "url": "/boards/svgs/landlords-game--1906-commercial.svg"
+    },
+    {
+      "id": "landlords-game--monarch-of-the-world",
+      "file": "landlords-game--monarch-of-the-world.svg",
+      "url": "/boards/svgs/landlords-game--monarch-of-the-world.svg"
+    },
+    {
+      "id": "landlords-game--prosperity",
+      "file": "landlords-game--prosperity.svg",
+      "url": "/boards/svgs/landlords-game--prosperity.svg"
+    },
+    {
+      "id": "landlords-game--single-tax",
+      "file": "landlords-game--single-tax.svg",
+      "url": "/boards/svgs/landlords-game--single-tax.svg"
+    },
+    {
+      "id": "lattaque--aviation",
+      "file": "lattaque--aviation.svg",
+      "url": "/boards/svgs/lattaque--aviation.svg"
+    },
+    {
+      "id": "lattaque--dover-patrol",
+      "file": "lattaque--dover-patrol.svg",
+      "url": "/boards/svgs/lattaque--dover-patrol.svg"
+    },
+    {
+      "id": "lattaque--standard",
+      "file": "lattaque--standard.svg",
+      "url": "/boards/svgs/lattaque--standard.svg"
+    },
+    {
+      "id": "lattaque--tri-tactics",
+      "file": "lattaque--tri-tactics.svg",
+      "url": "/boards/svgs/lattaque--tri-tactics.svg"
+    },
+    {
+      "id": "mahjong--american-classic",
+      "file": "mahjong--american-classic.svg",
+      "url": "/boards/svgs/mahjong--american-classic.svg"
+    },
+    {
+      "id": "mahjong--hong-kong",
+      "file": "mahjong--hong-kong.svg",
+      "url": "/boards/svgs/mahjong--hong-kong.svg"
+    },
+    {
+      "id": "mahjong--riichi",
+      "file": "mahjong--riichi.svg",
+      "url": "/boards/svgs/mahjong--riichi.svg"
+    },
+    {
+      "id": "mahjong--taiwanese",
+      "file": "mahjong--taiwanese.svg",
+      "url": "/boards/svgs/mahjong--taiwanese.svg"
+    },
+    {
+      "id": "mahjong--zung-jung",
+      "file": "mahjong--zung-jung.svg",
+      "url": "/boards/svgs/mahjong--zung-jung.svg"
+    },
+    {
+      "id": "mancala--ayo",
+      "file": "mancala--ayo.svg",
+      "url": "/boards/svgs/mancala--ayo.svg"
+    },
+    {
+      "id": "mancala--bao",
+      "file": "mancala--bao.svg",
+      "url": "/boards/svgs/mancala--bao.svg"
+    },
+    {
+      "id": "mancala--congkak",
+      "file": "mancala--congkak.svg",
+      "url": "/boards/svgs/mancala--congkak.svg"
+    },
+    {
+      "id": "mancala--kalah",
+      "file": "mancala--kalah.svg",
+      "url": "/boards/svgs/mancala--kalah.svg"
+    },
+    {
+      "id": "mancala--oware",
+      "file": "mancala--oware.svg",
+      "url": "/boards/svgs/mancala--oware.svg"
+    },
+    {
+      "id": "mancala--pallanguzhi",
+      "file": "mancala--pallanguzhi.svg",
+      "url": "/boards/svgs/mancala--pallanguzhi.svg"
+    },
+    {
+      "id": "mancala--sungka",
+      "file": "mancala--sungka.svg",
+      "url": "/boards/svgs/mancala--sungka.svg"
+    },
+    {
+      "id": "mancala--toguz-korgool",
+      "file": "mancala--toguz-korgool.svg",
+      "url": "/boards/svgs/mancala--toguz-korgool.svg"
+    },
+    {
+      "id": "moddable-chess--absorption",
+      "file": "moddable-chess--absorption.svg",
+      "url": "/boards/svgs/moddable-chess--absorption.svg"
+    },
+    {
+      "id": "moddable-chess--alice",
+      "file": "moddable-chess--alice.svg",
+      "url": "/boards/svgs/moddable-chess--alice.svg"
+    },
+    {
+      "id": "moddable-chess--almost-chess",
+      "file": "moddable-chess--almost-chess.svg",
+      "url": "/boards/svgs/moddable-chess--almost-chess.svg"
+    },
+    {
+      "id": "moddable-chess--amazon-chess",
+      "file": "moddable-chess--amazon-chess.svg",
+      "url": "/boards/svgs/moddable-chess--amazon-chess.svg"
+    },
+    {
+      "id": "moddable-chess--andernach",
+      "file": "moddable-chess--andernach.svg",
+      "url": "/boards/svgs/moddable-chess--andernach.svg"
+    },
+    {
+      "id": "moddable-chess--anti-king-chess-2",
+      "file": "moddable-chess--anti-king-chess-2.svg",
+      "url": "/boards/svgs/moddable-chess--anti-king-chess-2.svg"
+    },
+    {
+      "id": "moddable-chess--antichess",
+      "file": "moddable-chess--antichess.svg",
+      "url": "/boards/svgs/moddable-chess--antichess.svg"
+    },
+    {
+      "id": "moddable-chess--archchess",
+      "file": "moddable-chess--archchess.svg",
+      "url": "/boards/svgs/moddable-chess--archchess.svg"
+    },
+    {
+      "id": "moddable-chess--asean",
+      "file": "moddable-chess--asean.svg",
+      "url": "/boards/svgs/moddable-chess--asean.svg"
+    },
+    {
+      "id": "moddable-chess--atomic",
+      "file": "moddable-chess--atomic.svg",
+      "url": "/boards/svgs/moddable-chess--atomic.svg"
+    },
+    {
+      "id": "moddable-chess--avalanche",
+      "file": "moddable-chess--avalanche.svg",
+      "url": "/boards/svgs/moddable-chess--avalanche.svg"
+    },
+    {
+      "id": "moddable-chess--balbos-chess",
+      "file": "moddable-chess--balbos-chess.svg",
+      "url": "/boards/svgs/moddable-chess--balbos-chess.svg"
+    },
+    {
+      "id": "moddable-chess--benedict",
+      "file": "moddable-chess--benedict.svg",
+      "url": "/boards/svgs/moddable-chess--benedict.svg"
+    },
+    {
+      "id": "moddable-chess--berolina-chess",
+      "file": "moddable-chess--berolina-chess.svg",
+      "url": "/boards/svgs/moddable-chess--berolina-chess.svg"
+    },
+    {
+      "id": "moddable-chess--berserk",
+      "file": "moddable-chess--berserk.svg",
+      "url": "/boards/svgs/moddable-chess--berserk.svg"
+    },
+    {
+      "id": "moddable-chess--birds-chess",
+      "file": "moddable-chess--birds-chess.svg",
+      "url": "/boards/svgs/moddable-chess--birds-chess.svg"
+    },
+    {
+      "id": "moddable-chess--blind-chess",
+      "file": "moddable-chess--blind-chess.svg",
+      "url": "/boards/svgs/moddable-chess--blind-chess.svg"
+    },
+    {
+      "id": "moddable-chess--breakthrough",
+      "file": "moddable-chess--breakthrough.svg",
+      "url": "/boards/svgs/moddable-chess--breakthrough.svg"
+    },
+    {
+      "id": "moddable-chess--brusky",
+      "file": "moddable-chess--brusky.svg",
+      "url": "/boards/svgs/moddable-chess--brusky.svg"
+    },
+    {
+      "id": "moddable-chess--byzantine-chess",
+      "file": "moddable-chess--byzantine-chess.svg",
+      "url": "/boards/svgs/moddable-chess--byzantine-chess.svg"
+    },
+    {
+      "id": "moddable-chess--capablanca",
+      "file": "moddable-chess--capablanca.svg",
+      "url": "/boards/svgs/moddable-chess--capablanca.svg"
+    },
+    {
+      "id": "moddable-chess--carrera",
+      "file": "moddable-chess--carrera.svg",
+      "url": "/boards/svgs/moddable-chess--carrera.svg"
+    },
+    {
+      "id": "moddable-chess--centennial-chess",
+      "file": "moddable-chess--centennial-chess.svg",
+      "url": "/boards/svgs/moddable-chess--centennial-chess.svg"
+    },
+    {
+      "id": "moddable-chess--chak",
+      "file": "moddable-chess--chak.svg",
+      "url": "/boards/svgs/moddable-chess--chak.svg"
+    },
+    {
+      "id": "moddable-chess--chancellor-chess",
+      "file": "moddable-chess--chancellor-chess.svg",
+      "url": "/boards/svgs/moddable-chess--chancellor-chess.svg"
+    },
+    {
+      "id": "moddable-chess--chaturanga",
+      "file": "moddable-chess--chaturanga.svg",
+      "url": "/boards/svgs/moddable-chess--chaturanga.svg"
+    },
+    {
+      "id": "moddable-chess--checkless",
+      "file": "moddable-chess--checkless.svg",
+      "url": "/boards/svgs/moddable-chess--checkless.svg"
+    },
+    {
+      "id": "moddable-chess--chennis",
+      "file": "moddable-chess--chennis.svg",
+      "url": "/boards/svgs/moddable-chess--chennis.svg"
+    },
+    {
+      "id": "moddable-chess--chigorin",
+      "file": "moddable-chess--chigorin.svg",
+      "url": "/boards/svgs/moddable-chess--chigorin.svg"
+    },
+    {
+      "id": "moddable-chess--circular-chess",
+      "file": "moddable-chess--circular-chess.svg",
+      "url": "/boards/svgs/moddable-chess--circular-chess.svg"
+    },
+    {
+      "id": "moddable-chess--citadel-chess",
+      "file": "moddable-chess--citadel-chess.svg",
+      "url": "/boards/svgs/moddable-chess--citadel-chess.svg"
+    },
+    {
+      "id": "moddable-chess--codrus",
+      "file": "moddable-chess--codrus.svg",
+      "url": "/boards/svgs/moddable-chess--codrus.svg"
+    },
+    {
+      "id": "moddable-chess--congo",
+      "file": "moddable-chess--congo.svg",
+      "url": "/boards/svgs/moddable-chess--congo.svg"
+    },
+    {
+      "id": "moddable-chess--courier",
+      "file": "moddable-chess--courier.svg",
+      "url": "/boards/svgs/moddable-chess--courier.svg"
+    },
+    {
+      "id": "moddable-chess--crazy-38s",
+      "file": "moddable-chess--crazy-38s.svg",
+      "url": "/boards/svgs/moddable-chess--crazy-38s.svg"
+    },
+    {
+      "id": "moddable-chess--crazyhouse",
+      "file": "moddable-chess--crazyhouse.svg",
+      "url": "/boards/svgs/moddable-chess--crazyhouse.svg"
+    },
+    {
+      "id": "moddable-chess--cylinder-chess",
+      "file": "moddable-chess--cylinder-chess.svg",
+      "url": "/boards/svgs/moddable-chess--cylinder-chess.svg"
+    },
+    {
+      "id": "moddable-chess--cylindrical-chess",
+      "file": "moddable-chess--cylindrical-chess.svg",
+      "url": "/boards/svgs/moddable-chess--cylindrical-chess.svg"
+    },
+    {
+      "id": "moddable-chess--dark-chess",
+      "file": "moddable-chess--dark-chess.svg",
+      "url": "/boards/svgs/moddable-chess--dark-chess.svg"
+    },
+    {
+      "id": "moddable-chess--de-vasa",
+      "file": "moddable-chess--de-vasa.svg",
+      "url": "/boards/svgs/moddable-chess--de-vasa.svg"
+    },
+    {
+      "id": "moddable-chess--delirious-bughouse",
+      "file": "moddable-chess--delirious-bughouse.svg",
+      "url": "/boards/svgs/moddable-chess--delirious-bughouse.svg"
+    },
+    {
+      "id": "moddable-chess--diana",
+      "file": "moddable-chess--diana.svg",
+      "url": "/boards/svgs/moddable-chess--diana.svg"
+    },
+    {
+      "id": "moddable-chess--dice-chess",
+      "file": "moddable-chess--dice-chess.svg",
+      "url": "/boards/svgs/moddable-chess--dice-chess.svg"
+    },
+    {
+      "id": "moddable-chess--displacement-chess",
+      "file": "moddable-chess--displacement-chess.svg",
+      "url": "/boards/svgs/moddable-chess--displacement-chess.svg"
+    },
+    {
+      "id": "moddable-chess--djambi",
+      "file": "moddable-chess--djambi.svg",
+      "url": "/boards/svgs/moddable-chess--djambi.svg"
+    },
+    {
+      "id": "moddable-chess--dragon-chess",
+      "file": "moddable-chess--dragon-chess.svg",
+      "url": "/boards/svgs/moddable-chess--dragon-chess.svg"
+    },
+    {
+      "id": "moddable-chess--duck-chess",
+      "file": "moddable-chess--duck-chess.svg",
+      "url": "/boards/svgs/moddable-chess--duck-chess.svg"
+    },
+    {
+      "id": "moddable-chess--einstein-chess",
+      "file": "moddable-chess--einstein-chess.svg",
+      "url": "/boards/svgs/moddable-chess--einstein-chess.svg"
+    },
+    {
+      "id": "moddable-chess--empire",
+      "file": "moddable-chess--empire.svg",
+      "url": "/boards/svgs/moddable-chess--empire.svg"
+    },
+    {
+      "id": "moddable-chess--endgame-chess",
+      "file": "moddable-chess--endgame-chess.svg",
+      "url": "/boards/svgs/moddable-chess--endgame-chess.svg"
+    },
+    {
+      "id": "moddable-chess--extinction",
+      "file": "moddable-chess--extinction.svg",
+      "url": "/boards/svgs/moddable-chess--extinction.svg"
+    },
+    {
+      "id": "moddable-chess--fanorona-chess",
+      "file": "moddable-chess--fanorona-chess.svg",
+      "url": "/boards/svgs/moddable-chess--fanorona-chess.svg"
+    },
+    {
+      "id": "moddable-chess--fischer-random",
+      "file": "moddable-chess--fischer-random.svg",
+      "url": "/boards/svgs/moddable-chess--fischer-random.svg"
+    },
+    {
+      "id": "moddable-chess--five-check",
+      "file": "moddable-chess--five-check.svg",
+      "url": "/boards/svgs/moddable-chess--five-check.svg"
+    },
+    {
+      "id": "moddable-chess--flip-chess",
+      "file": "moddable-chess--flip-chess.svg",
+      "url": "/boards/svgs/moddable-chess--flip-chess.svg"
+    },
+    {
+      "id": "moddable-chess--fog-of-war",
+      "file": "moddable-chess--fog-of-war.svg",
+      "url": "/boards/svgs/moddable-chess--fog-of-war.svg"
+    },
+    {
+      "id": "moddable-chess--four-handed-chess",
+      "file": "moddable-chess--four-handed-chess.svg",
+      "url": "/boards/svgs/moddable-chess--four-handed-chess.svg"
+    },
+    {
+      "id": "moddable-chess--giveaway",
+      "file": "moddable-chess--giveaway.svg",
+      "url": "/boards/svgs/moddable-chess--giveaway.svg"
+    },
+    {
+      "id": "moddable-chess--glinski",
+      "file": "moddable-chess--glinski.svg",
+      "url": "/boards/svgs/moddable-chess--glinski.svg"
+    },
+    {
+      "id": "moddable-chess--grand",
+      "file": "moddable-chess--grand.svg",
+      "url": "/boards/svgs/moddable-chess--grand.svg"
+    },
+    {
+      "id": "moddable-chess--grande-acedrex",
+      "file": "moddable-chess--grande-acedrex.svg",
+      "url": "/boards/svgs/moddable-chess--grande-acedrex.svg"
+    },
+    {
+      "id": "moddable-chess--grasshopper",
+      "file": "moddable-chess--grasshopper.svg",
+      "url": "/boards/svgs/moddable-chess--grasshopper.svg"
+    },
+    {
+      "id": "moddable-chess--grid-chess",
+      "file": "moddable-chess--grid-chess.svg",
+      "url": "/boards/svgs/moddable-chess--grid-chess.svg"
+    },
+    {
+      "id": "moddable-chess--gustav-iii-chess",
+      "file": "moddable-chess--gustav-iii-chess.svg",
+      "url": "/boards/svgs/moddable-chess--gustav-iii-chess.svg"
+    },
+    {
+      "id": "moddable-chess--gygax",
+      "file": "moddable-chess--gygax.svg",
+      "url": "/boards/svgs/moddable-chess--gygax.svg"
+    },
+    {
+      "id": "moddable-chess--half-chess",
+      "file": "moddable-chess--half-chess.svg",
+      "url": "/boards/svgs/moddable-chess--half-chess.svg"
+    },
+    {
+      "id": "moddable-chess--hexapawn",
+      "file": "moddable-chess--hexapawn.svg",
+      "url": "/boards/svgs/moddable-chess--hexapawn.svg"
+    },
+    {
+      "id": "moddable-chess--hole-chess",
+      "file": "moddable-chess--hole-chess.svg",
+      "url": "/boards/svgs/moddable-chess--hole-chess.svg"
+    },
+    {
+      "id": "moddable-chess--hoppel-poppel",
+      "file": "moddable-chess--hoppel-poppel.svg",
+      "url": "/boards/svgs/moddable-chess--hoppel-poppel.svg"
+    },
+    {
+      "id": "moddable-chess--horde",
+      "file": "moddable-chess--horde.svg",
+      "url": "/boards/svgs/moddable-chess--horde.svg"
+    },
+    {
+      "id": "moddable-chess--hostage-chess",
+      "file": "moddable-chess--hostage-chess.svg",
+      "url": "/boards/svgs/moddable-chess--hostage-chess.svg"
+    },
+    {
+      "id": "moddable-chess--immunization-chess",
+      "file": "moddable-chess--immunization-chess.svg",
+      "url": "/boards/svgs/moddable-chess--immunization-chess.svg"
+    },
+    {
+      "id": "moddable-chess--janus",
+      "file": "moddable-chess--janus.svg",
+      "url": "/boards/svgs/moddable-chess--janus.svg"
+    },
+    {
+      "id": "moddable-chess--khans-chess",
+      "file": "moddable-chess--khans-chess.svg",
+      "url": "/boards/svgs/moddable-chess--khans-chess.svg"
+    },
+    {
+      "id": "moddable-chess--king-of-the-hill",
+      "file": "moddable-chess--king-of-the-hill.svg",
+      "url": "/boards/svgs/moddable-chess--king-of-the-hill.svg"
+    },
+    {
+      "id": "moddable-chess--klein-bottle-chess",
+      "file": "moddable-chess--klein-bottle-chess.svg",
+      "url": "/boards/svgs/moddable-chess--klein-bottle-chess.svg"
+    },
+    {
+      "id": "moddable-chess--knightmate",
+      "file": "moddable-chess--knightmate.svg",
+      "url": "/boards/svgs/moddable-chess--knightmate.svg"
+    },
+    {
+      "id": "moddable-chess--kriegspiel",
+      "file": "moddable-chess--kriegspiel.svg",
+      "url": "/boards/svgs/moddable-chess--kriegspiel.svg"
+    },
+    {
+      "id": "moddable-chess--legan-chess",
+      "file": "moddable-chess--legan-chess.svg",
+      "url": "/boards/svgs/moddable-chess--legan-chess.svg"
+    },
+    {
+      "id": "moddable-chess--los-alamos-vierschach",
+      "file": "moddable-chess--los-alamos-vierschach.svg",
+      "url": "/boards/svgs/moddable-chess--los-alamos-vierschach.svg"
+    },
+    {
+      "id": "moddable-chess--los-alamos",
+      "file": "moddable-chess--los-alamos.svg",
+      "url": "/boards/svgs/moddable-chess--los-alamos.svg"
+    },
+    {
+      "id": "moddable-chess--madrasi",
+      "file": "moddable-chess--madrasi.svg",
+      "url": "/boards/svgs/moddable-chess--madrasi.svg"
+    },
+    {
+      "id": "moddable-chess--maharaja",
+      "file": "moddable-chess--maharaja.svg",
+      "url": "/boards/svgs/moddable-chess--maharaja.svg"
+    },
+    {
+      "id": "moddable-chess--makpong",
+      "file": "moddable-chess--makpong.svg",
+      "url": "/boards/svgs/moddable-chess--makpong.svg"
+    },
+    {
+      "id": "moddable-chess--makruk",
+      "file": "moddable-chess--makruk.svg",
+      "url": "/boards/svgs/moddable-chess--makruk.svg"
+    },
+    {
+      "id": "moddable-chess--mansindam",
+      "file": "moddable-chess--mansindam.svg",
+      "url": "/boards/svgs/moddable-chess--mansindam.svg"
+    },
+    {
+      "id": "moddable-chess--marseillais",
+      "file": "moddable-chess--marseillais.svg",
+      "url": "/boards/svgs/moddable-chess--marseillais.svg"
+    },
+    {
+      "id": "moddable-chess--mccooey",
+      "file": "moddable-chess--mccooey.svg",
+      "url": "/boards/svgs/moddable-chess--mccooey.svg"
+    },
+    {
+      "id": "moddable-chess--medusa-chess",
+      "file": "moddable-chess--medusa-chess.svg",
+      "url": "/boards/svgs/moddable-chess--medusa-chess.svg"
+    },
+    {
+      "id": "moddable-chess--metamachy",
+      "file": "moddable-chess--metamachy.svg",
+      "url": "/boards/svgs/moddable-chess--metamachy.svg"
+    },
+    {
+      "id": "moddable-chess--mini-hexchess",
+      "file": "moddable-chess--mini-hexchess.svg",
+      "url": "/boards/svgs/moddable-chess--mini-hexchess.svg"
+    },
+    {
+      "id": "moddable-chess--minichess",
+      "file": "moddable-chess--minichess.svg",
+      "url": "/boards/svgs/moddable-chess--minichess.svg"
+    },
+    {
+      "id": "moddable-chess--mobius-strip-chess",
+      "file": "moddable-chess--mobius-strip-chess.svg",
+      "url": "/boards/svgs/moddable-chess--mobius-strip-chess.svg"
+    },
+    {
+      "id": "moddable-chess--monster-chess",
+      "file": "moddable-chess--monster-chess.svg",
+      "url": "/boards/svgs/moddable-chess--monster-chess.svg"
+    },
+    {
+      "id": "moddable-chess--nightrider",
+      "file": "moddable-chess--nightrider.svg",
+      "url": "/boards/svgs/moddable-chess--nightrider.svg"
+    },
+    {
+      "id": "moddable-chess--no-castling",
+      "file": "moddable-chess--no-castling.svg",
+      "url": "/boards/svgs/moddable-chess--no-castling.svg"
+    },
+    {
+      "id": "moddable-chess--no-retreat",
+      "file": "moddable-chess--no-retreat.svg",
+      "url": "/boards/svgs/moddable-chess--no-retreat.svg"
+    },
+    {
+      "id": "moddable-chess--oblong-chess",
+      "file": "moddable-chess--oblong-chess.svg",
+      "url": "/boards/svgs/moddable-chess--oblong-chess.svg"
+    },
+    {
+      "id": "moddable-chess--omega-chess",
+      "file": "moddable-chess--omega-chess.svg",
+      "url": "/boards/svgs/moddable-chess--omega-chess.svg"
+    },
+    {
+      "id": "moddable-chess--omnicide",
+      "file": "moddable-chess--omnicide.svg",
+      "url": "/boards/svgs/moddable-chess--omnicide.svg"
+    },
+    {
+      "id": "moddable-chess--orda-chess",
+      "file": "moddable-chess--orda-chess.svg",
+      "url": "/boards/svgs/moddable-chess--orda-chess.svg"
+    },
+    {
+      "id": "moddable-chess--orda-mirror",
+      "file": "moddable-chess--orda-mirror.svg",
+      "url": "/boards/svgs/moddable-chess--orda-mirror.svg"
+    },
+    {
+      "id": "moddable-chess--ouk-chaktrang",
+      "file": "moddable-chess--ouk-chaktrang.svg",
+      "url": "/boards/svgs/moddable-chess--ouk-chaktrang.svg"
+    },
+    {
+      "id": "moddable-chess--patrol",
+      "file": "moddable-chess--patrol.svg",
+      "url": "/boards/svgs/moddable-chess--patrol.svg"
+    },
+    {
+      "id": "moddable-chess--pawns-only",
+      "file": "moddable-chess--pawns-only.svg",
+      "url": "/boards/svgs/moddable-chess--pawns-only.svg"
+    },
+    {
+      "id": "moddable-chess--peasants-revolt",
+      "file": "moddable-chess--peasants-revolt.svg",
+      "url": "/boards/svgs/moddable-chess--peasants-revolt.svg"
+    },
+    {
+      "id": "moddable-chess--petty",
+      "file": "moddable-chess--petty.svg",
+      "url": "/boards/svgs/moddable-chess--petty.svg"
+    },
+    {
+      "id": "moddable-chess--placement-chess",
+      "file": "moddable-chess--placement-chess.svg",
+      "url": "/boards/svgs/moddable-chess--placement-chess.svg"
+    },
+    {
+      "id": "moddable-chess--pocket-knight",
+      "file": "moddable-chess--pocket-knight.svg",
+      "url": "/boards/svgs/moddable-chess--pocket-knight.svg"
+    },
+    {
+      "id": "moddable-chess--poison-chess",
+      "file": "moddable-chess--poison-chess.svg",
+      "url": "/boards/svgs/moddable-chess--poison-chess.svg"
+    },
+    {
+      "id": "moddable-chess--progressive",
+      "file": "moddable-chess--progressive.svg",
+      "url": "/boards/svgs/moddable-chess--progressive.svg"
+    },
+    {
+      "id": "moddable-chess--racing-kings",
+      "file": "moddable-chess--racing-kings.svg",
+      "url": "/boards/svgs/moddable-chess--racing-kings.svg"
+    },
+    {
+      "id": "moddable-chess--raumschach",
+      "file": "moddable-chess--raumschach.svg",
+      "url": "/boards/svgs/moddable-chess--raumschach.svg"
+    },
+    {
+      "id": "moddable-chess--recruitment-chess",
+      "file": "moddable-chess--recruitment-chess.svg",
+      "url": "/boards/svgs/moddable-chess--recruitment-chess.svg"
+    },
+    {
+      "id": "moddable-chess--rifle",
+      "file": "moddable-chess--rifle.svg",
+      "url": "/boards/svgs/moddable-chess--rifle.svg"
+    },
+    {
+      "id": "moddable-chess--rollerball",
+      "file": "moddable-chess--rollerball.svg",
+      "url": "/boards/svgs/moddable-chess--rollerball.svg"
+    },
+    {
+      "id": "moddable-chess--romanchenkos-chess",
+      "file": "moddable-chess--romanchenkos-chess.svg",
+      "url": "/boards/svgs/moddable-chess--romanchenkos-chess.svg"
+    },
+    {
+      "id": "moddable-chess--s-chess",
+      "file": "moddable-chess--s-chess.svg",
+      "url": "/boards/svgs/moddable-chess--s-chess.svg"
+    },
+    {
+      "id": "moddable-chess--senterej",
+      "file": "moddable-chess--senterej.svg",
+      "url": "/boards/svgs/moddable-chess--senterej.svg"
+    },
+    {
+      "id": "moddable-chess--shafran",
+      "file": "moddable-chess--shafran.svg",
+      "url": "/boards/svgs/moddable-chess--shafran.svg"
+    },
+    {
+      "id": "moddable-chess--shako",
+      "file": "moddable-chess--shako.svg",
+      "url": "/boards/svgs/moddable-chess--shako.svg"
+    },
+    {
+      "id": "moddable-chess--shatar",
+      "file": "moddable-chess--shatar.svg",
+      "url": "/boards/svgs/moddable-chess--shatar.svg"
+    },
+    {
+      "id": "moddable-chess--shatranj-kamil",
+      "file": "moddable-chess--shatranj-kamil.svg",
+      "url": "/boards/svgs/moddable-chess--shatranj-kamil.svg"
+    },
+    {
+      "id": "moddable-chess--shatranj",
+      "file": "moddable-chess--shatranj.svg",
+      "url": "/boards/svgs/moddable-chess--shatranj.svg"
+    },
+    {
+      "id": "moddable-chess--shinobi",
+      "file": "moddable-chess--shinobi.svg",
+      "url": "/boards/svgs/moddable-chess--shinobi.svg"
+    },
+    {
+      "id": "moddable-chess--shinobiplus",
+      "file": "moddable-chess--shinobiplus.svg",
+      "url": "/boards/svgs/moddable-chess--shinobiplus.svg"
+    },
+    {
+      "id": "moddable-chess--shogun",
+      "file": "moddable-chess--shogun.svg",
+      "url": "/boards/svgs/moddable-chess--shogun.svg"
+    },
+    {
+      "id": "moddable-chess--single-check",
+      "file": "moddable-chess--single-check.svg",
+      "url": "/boards/svgs/moddable-chess--single-check.svg"
+    },
+    {
+      "id": "moddable-chess--sittuyin",
+      "file": "moddable-chess--sittuyin.svg",
+      "url": "/boards/svgs/moddable-chess--sittuyin.svg"
+    },
+    {
+      "id": "moddable-chess--spartan",
+      "file": "moddable-chess--spartan.svg",
+      "url": "/boards/svgs/moddable-chess--spartan.svg"
+    },
+    {
+      "id": "moddable-chess--spherical-chess",
+      "file": "moddable-chess--spherical-chess.svg",
+      "url": "/boards/svgs/moddable-chess--spherical-chess.svg"
+    },
+    {
+      "id": "moddable-chess--stalemate-wins",
+      "file": "moddable-chess--stalemate-wins.svg",
+      "url": "/boards/svgs/moddable-chess--stalemate-wins.svg"
+    },
+    {
+      "id": "moddable-chess--standard",
+      "file": "moddable-chess--standard.svg",
+      "url": "/boards/svgs/moddable-chess--standard.svg"
+    },
+    {
+      "id": "moddable-chess--stupidhouse",
+      "file": "moddable-chess--stupidhouse.svg",
+      "url": "/boards/svgs/moddable-chess--stupidhouse.svg"
+    },
+    {
+      "id": "moddable-chess--suicide-chess",
+      "file": "moddable-chess--suicide-chess.svg",
+      "url": "/boards/svgs/moddable-chess--suicide-chess.svg"
+    },
+    {
+      "id": "moddable-chess--synochess",
+      "file": "moddable-chess--synochess.svg",
+      "url": "/boards/svgs/moddable-chess--synochess.svg"
+    },
+    {
+      "id": "moddable-chess--tamerlane",
+      "file": "moddable-chess--tamerlane.svg",
+      "url": "/boards/svgs/moddable-chess--tamerlane.svg"
+    },
+    {
+      "id": "moddable-chess--tandem-chess",
+      "file": "moddable-chess--tandem-chess.svg",
+      "url": "/boards/svgs/moddable-chess--tandem-chess.svg"
+    },
+    {
+      "id": "moddable-chess--teleport-chess",
+      "file": "moddable-chess--teleport-chess.svg",
+      "url": "/boards/svgs/moddable-chess--teleport-chess.svg"
+    },
+    {
+      "id": "moddable-chess--three-check",
+      "file": "moddable-chess--three-check.svg",
+      "url": "/boards/svgs/moddable-chess--three-check.svg"
+    },
+    {
+      "id": "moddable-chess--toroidal-byzantine",
+      "file": "moddable-chess--toroidal-byzantine.svg",
+      "url": "/boards/svgs/moddable-chess--toroidal-byzantine.svg"
+    },
+    {
+      "id": "moddable-chess--toroidal-chess",
+      "file": "moddable-chess--toroidal-chess.svg",
+      "url": "/boards/svgs/moddable-chess--toroidal-chess.svg"
+    },
+    {
+      "id": "moddable-chess--torpedo",
+      "file": "moddable-chess--torpedo.svg",
+      "url": "/boards/svgs/moddable-chess--torpedo.svg"
+    },
+    {
+      "id": "moddable-chess--turkish-great-chess-ii",
+      "file": "moddable-chess--turkish-great-chess-ii.svg",
+      "url": "/boards/svgs/moddable-chess--turkish-great-chess-ii.svg"
+    },
+    {
+      "id": "moddable-chess--turkish-great-chess-iii",
+      "file": "moddable-chess--turkish-great-chess-iii.svg",
+      "url": "/boards/svgs/moddable-chess--turkish-great-chess-iii.svg"
+    },
+    {
+      "id": "moddable-chess--turkish-great-chess-iv",
+      "file": "moddable-chess--turkish-great-chess-iv.svg",
+      "url": "/boards/svgs/moddable-chess--turkish-great-chess-iv.svg"
+    },
+    {
+      "id": "moddable-chess--ultima",
+      "file": "moddable-chess--ultima.svg",
+      "url": "/boards/svgs/moddable-chess--ultima.svg"
+    },
+    {
+      "id": "moddable-chess--upside-down",
+      "file": "moddable-chess--upside-down.svg",
+      "url": "/boards/svgs/moddable-chess--upside-down.svg"
+    },
+    {
+      "id": "moddable-chess--vierschach",
+      "file": "moddable-chess--vierschach.svg",
+      "url": "/boards/svgs/moddable-chess--vierschach.svg"
+    },
+    {
+      "id": "moddable-chess--weak",
+      "file": "moddable-chess--weak.svg",
+      "url": "/boards/svgs/moddable-chess--weak.svg"
+    },
+    {
+      "id": "moddable-chess--wildebeest",
+      "file": "moddable-chess--wildebeest.svg",
+      "url": "/boards/svgs/moddable-chess--wildebeest.svg"
+    },
+    {
+      "id": "moddable-chess--xiang-fu",
+      "file": "moddable-chess--xiang-fu.svg",
+      "url": "/boards/svgs/moddable-chess--xiang-fu.svg"
+    },
+    {
+      "id": "moddable-chess--yalta-chess",
+      "file": "moddable-chess--yalta-chess.svg",
+      "url": "/boards/svgs/moddable-chess--yalta-chess.svg"
+    },
+    {
+      "id": "morris--lasker-morris",
+      "file": "morris--lasker-morris.svg",
+      "url": "/boards/svgs/morris--lasker-morris.svg"
+    },
+    {
+      "id": "morris--morabaraba",
+      "file": "morris--morabaraba.svg",
+      "url": "/boards/svgs/morris--morabaraba.svg"
+    },
+    {
+      "id": "morris--nine-mens-morris",
+      "file": "morris--nine-mens-morris.svg",
+      "url": "/boards/svgs/morris--nine-mens-morris.svg"
+    },
+    {
+      "id": "morris--shax",
+      "file": "morris--shax.svg",
+      "url": "/boards/svgs/morris--shax.svg"
+    },
+    {
+      "id": "morris--six-mens-morris",
+      "file": "morris--six-mens-morris.svg",
+      "url": "/boards/svgs/morris--six-mens-morris.svg"
+    },
+    {
+      "id": "morris--three-mens-morris",
+      "file": "morris--three-mens-morris.svg",
+      "url": "/boards/svgs/morris--three-mens-morris.svg"
+    },
+    {
+      "id": "morris--twelve-mens-morris",
+      "file": "morris--twelve-mens-morris.svg",
+      "url": "/boards/svgs/morris--twelve-mens-morris.svg"
+    },
+    {
+      "id": "nukes--asymmetric-powers",
+      "file": "nukes--asymmetric-powers.svg",
+      "url": "/boards/svgs/nukes--asymmetric-powers.svg"
+    },
+    {
+      "id": "nukes--fallout",
+      "file": "nukes--fallout.svg",
+      "url": "/boards/svgs/nukes--fallout.svg"
+    },
+    {
+      "id": "nukes--siege",
+      "file": "nukes--siege.svg",
+      "url": "/boards/svgs/nukes--siege.svg"
+    },
+    {
+      "id": "nukes--standard",
+      "file": "nukes--standard.svg",
+      "url": "/boards/svgs/nukes--standard.svg"
+    },
+    {
+      "id": "nyout--standard",
+      "file": "nyout--standard.svg",
+      "url": "/boards/svgs/nyout--standard.svg"
+    },
+    {
+      "id": "pachisi--seven-shell",
+      "file": "pachisi--seven-shell.svg",
+      "url": "/boards/svgs/pachisi--seven-shell.svg"
+    },
+    {
+      "id": "pachisi--standard",
+      "file": "pachisi--standard.svg",
+      "url": "/boards/svgs/pachisi--standard.svg"
+    },
+    {
+      "id": "pachisi--two-player",
+      "file": "pachisi--two-player.svg",
+      "url": "/boards/svgs/pachisi--two-player.svg"
+    },
+    {
+      "id": "reversi--anti-reversi",
+      "file": "reversi--anti-reversi.svg",
+      "url": "/boards/svgs/reversi--anti-reversi.svg"
+    },
+    {
+      "id": "reversi--six-by-six",
+      "file": "reversi--six-by-six.svg",
+      "url": "/boards/svgs/reversi--six-by-six.svg"
+    },
+    {
+      "id": "reversi--standard",
+      "file": "reversi--standard.svg",
+      "url": "/boards/svgs/reversi--standard.svg"
+    },
+    {
+      "id": "royal-ur--standard",
+      "file": "royal-ur--standard.svg",
+      "url": "/boards/svgs/royal-ur--standard.svg"
+    },
+    {
+      "id": "shogi--annan-shogi",
+      "file": "shogi--annan-shogi.svg",
+      "url": "/boards/svgs/shogi--annan-shogi.svg"
+    },
+    {
+      "id": "shogi--cannon-shogi",
+      "file": "shogi--cannon-shogi.svg",
+      "url": "/boards/svgs/shogi--cannon-shogi.svg"
+    },
+    {
+      "id": "shogi--chu-shogi",
+      "file": "shogi--chu-shogi.svg",
+      "url": "/boards/svgs/shogi--chu-shogi.svg"
+    },
+    {
+      "id": "shogi--dai-shogi",
+      "file": "shogi--dai-shogi.svg",
+      "url": "/boards/svgs/shogi--dai-shogi.svg"
+    },
+    {
+      "id": "shogi--dobutsu",
+      "file": "shogi--dobutsu.svg",
+      "url": "/boards/svgs/shogi--dobutsu.svg"
+    },
+    {
+      "id": "shogi--four-player-shogi",
+      "file": "shogi--four-player-shogi.svg",
+      "url": "/boards/svgs/shogi--four-player-shogi.svg"
+    },
+    {
+      "id": "shogi--gorogoro-plus",
+      "file": "shogi--gorogoro-plus.svg",
+      "url": "/boards/svgs/shogi--gorogoro-plus.svg"
+    },
+    {
+      "id": "shogi--hasami-shogi",
+      "file": "shogi--hasami-shogi.svg",
+      "url": "/boards/svgs/shogi--hasami-shogi.svg"
+    },
+    {
+      "id": "shogi--heian-shogi",
+      "file": "shogi--heian-shogi.svg",
+      "url": "/boards/svgs/shogi--heian-shogi.svg"
+    },
+    {
+      "id": "shogi--hex-shogi-91",
+      "file": "shogi--hex-shogi-91.svg",
+      "url": "/boards/svgs/shogi--hex-shogi-91.svg"
+    },
+    {
+      "id": "shogi--judkins-shogi",
+      "file": "shogi--judkins-shogi.svg",
+      "url": "/boards/svgs/shogi--judkins-shogi.svg"
+    },
+    {
+      "id": "shogi--kyoto-shogi",
+      "file": "shogi--kyoto-shogi.svg",
+      "url": "/boards/svgs/shogi--kyoto-shogi.svg"
+    },
+    {
+      "id": "shogi--maka-dai-dai-shogi",
+      "file": "shogi--maka-dai-dai-shogi.svg",
+      "url": "/boards/svgs/shogi--maka-dai-dai-shogi.svg"
+    },
+    {
+      "id": "shogi--minishogi",
+      "file": "shogi--minishogi.svg",
+      "url": "/boards/svgs/shogi--minishogi.svg"
+    },
+    {
+      "id": "shogi--mortal-shogi",
+      "file": "shogi--mortal-shogi.svg",
+      "url": "/boards/svgs/shogi--mortal-shogi.svg"
+    },
+    {
+      "id": "shogi--sankaku-shogi",
+      "file": "shogi--sankaku-shogi.svg",
+      "url": "/boards/svgs/shogi--sankaku-shogi.svg"
+    },
+    {
+      "id": "shogi--sho-shogi",
+      "file": "shogi--sho-shogi.svg",
+      "url": "/boards/svgs/shogi--sho-shogi.svg"
+    },
+    {
+      "id": "shogi--standard",
+      "file": "shogi--standard.svg",
+      "url": "/boards/svgs/shogi--standard.svg"
+    },
+    {
+      "id": "shogi--tai-shogi",
+      "file": "shogi--tai-shogi.svg",
+      "url": "/boards/svgs/shogi--tai-shogi.svg"
+    },
+    {
+      "id": "shogi--taikyoku-shogi",
+      "file": "shogi--taikyoku-shogi.svg",
+      "url": "/boards/svgs/shogi--taikyoku-shogi.svg"
+    },
+    {
+      "id": "shogi--tenjiku-shogi",
+      "file": "shogi--tenjiku-shogi.svg",
+      "url": "/boards/svgs/shogi--tenjiku-shogi.svg"
+    },
+    {
+      "id": "shogi--tori-shogi",
+      "file": "shogi--tori-shogi.svg",
+      "url": "/boards/svgs/shogi--tori-shogi.svg"
+    },
+    {
+      "id": "shogi--wa-shogi",
+      "file": "shogi--wa-shogi.svg",
+      "url": "/boards/svgs/shogi--wa-shogi.svg"
+    },
+    {
+      "id": "shogi--yari-shogi",
+      "file": "shogi--yari-shogi.svg",
+      "url": "/boards/svgs/shogi--yari-shogi.svg"
+    },
+    {
+      "id": "standard-52--big2",
+      "file": "standard-52--big2.svg",
+      "url": "/boards/svgs/standard-52--big2.svg"
+    },
+    {
+      "id": "standard-52--blackjack",
+      "file": "standard-52--blackjack.svg",
+      "url": "/boards/svgs/standard-52--blackjack.svg"
+    },
+    {
+      "id": "standard-52--bridge",
+      "file": "standard-52--bridge.svg",
+      "url": "/boards/svgs/standard-52--bridge.svg"
+    },
+    {
+      "id": "standard-52--canasta",
+      "file": "standard-52--canasta.svg",
+      "url": "/boards/svgs/standard-52--canasta.svg"
+    },
+    {
+      "id": "standard-52--crazy-eights",
+      "file": "standard-52--crazy-eights.svg",
+      "url": "/boards/svgs/standard-52--crazy-eights.svg"
+    },
+    {
+      "id": "standard-52--cribbage-four-player",
+      "file": "standard-52--cribbage-four-player.svg",
+      "url": "/boards/svgs/standard-52--cribbage-four-player.svg"
+    },
+    {
+      "id": "standard-52--cribbage-three-player",
+      "file": "standard-52--cribbage-three-player.svg",
+      "url": "/boards/svgs/standard-52--cribbage-three-player.svg"
+    },
+    {
+      "id": "standard-52--cribbage",
+      "file": "standard-52--cribbage.svg",
+      "url": "/boards/svgs/standard-52--cribbage.svg"
+    },
+    {
+      "id": "standard-52--euchre",
+      "file": "standard-52--euchre.svg",
+      "url": "/boards/svgs/standard-52--euchre.svg"
+    },
+    {
+      "id": "standard-52--freecell",
+      "file": "standard-52--freecell.svg",
+      "url": "/boards/svgs/standard-52--freecell.svg"
+    },
+    {
+      "id": "standard-52--gin-rummy",
+      "file": "standard-52--gin-rummy.svg",
+      "url": "/boards/svgs/standard-52--gin-rummy.svg"
+    },
+    {
+      "id": "standard-52--hearts",
+      "file": "standard-52--hearts.svg",
+      "url": "/boards/svgs/standard-52--hearts.svg"
+    },
+    {
+      "id": "standard-52--klondike",
+      "file": "standard-52--klondike.svg",
+      "url": "/boards/svgs/standard-52--klondike.svg"
+    },
+    {
+      "id": "standard-52--poker",
+      "file": "standard-52--poker.svg",
+      "url": "/boards/svgs/standard-52--poker.svg"
+    },
+    {
+      "id": "standard-52--president",
+      "file": "standard-52--president.svg",
+      "url": "/boards/svgs/standard-52--president.svg"
+    },
+    {
+      "id": "standard-52--rummy",
+      "file": "standard-52--rummy.svg",
+      "url": "/boards/svgs/standard-52--rummy.svg"
+    },
+    {
+      "id": "standard-52--spades",
+      "file": "standard-52--spades.svg",
+      "url": "/boards/svgs/standard-52--spades.svg"
+    },
+    {
+      "id": "standard-52--spider-solitaire",
+      "file": "standard-52--spider-solitaire.svg",
+      "url": "/boards/svgs/standard-52--spider-solitaire.svg"
+    },
+    {
+      "id": "standard-52--war",
+      "file": "standard-52--war.svg",
+      "url": "/boards/svgs/standard-52--war.svg"
+    },
+    {
+      "id": "standard-52--whist",
+      "file": "standard-52--whist.svg",
+      "url": "/boards/svgs/standard-52--whist.svg"
+    },
+    {
+      "id": "standard-dice--bunco",
+      "file": "standard-dice--bunco.svg",
+      "url": "/boards/svgs/standard-dice--bunco.svg"
+    },
+    {
+      "id": "standard-dice--craps",
+      "file": "standard-dice--craps.svg",
+      "url": "/boards/svgs/standard-dice--craps.svg"
+    },
+    {
+      "id": "standard-dice--farkle",
+      "file": "standard-dice--farkle.svg",
+      "url": "/boards/svgs/standard-dice--farkle.svg"
+    },
+    {
+      "id": "standard-dice--liars-dice",
+      "file": "standard-dice--liars-dice.svg",
+      "url": "/boards/svgs/standard-dice--liars-dice.svg"
+    },
+    {
+      "id": "standard-dice--yahtzee",
+      "file": "standard-dice--yahtzee.svg",
+      "url": "/boards/svgs/standard-dice--yahtzee.svg"
+    },
+    {
+      "id": "stern-halma--standard-2p",
+      "file": "stern-halma--standard-2p.svg",
+      "url": "/boards/svgs/stern-halma--standard-2p.svg"
+    },
+    {
+      "id": "stern-halma--standard-3p",
+      "file": "stern-halma--standard-3p.svg",
+      "url": "/boards/svgs/stern-halma--standard-3p.svg"
+    },
+    {
+      "id": "stern-halma--standard-4p",
+      "file": "stern-halma--standard-4p.svg",
+      "url": "/boards/svgs/stern-halma--standard-4p.svg"
+    },
+    {
+      "id": "stern-halma--standard-6p",
+      "file": "stern-halma--standard-6p.svg",
+      "url": "/boards/svgs/stern-halma--standard-6p.svg"
+    },
+    {
+      "id": "stern-halma--super-chinese-checkers",
+      "file": "stern-halma--super-chinese-checkers.svg",
+      "url": "/boards/svgs/stern-halma--super-chinese-checkers.svg"
+    },
+    {
+      "id": "surakarta--standard",
+      "file": "surakarta--standard.svg",
+      "url": "/boards/svgs/surakarta--standard.svg"
+    },
+    {
+      "id": "tafl--brandubh",
+      "file": "tafl--brandubh.svg",
+      "url": "/boards/svgs/tafl--brandubh.svg"
+    },
+    {
+      "id": "tafl--hnefatafl",
+      "file": "tafl--hnefatafl.svg",
+      "url": "/boards/svgs/tafl--hnefatafl.svg"
+    },
+    {
+      "id": "tafl--standard",
+      "file": "tafl--standard.svg",
+      "url": "/boards/svgs/tafl--standard.svg"
+    },
+    {
+      "id": "tafl--tawlbwrdd",
+      "file": "tafl--tawlbwrdd.svg",
+      "url": "/boards/svgs/tafl--tawlbwrdd.svg"
+    },
+    {
+      "id": "xiangqi--janggi",
+      "file": "xiangqi--janggi.svg",
+      "url": "/boards/svgs/xiangqi--janggi.svg"
+    },
+    {
+      "id": "xiangqi--jieqi",
+      "file": "xiangqi--jieqi.svg",
+      "url": "/boards/svgs/xiangqi--jieqi.svg"
+    },
+    {
+      "id": "xiangqi--manchu-plus",
+      "file": "xiangqi--manchu-plus.svg",
+      "url": "/boards/svgs/xiangqi--manchu-plus.svg"
+    },
+    {
+      "id": "xiangqi--minixiangqi",
+      "file": "xiangqi--minixiangqi.svg",
+      "url": "/boards/svgs/xiangqi--minixiangqi.svg"
+    },
+    {
+      "id": "xiangqi--quang-trung",
+      "file": "xiangqi--quang-trung.svg",
+      "url": "/boards/svgs/xiangqi--quang-trung.svg"
+    },
+    {
+      "id": "xiangqi--standard",
+      "file": "xiangqi--standard.svg",
+      "url": "/boards/svgs/xiangqi--standard.svg"
+    },
+    {
+      "id": "xiangqi--xiangqi-42",
+      "file": "xiangqi--xiangqi-42.svg",
+      "url": "/boards/svgs/xiangqi--xiangqi-42.svg"
+    },
+    {
+      "id": "xiangqi--yang-qi",
+      "file": "xiangqi--yang-qi.svg",
+      "url": "/boards/svgs/xiangqi--yang-qi.svg"
+    }
+  ]
+}

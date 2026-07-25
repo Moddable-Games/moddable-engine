@@ -1,0 +1,81 @@
+{
+  "name": "Moddable Engine API",
+  "version": "1.0.0",
+  "description": "Static JSON API for the Moddable board game engine",
+  "homepage": "https://engine.moddable.games",
+  "endpoints": [
+    {
+      "path": "/api/pieces/index.json",
+      "type": "json",
+      "description": "Piece gallery — 115 SVG sets across chess, shogi, xiangqi, Go, draughts, backgammon",
+      "count": 115
+    },
+    {
+      "path": "/api/boards/index.json",
+      "type": "json",
+      "description": "Board gallery — 333 rendered SVG diagrams spanning 42 game families",
+      "count": 333
+    },
+    {
+      "path": "/api/tiles/index.json",
+      "type": "json",
+      "description": "Tile gallery — 7 hex tile sets for strategy maps",
+      "count": 7
+    },
+    {
+      "path": "/api/puzzles/index.json",
+      "type": "json",
+      "description": "Chess puzzles — 1,557 tactical puzzles with FEN, solutions, and difficulty ratings",
+      "count": 1557
+    }
+  ],
+  "deprecations": [
+    {
+      "old": "/pieces/gallery-index.json",
+      "new": "/api/pieces/index.json",
+      "consumers": ["moddable-tools", "board-studio"]
+    },
+    {
+      "old": "/tiles/tile-index.json",
+      "new": "/api/tiles/index.json",
+      "consumers": ["moddable-tools"]
+    },
+    {
+      "old": "moddable-chess/data/puzzles-standard.json",
+      "new": "/api/puzzles/index.json",
+      "consumers": ["moddable-tools MCP"]
+    },
+    {
+      "old": "moddable-chess/data/puzzles-variants.json",
+      "new": "/api/puzzles/index.json",
+      "consumers": ["moddable-tools MCP"]
+    },
+    {
+      "old": "moddable-chess/assets/pieces/gallery-index.json",
+      "new": "/api/pieces/index.json",
+      "consumers": ["moddable-tools MCP"]
+    }
+  ],
+  "sdk": {
+    "package": "@moddable/engine",
+    "exports": {
+      "core": "Event bus, RNG, state store, player system, move pipeline",
+      "plugins": "All 13 game families (chess, go, mancala, morris, draughts, reversi, halma, shogi, xiangqi, backgammon, big2, hex, race)",
+      "plugins/*": "Individual plugin (e.g. plugins/chess, plugins/mancala)",
+      "component-dice": "Dice expressions, roll, probability calculation",
+      "component-deck": "6 deck types, shuffle, deal, tableau layout",
+      "hex-generators": "Map generation for 6 hex games (nukes, twilight, talisman, colony, mongo, endless)",
+      "rpg": "Entity search, oracle rolls, card data, link resolution, manifest loading",
+      "ai": "Minimax, MCTS, evaluators for 9 game families",
+      "game": "Factory, topology + component registries",
+      "schema": "Frontmatter parser, validator, producer, loader",
+      "render": "Layer-compositing SVG renderer",
+      "rule": "Rule registry, composition, dependency resolution"
+    }
+  },
+  "related": {
+    "rules_api": "https://rules.moddable.games/api/index.json",
+    "mcp_tools": "https://tools.moddable.games/mcp",
+    "openapi": "https://tools.moddable.games/openapi.json"
+  }
+}

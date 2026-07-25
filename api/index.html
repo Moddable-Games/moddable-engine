@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Static API — Moddable Engine</title>
+<meta name="description" content="Static JSON API for the Moddable board game engine. Piece sets, board diagrams, hex tiles, and chess puzzles.">
+<meta property="og:title" content="Static API — Moddable Engine">
+<meta property="og:description" content="Static JSON API for the Moddable board game engine. Piece sets, board diagrams, hex tiles, and chess puzzles.">
+<meta property="og:url" content="https://engine.moddable.games/api/">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://engine.moddable.games/og/api.png?v=1.0.8">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Static API — Moddable Engine">
+<meta name="twitter:description" content="Static JSON API for the Moddable board game engine. Piece sets, board diagrams, hex tiles, and chess puzzles.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/api.png?v=1.0.8">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../css/api.css?v=1.0.8">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../play/" class="nav-link">Play</a>
+      <a href="../create/" class="nav-link">Create</a>
+      <a href="../boards/" class="nav-link">Boards</a>
+      <a href="../pieces/" class="nav-link">Pieces</a>
+      <a href="../tiles/" class="nav-link">Tiles</a>
+      <a href="../docs/" class="nav-link">Docs</a>
+      <a href="./" class="nav-link nav-link--active">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-bg">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Developer Resources</div>
+    <h1 class="hero-title">Static API</h1>
+    <p class="hero-lede">JSON endpoints served from GitHub Pages. No authentication, no rate limits, no server. Fetch game assets directly from the CDN.</p>
+  </div>
+</section>
+
+<section class="stats-section">
+  <div class="stats-inner">
+    <div class="stat-card">
+      <span class="stat-value" data-stat="pieces">115</span>
+      <span class="stat-label">Piece Sets</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" data-stat="boards">333</span>
+      <span class="stat-label">Board Diagrams</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" data-stat="tiles">7</span>
+      <span class="stat-label">Tile Sets</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" data-stat="puzzles">1,557</span>
+      <span class="stat-label">Chess Puzzles</span>
+    </div>
+  </div>
+</section>
+
+<section class="endpoints-section">
+  <div class="endpoints-inner">
+    <h2 class="section-heading">Endpoints</h2>
+    <div class="endpoint-grid">
+      <a href="pieces/index.json" class="endpoint-card">
+        <div class="endpoint-icon">&#x265A;</div>
+        <h3 class="endpoint-name">Pieces</h3>
+        <p class="endpoint-desc">115 SVG sets across chess, shogi, xiangqi, Go, draughts, and backgammon.</p>
+        <code class="endpoint-url">/api/pieces/index.json</code>
+      </a>
+      <a href="boards/index.json" class="endpoint-card">
+        <div class="endpoint-icon">&#x25A6;</div>
+        <h3 class="endpoint-name">Boards</h3>
+        <p class="endpoint-desc">333 rendered SVG diagrams spanning 42 game families.</p>
+        <code class="endpoint-url">/api/boards/index.json</code>
+      </a>
+      <a href="tiles/index.json" class="endpoint-card">
+        <div class="endpoint-icon">&#x2B21;</div>
+        <h3 class="endpoint-name">Tiles</h3>
+        <p class="endpoint-desc">7 hex tile sets for strategy maps and terrain generation.</p>
+        <code class="endpoint-url">/api/tiles/index.json</code>
+      </a>
+      <a href="puzzles/index.json" class="endpoint-card">
+        <div class="endpoint-icon">&#x2659;</div>
+        <h3 class="endpoint-name">Puzzles</h3>
+        <p class="endpoint-desc">1,557 tactical puzzles with FEN positions, solutions, and difficulty ratings.</p>
+        <code class="endpoint-url">/api/puzzles/index.json</code>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="patterns-section">
+  <div class="patterns-inner">
+    <h2 class="section-heading">URL Patterns</h2>
+    <div class="pattern-list">
+      <div class="pattern-item">
+        <code class="pattern-url">https://engine.moddable.games/api/index.json</code>
+        <span class="pattern-desc">Discovery index (this page as JSON)</span>
+      </div>
+      <div class="pattern-item">
+        <code class="pattern-url">https://engine.moddable.games/api/pieces/index.json</code>
+        <span class="pattern-desc">All piece set metadata</span>
+      </div>
+      <div class="pattern-item">
+        <code class="pattern-url">https://engine.moddable.games/api/boards/index.json</code>
+        <span class="pattern-desc">All board diagram metadata</span>
+      </div>
+      <div class="pattern-item">
+        <code class="pattern-url">https://engine.moddable.games/api/tiles/index.json</code>
+        <span class="pattern-desc">All tile set metadata</span>
+      </div>
+      <div class="pattern-item">
+        <code class="pattern-url">https://engine.moddable.games/api/puzzles/index.json</code>
+        <span class="pattern-desc">All chess puzzles (standard + variants)</span>
+      </div>
+      <div class="pattern-item">
+        <code class="pattern-url">https://engine.moddable.games/boards/svgs/{id}.svg</code>
+        <span class="pattern-desc">Individual board SVG by ID</span>
+      </div>
+      <div class="pattern-item">
+        <code class="pattern-url">https://engine.moddable.games/pieces/sets/{set}/</code>
+        <span class="pattern-desc">Individual piece set directory</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="usage-section">
+  <div class="usage-inner">
+    <h2 class="section-heading">Usage</h2>
+    <div class="usage-example">
+      <pre class="usage-code"><code>// Fetch the discovery index
+const api = await fetch('https://engine.moddable.games/api/index.json')
+  .then(r =&gt; r.json());
+
+// List all piece sets
+const pieces = await fetch('https://engine.moddable.games/api/pieces/index.json')
+  .then(r =&gt; r.json());
+
+// Get a specific board SVG
+const svg = await fetch('https://engine.moddable.games/boards/svgs/chess-standard.svg')
+  .then(r =&gt; r.text());</code></pre>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../play/">Play</a>
+        <a href="../boards/">Boards</a>
+        <a href="../pieces/">Pieces</a>
+        <a href="../tiles/">Tiles</a>
+        <a href="../docs/">Docs</a>
+        <a href="./">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Moddable Games</h4>
+        <a href="https://moddable.games" target="_blank" rel="noopener">Homepage</a>
+        <a href="https://rules.moddable.games" target="_blank" rel="noopener">Rules</a>
+        <a href="https://moddable.games/news/" target="_blank" rel="noopener">News</a>
+        <a href="https://discord.gg/VhsVGNq6Za" target="_blank" rel="noopener">Discord</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.8</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/api.js?v=1.0.8"></script>
+</body>
+</html>
