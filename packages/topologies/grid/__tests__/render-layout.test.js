@@ -33,10 +33,10 @@ describe('renderLayout — single pipeline, no branches per provider', () => {
       lines: { horizontal: false },
     })
 
-    const rects = result.elements.filter(e => e.tag === 'rect')
-    expect(rects.length).toBe(64)
-    expect(rects[0].attrs.fill).toBe(light) // (0,0) even
-    expect(rects[1].attrs.fill).toBe(dark)  // (0,1) odd
+    const fillRects = result.elements.filter(e => e.tag === 'rect' && e.attrs.fill !== 'transparent')
+    expect(fillRects.length).toBe(64)
+    expect(fillRects[0].attrs.fill).toBe(light) // (0,0) even
+    expect(fillRects[1].attrs.fill).toBe(dark)  // (0,1) odd
   })
 
   test('cellMap fill via cellFill function with zone lookup', () => {
@@ -72,8 +72,8 @@ describe('renderLayout — single pipeline, no branches per provider', () => {
 
     const lines = result.elements.filter(e => e.tag === 'line')
     expect(lines.length).toBe(38) // 19h + 19v
-    const circles = result.elements.filter(e => e.tag === 'circle')
-    expect(circles.length).toBe(4)
+    const markerCircles = result.elements.filter(e => e.tag === 'circle' && !e.attrs.class)
+    expect(markerCircles.length).toBe(4)
     expect(result.cells.length).toBe(361)
   })
 

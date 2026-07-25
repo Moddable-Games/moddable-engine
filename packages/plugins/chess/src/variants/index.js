@@ -1,0 +1,8 @@
+export { standard } from './standard.js'
+export { noCastling } from './no-castling.js'
+export { torpedo } from './torpedo.js'
+export { threeCheck } from './three-check.js'
+export { fiveCheck } from './five-check.js'
+export { kingOfTheHill } from './king-of-the-hill.js'
+export { racingKings } from './racing-kings.js'
+export { antichess } from './antichess.js'

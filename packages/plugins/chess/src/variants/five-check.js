@@ -1,0 +1,26 @@
+export const fiveCheck = {
+  key: 'fiveCheck',
+  label: 'Five-Check',
+  group: 'Tactical',
+  title: 'Five-Check',
+  description: 'Extended Three-Check. Five checks wins instead of three.',
+  rule: 'Board: 8x8 · Win: Checkmate or 5 checks',
+  rows: 8,
+  cols: 8,
+  checkThreshold: 5,
+
+  winCondition(state, ctx) {
+    const checks = state.checkCount || { 0: 0, 1: 0 }
+    if (checks[0] >= 5) return 'white'
+    if (checks[1] >= 5) return 'black'
+    return null
+  },
+
+  evaluate(state, ctx) {
+    const checks = state.checkCount || { 0: 0, 1: 0 }
+    const currentPlayer = ctx.currentPlayer
+    const myChecks = checks[currentPlayer] || 0
+    const oppChecks = checks[1 - currentPlayer] || 0
+    return myChecks * 250 - oppChecks * 250
+  },
+}

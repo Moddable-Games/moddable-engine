@@ -217,7 +217,10 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
         moves.push({ from, to: forward })
       }
 
-      if (doubleStep && startCells[playerIdx].has(from)) {
+      const canDoubleStep = config.torpedo
+        ? doubleStep
+        : doubleStep && startCells[playerIdx].has(from)
+      if (canDoubleStep) {
         const doubleForward = topology.step(forward, fwd)
         if (doubleForward !== null && getCell(slice.board, doubleForward) === null) {
           moves.push({ from, to: doubleForward })
@@ -485,7 +488,15 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       }
     }
 
-    return filterLegalMoves(allMoves, slice, playerIdx)
+    let legal = config.noCheck
+      ? allMoves
+      : filterLegalMoves(allMoves, slice, playerIdx)
+
+    if (config.moveFilter) {
+      legal = config.moveFilter(legal, slice, { currentPlayer: playerIdx })
+    }
+
+    return legal
   }
 
   function filterLegalMoves(moves, slice, playerIdx) {
@@ -515,10 +526,20 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const playerIdx = full.__players.currentIndex
     const opponent = 1 - playerIdx
 
+    if (config.winCondition) {
+      const result = config.winCondition(slice, { currentPlayer: playerIdx })
+      if (result !== null && result !== undefined) return result
+    }
+
     const oppFull = { ...full, __players: { ...full.__players, currentIndex: opponent } }
     const oppMoves = getLegalMoves(slice, oppFull)
 
     if (oppMoves.length === 0) {
+      if (config.noCheck) {
+        return config.stalemateMeaning === 'win'
+          ? (opponent === 0 ? 'white' : 'black')
+          : 'draw'
+      }
       if (isInCheck(slice.board, opponent)) {
         return playerIdx === 0 ? 'white' : 'black'
       }

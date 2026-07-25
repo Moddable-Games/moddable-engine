@@ -864,7 +864,7 @@ function normalizeLegacyConfig(rows, cols, config) {
     ops.push({ op: 'texts', items: texts.map(t => ({ attrs: { x: t.x, y: t.y, 'text-anchor': t.anchor || 'middle', 'dominant-baseline': t.baseline || 'central', 'font-size': t.fontSize, 'font-family': t.fontFamily || 'serif', fill: t.fill || '#333', ...(t.attrs || {}) }, text: t.text })) })
   }
 
-  ops.push({ op: 'hit-targets', shape: isIntersection ? 'circle' : 'rect', radius: tileSize * 0.45, idStyle: labelConfig.alphabet ? (r, c, rws) => labelConfig.alphabet[c] + (rws - r) : 'algebraic', emitTo: 'cells', cellAttrs: config.cellAttrs })
+  ops.push({ op: 'hit-targets', shape: isIntersection ? 'circle' : 'rect', radius: tileSize * 0.45, idStyle: labelConfig.alphabet ? (r, c, rws) => labelConfig.alphabet[c] + (rws - r) : 'algebraic', cellAttrs: config.cellAttrs })
 
   return {
     tileSize,

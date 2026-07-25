@@ -398,9 +398,25 @@ function resetSidebarControls() {
   document.getElementById('chargen-group').style.display = 'none'
 }
 
+const PLAYABLE_GAMES = new Set(['moddable-chess'])
+
+function updatePlayButton() {
+  const group = document.getElementById('play-interactive-group')
+  const btn = document.getElementById('play-interactive-btn')
+  if (!group || !btn) return
+  if (PLAYABLE_GAMES.has(state.game)) {
+    group.style.display = ''
+    const params = new URLSearchParams({ mode: 'play', game: state.game, variant: state.variant })
+    btn.href = '?' + params.toString()
+  } else {
+    group.style.display = 'none'
+  }
+}
+
 async function render() {
   if (!state.game || !state.variant) return
   resetSidebarControls()
+  updatePlayButton()
 
   const entry = manifestIndex[`${state.game}/${state.variant}`]
 

@@ -22,6 +22,7 @@
 <meta name="base-path" content="..">
 <link rel="stylesheet" href="../css/home.css?v=1.0.8">
 <link rel="stylesheet" href="../css/boards.css?v=1.0.8">
+<link rel="stylesheet" href="../css/chess-play.css?v=1.0.8">
 </head>
 <body>
 
@@ -105,6 +106,10 @@
 
       <div id="chargen-group" style="display:none"></div>
 
+      <div id="play-interactive-group" style="display:none;margin-top:12px">
+        <a id="play-interactive-btn" class="btn btn-primary" href="#">&#9654; Play Interactive</a>
+      </div>
+
       <div id="derived-info" class="derived-info"></div>
 
     </div>
@@ -161,5 +166,17 @@
   </div>
 </footer>
 <script type="module" src="../js/play.js?v=1.0.8"></script>
+<script type="module">
+if (new URLSearchParams(location.search).get('mode') === 'play') {
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelector('.boards-hero').style.display = 'none';
+    document.querySelector('.boards-app').style.display = 'none';
+    const playContainer = document.createElement('div');
+    playContainer.id = 'chess-play-root';
+    document.querySelector('.boards-app').before(playContainer);
+    import('../js/chess-play.js?v=1.0.8').then(m => m.initChessPlay(playContainer));
+  });
+}
+</script>
 </body>
 </html>
