@@ -373,7 +373,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
         break
       }
     }
-    if (kingPos === null) return true
+    if (kingPos === null) return false
     return isSquareAttacked(board, kingPos, playerIdx)
   }
 

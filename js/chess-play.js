@@ -4,10 +4,13 @@ import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolv
 import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
 import { createChessPlugin } from '../packages/plugins/chess/index.js'
 import { createGameFromDefinition } from '../packages/game/index.js'
-import { createGridTopology } from '../packages/topologies/grid/index.js'
+import { createGridTopology, algebraicId, algebraicToIndex } from '../packages/topologies/grid/index.js'
 import { createGameController } from '../packages/play/index.js'
+import { createSimulator } from '../packages/ai/src/simulator.js'
+import { createMinimax, DIFFICULTIES } from '../packages/ai/src/minimax.js'
+import { chessEvaluate } from '../packages/ai/src/evaluators.js'
 import { registerVariant, getVariantConfig, getVariantGroups } from '../packages/plugins/chess/index.js'
-import { standard, noCastling, torpedo, threeCheck, fiveCheck, kingOfTheHill, antichess, racingKings } from '../packages/plugins/chess/src/variants/index.js'
+import { standard, noCastling, torpedo, threeCheck, fiveCheck, kingOfTheHill, antichess, racingKings, capablanca, losAlamos, horde } from '../packages/plugins/chess/src/variants/index.js'
 
 registerVariant('standard', standard)
 registerVariant('noCastling', noCastling)
@@ -17,6 +20,9 @@ registerVariant('fiveCheck', fiveCheck)
 registerVariant('kingOfTheHill', kingOfTheHill)
 registerVariant('antichess', antichess)
 registerVariant('racingKings', racingKings)
+registerVariant('capablanca', capablanca)
+registerVariant('losAlamos', losAlamos)
+registerVariant('horde', horde)
 
 const RULES_BASE = location.hostname === 'engine.moddable.games'
   ? 'https://rules.moddable.games/'
@@ -30,13 +36,23 @@ let boardSvgContainer = null
 export async function initChessPlay(container) {
   const params = new URLSearchParams(location.search)
   currentVariant = params.get('variant') || 'standard'
+  const savedColor = params.get('color') || 'white'
+  const savedOpponent = params.get('opponent') || 'human'
+  const savedFlipped = params.get('flipped') === '1'
 
   galleryIndex = await fetch('../pieces/gallery-index.json').then(r => r.json()).catch(() => null)
 
   container.innerHTML = buildUI()
   boardSvgContainer = container.querySelector('#chess-board-svg')
+
+  const colorSelect = container.querySelector('#chess-color-select')
+  const opponentSelect = container.querySelector('#chess-opponent-select')
+  if (colorSelect) colorSelect.value = savedColor
+  if (opponentSelect) opponentSelect.value = savedOpponent
+
   populateVariantPicker(container)
   await startGame()
+  if (savedFlipped) controller.setFlipped(true)
   bindEvents(container)
 }
 
@@ -59,7 +75,17 @@ function buildUI() {
       <label class="control-label">Opponent</label>
       <select id="chess-opponent-select">
         <option value="human">Human</option>
-        <option value="ai">AI (Random)</option>
+        <option value="ai">AI</option>
+      </select>
+    </div>
+    <div class="control-group" id="chess-difficulty-group" style="display:none">
+      <label class="control-label">Difficulty</label>
+      <select id="chess-difficulty-select">
+        <option value="beginner">Beginner</option>
+        <option value="easy">Easy</option>
+        <option value="medium" selected>Medium</option>
+        <option value="hard">Hard</option>
+        <option value="expert">Expert</option>
       </select>
     </div>
     <div class="chess-controls">
@@ -80,7 +106,7 @@ function buildUI() {
 function populateVariantPicker(container) {
   const select = container.querySelector('#chess-variant-select')
   const groups = getVariantGroups()
-  const GROUP_ORDER = ['Classic', 'Tactical', 'Alternate Rules', 'Other']
+  const GROUP_ORDER = ['Classic', 'Tactical', 'Alternate Rules', 'Small Boards', 'Large Boards', 'Asymmetric', 'Other']
 
   for (const groupName of GROUP_ORDER) {
     const variants = groups.get(groupName)
@@ -99,15 +125,11 @@ function populateVariantPicker(container) {
 }
 
 function sqToAlgebraic(idx, rows, cols) {
-  const r = Math.floor(idx / cols)
-  const c = idx % cols
-  return String.fromCharCode(97 + c) + (rows - r)
+  return algebraicId(Math.floor(idx / cols), idx % cols, rows)
 }
 
 function algebraicToSq(alg, rows, cols) {
-  const c = alg.charCodeAt(0) - 97
-  const r = rows - parseInt(alg.slice(1))
-  return r * cols + c
+  return algebraicToIndex(alg, rows, cols)
 }
 
 async function startGame() {
@@ -137,8 +159,13 @@ async function startGame() {
 
   const colorSelect = document.getElementById('chess-color-select')
   const opponentSelect = document.getElementById('chess-opponent-select')
+  const difficultySelect = document.getElementById('chess-difficulty-select')
+  const difficultyGroup = document.getElementById('chess-difficulty-group')
   const humanColor = colorSelect?.value || 'white'
   const opponent = opponentSelect?.value || 'human'
+  const difficulty = difficultySelect?.value || 'medium'
+
+  if (difficultyGroup) difficultyGroup.style.display = opponent === 'ai' ? '' : 'none'
 
   const players = {}
   if (opponent === 'ai') {
@@ -149,11 +176,33 @@ async function startGame() {
     players.black = 'human'
   }
 
+  let aiPickMove = null
+  if (opponent === 'ai') {
+    const plugins = game.registry.getPlugins()
+    const chessPlugin = plugins.find(p => p.sliceName === 'chess')
+    if (chessPlugin) {
+      const evaluate = variantConfig.evaluate
+        ? (state, playerIdx) => {
+            const base = chessEvaluate(state, playerIdx)
+            return base + variantConfig.evaluate(state, { currentPlayer: playerIdx })
+          }
+        : chessEvaluate
+      const simulator = createSimulator(chessPlugin, { playerCount: 2, evaluate })
+      const minimax = createMinimax(simulator, { difficulty })
+      aiPickMove = (g) => {
+        const chessState = g.getState('chess')
+        const playerIdx = g.playerSystem.getAll().indexOf(g.currentPlayer())
+        return minimax.search(chessState, playerIdx)
+      }
+    }
+  }
+
   const moveLog = []
 
   controller = createGameController(game, {
     players,
-    onRender: (g, state) => renderBoard(g, state, rows, cols),
+    aiPickMove,
+    onRender: (g, state) => renderBoard(g, state, rows, cols, variantConfig),
     onMove: (move, player) => {
       moveLog.push({ move, player })
       updateMoveList(moveLog, cols, rows)
@@ -173,26 +222,31 @@ async function startGame() {
   updateURL()
 }
 
-function renderBoard(game, state, rows, cols) {
+function renderBoard(game, state, rows, cols, variantConfig) {
   if (!boardSvgContainer) return
   const chessState = game.getState('chess')
   if (!chessState) return
 
   const board = chessState.board
+  const plugins = game.registry?.getPlugins ? game.registry.getPlugins() : []
+  const chessPlugin = plugins.find(p => p.sliceName === 'chess')
+  const vocabulary = chessPlugin?.vocabulary || {}
   const selected = state.selected
   const lastMove = state.lastMove
   const legalMoves = state.legalMoves || []
-  const legalTargets = new Set(legalMoves.map(m => sqToAlgebraic(m.to, rows, cols)))
 
+  const flipped = state.flipped
   const fenRows = []
-  for (let r = 0; r < rows; r++) {
+  for (let vr = 0; vr < rows; vr++) {
+    const r = flipped ? rows - 1 - vr : vr
     let row = ''
     let empty = 0
-    for (let c = 0; c < cols; c++) {
+    for (let vc = 0; vc < cols; vc++) {
+      const c = flipped ? cols - 1 - vc : vc
       const piece = board[r * cols + c]
       if (piece) {
         if (empty > 0) { row += empty; empty = 0 }
-        const sym = pieceToFen(piece)
+        const sym = pieceToFen(piece, vocabulary)
         row += sym
       } else {
         empty++
@@ -222,42 +276,57 @@ function renderBoard(game, state, rows, cols) {
     svgEl.style.display = 'block'
   }
 
-  if (selected !== null) {
-    const selAlg = sqToAlgebraic(selected, rows, cols)
-    const cell = boardSvgContainer.querySelector(`[data-sq="${selAlg}"]`)
-    if (cell) cell.style.fill = 'rgba(127, 179, 62, 0.6)'
-  }
+  if (svgEl) {
+    const overlay = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    overlay.setAttribute('class', 'play-overlay')
+    overlay.setAttribute('pointer-events', 'none')
+    const piecesLayer = svgEl.querySelector('g[pointer-events="none"]')
+    const insertBefore = piecesLayer || svgEl.lastChild
 
-  if (lastMove) {
-    const fromAlg = sqToAlgebraic(lastMove.from, rows, cols)
-    const toAlg = sqToAlgebraic(lastMove.to, rows, cols)
-    const fromCell = boardSvgContainer.querySelector(`[data-sq="${fromAlg}"]`)
-    const toCell = boardSvgContainer.querySelector(`[data-sq="${toAlg}"]`)
-    if (fromCell) fromCell.style.fill = 'rgba(205, 210, 106, 0.5)'
-    if (toCell) toCell.style.fill = 'rgba(205, 210, 106, 0.5)'
-  }
+    if (lastMove) {
+      addHighlight(overlay, lastMove.from, rows, cols, 'rgba(205, 210, 106, 0.45)', flipped)
+      addHighlight(overlay, lastMove.to, rows, cols, 'rgba(205, 210, 106, 0.45)', flipped)
+    }
 
-  for (const alg of legalTargets) {
-    const cell = boardSvgContainer.querySelector(`[data-sq="${alg}"]`)
-    if (cell) {
-      const idx = algebraicToSq(alg, rows, cols)
-      const hasPiece = board[idx] !== null
+    if (selected !== null) {
+      addHighlight(overlay, selected, rows, cols, 'rgba(127, 179, 62, 0.55)', flipped)
+    }
+
+    const seenTargets = new Set()
+    for (const targetIdx of legalMoves.map(m => m.to)) {
+      if (seenTargets.has(targetIdx)) continue
+      seenTargets.add(targetIdx)
+      const hasPiece = board[targetIdx] !== null
+      let visualIdx = targetIdx
+      if (flipped) {
+        const r = Math.floor(targetIdx / cols)
+        const c = targetIdx % cols
+        visualIdx = (rows - 1 - r) * cols + (cols - 1 - c)
+      }
+      const alg = sqToAlgebraic(visualIdx, rows, cols)
+      const cell = boardSvgContainer.querySelector(`[data-sq="${alg}"]`)
+      if (!cell) continue
+      const bbox = cell.getBBox ? cell.getBBox() : null
+      if (!bbox) continue
       if (hasPiece) {
-        cell.style.fill = 'rgba(224, 64, 64, 0.4)'
+        const ring = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+        ring.setAttribute('x', bbox.x)
+        ring.setAttribute('y', bbox.y)
+        ring.setAttribute('width', bbox.width)
+        ring.setAttribute('height', bbox.height)
+        ring.setAttribute('fill', 'rgba(224, 64, 64, 0.35)')
+        overlay.appendChild(ring)
       } else {
         const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-        const bbox = cell.getBBox ? cell.getBBox() : null
-        if (bbox) {
-          dot.setAttribute('cx', bbox.x + bbox.width / 2)
-          dot.setAttribute('cy', bbox.y + bbox.height / 2)
-          dot.setAttribute('r', bbox.width * 0.15)
-          dot.setAttribute('fill', 'rgba(0, 0, 0, 0.25)')
-          dot.setAttribute('class', 'legal-dot')
-          dot.setAttribute('pointer-events', 'none')
-          cell.parentNode.appendChild(dot)
-        }
+        dot.setAttribute('cx', bbox.x + bbox.width / 2)
+        dot.setAttribute('cy', bbox.y + bbox.height / 2)
+        dot.setAttribute('r', bbox.width * 0.16)
+        dot.setAttribute('fill', 'rgba(0, 0, 0, 0.22)')
+        overlay.appendChild(dot)
       }
     }
+
+    svgEl.insertBefore(overlay, insertBefore)
   }
 
   boardSvgContainer.onclick = (e) => {
@@ -265,15 +334,39 @@ function renderBoard(game, state, rows, cols) {
     while (el && el !== boardSvgContainer) {
       if (el.getAttribute && el.getAttribute('data-sq')) {
         const alg = el.getAttribute('data-sq')
-        const idx = algebraicToSq(alg, rows, cols)
-        console.log('CLICK:', alg, '→ idx', idx, '| piece:', game.getState('chess')?.board[idx])
+        let idx = algebraicToSq(alg, rows, cols)
+        if (flipped) {
+          const r = Math.floor(idx / cols)
+          const c = idx % cols
+          idx = (rows - 1 - r) * cols + (cols - 1 - c)
+        }
         controller.handleClick(idx)
         return
       }
       el = el.parentNode
     }
-    console.log('CLICK: no data-sq found, target:', e.target.tagName, e.target.className)
   }
+}
+
+function addHighlight(overlay, idx, rows, cols, color, flipped) {
+  let visualIdx = idx
+  if (flipped) {
+    const r = Math.floor(idx / cols)
+    const c = idx % cols
+    visualIdx = (rows - 1 - r) * cols + (cols - 1 - c)
+  }
+  const alg = sqToAlgebraic(visualIdx, rows, cols)
+  const cell = boardSvgContainer.querySelector(`[data-sq="${alg}"]`)
+  if (!cell) return
+  const bbox = cell.getBBox ? cell.getBBox() : null
+  if (!bbox) return
+  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+  rect.setAttribute('x', bbox.x)
+  rect.setAttribute('y', bbox.y)
+  rect.setAttribute('width', bbox.width)
+  rect.setAttribute('height', bbox.height)
+  rect.setAttribute('fill', color)
+  overlay.appendChild(rect)
 }
 
 function buildResolved(fen, rows, cols) {
@@ -291,10 +384,11 @@ function buildResolved(fen, rows, cols) {
   }
 }
 
-function pieceToFen(piece) {
-  const map = { king: 'k', queen: 'q', rook: 'r', bishop: 'b', knight: 'n', pawn: 'p' }
-  const ch = map[piece.type] || piece.type[0]
-  return piece.owner === 0 ? ch.toUpperCase() : ch.toLowerCase()
+function pieceToFen(piece, vocabulary) {
+  if (vocabulary && vocabulary[piece.type]) {
+    return vocabulary[piece.type].symbols[piece.owner] || piece.type[0]
+  }
+  return piece.owner === 0 ? piece.type[0].toUpperCase() : piece.type[0].toLowerCase()
 }
 
 function showPromotionDialog(choices, resolve) {
@@ -350,9 +444,11 @@ function bindEvents(container) {
   container.querySelector('#chess-flip-btn')?.addEventListener('click', () => {
     const state = controller?.getState()
     controller?.setFlipped(!state?.flipped)
+    updateURL()
   })
   container.querySelector('#chess-color-select')?.addEventListener('change', () => startGame())
   container.querySelector('#chess-opponent-select')?.addEventListener('change', () => startGame())
+  container.querySelector('#chess-difficulty-select')?.addEventListener('change', () => startGame())
 }
 
 function updateURL() {
@@ -360,5 +456,14 @@ function updateURL() {
   params.set('mode', 'play')
   params.set('game', 'moddable-chess')
   params.set('variant', currentVariant)
+  const color = document.getElementById('chess-color-select')?.value
+  const opponent = document.getElementById('chess-opponent-select')?.value
+  if (color && color !== 'white') params.set('color', color)
+  else params.delete('color')
+  if (opponent && opponent !== 'human') params.set('opponent', opponent)
+  else params.delete('opponent')
+  const flipped = controller?.getState()?.flipped
+  if (flipped) params.set('flipped', '1')
+  else params.delete('flipped')
   history.replaceState(null, '', '?' + params.toString())
 }

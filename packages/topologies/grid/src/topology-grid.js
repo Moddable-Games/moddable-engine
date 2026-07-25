@@ -472,6 +472,12 @@ export function algebraicId(r, c, rows) {
   return String.fromCharCode(97 + c) + (rows - r)
 }
 
+export function algebraicToIndex(alg, rows, cols) {
+  const c = alg.charCodeAt(0) - 97
+  const r = rows - parseInt(alg.slice(1))
+  return r * cols + c
+}
+
 export function goId(r, c, rows) {
   return GO_ALPHABET[c] + (rows - r)
 }
