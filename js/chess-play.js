@@ -116,7 +116,7 @@ function startGame() {
       const statusEl = document.getElementById('chess-status')
       if (statusEl) {
         const color = turn === MCE.WHITE ? 'White' : 'Black'
-        statusEl.textContent = `${color} to move`
+        statusEl.textContent = game.duckPhase ? `${color} — place the duck` : `${color} to move`
         statusEl.classList.remove('chess-status--over')
       }
     },
@@ -159,7 +159,14 @@ function renderBoard(game, state, rows, cols) {
   if (animating) return
 
   const { selected, lastMove, flipped, getLegalMoves } = state
-  const legal = (selected !== null && getLegalMoves) ? getLegalMoves().filter(m => m.from === selected) : []
+  let legal = []
+  if (game.duckPhase) {
+    for (let i = 0; i < rows * cols; i++) {
+      if (!game.board[i] && i !== game.duckSq) legal.push({ from: i, to: i })
+    }
+  } else if (selected !== null && getLegalMoves) {
+    legal = getLegalMoves().filter(m => m.from === selected)
+  }
   const board = game.board
 
   const fen = boardToFEN(board, rows, cols, flipped)
@@ -256,6 +263,36 @@ function renderBoard(game, state, rows, cols) {
         const ebb = ecell.getBBox()
         const effectEl = renderEffectOverlay(effect, ebb.x, ebb.y, ebb.width)
         if (effectEl) overlay.appendChild(effectEl)
+      }
+    }
+
+    // Fog-of-war masking
+    const vc = MCE.getVariantConfig ? MCE.getVariantConfig(currentVariant) : null
+    if (vc && vc.visibility) {
+      const viewSide = game.turn
+      const fogMask = vc.visibility(game, viewSide)
+      if (fogMask) {
+        for (let i = 0; i < fogMask.length; i++) {
+          if (fogMask[i]) continue
+          let vIdx = i
+          if (flipped) {
+            const fr = Math.floor(i / cols)
+            const fc = i % cols
+            vIdx = (rows - 1 - fr) * cols + (cols - 1 - fc)
+          }
+          const falg = sqToAlgebraic(vIdx, rows, cols)
+          const fcell = boardSvgContainer.querySelector(`[data-sq="${falg}"]`)
+          if (!fcell || !fcell.getBBox) continue
+          const fbb = fcell.getBBox()
+          const fog = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+          fog.setAttribute('x', fbb.x)
+          fog.setAttribute('y', fbb.y)
+          fog.setAttribute('width', fbb.width)
+          fog.setAttribute('height', fbb.height)
+          fog.setAttribute('fill', '#1a1a2e')
+          fog.setAttribute('opacity', '0.92')
+          overlay.appendChild(fog)
+        }
       }
     }
 
