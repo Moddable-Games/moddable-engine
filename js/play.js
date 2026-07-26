@@ -878,7 +878,7 @@ const _hexEmbed = _embedParams.has('embed') && _embedParams.get('game') &&
 
 if (_hexEmbed) {
   (async () => {
-    document.querySelectorAll('.boards-hero, .site-header, .site-footer, footer, .boards-sidebar, .sidebar, .boards-app > .boards-sidebar, .hex-info-bar').forEach(el => el.style.display = 'none')
+    document.querySelectorAll('.boards-hero, .site-header, .site-footer, footer, .boards-sidebar, .sidebar, .hex-info-bar, .canvas-empty, #board-empty').forEach(el => el.style.display = 'none')
     const app = document.querySelector('.boards-app')
     if (app) { app.style.padding = '0'; app.style.gap = '0'; app.style.gridTemplateColumns = '1fr' }
     document.body.style.margin = '0'
@@ -917,11 +917,13 @@ if (_hexEmbed) {
       const colors = gameConfig.getColors ? gameConfig.getColors(hexStyle) : {}
       const bg = _embedParams.get('bg') ? '#' + _embedParams.get('bg') : '#1a1a2e'
 
+      const hasImages = hexes.some(h => h.imagePath)
       const svgOpts = {
         size: 30,
         orientation: gameConfig.orientation || 'pointy',
         bgColor: bg,
         colors,
+        imageMode: hasImages ? 'link' : 'none',
       }
 
       const svg = annotations
