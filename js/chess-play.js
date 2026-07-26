@@ -1,6 +1,16 @@
 import { renderFromEngine, attachPieceImages } from '../packages/render/src/render-engine.js'
 import { algebraicId, algebraicToIndex } from '../packages/topologies/grid/index.js'
-import MCE, { legalMoves, makeMove, unmakeMove, getStatus, aiPickMove, AI_DIFFICULTIES } from '../packages/plugins/chess/src/mce/index.js'
+import MCE, { legalMoves, makeMove, unmakeMove, getStatus, getVariantStatus, variantLegalMoves, aiPickMove, AI_DIFFICULTIES } from '../packages/plugins/chess/src/mce/index.js'
+
+function getEffectiveStatus(game) {
+  const vs = getVariantStatus(game)
+  if (vs) return vs
+  return getStatus(game)
+}
+
+function getEffectiveLegalMoves(game) {
+  return variantLegalMoves(game)
+}
 
 const RULES_BASE = location.hostname === 'engine.moddable.games'
   ? 'https://rules.moddable.games/'
@@ -334,7 +344,7 @@ function createMCEController(game, opts) {
 
   function render() {
     if (destroyed) return
-    const legal = selected !== null ? legalMoves(game).filter(m => m.from === selected) : []
+    const legal = selected !== null ? getEffectiveLegalMoves(game).filter(m => m.from === selected) : []
     onRender({ selected, lastMove, flipped, aiThinking, gameOver, legalMoves: legal, board: game.board })
   }
 
@@ -342,7 +352,7 @@ function createMCEController(game, opts) {
     if (destroyed || gameOver || aiThinking) return
     if (!isHumanTurn()) return
 
-    const allMoves = legalMoves(game)
+    const allMoves = getEffectiveLegalMoves(game)
 
     if (selected !== null) {
       const candidates = allMoves.filter(m => m.from === selected && m.to === pos)
@@ -395,7 +405,7 @@ function createMCEController(game, opts) {
     if (onMove) onMove(move, player)
 
     const finishMove = () => {
-      const status = getStatus(game)
+      const status = getEffectiveStatus(game)
       if (status === 'checkmate' || status === 'stalemate' || status.startsWith('draw')) {
         gameOver = true
         let winner

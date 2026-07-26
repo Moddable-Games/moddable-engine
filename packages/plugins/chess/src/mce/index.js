@@ -1,7 +1,7 @@
 import MCE from './engine.js'
 import './pieces/index.js'
 import './rules/index.js'
-import './variants-util.js'
+import { getVariantStatus, variantLegalMoves } from './variants-util.js'
 import './variants/index.js'
 import { pseudoLegalMoves, legalMoves, inCheck, isAttacked } from './moves.js'
 import { makeMove, unmakeMove, getStatus } from './play.js'
@@ -17,6 +17,8 @@ export {
   makeMove,
   unmakeMove,
   getStatus,
+  getVariantStatus,
+  variantLegalMoves,
   aiPickMove,
   aiPickDuckSquare,
   AI_DIFFICULTIES,
