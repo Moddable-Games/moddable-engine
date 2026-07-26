@@ -25,7 +25,8 @@
     "./piece-behaviour": "./packages/piece-behaviour/index.js",
     "./board-theme": "./packages/board-theme/index.js",
     "./piece-theme": "./packages/piece-theme/index.js",
-    "./chess-sdk": "./packages/plugins/chess/src/sdk.js"
+    "./chess-sdk": "./packages/plugins/chess/src/sdk.js",
+    "./hex-sdk": "./packages/hex-generators/src/sdk.js"
   },
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
