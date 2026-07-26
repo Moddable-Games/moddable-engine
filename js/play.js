@@ -877,12 +877,10 @@ const _hexEmbed = _embedParams.has('embed') && _embedParams.get('game') &&
   ['nukes', 'twilight', 'colony', 'talisman', 'mongo', 'endless'].includes(_embedParams.get('game'))
 
 if (_hexEmbed) {
-  document.addEventListener('DOMContentLoaded', async () => {
-    document.querySelector('.boards-hero')?.style.setProperty('display', 'none')
-    document.querySelector('.site-header')?.style.setProperty('display', 'none')
-    document.querySelector('.site-footer')?.style.setProperty('display', 'none')
-    const sidebar = document.querySelector('.boards-sidebar, .sidebar')
-    if (sidebar) sidebar.style.display = 'none'
+  (async () => {
+    document.querySelectorAll('.boards-hero, .site-header, .site-footer, footer, .boards-sidebar, .sidebar, .boards-app > .boards-sidebar, .hex-info-bar').forEach(el => el.style.display = 'none')
+    const app = document.querySelector('.boards-app')
+    if (app) { app.style.padding = '0'; app.style.gap = '0'; app.style.gridTemplateColumns = '1fr' }
     document.body.style.margin = '0'
     document.body.style.padding = '0'
     document.body.style.overflow = 'hidden'
@@ -988,7 +986,7 @@ if (_hexEmbed) {
     })
 
     renderHexEmbed()
-  })
+  })()
 } else if (document.getElementById('game-select')) {
   document.addEventListener('DOMContentLoaded', init)
 }
