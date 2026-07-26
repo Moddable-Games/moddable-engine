@@ -337,6 +337,15 @@ function createGameController(boardContainer, game, opts) {
     if (destroyed) return;
     if (!move) { aiThinking = false; render(); return; }
 
+    if (onAnimateMove) {
+      render();
+      onAnimateMove(move, game, function() { handleAIResultCore(move); });
+    } else {
+      handleAIResultCore(move);
+    }
+  }
+
+  function handleAIResultCore(move) {
     const side = game.turn;
     const captured = game.board[move.to] || (move.flag === 'ep' ? true : null);
     const undo = MCE.makeMove(game, move);

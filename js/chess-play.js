@@ -484,7 +484,28 @@ function animatePiece(fromIdx, fromPos, toPos, duration, flipped, rows, cols, on
       break
     }
   }
-  if (!pieceEl) { console.log('[anim] no piece at', fromPos, 'total els:', pieceEls.length); onDone(); return }
+  if (!pieceEl) { onDone(); return }
+
+  // Hide captured piece at destination so slide looks clean
+  for (const el of pieceEls) {
+    const tag = el.tagName.toLowerCase()
+    let cx, cy, size
+    if (tag === 'image') {
+      const ix = parseFloat(el.getAttribute('x'))
+      const iy = parseFloat(el.getAttribute('y'))
+      size = parseFloat(el.getAttribute('width'))
+      cx = ix + size / 2
+      cy = iy + size / 2
+    } else if (tag === 'text') {
+      cx = parseFloat(el.getAttribute('x'))
+      cy = parseFloat(el.getAttribute('y'))
+      size = 40
+    } else continue
+    if (el !== pieceEl && Math.abs(cx - toPos.x) < size * 0.5 && Math.abs(cy - toPos.y) < size * 0.5) {
+      el.style.opacity = '0'
+      break
+    }
+  }
 
   if (!pieceEl) { onDone(); return }
 
