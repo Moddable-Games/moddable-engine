@@ -915,15 +915,16 @@ if (_hexEmbed) {
       lastHexes = hexes
       const annotations = result.annotations || null
       const colors = gameConfig.getColors ? gameConfig.getColors(hexStyle) : {}
-      const bg = _embedParams.get('bg') ? '#' + _embedParams.get('bg') : '#1a1a2e'
+      const bg = _embedParams.get('bg') ? '#' + _embedParams.get('bg') : (document.body.style.background || '#1a1a2e')
 
       const hasImages = hexes.some(h => h.imagePath)
       const svgOpts = {
-        size: 30,
+        size: 40,
         orientation: gameConfig.orientation || 'pointy',
         bgColor: bg,
         colors,
         imageMode: hasImages ? 'link' : 'none',
+        fitToViewport: true,
       }
 
       const svg = annotations
@@ -934,11 +935,11 @@ if (_hexEmbed) {
         boardEl.innerHTML = svg
         const svgEl = boardEl.querySelector('svg')
         if (svgEl) {
-          svgEl.style.width = '100%'
-          svgEl.style.height = '100%'
-          svgEl.style.objectFit = 'contain'
           svgEl.removeAttribute('width')
           svgEl.removeAttribute('height')
+          svgEl.style.width = '100%'
+          svgEl.style.height = '100vh'
+          svgEl.style.display = 'block'
         }
       }
 
