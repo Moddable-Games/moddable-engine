@@ -1,28 +1,19 @@
 import { renderFromEngine, attachPieceImages } from '../packages/render/src/render-engine.js'
 import { algebraicId, algebraicToIndex } from '../packages/topologies/grid/index.js'
-import MCE, { legalMoves, makeMove, unmakeMove, getStatus, getVariantStatus, variantLegalMoves, aiPickMove, AI_DIFFICULTIES } from '../packages/plugins/chess/src/mce/index.js'
+import MCE, { createGameController, aiPickMove } from '../packages/plugins/chess/src/mce/index.js'
 
-function getEffectiveStatus(game) {
-  const vs = getVariantStatus(game)
-  if (vs) return vs
-  return getStatus(game)
-}
-
-function getEffectiveLegalMoves(game) {
-  return variantLegalMoves(game)
-}
-
-const RULES_BASE = location.hostname === 'engine.moddable.games'
-  ? 'https://rules.moddable.games/'
-  : '../../moddable-rules/'
-
-let controller = null
+let ctrl = null
 let currentVariant = 'standard'
 let currentPieceSet = localStorage.getItem('mce-piece-set') || 'mce-fairy-complete'
 let galleryIndex = null
 let boardSvgContainer = null
 let embedMode = false
 let fullscreenMode = false
+
+const ANIM_SPEEDS = { instant: 0, fast: 120, normal: 220, slow: 400 }
+const ANIM_STYLES = { slide: 'Slide', arc: 'Arc', bounce: 'Bounce', warp: 'Warp' }
+let animSpeed = localStorage.getItem('mce-anim-speed') || 'normal'
+let animStyle = localStorage.getItem('mce-anim-style') || 'slide'
 
 export async function initChessPlay(container) {
   const params = new URLSearchParams(location.search)
@@ -58,9 +49,185 @@ export async function initChessPlay(container) {
   if (animStyleSelect) animStyleSelect.value = animStyle
   const animSpeedSelect = container.querySelector('#chess-anim-speed-select')
   if (animSpeedSelect) animSpeedSelect.value = animSpeed
-  await startGame()
-  if (savedFlipped && controller) controller.setFlipped(true)
+  startGame()
+  if (savedFlipped && ctrl) ctrl.setFlipped(true)
   bindEvents(container)
+}
+
+function startGame() {
+  if (ctrl) ctrl.destroy()
+
+  const game = MCE.createGame(currentVariant)
+  const vc = MCE.getVariantConfig(currentVariant)
+  const rows = game.rows
+  const cols = game.cols
+
+  const colorSelect = document.getElementById('chess-color-select')
+  const opponentSelect = document.getElementById('chess-opponent-select')
+  const difficultySelect = document.getElementById('chess-difficulty-select')
+  const difficultyGroup = document.getElementById('chess-difficulty-group')
+  const humanColor = colorSelect?.value || 'white'
+  const opponent = opponentSelect?.value || 'human'
+  const difficulty = difficultySelect?.value || 'medium'
+
+  if (difficultyGroup) difficultyGroup.style.display = opponent === 'ai' ? '' : 'none'
+
+  const players = {}
+  if (opponent === 'ai') {
+    players[MCE.WHITE] = humanColor === 'white' ? 'human' : 'ai'
+    players[MCE.BLACK] = humanColor === 'black' ? 'human' : 'ai'
+  } else {
+    players[MCE.WHITE] = 'human'
+    players[MCE.BLACK] = 'human'
+  }
+
+  const moveLog = []
+
+  ctrl = createGameController(null, game, {
+    players,
+    aiDifficulty: difficulty,
+    renderOpts: {
+      animate: ANIM_SPEEDS[animSpeed] > 0,
+      animDuration: ANIM_SPEEDS[animSpeed],
+    },
+    customRender: (g, state) => {
+      renderBoard(g, state, rows, cols)
+    },
+    onMove: (move, undo, captured, side) => {
+      moveLog.push({ move, side })
+      updateMoveList(moveLog, cols, rows)
+      postEmbedMessage('move', { from: move.from, to: move.to, fen: MCE.toFEN(game), variant: currentVariant })
+    },
+    onGameEnd: (status) => {
+      updateStatus(status)
+      postEmbedMessage('status', { text: status, gameOver: true, variant: currentVariant })
+    },
+    onTurnChange: (turn) => {
+      const statusEl = document.getElementById('chess-status')
+      if (statusEl) {
+        const color = turn === MCE.WHITE ? 'White' : 'Black'
+        statusEl.textContent = `${color} to move`
+        statusEl.classList.remove('chess-status--over')
+      }
+    },
+    onPromotionNeeded: (candidates, turn, resolve) => {
+      const choices = [...new Set(candidates.map(m => m.promo))]
+      showPromotionDialog(choices, resolve)
+    },
+    onAnimateMove: (move, g, done) => {
+      const duration = ANIM_SPEEDS[animSpeed] || 0
+      if (duration === 0) { done(); return }
+      const fromPos = getCellCenter(move.from, ctrl?.getState()?.flipped, rows, cols)
+      const toPos = getCellCenter(move.to, ctrl?.getState()?.flipped, rows, cols)
+      if (!fromPos || !toPos) { done(); return }
+      animatePiece(move.from, fromPos, toPos, duration, ctrl?.getState()?.flipped, rows, cols, done)
+    },
+  })
+
+  const statusEl = document.getElementById('chess-status')
+  if (statusEl) statusEl.textContent = 'White to move'
+  const movesEl = document.getElementById('chess-moves')
+  if (movesEl) movesEl.innerHTML = ''
+  postEmbedMessage('ready', { variant: currentVariant, fen: MCE.toFEN(game) })
+  updateURL()
+}
+
+function renderBoard(game, state, rows, cols) {
+  if (!boardSvgContainer) return
+
+  const { selected, lastMove, flipped, legalMoves: legal } = state
+  const board = game.board
+
+  const fen = boardToFEN(board, rows, cols, flipped)
+  const resolved = buildResolved(fen, rows, cols)
+  const pieceResult = galleryIndex ? attachPieceImages(resolved, galleryIndex) : { images: {}, surfaceMap: {}, surface: null }
+  const svg = renderFromEngine(resolved, {
+    pieceImages: pieceResult.images || {},
+    pieceSurfaceMap: pieceResult.surfaceMap || {},
+    pieceSurface: pieceResult.surface || null,
+  })
+
+  if (!svg) return
+  boardSvgContainer.innerHTML = svg
+
+  const svgEl = boardSvgContainer.querySelector('svg')
+  if (svgEl) {
+    svgEl.style.width = '100%'
+    svgEl.style.height = 'auto'
+    svgEl.style.maxHeight = embedMode ? 'none' : 'calc(100vh - 180px)'
+    svgEl.style.display = 'block'
+  }
+
+  if (svgEl) {
+    const overlay = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    overlay.setAttribute('class', 'play-overlay')
+    overlay.setAttribute('pointer-events', 'none')
+    const piecesLayer = svgEl.querySelector('g[pointer-events="none"]')
+    const insertBefore = piecesLayer || svgEl.lastChild
+
+    if (lastMove) {
+      addHighlight(overlay, lastMove.from, rows, cols, 'rgba(205, 210, 106, 0.45)', flipped)
+      addHighlight(overlay, lastMove.to, rows, cols, 'rgba(205, 210, 106, 0.45)', flipped)
+    }
+
+    if (selected !== null) {
+      addHighlight(overlay, selected, rows, cols, 'rgba(127, 179, 62, 0.55)', flipped)
+    }
+
+    const seenTargets = new Set()
+    for (const m of (legal || [])) {
+      if (seenTargets.has(m.to)) continue
+      seenTargets.add(m.to)
+      const hasPiece = board[m.to] !== null
+      let visualIdx = m.to
+      if (flipped) {
+        const r = Math.floor(m.to / cols)
+        const c = m.to % cols
+        visualIdx = (rows - 1 - r) * cols + (cols - 1 - c)
+      }
+      const alg = sqToAlgebraic(visualIdx, rows, cols)
+      const cell = boardSvgContainer.querySelector(`[data-sq="${alg}"]`)
+      if (!cell) continue
+      const bbox = cell.getBBox ? cell.getBBox() : null
+      if (!bbox) continue
+      if (hasPiece) {
+        const ring = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+        ring.setAttribute('x', bbox.x)
+        ring.setAttribute('y', bbox.y)
+        ring.setAttribute('width', bbox.width)
+        ring.setAttribute('height', bbox.height)
+        ring.setAttribute('fill', 'rgba(224, 64, 64, 0.35)')
+        overlay.appendChild(ring)
+      } else {
+        const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+        dot.setAttribute('cx', bbox.x + bbox.width / 2)
+        dot.setAttribute('cy', bbox.y + bbox.height / 2)
+        dot.setAttribute('r', bbox.width * 0.16)
+        dot.setAttribute('fill', 'rgba(0, 0, 0, 0.22)')
+        overlay.appendChild(dot)
+      }
+    }
+
+    svgEl.insertBefore(overlay, insertBefore)
+  }
+
+  boardSvgContainer.onclick = (e) => {
+    let el = e.target
+    while (el && el !== boardSvgContainer) {
+      if (el.getAttribute && el.getAttribute('data-sq')) {
+        const alg = el.getAttribute('data-sq')
+        let idx = algebraicToSq(alg, rows, cols)
+        if (flipped) {
+          const r = Math.floor(idx / cols)
+          const c = idx % cols
+          idx = (rows - 1 - r) * cols + (cols - 1 - c)
+        }
+        ctrl.handleClick(idx)
+        return
+      }
+      el = el.parentNode
+    }
+  }
 }
 
 function buildUI() {
@@ -179,22 +346,13 @@ function populatePieceSetPicker(container) {
   const chessRelevant = Array.isArray(sets)
     ? sets.filter(s => s.tags?.includes('chess') || s.id?.startsWith('mce-'))
     : []
-  if (chessRelevant.length === 0 && Array.isArray(sets)) {
-    for (const s of sets) {
-      const opt = document.createElement('option')
-      opt.value = s.id || s.name
-      opt.textContent = s.label || s.name || s.id
-      if ((s.id || s.name) === currentPieceSet) opt.selected = true
-      select.appendChild(opt)
-    }
-  } else {
-    for (const s of chessRelevant) {
-      const opt = document.createElement('option')
-      opt.value = s.id || s.name
-      opt.textContent = s.label || s.name || s.id
-      if ((s.id || s.name) === currentPieceSet) opt.selected = true
-      select.appendChild(opt)
-    }
+  const list = chessRelevant.length > 0 ? chessRelevant : (Array.isArray(sets) ? sets : [])
+  for (const s of list) {
+    const opt = document.createElement('option')
+    opt.value = s.id || s.name
+    opt.textContent = s.label || s.name || s.id
+    if ((s.id || s.name) === currentPieceSet) opt.selected = true
+    select.appendChild(opt)
   }
 }
 
@@ -218,38 +376,26 @@ function initEmbedMessageListener() {
     if (!e.data || typeof e.data.type !== 'string') return
     switch (e.data.type) {
       case 'chess:setVariant': {
-        const v = e.data.variant
-        if (v && MCE.variantRegistry[v]) {
-          currentVariant = v
+        if (e.data.variant && MCE.variantRegistry[e.data.variant]) {
+          currentVariant = e.data.variant
           startGame()
         }
         break
       }
-      case 'chess:newGame': {
-        startGame()
-        break
-      }
+      case 'chess:newGame': startGame(); break
       case 'chess:setDifficulty': {
-        if (e.data.difficulty && controller) {
-          startGame()
-        }
+        if (e.data.difficulty && ctrl) ctrl.setDifficulty(e.data.difficulty)
         break
       }
       case 'chess:setPieces': {
-        if (e.data.set) {
-          currentPieceSet = e.data.set
-          startGame()
-        }
+        if (e.data.set) { currentPieceSet = e.data.set; startGame() }
         break
       }
       case 'chess:flip': {
-        if (controller) controller.setFlipped(!controller.getState().flipped)
+        if (ctrl) { const s = ctrl.getState(); ctrl.setFlipped(!s.flipped) }
         break
       }
-      case 'chess:undo': {
-        if (controller) controller.undo()
-        break
-      }
+      case 'chess:undo': { if (ctrl) ctrl.undo(); break }
     }
   })
 }
@@ -262,339 +408,32 @@ function algebraicToSq(alg, rows, cols) {
   return algebraicToIndex(alg, rows, cols)
 }
 
-async function startGame() {
-  if (controller) controller.destroy()
-
-  const vc = MCE.getVariantConfig(currentVariant)
-  const rows = (vc && vc.rows) || 8
-  const cols = (vc && vc.cols) || 8
-
-  const game = MCE.createGame(currentVariant)
-
-  const colorSelect = document.getElementById('chess-color-select')
-  const opponentSelect = document.getElementById('chess-opponent-select')
-  const difficultySelect = document.getElementById('chess-difficulty-select')
-  const difficultyGroup = document.getElementById('chess-difficulty-group')
-  const humanColor = colorSelect?.value || 'white'
-  const opponent = opponentSelect?.value || 'human'
-  const difficulty = difficultySelect?.value || 'medium'
-
-  if (difficultyGroup) difficultyGroup.style.display = opponent === 'ai' ? '' : 'none'
-
-  const players = {}
-  if (opponent === 'ai') {
-    players[humanColor] = 'human'
-    players[humanColor === 'white' ? 'black' : 'white'] = 'ai'
-  } else {
-    players.white = 'human'
-    players.black = 'human'
-  }
-
-  controller = createMCEController(game, {
-    rows, cols, players, difficulty, opponent,
-    onRender: (state) => renderBoard(game, state, rows, cols),
-    onMove: (move, player) => {
-      postEmbedMessage('move', { from: move.from, to: move.to, player, fen: MCE.toFEN(game), variant: currentVariant })
-    },
-    onGameEnd: (status) => {
-      updateStatus(status)
-      postEmbedMessage('status', { text: status, gameOver: true, variant: currentVariant })
-    },
-    onChoiceNeeded: (choices, resolve) => showPromotionDialog(choices, resolve),
-  })
-
-  postEmbedMessage('ready', { variant: currentVariant, fen: MCE.toFEN(game) })
-
-  const statusEl = document.getElementById('chess-status')
-  if (statusEl) statusEl.textContent = 'white to move'
-  const movesEl = document.getElementById('chess-moves')
-  if (movesEl) movesEl.innerHTML = ''
-  updateURL()
-}
-
-const ANIM_SPEEDS = { instant: 0, fast: 120, normal: 220, slow: 400 }
-const ANIM_STYLES = { slide: 'Slide', arc: 'Arc', bounce: 'Bounce', warp: 'Warp' }
-let animSpeed = localStorage.getItem('mce-anim-speed') || 'normal'
-let animStyle = localStorage.getItem('mce-anim-style') || 'slide'
-
-function createMCEController(game, opts) {
-  const { rows, cols, players, difficulty, opponent } = opts
-  const onRender = opts.onRender
-  const onMove = opts.onMove
-  const onGameEnd = opts.onGameEnd
-  const onChoiceNeeded = opts.onChoiceNeeded
-
-  let selected = null
-  let lastMove = null
-  let undoStack = []
-  let flipped = false
-  let aiThinking = false
-  let gameOver = false
-  let destroyed = false
-  let animating = false
-  const moveLog = []
-
-  function currentPlayerColor() {
-    return game.turn === MCE.WHITE ? 'white' : 'black'
-  }
-
-  function isHumanTurn() {
-    return players[currentPlayerColor()] !== 'ai'
-  }
-
-  function render() {
-    if (destroyed) return
-    const legal = selected !== null ? getEffectiveLegalMoves(game).filter(m => m.from === selected) : []
-    onRender({ selected, lastMove, flipped, aiThinking, gameOver, legalMoves: legal, board: game.board })
-  }
-
-  function handleClick(pos) {
-    if (destroyed || gameOver || aiThinking) return
-    if (!isHumanTurn()) return
-
-    const allMoves = getEffectiveLegalMoves(game)
-
-    if (selected !== null) {
-      const candidates = allMoves.filter(m => m.from === selected && m.to === pos)
-
-      if (candidates.length > 1 && candidates.some(m => m.promo)) {
-        if (onChoiceNeeded) {
-          const choices = [...new Set(candidates.map(m => m.promo))]
-          onChoiceNeeded(choices, (chosen) => {
-            const move = candidates.find(m => m.promo === chosen)
-            if (move) executeMove(move)
-          })
-        } else {
-          executeMove(candidates[0])
-        }
-        return
-      }
-
-      if (candidates.length > 0) {
-        executeMove(candidates[0])
-        return
-      }
-    }
-
-    const piece = game.board[pos]
-    const isOwn = piece && MCE.pieceColor(piece) === game.turn
-    if (isOwn) {
-      selected = pos
-    } else {
-      selected = null
-    }
-    render()
-  }
-
-  function executeMove(move) {
-    if (animating) return false
-    const player = currentPlayerColor()
-    const duration = ANIM_SPEEDS[animSpeed] || 0
-
-    const fromPos = getCellCenter(move.from, flipped, rows, cols)
-    const toPos = getCellCenter(move.to, flipped, rows, cols)
-
-    const undo = makeMove(game, move)
-    if (!undo) return false
-
-    undoStack.push(undo)
-    lastMove = { from: move.from, to: move.to }
-    selected = null
-    moveLog.push({ move, player })
-    updateMoveList(moveLog, cols, rows)
-    if (onMove) onMove(move, player)
-
-    const finishMove = () => {
-      const status = getEffectiveStatus(game)
-      if (status === 'checkmate' || status === 'stalemate' || status.startsWith('draw')) {
-        gameOver = true
-        let winner
-        if (status === 'checkmate') {
-          winner = game.turn === MCE.WHITE ? 'black' : 'white'
-        } else {
-          winner = 'draw'
-        }
-        if (onGameEnd) onGameEnd(winner)
-        render()
-        return
-      }
-
-      const statusEl = document.getElementById('chess-status')
-      if (statusEl) {
-        const inCheck = status === 'check'
-        statusEl.textContent = `${currentPlayerColor()} to move${inCheck ? ' (check)' : ''}`
-      }
-
-      render()
-
-      if (!gameOver && !isHumanTurn()) {
-        scheduleAIMove()
-      }
-    }
-
-    if (duration > 0 && fromPos && toPos && boardSvgContainer) {
-      animating = true
-      animatePiece(move.from, fromPos, toPos, duration, flipped, rows, cols, () => {
-        animating = false
-        finishMove()
-      })
-    } else {
-      finishMove()
-    }
-
-    return true
-  }
-
-  function scheduleAIMove() {
-    aiThinking = true
-    render()
-    setTimeout(doAIMove, 150)
-  }
-
-  function doAIMove() {
-    if (destroyed || gameOver) { aiThinking = false; render(); return }
-
-    const move = aiPickMove(game, { difficulty })
-    if (!move) { aiThinking = false; render(); return }
-
-    aiThinking = false
-    executeMove(move)
-  }
-
-  function undo() {
-    if (undoStack.length === 0 || aiThinking) return false
-    unmakeMove(game, undoStack.pop())
-    moveLog.pop()
-
-    if (opponent === 'ai' && undoStack.length > 0 && !isHumanTurn()) {
-      unmakeMove(game, undoStack.pop())
-      moveLog.pop()
-    }
-
-    selected = null
-    gameOver = false
-    lastMove = undoStack.length > 0
-      ? { from: undoStack[undoStack.length - 1].from, to: undoStack[undoStack.length - 1].to }
-      : null
-
-    const statusEl = document.getElementById('chess-status')
-    if (statusEl) statusEl.textContent = `${currentPlayerColor()} to move`
-    statusEl?.classList.remove('chess-status--over')
-    updateMoveList(moveLog, cols, rows)
-    render()
-    return true
-  }
-
-  function setFlipped(val) { flipped = val; render() }
-  function getState() { return { flipped, gameOver, aiThinking, selected } }
-  function destroy() { destroyed = true }
-
-  render()
-  if (!isHumanTurn()) scheduleAIMove()
-
-  return { handleClick, undo, setFlipped, getState, destroy }
-}
-
-function renderBoard(game, state, rows, cols) {
-  if (!boardSvgContainer) return
-
-  const { selected, lastMove, legalMoves: legal, flipped } = state
-  const board = game.board
-
-  const fen = boardToFEN(board, rows, cols, flipped)
-  const resolved = buildResolved(fen, rows, cols)
-  const pieceResult = galleryIndex ? attachPieceImages(resolved, galleryIndex) : { images: {}, surfaceMap: {}, surface: null }
-  const svg = renderFromEngine(resolved, {
-    pieceImages: pieceResult.images || {},
-    pieceSurfaceMap: pieceResult.surfaceMap || {},
-    pieceSurface: pieceResult.surface || null,
-  })
-
-  if (!svg) return
-  boardSvgContainer.innerHTML = svg
-
-  const svgEl = boardSvgContainer.querySelector('svg')
-  if (svgEl) {
-    svgEl.style.width = '100%'
-    svgEl.style.height = 'auto'
-    svgEl.style.maxHeight = 'calc(100vh - 180px)'
-    svgEl.style.display = 'block'
-  }
-
-  if (svgEl) {
-    const overlay = document.createElementNS('http://www.w3.org/2000/svg', 'g')
-    overlay.setAttribute('class', 'play-overlay')
-    overlay.setAttribute('pointer-events', 'none')
-    const piecesLayer = svgEl.querySelector('g[pointer-events="none"]')
-    const insertBefore = piecesLayer || svgEl.lastChild
-
-    if (lastMove) {
-      addHighlight(overlay, lastMove.from, rows, cols, 'rgba(205, 210, 106, 0.45)', flipped)
-      addHighlight(overlay, lastMove.to, rows, cols, 'rgba(205, 210, 106, 0.45)', flipped)
-    }
-
-    if (selected !== null) {
-      addHighlight(overlay, selected, rows, cols, 'rgba(127, 179, 62, 0.55)', flipped)
-    }
-
-    const seenTargets = new Set()
-    for (const m of (legal || [])) {
-      if (seenTargets.has(m.to)) continue
-      seenTargets.add(m.to)
-      const hasPiece = board[m.to] !== null
-      let visualIdx = m.to
-      if (flipped) {
-        const r = Math.floor(m.to / cols)
-        const c = m.to % cols
-        visualIdx = (rows - 1 - r) * cols + (cols - 1 - c)
-      }
-      const alg = sqToAlgebraic(visualIdx, rows, cols)
-      const cell = boardSvgContainer.querySelector(`[data-sq="${alg}"]`)
-      if (!cell) continue
-      const bbox = cell.getBBox ? cell.getBBox() : null
-      if (!bbox) continue
-      if (hasPiece) {
-        const ring = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-        ring.setAttribute('x', bbox.x)
-        ring.setAttribute('y', bbox.y)
-        ring.setAttribute('width', bbox.width)
-        ring.setAttribute('height', bbox.height)
-        ring.setAttribute('fill', 'rgba(224, 64, 64, 0.35)')
-        overlay.appendChild(ring)
+function boardToFEN(board, rows, cols, flipped) {
+  const fenRows = []
+  for (let vr = 0; vr < rows; vr++) {
+    const r = flipped ? rows - 1 - vr : vr
+    let row = ''
+    let empty = 0
+    for (let vc = 0; vc < cols; vc++) {
+      const c = flipped ? cols - 1 - vc : vc
+      const piece = board[r * cols + c]
+      if (piece) {
+        if (empty > 0) { row += empty; empty = 0 }
+        row += piece
       } else {
-        const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-        dot.setAttribute('cx', bbox.x + bbox.width / 2)
-        dot.setAttribute('cy', bbox.y + bbox.height / 2)
-        dot.setAttribute('r', bbox.width * 0.16)
-        dot.setAttribute('fill', 'rgba(0, 0, 0, 0.22)')
-        overlay.appendChild(dot)
+        empty++
       }
     }
-
-    svgEl.insertBefore(overlay, insertBefore)
+    if (empty > 0) row += empty
+    fenRows.push(row)
   }
-
-  boardSvgContainer.onclick = (e) => {
-    let el = e.target
-    while (el && el !== boardSvgContainer) {
-      if (el.getAttribute && el.getAttribute('data-sq')) {
-        const alg = el.getAttribute('data-sq')
-        let idx = algebraicToSq(alg, rows, cols)
-        if (flipped) {
-          const r = Math.floor(idx / cols)
-          const c = idx % cols
-          idx = (rows - 1 - r) * cols + (cols - 1 - c)
-        }
-        controller.handleClick(idx)
-        return
-      }
-      el = el.parentNode
-    }
-  }
+  return fenRows.join('/')
 }
 
 function getCellCenter(idx, flipped, rows, cols) {
   if (!boardSvgContainer) return null
+  const game = ctrl?.getGame()
+  if (!game) return null
   let visualIdx = idx
   if (flipped) {
     const r = Math.floor(idx / cols)
@@ -612,15 +451,14 @@ function animatePiece(fromIdx, fromPos, toPos, duration, flipped, rows, cols, on
   const svgEl = boardSvgContainer.querySelector('svg')
   if (!svgEl) { onDone(); return }
 
+  const game = ctrl?.getGame()
+  if (!game) { onDone(); return }
   let visualIdx = fromIdx
   if (flipped) {
-    const r = Math.floor(fromIdx / cols)
-    const c = fromIdx % cols
-    visualIdx = (rows - 1 - r) * cols + (cols - 1 - c)
+    const r = Math.floor(fromIdx / game.cols)
+    const c = fromIdx % game.cols
+    visualIdx = (game.rows - 1 - r) * game.cols + (game.cols - 1 - c)
   }
-  const alg = sqToAlgebraic(visualIdx, rows, cols)
-  const cell = boardSvgContainer.querySelector(`[data-sq="${alg}"]`)
-  if (!cell) { onDone(); return }
 
   const piecesGroup = svgEl.querySelector('g[pointer-events="none"]')
   if (!piecesGroup) { onDone(); return }
@@ -658,51 +496,24 @@ function animatePiece(fromIdx, fromPos, toPos, duration, flipped, rows, cols, on
     return
   }
 
-  let easing = 'ease-out'
-  let transformEnd = `translate(${dx}px, ${dy}px)`
-
   if (animStyle === 'arc') {
     const dist = Math.sqrt(dx * dx + dy * dy)
     const lift = -dist * 0.3
     pieceEl.animate([
       { transform: 'translate(0, 0)', offset: 0 },
       { transform: `translate(${dx * 0.5}px, ${dy * 0.5 + lift}px)`, offset: 0.5 },
-      { transform: transformEnd, offset: 1 },
+      { transform: `translate(${dx}px, ${dy}px)`, offset: 1 },
     ], { duration, easing: 'ease-in-out', fill: 'forwards' })
     setTimeout(onDone, duration)
     return
   }
 
-  if (animStyle === 'bounce') {
-    easing = 'cubic-bezier(0.34, 1.56, 0.64, 1)'
-  }
+  let easing = 'ease-out'
+  if (animStyle === 'bounce') easing = 'cubic-bezier(0.34, 1.56, 0.64, 1)'
 
   pieceEl.style.transition = `transform ${duration}ms ${easing}`
-  pieceEl.style.transform = transformEnd
-
+  pieceEl.style.transform = `translate(${dx}px, ${dy}px)`
   setTimeout(onDone, duration)
-}
-
-function boardToFEN(board, rows, cols, flipped) {
-  const fenRows = []
-  for (let vr = 0; vr < rows; vr++) {
-    const r = flipped ? rows - 1 - vr : vr
-    let row = ''
-    let empty = 0
-    for (let vc = 0; vc < cols; vc++) {
-      const c = flipped ? cols - 1 - vc : vc
-      const piece = board[r * cols + c]
-      if (piece) {
-        if (empty > 0) { row += empty; empty = 0 }
-        row += piece
-      } else {
-        empty++
-      }
-    }
-    if (empty > 0) row += empty
-    fenRows.push(row)
-  }
-  return fenRows.join('/')
 }
 
 function addHighlight(overlay, idx, rows, cols, color, flipped) {
@@ -744,7 +555,7 @@ function buildResolved(fen, rows, cols) {
 function showPromotionDialog(choices, resolve) {
   const dialog = document.getElementById('chess-promotion-dialog')
   if (!dialog) { resolve(choices[0]); return }
-  const SYMBOLS = { q: '♕', r: '♖', b: '♗', n: '♘', queen: '♕', rook: '♖', bishop: '♗', knight: '♘' }
+  const SYMBOLS = { q: '♕', r: '♖', b: '♗', n: '♘', Q: '♕', R: '♖', B: '♗', N: '♘' }
   dialog.style.display = 'flex'
   dialog.innerHTML = choices.map(c => {
     const sym = SYMBOLS[c] || c[0].toUpperCase()
@@ -763,8 +574,11 @@ function updateStatus(status) {
   const statusEl = document.getElementById('chess-status')
   if (!statusEl) return
   if (status === 'forfeit') statusEl.textContent = 'Game forfeited'
-  else if (status === 'draw') statusEl.textContent = 'Draw'
-  else if (status === 'white' || status === 'black') statusEl.textContent = `${status.charAt(0).toUpperCase() + status.slice(1)} wins!`
+  else if (status === 'checkmate') statusEl.textContent = 'Checkmate'
+  else if (status === 'stalemate') statusEl.textContent = 'Stalemate'
+  else if (status === 'draw' || (typeof status === 'string' && status.startsWith('draw'))) statusEl.textContent = 'Draw'
+  else if (status === MCE.WHITE || status === 'white') statusEl.textContent = 'White wins!'
+  else if (status === MCE.BLACK || status === 'black') statusEl.textContent = 'Black wins!'
   else statusEl.textContent = status
   statusEl.classList.add('chess-status--over')
 }
@@ -790,17 +604,16 @@ function bindEvents(container) {
     startGame()
   })
   container.querySelector('#chess-new-btn')?.addEventListener('click', () => startGame())
-  container.querySelector('#chess-undo-btn')?.addEventListener('click', () => controller?.undo())
+  container.querySelector('#chess-undo-btn')?.addEventListener('click', () => ctrl?.undo())
   container.querySelector('#chess-flip-btn')?.addEventListener('click', () => {
-    const state = controller?.getState()
-    controller?.setFlipped(!state?.flipped)
+    const state = ctrl?.getState()
+    ctrl?.setFlipped(!state?.flipped)
     updateURL()
   })
   container.querySelector('#chess-fullscreen-btn')?.addEventListener('click', toggleFullscreen)
   container.querySelector('#chess-pieceset-select')?.addEventListener('change', (e) => {
     currentPieceSet = e.target.value
     localStorage.setItem('mce-piece-set', currentPieceSet)
-    controller?.render?.()
     startGame()
   })
   container.querySelector('#chess-anim-style-select')?.addEventListener('change', (e) => {
@@ -810,6 +623,7 @@ function bindEvents(container) {
   container.querySelector('#chess-anim-speed-select')?.addEventListener('change', (e) => {
     animSpeed = e.target.value
     localStorage.setItem('mce-anim-speed', animSpeed)
+    if (ctrl) ctrl.setRenderOpts({ animate: ANIM_SPEEDS[animSpeed] > 0, animDuration: ANIM_SPEEDS[animSpeed] })
   })
   container.querySelector('#chess-color-select')?.addEventListener('change', () => startGame())
   container.querySelector('#chess-opponent-select')?.addEventListener('change', () => startGame())
@@ -819,7 +633,6 @@ function bindEvents(container) {
 function updateURL() {
   const params = new URLSearchParams(location.search)
   params.set('mode', 'play')
-  params.set('game', 'moddable-chess')
   params.set('variant', currentVariant)
   const color = document.getElementById('chess-color-select')?.value
   const opponent = document.getElementById('chess-opponent-select')?.value
@@ -827,8 +640,9 @@ function updateURL() {
   else params.delete('color')
   if (opponent && opponent !== 'human') params.set('opponent', opponent)
   else params.delete('opponent')
-  const flipped = controller?.getState()?.flipped
+  const flipped = ctrl?.getState()?.flipped
   if (flipped) params.set('flipped', '1')
   else params.delete('flipped')
+  if (embedMode) params.set('embed', '1')
   history.replaceState(null, '', '?' + params.toString())
 }
