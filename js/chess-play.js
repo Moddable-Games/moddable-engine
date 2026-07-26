@@ -517,7 +517,8 @@ function animatePiece(fromIdx, fromPos, toPos, duration, flipped, rows, cols, on
   }
   if (!pieceEl) { onDone(); return }
 
-  // Hide captured piece at destination so slide looks clean
+  // Find and hide captured piece at destination
+  let capturedEl = null
   for (const el of pieceEls) {
     if (el === pieceEl) continue
     const tag = el.tagName.toLowerCase()
@@ -534,10 +535,11 @@ function animatePiece(fromIdx, fromPos, toPos, duration, flipped, rows, cols, on
       size = 40
     } else continue
     if (Math.abs(cx - toPos.x) < size * 0.5 && Math.abs(cy - toPos.y) < size * 0.5) {
-      el.setAttribute('opacity', '0')
+      capturedEl = el
       break
     }
   }
+  console.log('[anim] pieceEl:', pieceEl.tagName, 'capturedEl:', capturedEl?.tagName || 'none', 'from:', fromPos, 'to:', toPos)
 
   if (!pieceEl) { onDone(); return }
 
