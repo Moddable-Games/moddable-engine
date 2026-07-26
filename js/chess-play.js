@@ -114,6 +114,13 @@ function startGame() {
       const choices = [...new Set(candidates.map(m => m.promo))]
       showPromotionDialog(choices, resolve)
     },
+    onCaptureEffect: (sq) => {
+      const game = ctrl?.getGame()
+      if (!game) return
+      const flp = ctrl?.getState()?.flipped || false
+      const pos = getCellCenter(sq, flp, game.rows, game.cols)
+      if (pos) captureBurst(pos.x, pos.y, pos.w)
+    },
     onAnimateMove: (move, g, done) => {
       const duration = ANIM_SPEEDS[animSpeed] || 0
       if (duration === 0) { done(); return }
@@ -546,6 +553,71 @@ function animatePiece(fromIdx, fromPos, toPos, duration, flipped, rows, cols, on
   pieceEl.style.transition = `transform ${duration}ms ${easing}`
   pieceEl.style.transform = `translate(${dx}px, ${dy}px)`
   setTimeout(onDone, duration)
+}
+
+function captureBurst(cx, cy, tileSize) {
+  const svgEl = boardSvgContainer.querySelector('svg')
+  if (!svgEl) return
+  const ns = 'http://www.w3.org/2000/svg'
+  const flash = document.createElementNS(ns, 'g')
+  flash.setAttribute('style', 'pointer-events:none')
+
+  const ring = document.createElementNS(ns, 'circle')
+  ring.setAttribute('cx', cx)
+  ring.setAttribute('cy', cy)
+  ring.setAttribute('r', tileSize * 0.15)
+  ring.setAttribute('fill', 'none')
+  ring.setAttribute('stroke', 'rgba(255,100,40,0.95)')
+  ring.setAttribute('stroke-width', '3')
+  flash.appendChild(ring)
+
+  const particleCount = 8
+  for (let i = 0; i < particleCount; i++) {
+    const angle = (i / particleCount) * Math.PI * 2
+    const p = document.createElementNS(ns, 'circle')
+    p.setAttribute('cx', cx + Math.cos(angle) * tileSize * 0.1)
+    p.setAttribute('cy', cy + Math.sin(angle) * tileSize * 0.1)
+    p.setAttribute('r', '2.5')
+    p.setAttribute('fill', 'rgba(255,220,60,0.95)')
+    flash.appendChild(p)
+  }
+
+  const innerFlash = document.createElementNS(ns, 'circle')
+  innerFlash.setAttribute('cx', cx)
+  innerFlash.setAttribute('cy', cy)
+  innerFlash.setAttribute('r', tileSize * 0.3)
+  innerFlash.setAttribute('fill', 'rgba(255,200,80,0.4)')
+  flash.appendChild(innerFlash)
+
+  svgEl.appendChild(flash)
+
+  const start = performance.now()
+  const DURATION = 400
+  function frame(now) {
+    const t = Math.min((now - start) / DURATION, 1)
+    const ease = 1 - Math.pow(1 - t, 3)
+
+    ring.setAttribute('r', tileSize * 0.15 + ease * tileSize * 0.6)
+    ring.setAttribute('stroke-opacity', 1 - ease)
+    ring.setAttribute('stroke-width', 3 * (1 - ease * 0.7))
+
+    innerFlash.setAttribute('r', tileSize * 0.3 * (1 - ease))
+    innerFlash.setAttribute('opacity', 1 - ease)
+
+    const particles = flash.querySelectorAll('circle:not(:first-child):not(:last-child)')
+    particles.forEach((p, i) => {
+      const angle = (i / particleCount) * Math.PI * 2
+      const dist = tileSize * 0.1 + ease * tileSize * 0.55
+      p.setAttribute('cx', cx + Math.cos(angle) * dist)
+      p.setAttribute('cy', cy + Math.sin(angle) * dist)
+      p.setAttribute('opacity', 1 - ease * ease)
+      p.setAttribute('r', 2.5 * (1 - ease * 0.5))
+    })
+
+    if (t < 1) requestAnimationFrame(frame)
+    else flash.remove()
+  }
+  requestAnimationFrame(frame)
 }
 
 function addHighlight(overlay, idx, rows, cols, color, flipped) {
