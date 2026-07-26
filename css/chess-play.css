@@ -81,6 +81,29 @@
   font-weight: 600;
 }
 
+.chess-captured {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 0;
+  min-height: 24px;
+}
+
+.captured-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+}
+
+.cap-piece {
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.85;
+}
+
+.cap-white { color: #f0ede8; }
+.cap-black { color: #4a4540; }
+
 .chess-moves {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;

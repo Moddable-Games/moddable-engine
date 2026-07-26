@@ -91,6 +91,7 @@ function startGame() {
   }
 
   const moveLog = []
+  const captured = { w: [], b: [] }
 
   ctrl = createGameController(null, game, {
     players,
@@ -102,9 +103,15 @@ function startGame() {
     customRender: (g, state) => {
       renderBoard(g, state, rows, cols)
     },
-    onMove: (move, undo, captured, side) => {
+    onMove: (move, undo, cap, side) => {
       moveLog.push({ move, side })
+      const capPiece = undo && undo.captured
+      if (capPiece && typeof capPiece === 'string') {
+        const capColor = capPiece === capPiece.toUpperCase() ? 'w' : 'b'
+        captured[capColor].push(capPiece.toLowerCase())
+      }
       updateMoveList(moveLog, cols, rows)
+      updateCaptured(captured)
       postEmbedMessage('move', { from: move.from, to: move.to, fen: MCE.toFEN(game), variant: currentVariant })
     },
     onGameEnd: (status) => {
@@ -388,6 +395,7 @@ function buildUI() {
       <button id="chess-fullscreen-btn" class="btn btn-outline">Fullscreen</button>
     </div>
     <div id="chess-status" class="chess-status"></div>
+    <div id="chess-captured" class="chess-captured"></div>
     <div id="chess-moves" class="chess-moves"></div>
   </div>
   <div class="chess-board-area">
@@ -859,6 +867,20 @@ function updateStatus(status) {
   else if (status === MCE.BLACK || status === 'black' || (typeof status === 'string' && status.endsWith('-b'))) statusEl.textContent = 'Black wins!'
   else statusEl.textContent = status
   statusEl.classList.add('chess-status--over')
+}
+
+function updateCaptured(captured) {
+  const el = document.getElementById('chess-captured')
+  if (!el) return
+  const SYM = { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' }
+  const ORDER = ['q', 'r', 'b', 'n', 'p']
+  const sort = (arr) => arr.slice().sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b))
+  const byCapturer = (pieces, cls) => sort(pieces).map(p => `<span class="cap-piece ${cls}">${SYM[p] || p}</span>`).join('')
+  const byWhite = byCapturer(captured.b, 'cap-black')
+  const byBlack = byCapturer(captured.w, 'cap-white')
+  el.innerHTML = (byWhite || byBlack)
+    ? `<div class="captured-row">${byWhite}</div><div class="captured-row">${byBlack}</div>`
+    : ''
 }
 
 function updateMoveList(moveLog, cols, rows) {
