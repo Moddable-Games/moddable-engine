@@ -871,7 +871,131 @@ function fitToView() {
   svg.style.margin = '0 auto'
 }
 
-if (document.getElementById('game-select')) {
+// --- Hex Embed Mode ---
+const _embedParams = new URLSearchParams(location.search)
+const _hexEmbed = _embedParams.has('embed') && _embedParams.get('game') &&
+  ['nukes', 'twilight', 'colony', 'talisman', 'mongo', 'endless'].includes(_embedParams.get('game'))
+
+if (_hexEmbed) {
+  (async () => {
+    document.querySelectorAll('.boards-hero, .site-header, .site-footer, footer, .boards-sidebar, .sidebar, .hex-info-bar, .canvas-empty, #board-empty').forEach(el => el.style.display = 'none')
+    const app = document.querySelector('.boards-app')
+    if (app) { app.style.padding = '0'; app.style.gap = '0'; app.style.gridTemplateColumns = '1fr' }
+    document.body.style.margin = '0'
+    document.body.style.padding = '0'
+    document.body.style.overflow = 'hidden'
+    document.body.style.background = _embedParams.get('bg') ? '#' + _embedParams.get('bg') : 'transparent'
+    document.documentElement.style.background = document.body.style.background
+
+    const boardEl = document.getElementById('board-svg')
+    if (boardEl) {
+      boardEl.style.width = '100%'
+      boardEl.style.height = '100vh'
+      boardEl.style.display = 'flex'
+      boardEl.style.alignItems = 'center'
+      boardEl.style.justifyContent = 'center'
+      boardEl.style.padding = '0'
+      boardEl.style.background = 'transparent'
+      boardEl.classList.add('active')
+    }
+
+    let hexGame = _embedParams.get('game')
+    let hexStyle = _embedParams.get('style') || 'artistic'
+    let hexSize = parseInt(_embedParams.get('size')) || 0
+    let hexPlayers = parseInt(_embedParams.get('players')) || 0
+    let hexSeed = _embedParams.get('seed') || String(Math.floor(Math.random() * 9999999999))
+    let hexLayout = _embedParams.get('layout') || null
+    let lastHexes = null
+
+    function renderHexEmbed() {
+      const gameConfig = getGameConfig(hexGame)
+      if (!gameConfig) return
+      const size = hexSize || gameConfig.defaultSize || 5
+      const players = hexPlayers || gameConfig.defaultPlayers || 2
+      const rng = createSeededRng(hexSeed)
+      const result = gameConfig.generate(size, players, hexSeed, rng)
+      const hexes = result.hexes || result
+      lastHexes = hexes
+      const annotations = result.annotations || null
+      const colors = gameConfig.getColors ? gameConfig.getColors(hexStyle) : {}
+      const rawBg = _embedParams.get('bg')
+      const bg = rawBg ? (rawBg.startsWith('#') ? rawBg : '#' + rawBg) : null
+
+      const hasImages = hexes.some(h => h.imagePath)
+      const svgOpts = {
+        size: 40,
+        orientation: gameConfig.orientation || 'pointy',
+        bgColor: bg,
+        colors,
+        imageMode: hasImages ? 'link' : 'none',
+        fitToViewport: true,
+      }
+
+      const svg = annotations
+        ? HexSvg.toAnnotatedSVG(hexes, annotations, svgOpts)
+        : HexSvg.toSVG(hexes, svgOpts)
+
+      if (boardEl) {
+        boardEl.innerHTML = svg
+        const svgEl = boardEl.querySelector('svg')
+        if (svgEl) {
+          svgEl.removeAttribute('width')
+          svgEl.removeAttribute('height')
+          svgEl.style.width = '100%'
+          svgEl.style.height = '100vh'
+          svgEl.style.display = 'block'
+          svgEl.style.background = rawBg ? '#' + rawBg : 'transparent'
+        }
+      }
+
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'hexmap:ready', game: hexGame, seed: hexSeed, size, players }, '*')
+      }
+    }
+
+    window.addEventListener('message', (e) => {
+      if (!e.data || typeof e.data.type !== 'string') return
+      switch (e.data.type) {
+        case 'hexmap:setGame':
+          if (e.data.game) { hexGame = e.data.game; if (e.data.style) hexStyle = e.data.style }
+          hexSeed = String(Math.floor(Math.random() * 9999999999))
+          renderHexEmbed()
+          break
+        case 'hexmap:setStyle':
+          if (e.data.style) { hexStyle = e.data.style; renderHexEmbed() }
+          break
+        case 'hexmap:regenerate':
+          if (e.data.size) hexSize = e.data.size
+          if (e.data.layout) hexLayout = e.data.layout
+          if (e.data.players) hexPlayers = e.data.players
+          hexSeed = e.data.seed || (e.data.random ? String(Math.floor(Math.random() * 9999999999)) : hexSeed)
+          renderHexEmbed()
+          break
+        case 'hexmap:getMap':
+          if (e.source) {
+            e.source.postMessage({ type: 'hexmap:mapData', hexes: lastHexes, seed: hexSeed, game: hexGame }, e.origin !== 'null' ? e.origin : '*')
+          }
+          break
+        case 'hexmap:exportSvg':
+          if (e.source && boardEl) {
+            const svgStr = boardEl.innerHTML
+            e.source.postMessage({ type: 'hexmap:svgData', svg: svgStr }, e.origin !== 'null' ? e.origin : '*')
+          }
+          break
+        case 'hexmap:setBg':
+          if (e.data.bg) {
+            const bg = e.data.bg.startsWith('#') ? e.data.bg : '#' + e.data.bg
+            document.body.style.background = bg
+            document.documentElement.style.background = bg
+            renderHexEmbed()
+          }
+          break
+      }
+    })
+
+    renderHexEmbed()
+  })()
+} else if (document.getElementById('game-select')) {
   document.addEventListener('DOMContentLoaded', init)
 }
 

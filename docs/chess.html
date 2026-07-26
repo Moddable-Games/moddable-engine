@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chess — Moddable Engine</title>
+<meta name="description" content="Chess SDK, embed protocol, and variant reference for the Moddable Engine.">
+<meta property="og:title" content="Chess — Moddable Engine">
+<meta property="og:description" content="75 chess variants with AI, embed support, and a headless SDK for server-side consumers.">
+<meta property="og:image" content="https://engine.moddable.games/og/docs.png?v=1.0.8">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://engine.moddable.games/docs/chess.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Chess — Moddable Engine">
+<meta name="twitter:description" content="75 chess variants with AI, embed support, and a headless SDK for server-side consumers.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/docs.png?v=1.0.8">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../css/home.css?v=1.0.8">
+<link rel="stylesheet" href="../css/docs.css?v=1.0.8">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../play/" class="nav-link">Play</a>
+      <a href="../create/" class="nav-link">Create</a>
+      <a href="../boards/" class="nav-link">Boards</a>
+      <a href="../pieces/" class="nav-link">Pieces</a>
+      <a href="../tiles/" class="nav-link">Tiles</a>
+      <a href="./" class="nav-link nav-link--active">Docs</a>
+      <a href="../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</header>
+<div class="docs-layout">
+<button class="docs-toc-toggle" onclick="this.classList.toggle('active');this.nextElementSibling.classList.toggle('open')">Navigation</button>
+<nav class="docs-toc">
+  <div class="docs-toc-title">Pages</div>
+  <ul class="docs-toc-list">
+    <li><a href="./">Overview</a></li>
+    <li><a href="frontmatter.html">Frontmatter</a></li>
+    <li><a href="topologies.html">Topologies</a></li>
+    <li><a href="surfaces.html">Surfaces</a></li>
+    <li><a href="pieces.html">Piece Sets</a></li>
+    <li><a href="plugins.html">Plugins</a></li>
+    <li><a href="render-pipeline.html">Render Pipeline</a></li>
+    <li><a href="chess.html" class="active">Chess</a></li>
+    <li><a href="hexmaps.html">Hex Maps</a></li>
+  </ul>
+  <div class="docs-toc-title" style="margin-top:20px">On this page</div>
+  <ul class="docs-toc-list">
+    <li><a href="#embed">Embed via iframe</a></li>
+    <li><a href="#sdk">Chess SDK</a></li>
+    <li><a href="#variants">Variant groups</a></li>
+    <li><a href="#ai">AI difficulties</a></li>
+    <li><a href="#puzzles">Puzzle API</a></li>
+  </ul>
+</nav>
+<div class="docs-body">
+
+  <h1>Chess</h1>
+  <p class="docs-lede">75 chess variants with AI, embed support, and a headless SDK for server-side consumers.</p>
+
+  <h2 id="embed">Embed via iframe</h2>
+  <p>Drop a board into any page with a single iframe. The embed is fully responsive and touch-ready.</p>
+
+  <pre><code>&lt;iframe
+  src="https://engine.moddable.games/play/?embed=1&amp;variant=standard"
+  style="width:100%;max-width:560px;aspect-ratio:1/1;border:none"
+  title="Play Chess"
+&gt;&lt;/iframe&gt;</code></pre>
+
+  <h3>URL parameters</h3>
+  <table class="docs-table">
+    <thead><tr><th>Param</th><th>Values</th><th>Default</th></tr></thead>
+    <tbody>
+      <tr><td><code>embed</code></td><td><code>1</code></td><td>Required for embed mode</td></tr>
+      <tr><td><code>variant</code></td><td>Any variant key</td><td><code>standard</code></td></tr>
+      <tr><td><code>opponent</code></td><td><code>ai</code> | <code>human</code></td><td><code>ai</code> in embed</td></tr>
+      <tr><td><code>difficulty</code></td><td><code>beginner</code> | <code>easy</code> | <code>medium</code> | <code>hard</code> | <code>expert</code></td><td><code>medium</code></td></tr>
+      <tr><td><code>color</code></td><td><code>white</code> | <code>black</code></td><td><code>white</code></td></tr>
+      <tr><td><code>pieces</code></td><td>Piece set ID</td><td><code>mce-fairy-complete</code></td></tr>
+      <tr><td><code>flipped</code></td><td><code>1</code></td><td>Board orientation</td></tr>
+    </tbody>
+  </table>
+
+  <h3>postMessage control</h3>
+  <p>Control the embed without reloading the iframe. Send messages to <code>iframe.contentWindow</code>:</p>
+
+  <pre><code>// Change variant
+iframe.contentWindow.postMessage({ type: 'chess:setVariant', variant: 'atomic' }, '*')
+
+// Change difficulty (also activates AI)
+iframe.contentWindow.postMessage({ type: 'chess:setDifficulty', difficulty: 'hard' }, '*')
+
+// Switch between human/AI
+iframe.contentWindow.postMessage({ type: 'chess:setOpponent', opponent: 'ai' }, '*')
+
+// Game controls
+iframe.contentWindow.postMessage({ type: 'chess:newGame' }, '*')
+iframe.contentWindow.postMessage({ type: 'chess:undo' }, '*')
+iframe.contentWindow.postMessage({ type: 'chess:flip' }, '*')
+
+// Change piece set
+iframe.contentWindow.postMessage({ type: 'chess:setPieces', set: 'mce-chess' }, '*')</code></pre>
+
+  <h3>Events from embed</h3>
+  <p>Listen on the parent window for game events:</p>
+
+  <pre><code>window.addEventListener('message', (e) => {
+  switch (e.data.type) {
+    case 'chess:ready':
+      // { variant, fen }
+      break
+    case 'chess:move':
+      // { from, to, fen, variant }
+      break
+    case 'chess:status':
+      // { text: 'white'|'black'|'draw', gameOver: true, variant }
+      break
+  }
+})</code></pre>
+
+  <h2 id="sdk">Chess SDK</h2>
+  <p>Headless SDK for server-side tools, APIs, and direct browser consumption.</p>
+
+  <pre><code>import {
+  listVariants,
+  createGame,
+  getLegalMoves,
+  analyzePosition,
+  getGameStatus,
+  renderSvg,
+  MCE,
+  makeMove,
+  toFEN,
+  loadFEN,
+} from 'moddable-engine/chess-sdk'</code></pre>
+
+  <h3>listVariants(group?)</h3>
+  <p>Returns all registered variants with metadata.</p>
+  <pre><code>const all = listVariants()          // 75 variants
+const tactical = listVariants('Tactical')  // filtered by group
+// [{ key, label, group, board, description, rule }]</code></pre>
+
+  <h3>getLegalMoves(variant, fen?)</h3>
+  <p>Returns all legal moves in algebraic notation.</p>
+  <pre><code>const moves = getLegalMoves('standard')  // starting position: 20 moves
+// [{ from: 'e2', to: 'e4', capture: false, promotion: null, flag: null }]</code></pre>
+
+  <h3>analyzePosition(variant, fen?, depth?)</h3>
+  <p>AI evaluation with best move.</p>
+  <pre><code>const result = analyzePosition('standard', null, 4)
+// { bestMove: 'e2e4', evaluation: 0.3 }</code></pre>
+
+  <h3>renderSvg(variant, fen?, opts?)</h3>
+  <p>Renders a board position as an SVG string. No DOM required.</p>
+  <pre><code>const { svg, rows, cols } = renderSvg('capablanca')
+// svg = '&lt;svg xmlns="..." ...' (14KB, self-contained)
+
+const custom = renderSvg('standard', 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1')</code></pre>
+
+  <h3>getGameStatus(variant, fen?)</h3>
+  <pre><code>const status = getGameStatus('standard', 'some-fen')
+// { status: 'active', gameOver: false, turn: 'white', inCheck: false }
+// or: { status: 'checkmate', gameOver: true }</code></pre>
+
+  <h3>Game state management</h3>
+  <pre><code>const game = createGame('atomic')
+const moves = MCE.legalMoves(game)
+const undo = makeMove(game, moves[0])
+const fen = toFEN(game)</code></pre>
+
+  <h2 id="variants">Variant groups</h2>
+  <table class="docs-table">
+    <thead><tr><th>Group</th><th>Count</th><th>Examples</th></tr></thead>
+    <tbody>
+      <tr><td>Classic</td><td>5</td><td>Standard, Chess960, Torpedo, No Castling</td></tr>
+      <tr><td>Tactical</td><td>12</td><td>Atomic, King of the Hill, Three-Check, Grid Chess</td></tr>
+      <tr><td>Alternate Rules</td><td>22</td><td>Antichess, Racing Kings, Crazyhouse, Duck Chess</td></tr>
+      <tr><td>Small Boards</td><td>8</td><td>Los Alamos, Minichess, Diana, Petty</td></tr>
+      <tr><td>Large Boards</td><td>5</td><td>Capablanca, Grand, Courier</td></tr>
+      <tr><td>Asymmetric</td><td>8</td><td>Horde, Maharaja, Orda, Chigorin</td></tr>
+      <tr><td>Historical</td><td>6</td><td>Makruk, Shatar, Shatranj</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="ai">AI difficulties</h2>
+  <table class="docs-table">
+    <thead><tr><th>Level</th><th>Depth</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>beginner</td><td>1</td><td>Random with basic blunder avoidance</td></tr>
+      <tr><td>easy</td><td>2</td><td>Simple evaluation, no deep tactics</td></tr>
+      <tr><td>medium</td><td>3</td><td>Full evaluation, opening book, captures extended</td></tr>
+      <tr><td>hard</td><td>4</td><td>Transposition table, quiescence search</td></tr>
+      <tr><td>expert</td><td>5+</td><td>Full search with iterative deepening</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="puzzles">Puzzle API</h2>
+  <p>1,557 puzzles available as static JSON at <code>/api/puzzles/index.json</code>.</p>
+  <pre><code>// Fetch puzzle data
+const res = await fetch('https://engine.moddable.games/api/puzzles/index.json')
+const data = await res.json()
+
+// data.standard = [{ id, fen, solution, rating, themes }]
+// data.variants = [{ id, variant, fen, solution, rating }]
+// data.meta = { count: 1557, standard: 606, variants: 951 }</code></pre>
+
+</div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../play/">Play</a>
+        <a href="../boards/">Boards</a>
+        <a href="../pieces/">Pieces</a>
+        <a href="../tiles/">Tiles</a>
+        <a href="../docs/">Docs</a>
+        <a href="../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Moddable Games</h4>
+        <a href="https://moddable.games" target="_blank" rel="noopener">Homepage</a>
+        <a href="https://rules.moddable.games" target="_blank" rel="noopener">Rules</a>
+        <a href="https://moddable.games/news/" target="_blank" rel="noopener">News</a>
+        <a href="https://discord.gg/VhsVGNq6Za" target="_blank" rel="noopener">Discord</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.8</span>
+    </div>
+  </div>
+</footer></body>
+</html>

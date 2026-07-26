@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hex Maps — Moddable Engine</title>
+<meta name="description" content="Hex map SDK, embed protocol, and game reference for the Moddable Engine.">
+<meta property="og:title" content="Hex Maps — Moddable Engine">
+<meta property="og:description" content="6 game generators with deterministic seeded output, SVG rendering, and a headless SDK.">
+<meta property="og:image" content="https://engine.moddable.games/og/docs.png?v=1.0.8">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://engine.moddable.games/docs/hexmaps.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Hex Maps — Moddable Engine">
+<meta name="twitter:description" content="6 game generators with deterministic seeded output, SVG rendering, and a headless SDK.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/docs.png?v=1.0.8">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../css/home.css?v=1.0.8">
+<link rel="stylesheet" href="../css/docs.css?v=1.0.8">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../play/" class="nav-link">Play</a>
+      <a href="../create/" class="nav-link">Create</a>
+      <a href="../boards/" class="nav-link">Boards</a>
+      <a href="../pieces/" class="nav-link">Pieces</a>
+      <a href="../tiles/" class="nav-link">Tiles</a>
+      <a href="./" class="nav-link nav-link--active">Docs</a>
+      <a href="../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</header>
+<div class="docs-layout">
+<button class="docs-toc-toggle" onclick="this.classList.toggle('active');this.nextElementSibling.classList.toggle('open')">Navigation</button>
+<nav class="docs-toc">
+  <div class="docs-toc-title">Pages</div>
+  <ul class="docs-toc-list">
+    <li><a href="./">Overview</a></li>
+    <li><a href="frontmatter.html">Frontmatter</a></li>
+    <li><a href="topologies.html">Topologies</a></li>
+    <li><a href="surfaces.html">Surfaces</a></li>
+    <li><a href="pieces.html">Piece Sets</a></li>
+    <li><a href="plugins.html">Plugins</a></li>
+    <li><a href="render-pipeline.html">Render Pipeline</a></li>
+    <li><a href="chess.html">Chess</a></li>
+    <li><a href="hexmaps.html" class="active">Hex Maps</a></li>
+  </ul>
+  <div class="docs-toc-title" style="margin-top:20px">On this page</div>
+  <ul class="docs-toc-list">
+    <li><a href="#embed">Embed via iframe</a></li>
+    <li><a href="#sdk">Hex SDK</a></li>
+    <li><a href="#games">Games</a></li>
+    <li><a href="#hexmath">HexMath</a></li>
+    <li><a href="#hexsvg">HexSvg</a></li>
+    <li><a href="#tiles">Tile API</a></li>
+  </ul>
+</nav>
+<div class="docs-body">
+
+  <h1>Hex Maps</h1>
+  <p class="docs-lede">6 game generators with deterministic seeded output, SVG rendering, and a headless SDK for server-side consumers.</p>
+
+  <h2 id="embed">Embed via iframe</h2>
+  <p>Embed a hex map generator into any page. The same seed always produces the same map.</p>
+
+  <pre><code>&lt;iframe
+  src="https://engine.moddable.games/play/?embed=1&amp;game=nukes&amp;style=artistic&amp;random=1"
+  style="width:100%;max-width:560px;aspect-ratio:1/1;border:none"
+  title="Hex Map"
+&gt;&lt;/iframe&gt;</code></pre>
+
+  <h3>URL parameters</h3>
+  <table class="docs-table">
+    <thead><tr><th>Param</th><th>Values</th><th>Default</th></tr></thead>
+    <tbody>
+      <tr><td><code>embed</code></td><td><code>1</code></td><td>Required for embed mode</td></tr>
+      <tr><td><code>game</code></td><td><code>nukes</code> | <code>twilight</code> | <code>colony</code> | <code>talisman</code> | <code>mongo</code> | <code>endless</code></td><td>Required</td></tr>
+      <tr><td><code>style</code></td><td><code>artistic</code> | <code>classic</code> | <code>kenney</code> | <code>realistic</code></td><td><code>artistic</code></td></tr>
+      <tr><td><code>size</code></td><td>Integer (ring count)</td><td>Game default</td></tr>
+      <tr><td><code>players</code></td><td>Integer</td><td>Game default</td></tr>
+      <tr><td><code>seed</code></td><td>Any string</td><td>Random</td></tr>
+      <tr><td><code>random</code></td><td><code>1</code></td><td>Generate with random seed</td></tr>
+      <tr><td><code>bg</code></td><td>Hex colour (no #)</td><td>Transparent</td></tr>
+    </tbody>
+  </table>
+
+  <h3>postMessage control</h3>
+  <p>Control the embed without reloading:</p>
+
+  <pre><code>// Switch game
+iframe.contentWindow.postMessage({ type: 'hexmap:setGame', game: 'twilight', style: 'classic' }, '*')
+
+// Change visual style
+iframe.contentWindow.postMessage({ type: 'hexmap:setStyle', style: 'kenney' }, '*')
+
+// Generate new map
+iframe.contentWindow.postMessage({ type: 'hexmap:regenerate', random: true }, '*')
+iframe.contentWindow.postMessage({ type: 'hexmap:regenerate', size: 5, players: 6 }, '*')
+iframe.contentWindow.postMessage({ type: 'hexmap:regenerate', seed: 'my-seed' }, '*')
+
+// Request data
+iframe.contentWindow.postMessage({ type: 'hexmap:getMap' }, '*')
+iframe.contentWindow.postMessage({ type: 'hexmap:exportSvg' }, '*')
+
+// Change background
+iframe.contentWindow.postMessage({ type: 'hexmap:setBg', bg: '#0B0F1A' }, '*')</code></pre>
+
+  <h3>Events from embed</h3>
+
+  <pre><code>window.addEventListener('message', (e) => {
+  switch (e.data.type) {
+    case 'hexmap:ready':
+      // { game, seed, size, players }
+      break
+    case 'hexmap:mapData':
+      // { hexes: [{q, r, type, ...}], seed, game, size, players }
+      break
+    case 'hexmap:svgData':
+      // { svg: '&lt;svg ...' }
+      break
+  }
+})</code></pre>
+
+  <h2 id="sdk">Hex SDK</h2>
+  <p>Headless SDK for server-side tools, APIs, and direct browser consumption.</p>
+
+  <pre><code>import {
+  listGames,
+  generate,
+  renderSvg,
+  getHexInfo,
+  HexMath,
+  HexSvg,
+  createSeededRng,
+} from 'moddable-engine/hex-sdk'</code></pre>
+
+  <h3>listGames()</h3>
+  <p>Returns all registered games with metadata.</p>
+  <pre><code>const games = listGames()
+// [{ key: 'nukes', label: 'nukes', defaultSize: 5, defaultPlayers: 4,
+//    orientation: 'pointy', styles: ['artistic','classic','kenney'] }]</code></pre>
+
+  <h3>generate(game, opts?)</h3>
+  <p>Generate a map. Same seed always produces the same result.</p>
+  <pre><code>const result = generate('nukes', { size: 4, players: 4, seed: 'abc123' })
+// { hexes: [{q, r, type, ...}], annotations: [...], seed, game, size, players }</code></pre>
+
+  <h3>renderSvg(game, opts?)</h3>
+  <p>Generate and render as SVG in one call. No DOM required.</p>
+  <pre><code>const { svg, hexes, seed } = renderSvg('twilight', {
+  seed: 'galaxy42',
+  style: 'classic',
+  bgColor: '#0a0d2a'
+})
+// svg = '&lt;svg ...' (~10-15KB)</code></pre>
+
+  <h3>getHexInfo(hexes, q, r)</h3>
+  <p>Look up a hex and its neighbours.</p>
+  <pre><code>const info = getHexInfo(result.hexes, 0, 0)
+// { hex: {q, r, type: 'mount'}, neighbours: [...], distance: 0 }</code></pre>
+
+  <h2 id="games">Games</h2>
+  <table class="docs-table">
+    <thead><tr><th>Key</th><th>Game</th><th>Sizes</th><th>Styles</th></tr></thead>
+    <tbody>
+      <tr><td><code>nukes</code></td><td>Nukes (area control)</td><td>2–6 rings</td><td>artistic, classic, kenney</td></tr>
+      <tr><td><code>twilight</code></td><td>Twilight Imperium (galactic)</td><td>3–8 players</td><td>artistic, classic</td></tr>
+      <tr><td><code>colony</code></td><td>Colony (resource/trade)</td><td>3–4 rings</td><td>classic, kenney, realistic</td></tr>
+      <tr><td><code>talisman</code></td><td>Talisman (fantasy adventure)</td><td>3–5 rings</td><td>artistic, classic</td></tr>
+      <tr><td><code>mongo</code></td><td>Planet Mongo (pulp sci-fi)</td><td>Fixed layout</td><td>artistic</td></tr>
+      <tr><td><code>endless</code></td><td>Endless Skies (exploration)</td><td>Fixed layout</td><td>artistic</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="hexmath">HexMath</h2>
+  <p>Axial coordinate utilities for hex grids.</p>
+  <pre><code>import { HexMath } from 'moddable-engine/hex-sdk'
+
+HexMath.getNeighbors(q, r)       // [{q, r}] — 6 adjacent hexes
+HexMath.axialDistance(a, b)      // integer distance between two {q, r} points
+HexMath.hexRing(center, radius)  // all hexes at exactly N distance
+HexMath.hexSpiral(center, radius) // all hexes within N distance</code></pre>
+
+  <h2 id="hexsvg">HexSvg</h2>
+  <p>Low-level SVG renderer with tile images, labels, and overlays.</p>
+  <pre><code>import { HexSvg } from 'moddable-engine/hex-sdk'
+
+const svg = HexSvg.toSVG(hexes, {
+  size: 30,
+  orientation: 'pointy',    // or 'flat'
+  bgColor: '#1a1a2e',
+  colors: { mount: '#4a3728', plains: '#3d6b35' }
+})
+
+// With annotations (highlights, tokens, arrows, legend)
+const svg = HexSvg.toAnnotatedSVG(hexes, annotations, opts)</code></pre>
+
+  <h2 id="tiles">Tile API</h2>
+  <p>Tile set metadata available at <code>/api/tiles/index.json</code>.</p>
+  <pre><code>const res = await fetch('https://engine.moddable.games/api/tiles/index.json')
+const data = await res.json()
+// { sets: [{ id, label, game, tileCount, path }] }</code></pre>
+  <p>8 tile sets: nukes, nukes-kenney, talisman, talisman-kenney, colony, mongo, endless, twilight.</p>
+
+</div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../play/">Play</a>
+        <a href="../boards/">Boards</a>
+        <a href="../pieces/">Pieces</a>
+        <a href="../tiles/">Tiles</a>
+        <a href="../docs/">Docs</a>
+        <a href="../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Moddable Games</h4>
+        <a href="https://moddable.games" target="_blank" rel="noopener">Homepage</a>
+        <a href="https://rules.moddable.games" target="_blank" rel="noopener">Rules</a>
+        <a href="https://moddable.games/news/" target="_blank" rel="noopener">News</a>
+        <a href="https://discord.gg/VhsVGNq6Za" target="_blank" rel="noopener">Discord</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.8</span>
+    </div>
+  </div>
+</footer></body>
+</html>

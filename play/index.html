@@ -165,17 +165,28 @@
     </div>
   </div>
 </footer>
-<script type="module" src="../js/play.js?v=1.0.8"></script>
 <script type="module">
-if (new URLSearchParams(location.search).get('mode') === 'play') {
+const _params = new URLSearchParams(location.search);
+const _mode = _params.get('mode');
+const _game = _params.get('game');
+const _isEmbed = _params.has('embed');
+const _hexGames = ['nukes','twilight','colony','talisman','mongo','endless'];
+const _isHexEmbed = _isEmbed && _game && _hexGames.includes(_game);
+const _isChessMode = _mode === 'play' || _mode === 'solo' || (_isEmbed && !_isHexEmbed);
+if (_isChessMode) {
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.boards-hero').style.display = 'none';
     document.querySelector('.boards-app').style.display = 'none';
     const playContainer = document.createElement('div');
     playContainer.id = 'chess-play-root';
     document.querySelector('.boards-app').before(playContainer);
-    import('../js/chess-play.js?v=1.0.8').then(m => m.initChessPlay(playContainer));
+    import('../js/chess-play.js').then(m => m.initChessPlay(playContainer)).catch(e => {
+      console.error('[chess-play] load failed:', e);
+      playContainer.textContent = 'Failed to load: ' + e.message;
+    });
   });
+} else {
+  import('../js/play.js?v=1.0.9');
 }
 </script>
 </body>

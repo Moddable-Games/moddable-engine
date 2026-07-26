@@ -81,6 +81,29 @@
   font-weight: 600;
 }
 
+.chess-captured {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 0;
+  min-height: 24px;
+}
+
+.captured-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+}
+
+.cap-piece {
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.85;
+}
+
+.cap-white { color: #f0ede8; }
+.cap-black { color: #4a4540; }
+
 .chess-moves {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
@@ -111,6 +134,10 @@
   width: 100%;
   height: auto;
   display: block;
+}
+
+.chess-board-svg image {
+  will-change: transform;
 }
 
 .chess-board-svg .board-cell {
@@ -153,6 +180,78 @@
 .promo-btn:hover {
   background: var(--accent, #40c060);
   color: #0a0d2a;
+}
+
+/* Embed mode — board only, no sidebar */
+.chess-play--embed {
+  display: block;
+  padding: 0;
+  max-width: none;
+  width: 100%;
+}
+
+.chess-play--embed .chess-board-area {
+  width: 100%;
+  height: 100vh;
+}
+
+.chess-play--embed .chess-board-svg {
+  max-width: none;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chess-play--embed .chess-board-svg svg {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  object-fit: contain;
+}
+
+.chess-embed-mode {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+body.chess-embed-mode,
+body.chess-embed-mode #chess-play-root {
+  width: 100%;
+  height: 100vh;
+  background: transparent;
+}
+
+.chess-embed-mode .site-header,
+.chess-embed-mode .site-footer,
+.chess-embed-mode .boards-hero,
+.chess-embed-mode .boards-app,
+.chess-embed-mode footer {
+  display: none !important;
+}
+
+/* Fullscreen mode */
+.chess-play--fullscreen {
+  position: fixed;
+  inset: 0;
+  max-width: none;
+  z-index: 9999;
+  background: var(--surface, #0e1128);
+  padding: 16px;
+  grid-template-columns: 220px 1fr;
+}
+
+.chess-play--fullscreen .chess-board-svg {
+  max-width: none;
+}
+
+.chess-fullscreen-mode .site-header,
+.chess-fullscreen-mode .site-nav,
+.chess-fullscreen-mode .page-header {
+  display: none;
 }
 
 @media (max-width: 768px) {
