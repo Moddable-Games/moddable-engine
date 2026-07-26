@@ -4,6 +4,7 @@ import MCE, {
   aiPickMove, aiPickDuckSquare, AI_DIFFICULTIES,
   createGameController,
 } from './mce/index.js'
+import { renderFromEngine } from '../../../render/src/render-engine.js'
 
 export function listVariants(group) {
   const registry = MCE.variantRegistry
@@ -80,6 +81,30 @@ export function toFEN(game) {
 export function loadFEN(game, fen) {
   MCE.loadFEN(game, fen)
   return game
+}
+
+export function renderSvg(variant = 'standard', fen, opts = {}) {
+  const game = MCE.createGame(variant)
+  if (fen) MCE.loadFEN(game, fen)
+  const rows = game.rows
+  const cols = game.cols
+
+  const boardFen = fen || MCE.toFEN(game).split(' ')[0]
+  const resolved = {
+    topology: { type: 'grid', rows, cols, tileMode: 'tiles' },
+    render: {
+      cellColor: 'checkered',
+      alternating: true,
+      labels: opts.labels !== false,
+      interactive: !!opts.interactive,
+    },
+    setup: boardFen,
+    pieces: { set: opts.pieceSet || 'mce-fairy-complete' },
+    meta: { label: '' },
+  }
+
+  const svg = renderFromEngine(resolved, opts.renderOpts || {})
+  return { svg, rows, cols }
 }
 
 function algebraicFromIdx(idx, rows, cols) {
