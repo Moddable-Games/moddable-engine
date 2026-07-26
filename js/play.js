@@ -944,6 +944,7 @@ if (_hexEmbed) {
           svgEl.style.width = '100%'
           svgEl.style.height = '100vh'
           svgEl.style.display = 'block'
+          svgEl.style.background = rawBg ? '#' + rawBg : 'transparent'
         }
       }
 
