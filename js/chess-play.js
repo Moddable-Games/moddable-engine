@@ -519,6 +519,7 @@ function animatePiece(fromIdx, fromPos, toPos, duration, flipped, rows, cols, on
 
   // Hide captured piece at destination so slide looks clean
   for (const el of pieceEls) {
+    if (el === pieceEl) continue
     const tag = el.tagName.toLowerCase()
     let cx, cy, size
     if (tag === 'image') {
@@ -532,8 +533,8 @@ function animatePiece(fromIdx, fromPos, toPos, duration, flipped, rows, cols, on
       cy = parseFloat(el.getAttribute('y'))
       size = 40
     } else continue
-    if (el !== pieceEl && Math.abs(cx - toPos.x) < size * 0.5 && Math.abs(cy - toPos.y) < size * 0.5) {
-      el.style.opacity = '0'
+    if (Math.abs(cx - toPos.x) < size * 0.5 && Math.abs(cy - toPos.y) < size * 0.5) {
+      el.setAttribute('opacity', '0')
       break
     }
   }
