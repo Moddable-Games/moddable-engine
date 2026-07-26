@@ -117,10 +117,12 @@ function startGame() {
     onAnimateMove: (move, g, done) => {
       const duration = ANIM_SPEEDS[animSpeed] || 0
       if (duration === 0) { done(); return }
-      const fromPos = getCellCenter(move.from, ctrl?.getState()?.flipped, rows, cols)
-      const toPos = getCellCenter(move.to, ctrl?.getState()?.flipped, rows, cols)
+      const flp = ctrl?.getState()?.flipped || false
+      const fromPos = getCellCenter(move.from, flp, rows, cols)
+      const toPos = getCellCenter(move.to, flp, rows, cols)
+      console.log('[anim]', move.from, '->', move.to, 'fromPos:', fromPos, 'toPos:', toPos, 'duration:', duration)
       if (!fromPos || !toPos) { done(); return }
-      animatePiece(move.from, fromPos, toPos, duration, ctrl?.getState()?.flipped, rows, cols, done)
+      animatePiece(move.from, fromPos, toPos, duration, flp, rows, cols, done)
     },
   })
 
