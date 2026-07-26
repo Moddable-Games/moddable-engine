@@ -135,7 +135,8 @@ function startGame() {
 function renderBoard(game, state, rows, cols) {
   if (!boardSvgContainer) return
 
-  const { selected, lastMove, flipped, legalMoves: legal } = state
+  const { selected, lastMove, flipped, getLegalMoves } = state
+  const legal = (selected !== null && getLegalMoves) ? getLegalMoves().filter(m => m.from === selected) : []
   const board = game.board
 
   const fen = boardToFEN(board, rows, cols, flipped)
