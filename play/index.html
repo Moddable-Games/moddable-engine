@@ -168,7 +168,11 @@
 <script type="module">
 const _params = new URLSearchParams(location.search);
 const _mode = _params.get('mode');
-const _isChessMode = _mode === 'play' || _mode === 'solo' || _params.has('embed');
+const _game = _params.get('game');
+const _isEmbed = _params.has('embed');
+const _hexGames = ['nukes','twilight','colony','talisman','mongo','endless'];
+const _isHexEmbed = _isEmbed && _game && _hexGames.includes(_game);
+const _isChessMode = _mode === 'play' || _mode === 'solo' || (_isEmbed && !_isHexEmbed);
 if (_isChessMode) {
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.boards-hero').style.display = 'none';
