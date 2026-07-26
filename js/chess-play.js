@@ -544,39 +544,68 @@ function animatePiece(fromIdx, fromPos, toPos, duration, flipped, rows, cols, on
   const dy = toPos.y - fromPos.y
 
   if (animStyle === 'warp') {
-    pieceEl.style.transition = `opacity ${duration * 0.4}ms ease-out`
-    pieceEl.style.opacity = '0'
-    setTimeout(() => {
-      pieceEl.style.transition = 'none'
-      pieceEl.style.transform = `translate(${dx}px, ${dy}px)`
-      pieceEl.style.opacity = '0'
-      requestAnimationFrame(() => {
-        pieceEl.style.transition = `opacity ${duration * 0.4}ms ease-in`
-        pieceEl.style.opacity = '1'
-      })
-      setTimeout(onDone, duration * 0.5)
-    }, duration * 0.4)
+    const fadeOut = duration * 0.35
+    const fadeIn = duration * 0.35
+    const startTime = performance.now()
+    function warpFrame(now) {
+      const elapsed = now - startTime
+      if (elapsed < fadeOut) {
+        pieceEl.setAttribute('opacity', 1 - elapsed / fadeOut)
+        requestAnimationFrame(warpFrame)
+      } else if (elapsed < fadeOut + 50) {
+        pieceEl.setAttribute('opacity', '0')
+        pieceEl.setAttribute('transform', `translate(${dx}, ${dy})`)
+        requestAnimationFrame(warpFrame)
+      } else if (elapsed < fadeOut + 50 + fadeIn) {
+        const t = (elapsed - fadeOut - 50) / fadeIn
+        pieceEl.setAttribute('opacity', t)
+        requestAnimationFrame(warpFrame)
+      } else {
+        pieceEl.setAttribute('opacity', '1')
+        onDone()
+      }
+    }
+    requestAnimationFrame(warpFrame)
     return
   }
 
   if (animStyle === 'arc') {
     const dist = Math.sqrt(dx * dx + dy * dy)
     const lift = -dist * 0.3
-    pieceEl.animate([
-      { transform: 'translate(0, 0)', offset: 0 },
-      { transform: `translate(${dx * 0.5}px, ${dy * 0.5 + lift}px)`, offset: 0.5 },
-      { transform: `translate(${dx}px, ${dy}px)`, offset: 1 },
-    ], { duration, easing: 'ease-in-out', fill: 'forwards' })
-    setTimeout(onDone, duration)
+    const start = performance.now()
+    function arcFrame(now) {
+      const t = Math.min((now - start) / duration, 1)
+      const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
+      const cx = dx * ease
+      const cy = dy * ease + lift * Math.sin(ease * Math.PI)
+      pieceEl.setAttribute('transform', `translate(${cx}, ${cy})`)
+      if (t < 1) requestAnimationFrame(arcFrame)
+      else onDone()
+    }
+    requestAnimationFrame(arcFrame)
     return
   }
 
-  let easing = 'ease-out'
-  if (animStyle === 'bounce') easing = 'cubic-bezier(0.34, 1.56, 0.64, 1)'
+  const start = performance.now()
+  const easeOut = t => 1 - Math.pow(1 - t, 3)
+  const bounceEase = t => {
+    const n = 7.5625, d = 2.75
+    let tl = t
+    if (tl < 1/d) return n*tl*tl
+    if (tl < 2/d) return n*(tl-=1.5/d)*tl+0.75
+    if (tl < 2.5/d) return n*(tl-=2.25/d)*tl+0.9375
+    return n*(tl-=2.625/d)*tl+0.984375
+  }
+  const easeFn = animStyle === 'bounce' ? bounceEase : easeOut
 
-  pieceEl.style.transition = `transform ${duration}ms ${easing}`
-  pieceEl.style.transform = `translate(${dx}px, ${dy}px)`
-  setTimeout(onDone, duration)
+  function frame(now) {
+    const t = Math.min((now - start) / duration, 1)
+    const p = easeFn(t)
+    pieceEl.setAttribute('transform', `translate(${dx * p}, ${dy * p})`)
+    if (t < 1) requestAnimationFrame(frame)
+    else onDone()
+  }
+  requestAnimationFrame(frame)
 }
 
 function renderEffectOverlay(effect, x, y, tileSize) {
