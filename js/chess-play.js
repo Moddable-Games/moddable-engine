@@ -464,14 +464,36 @@ function animatePiece(fromIdx, fromPos, toPos, duration, flipped, rows, cols, on
   const piecesGroup = svgEl.querySelector('g[pointer-events="none"]')
   if (!piecesGroup) { onDone(); return }
 
-  const pieceImgs = piecesGroup.querySelectorAll('image')
+  const pieceEls = piecesGroup.querySelectorAll('image, text, g')
   let pieceEl = null
-  for (const img of pieceImgs) {
-    const ix = parseFloat(img.getAttribute('x'))
-    const iy = parseFloat(img.getAttribute('y'))
-    const iw = parseFloat(img.getAttribute('width'))
-    if (Math.abs((ix + iw / 2) - fromPos.x) < iw * 0.3 && Math.abs((iy + iw / 2) - fromPos.y) < iw * 0.3) {
-      pieceEl = img
+  for (const el of pieceEls) {
+    let cx, cy, size
+    if (el.tagName === 'image') {
+      const ix = parseFloat(el.getAttribute('x'))
+      const iy = parseFloat(el.getAttribute('y'))
+      size = parseFloat(el.getAttribute('width'))
+      cx = ix + size / 2
+      cy = iy + size / 2
+    } else if (el.tagName === 'text') {
+      cx = parseFloat(el.getAttribute('x'))
+      cy = parseFloat(el.getAttribute('y'))
+      size = 40
+    } else if (el.tagName === 'g' && el.querySelector('image, text')) {
+      const inner = el.querySelector('image') || el.querySelector('text')
+      if (inner.tagName === 'image') {
+        const ix = parseFloat(inner.getAttribute('x'))
+        const iy = parseFloat(inner.getAttribute('y'))
+        size = parseFloat(inner.getAttribute('width'))
+        cx = ix + size / 2
+        cy = iy + size / 2
+      } else {
+        cx = parseFloat(inner.getAttribute('x'))
+        cy = parseFloat(inner.getAttribute('y'))
+        size = 40
+      }
+    } else continue
+    if (Math.abs(cx - fromPos.x) < size * 0.4 && Math.abs(cy - fromPos.y) < size * 0.4) {
+      pieceEl = el
       break
     }
   }
