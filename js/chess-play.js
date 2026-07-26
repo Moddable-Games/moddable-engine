@@ -10,6 +10,9 @@ let boardSvgContainer = null
 let embedMode = false
 let fullscreenMode = false
 let animating = false
+let embedOpponent = 'ai'
+let embedDifficulty = 'medium'
+let embedColor = 'white'
 
 const ANIM_SPEEDS = { instant: 0, fast: 120, normal: 220, slow: 400 }
 const ANIM_STYLES = { slide: 'Slide', arc: 'Arc', bounce: 'Bounce', warp: 'Warp' }
@@ -19,12 +22,17 @@ let animStyle = localStorage.getItem('mce-anim-style') || 'slide'
 export async function initChessPlay(container) {
   const params = new URLSearchParams(location.search)
   currentVariant = params.get('variant') || 'standard'
-  const savedColor = params.get('color') || 'white'
-  const savedOpponent = params.get('opponent') || 'human'
-  const savedFlipped = params.get('flipped') === '1'
   embedMode = params.get('embed') === '1'
   fullscreenMode = params.get('fullscreen') === '1'
+  const savedColor = params.get('color') || 'white'
+  const savedOpponent = params.get('opponent') || (embedMode ? 'ai' : 'human')
+  const savedFlipped = params.get('flipped') === '1'
   if (params.get('pieces')) currentPieceSet = params.get('pieces')
+  if (params.get('difficulty')) embedDifficulty = params.get('difficulty')
+  if (embedMode) {
+    embedOpponent = savedOpponent
+    embedColor = savedColor
+  }
 
   if (embedMode) {
     document.body.classList.add('chess-embed-mode')
@@ -67,9 +75,9 @@ function startGame() {
   const opponentSelect = document.getElementById('chess-opponent-select')
   const difficultySelect = document.getElementById('chess-difficulty-select')
   const difficultyGroup = document.getElementById('chess-difficulty-group')
-  const humanColor = colorSelect?.value || 'white'
-  const opponent = opponentSelect?.value || 'human'
-  const difficulty = difficultySelect?.value || 'medium'
+  const humanColor = colorSelect?.value || embedColor
+  const opponent = opponentSelect?.value || embedOpponent
+  const difficulty = difficultySelect?.value || embedDifficulty
 
   if (difficultyGroup) difficultyGroup.style.display = opponent === 'ai' ? '' : 'none'
 
@@ -101,7 +109,8 @@ function startGame() {
     },
     onGameEnd: (status) => {
       updateStatus(status)
-      postEmbedMessage('status', { text: status, gameOver: true, variant: currentVariant })
+      const embedText = mapStatusForEmbed(status, game)
+      postEmbedMessage('status', { text: embedText, gameOver: true, variant: currentVariant })
     },
     onTurnChange: (turn) => {
       const statusEl = document.getElementById('chess-status')
@@ -167,10 +176,18 @@ function renderBoard(game, state, rows, cols) {
 
   const svgEl = boardSvgContainer.querySelector('svg')
   if (svgEl) {
-    svgEl.style.width = '100%'
-    svgEl.style.height = 'auto'
-    svgEl.style.maxHeight = embedMode ? 'none' : 'calc(100vh - 180px)'
-    svgEl.style.display = 'block'
+    if (embedMode) {
+      svgEl.style.width = '100%'
+      svgEl.style.height = '100%'
+      svgEl.style.display = 'block'
+      svgEl.removeAttribute('width')
+      svgEl.removeAttribute('height')
+    } else {
+      svgEl.style.width = '100%'
+      svgEl.style.height = 'auto'
+      svgEl.style.maxHeight = 'calc(100vh - 180px)'
+      svgEl.style.display = 'block'
+    }
   }
 
   if (svgEl) {
@@ -398,6 +415,16 @@ function toggleFullscreen() {
   updateURL()
 }
 
+function mapStatusForEmbed(status, game) {
+  if (status === 'checkmate') {
+    return game.turn === MCE.WHITE ? 'black' : 'white'
+  }
+  if (status === 'stalemate' || (typeof status === 'string' && status.startsWith('draw'))) return 'draw'
+  if (status === MCE.WHITE || status === 'white' || (typeof status === 'string' && status.endsWith('-w'))) return 'white'
+  if (status === MCE.BLACK || status === 'black' || (typeof status === 'string' && status.endsWith('-b'))) return 'black'
+  return status
+}
+
 function postEmbedMessage(type, data) {
   if (embedMode && window.parent !== window) {
     window.parent.postMessage({ type: `chess:${type}`, ...data }, '*')
@@ -418,7 +445,18 @@ function initEmbedMessageListener() {
       }
       case 'chess:newGame': startGame(); break
       case 'chess:setDifficulty': {
-        if (e.data.difficulty && ctrl) ctrl.setDifficulty(e.data.difficulty)
+        if (e.data.difficulty) {
+          embedDifficulty = e.data.difficulty
+          embedOpponent = 'ai'
+          startGame()
+        }
+        break
+      }
+      case 'chess:setOpponent': {
+        if (e.data.opponent) {
+          embedOpponent = e.data.opponent
+          startGame()
+        }
         break
       }
       case 'chess:setPieces': {
@@ -780,8 +818,8 @@ function updateStatus(status) {
   else if (status === 'checkmate') statusEl.textContent = 'Checkmate'
   else if (status === 'stalemate') statusEl.textContent = 'Stalemate'
   else if (status === 'draw' || (typeof status === 'string' && status.startsWith('draw'))) statusEl.textContent = 'Draw'
-  else if (status === MCE.WHITE || status === 'white') statusEl.textContent = 'White wins!'
-  else if (status === MCE.BLACK || status === 'black') statusEl.textContent = 'Black wins!'
+  else if (status === MCE.WHITE || status === 'white' || (typeof status === 'string' && status.endsWith('-w'))) statusEl.textContent = 'White wins!'
+  else if (status === MCE.BLACK || status === 'black' || (typeof status === 'string' && status.endsWith('-b'))) statusEl.textContent = 'Black wins!'
   else statusEl.textContent = status
   statusEl.classList.add('chess-status--over')
 }
