@@ -24,7 +24,11 @@ export async function initChessPlay(container) {
   fullscreenMode = params.get('fullscreen') === '1'
   if (params.get('pieces')) currentPieceSet = params.get('pieces')
 
-  if (embedMode) document.body.classList.add('chess-embed-mode')
+  if (embedMode) {
+    document.body.classList.add('chess-embed-mode')
+    document.body.style.background = 'transparent'
+    document.documentElement.style.background = 'transparent'
+  }
   if (fullscreenMode) document.body.classList.add('chess-fullscreen-mode')
   initEmbedMessageListener()
 
