@@ -517,7 +517,7 @@ function animatePiece(fromIdx, fromPos, toPos, duration, flipped, rows, cols, on
   }
   if (!pieceEl) { onDone(); return }
 
-  // Find and hide captured piece at destination
+  // Find captured piece at destination for burst effect
   let capturedEl = null
   for (const el of pieceEls) {
     if (el === pieceEl) continue
@@ -539,7 +539,14 @@ function animatePiece(fromIdx, fromPos, toPos, duration, flipped, rows, cols, on
       break
     }
   }
-  console.log('[anim] pieceEl:', pieceEl.tagName, 'capturedEl:', capturedEl?.tagName || 'none', 'from:', fromPos, 'to:', toPos)
+
+  if (capturedEl) {
+    const burstDelay = animStyle === 'arc' ? duration : duration * 0.8
+    setTimeout(() => {
+      capturedEl.setAttribute('opacity', '0')
+      captureBurst(toPos.x, toPos.y, toPos.w)
+    }, burstDelay)
+  }
 
   if (!pieceEl) { onDone(); return }
 
