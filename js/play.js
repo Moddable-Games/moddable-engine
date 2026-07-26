@@ -894,6 +894,9 @@ if (_hexEmbed) {
       boardEl.style.display = 'flex'
       boardEl.style.alignItems = 'center'
       boardEl.style.justifyContent = 'center'
+      boardEl.style.padding = '0'
+      boardEl.style.background = 'transparent'
+      boardEl.classList.add('active')
     }
 
     let hexGame = _embedParams.get('game')
