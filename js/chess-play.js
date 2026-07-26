@@ -130,6 +130,7 @@ function buildUI() {
 
 function populateVariantPicker(container) {
   const select = container.querySelector('#chess-variant-select')
+  if (!select) return
   const registry = MCE.variantRegistry
   const groups = new Map()
 
