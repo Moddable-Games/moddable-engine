@@ -4,6 +4,8 @@ import { generateMap } from './generate-map.js'
 import { HexSvg } from './hex-svg.js'
 import { HexMath } from './hex-math.js'
 import { createSeededRng } from '../../core/src/xorshift.js'
+import { computeFov } from './hex-fov.js'
+import { pathfind } from './hex-pathfind.js'
 
 export function listGames() {
   return getRegisteredGames().map(key => {
@@ -70,4 +72,6 @@ export {
   HexSvg,
   HexMath,
   createSeededRng,
+  computeFov,
+  pathfind,
 }
