@@ -8,7 +8,7 @@ Every game in the Moddable Games collection — from standard chess to Endless S
 
 ## Status
 
-**All classic game families implemented.** 13 plugins covering 154 variants across chess, go, draughts, reversi, mancala, backgammon, morris, hex, big 2, halma, shogi, xiangqi, and race games. Rules are a first-class resource type: parametric, composable, topology-agnostic. Shared rules (capture, promotion, repetition, turn-continuation) work across all families. 1405 tests across 106 suites, all passing.
+**All classic game families implemented.** 13 plugins covering 154 variants across chess, go, draughts, reversi, mancala, backgammon, morris, hex, big 2, halma, shogi, xiangqi, and race games. Rules are a first-class resource type: parametric, composable, topology-agnostic. Shared rules (capture, promotion, repetition, turn-continuation) work across all families. 1620 tests across 110 suites, all passing.
 
 Current milestone: **Full pipeline proof + AI adapter** — factory instantiates every variant from frontmatter config alone, then generic minimax/MCTS for pass-and-play and AI opponents.
 
@@ -34,6 +34,7 @@ moddable-engine/
     surface/             ← board as resource type (frame, surface, divider, generators, filters)
     schema/              ← frontmatter → game definitions
     game/                ← factory, topology registry, component registry, rule registry
+    play/                ← universal game factory (all 13 families from a single import)
     board-theme/         ← board visual treatment (resolver, builtins)
     piece-theme/         ← piece visual treatment (resolver, recolour)
     component-deck/      ← standard 52-card deck
@@ -106,6 +107,11 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ---
 
 ## Changelog
+
+#### 2026-07-26
+- Universal game factory: `createGameForFamily()` in `packages/play` — single import for all 13 families with uniform interface (getLegalMoves, applyMove, checkWin, getState, loadState)
+- Added `./play` to package.json exports map
+- Closed issue #42: unblocks 5 moddable-tools play commands
 
 #### 2026-07-25
 - Added static API page (`/api/`) with JSON endpoint documentation
