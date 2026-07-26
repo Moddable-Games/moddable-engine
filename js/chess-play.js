@@ -468,6 +468,7 @@ function animatePiece(fromIdx, fromPos, toPos, duration, flipped, rows, cols, on
 
   const pieceEls = piecesGroup.querySelectorAll('image, text, g')
   let pieceEl = null
+  const debugPositions = []
   for (const el of pieceEls) {
     let cx, cy, size
     if (el.tagName === 'image') {
@@ -494,10 +495,14 @@ function animatePiece(fromIdx, fromPos, toPos, duration, flipped, rows, cols, on
         size = 40
       }
     } else continue
+    debugPositions.push({ tag: el.tagName, cx, cy, size })
     if (Math.abs(cx - fromPos.x) < size * 0.4 && Math.abs(cy - fromPos.y) < size * 0.4) {
       pieceEl = el
       break
     }
+  }
+  if (!pieceEl) {
+    console.log('[anim] NO piece found at', fromPos, 'Pieces in group:', debugPositions.slice(0, 5))
   }
 
   if (!pieceEl) { onDone(); return }
