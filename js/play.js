@@ -915,7 +915,8 @@ if (_hexEmbed) {
       lastHexes = hexes
       const annotations = result.annotations || null
       const colors = gameConfig.getColors ? gameConfig.getColors(hexStyle) : {}
-      const bg = _embedParams.get('bg') ? '#' + _embedParams.get('bg') : '#1a1a2e'
+      const rawBg = _embedParams.get('bg')
+      const bg = rawBg ? (rawBg.startsWith('#') ? rawBg : '#' + rawBg) : null
 
       const hasImages = hexes.some(h => h.imagePath)
       const svgOpts = {
