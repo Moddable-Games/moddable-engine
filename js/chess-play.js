@@ -25,6 +25,7 @@ export async function initChessPlay(container) {
 
   if (embedMode) document.body.classList.add('chess-embed-mode')
   if (fullscreenMode) document.body.classList.add('chess-fullscreen-mode')
+  initEmbedMessageListener()
 
   galleryIndex = await fetch('../pieces/gallery-index.json').then(r => r.json()).catch(() => null)
 
@@ -38,8 +39,10 @@ export async function initChessPlay(container) {
 
   populateVariantPicker(container)
   if (!embedMode) populatePieceSetPicker(container)
-  const animSelect = container.querySelector('#chess-anim-select')
-  if (animSelect) animSelect.value = animSpeed
+  const animStyleSelect = container.querySelector('#chess-anim-style-select')
+  if (animStyleSelect) animStyleSelect.value = animStyle
+  const animSpeedSelect = container.querySelector('#chess-anim-speed-select')
+  if (animSpeedSelect) animSpeedSelect.value = animSpeed
   await startGame()
   if (savedFlipped && controller) controller.setFlipped(true)
   bindEvents(container)
@@ -92,7 +95,16 @@ function buildUI() {
     </div>
     <div class="control-group">
       <label class="control-label">Animation</label>
-      <select id="chess-anim-select">
+      <select id="chess-anim-style-select">
+        <option value="slide">Slide</option>
+        <option value="arc">Arc</option>
+        <option value="bounce">Bounce</option>
+        <option value="warp">Warp</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label class="control-label">Speed</label>
+      <select id="chess-anim-speed-select">
         <option value="instant">Instant</option>
         <option value="fast">Fast</option>
         <option value="normal" selected>Normal</option>
@@ -184,6 +196,48 @@ function postEmbedMessage(type, data) {
   }
 }
 
+function initEmbedMessageListener() {
+  if (!embedMode) return
+  window.addEventListener('message', (e) => {
+    if (!e.data || typeof e.data.type !== 'string') return
+    switch (e.data.type) {
+      case 'chess:setVariant': {
+        const v = e.data.variant
+        if (v && MCE.variantRegistry[v]) {
+          currentVariant = v
+          startGame()
+        }
+        break
+      }
+      case 'chess:newGame': {
+        startGame()
+        break
+      }
+      case 'chess:setDifficulty': {
+        if (e.data.difficulty && controller) {
+          startGame()
+        }
+        break
+      }
+      case 'chess:setPieces': {
+        if (e.data.set) {
+          currentPieceSet = e.data.set
+          startGame()
+        }
+        break
+      }
+      case 'chess:flip': {
+        if (controller) controller.setFlipped(!controller.getState().flipped)
+        break
+      }
+      case 'chess:undo': {
+        if (controller) controller.undo()
+        break
+      }
+    }
+  })
+}
+
 function sqToAlgebraic(idx, rows, cols) {
   return algebraicId(Math.floor(idx / cols), idx % cols, rows)
 }
@@ -223,12 +277,17 @@ async function startGame() {
   controller = createMCEController(game, {
     rows, cols, players, difficulty, opponent,
     onRender: (state) => renderBoard(game, state, rows, cols),
+    onMove: (move, player) => {
+      postEmbedMessage('move', { from: move.from, to: move.to, player, fen: MCE.toFEN(game), variant: currentVariant })
+    },
     onGameEnd: (status) => {
       updateStatus(status)
       postEmbedMessage('status', { text: status, gameOver: true, variant: currentVariant })
     },
     onChoiceNeeded: (choices, resolve) => showPromotionDialog(choices, resolve),
   })
+
+  postEmbedMessage('ready', { variant: currentVariant, fen: MCE.toFEN(game) })
 
   const statusEl = document.getElementById('chess-status')
   if (statusEl) statusEl.textContent = 'white to move'
@@ -238,11 +297,14 @@ async function startGame() {
 }
 
 const ANIM_SPEEDS = { instant: 0, fast: 120, normal: 220, slow: 400 }
+const ANIM_STYLES = { slide: 'Slide', arc: 'Arc', bounce: 'Bounce', warp: 'Warp' }
 let animSpeed = localStorage.getItem('mce-anim-speed') || 'normal'
+let animStyle = localStorage.getItem('mce-anim-style') || 'slide'
 
 function createMCEController(game, opts) {
   const { rows, cols, players, difficulty, opponent } = opts
   const onRender = opts.onRender
+  const onMove = opts.onMove
   const onGameEnd = opts.onGameEnd
   const onChoiceNeeded = opts.onChoiceNeeded
 
@@ -324,6 +386,7 @@ function createMCEController(game, opts) {
     selected = null
     moveLog.push({ move, player })
     updateMoveList(moveLog, cols, rows)
+    if (onMove) onMove(move, player)
 
     const finishMove = () => {
       const status = getStatus(game)
@@ -563,9 +626,43 @@ function animatePiece(fromIdx, fromPos, toPos, duration, flipped, rows, cols, on
   const dx = toPos.x - fromPos.x
   const dy = toPos.y - fromPos.y
 
-  pieceEl.style.transition = `transform ${duration}ms ease-out`
-  pieceEl.style.transform = `translate(${dx}px, ${dy}px)`
-  pieceEl.style.zIndex = '100'
+  if (animStyle === 'warp') {
+    pieceEl.style.transition = `opacity ${duration * 0.4}ms ease-out`
+    pieceEl.style.opacity = '0'
+    setTimeout(() => {
+      pieceEl.style.transition = 'none'
+      pieceEl.style.transform = `translate(${dx}px, ${dy}px)`
+      pieceEl.style.opacity = '0'
+      requestAnimationFrame(() => {
+        pieceEl.style.transition = `opacity ${duration * 0.4}ms ease-in`
+        pieceEl.style.opacity = '1'
+      })
+      setTimeout(onDone, duration * 0.5)
+    }, duration * 0.4)
+    return
+  }
+
+  let easing = 'ease-out'
+  let transformEnd = `translate(${dx}px, ${dy}px)`
+
+  if (animStyle === 'arc') {
+    const dist = Math.sqrt(dx * dx + dy * dy)
+    const lift = -dist * 0.3
+    pieceEl.animate([
+      { transform: 'translate(0, 0)', offset: 0 },
+      { transform: `translate(${dx * 0.5}px, ${dy * 0.5 + lift}px)`, offset: 0.5 },
+      { transform: transformEnd, offset: 1 },
+    ], { duration, easing: 'ease-in-out', fill: 'forwards' })
+    setTimeout(onDone, duration)
+    return
+  }
+
+  if (animStyle === 'bounce') {
+    easing = 'cubic-bezier(0.34, 1.56, 0.64, 1)'
+  }
+
+  pieceEl.style.transition = `transform ${duration}ms ${easing}`
+  pieceEl.style.transform = transformEnd
 
   setTimeout(onDone, duration)
 }
@@ -690,7 +787,11 @@ function bindEvents(container) {
     controller?.render?.()
     startGame()
   })
-  container.querySelector('#chess-anim-select')?.addEventListener('change', (e) => {
+  container.querySelector('#chess-anim-style-select')?.addEventListener('change', (e) => {
+    animStyle = e.target.value
+    localStorage.setItem('mce-anim-style', animStyle)
+  })
+  container.querySelector('#chess-anim-speed-select')?.addEventListener('change', (e) => {
     animSpeed = e.target.value
     localStorage.setItem('mce-anim-speed', animSpeed)
   })
