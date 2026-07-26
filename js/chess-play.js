@@ -123,7 +123,15 @@ function startGame() {
       const statusEl = document.getElementById('chess-status')
       if (statusEl) {
         const color = turn === MCE.WHITE ? 'White' : 'Black'
-        statusEl.textContent = game.duckPhase ? `${color} — place the duck` : `${color} to move`
+        let text = `${color} to move`
+        if (game.duckPhase) text = `${color} — place the duck`
+        else if (MCE.inCheck && MCE.inCheck(game, turn)) text = `${color} to move (check!)`
+        if (game.checkCount && game.checkThreshold) {
+          const wc = game.checkCount.w || 0
+          const bc = game.checkCount.b || 0
+          text += ` [${wc}/${bc} of ${game.checkThreshold}]`
+        }
+        statusEl.textContent = text
         statusEl.classList.remove('chess-status--over')
       }
     },
