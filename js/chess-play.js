@@ -463,47 +463,28 @@ function animatePiece(fromIdx, fromPos, toPos, duration, flipped, rows, cols, on
     visualIdx = (game.rows - 1 - r) * game.cols + (game.cols - 1 - c)
   }
 
-  const piecesGroup = svgEl.querySelector('g[pointer-events="none"]')
-  if (!piecesGroup) { onDone(); return }
-
-  const pieceEls = piecesGroup.querySelectorAll('image, text, g')
+  const pieceEls = svgEl.querySelectorAll('image, text')
   let pieceEl = null
-  const debugPositions = []
   for (const el of pieceEls) {
     let cx, cy, size
-    if (el.tagName === 'image') {
+    const tag = el.tagName.toLowerCase()
+    if (tag === 'image') {
       const ix = parseFloat(el.getAttribute('x'))
       const iy = parseFloat(el.getAttribute('y'))
       size = parseFloat(el.getAttribute('width'))
       cx = ix + size / 2
       cy = iy + size / 2
-    } else if (el.tagName === 'text') {
+    } else if (tag === 'text') {
       cx = parseFloat(el.getAttribute('x'))
       cy = parseFloat(el.getAttribute('y'))
       size = 40
-    } else if (el.tagName === 'g' && el.querySelector('image, text')) {
-      const inner = el.querySelector('image') || el.querySelector('text')
-      if (inner.tagName === 'image') {
-        const ix = parseFloat(inner.getAttribute('x'))
-        const iy = parseFloat(inner.getAttribute('y'))
-        size = parseFloat(inner.getAttribute('width'))
-        cx = ix + size / 2
-        cy = iy + size / 2
-      } else {
-        cx = parseFloat(inner.getAttribute('x'))
-        cy = parseFloat(inner.getAttribute('y'))
-        size = 40
-      }
     } else continue
-    debugPositions.push({ tag: el.tagName, cx, cy, size })
-    if (Math.abs(cx - fromPos.x) < size * 0.4 && Math.abs(cy - fromPos.y) < size * 0.4) {
+    if (Math.abs(cx - fromPos.x) < size * 0.5 && Math.abs(cy - fromPos.y) < size * 0.5) {
       pieceEl = el
       break
     }
   }
-  if (!pieceEl) {
-    console.log('[anim] NO piece found at', fromPos, 'Pieces in group:', debugPositions.slice(0, 5))
-  }
+  if (!pieceEl) { console.log('[anim] no piece at', fromPos, 'total els:', pieceEls.length); onDone(); return }
 
   if (!pieceEl) { onDone(); return }
 
