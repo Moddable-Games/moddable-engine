@@ -9,6 +9,7 @@ let galleryIndex = null
 let boardSvgContainer = null
 let embedMode = false
 let fullscreenMode = false
+let animating = false
 
 const ANIM_SPEEDS = { instant: 0, fast: 120, normal: 220, slow: 400 }
 const ANIM_STYLES = { slide: 'Slide', arc: 'Arc', bounce: 'Bounce', warp: 'Warp' }
@@ -127,9 +128,12 @@ function startGame() {
       const flp = ctrl?.getState()?.flipped || false
       const fromPos = getCellCenter(move.from, flp, rows, cols)
       const toPos = getCellCenter(move.to, flp, rows, cols)
-      console.log('[anim]', move.from, '->', move.to, 'fromPos:', fromPos, 'toPos:', toPos, 'duration:', duration)
       if (!fromPos || !toPos) { done(); return }
-      animatePiece(move.from, fromPos, toPos, duration, flp, rows, cols, done)
+      animating = true
+      animatePiece(move.from, fromPos, toPos, duration, flp, rows, cols, () => {
+        animating = false
+        done()
+      })
     },
   })
 
@@ -143,6 +147,7 @@ function startGame() {
 
 function renderBoard(game, state, rows, cols) {
   if (!boardSvgContainer) return
+  if (animating) return
 
   const { selected, lastMove, flipped, getLegalMoves } = state
   const legal = (selected !== null && getLegalMoves) ? getLegalMoves().filter(m => m.from === selected) : []
@@ -215,6 +220,25 @@ function renderBoard(game, state, rows, cols) {
         dot.setAttribute('r', bbox.width * 0.16)
         dot.setAttribute('fill', 'rgba(0, 0, 0, 0.22)')
         overlay.appendChild(dot)
+      }
+    }
+
+    // Effect overlays (poison, immune, petrify)
+    if (game.effects && game.effects.length > 0) {
+      for (const effect of game.effects) {
+        if (effect.sq === undefined) continue
+        let vIdx = effect.sq
+        if (flipped) {
+          const er = Math.floor(effect.sq / cols)
+          const ec = effect.sq % cols
+          vIdx = (rows - 1 - er) * cols + (cols - 1 - ec)
+        }
+        const ealg = sqToAlgebraic(vIdx, rows, cols)
+        const ecell = boardSvgContainer.querySelector(`[data-sq="${ealg}"]`)
+        if (!ecell || !ecell.getBBox) continue
+        const ebb = ecell.getBBox()
+        const effectEl = renderEffectOverlay(effect, ebb.x, ebb.y, ebb.width)
+        if (effectEl) overlay.appendChild(effectEl)
       }
     }
 
@@ -553,6 +577,42 @@ function animatePiece(fromIdx, fromPos, toPos, duration, flipped, rows, cols, on
   pieceEl.style.transition = `transform ${duration}ms ${easing}`
   pieceEl.style.transform = `translate(${dx}px, ${dy}px)`
   setTimeout(onDone, duration)
+}
+
+function renderEffectOverlay(effect, x, y, tileSize) {
+  const ns = 'http://www.w3.org/2000/svg'
+  if (effect.type === 'immune') {
+    const shield = document.createElementNS(ns, 'rect')
+    shield.setAttribute('x', x + 2)
+    shield.setAttribute('y', y + 2)
+    shield.setAttribute('width', tileSize - 4)
+    shield.setAttribute('height', tileSize - 4)
+    shield.setAttribute('rx', '4')
+    shield.setAttribute('fill', 'none')
+    shield.setAttribute('stroke', '#00e676')
+    shield.setAttribute('stroke-width', '2.5')
+    shield.setAttribute('opacity', '0.7')
+    return shield
+  }
+  if (effect.type === 'poison') {
+    const dot = document.createElementNS(ns, 'circle')
+    dot.setAttribute('cx', x + tileSize - 8)
+    dot.setAttribute('cy', y + 8)
+    dot.setAttribute('r', '4')
+    dot.setAttribute('fill', '#ab47bc')
+    dot.setAttribute('opacity', '0.8')
+    return dot
+  }
+  if (effect.type === 'petrify') {
+    const dot = document.createElementNS(ns, 'circle')
+    dot.setAttribute('cx', x + tileSize - 8)
+    dot.setAttribute('cy', y + 8)
+    dot.setAttribute('r', '4')
+    dot.setAttribute('fill', '#78909c')
+    dot.setAttribute('opacity', '0.8')
+    return dot
+  }
+  return null
 }
 
 function captureBurst(cx, cy, tileSize) {
