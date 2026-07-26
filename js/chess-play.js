@@ -22,6 +22,7 @@ export async function initChessPlay(container) {
   const savedFlipped = params.get('flipped') === '1'
   embedMode = params.get('embed') === '1'
   fullscreenMode = params.get('fullscreen') === '1'
+  if (params.get('pieces')) currentPieceSet = params.get('pieces')
 
   if (embedMode) document.body.classList.add('chess-embed-mode')
   if (fullscreenMode) document.body.classList.add('chess-fullscreen-mode')

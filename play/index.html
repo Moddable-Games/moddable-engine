@@ -167,7 +167,8 @@
 </footer>
 <script type="module" src="../js/play.js?v=1.0.8"></script>
 <script type="module">
-if (new URLSearchParams(location.search).get('mode') === 'play') {
+const _mode = new URLSearchParams(location.search).get('mode');
+if (_mode === 'play' || _mode === 'solo' || new URLSearchParams(location.search).has('embed')) {
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.boards-hero').style.display = 'none';
     document.querySelector('.boards-app').style.display = 'none';

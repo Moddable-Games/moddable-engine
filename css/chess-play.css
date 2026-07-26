@@ -183,6 +183,14 @@
   overflow: hidden;
 }
 
+.chess-embed-mode .site-header,
+.chess-embed-mode .site-footer,
+.chess-embed-mode .boards-hero,
+.chess-embed-mode .boards-app,
+.chess-embed-mode footer {
+  display: none !important;
+}
+
 /* Fullscreen mode */
 .chess-play--fullscreen {
   position: fixed;
