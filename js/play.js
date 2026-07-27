@@ -138,7 +138,7 @@ const boardDataCache = {}
 function readStateFromURL() {
   const params = new URLSearchParams(window.location.search)
   return {
-    game: params.get('game') || 'moddable-chess',
+    game: params.get('game') || 'chess',
     variant: params.get('variant') || 'standard',
     handicap: parseInt(params.get('handicap')) || 0,
     seed: params.get('seed') || String(Math.floor(Math.random() * 9999999999)),
@@ -398,7 +398,8 @@ function resetSidebarControls() {
   document.getElementById('chargen-group').style.display = 'none'
 }
 
-const PLAYABLE_GAMES = new Set(['moddable-chess'])
+const PLAYABLE_GAMES = new Set(['chess', 'go', 'draughts'])
+const FAMILY_PLAY_GAMES = new Set(['go', 'draughts'])
 
 function updatePlayButton() {
   const group = document.getElementById('play-interactive-group')
@@ -406,8 +407,13 @@ function updatePlayButton() {
   if (!group || !btn) return
   if (PLAYABLE_GAMES.has(state.game)) {
     group.style.display = ''
-    const params = new URLSearchParams({ mode: 'play', game: state.game, variant: state.variant })
-    btn.href = '?' + params.toString()
+    if (FAMILY_PLAY_GAMES.has(state.game)) {
+      const params = new URLSearchParams({ family: state.game, variant: state.variant })
+      btn.href = '?' + params.toString()
+    } else {
+      const params = new URLSearchParams({ mode: 'play', game: state.game, variant: state.variant })
+      btn.href = '?' + params.toString()
+    }
   } else {
     group.style.display = 'none'
   }
