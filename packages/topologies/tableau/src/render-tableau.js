@@ -440,7 +440,7 @@ function renderSingleCard(card, x, y, cardW, cardH, deckType, faceUp) {
   ] }
 }
 
-function getCardImagePath(card, deckType, opts) {
+export function getCardImagePath(card, deckType, opts) {
   if (deckType === 'standard-52') {
     if (card.suit === 'joker') return `../pieces/sets/letele-cards/J-1.svg`
     const suitLetter = { spades: 'S', hearts: 'H', clubs: 'C', diamonds: 'D' }[card.suit]
@@ -499,7 +499,7 @@ function getCardImagePath(card, deckType, opts) {
   return null
 }
 
-function getCardBackPath(deckType) {
+export function getCardBackPath(deckType) {
   if (deckType === 'standard-52') return `../pieces/sets/letele-cards/B-1.svg`
   if (deckType === 'mahjong-136') return `../pieces/sets/mahjong-regular/Back.svg`
   if (deckType === 'dominoes-28') return `../pieces/sets/dominoes-classic/domino-back.svg`
