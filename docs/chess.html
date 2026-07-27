@@ -112,7 +112,11 @@ iframe.contentWindow.postMessage({ type: 'chess:undo' }, '*')
 iframe.contentWindow.postMessage({ type: 'chess:flip' }, '*')
 
 // Change piece set
-iframe.contentWindow.postMessage({ type: 'chess:setPieces', set: 'mce-chess' }, '*')</code></pre>
+iframe.contentWindow.postMessage({ type: 'chess:setPieces', set: 'mce-chess' }, '*')
+
+// Change board theme
+iframe.contentWindow.postMessage({ type: 'chess:setTheme', theme: 'cosmic' }, '*')
+// Themes: classic, cosmic, wood, marble, neon, minimal, transparent</code></pre>
 
   <h3>Events from embed</h3>
   <p>Listen on the parent window for game events:</p>

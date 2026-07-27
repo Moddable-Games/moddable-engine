@@ -945,6 +945,22 @@ if (_hexEmbed) {
           svgEl.style.height = '100vh'
           svgEl.style.display = 'block'
           svgEl.style.background = rawBg ? '#' + rawBg : 'transparent'
+
+          const gameConfig = getGameConfig(hexGame)
+          if (gameConfig && gameConfig.onHexClick) {
+            svgEl.style.cursor = 'pointer'
+            svgEl.addEventListener('click', (evt) => {
+              const target = evt.target.closest('[data-q][data-r]')
+              if (!target) return
+              const q = parseInt(target.getAttribute('data-q'))
+              const r = parseInt(target.getAttribute('data-r'))
+              const hex = lastHexes.find(h => h.q === q && h.r === r)
+              if (hex) {
+                gameConfig.onHexClick(hex)
+                renderHexEmbed()
+              }
+            })
+          }
         }
       }
 
@@ -973,13 +989,57 @@ if (_hexEmbed) {
           break
         case 'hexmap:getMap':
           if (e.source) {
-            e.source.postMessage({ type: 'hexmap:mapData', hexes: lastHexes, seed: hexSeed, game: hexGame }, e.origin !== 'null' ? e.origin : '*')
+            const gameConfig = getGameConfig(hexGame)
+            let structured = null
+            if (gameConfig && gameConfig.exportForParent && lastHexes) {
+              structured = gameConfig.exportForParent(lastHexes, { seed: hexSeed, size: hexSize, players: hexPlayers })
+            }
+            e.source.postMessage({ type: 'hexmap:mapData', hexes: lastHexes, seed: hexSeed, game: hexGame, structured }, e.origin !== 'null' ? e.origin : '*')
           }
           break
         case 'hexmap:exportSvg':
           if (e.source && boardEl) {
             const svgStr = boardEl.innerHTML
             e.source.postMessage({ type: 'hexmap:svgData', svg: svgStr }, e.origin !== 'null' ? e.origin : '*')
+          }
+          break
+        case 'hexmap:exportPng':
+          if (e.source && boardEl) {
+            const svgEl = boardEl.querySelector('svg')
+            if (svgEl) {
+              const scale = e.data.scale || 2
+              const svgData = new XMLSerializer().serializeToString(svgEl)
+              const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
+              const url = URL.createObjectURL(svgBlob)
+              const img = new Image()
+              img.onload = () => {
+                const canvas = document.createElement('canvas')
+                canvas.width = img.naturalWidth * scale
+                canvas.height = img.naturalHeight * scale
+                const ctx = canvas.getContext('2d')
+                ctx.scale(scale, scale)
+                ctx.drawImage(img, 0, 0)
+                URL.revokeObjectURL(url)
+                const pngDataUrl = canvas.toDataURL('image/png')
+                e.source.postMessage({ type: 'hexmap:pngData', png: pngDataUrl, width: canvas.width, height: canvas.height }, e.origin !== 'null' ? e.origin : '*')
+              }
+              img.src = url
+            }
+          }
+          break
+        case 'hexmap:editHex':
+          if (e.data.q !== undefined && e.data.r !== undefined && lastHexes) {
+            const gameConfig = getGameConfig(hexGame)
+            if (gameConfig && gameConfig.onHexClick) {
+              const hex = lastHexes.find(h => h.q === e.data.q && h.r === e.data.r)
+              if (hex) {
+                gameConfig.onHexClick(hex)
+                renderHexEmbed()
+                if (e.source) {
+                  e.source.postMessage({ type: 'hexmap:hexEdited', q: hex.q, r: hex.r, type: hex.type }, e.origin !== 'null' ? e.origin : '*')
+                }
+              }
+            }
           }
           break
         case 'hexmap:setBg':

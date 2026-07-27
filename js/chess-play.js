@@ -13,11 +13,36 @@ let animating = false
 let embedOpponent = 'ai'
 let embedDifficulty = 'medium'
 let embedColor = 'white'
+let dropMode = null
+let gameOver = false
 
 const ANIM_SPEEDS = { instant: 0, fast: 120, normal: 220, slow: 400 }
 const ANIM_STYLES = { slide: 'Slide', arc: 'Arc', bounce: 'Bounce', warp: 'Warp' }
 let animSpeed = localStorage.getItem('mce-anim-speed') || 'normal'
 let animStyle = localStorage.getItem('mce-anim-style') || 'slide'
+
+const BOARD_THEMES = {
+  classic: { light: '#f0d9b5', dark: '#b58863', highlight: 'rgba(255,255,0,0.4)', lastMove: 'rgba(100,180,255,0.3)', dot: 'rgba(0,0,0,0.2)', ring: 'rgba(0,0,0,0.2)', label: 'Classic' },
+  cosmic: { light: '#2d3760', dark: '#141c37', highlight: 'rgba(111,181,255,0.35)', lastMove: 'rgba(111,181,255,0.2)', dot: 'rgba(255,255,255,0.25)', ring: 'rgba(255,255,255,0.3)', label: 'Cosmic Dark' },
+  wood: { light: '#deb887', dark: '#8b5e3c', highlight: 'rgba(255,215,0,0.4)', lastMove: 'rgba(139,90,43,0.3)', dot: 'rgba(0,0,0,0.2)', ring: 'rgba(0,0,0,0.25)', label: 'Classic Wood' },
+  marble: { light: '#f2f0ec', dark: '#b8b5af', highlight: 'rgba(100,149,237,0.35)', lastMove: 'rgba(100,149,237,0.2)', dot: 'rgba(0,0,0,0.15)', ring: 'rgba(0,0,0,0.2)', label: 'Marble' },
+  neon: { light: '#1a1a2e', dark: '#0f0f1a', highlight: 'rgba(0,255,136,0.3)', lastMove: 'rgba(0,200,255,0.25)', dot: 'rgba(0,255,136,0.4)', ring: 'rgba(255,0,128,0.5)', label: 'Neon' },
+  minimal: { light: '#fafafa', dark: '#e8e8e8', highlight: 'rgba(66,133,244,0.3)', lastMove: 'rgba(66,133,244,0.15)', dot: 'rgba(0,0,0,0.12)', ring: 'rgba(0,0,0,0.15)', label: 'Minimal' },
+  transparent: { light: 'rgba(128,128,128,0.12)', dark: 'rgba(128,128,128,0.3)', highlight: 'rgba(111,181,255,0.35)', lastMove: 'rgba(111,181,255,0.2)', dot: 'rgba(128,128,128,0.4)', ring: 'rgba(128,128,128,0.45)', label: 'Transparent' },
+}
+const DARK_THEMES = ['cosmic', 'neon', 'transparent']
+let currentTheme = localStorage.getItem('mce-board-theme') || 'classic'
+
+const PIECE_STYLES = {
+  auto: { label: 'Auto', light: null, dark: null },
+  gold: { label: 'White & Gold', light: { fill: '#fff', stroke: '#000' }, dark: { fill: '#b58863', stroke: '#5c3a1e' } },
+  charcoal: { label: 'Cream & Charcoal', light: { fill: '#f5f0e8', stroke: '#333' }, dark: { fill: '#3a3a3a', stroke: '#1a1a1a' } },
+  burgundy: { label: 'White & Burgundy', light: { fill: '#fff', stroke: '#000' }, dark: { fill: '#6b1a2a', stroke: '#3d0f18' } },
+  navy: { label: 'White & Navy', light: { fill: '#fff', stroke: '#000' }, dark: { fill: '#1a3a5c', stroke: '#0d1f33' } },
+}
+let currentPieceStyle = localStorage.getItem('mce-piece-style') || 'auto'
+const recolourCache = {}
+let recolouredImages = null
 
 export async function initChessPlay(container) {
   const params = new URLSearchParams(location.search)
@@ -43,6 +68,7 @@ export async function initChessPlay(container) {
   initEmbedMessageListener()
 
   galleryIndex = await fetch('../pieces/gallery-index.json').then(r => r.json()).catch(() => null)
+  await loadRecolouredPieces()
 
   container.innerHTML = buildUI()
   boardSvgContainer = container.querySelector('#chess-board-svg')
@@ -92,6 +118,8 @@ function startGame() {
 
   const moveLog = []
   const captured = { w: [], b: [] }
+  dropMode = null
+  gameOver = false
 
   ctrl = createGameController(null, game, {
     players,
@@ -102,19 +130,41 @@ function startGame() {
     },
     customRender: (g, state) => {
       renderBoard(g, state, rows, cols)
+      renderHand(g)
+    },
+    onSquareClick: (sq, g, api) => {
+      if (dropMode) {
+        const allMoves = api.getLegalMoves()
+        const dropMove = allMoves.find(m => m.flag === 'action' && m.action === 'drop' && m.dropPiece === dropMode && m.to === sq)
+        if (dropMove) {
+          dropMode = null
+          api.executeMove(dropMove)
+        } else {
+          dropMode = null
+          api.setSelected(null)
+          api.render()
+        }
+        return true
+      }
+      return false
     },
     onMove: (move, undo, cap, side) => {
-      moveLog.push({ move, side })
+      const isCapture = !!(undo && undo.captured)
+      const san = moveToSAN(move, game, rows, cols, isCapture)
+      moveLog.push({ move, side, san })
       const capPiece = undo && undo.captured
       if (capPiece && typeof capPiece === 'string') {
         const capColor = capPiece === capPiece.toUpperCase() ? 'w' : 'b'
         captured[capColor].push(capPiece.toLowerCase())
       }
-      updateMoveList(moveLog, cols, rows)
+      dropMode = null
+      updateMoveList(moveLog)
       updateCaptured(captured)
+      renderHand(game)
       postEmbedMessage('move', { from: move.from, to: move.to, fen: MCE.toFEN(game), variant: currentVariant })
     },
     onGameEnd: (status) => {
+      gameOver = true
       updateStatus(status)
       const embedText = mapStatusForEmbed(status, game)
       postEmbedMessage('status', { text: embedText, gameOver: true, variant: currentVariant })
@@ -122,10 +172,17 @@ function startGame() {
     onTurnChange: (turn) => {
       const statusEl = document.getElementById('chess-status')
       if (statusEl) {
-        const color = turn === MCE.WHITE ? 'White' : 'Black'
-        let text = `${color} to move`
-        if (game.duckPhase) text = `${color} — place the duck`
-        else if (MCE.inCheck && MCE.inCheck(game, turn)) text = `${color} to move (check!)`
+        const helpers = { nameFor: (t) => t === MCE.WHITE ? 'White' : 'Black' }
+        const customStatus = vc && vc.statusText ? vc.statusText(game, helpers) : null
+        let text
+        if (customStatus) {
+          text = customStatus
+        } else {
+          const color = helpers.nameFor(turn)
+          text = `${color} to move`
+          if (game.duckPhase) text = `${color} — place the duck`
+          else if (MCE.inCheck && MCE.inCheck(game, turn)) text = `${color} to move (check!)`
+        }
         if (game.checkCount && game.checkThreshold) {
           const wc = game.checkCount.w || 0
           const bc = game.checkCount.b || 0
@@ -179,6 +236,8 @@ function renderBoard(game, state, rows, cols) {
     for (let i = 0; i < rows * cols; i++) {
       if (!game.board[i] && i !== game.duckSq) legal.push({ from: i, to: i })
     }
+  } else if (dropMode && getLegalMoves) {
+    legal = getLegalMoves().filter(m => m.flag === 'action' && m.action === 'drop' && m.dropPiece === dropMode)
   } else if (selected !== null && getLegalMoves) {
     legal = getLegalMoves().filter(m => m.from === selected)
   }
@@ -187,8 +246,10 @@ function renderBoard(game, state, rows, cols) {
   const fen = boardToFEN(board, rows, cols, flipped)
   const resolved = buildResolved(fen, rows, cols)
   const pieceResult = galleryIndex ? attachPieceImages(resolved, galleryIndex) : { images: {}, surfaceMap: {}, surface: null }
+  let pieceImages = pieceResult.images || {}
+  if (recolouredImages) pieceImages = { ...pieceImages, ...recolouredImages }
   const svg = renderFromEngine(resolved, {
-    pieceImages: pieceResult.images || {},
+    pieceImages,
     pieceSurfaceMap: pieceResult.surfaceMap || {},
     pieceSurface: pieceResult.surface || null,
   })
@@ -219,13 +280,14 @@ function renderBoard(game, state, rows, cols) {
     const piecesLayer = svgEl.querySelector('g[pointer-events="none"]')
     const insertBefore = piecesLayer || svgEl.lastChild
 
+    const theme = BOARD_THEMES[currentTheme] || BOARD_THEMES.classic
     if (lastMove) {
-      addHighlight(overlay, lastMove.from, rows, cols, 'rgba(205, 210, 106, 0.45)', flipped)
-      addHighlight(overlay, lastMove.to, rows, cols, 'rgba(205, 210, 106, 0.45)', flipped)
+      addHighlight(overlay, lastMove.from, rows, cols, theme.lastMove, flipped)
+      addHighlight(overlay, lastMove.to, rows, cols, theme.lastMove, flipped)
     }
 
     if (selected !== null) {
-      addHighlight(overlay, selected, rows, cols, 'rgba(127, 179, 62, 0.55)', flipped)
+      addHighlight(overlay, selected, rows, cols, theme.highlight, flipped)
     }
 
     const seenTargets = new Set()
@@ -250,14 +312,14 @@ function renderBoard(game, state, rows, cols) {
         ring.setAttribute('y', bbox.y)
         ring.setAttribute('width', bbox.width)
         ring.setAttribute('height', bbox.height)
-        ring.setAttribute('fill', 'rgba(224, 64, 64, 0.35)')
+        ring.setAttribute('fill', theme.ring)
         overlay.appendChild(ring)
       } else {
         const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
         dot.setAttribute('cx', bbox.x + bbox.width / 2)
         dot.setAttribute('cy', bbox.y + bbox.height / 2)
         dot.setAttribute('r', bbox.width * 0.16)
-        dot.setAttribute('fill', 'rgba(0, 0, 0, 0.22)')
+        dot.setAttribute('fill', theme.dot)
         overlay.appendChild(dot)
       }
     }
@@ -338,11 +400,16 @@ function buildUI() {
     return `
 <div class="chess-play chess-play--embed">
   <div class="chess-board-area">
+    <div id="chess-hand-panel" class="chess-hand-panel"></div>
     <div id="chess-board-svg" class="chess-board-svg"></div>
+    <div id="chess-hand-panel-bottom" class="chess-hand-panel"></div>
     <div id="chess-promotion-dialog" class="chess-promotion" style="display:none"></div>
   </div>
 </div>`
   }
+  const themeOpts = Object.entries(BOARD_THEMES).map(([k, v]) =>
+    `<option value="${k}"${k === currentTheme ? ' selected' : ''}>${v.label}</option>`
+  ).join('')
   return `
 <div class="chess-play${fullscreenMode ? ' chess-play--fullscreen' : ''}">
   <div class="chess-sidebar">
@@ -379,6 +446,16 @@ function buildUI() {
       <select id="chess-pieceset-select"></select>
     </div>
     <div class="control-group">
+      <label class="control-label">Board</label>
+      <select id="chess-theme-select">${themeOpts}</select>
+    </div>
+    <div class="control-group">
+      <label class="control-label">Piece Colours</label>
+      <select id="chess-piece-style-select">${Object.entries(PIECE_STYLES).map(([k, v]) =>
+        `<option value="${k}"${k === currentPieceStyle ? ' selected' : ''}>${v.label}</option>`
+      ).join('')}</select>
+    </div>
+    <div class="control-group">
       <label class="control-label">Animation</label>
       <select id="chess-anim-style-select">
         <option value="slide">Slide</option>
@@ -403,6 +480,7 @@ function buildUI() {
       <button id="chess-fullscreen-btn" class="btn btn-outline">Fullscreen</button>
     </div>
     <div id="chess-status" class="chess-status"></div>
+    <div id="chess-hand-panel" class="chess-hand-panel"></div>
     <div id="chess-captured" class="chess-captured"></div>
     <div id="chess-moves" class="chess-moves"></div>
   </div>
@@ -521,6 +599,13 @@ function initEmbedMessageListener() {
         break
       }
       case 'chess:undo': { if (ctrl) ctrl.undo(); break }
+      case 'chess:setTheme': {
+        if (e.data.theme && BOARD_THEMES[e.data.theme]) {
+          currentTheme = e.data.theme
+          if (ctrl) ctrl.render()
+        }
+        break
+      }
     }
   })
 }
@@ -831,9 +916,57 @@ function addHighlight(overlay, idx, rows, cols, color, flipped) {
   overlay.appendChild(rect)
 }
 
+async function loadRecolouredPieces() {
+  const style = PIECE_STYLES[currentPieceStyle]
+  if (!style || currentPieceStyle === 'auto' || !style.dark) {
+    recolouredImages = null
+    return
+  }
+  if (!galleryIndex) { recolouredImages = null; return }
+  const setDef = galleryIndex.find(s => s.id === currentPieceSet)
+  if (!setDef || !setDef.pieces) { recolouredImages = null; return }
+
+  const basePath = `../pieces/sets/${setDef.baseSet || currentPieceSet}/`
+  const images = {}
+  const fetches = []
+
+  for (const [pieceId, entry] of Object.entries(setDef.pieces)) {
+    const filename = typeof entry === 'string' ? entry : entry?.file
+    if (!filename) continue
+    const isUpper = pieceId === pieceId.toUpperCase() || (pieceId.length === 1 && pieceId >= 'A' && pieceId <= 'Z')
+    const colors = isUpper ? style.light : style.dark
+    if (!colors) continue
+
+    const cacheKey = `${currentPieceSet}/${filename}:${colors.fill}`
+    if (recolourCache[cacheKey]) {
+      images[pieceId] = recolourCache[cacheKey]
+      continue
+    }
+
+    fetches.push(
+      fetch(basePath + filename).then(r => r.text()).then(svg => {
+        let tinted = svg
+        if (isUpper && colors.fill !== '#fff') {
+          tinted = tinted.replaceAll('#fff', colors.fill).replaceAll('#000', colors.stroke)
+        } else if (!isUpper) {
+          tinted = tinted.replaceAll('#000', colors.fill).replaceAll('#fff', colors.stroke)
+        }
+        const dataUri = 'data:image/svg+xml,' + encodeURIComponent(tinted)
+        recolourCache[cacheKey] = dataUri
+        images[pieceId] = dataUri
+      }).catch(() => {})
+    )
+  }
+
+  await Promise.all(fetches)
+  recolouredImages = Object.keys(images).length > 0 ? images : null
+}
+
 function buildResolved(fen, rows, cols) {
+  const theme = BOARD_THEMES[currentTheme] || BOARD_THEMES.classic
   return {
     topology: { type: 'grid', rows, cols, tileMode: 'tiles' },
+    surface: { colors: { 'cell-light': theme.light, 'cell-dark': theme.dark } },
     render: {
       cellColor: 'checkered',
       alternating: true,
@@ -891,19 +1024,96 @@ function updateCaptured(captured) {
     : ''
 }
 
-function updateMoveList(moveLog, cols, rows) {
+function moveToSAN(move, game, rows, cols, isCapture) {
+  if (move.flag === 'action' && move.action === 'drop') {
+    const to = sqToAlgebraic(move.to, rows, cols)
+    return (move.dropPiece || 'p').toUpperCase() + '@' + to
+  }
+  if (move.flag === 'castle-k' || (move.flag === 'castle' && move.to > move.from)) return 'O-O'
+  if (move.flag === 'castle-q' || (move.flag === 'castle' && move.to < move.from)) return 'O-O-O'
+
+  const piece = game.board[move.to]
+  const pieceType = piece ? MCE.pieceType(move.to, game) : null
+  const SYMBOLS = { k: 'K', q: 'Q', r: 'R', b: 'B', n: 'N' }
+  const prefix = (pieceType && pieceType !== 'p') ? (SYMBOLS[pieceType] || pieceType.toUpperCase()) : ''
+  const to = sqToAlgebraic(move.to, rows, cols)
+  const from = sqToAlgebraic(move.from, rows, cols)
+  const captured = isCapture || (move.flag === 'ep')
+  const captureStr = captured ? 'x' : ''
+  let disambig = ''
+  if (prefix && prefix !== 'K') {
+    disambig = from[0]
+  }
+  let pawnFile = ''
+  if (!prefix && captured) pawnFile = from[0]
+  const promo = move.promo ? '=' + move.promo.toUpperCase() : ''
+  return prefix + disambig + pawnFile + captureStr + to + promo
+}
+
+function updateMoveList(moveLog) {
   const movesEl = document.getElementById('chess-moves')
   if (!movesEl) return
   const entries = moveLog.map((entry, i) => {
-    const m = entry.move
-    const from = sqToAlgebraic(m.from, rows, cols)
-    const to = sqToAlgebraic(m.to, rows, cols)
     const num = Math.floor(i / 2) + 1
     const prefix = i % 2 === 0 ? `${num}. ` : ''
-    return `<span class="move-entry">${prefix}${from}${to}</span>`
+    return `<span class="move-entry">${prefix}${entry.san}</span>`
   })
   movesEl.innerHTML = entries.join(' ')
   movesEl.scrollTop = movesEl.scrollHeight
+}
+
+function renderHand(game) {
+  const handEl = document.getElementById('chess-hand-panel')
+  if (!handEl) return
+  if (!game || !game.hand) { handEl.innerHTML = ''; return }
+
+  handEl.innerHTML = ''
+  const flipped = ctrl?.getState()?.flipped || false
+  const sides = flipped ? [MCE.WHITE, MCE.BLACK] : [MCE.BLACK, MCE.WHITE]
+  const PIECE_SYMBOLS = { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' }
+  const ORDER = ['q', 'r', 'b', 'n', 'p']
+
+  for (const side of sides) {
+    const hand = game.hand[side]
+    if (!hand || hand.length === 0) continue
+    const row = document.createElement('div')
+    row.className = 'hand-row'
+    const label = document.createElement('span')
+    label.className = 'hand-label'
+    label.textContent = (side === MCE.WHITE ? 'White' : 'Black') + ':'
+    row.appendChild(label)
+
+    const counted = {}
+    for (const p of hand) counted[p] = (counted[p] || 0) + 1
+
+    for (const pt of ORDER) {
+      if (!counted[pt]) continue
+      const btn = document.createElement('button')
+      btn.className = 'hand-piece'
+      if (dropMode === pt && side === game.turn) btn.classList.add('hand-piece--active')
+      btn.textContent = PIECE_SYMBOLS[pt] || pt
+      if (counted[pt] > 1) {
+        const badge = document.createElement('span')
+        badge.className = 'hand-count'
+        badge.textContent = counted[pt]
+        btn.appendChild(badge)
+      }
+      const isMyTurn = side === game.turn && !gameOver
+      const state = ctrl?.getState()
+      const isHuman = !state?.aiThinking && (state?.players?.[side] === 'human' || !state?.players)
+      if (isMyTurn && isHuman) {
+        btn.addEventListener('click', () => {
+          if (dropMode === pt) { dropMode = null } else { dropMode = pt; if (ctrl) ctrl.setSelected(null) }
+          ctrl?.render()
+          renderHand(game)
+        })
+      } else {
+        btn.disabled = true
+      }
+      row.appendChild(btn)
+    }
+    handEl.appendChild(row)
+  }
 }
 
 function bindEvents(container) {
@@ -923,6 +1133,19 @@ function bindEvents(container) {
     currentPieceSet = e.target.value
     localStorage.setItem('mce-piece-set', currentPieceSet)
     startGame()
+  })
+  container.querySelector('#chess-theme-select')?.addEventListener('change', (e) => {
+    currentTheme = e.target.value
+    localStorage.setItem('mce-board-theme', currentTheme)
+    const isDark = DARK_THEMES.includes(currentTheme)
+    document.body.classList.toggle('chess-theme-dark', isDark)
+    if (ctrl) ctrl.render()
+  })
+  container.querySelector('#chess-piece-style-select')?.addEventListener('change', async (e) => {
+    currentPieceStyle = e.target.value
+    localStorage.setItem('mce-piece-style', currentPieceStyle)
+    await loadRecolouredPieces()
+    if (ctrl) ctrl.render()
   })
   container.querySelector('#chess-anim-style-select')?.addEventListener('change', (e) => {
     animStyle = e.target.value

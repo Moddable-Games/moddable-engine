@@ -254,6 +254,76 @@ body.chess-embed-mode #chess-play-root {
   display: none;
 }
 
+/* Hand panel (crazyhouse, sittuyin) */
+.chess-hand-panel {
+  min-height: 0;
+}
+
+.hand-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.hand-label {
+  font-size: 11px;
+  color: var(--text-muted, #8a8580);
+  min-width: 42px;
+}
+
+.hand-piece {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  font-size: 22px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2, #141830);
+  border: 1px solid var(--border, #2a2d4a);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text, #f0ede8);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.hand-piece:hover:not(:disabled) {
+  border-color: var(--accent, #40c060);
+  background: var(--surface-3, #1e2148);
+}
+
+.hand-piece--active {
+  border-color: var(--accent, #40c060);
+  background: var(--accent, #40c060);
+  color: #0a0d2a;
+}
+
+.hand-piece:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.hand-count {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  font-size: 9px;
+  background: var(--accent, #40c060);
+  color: #0a0d2a;
+  border-radius: 8px;
+  padding: 0 4px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* Dark theme body */
+body.chess-theme-dark {
+  --surface: #0a0d1a;
+  --surface-2: #0e1128;
+}
+
 @media (max-width: 768px) {
   .chess-play {
     grid-template-columns: 1fr;

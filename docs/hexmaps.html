@@ -61,6 +61,7 @@
   <ul class="docs-toc-list">
     <li><a href="#embed">Embed via iframe</a></li>
     <li><a href="#sdk">Hex SDK</a></li>
+    <li><a href="#fov">FOV &amp; Pathfinding</a></li>
     <li><a href="#games">Games</a></li>
     <li><a href="#hexmath">HexMath</a></li>
     <li><a href="#hexsvg">HexSvg</a></li>
@@ -117,6 +118,14 @@ iframe.contentWindow.postMessage({ type: 'hexmap:exportSvg' }, '*')
 // Change background
 iframe.contentWindow.postMessage({ type: 'hexmap:setBg', bg: '#0B0F1A' }, '*')</code></pre>
 
+  <h3>Additional commands</h3>
+
+  <pre><code>// Export PNG (canvas-rendered)
+iframe.contentWindow.postMessage({ type: 'hexmap:exportPng', scale: 2 }, '*')
+
+// Edit a hex (cycle terrain type, games that support it)
+iframe.contentWindow.postMessage({ type: 'hexmap:editHex', q: 0, r: 1 }, '*')</code></pre>
+
   <h3>Events from embed</h3>
 
   <pre><code>window.addEventListener('message', (e) => {
@@ -125,10 +134,17 @@ iframe.contentWindow.postMessage({ type: 'hexmap:setBg', bg: '#0B0F1A' }, '*')</
       // { game, seed, size, players }
       break
     case 'hexmap:mapData':
-      // { hexes: [{q, r, type, ...}], seed, game, size, players }
+      // { hexes: [{q, r, type, ...}], seed, game, structured }
+      // structured: game-specific export (e.g. Twilight tile IDs)
       break
     case 'hexmap:svgData':
       // { svg: '&lt;svg ...' }
+      break
+    case 'hexmap:pngData':
+      // { png: 'data:image/png;base64,...', width, height }
+      break
+    case 'hexmap:hexEdited':
+      // { q, r, type } — after editHex command
       break
   }
 })</code></pre>
@@ -141,6 +157,10 @@ iframe.contentWindow.postMessage({ type: 'hexmap:setBg', bg: '#0B0F1A' }, '*')</
   generate,
   renderSvg,
   getHexInfo,
+  exportGameData,
+  editHex,
+  computeFov,
+  pathfind,
   HexMath,
   HexSvg,
   createSeededRng,
@@ -170,6 +190,36 @@ iframe.contentWindow.postMessage({ type: 'hexmap:setBg', bg: '#0B0F1A' }, '*')</
   <p>Look up a hex and its neighbours.</p>
   <pre><code>const info = getHexInfo(result.hexes, 0, 0)
 // { hex: {q, r, type: 'mount'}, neighbours: [...], distance: 0 }</code></pre>
+
+  <h3>exportGameData(game, opts?)</h3>
+  <p>Generate a map and export in game-specific structured format.</p>
+  <pre><code>const result = exportGameData('nukes', { size: 4, seed: '12345' })
+// { game: 'nukes', format: 'nukes', data: {...}, seed: '12345' }
+
+const result = exportGameData('twilight', { size: 3, seed: '12345' })
+// { game: 'twilight', format: 'hex', data: { hexes: [...], seed, size, players } }</code></pre>
+
+  <h3>editHex(game, hexes, q, r)</h3>
+  <p>Cycle a hex through terrain types (games that support terrain editing).</p>
+  <pre><code>const hex = editHex('nukes', hexes, 0, 1)
+// { q: 0, r: 1, type: 'desert' } — type has been cycled
+// Returns null for games without terrain editing or invalid coords</code></pre>
+
+  <h3 id="fov">computeFov(hexes, origin, opts?)</h3>
+  <p>Line-of-sight field-of-view from a hex. Blocking terrain creates shadows.</p>
+  <pre><code>const result = computeFov(hexes, { q: 0, r: 0 }, {
+  range: 3,              // max distance (default: 3)
+  blocking: ['mountain'] // terrain types that block LOS
+})
+// { origin, range, blocking, visible: [{q,r,type,distance}], blocked: [...] }</code></pre>
+
+  <h3 id="pathfind">pathfind(hexes, from, to, opts?)</h3>
+  <p>BFS shortest path between two hexes, respecting impassable terrain.</p>
+  <pre><code>const result = pathfind(hexes, { q: -2, r: 0 }, { q: 2, r: 0 }, {
+  impassable: ['mountain', 'water'] // terrain types that cannot be traversed
+})
+// { reachable: true, from, to, distance: 4, path: [{q,r,type}, ...] }
+// { reachable: false, from, to, path: null } — when no path exists</code></pre>
 
   <h2 id="games">Games</h2>
   <table class="docs-table">

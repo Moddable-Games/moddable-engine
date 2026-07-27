@@ -64,6 +64,26 @@ export function getHexInfo(hexes, q, r) {
   return { hex, neighbours, distance: HexMath.axialDistance({ q: 0, r: 0 }, { q, r }) }
 }
 
+export function exportGameData(game, opts = {}) {
+  const config = getGameConfig(game)
+  if (!config) throw new Error(`Unknown hex game: ${game}`)
+  const result = generate(game, opts)
+  const hexes = result.hexes
+  if (config.exportForParent) {
+    return { game, format: game, data: config.exportForParent(hexes, { seed: result.seed, size: result.size, players: result.players }), seed: result.seed }
+  }
+  return { game, format: 'hex', data: { hexes, seed: result.seed, size: result.size, players: result.players } }
+}
+
+export function editHex(game, hexes, q, r) {
+  const config = getGameConfig(game)
+  if (!config || !config.onHexClick) return null
+  const hex = hexes.find(h => h.q === q && h.r === r)
+  if (!hex) return null
+  config.onHexClick(hex)
+  return hex
+}
+
 export {
   getGameConfig,
   getRegisteredGames,
