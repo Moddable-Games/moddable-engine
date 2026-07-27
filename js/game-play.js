@@ -1,32 +1,63 @@
 import { createGameForFamily } from '../packages/play/src/play.js'
 import { createGameController } from '../packages/play/src/game-controller.js'
-import { renderInteractiveBoard, marksForState } from '../packages/play/src/board-view.js'
 import { listVariants, getVariantConfig } from '../packages/play/src/variant-registry.js'
 import { createAI } from '../packages/play/src/sdk.js'
 import { interactionModelFor, FAMILY_INTERACTION } from '../packages/play/src/interaction.js'
 import { createEmbedBridge, parseEmbedParams, normaliseOutcome } from '../packages/play/src/embed.js'
+import { renderFromEngine, attachPieceImages } from '../packages/render/src/render-engine.js'
+import { resolveSurface } from '../packages/schema/src/surfaces.js'
+import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolver.js'
+import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
 
 import '../packages/plugins/go/index.js'
 import '../packages/plugins/draughts/index.js'
 
 const BOARD_THEMES = {
-  classic: { light: '#f0d9b5', dark: '#b58863', label: 'Classic' },
-  cosmic: { light: '#2d3760', dark: '#141c37', label: 'Cosmic Dark' },
-  wood: { light: '#deb887', dark: '#8b5e3c', label: 'Classic Wood' },
-  marble: { light: '#f2f0ec', dark: '#b8b5af', label: 'Marble' },
-  neon: { light: '#1a1a2e', dark: '#0f0f1a', label: 'Neon' },
-  minimal: { light: '#fafafa', dark: '#e8e8e8', label: 'Minimal' },
+  classic: { label: 'Classic' },
+  cosmic: { label: 'Cosmic Dark' },
+  wood: { label: 'Classic Wood' },
+  marble: { label: 'Marble' },
+  neon: { label: 'Neon' },
+  minimal: { label: 'Minimal' },
 }
 
 const DIFFICULTIES = ['beginner', 'easy', 'medium', 'hard', 'expert']
 
-const LAYOUT_OPTS = {
-  go: { mode: 'intersections' },
-  hex: { mode: 'intersections' },
+const RULES_BASE = location.hostname === 'engine.moddable.games'
+  ? 'https://rules.moddable.games/'
+  : '../../moddable-rules/'
+
+let galleryIndex = null
+async function loadGalleryIndex() {
+  if (galleryIndex) return galleryIndex
+  try { galleryIndex = await fetch('../pieces/gallery-index.json').then(r => r.json()) }
+  catch { galleryIndex = [] }
+  return galleryIndex
 }
 
-function layoutOptsFor(family) {
-  return LAYOUT_OPTS[family] || {}
+async function loadFamilyConfig(family) {
+  const basePath = RULES_BASE + 'games/'
+  const familyMd = await fetch(basePath + family + '/content/rulebook.md').then(r => r.text())
+  const familyFm = parseFrontmatter(familyMd).meta || {}
+  return familyFm
+}
+
+async function resolveBoard(family, variantConfig) {
+  const familyFm = await loadFamilyConfig(family)
+  const familyEngine = familyFm.engine || {}
+  const size = variantConfig.size || variantConfig.rows || familyEngine.topology?.rows || 19
+  const cols = variantConfig.cols || variantConfig.size || familyEngine.topology?.cols || size
+  const variantEngine = {
+    topology: { ...familyEngine.topology, rows: size, cols },
+  }
+  const surfaceRef = familyEngine.surface
+  const surface = resolveSurface(surfaceRef)
+  const { resolved } = cascadeResolve({
+    surface,
+    family: { engine: familyEngine, meta: { label: familyFm.title || '' } },
+    variant: { engine: variantEngine, meta: { label: variantConfig.label || '' } },
+  })
+  return resolved
 }
 
 export function createPlaySession(options = {}) {
@@ -47,6 +78,7 @@ export function createPlaySession(options = {}) {
   let scoring = null
   let deadStones = []
   let currentTheme = theme
+  let resolvedBoard = null
 
   function playerNames() {
     return game.raw.definition.players.names || []
@@ -56,10 +88,14 @@ export function createPlaySession(options = {}) {
     return game.raw.registry.getPlugins().find(p => p.sliceName === family) || null
   }
 
-  function start() {
+  async function start() {
     game = createGameForFamily(family, { variant })
     scoring = null
     deadStones = []
+
+    const variantCfg = getVariantConfig(family, variant) || {}
+    resolvedBoard = await resolveBoard(family, variantCfg)
+    await loadGalleryIndex()
 
     ai = opponent === 'ai'
       ? createAI(family, variant, { difficulty })
@@ -136,36 +172,27 @@ export function createPlaySession(options = {}) {
     }
   }
 
-  function legalTargets() {
-    const state = ctrl.getState()
-    if (state.selected === null || state.selected === undefined) return []
-    const model = interactionModelFor(family)
-    return model.targetsFor(state.selected, ctrl.getLegalMoves()).map(m => m.to)
-  }
-
   function draw() {
-    if (!container || !ctrl) return
-    const layout = game.raw.getLayout(layoutOptsFor(family))
-    if (!layout) return
+    if (!container || !ctrl || !resolvedBoard) return
 
-    const state = ctrl.getState()
     const slice = game.getState().slice
-    const marks = marksForState(state, legalTargets())
-
-    for (const cell of deadStones) marks.push({ key: cell, type: 'dead' })
-
-    container.innerHTML = renderInteractiveBoard(layout, {
-      pieces: piecesFrom(slice),
-      marks,
-      colors: {
-        lightCell: BOARD_THEMES[currentTheme].light,
-        darkCell: BOARD_THEMES[currentTheme].dark,
-      },
+    const rendered = { ...resolvedBoard, setup: boardToFen(slice, resolvedBoard.topology) }
+    const gallery = galleryIndex || []
+    const pieceResult = attachPieceImages(rendered, gallery)
+    const svg = renderFromEngine(rendered, {
+      pieceImages: pieceResult.images || {},
+      pieceSurfaceMap: pieceResult.surfaceMap || {},
+      pieceSurface: pieceResult.surface || null,
     })
 
-    for (const target of container.querySelectorAll('.hit-target')) {
-      target.addEventListener('click', () => {
-        const key = coerceKey(target.getAttribute('data-cell'))
+    if (!svg) return
+    container.innerHTML = svg
+
+    for (const cell of container.querySelectorAll('.board-cell')) {
+      cell.style.cursor = 'pointer'
+      cell.addEventListener('click', () => {
+        const sq = cell.getAttribute('data-sq')
+        const key = coerceKey(sq)
         if (scoring) toggleDead(key)
         else ctrl.handleClick(key)
       })
@@ -174,38 +201,51 @@ export function createPlaySession(options = {}) {
 
   function coerceKey(raw) {
     const asNumber = Number(raw)
-    return Number.isNaN(asNumber) ? raw : asNumber
+    if (!Number.isNaN(asNumber)) return asNumber
+    if (!raw || raw.length < 2) return raw
+    return algebraicToIndex(raw, resolvedBoard.topology)
   }
 
-  function piecesFrom(slice) {
-    const pieces = {}
+  function algebraicToIndex(sq, topo) {
+    const cols = topo.cols || 19
+    const rows = topo.rows || 19
+    const idStyle = topo.layout === 'intersections' ? 'go' : 'algebraic'
+    const alpha = idStyle === 'go' ? 'abcdefghjklmnopqrst' : 'abcdefghijklmnopqrstuvwxyz'
+    const c = alpha.indexOf(sq[0])
+    const r = rows - parseInt(sq.slice(1), 10)
+    if (c < 0 || r < 0 || r >= rows) return sq
+    return r * cols + c
+  }
+
+  function boardToFen(slice, topo) {
     const board = slice.board || []
-    const names = playerNames()
-
-    if (Array.isArray(board)) {
-      for (let i = 0; i < board.length; i++) {
-        const cell = board[i]
-        if (!cell) continue
-        pieces[String(i)] = describePiece(cell, names)
+    if (!Array.isArray(board)) return ''
+    const cols = topo.cols || Math.round(Math.sqrt(board.length))
+    const rows = topo.rows || Math.round(board.length / cols)
+    const fenRows = []
+    for (let r = 0; r < rows; r++) {
+      let row = ''
+      let empty = 0
+      for (let c = 0; c < cols; c++) {
+        const cell = board[r * cols + c]
+        if (!cell) { empty++; continue }
+        if (empty > 0) { row += empty; empty = 0 }
+        row += cellToFenChar(cell)
       }
-    } else {
-      for (const [key, cell] of Object.entries(board)) {
-        if (cell) pieces[key] = describePiece(cell, names)
-      }
+      if (empty > 0) row += empty
+      fenRows.push(row)
     }
-    return pieces
+    return fenRows.join('/')
   }
 
-  function describePiece(cell, names) {
+  function cellToFenChar(cell) {
     if (typeof cell === 'string') {
-      return { color: cell === 'black' ? 'black' : 'white', type: 'stone' }
+      return cell === 'black' ? 'b' : 'w'
     }
-    const ownerIndex = typeof cell.owner === 'number' ? cell.owner : names.indexOf(cell.owner)
-    return {
-      color: ownerIndex === 0 ? 'white' : 'black',
-      type: cell.type || null,
-      label: cell.type === 'king' ? 'K' : null,
+    if (cell.type === 'king') {
+      return cell.owner === 0 ? 'W' : 'B'
     }
+    return cell.owner === 0 ? 'w' : 'b'
   }
 
   const session = {
