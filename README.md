@@ -8,7 +8,7 @@ Every game in the Moddable Games collection — from standard chess to Endless S
 
 ## Status
 
-**All classic game families implemented.** 13 plugins covering 154 variants across chess, go, draughts, reversi, mancala, backgammon, morris, hex, big 2, halma, shogi, xiangqi, and race games. Rules are a first-class resource type: parametric, composable, topology-agnostic. Shared rules (capture, promotion, repetition, turn-continuation) work across all families. 1620 tests across 110 suites, all passing.
+**All classic game families implemented.** 13 plugins covering 154 variants across chess, go, draughts, reversi, mancala, backgammon, morris, hex, big 2, halma, shogi, xiangqi, and race games. Rules are a first-class resource type: parametric, composable, topology-agnostic. Shared rules (capture, promotion, repetition, turn-continuation) work across all families. 1663 tests across 115 suites, all passing.
 
 Current milestone: **Full pipeline proof + AI adapter** — factory instantiates every variant from frontmatter config alone, then generic minimax/MCTS for pass-and-play and AI opponents.
 
@@ -107,6 +107,13 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ---
 
 ## Changelog
+
+#### 2026-07-27
+- Chess play parity: hand/drop UI, 7 board themes, 5 piece colour presets, SAN notation, multi-move indicator (closes #40)
+- Hex SDK: FOV computation, BFS pathfinding, exportGameData, editHex, PNG export, terrain editor (closes #41)
+- 26 new tests (hex-fov, hex-pathfind, hex SDK extensions)
+- Hex docs updated with FOV, pathfinding, and new embed commands
+- Chess docs updated with setTheme command
 
 #### 2026-07-26
 - Universal game factory: `createGameForFamily()` in `packages/play` — single import for all 13 families with uniform interface (getLegalMoves, applyMove, checkWin, getState, loadState)
