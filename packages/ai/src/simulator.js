@@ -1,6 +1,7 @@
 export function createSimulator(plugin, opts = {}) {
   const playerCount = opts.playerCount || 2
   const evaluate = opts.evaluate || null
+  const playerNames = opts.playerNames || null
 
   function cloneState(state) {
     return JSON.parse(JSON.stringify(state))
@@ -72,7 +73,14 @@ export function createSimulator(plugin, opts = {}) {
 
   function parseWinnerIndex(winner) {
     if (typeof winner === 'number') return winner
-    const match = String(winner).match(/(\d+)/)
+
+    const name = String(winner)
+    if (playerNames) {
+      const named = playerNames.indexOf(name)
+      if (named !== -1) return named
+    }
+
+    const match = name.match(/(\d+)/)
     if (match) return parseInt(match[1], 10) - 1
     return 0
   }
@@ -85,5 +93,6 @@ export function createSimulator(plugin, opts = {}) {
     nextPlayer,
     cloneState,
     playerCount,
+    playerNames,
   }
 }

@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Draughts &mdash; Moddable Engine</title>
+<meta name="description" content="Thirteen draughts variants with capture chains, flying kings, and a minimax opponent.">
+<meta property="og:title" content="Draughts &mdash; Moddable Engine">
+<meta property="og:description" content="Thirteen draughts variants with capture chains, flying kings, and a minimax opponent.">
+<meta property="og:image" content="https://engine.moddable.games/og/docs.png?v=1.0.8">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://engine.moddable.games/docs/draughts.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Draughts &mdash; Moddable Engine">
+<meta name="twitter:description" content="Thirteen draughts variants with capture chains, flying kings, and a minimax opponent.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/docs.png?v=1.0.8">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../css/home.css?v=1.0.8">
+<link rel="stylesheet" href="../css/docs.css?v=1.0.8">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../play/" class="nav-link">Play</a>
+      <a href="../create/" class="nav-link">Create</a>
+      <a href="../boards/" class="nav-link">Boards</a>
+      <a href="../pieces/" class="nav-link">Pieces</a>
+      <a href="../tiles/" class="nav-link">Tiles</a>
+      <a href="./" class="nav-link nav-link--active">Docs</a>
+      <a href="../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</header>
+<div class="docs-layout">
+<button class="docs-toc-toggle" onclick="this.classList.toggle('active');this.nextElementSibling.classList.toggle('open')">Navigation</button>
+<nav class="docs-toc">
+  <div class="docs-toc-title">Pages</div>
+  <ul class="docs-toc-list">
+    <li><a href="./">Overview</a></li>
+    <li><a href="frontmatter.html">Frontmatter</a></li>
+    <li><a href="topologies.html">Topologies</a></li>
+    <li><a href="surfaces.html">Surfaces</a></li>
+    <li><a href="pieces.html">Piece Sets</a></li>
+    <li><a href="plugins.html">Plugins</a></li>
+    <li><a href="render-pipeline.html">Render Pipeline</a></li>
+    <li><a href="chess.html">Chess</a></li>
+    <li><a href="go.html">Go</a></li>
+    <li><a href="draughts.html" class="active">Draughts</a></li>
+    <li><a href="hexmaps.html">Hex Maps</a></li>
+  </ul>
+  <div class="docs-toc-title" style="margin-top:20px">On this page</div>
+  <ul class="docs-toc-list">
+    <li><a href="#embed">Embed via iframe</a></li>
+    <li><a href="#variants">Variants</a></li>
+    <li><a href="#chains">Capture chains</a></li>
+    <li><a href="#knobs">Variant parameters</a></li>
+    <li><a href="#gaps">Known gaps</a></li>
+  </ul>
+</nav>
+<div class="docs-body">
+
+  <h1>Draughts</h1>
+  <p class="docs-lede">Thirteen draughts variants with forced-capture chains, flying kings, a minimax opponent, and embed support.</p>
+
+  <h2 id="embed">Embed via iframe</h2>
+  <pre><code>&lt;iframe
+  src="https://engine.moddable.games/play/?embed=1&amp;family=draughts&amp;variant=international"
+  style="width:100%;max-width:560px;aspect-ratio:1/1;border:none"
+  title="Play Draughts"
+&gt;&lt;/iframe&gt;</code></pre>
+
+  <p>The parameters, commands and events are identical to every other family. See the <a href="go.html#embed">Go page</a> for the full table; substitute <code>family=draughts</code>.</p>
+
+  <h2 id="variants">Variants</h2>
+  <p>Parameters follow the draughts hub in moddable-rules.</p>
+
+  <table class="docs-table">
+    <thead><tr><th>Key</th><th>Board</th><th>Distinguishing rule</th></tr></thead>
+    <tbody>
+      <tr><td><code>english</code></td><td>8&times;8</td><td>Men capture forwards only, kings do not fly</td></tr>
+      <tr><td><code>international</code></td><td>10&times;10</td><td>Flying kings, longest capture chain compulsory</td></tr>
+      <tr><td><code>brazilian</code></td><td>8&times;8</td><td>International rules on the small board</td></tr>
+      <tr><td><code>canadian</code></td><td>12&times;12</td><td>International rules, thirty pieces a side</td></tr>
+      <tr><td><code>russian</code></td><td>8&times;8</td><td>Backward capture, mid-jump promotion, free choice</td></tr>
+      <tr><td><code>pool</code></td><td>8&times;8</td><td>Russian rules, the US tournament standard</td></tr>
+      <tr><td><code>german</code></td><td>8&times;8</td><td>Capture in all directions, no majority rule</td></tr>
+      <tr><td><code>spanish</code></td><td>8&times;8</td><td>Majority rule, ties resolved in favour of the king</td></tr>
+      <tr><td><code>czech</code></td><td>8&times;8</td><td>King captures take priority over man captures</td></tr>
+      <tr><td><code>italian</code></td><td>8&times;8</td><td>Men may not capture kings</td></tr>
+      <tr><td><code>turkish-draughts</code></td><td>8&times;8</td><td>Orthogonal movement across all sixty-four squares</td></tr>
+      <tr><td><code>ghanaian</code></td><td>10&times;10</td><td>Reduced to one piece is a loss</td></tr>
+      <tr><td><code>spantsiretti</code></td><td>10&times;8</td><td>Russian rules on a wider board</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="chains">Capture chains</h2>
+  <p>A multi-jump is a sequence of moves, not one move. The plugin signals <code>continueTurn</code> after each jump, so the turn does not advance and the controller anchors selection to the jumping piece until the chain is exhausted.</p>
+
+  <pre><code>ctrl.handleClick(from)        // select
+ctrl.handleClick(firstJump)   // capture, turn does not pass
+ctrl.getState().chainAnchor   // the piece mid-chain
+ctrl.handleClick(secondJump)  // continue the same chain</code></pre>
+
+  <p>While a chain is live the interaction model rejects clicks that would abandon it. Board state and turn order stay consistent because the core move pipeline, not the interface, owns the decision.</p>
+
+  <h2 id="knobs">Variant parameters</h2>
+  <p>Every variant above is expressed through the plugin's parametric configuration, with no per-variant code:</p>
+
+  <table class="docs-table">
+    <thead><tr><th>Parameter</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr><td><code>directions</code></td><td><code>diagonal</code> or <code>orthogonal</code> movement and capture</td></tr>
+      <tr><td><code>manCapture</code></td><td><code>forward</code> or <code>all</code></td></tr>
+      <tr><td><code>forcedCapture</code></td><td>Captures are compulsory when available</td></tr>
+      <tr><td><code>maximalCapture</code></td><td>The longest available chain must be taken</td></tr>
+      <tr><td><code>majorityPrefersKing</code></td><td>Ties in chain length resolve to the king's capture</td></tr>
+      <tr><td><code>kingCapturePriority</code></td><td>Any king capture outranks any man capture</td></tr>
+      <tr><td><code>menCannotCaptureKings</code></td><td>Men may not jump kings</td></tr>
+      <tr><td><code>flyingKings</code></td><td>Kings slide any distance along a line</td></tr>
+      <tr><td><code>promotionDuring</code></td><td>Promotion mid-chain continues as a king</td></tr>
+      <tr><td><code>removeImmediately</code></td><td>Captured pieces leave after each jump, not at the end</td></tr>
+      <tr><td><code>loseOnSinglePiece</code></td><td>Being reduced to one piece is a loss</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="gaps">Known gaps</h2>
+  <p>Seven hub variants are not registered, each because it needs a mechanic the plugin does not model:</p>
+  <ul>
+    <li><strong>bashni</strong> and <strong>lasca</strong> &mdash; column stacking, where captured pieces are carried beneath the capturer rather than removed</li>
+    <li><strong>dameo</strong> &mdash; linear movement of whole rows of pieces</li>
+    <li><strong>alquerque</strong> &mdash; a 5&times;5 point-and-line board rather than a square grid</li>
+    <li><strong>frisian</strong> &mdash; mixed orthogonal and diagonal capture with a three-move king limit</li>
+    <li><strong>thai</strong> &mdash; flying kings constrained to stop immediately behind the captured piece</li>
+    <li><strong>diagonal</strong> &mdash; pieces set up along the anti-diagonal rather than in ranks</li>
+  </ul>
+  <p>Each is named in <code>UNSUPPORTED</code> in the variant module with its reason, so the gap is visible in code rather than silently missing.</p>
+
+
+</div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../play/">Play</a>
+        <a href="../boards/">Boards</a>
+        <a href="../pieces/">Pieces</a>
+        <a href="../tiles/">Tiles</a>
+        <a href="../docs/">Docs</a>
+        <a href="../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Moddable Games</h4>
+        <a href="https://moddable.games" target="_blank" rel="noopener">Homepage</a>
+        <a href="https://rules.moddable.games" target="_blank" rel="noopener">Rules</a>
+        <a href="https://moddable.games/news/" target="_blank" rel="noopener">News</a>
+        <a href="https://discord.gg/VhsVGNq6Za" target="_blank" rel="noopener">Discord</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.8</span>
+    </div>
+  </div>
+</footer></body>
+</html>

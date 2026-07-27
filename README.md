@@ -8,9 +8,9 @@ Every game in the Moddable Games collection — from standard chess to Endless S
 
 ## Status
 
-**All classic game families implemented.** 13 plugins covering 154 variants across chess, go, draughts, reversi, mancala, backgammon, morris, hex, big 2, halma, shogi, xiangqi, and race games. Rules are a first-class resource type: parametric, composable, topology-agnostic. Shared rules (capture, promotion, repetition, turn-continuation) work across all families. 1663 tests across 115 suites, all passing.
+**All classic game families implemented.** 13 plugins covering 154 variants across chess, go, draughts, reversi, mancala, backgammon, morris, hex, big 2, halma, shogi, xiangqi, and race games. Rules are a first-class resource type: parametric, composable, topology-agnostic. Shared rules (capture, promotion, repetition, turn-continuation) work across all families. 1725 tests across 116 suites, all passing.
 
-Current milestone: **Full pipeline proof + AI adapter** — factory instantiates every variant from frontmatter config alone, then generic minimax/MCTS for pass-and-play and AI opponents.
+Current milestone: **Playable and embeddable parity across families.** The play surface (interaction, embed protocol, variant registry, SDK) is family-agnostic and lives in `packages/play`. Chess, Go and draughts are playable and embeddable; the remaining families reach parity by registering variants against the same kit rather than by writing another play page.
 
 Read [`SPEC.md`](./SPEC.md) before contributing anything.
 
@@ -34,7 +34,7 @@ moddable-engine/
     surface/             ← board as resource type (frame, surface, divider, generators, filters)
     schema/              ← frontmatter → game definitions
     game/                ← factory, topology registry, component registry, rule registry
-    play/                ← universal game factory (all 13 families from a single import)
+    play/                ← universal game factory, interaction models, embed protocol, variant registry, SDK
     board-theme/         ← board visual treatment (resolver, builtins)
     piece-theme/         ← piece visual treatment (resolver, recolour)
     component-deck/      ← standard 52-card deck
@@ -109,6 +109,12 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-07-27
+- Family-agnostic play kit in `packages/play`: interaction models (move, place, chain, drop), generic `game:*` embed protocol with per-family aliases, family-scoped variant registry with `extends` inheritance, and a headless SDK covering every family
+- Game controller now drives interaction through the models rather than assuming from/to moves, and gained `performAction` (pass, resign), `handleHandClick`, and chain anchoring for multi-jump turns
+- Go brought to playable parity: 9 hub variants registered, territory and area scoring with dead-stone marking, positional superko, capture annotation, MCTS opponent
+- Draughts brought to playable parity: 13 hub variants registered, capture-priority and king-preference rules, `loseOnSinglePiece`, hooks on the plugin
+- Fixed the AI simulator scoring every terminal position for player 0 when winners are named by colour rather than by index
+- Added `docs/go.html` and `docs/draughts.html`
 - Chess play parity: hand/drop UI, 7 board themes, 5 piece colour presets, SAN notation, multi-move indicator (closes #40)
 - Hex SDK: FOV computation, BFS pathfinding, exportGameData, editHex, PNG export, terrain editor (closes #41)
 - 26 new tests (hex-fov, hex-pathfind, hex SDK extensions)

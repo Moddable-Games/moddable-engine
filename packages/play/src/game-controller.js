@@ -1,3 +1,5 @@
+import { interactionModelFor, availableActions } from './interaction.js'
+
 export function createGameController(game, opts = {}) {
   const players = opts.players || {}
   let aiDifficulty = opts.aiDifficulty || 'medium'
@@ -15,6 +17,11 @@ export function createGameController(game, opts = {}) {
 
   const aiPickMove = opts.aiPickMove || null
 
+  const family = opts.family || null
+  const interaction = opts.interaction || interactionModelFor(family, opts.interactionModel)
+  const onActionsChange = opts.onActionsChange || null
+  const onDropArmed = opts.onDropArmed || null
+
   let selected = null
   let lastMove = null
   let undoStack = []
@@ -23,6 +30,8 @@ export function createGameController(game, opts = {}) {
   let aiThinking = false
   let gameOver = false
   let destroyed = false
+  let chainAnchor = null
+  let dropType = null
 
   function isHuman(playerName) {
     return players[playerName] !== 'ai'
@@ -67,38 +76,109 @@ export function createGameController(game, opts = {}) {
     if (destroyed || gameOver) return
     if (!isHuman(currentPlayer())) return
 
-    const allMoves = getLegalMoves()
+    const moves = getLegalMoves()
+    const result = interaction.handleClick(pos, {
+      selected,
+      chainAnchor,
+      dropType,
+      moves,
+      playerIndex: getPlayerIndex(),
+      getOwnerAt: (p) => {
+        const piece = getPieceAt(p)
+        if (!piece) return null
+        return typeof piece.owner === 'number' ? piece.owner : getPlayerIndexOf(piece.owner)
+      },
+    })
 
-    if (selected !== null) {
-      const candidates = allMoves.filter(m => m.from === selected && m.to === pos)
+    applyInteractionResult(result, moves)
+  }
 
-      if (candidates.length > 1 && candidates[0].promotion) {
+  function applyInteractionResult(result, moves) {
+    if (!result) return
+
+    switch (result.type) {
+      case 'select': {
+        selected = result.pos
+        const piece = getPieceAt(result.pos)
+        if (onSelect) onSelect(result.pos, piece, interaction.targetsFor(result.pos, moves))
+        render()
+        break
+      }
+      case 'deselect': {
+        selected = null
+        render()
+        break
+      }
+      case 'choice': {
         if (onChoiceNeeded) {
-          const choices = [...new Set(candidates.map(m => m.promotion))]
-          onChoiceNeeded(choices, currentPlayer(), (chosen) => {
-            const move = candidates.find(m => m.promotion === chosen)
+          onChoiceNeeded(result.choices, currentPlayer(), (chosen) => {
+            const move = result.candidates.find(m => m[result.choiceKey] === chosen)
             if (move) executeMove(move)
           })
         } else {
-          executeMove(candidates[0])
+          executeMove(result.candidates[0])
         }
-        return
+        break
       }
+      case 'arm-drop': {
+        dropType = result.dropType
+        selected = null
+        if (onDropArmed) onDropArmed(result.dropType)
+        render()
+        break
+      }
+      case 'move': {
+        if (result.clearsDrop) dropType = null
+        executeMove(result.move)
+        break
+      }
+      case 'reject': {
+        if (result.clearsDrop) dropType = null
+        render()
+        break
+      }
+      default:
+        break
+    }
+  }
 
-      if (candidates.length > 0) {
-        executeMove(candidates[0])
-        return
-      }
+  function handleHandClick(pieceType) {
+    if (destroyed || gameOver) return
+    if (!isHuman(currentPlayer())) return
+    if (!interaction.handleHandClick) return
+    const moves = getLegalMoves()
+    applyInteractionResult(interaction.handleHandClick(pieceType, { moves, dropType }), moves)
+  }
+
+  function performAction(action) {
+    if (destroyed || gameOver) return false
+    if (!isHuman(currentPlayer())) return false
+
+    if (action === 'resign') {
+      gameOver = true
+      const loser = currentPlayer()
+      if (onGameEnd) onGameEnd({ result: 'resign', loser })
+      render()
+      return true
     }
 
-    const piece = getPieceAt(pos)
-    if (piece && piece.owner === getPlayerIndex()) {
-      selected = pos
-      if (onSelect) onSelect(pos, piece, allMoves.filter(m => m.from === pos))
-    } else {
-      selected = null
-    }
-    render()
+    const moves = getLegalMoves()
+    const move = moves.find(m => m.action === action)
+    if (!move) return false
+    return executeMove(move)
+  }
+
+  function getAvailableActions() {
+    if (gameOver) return []
+    return availableActions(getLegalMoves())
+  }
+
+  function getPlayerIndexOf(name) {
+    const names = game.playerSystem
+      ? game.playerSystem.getAll()
+      : game.definition?.players?.names || []
+    const idx = names.indexOf(name)
+    return idx === -1 ? null : idx
   }
 
   function getPieceAt(pos) {
@@ -140,19 +220,31 @@ export function createGameController(game, opts = {}) {
 
     undoStack.push(move)
     redoStack = []
-    lastMove = { from: move.from, to: move.to }
+    lastMove = describeLastMove(move)
     selected = null
 
     if (onMove) onMove(move, player)
 
     if (result.winner) {
       gameOver = true
+      chainAnchor = null
       if (onGameEnd) onGameEnd(result.winner)
       render()
       return true
     }
 
+    if (result.continueTurn) {
+      chainAnchor = move.to !== undefined ? move.to : null
+      selected = chainAnchor
+      if (onActionsChange) onActionsChange(getAvailableActions())
+      render()
+      return true
+    }
+
+    chainAnchor = null
+
     if (onTurnChange) onTurnChange(currentPlayer())
+    if (onActionsChange) onActionsChange(getAvailableActions())
 
     render()
     checkGameEnd()
@@ -164,12 +256,45 @@ export function createGameController(game, opts = {}) {
     return true
   }
 
+  function describeLastMove(move) {
+    if (move.from !== undefined && move.to !== undefined) {
+      return { from: move.from, to: move.to }
+    }
+    if (move.coord !== undefined) {
+      return { from: null, to: move.coord, placed: true }
+    }
+    if (move.action) {
+      return { action: move.action }
+    }
+    return { from: move.from ?? null, to: move.to ?? null }
+  }
+
   function checkGameEnd() {
+    const plugin = findPlugin()
+    if (plugin && plugin.checkWin) {
+      const outcome = plugin.checkWin(game.getState(plugin.sliceName), game.store.getAll())
+      if (outcome !== null && outcome !== undefined) {
+        gameOver = true
+        if (onGameEnd) onGameEnd(outcome)
+        return
+      }
+    }
+
     const moves = getLegalMoves()
     if (moves.length === 0) {
       gameOver = true
       if (onGameEnd) onGameEnd('draw')
     }
+  }
+
+  function findPlugin() {
+    if (!game.registry || !game.registry.getPlugins) return null
+    const plugins = game.registry.getPlugins()
+    if (family) {
+      const match = plugins.find(p => p.sliceName === family)
+      if (match) return match
+    }
+    return plugins[0] || null
   }
 
   function scheduleAIMove() {
@@ -199,7 +324,7 @@ export function createGameController(game, opts = {}) {
 
     undoStack.push(move)
     redoStack = []
-    lastMove = { from: move.from, to: move.to }
+    lastMove = describeLastMove(move)
 
     if (onMove) onMove(move, player)
 
@@ -234,9 +359,11 @@ export function createGameController(game, opts = {}) {
     }
 
     selected = null
+    chainAnchor = null
+    dropType = null
     gameOver = false
     lastMove = undoStack.length > 0
-      ? { from: undoStack[undoStack.length - 1].from, to: undoStack[undoStack.length - 1].to }
+      ? describeLastMove(undoStack[undoStack.length - 1])
       : null
 
     if (onUndo) onUndo()
@@ -265,7 +392,7 @@ export function createGameController(game, opts = {}) {
   }
 
   function getState() {
-    return { aiThinking, gameOver, selected, lastMove, flipped, undoCount: undoStack.length }
+    return { aiThinking, gameOver, selected, lastMove, flipped, chainAnchor, dropType, undoCount: undoStack.length }
   }
 
   function destroy() {
@@ -280,6 +407,9 @@ export function createGameController(game, opts = {}) {
 
   return {
     handleClick,
+    handleHandClick,
+    performAction,
+    getAvailableActions,
     executeMove,
     undo,
     forfeit,

@@ -14,9 +14,27 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
     promotionDuring: false,
     flyingKings: false,
     removeImmediately: true,
+    playerNames: null,
   }
 
   const config = { ...defaults, ...variantConfig }
+
+  const hooks = {
+    moveFilter: (moves) => moves,
+    winCondition: null,
+    ...config.hooks,
+  }
+
+  function winnerName(playerIndex) {
+    if (Array.isArray(config.playerNames) && config.playerNames[playerIndex]) {
+      return config.playerNames[playerIndex]
+    }
+    const declared = context.definition
+      && context.definition.players
+      && context.definition.players.names
+    if (Array.isArray(declared) && declared[playerIndex]) return declared[playerIndex]
+    return playerIndex === 0 ? 'player1' : 'player2'
+  }
 
   let topology = null
 
@@ -258,6 +276,14 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
     return board
   }
 
+  function capturesAKing(move, board) {
+    const captured = move.captures || move.captured || []
+    return captured.some(pos => {
+      const piece = board[pos]
+      return piece && piece.type === 'king'
+    })
+  }
+
   return {
     sliceName: 'draughts',
     pieceTypes: ['man', 'king'],
@@ -334,36 +360,66 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
       const playerIndex = full.__players.currentIndex
 
       if (slice._chainActive) {
-        return findCaptures(slice.board, playerIndex, slice._chainFrom)
+        return hooks.moveFilter(findCaptures(slice.board, playerIndex, slice._chainFrom), slice, full)
       }
 
-      const captures = findCaptures(slice.board, playerIndex)
+      let captures = findCaptures(slice.board, playerIndex)
+
+      if (config.menCannotCaptureKings) {
+        captures = captures.filter(c => !capturesAKing(c, slice.board))
+      }
+
+      if (config.kingCapturePriority && captures.length > 0) {
+        const kingCaptures = captures.filter(c => {
+          const piece = slice.board[c.from]
+          return piece && piece.type === 'king'
+        })
+        if (kingCaptures.length > 0) captures = kingCaptures
+      }
+
       if (config.forcedCapture && captures.length > 0) {
         if (config.maximalCapture) {
           const maxLen = Math.max(...captures.map(c => c.captureCount))
-          return captures.filter(c => c.captureCount >= maxLen)
+          captures = captures.filter(c => c.captureCount >= maxLen)
+
+          if (config.majorityPrefersKing) {
+            const withKing = captures.filter(c => {
+              const piece = slice.board[c.from]
+              return piece && piece.type === 'king'
+            })
+            if (withKing.length > 0) captures = withKing
+          }
         }
-        return captures
+        return hooks.moveFilter(captures, slice, full)
       }
 
       const simpleMoves = findSimpleMoves(slice.board, playerIndex)
-      return [...captures, ...simpleMoves]
+      return hooks.moveFilter([...captures, ...simpleMoves], slice, full)
     },
 
     checkWin(slice, full) {
       const playerIndex = full.__players.currentIndex
       const opponent = 1 - playerIndex
 
+      if (typeof hooks.winCondition === 'function') {
+        const outcome = hooks.winCondition(slice, { currentPlayer: playerIndex, winnerName })
+        if (outcome !== null && outcome !== undefined) return outcome
+      }
+
       const opponentPieces = slice.board.filter(p => p && p.owner === opponent)
       if (opponentPieces.length === 0) {
-        return playerIndex === 0 ? 'player1' : 'player2'
+        return winnerName(playerIndex)
+      }
+
+      if (config.loseOnSinglePiece && opponentPieces.length === 1) {
+        return winnerName(playerIndex)
       }
 
       const opponentMoves = findCaptures(slice.board, opponent)
       if (opponentMoves.length === 0) {
         const opponentSimple = findSimpleMoves(slice.board, opponent)
         if (opponentSimple.length === 0) {
-          return playerIndex === 0 ? 'player1' : 'player2'
+          return winnerName(playerIndex)
         }
       }
 

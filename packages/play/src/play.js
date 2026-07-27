@@ -1,5 +1,7 @@
 import { createGameFromDefinition } from '../../game/src/create-game.js'
 import { produce } from '../../schema/src/produce.js'
+import { getVariantConfig, hasVariant } from './variant-registry.js'
+import { definitionFromVariant } from './variant-definition.js'
 import { createGridTopology } from '../../topologies/grid/src/topology-grid.js'
 import { createHexTopology } from '../../topologies/hex/src/topology-hex.js'
 import { createTrackTopology } from '../../topologies/track/src/topology-track.js'
@@ -50,6 +52,20 @@ const COMPONENT_FACTORIES = {
   'deck.standard-52': () => createStandard52Deck(),
 }
 
+export function defaultPlayersFor(family) {
+  const defaults = DEFAULT_DEFINITIONS[family]
+  if (!defaults) return null
+  const engine = defaults.default.engine || {}
+  return engine.players || null
+}
+
+export function defaultTopologyFor(family) {
+  const defaults = DEFAULT_DEFINITIONS[family]
+  if (!defaults) return null
+  const engine = defaults.default.engine || {}
+  return engine.topology || null
+}
+
 export function getPlugin(family) {
   const factory = PLUGIN_FACTORIES[family]
   if (!factory) return null
@@ -74,7 +90,7 @@ export function createGameForFamily(family, opts = {}) {
 
   const definition = userDefinition
     ? (userDefinition.topology !== undefined ? userDefinition : produce(userDefinition))
-    : produce(getDefaultMeta(family, variant))
+    : produce(resolveMeta(family, variant))
 
   const gameOpts = {
     topologies: TOPOLOGIES,
@@ -137,6 +153,19 @@ export function createGameForFamily(family, opts = {}) {
       return game
     },
   }
+}
+
+function resolveMeta(family, variant) {
+  if (variant && hasVariant(family, variant)) {
+    const config = getVariantConfig(family, variant)
+    const defaults = DEFAULT_DEFINITIONS[family]
+    const base = defaults ? (defaults.default.engine || {}) : {}
+    return definitionFromVariant(family, config, {
+      topology: base.topology || {},
+      players: base.players,
+    })
+  }
+  return getDefaultMeta(family, variant)
 }
 
 function getDefaultMeta(family, variant) {

@@ -19,11 +19,12 @@ export function createSimulatorForFamily(family, state, opts = {}) {
     throw new Error(`Plugin "${family}" not found after game creation`)
   }
 
-  const playerCount = rawGame.definition.players.names
-    ? rawGame.definition.players.names.length
+  const playerNames = rawGame.definition.players.names || null
+  const playerCount = playerNames
+    ? playerNames.length
     : (rawGame.definition.players.length || 2)
 
   const evaluate = opts.evaluate || EVALUATORS[family] || null
 
-  return createSimulator(plugin, { playerCount, evaluate })
+  return createSimulator(plugin, { playerCount, playerNames, evaluate })
 }
