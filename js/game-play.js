@@ -20,6 +20,15 @@ const BOARD_THEMES = {
 
 const DIFFICULTIES = ['beginner', 'easy', 'medium', 'hard', 'expert']
 
+const LAYOUT_OPTS = {
+  go: { mode: 'intersections', starPoints: true },
+  hex: { mode: 'intersections' },
+}
+
+function layoutOptsFor(family) {
+  return LAYOUT_OPTS[family] || {}
+}
+
 export function createPlaySession(options = {}) {
   const {
     family,
@@ -136,7 +145,7 @@ export function createPlaySession(options = {}) {
 
   function draw() {
     if (!container || !ctrl) return
-    const layout = game.raw.getLayout({})
+    const layout = game.raw.getLayout(layoutOptsFor(family))
     if (!layout) return
 
     const state = ctrl.getState()
