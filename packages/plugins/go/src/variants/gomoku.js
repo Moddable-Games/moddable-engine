@@ -66,6 +66,33 @@ export const gomoku = {
   },
 }
 
+function pairCaptures(coord, board, opponentColour, slice) {
+  const cols = slice.cols || Math.round(Math.sqrt(board.length))
+  const rows = slice.rows || Math.round(board.length / cols)
+  const row = Math.floor(coord / cols)
+  const col = coord % cols
+  const self = board[coord]
+  const captured = []
+
+  for (const [dr, dc] of [[0, 1], [1, 0], [1, 1], [1, -1]]) {
+    for (const sign of [1, -1]) {
+      const r1 = row + dr * sign, c1 = col + dc * sign
+      const r2 = row + dr * sign * 2, c2 = col + dc * sign * 2
+      const r3 = row + dr * sign * 3, c3 = col + dc * sign * 3
+      if (r3 < 0 || r3 >= rows || c3 < 0 || c3 >= cols) continue
+      const i1 = r1 * cols + c1
+      const i2 = r2 * cols + c2
+      const i3 = r3 * cols + c3
+      if (board[i1] === opponentColour && board[i2] === opponentColour && board[i3] === self) {
+        board[i1] = null
+        board[i2] = null
+        captured.push(i1, i2)
+      }
+    }
+  }
+  return captured
+}
+
 export const ninukiRenju = {
   key: 'ninuki-renju',
   extends: 'gomoku',
@@ -75,6 +102,13 @@ export const ninukiRenju = {
   rule: 'Board: 15×15 · Win: Five in a row or ten captured stones',
   captures: 'pairs',
   captureTarget: 10,
+
+  hooks: {
+    moveFilter(moves) {
+      return moves.filter(m => m.action !== 'pass')
+    },
+    captureEffect: pairCaptures,
+  },
 
   winCondition(slice) {
     const winner = winnerFromRuns(slice, false)

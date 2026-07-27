@@ -119,6 +119,39 @@ describe('go variants', () => {
     })
   })
 
+  describe('ninuki-renju', () => {
+    it('captures a pair of stones flanked on both ends', () => {
+      const game = createGame('go', 'ninuki-renju')
+      const state = game.getState()
+      // row 0: black at 0, white at 1, white at 2, black at 3
+      // placing at 0 flanks the pair at 1,2 (already black at 3)
+      state.slice.board[3] = 'black'
+      state.slice.board[1] = 'white'
+      state.slice.board[2] = 'white'
+      game.loadState(state)
+
+      place(game, 0)
+      const after = game.getState().slice
+      expect(after.board[1]).toBeNull()
+      expect(after.board[2]).toBeNull()
+      expect(after.captures[0]).toBe(2)
+    })
+
+    it('wins on ten captured stones', () => {
+      const game = createGame('go', 'ninuki-renju')
+      const state = game.getState()
+      state.slice.captures = { 0: 8, 1: 0 }
+      // set up one more pair capture for black
+      state.slice.board[3] = 'black'
+      state.slice.board[1] = 'white'
+      state.slice.board[2] = 'white'
+      game.loadState(state)
+
+      place(game, 0)
+      expect(game.checkWin()).toBe('black')
+    })
+  })
+
   describe('stoical go', () => {
     it('bars capturing moves on the turn after being captured', () => {
       const game = createGame('go', 'stoical')
