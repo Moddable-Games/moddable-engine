@@ -1,3 +1,5 @@
+import { scoreGame } from './scoring.js'
+
 export function createGoPlugin(variantConfig = {}, context = {}) {
   const { definition } = context
 
@@ -6,6 +8,9 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
     scoring: 'territory',
     suicideAllowed: false,
     superko: false,
+    captures: true,
+    allowPass: true,
+    captureTarget: null,
   }
 
   const config = { ...defaults, ...variantConfig }
@@ -36,6 +41,13 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
       const dim = pluginConfig.size || 19
       boardSize = dim * dim
     }
+    const cols = topology && topology.cols
+      ? topology.cols
+      : (pluginConfig.cols || pluginConfig.size || Math.round(Math.sqrt(boardSize)))
+    const rows = topology && topology.rows
+      ? topology.rows
+      : (pluginConfig.rows || Math.round(boardSize / cols))
+
     return {
       board: new Array(boardSize).fill(null),
       passes: 0,
@@ -44,11 +56,16 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
       komi: config.komi,
       scoring: config.scoring,
       previousStates: config.superko ? [] : null,
+      rows,
+      cols,
+      lastPlaced: null,
+      lastCaptureBy: null,
+      deadStones: [],
     }
   }
 
   function defaultValidateMove(move, slice, full) {
-    if (move.action === 'pass') return true
+    if (move.action === 'pass') return config.allowPass !== false
     if (move.action === 'resign') return true
 
     const coord = move.coord
@@ -60,7 +77,28 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
       if (wouldBeSuicide(coord, slice, full)) return false
     }
 
+    if (config.superko && slice.previousStates && violatesSuperko(coord, slice, full)) {
+      return false
+    }
+
     return true
+  }
+
+  function violatesSuperko(coord, slice, full) {
+    const { board } = simulatePlacement(coord, slice, full)
+    return slice.previousStates.includes(boardKey(board))
+  }
+
+  function simulatePlacement(coord, slice, full) {
+    const board = [...slice.board]
+    const playerIndex = full && full.__players ? full.__players.currentIndex : 0
+    const currentColour = playerIndex === 0 ? 'black' : 'white'
+    const opponentColour = currentColour === 'black' ? 'white' : 'black'
+    board[coord] = currentColour
+    const captured = config.captures === false
+      ? []
+      : hooks.captureEffect(coord, board, opponentColour, slice)
+    return { board, captured, playerIndex }
   }
 
   function defaultApplyMove(move, slice, full) {
@@ -82,7 +120,9 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
 
     board[move.coord] = currentColour
 
-    const captured = hooks.captureEffect(move.coord, board, opponentColour, slice)
+    const captured = config.captures === false
+      ? []
+      : hooks.captureEffect(move.coord, board, opponentColour, slice)
     const captureCount = captured.length
     const captures = { ...slice.captures }
     captures[playerIndex] = (captures[playerIndex] || 0) + captureCount
@@ -101,6 +141,8 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
       ko,
       captures,
       previousStates,
+      lastPlaced: move.coord,
+      lastCaptureBy: captureCount > 0 ? playerIndex : null,
     }
 
     hooks.afterMove(move, newSlice, full)
@@ -126,24 +168,58 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
   }
 
   function defaultGetLegalMoves(slice, full) {
-    const moves = [{ action: 'pass' }]
+    const moves = config.allowPass === false ? [] : [{ action: 'pass' }]
+
     for (let i = 0; i < slice.board.length; i++) {
-      if (slice.board[i] === null && i !== slice.ko) {
-        if (!config.suicideAllowed) {
-          if (!wouldBeSuicide(i, slice, full)) {
-            moves.push({ coord: i })
-          }
-        } else {
-          moves.push({ coord: i })
-        }
-      }
+      if (slice.board[i] !== null || i === slice.ko) continue
+      if (!config.suicideAllowed && wouldBeSuicide(i, slice, full)) continue
+      if (config.superko && slice.previousStates && violatesSuperko(i, slice, full)) continue
+      moves.push(annotateMove(i, slice, full))
     }
+
     return hooks.moveFilter(moves, slice, full)
   }
 
+  function annotateMove(coord, slice, full) {
+    if (config.captures === false) return { coord }
+    const { captured } = simulatePlacement(coord, slice, full)
+    if (captured.length === 0) return { coord }
+    return { coord, wouldCapture: true, captures: captured }
+  }
+
   function defaultCheckWin(slice, full) {
-    if (slice.passes >= 2) return 'scoring'
+    if (typeof config.winCondition === 'function') {
+      const outcome = config.winCondition(slice, {
+        currentPlayer: full && full.__players ? full.__players.currentIndex : 0,
+      })
+      if (outcome !== null && outcome !== undefined) return outcome
+    }
+
+    if (config.captureTarget) {
+      if ((slice.captures[0] || 0) >= config.captureTarget) return 'black'
+      if ((slice.captures[1] || 0) >= config.captureTarget) return 'white'
+    }
+
+    if (config.allowPass !== false && slice.passes >= 2) {
+      if (config.autoScore === true) return score(slice).winner
+      return 'scoring'
+    }
+
     return null
+  }
+
+  function score(slice, opts = {}) {
+    return scoreGame(slice, {
+      getNeighbours: (pos) => neighboursOf(pos, slice),
+      method: opts.method || config.scoring || slice.scoring,
+      komi: opts.komi !== undefined ? opts.komi : (slice.komi !== undefined ? slice.komi : config.komi),
+      deadStones: opts.deadStones || slice.deadStones || [],
+      captures: slice.captures,
+    })
+  }
+
+  function neighboursOf(pos, slice) {
+    return topology ? topology.neighbours(pos) : gridNeighbours(pos, slice)
   }
 
   function passthrough(moves) { return moves }
@@ -266,6 +342,19 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
 
     checkWin(slice, full) {
       return hooks.checkWin(slice, full)
+    },
+
+    score(slice, opts) {
+      return score(slice, opts)
+    },
+
+    evaluate(slice, playerIndex) {
+      if (typeof config.evaluate === 'function') return config.evaluate(slice, playerIndex)
+      return null
+    },
+
+    markDead(slice, deadStones) {
+      return { ...slice, deadStones }
     },
   }
 }
