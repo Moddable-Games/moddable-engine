@@ -135,7 +135,7 @@ export function createPlaySession(options = {}) {
   }
 
   function draw() {
-    if (!container) return
+    if (!container || !ctrl) return
     const layout = game.raw.getLayout({})
     if (!layout) return
 
@@ -227,6 +227,31 @@ export async function initGamePlay(container, defaults = {}) {
     ? params.variant
     : (variants[0] && variants[0].key)
 
+  const sidebar = document.createElement('aside')
+  sidebar.className = 'game-play-sidebar'
+
+  const boardArea = document.createElement('div')
+  boardArea.className = 'game-play-board'
+
+  container.appendChild(sidebar)
+  container.appendChild(boardArea)
+
+  const variantSelect = buildSelect(sidebar, 'Variant', variants.map(v => ({ value: v.key, label: v.label })), variant)
+  const opponentSelect = buildSelect(sidebar, 'Opponent', [
+    { value: 'human', label: 'Human vs Human' },
+    { value: 'ai', label: 'vs AI' },
+  ], params.opponent === 'ai' ? 'ai' : 'human')
+  const difficultySelect = buildSelect(sidebar, 'Difficulty', DIFFICULTIES.map(d => ({ value: d, label: d[0].toUpperCase() + d.slice(1) })), params.difficulty || 'medium')
+  const themeSelect = buildSelect(sidebar, 'Theme', Object.entries(BOARD_THEMES).map(([k, v]) => ({ value: k, label: v.label })), params.theme || 'classic')
+
+  const statusEl = document.createElement('div')
+  statusEl.className = 'game-play-status'
+  sidebar.appendChild(statusEl)
+
+  const actionsEl = document.createElement('div')
+  actionsEl.className = 'game-play-actions'
+  sidebar.appendChild(actionsEl)
+
   let session = null
 
   const bridge = createEmbedBridge({
@@ -250,21 +275,78 @@ export async function initGamePlay(container, defaults = {}) {
   let config = {
     family,
     variant,
-    container,
-    opponent: params.opponent,
-    difficulty: params.difficulty,
-    theme: params.theme || 'classic',
+    container: boardArea,
+    opponent: opponentSelect.value === 'ai' ? 'ai' : 'human',
+    difficulty: difficultySelect.value,
+    theme: themeSelect.value,
     embed: params.embed ? bridge : null,
+    onStatus: updateStatus,
+  }
+
+  function updateStatus(info) {
+    statusEl.textContent = info.text || ''
+    statusEl.classList.toggle('game-over', !!info.gameOver)
+    renderActions()
+  }
+
+  function renderActions() {
+    actionsEl.innerHTML = ''
+    if (!session) return
+    const actions = session.actions()
+    for (const action of actions) {
+      const btn = document.createElement('button')
+      btn.className = 'btn'
+      btn.textContent = action[0].toUpperCase() + action.slice(1)
+      btn.addEventListener('click', () => session.controller.performAction(action))
+      actionsEl.appendChild(btn)
+    }
+    const undoBtn = document.createElement('button')
+    undoBtn.className = 'btn'
+    undoBtn.textContent = 'Undo'
+    undoBtn.addEventListener('click', () => session.undo())
+    actionsEl.appendChild(undoBtn)
+
+    const newBtn = document.createElement('button')
+    newBtn.className = 'btn'
+    newBtn.textContent = 'New Game'
+    newBtn.addEventListener('click', () => restart({}))
+    actionsEl.appendChild(newBtn)
   }
 
   function restart(changes) {
     config = { ...config, ...changes }
     session = createPlaySession(config)
     session.start()
+    renderActions()
   }
+
+  variantSelect.addEventListener('change', () => restart({ variant: variantSelect.value }))
+  opponentSelect.addEventListener('change', () => restart({ opponent: opponentSelect.value }))
+  difficultySelect.addEventListener('change', () => restart({ difficulty: difficultySelect.value }))
+  themeSelect.addEventListener('change', () => session.setTheme(themeSelect.value))
 
   restart({})
   return session
+}
+
+function buildSelect(parent, label, options, selected) {
+  const group = document.createElement('div')
+  group.className = 'control-group'
+  const lbl = document.createElement('label')
+  lbl.className = 'control-label'
+  lbl.textContent = label
+  const sel = document.createElement('select')
+  for (const opt of options) {
+    const o = document.createElement('option')
+    o.value = opt.value
+    o.textContent = opt.label
+    if (opt.value === selected) o.selected = true
+    sel.appendChild(o)
+  }
+  group.appendChild(lbl)
+  group.appendChild(sel)
+  parent.appendChild(group)
+  return sel
 }
 
 export { BOARD_THEMES, DIFFICULTIES, FAMILY_INTERACTION, getVariantConfig }

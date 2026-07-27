@@ -1056,6 +1056,10 @@ if (_hexEmbed) {
     renderHexEmbed()
   })()
 } else if (document.getElementById('game-select')) {
-  document.addEventListener('DOMContentLoaded', init)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init)
+  } else {
+    init()
+  }
 }
 
