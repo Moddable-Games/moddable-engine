@@ -21,7 +21,7 @@ const BOARD_THEMES = {
 const DIFFICULTIES = ['beginner', 'easy', 'medium', 'hard', 'expert']
 
 const LAYOUT_OPTS = {
-  go: { mode: 'intersections', starPoints: true },
+  go: { mode: 'intersections' },
   hex: { mode: 'intersections' },
 }
 
