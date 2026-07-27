@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Go &mdash; Moddable Engine</title>
+<meta name="description" content="Nine Go variants with territory scoring, an MCTS opponent, and embed support.">
+<meta property="og:title" content="Go &mdash; Moddable Engine">
+<meta property="og:description" content="Nine Go variants with territory scoring, an MCTS opponent, and embed support.">
+<meta property="og:image" content="https://engine.moddable.games/og/docs.png?v=1.0.8">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://engine.moddable.games/docs/go.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Go &mdash; Moddable Engine">
+<meta name="twitter:description" content="Nine Go variants with territory scoring, an MCTS opponent, and embed support.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/docs.png?v=1.0.8">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../css/home.css?v=1.0.8">
+<link rel="stylesheet" href="../css/docs.css?v=1.0.8">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../play/" class="nav-link">Play</a>
+      <a href="../create/" class="nav-link">Create</a>
+      <a href="../boards/" class="nav-link">Boards</a>
+      <a href="../pieces/" class="nav-link">Pieces</a>
+      <a href="../tiles/" class="nav-link">Tiles</a>
+      <a href="./" class="nav-link nav-link--active">Docs</a>
+      <a href="../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</header>
+<div class="docs-layout">
+<button class="docs-toc-toggle" onclick="this.classList.toggle('active');this.nextElementSibling.classList.toggle('open')">Navigation</button>
+<nav class="docs-toc">
+  <div class="docs-toc-title">Pages</div>
+  <ul class="docs-toc-list">
+    <li><a href="./">Overview</a></li>
+    <li><a href="frontmatter.html">Frontmatter</a></li>
+    <li><a href="topologies.html">Topologies</a></li>
+    <li><a href="surfaces.html">Surfaces</a></li>
+    <li><a href="pieces.html">Piece Sets</a></li>
+    <li><a href="plugins.html">Plugins</a></li>
+    <li><a href="render-pipeline.html">Render Pipeline</a></li>
+    <li><a href="chess.html">Chess</a></li>
+    <li><a href="go.html" class="active">Go</a></li>
+    <li><a href="draughts.html">Draughts</a></li>
+    <li><a href="hexmaps.html">Hex Maps</a></li>
+  </ul>
+  <div class="docs-toc-title" style="margin-top:20px">On this page</div>
+  <ul class="docs-toc-list">
+    <li><a href="#embed">Embed via iframe</a></li>
+    <li><a href="#variants">Variants</a></li>
+    <li><a href="#hooks">Variants as plugins</a></li>
+    <li><a href="#scoring">Scoring</a></li>
+    <li><a href="#sdk">SDK</a></li>
+    <li><a href="#gaps">Known gaps</a></li>
+  </ul>
+</nav>
+<div class="docs-body">
+
+  <h1>Go</h1>
+  <p class="docs-lede">Nine Go variants with territory scoring, an MCTS opponent, embed support, and the same headless SDK every family uses.</p>
+
+  <h2 id="embed">Embed via iframe</h2>
+  <p>Every game family shares one embed surface. Select the family and variant through the URL.</p>
+
+  <pre><code>&lt;iframe
+  src="https://engine.moddable.games/play/?embed=1&amp;family=go&amp;variant=9x9"
+  style="width:100%;max-width:560px;aspect-ratio:1/1;border:none"
+  title="Play Go"
+&gt;&lt;/iframe&gt;</code></pre>
+
+  <h3>URL parameters</h3>
+  <table class="docs-table">
+    <thead><tr><th>Param</th><th>Values</th><th>Default</th></tr></thead>
+    <tbody>
+      <tr><td><code>embed</code></td><td><code>1</code></td><td>Required for embed mode</td></tr>
+      <tr><td><code>family</code></td><td><code>go</code></td><td><code>chess</code></td></tr>
+      <tr><td><code>variant</code></td><td>Any variant key below</td><td><code>standard</code></td></tr>
+      <tr><td><code>opponent</code></td><td><code>ai</code> | <code>human</code></td><td><code>ai</code> in embed</td></tr>
+      <tr><td><code>difficulty</code></td><td><code>beginner</code> | <code>easy</code> | <code>medium</code> | <code>hard</code> | <code>expert</code></td><td><code>medium</code></td></tr>
+      <tr><td><code>theme</code></td><td>Board theme id</td><td><code>classic</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>postMessage control</h3>
+  <p>Commands accept either the generic <code>game:</code> prefix or the family prefix, so <code>game:undo</code> and <code>go:undo</code> both work.</p>
+
+  <pre><code>iframe.contentWindow.postMessage({ type: 'game:setVariant', variant: 'capture-go' }, '*')
+iframe.contentWindow.postMessage({ type: 'game:setDifficulty', difficulty: 'hard' }, '*')
+iframe.contentWindow.postMessage({ type: 'game:newGame' }, '*')
+iframe.contentWindow.postMessage({ type: 'game:undo' }, '*')
+iframe.contentWindow.postMessage({ type: 'game:pass' }, '*')
+iframe.contentWindow.postMessage({ type: 'game:resign' }, '*')
+iframe.contentWindow.postMessage({ type: 'game:requestState' }, '*')</code></pre>
+
+  <h3>Events from embed</h3>
+  <pre><code>window.addEventListener('message', (e) =&gt; {
+  switch (e.data.type) {
+    case 'game:ready':  break  // { family, variant, state }
+    case 'game:move':   break  // { move, state }
+    case 'game:status': break  // { text, gameOver, family, variant }
+    case 'game:state':  break  // { state } in reply to requestState
+  }
+})</code></pre>
+
+  <h2 id="variants">Variants</h2>
+  <p>Variant parameters follow the Go hub in moddable-rules. Nine of the fourteen hub variants are registered; the rest are listed under gaps below.</p>
+
+  <table class="docs-table">
+    <thead><tr><th>Key</th><th>Board</th><th>Distinguishing rule</th></tr></thead>
+    <tbody>
+      <tr><td><code>standard</code></td><td>19&times;19</td><td>Territory scoring, komi 6.5, positional superko</td></tr>
+      <tr><td><code>13x13</code></td><td>13&times;13</td><td>Standard rules, komi 6.5</td></tr>
+      <tr><td><code>9x9</code></td><td>9&times;9</td><td>Standard rules, komi 5.5</td></tr>
+      <tr><td><code>capture-go</code></td><td>9&times;9</td><td>First capture wins, passing removed from the move list</td></tr>
+      <tr><td><code>one-colour</code></td><td>19&times;19</td><td>Standard rules rendered with a single stone colour</td></tr>
+      <tr><td><code>stoical</code></td><td>19&times;19</td><td>Cannot capture on the turn after being captured</td></tr>
+      <tr><td><code>toroidal-go</code></td><td>11&times;11</td><td>Edges wrap both ways, komi 4.5</td></tr>
+      <tr><td><code>gomoku</code></td><td>15&times;15</td><td>No captures, exactly five in a row wins, overlines do not</td></tr>
+      <tr><td><code>ninuki-renju</code></td><td>15&times;15</td><td>Five in a row, or ten stones captured in pairs</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="hooks">Variants as plugins</h2>
+  <p>A variant is a plain object of declarative configuration plus optional hooks. Nothing about a variant requires touching the plugin.</p>
+
+  <pre><code>export const captureGo = {
+  key: 'capture-go',
+  label: 'Capture Go',
+  size: 9,
+  komi: 0,
+  allowPass: false,
+
+  hooks: {
+    moveFilter(moves) {
+      return moves.filter(m =&gt; m.action !== 'pass')
+    },
+  },
+
+  winCondition(slice) {
+    if (slice.captures[0] &gt;= 1) return 'black'
+    if (slice.captures[1] &gt;= 1) return 'white'
+    return null
+  },
+}</code></pre>
+
+  <p>Available hooks: <code>init</code>, <code>validateMove</code>, <code>applyMove</code>, <code>getLegalMoves</code>, <code>checkWin</code>, <code>moveFilter</code>, <code>captureEffect</code>, <code>continueTurn</code>, <code>beforeMove</code>, <code>afterMove</code>. Top-level <code>winCondition</code> and <code>evaluate</code> are checked before the default rules. Variants compose through <code>extends</code>, which merges hooks rather than replacing them.</p>
+
+  <h2 id="scoring">Scoring</h2>
+  <p>Two passes end play and report <code>scoring</code> rather than a winner, so the interface can run a dead-stone marking phase before the count. Call the plugin's <code>score()</code> once stones are agreed.</p>
+
+  <pre><code>import { scoreGame } from 'moddable-engine/plugins/go'
+
+const result = scoreGame(slice, {
+  getNeighbours,
+  method: 'territory',   // or 'area'
+  komi: 6.5,
+  deadStones: [40, 41],
+})
+// { winner, margin, scores: { black, white }, territory, stones, neutral }</code></pre>
+
+  <p>Territory scoring counts surrounded points plus prisoners. Area scoring counts surrounded points plus stones on the board. Empty regions bordered by both colours are neutral and count to neither side.</p>
+
+  <h2 id="sdk">SDK</h2>
+  <pre><code>import { createGame, getLegalMoves, getGameStatus, createAI, listVariants } from 'moddable-engine/play'
+
+listVariants('go')                       // [{ key, label, group, board, description }]
+const game = createGame('go', '9x9')
+game.applyMove({ coord: 40 })
+getGameStatus('go', '9x9', game.getState())
+
+const ai = createAI('go', '9x9', { difficulty: 'hard' })
+ai.pickMove(game.getState().slice, 0)    // MCTS by default for Go</code></pre>
+
+  <h2 id="gaps">Known gaps</h2>
+  <p>Five hub variants are deliberately not registered, because each needs a mechanic the engine does not model yet:</p>
+  <ul>
+    <li><strong>phantom-go</strong> &mdash; hidden information; needs the private per-player state layer</li>
+    <li><strong>rengo</strong> &mdash; pair play; needs team ownership over four seats</li>
+    <li><strong>sunjang</strong> and <strong>tibetan</strong> &mdash; fixed opening placements and their own scoring conventions</li>
+    <li><strong>renju</strong> &mdash; the forbidden-move restrictions on black have not been encoded</li>
+  </ul>
+
+
+</div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../play/">Play</a>
+        <a href="../boards/">Boards</a>
+        <a href="../pieces/">Pieces</a>
+        <a href="../tiles/">Tiles</a>
+        <a href="../docs/">Docs</a>
+        <a href="../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Moddable Games</h4>
+        <a href="https://moddable.games" target="_blank" rel="noopener">Homepage</a>
+        <a href="https://rules.moddable.games" target="_blank" rel="noopener">Rules</a>
+        <a href="https://moddable.games/news/" target="_blank" rel="noopener">News</a>
+        <a href="https://discord.gg/VhsVGNq6Za" target="_blank" rel="noopener">Discord</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.8</span>
+    </div>
+  </div>
+</footer></body>
+</html>
