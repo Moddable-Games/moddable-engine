@@ -11,6 +11,20 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
 
   let topology = null
 
+  // Symbols match the setup SFEN/FEN used by the variant frontmatter in
+  // moddable-rules, so a position read from the rules parses here and renders
+  // through the same piece mapping the board diagram uses.
+  const VOCABULARY = {
+    king: { symbols: { 0: 'K', 1: 'k' } },
+    rook: { symbols: { 0: 'R', 1: 'r' } },
+    bishop: { symbols: { 0: 'B', 1: 'b' } },
+    gold: { symbols: { 0: 'G', 1: 'g' } },
+    silver: { symbols: { 0: 'S', 1: 's' } },
+    knight: { symbols: { 0: 'N', 1: 'n' } },
+    lance: { symbols: { 0: 'L', 1: 'l' } },
+    pawn: { symbols: { 0: 'P', 1: 'p' } },
+  }
+
   function cellIndex(row, col) {
     return row * config.cols + col
   }
@@ -203,16 +217,7 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
   return {
     sliceName: 'shogi',
     pieceTypes: ['king', 'rook', 'bishop', 'gold', 'silver', 'knight', 'lance', 'pawn'],
-    vocabulary: {
-      king: { symbols: { 0: 'K', 1: 'k' } },
-      rook: { symbols: { 0: 'R', 1: 'r' } },
-      bishop: { symbols: { 0: 'B', 1: 'b' } },
-      gold: { symbols: { 0: 'G', 1: 'g' } },
-      silver: { symbols: { 0: 'S', 1: 's' } },
-      knight: { symbols: { 0: 'N', 1: 'n' } },
-      lance: { symbols: { 0: 'L', 1: 'l' } },
-      pawn: { symbols: { 0: 'P', 1: 'p' } },
-    },
+    vocabulary: VOCABULARY,
     config,
     rules: ['capture.recruit', 'promotion.zone', 'check', 'checkmate'],
 
@@ -339,8 +344,44 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     return new Array(config.rows * config.cols).fill(null)
   }
 
+  // The starting position comes from the variant's frontmatter in
+  // moddable-rules, the same string the published board diagram is drawn from.
+  // A "+" prefix marks a promoted piece. The plugin models promotion as a
+  // distinct piece type rather than a flag, so the marker is resolved to the
+  // promoted type: a piece carrying only a flag would be moved as though it
+  // were unpromoted.
   function parseSetup(setup) {
     if (Array.isArray(setup)) return setup
-    return new Array(config.rows * config.cols).fill(null)
+    if (!setup || !topology || !topology.parsePosition) {
+      return new Array(config.rows * config.cols).fill(null)
+    }
+
+    // Strip the promotion markers so the notation is plain enough for
+    // parsePosition, recording which piece each one applied to.
+    const promotedAt = new Set()
+    let plain = ''
+    let pieceIndex = 0
+    for (const ch of setup) {
+      if (ch === '+') {
+        promotedAt.add(pieceIndex)
+        continue
+      }
+      plain += ch
+      if (ch !== '/' && !(ch >= '0' && ch <= '9')) pieceIndex++
+    }
+
+    const board = topology.parsePosition(plain, VOCABULARY)
+    if (promotedAt.size === 0) return board
+
+    let seen = 0
+    for (let i = 0; i < board.length; i++) {
+      if (!board[i]) continue
+      if (promotedAt.has(seen)) {
+        const promotedType = getPromotedType(board[i].type)
+        if (promotedType) board[i] = { ...board[i], type: promotedType }
+      }
+      seen++
+    }
+    return board
   }
 }
