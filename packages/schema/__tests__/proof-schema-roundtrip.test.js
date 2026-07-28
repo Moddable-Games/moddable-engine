@@ -14,7 +14,10 @@ import { createStore } from '../../core/src/state-store.js'
 
 const ALL_TOPOLOGIES = [gridSchema, hexSchema, trackSchema, pitSchema, graphSchema]
 
-const RULES_DIR = '/Applications/MAMP/htdocs/MODDABLE/moddable-rules/games'
+import { resolveRulesDir } from '../src/rules-dir.js'
+
+const RULES_DIR = resolveRulesDir()
+const describeWithRules = RULES_DIR ? describe : describe.skip
 
 async function roundTrip(familyPath) {
   const content = await readFile(familyPath, 'utf-8')
@@ -25,18 +28,18 @@ async function roundTrip(familyPath) {
   return definition
 }
 
-describe('proof: full round-trip from real moddable-rules files', () => {
+describeWithRules('proof: full round-trip from real moddable-rules files', () => {
   test('chess standard → grid topology instance', async () => {
-    const def = await roundTrip(join(RULES_DIR, 'moddable-chess/content/variants/standard.md'))
-    expect(def.id).toBe('moddable-chess/standard')
+    const def = await roundTrip(join(RULES_DIR, 'chess/content/variants/standard.md'))
+    expect(def.id).toBe('chess/standard')
     const topo = createGridTopology(def.topology)
     expect(topo.size).toBe(64)
     expect(topo.neighbours(27)).toHaveLength(4)
   })
 
   test('atomic chess → grid topology with 8x8', async () => {
-    const def = await roundTrip(join(RULES_DIR, 'moddable-chess/content/variants/atomic.md'))
-    expect(def.id).toBe('moddable-chess/atomic')
+    const def = await roundTrip(join(RULES_DIR, 'chess/content/variants/atomic.md'))
+    expect(def.id).toBe('chess/atomic')
     const topo = createGridTopology(def.topology)
     expect(topo.size).toBe(64)
   })
@@ -88,7 +91,7 @@ describe('proof: full round-trip from real moddable-rules files', () => {
 
   test('player system works for all variants', async () => {
     const defs = await Promise.all([
-      roundTrip(join(RULES_DIR, 'moddable-chess/content/variants/standard.md')),
+      roundTrip(join(RULES_DIR, 'chess/content/variants/standard.md')),
       roundTrip(join(RULES_DIR, 'mancala/content/variants/oware.md')),
       roundTrip(join(RULES_DIR, 'go/content/variants/standard.md')),
     ])

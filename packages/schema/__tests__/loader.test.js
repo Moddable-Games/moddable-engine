@@ -1,15 +1,18 @@
 import { loadVariantFile, loadFamily, loadAllFamilies, scanFrontmatter } from '../src/loader.js'
 import { join } from 'node:path'
 
-const RULES_DIR = '/Applications/MAMP/htdocs/MODDABLE/moddable-rules/games'
+import { resolveRulesDir } from '../src/rules-dir.js'
 
-describe('loader', () => {
+const RULES_DIR = resolveRulesDir()
+const describeWithRules = RULES_DIR ? describe : describe.skip
+
+describeWithRules('loader', () => {
   test('loads a single variant file', async () => {
-    const path = join(RULES_DIR, 'moddable-chess', 'content', 'variants', 'standard.md')
+    const path = join(RULES_DIR, 'chess', 'content', 'variants', 'standard.md')
     const result = await loadVariantFile(path)
     expect(result.meta.title).toBe('Standard Chess')
     expect(result.meta.slug).toBe('standard')
-    expect(result.meta.parent).toBe('moddable-chess')
+    expect(result.meta.parent).toBe('chess')
     expect(result.body).toContain('## Standard Chess')
   })
 
@@ -39,7 +42,7 @@ describe('loader', () => {
   test('loads all families from games directory', async () => {
     const families = await loadAllFamilies(RULES_DIR)
     expect(families.length).toBeGreaterThanOrEqual(41)
-    const chess = families.find(f => f.family === 'moddable-chess')
+    const chess = families.find(f => f.family === 'chess')
     expect(chess).toBeDefined()
     expect(chess.variants.length).toBeGreaterThan(30)
   })
