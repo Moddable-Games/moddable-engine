@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shogi &mdash; Moddable Engine</title>
+<meta name="description" content="Three shogi variants with drops, zone promotion, and captured pieces that change allegiance.">
+<meta property="og:title" content="Shogi &mdash; Moddable Engine">
+<meta property="og:description" content="Three shogi variants with drops, zone promotion, and captured pieces that change allegiance.">
+<meta property="og:image" content="https://engine.moddable.games/og/docs.png?v=1.0.8">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://engine.moddable.games/docs/shogi.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Shogi &mdash; Moddable Engine">
+<meta name="twitter:description" content="Three shogi variants with drops, zone promotion, and captured pieces that change allegiance.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/docs.png?v=1.0.8">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../css/home.css?v=1.0.8">
+<link rel="stylesheet" href="../css/docs.css?v=1.0.8">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../play/" class="nav-link">Play</a>
+      <a href="../create/" class="nav-link">Create</a>
+      <a href="../boards/" class="nav-link">Boards</a>
+      <a href="../pieces/" class="nav-link">Pieces</a>
+      <a href="../tiles/" class="nav-link">Tiles</a>
+      <a href="./" class="nav-link nav-link--active">Docs</a>
+      <a href="../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</header>
+<div class="docs-layout">
+<button class="docs-toc-toggle" onclick="this.classList.toggle('active');this.nextElementSibling.classList.toggle('open')">Navigation</button>
+<nav class="docs-toc">
+  <div class="docs-toc-title">Pages</div>
+  <ul class="docs-toc-list">
+    <li><a href="./">Overview</a></li>
+    <li><a href="frontmatter.html">Frontmatter</a></li>
+    <li><a href="topologies.html">Topologies</a></li>
+    <li><a href="surfaces.html">Surfaces</a></li>
+    <li><a href="pieces.html">Piece Sets</a></li>
+    <li><a href="plugins.html">Plugins</a></li>
+    <li><a href="render-pipeline.html">Render Pipeline</a></li>
+    <li><a href="chess.html">Chess</a></li>
+    <li><a href="go.html">Go</a></li>
+    <li><a href="draughts.html">Draughts</a></li>
+    <li><a href="xiangqi.html">Xiangqi</a></li>
+    <li><a href="shogi.html" class="active">Shogi</a></li>
+    <li><a href="hexmaps.html">Hex Maps</a></li>
+  </ul>
+  <div class="docs-toc-title" style="margin-top:20px">On this page</div>
+  <ul class="docs-toc-list">
+    <li><a href="#embed">Embed via iframe</a></li>
+    <li><a href="#variants">Variants</a></li>
+    <li><a href="#pieces">Pieces and notation</a></li>
+    <li><a href="#promotion">Promotion</a></li>
+    <li><a href="#drops">Drops and hands</a></li>
+    <li><a href="#knobs">Variant parameters</a></li>
+    <li><a href="#sdk">SDK</a></li>
+    <li><a href="#gaps">Known gaps</a></li>
+  </ul>
+</nav>
+<div class="docs-body">
+
+  <h1>Shogi</h1>
+  <p class="docs-lede">Three shogi variants on 9&times;9, 6&times;6 and 5&times;5 boards. Captured pieces change allegiance and return to play as drops, which is the mechanic the rest of the family is built around.</p>
+
+  <h2 id="embed">Embed via iframe</h2>
+  <pre><code>&lt;iframe
+  src="https://engine.moddable.games/play/?embed=1&amp;family=shogi&amp;variant=minishogi"
+  style="width:100%;max-width:560px;aspect-ratio:1/1;border:none"
+  title="Play Shogi"
+&gt;&lt;/iframe&gt;</code></pre>
+
+  <p>The parameters, commands and events are identical to every other family. See the <a href="go.html#embed">Go page</a> for the full table; substitute <code>family=shogi</code>.</p>
+
+  <h2 id="variants">Variants</h2>
+  <p>Parameters follow the shogi hub in moddable-rules, and each <code>setup</code> is copied verbatim from the variant's frontmatter &mdash; the same string the published board diagram is drawn from.</p>
+
+  <table class="docs-table">
+    <thead><tr><th>Key</th><th>Board</th><th>Zone</th><th>Distinguishing rule</th></tr></thead>
+    <tbody>
+      <tr><td><code>standard</code></td><td>9&times;9</td><td>3 ranks</td><td>The full game, twenty pieces a side</td></tr>
+      <tr><td><code>judkins-shogi</code></td><td>6&times;6</td><td>2 ranks</td><td>Six a side; knight retained, no lance</td></tr>
+      <tr><td><code>minishogi</code></td><td>5&times;5</td><td>1 rank</td><td>Five pieces a side; no knight or lance</td></tr>
+    </tbody>
+  </table>
+
+  <p>Players are <code>sente</code> and <code>gote</code>. Three variants are registered out of twenty-four in the hub; the rest are held back for the reasons under <a href="#gaps">known gaps</a>.</p>
+
+  <h2 id="pieces">Pieces and notation</h2>
+  <p>Symbols match the setup notation the variant frontmatter uses, so a position read from the rules parses here and renders through the piece mapping the board diagram already uses. Sente is player <code>0</code> and takes the uppercase letter.</p>
+
+  <table class="docs-table">
+    <thead><tr><th>Type</th><th>Sente</th><th>Gote</th><th>Movement</th><th>Promotes to</th></tr></thead>
+    <tbody>
+      <tr><td><code>king</code></td><td><code>K</code></td><td><code>k</code></td><td>One step in any direction</td><td>&mdash;</td></tr>
+      <tr><td><code>rook</code></td><td><code>R</code></td><td><code>r</code></td><td>Slides orthogonally</td><td>Adds one diagonal step</td></tr>
+      <tr><td><code>bishop</code></td><td><code>B</code></td><td><code>b</code></td><td>Slides diagonally</td><td>Adds one orthogonal step</td></tr>
+      <tr><td><code>gold</code></td><td><code>G</code></td><td><code>g</code></td><td>Six directions: all but the back diagonals</td><td>&mdash;</td></tr>
+      <tr><td><code>silver</code></td><td><code>S</code></td><td><code>s</code></td><td>Five directions: forward three, back diagonals</td><td>Gold</td></tr>
+      <tr><td><code>knight</code></td><td><code>N</code></td><td><code>n</code></td><td>Two forward, one sideways; jumps</td><td>Gold</td></tr>
+      <tr><td><code>lance</code></td><td><code>L</code></td><td><code>l</code></td><td>Slides straight forward</td><td>Gold</td></tr>
+      <tr><td><code>pawn</code></td><td><code>P</code></td><td><code>p</code></td><td>One step forward</td><td>Gold</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="promotion">Promotion</h2>
+  <p>The plugin models a promoted piece as its own type &mdash; <code>promoted_rook</code>, <code>promoted_silver</code> and so on &mdash; rather than as a flag on the base piece. A flag would have to be consulted at every point movement is generated, and a piece carrying only a flag would be moved as though it were unpromoted.</p>
+
+  <p>The canonical notation writes a promoted piece as its base symbol behind a <code>+</code>, so serialisation resolves the type back to <code>+R</code>, <code>+S</code> and so on, and the setup parser resolves <code>+</code> markers forward to the promoted type on the way in.</p>
+
+  <p>Promotion is offered when a move starts or ends inside the zone, and both the promoting and non-promoting move appear in the list &mdash; except where the piece would otherwise have no legal move, in which case only the promotion is generated. That covers a pawn or lance reaching the last rank, and a knight reaching either of the last two.</p>
+
+  <h2 id="drops">Drops and hands</h2>
+  <p>A captured piece is demoted to its base type and added to the capturing player's hand, from which it may be dropped back onto any empty square as a whole turn. A captured king is not added, so no position can produce two kings for one side.</p>
+
+  <pre><code>const state = game.getState().slice
+state.hands            // [['pawn','silver'], ['pawn']] indexed by player
+game.applyMove({ action: 'drop', type: 'pawn', to: 40 })</code></pre>
+
+  <p>Drop legality is generated, not validated after the fact. Pawns and lances may not be dropped on the last rank and knights not on the last two, since they would have no move. With <code>dropPawnFileLimit</code> set, a pawn may not be dropped onto a file that already holds one of your unpromoted pawns. Every drop is then filtered through the same check test as a board move, so a drop that leaves your own king in check never appears.</p>
+
+  <p>Hands always start empty. This is the reason Gorogoro+ is not registered: it opens with the knight and lance already in hand.</p>
+
+  <h2 id="knobs">Variant parameters</h2>
+  <p>The plugin is parametric, with no per-variant code:</p>
+
+  <table class="docs-table">
+    <thead><tr><th>Parameter</th><th>Default</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr><td><code>rows</code> / <code>cols</code></td><td>9 / 9</td><td>Board dimensions</td></tr>
+      <tr><td><code>promotionZone</code></td><td><code>3</code></td><td>Depth of the promotion zone in ranks, from each far edge</td></tr>
+      <tr><td><code>dropPawnFileLimit</code></td><td><code>true</code></td><td>No two unpromoted pawns of one player on a file</td></tr>
+      <tr><td><code>dropCheckmateLimit</code></td><td><code>true</code></td><td>Declared but <strong>not yet enforced</strong> &mdash; see gaps</td></tr>
+    </tbody>
+  </table>
+
+  <p>The plugin composes the rules <code>capture.recruit</code>, <code>promotion.zone</code>, <code>check</code> and <code>checkmate</code>.</p>
+
+  <h2 id="sdk">SDK</h2>
+  <pre><code>import { createGame, getLegalMoves, getGameStatus, createAI, listVariants } from 'moddable-engine/play'
+
+listVariants('shogi')                    // [{ key, label, group, board, description }]
+const game = createGame('shogi', 'minishogi')
+game.getLegalMoves()                     // [{ from, to, promote? }, { action: 'drop', type, to }, ...]
+game.applyMove({ from: 21, to: 16, promote: true })
+getGameStatus('shogi', 'minishogi', game.getState())
+
+const ai = createAI('shogi', 'minishogi', { difficulty: 'hard' })
+ai.pickMove(game.getState().slice, 0)</code></pre>
+
+  <p>Shogi uses the <code>drop</code> interaction model, which behaves as the <code>move</code> model until a drop is armed from the hand:</p>
+
+  <pre><code>ctrl.handleHandClick('pawn')   // { type: 'arm-drop', dropType: 'pawn' }
+ctrl.handleClick(square)       // commits the drop, then clears the armed type</code></pre>
+
+  <h2 id="gaps">Known gaps</h2>
+
+  <p><strong>The play page has no hand.</strong> Drops are generated, legal and reachable through the controller's <code>handleHandClick</code>, but <code>js/game-play.js</code> renders no captured-piece tray, so a drop cannot currently be made by clicking. Board play, promotion and checkmate all work; a game that hinges on a drop cannot be finished through the page alone. The SDK and embed paths are unaffected.</p>
+
+  <p><strong><code>dropCheckmateLimit</code> is declared but not read.</strong> Dropping a pawn to deliver immediate checkmate &mdash; <em>uchifuzume</em> &mdash; is illegal in standard shogi and is currently allowed. The parameter exists in the config so the intent is recorded, but nothing consults it yet.</p>
+
+  <p>Twenty-one hub variants are not registered. Each is named in <code>UNSUPPORTED</code> in the variant module with its reason. They fall into three groups:</p>
+
+  <p><strong>Would play to the wrong rules</strong>, which is worse than being absent. These parse correctly and give the right piece count, so the failure would be silent:</p>
+  <ul>
+    <li><strong>heian-shogi</strong> &mdash; predates the drop rule, and the plugin cannot disable drops</li>
+    <li><strong>gorogoro-plus</strong> &mdash; the knight and lance start in hand, and hands always start empty</li>
+    <li><strong>mortal-shogi</strong> &mdash; captured pieces demote along a ranking chain rather than to base form</li>
+  </ul>
+
+  <p><strong>New piece types</strong> beyond the eight above: <strong>sho-shogi</strong> (the Drunken Elephant, which promotes to a second royal piece), <strong>chu-shogi</strong>, <strong>dai-shogi</strong>, <strong>tenjiku-shogi</strong>, <strong>maka-dai-dai-shogi</strong>, <strong>tai-shogi</strong>, <strong>taikyoku-shogi</strong>, <strong>tori-shogi</strong>, <strong>wa-shogi</strong>, <strong>yari-shogi</strong> and <strong>dobutsu</strong>.</p>
+
+  <p><strong>Distinct mechanics</strong> rather than distinct pieces: <strong>kyoto-shogi</strong> (every piece flips to its alternate face after each move), <strong>annan-shogi</strong> (a piece moves using the move of the allied piece behind it), <strong>cannon-shogi</strong>, <strong>hasami-shogi</strong>, <strong>hex-shogi-91</strong>, <strong>sankaku-shogi</strong> and <strong>four-player-shogi</strong>.</p>
+
+
+</div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../play/">Play</a>
+        <a href="../boards/">Boards</a>
+        <a href="../pieces/">Pieces</a>
+        <a href="../tiles/">Tiles</a>
+        <a href="../docs/">Docs</a>
+        <a href="../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Moddable Games</h4>
+        <a href="https://moddable.games" target="_blank" rel="noopener">Homepage</a>
+        <a href="https://rules.moddable.games" target="_blank" rel="noopener">Rules</a>
+        <a href="https://moddable.games/news/" target="_blank" rel="noopener">News</a>
+        <a href="https://discord.gg/VhsVGNq6Za" target="_blank" rel="noopener">Discord</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.8</span>
+    </div>
+  </div>
+</footer></body>
+</html>

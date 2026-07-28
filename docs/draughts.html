@@ -57,6 +57,8 @@
     <li><a href="chess.html">Chess</a></li>
     <li><a href="go.html">Go</a></li>
     <li><a href="draughts.html" class="active">Draughts</a></li>
+    <li><a href="xiangqi.html">Xiangqi</a></li>
+    <li><a href="shogi.html">Shogi</a></li>
     <li><a href="hexmaps.html">Hex Maps</a></li>
   </ul>
   <div class="docs-toc-title" style="margin-top:20px">On this page</div>
@@ -65,6 +67,7 @@
     <li><a href="#variants">Variants</a></li>
     <li><a href="#chains">Capture chains</a></li>
     <li><a href="#knobs">Variant parameters</a></li>
+    <li><a href="#sdk">SDK</a></li>
     <li><a href="#gaps">Known gaps</a></li>
   </ul>
 </nav>
@@ -133,6 +136,29 @@ ctrl.handleClick(secondJump)  // continue the same chain</code></pre>
       <tr><td><code>loseOnSinglePiece</code></td><td>Being reduced to one piece is a loss</td></tr>
     </tbody>
   </table>
+
+  <h2 id="sdk">SDK</h2>
+  <p>The SDK is the same across every family; only the family key and the shape of a move differ.</p>
+
+  <pre><code>import { createGame, getLegalMoves, getGameStatus, createAI, listVariants } from 'moddable-engine/play'
+
+listVariants('draughts')                 // [{ key, label, group, board, description }]
+const game = createGame('draughts', 'international')
+game.getLegalMoves()                     // [{ from, to, captures: [...] }, ...]
+game.applyMove({ from: 31, to: 22 })
+getGameStatus('draughts', 'international', game.getState())
+
+const ai = createAI('draughts', 'international', { difficulty: 'hard' })
+ai.pickMove(game.getState().slice, 0)    // minimax by default for draughts</code></pre>
+
+  <p>Difficulty accepts <code>beginner</code>, <code>easy</code>, <code>medium</code>, <code>hard</code> and <code>expert</code>.</p>
+
+  <p>Because captures are compulsory in most variants, <code>getLegalMoves</code> already reflects the forced-capture and maximal-capture parameters &mdash; a quiet move simply will not be in the list when a capture is available. A multi-jump arrives as a sequence of separate moves rather than one move; see <a href="#chains">capture chains</a> above, and drive it through the <code>chain</code> interaction model:</p>
+
+  <pre><code>import { interactionModelFor } from 'moddable-engine/play'
+
+const model = interactionModelFor('draughts')   // the 'chain' model
+model.handleClick(pos, ctx)                     // rejects clicks that abandon a live chain</code></pre>
 
   <h2 id="gaps">Known gaps</h2>
   <p>Seven hub variants are not registered, each because it needs a mechanic the plugin does not model:</p>

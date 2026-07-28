@@ -8,9 +8,12 @@ import { renderFromEngine, attachPieceImages } from '../packages/render/src/rend
 import { resolveSurface } from '../packages/schema/src/surfaces.js'
 import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolver.js'
 import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
+import { boardToSetup as serialiseBoard } from '../packages/play/src/serialise.js'
 
 import '../packages/plugins/go/index.js'
 import '../packages/plugins/draughts/index.js'
+import '../packages/plugins/xiangqi/index.js'
+import '../packages/plugins/shogi/index.js'
 
 const BOARD_THEMES = {
   classic: { label: 'Classic', highlight: 'rgba(255,255,0,0.4)', lastMove: 'rgba(100,180,255,0.3)', dot: 'rgba(0,0,0,0.25)', ring: 'rgba(0,0,0,0.25)' },
@@ -340,56 +343,11 @@ export function createPlaySession(options = {}) {
     return r * cols + c
   }
 
+  // Driven by the vocabulary the plugin declares rather than by a family branch.
+  // When this was inline, draughts men serialised to symbols that resolved to
+  // chess artwork and nothing caught it.
   function boardToSetup(slice, topo) {
-    const board = slice.board || []
-    if (!Array.isArray(board)) return ''
-    const cols = topo.cols || Math.round(Math.sqrt(board.length))
-    const rows = topo.rows || Math.round(board.length / cols)
-    const isGo = topo.layout === 'intersections'
-    const alpha = isGo ? 'abcdefghjklmnopqrst' : 'abcdefghijklmnopqrstuvwxyz'
-
-    if (family === 'go' || family === 'draughts') {
-      const position = {}
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const cell = board[r * cols + c]
-          if (!cell) continue
-          const sq = `${alpha[c]}${rows - r}`
-          if (typeof cell === 'string') {
-            position[sq] = { type: 'stone', color: cell === 'black' ? 'black' : 'white' }
-          } else {
-            const color = cell.owner === 0 ? 'white' : 'black'
-            position[sq] = { type: cell.type || 'man', color }
-          }
-        }
-      }
-      return position
-    }
-
-    const fenRows = []
-    for (let r = 0; r < rows; r++) {
-      let row = ''
-      let empty = 0
-      for (let c = 0; c < cols; c++) {
-        const cell = board[r * cols + c]
-        if (!cell) { empty++; continue }
-        if (empty > 0) { row += empty; empty = 0 }
-        row += cellToFenChar(cell)
-      }
-      if (empty > 0) row += empty
-      fenRows.push(row)
-    }
-    return fenRows.join('/')
-  }
-
-  function cellToFenChar(cell) {
-    if (typeof cell === 'string') {
-      return cell === 'black' ? 'b' : 'w'
-    }
-    if (cell.type === 'king') {
-      return cell.owner === 0 ? 'W' : 'B'
-    }
-    return cell.owner === 0 ? 'w' : 'b'
+    return serialiseBoard(slice, topo, (pluginFor() || {}).vocabulary || {})
   }
 
   function moveToNotation(move) {
@@ -406,28 +364,7 @@ export function createPlaySession(options = {}) {
 
   function getFEN() {
     if (!game || !resolvedBoard) return ''
-    return boardToFen(game.getState().slice, resolvedBoard.topology)
-  }
-
-  function boardToFen(slice, topo) {
-    const board = slice.board || []
-    if (!Array.isArray(board)) return ''
-    const cols = topo.cols || Math.round(Math.sqrt(board.length))
-    const rows = topo.rows || Math.round(board.length / cols)
-    const fenRows = []
-    for (let r = 0; r < rows; r++) {
-      let row = ''
-      let empty = 0
-      for (let c = 0; c < cols; c++) {
-        const cell = board[r * cols + c]
-        if (!cell) { empty++; continue }
-        if (empty > 0) { row += empty; empty = 0 }
-        row += cellToFenChar(cell)
-      }
-      if (empty > 0) row += empty
-      fenRows.push(row)
-    }
-    return fenRows.join('/')
+    return boardToSetup(game.getState().slice, resolvedBoard.topology)
   }
 
   const session = {

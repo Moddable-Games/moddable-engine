@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xiangqi &mdash; Moddable Engine</title>
+<meta name="description" content="Xiangqi with palace confinement, the flying general rule, and cannon capture by screen jump.">
+<meta property="og:title" content="Xiangqi &mdash; Moddable Engine">
+<meta property="og:description" content="Xiangqi with palace confinement, the flying general rule, and cannon capture by screen jump.">
+<meta property="og:image" content="https://engine.moddable.games/og/docs.png?v=1.0.8">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://engine.moddable.games/docs/xiangqi.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Xiangqi &mdash; Moddable Engine">
+<meta name="twitter:description" content="Xiangqi with palace confinement, the flying general rule, and cannon capture by screen jump.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/docs.png?v=1.0.8">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../css/home.css?v=1.0.8">
+<link rel="stylesheet" href="../css/docs.css?v=1.0.8">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../play/" class="nav-link">Play</a>
+      <a href="../create/" class="nav-link">Create</a>
+      <a href="../boards/" class="nav-link">Boards</a>
+      <a href="../pieces/" class="nav-link">Pieces</a>
+      <a href="../tiles/" class="nav-link">Tiles</a>
+      <a href="./" class="nav-link nav-link--active">Docs</a>
+      <a href="../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</header>
+<div class="docs-layout">
+<button class="docs-toc-toggle" onclick="this.classList.toggle('active');this.nextElementSibling.classList.toggle('open')">Navigation</button>
+<nav class="docs-toc">
+  <div class="docs-toc-title">Pages</div>
+  <ul class="docs-toc-list">
+    <li><a href="./">Overview</a></li>
+    <li><a href="frontmatter.html">Frontmatter</a></li>
+    <li><a href="topologies.html">Topologies</a></li>
+    <li><a href="surfaces.html">Surfaces</a></li>
+    <li><a href="pieces.html">Piece Sets</a></li>
+    <li><a href="plugins.html">Plugins</a></li>
+    <li><a href="render-pipeline.html">Render Pipeline</a></li>
+    <li><a href="chess.html">Chess</a></li>
+    <li><a href="go.html">Go</a></li>
+    <li><a href="draughts.html">Draughts</a></li>
+    <li><a href="xiangqi.html" class="active">Xiangqi</a></li>
+    <li><a href="shogi.html">Shogi</a></li>
+    <li><a href="hexmaps.html">Hex Maps</a></li>
+  </ul>
+  <div class="docs-toc-title" style="margin-top:20px">On this page</div>
+  <ul class="docs-toc-list">
+    <li><a href="#embed">Embed via iframe</a></li>
+    <li><a href="#variants">Variants</a></li>
+    <li><a href="#pieces">Pieces and notation</a></li>
+    <li><a href="#knobs">Variant parameters</a></li>
+    <li><a href="#interaction">Interaction</a></li>
+    <li><a href="#sdk">SDK</a></li>
+    <li><a href="#gaps">Known gaps</a></li>
+  </ul>
+</nav>
+<div class="docs-body">
+
+  <h1>Xiangqi</h1>
+  <p class="docs-lede">Chinese chess on a 9&times;10 board: generals confined to their palaces, a river the elephants cannot cross, and a cannon that captures only by jumping a screen.</p>
+
+  <h2 id="embed">Embed via iframe</h2>
+  <pre><code>&lt;iframe
+  src="https://engine.moddable.games/play/?embed=1&amp;family=xiangqi&amp;variant=standard"
+  style="width:100%;max-width:560px;aspect-ratio:9/10;border:none"
+  title="Play Xiangqi"
+&gt;&lt;/iframe&gt;</code></pre>
+
+  <p>The parameters, commands and events are identical to every other family. See the <a href="go.html#embed">Go page</a> for the full table; substitute <code>family=xiangqi</code>.</p>
+
+  <h2 id="variants">Variants</h2>
+  <p>Parameters follow the xiangqi hub in moddable-rules, and each <code>setup</code> is copied verbatim from the variant's frontmatter &mdash; the same string the published board diagram is drawn from.</p>
+
+  <table class="docs-table">
+    <thead><tr><th>Key</th><th>Board</th><th>Distinguishing rule</th></tr></thead>
+    <tbody>
+      <tr><td><code>standard</code></td><td>9&times;10</td><td>River, palace confinement, flying general, cannon screen capture</td></tr>
+    </tbody>
+  </table>
+
+  <p>One variant is registered. Eight more exist in the hub and are held back for the reasons under <a href="#gaps">known gaps</a> &mdash; a deliberately short list, because each exclusion was checked by building the variant from its rules setup and inspecting the result rather than reasoning about it.</p>
+
+  <h2 id="pieces">Pieces and notation</h2>
+  <p>The plugin declares one vocabulary, and it is the same vocabulary the variant frontmatter uses. Symbols are the canonical Xiangqi FEN letters, so a position read from the rules parses here and renders through the piece mapping the board diagram already uses. Red is player <code>0</code> and takes the uppercase letter.</p>
+
+  <table class="docs-table">
+    <thead><tr><th>Type</th><th>Red</th><th>Black</th><th>Movement</th></tr></thead>
+    <tbody>
+      <tr><td><code>general</code></td><td><code>K</code></td><td><code>k</code></td><td>One step orthogonally, never leaving the palace</td></tr>
+      <tr><td><code>advisor</code></td><td><code>A</code></td><td><code>a</code></td><td>One step diagonally, never leaving the palace</td></tr>
+      <tr><td><code>elephant</code></td><td><code>E</code></td><td><code>e</code></td><td>Two points diagonally, blocked at the midpoint, never crossing the river</td></tr>
+      <tr><td><code>horse</code></td><td><code>H</code></td><td><code>h</code></td><td>Knight's move, blocked by a piece on the leg it leaves along</td></tr>
+      <tr><td><code>chariot</code></td><td><code>R</code></td><td><code>r</code></td><td>Slides orthogonally, as a rook</td></tr>
+      <tr><td><code>cannon</code></td><td><code>C</code></td><td><code>c</code></td><td>Slides orthogonally to move; captures only by jumping exactly one screen</td></tr>
+      <tr><td><code>soldier</code></td><td><code>P</code></td><td><code>p</code></td><td>One step forward; gains sideways steps after crossing the river</td></tr>
+    </tbody>
+  </table>
+
+  <p>The soldier is <code>P</code> rather than <code>S</code> because that is what canonical Xiangqi FEN uses. Getting this wrong is not cosmetic: the symbol a piece serialises to is what the renderer resolves against the piece set, so a piece emitting an unmapped symbol is simply not drawn.</p>
+
+  <h2 id="knobs">Variant parameters</h2>
+  <p>The plugin is parametric, with no per-variant code:</p>
+
+  <table class="docs-table">
+    <thead><tr><th>Parameter</th><th>Default</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr><td><code>rows</code> / <code>cols</code></td><td>10 / 9</td><td>Board dimensions</td></tr>
+      <tr><td><code>hasRiver</code></td><td><code>true</code></td><td>Elephants may not cross; soldiers widen after crossing</td></tr>
+      <tr><td><code>flyingGeneralRule</code></td><td><code>true</code></td><td>The generals may not face each other down an open file</td></tr>
+      <tr><td><code>cannonJumpToMove</code></td><td><code>false</code></td><td>When true the cannon must jump a screen to move as well as to capture</td></tr>
+      <tr><td><code>passAllowed</code></td><td><code>false</code></td><td>Adds <code>{ action: 'pass' }</code> to the move list</td></tr>
+    </tbody>
+  </table>
+
+  <p>The plugin composes the rules <code>constraint.region</code>, <code>capture.screen-jump</code>, <code>constraint.facing</code>, <code>check</code> and <code>checkmate</code>.</p>
+
+  <h2 id="interaction">Interaction</h2>
+  <p>Xiangqi uses the <code>move</code> interaction model: click to select one of your own pieces, click again to commit. Selection is rejected on empty points and on the opponent's pieces, and every generated move is filtered through the check test before it is offered, so the flying general rule constrains the move list rather than being caught after the fact.</p>
+
+  <pre><code>import { interactionModelFor } from 'moddable-engine/play'
+
+const model = interactionModelFor('xiangqi')   // the 'move' model
+model.handleClick(from, ctx)                   // { type: 'select', pos }
+model.handleClick(to, ctx)                     // { type: 'move', move }</code></pre>
+
+  <h2 id="sdk">SDK</h2>
+  <pre><code>import { createGame, getLegalMoves, getGameStatus, createAI, listVariants } from 'moddable-engine/play'
+
+listVariants('xiangqi')                  // [{ key, label, group, board, description }]
+const game = createGame('xiangqi', 'standard')
+game.getLegalMoves()                     // [{ from, to }, ...]
+game.applyMove({ from: 84, to: 63 })
+getGameStatus('xiangqi', 'standard', game.getState())
+
+const ai = createAI('xiangqi', 'standard', { difficulty: 'hard' })
+ai.pickMove(game.getState().slice, 0)</code></pre>
+
+  <p>Difficulty accepts <code>beginner</code>, <code>easy</code>, <code>medium</code>, <code>hard</code> and <code>expert</code>, as it does for every family.</p>
+
+  <h2 id="gaps">Known gaps</h2>
+
+  <p><strong>The palace is hardcoded to 9&times;10.</strong> <code>inPalace</code> tests files d&ndash;f and ranks 1&ndash;3 or 8&ndash;10 as fixed numbers. On a smaller board the general starts outside its own palace and has no legal move at all:</p>
+
+  <pre><code>xiangqi/minixiangqi   pieces 24/24  moves 15  general at r6c3 inPalace=false
+xiangqi/xiangqi-42    pieces 24/24  moves 23  general at r5c3 inPalace=false</code></pre>
+
+  <p>Deriving the palace from board size is a small, contained change and would unlock three variants at once. It is the single largest blocker on this family.</p>
+
+  <p>Eight hub variants are not registered. Each is named in <code>UNSUPPORTED</code> in the variant module with its reason, so the gap is visible in code rather than silently missing:</p>
+  <ul>
+    <li><strong>minixiangqi</strong> and <strong>xiangqi-42</strong> &mdash; palace geometry, as above</li>
+    <li><strong>quang-trung</strong> &mdash; palace geometry, and pawn promotion as an alternate win condition</li>
+    <li><strong>janggi</strong> &mdash; palace diagonals, the Korean elephant move, and the bikjang rule</li>
+    <li><strong>manchu-plus</strong> &mdash; the Banner, combining chariot, cannon and horse in one piece</li>
+    <li><strong>yang-qi</strong> &mdash; substitutes FIDE pieces and extends the cannon to diagonals</li>
+    <li><strong>jieqi</strong> &mdash; hidden information: pieces start face down and reveal on first move</li>
+    <li><strong>san-kwo-ki</strong> &mdash; three-player hexagonal trisected board (see engine issue #26)</li>
+  </ul>
+
+
+</div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../play/">Play</a>
+        <a href="../boards/">Boards</a>
+        <a href="../pieces/">Pieces</a>
+        <a href="../tiles/">Tiles</a>
+        <a href="../docs/">Docs</a>
+        <a href="../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Moddable Games</h4>
+        <a href="https://moddable.games" target="_blank" rel="noopener">Homepage</a>
+        <a href="https://rules.moddable.games" target="_blank" rel="noopener">Rules</a>
+        <a href="https://moddable.games/news/" target="_blank" rel="noopener">News</a>
+        <a href="https://discord.gg/VhsVGNq6Za" target="_blank" rel="noopener">Discord</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.8</span>
+    </div>
+  </div>
+</footer></body>
+</html>
