@@ -4,11 +4,16 @@
 // Every entry below is expressible through the plugin's existing parametric
 // knobs. Variants that need mechanics the plugin does not yet model are listed
 // in UNSUPPORTED at the foot of this file rather than being approximated.
+//
+// setup is the starting position, copied verbatim from the variant's
+// frontmatter. It is the same string the published board diagram is drawn from,
+// and the start-position test asserts the two stay in step.
 
 const PLAYERS = ['white', 'black']
 
 export const english = {
   key: 'english',
+  setup: '1b1b1b1b/b1b1b1b1/1b1b1b1b/8/8/w1w1w1w1/1w1w1w1w/w1w1w1w1',
   label: 'English Draughts',
   group: 'Standard Board (8×8)',
   description: 'The most widely known form: diagonal movement, men capture forwards only, and kings do not fly.',
@@ -27,6 +32,7 @@ export const english = {
 
 export const international = {
   key: 'international',
+  setup: '1b1b1b1b1b/b1b1b1b1b1/1b1b1b1b1b/b1b1b1b1b1/10/10/1w1w1w1w1w/w1w1w1w1w1/1w1w1w1w1w/w1w1w1w1w1',
   label: 'International Draughts',
   group: 'Large Board (10×10)',
   description: 'The competitive standard: flying kings, men capture in every direction, and the longest capture chain is compulsory.',
@@ -47,6 +53,7 @@ export const international = {
 
 export const brazilian = {
   key: 'brazilian',
+  setup: '1b1b1b1b/b1b1b1b1/1b1b1b1b/8/8/w1w1w1w1/1w1w1w1w/w1w1w1w1',
   extends: 'international',
   label: 'Brazilian Draughts',
   group: 'Standard Board (8×8)',
@@ -59,6 +66,7 @@ export const brazilian = {
 
 export const canadian = {
   key: 'canadian',
+  setup: '1b1b1b1b1b1b/b1b1b1b1b1b1/1b1b1b1b1b1b/b1b1b1b1b1b1/1b1b1b1b1b1b/12/12/w1w1w1w1w1w1/1w1w1w1w1w1w/w1w1w1w1w1w1/1w1w1w1w1w1w/w1w1w1w1w1w1',
   extends: 'international',
   label: 'Canadian Draughts',
   group: 'Large Board (12×12)',
@@ -71,6 +79,7 @@ export const canadian = {
 
 export const russian = {
   key: 'russian',
+  setup: '1b1b1b1b/b1b1b1b1/1b1b1b1b/8/8/w1w1w1w1/1w1w1w1w/w1w1w1w1',
   label: 'Russian Draughts',
   group: 'Standard Board (8×8)',
   description: 'Men capture backwards, a man promoting mid-chain continues as a king, and the capture chosen is free.',
@@ -89,14 +98,15 @@ export const russian = {
   playerNames: PLAYERS,
 }
 
-// The rules file for this variant contradicts itself: the prose says four rows
-// and twenty pieces a side, which on an eight-row board leaves no empty rows and
-// therefore no opening move, while the starting FEN in the same file gives three
-// rows and fifteen pieces a side with two empty rows between the players. The
-// FEN is the playable reading, so it is the one encoded here. Raised as
-// moddable-rules content issue rather than resolved silently.
+// The prose in this variant's rules file still says four rows and twenty pieces
+// a side, which on an eight-row board would leave no opening move. The setup FEN
+// below is taken verbatim from the same file and is the playable reading. Now
+// that the position is read from the FEN rather than derived from piece counts,
+// the prose discrepancy no longer affects play, but it is still worth correcting
+// in moddable-rules.
 export const spantsiretti = {
   key: 'spantsiretti',
+  setup: '1b1b1b1b1b/b1b1b1b1b1/1b1b1b1b1b/10/10/w1w1w1w1w1/1w1w1w1w1w/w1w1w1w1w1',
   extends: 'russian',
   label: 'Spantsiretti',
   group: 'Extended Board (10×8)',
@@ -109,6 +119,7 @@ export const spantsiretti = {
 
 export const pool = {
   key: 'pool',
+  setup: '1b1b1b1b/b1b1b1b1/1b1b1b1b/8/8/w1w1w1w1/1w1w1w1w/w1w1w1w1',
   extends: 'russian',
   label: 'Pool Checkers',
   group: 'Standard Board (8×8)',
@@ -118,6 +129,7 @@ export const pool = {
 
 export const german = {
   key: 'german',
+  setup: '1b1b1b1b/b1b1b1b1/1b1b1b1b/8/8/w1w1w1w1/1w1w1w1w/w1w1w1w1',
   label: 'German Draughts',
   group: 'Standard Board (8×8)',
   description: 'Men capture in all directions and kings fly, but no majority rule applies to the choice of capture.',
@@ -137,6 +149,7 @@ export const german = {
 
 export const spanish = {
   key: 'spanish',
+  setup: '1b1b1b1b/b1b1b1b1/1b1b1b1b/8/8/w1w1w1w1/1w1w1w1w/w1w1w1w1',
   label: 'Spanish Draughts',
   group: 'Standard Board (8×8)',
   description: 'Kings fly and men move forwards only. Where captures tie in length, the one taken by a king is compulsory.',
@@ -156,6 +169,7 @@ export const spanish = {
 
 export const czech = {
   key: 'czech',
+  setup: '1b1b1b1b/b1b1b1b1/1b1b1b1b/8/8/w1w1w1w1/1w1w1w1w/w1w1w1w1',
   label: 'Czech Draughts',
   group: 'Standard Board (8×8)',
   description: 'A capture by a king takes priority over any capture by a man, and a man promoting mid-chain continues as a king.',
@@ -176,6 +190,7 @@ export const czech = {
 
 export const italian = {
   key: 'italian',
+  setup: '1b1b1b1b/b1b1b1b1/1b1b1b1b/8/8/w1w1w1w1/1w1w1w1w/w1w1w1w1',
   label: 'Italian Draughts',
   group: 'Standard Board (8×8)',
   description: 'Men may not capture kings, and a strict priority hierarchy governs which capture must be taken.',
@@ -195,6 +210,7 @@ export const italian = {
 
 export const turkish = {
   key: 'turkish-draughts',
+  setup: '8/bbbbbbbb/bbbbbbbb/8/8/wwwwwwww/wwwwwwww/8',
   label: 'Turkish Draughts',
   group: 'Standard Board (8×8)',
   description: 'Orthogonal movement across all sixty-four squares, with the majority capture rule.',
@@ -213,6 +229,7 @@ export const turkish = {
 
 export const ghanaian = {
   key: 'ghanaian',
+  setup: '1b1b1b1b1b/b1b1b1b1b1/1b1b1b1b1b/b1b1b1b1b1/10/10/1w1w1w1w1w/w1w1w1w1w1/1w1w1w1w1w/w1w1w1w1w1',
   extends: 'international',
   label: 'Ghanaian Draughts',
   group: 'Large Board (10×10)',
