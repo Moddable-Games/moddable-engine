@@ -12,6 +12,20 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
 
   let topology = null
 
+  // Symbols match the setup FEN and pieces.vocabulary in moddable-rules, so a
+  // position read from the rules parses here and renders through the same piece
+  // mapping the board diagram uses. The soldier is P, not S, because that is
+  // what the canonical Xiangqi FEN uses.
+  const VOCABULARY = {
+    general: { symbols: { 0: 'K', 1: 'k' } },
+    advisor: { symbols: { 0: 'A', 1: 'a' } },
+    elephant: { symbols: { 0: 'E', 1: 'e' } },
+    horse: { symbols: { 0: 'H', 1: 'h' } },
+    chariot: { symbols: { 0: 'R', 1: 'r' } },
+    cannon: { symbols: { 0: 'C', 1: 'c' } },
+    soldier: { symbols: { 0: 'P', 1: 'p' } },
+  }
+
   function cellIndex(row, col) {
     return row * config.cols + col
   }
@@ -217,25 +231,27 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
     return false
   }
 
+  // The starting position comes from the variant's frontmatter in
+  // moddable-rules, the same string the published board diagram is drawn from.
+  function boardFromSetup(setup) {
+    const empty = () => new Array(config.rows * config.cols).fill(null)
+    if (!setup) return empty()
+    if (Array.isArray(setup)) return setup
+    if (topology && topology.parsePosition) return topology.parsePosition(setup, VOCABULARY)
+    return empty()
+  }
+
   return {
     sliceName: 'xiangqi',
     pieceTypes: ['general', 'advisor', 'elephant', 'horse', 'chariot', 'cannon', 'soldier'],
-    vocabulary: {
-      general: { symbols: { 0: 'K', 1: 'k' } },
-      advisor: { symbols: { 0: 'A', 1: 'a' } },
-      elephant: { symbols: { 0: 'E', 1: 'e' } },
-      horse: { symbols: { 0: 'H', 1: 'h' } },
-      chariot: { symbols: { 0: 'R', 1: 'r' } },
-      cannon: { symbols: { 0: 'C', 1: 'c' } },
-      soldier: { symbols: { 0: 'S', 1: 's' } },
-    },
+    vocabulary: VOCABULARY,
     config,
     rules: ['constraint.region', 'capture.screen-jump', 'constraint.facing', 'check', 'checkmate'],
 
     init(pluginConfig, { request }) {
       topology = request('core.topology')
-      const board = new Array(config.rows * config.cols).fill(null)
-      return { board, _cols: config.cols }
+      const setup = pluginConfig.setup || config.setup || null
+      return { board: boardFromSetup(setup), _cols: config.cols }
     },
 
     validateMove(move, slice, full) {
