@@ -320,7 +320,9 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
     sliceName: 'go',
     pieceTypes: ['stone'],
     vocabulary: {
-      stone: { symbols: { 0: 'X', 1: 'O' } },
+      // b and w match the vocabulary the go hub declares in moddable-rules, so
+      // the symbol a stone serialises to is the one the piece set resolves.
+      stone: { symbols: { 0: 'b', 1: 'w' } },
     },
     config,
 

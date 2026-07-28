@@ -38,6 +38,11 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
 
   let topology = null
 
+  const VOCABULARY = {
+    man: { symbols: { 0: 'w', 1: 'b' } },
+    king: { symbols: { 0: 'W', 1: 'B' } },
+  }
+
   function cellIndex(row, col) {
     return row * config.cols + col
   }
@@ -276,6 +281,20 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
     return board
   }
 
+  // The starting position is content, not code: it lives in the variant's
+  // frontmatter in moddable-rules and is the same string the board diagram is
+  // drawn from. Parsing it through topology.parsePosition means the played
+  // board and the published diagram cannot drift apart. buildSetupBoard below
+  // is retained only for callers that supply no setup at all.
+  function boardFromSetup(setup) {
+    if (!setup) return buildSetupBoard()
+    if (Array.isArray(setup)) return setup
+    if (topology && topology.parsePosition) {
+      return topology.parsePosition(setup, VOCABULARY)
+    }
+    return buildSetupBoard()
+  }
+
   function capturesAKing(move, board) {
     const captured = move.captures || move.captured || []
     return captured.some(pos => {
@@ -287,17 +306,15 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
   return {
     sliceName: 'draughts',
     pieceTypes: ['man', 'king'],
-    vocabulary: {
-      man: { symbols: { 0: 'w', 1: 'b' } },
-      king: { symbols: { 0: 'W', 1: 'B' } },
-    },
+    vocabulary: VOCABULARY,
     config,
     rules: ['capture.replacement', 'forced-capture', 'chain-capture', 'promotion.rank-reach'],
 
     init(pluginConfig, { request }) {
       topology = request('core.topology')
+      const setup = pluginConfig.setup || config.setup || null
       return {
-        board: buildSetupBoard(),
+        board: boardFromSetup(setup),
         _cols: config.cols,
         _chainActive: false,
         _chainFrom: null,
