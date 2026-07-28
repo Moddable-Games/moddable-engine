@@ -260,6 +260,10 @@ function parsePosition(resolved, topo) {
   if (!setup) return {}
   if (topo.type === 'hex' || topo.type === 'pit' || topo.type === 'track') return {}
 
+  if (typeof setup === 'object' && !Array.isArray(setup)) {
+    return setup
+  }
+
   const rows = topo.rows || 8
   const cols = topo.cols || 8
   const vocabulary = resolved.pieces?.vocabulary

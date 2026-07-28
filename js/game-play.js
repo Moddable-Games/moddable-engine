@@ -13,12 +13,12 @@ import '../packages/plugins/go/index.js'
 import '../packages/plugins/draughts/index.js'
 
 const BOARD_THEMES = {
-  classic: { label: 'Classic' },
-  cosmic: { label: 'Cosmic Dark' },
-  wood: { label: 'Classic Wood' },
-  marble: { label: 'Marble' },
-  neon: { label: 'Neon' },
-  minimal: { label: 'Minimal' },
+  classic: { label: 'Classic', highlight: 'rgba(255,255,0,0.4)', lastMove: 'rgba(100,180,255,0.3)', dot: 'rgba(0,0,0,0.25)', ring: 'rgba(0,0,0,0.25)' },
+  cosmic: { label: 'Cosmic Dark', highlight: 'rgba(111,181,255,0.35)', lastMove: 'rgba(111,181,255,0.2)', dot: 'rgba(255,255,255,0.25)', ring: 'rgba(255,255,255,0.3)' },
+  wood: { label: 'Classic Wood', highlight: 'rgba(255,215,0,0.4)', lastMove: 'rgba(139,90,43,0.3)', dot: 'rgba(0,0,0,0.2)', ring: 'rgba(0,0,0,0.25)' },
+  marble: { label: 'Marble', highlight: 'rgba(100,149,237,0.35)', lastMove: 'rgba(100,149,237,0.2)', dot: 'rgba(0,0,0,0.15)', ring: 'rgba(0,0,0,0.2)' },
+  neon: { label: 'Neon', highlight: 'rgba(0,255,136,0.3)', lastMove: 'rgba(0,200,255,0.25)', dot: 'rgba(0,255,136,0.4)', ring: 'rgba(255,0,128,0.5)' },
+  minimal: { label: 'Minimal', highlight: 'rgba(66,133,244,0.3)', lastMove: 'rgba(66,133,244,0.15)', dot: 'rgba(0,0,0,0.12)', ring: 'rgba(0,0,0,0.15)' },
 }
 
 const DIFFICULTIES = ['beginner', 'easy', 'medium', 'hard', 'expert']
@@ -79,6 +79,7 @@ export function createPlaySession(options = {}) {
   let deadStones = []
   let currentTheme = theme
   let resolvedBoard = null
+  let moveHistory = []
 
   function playerNames() {
     return game.raw.definition.players.names || []
@@ -92,6 +93,7 @@ export function createPlaySession(options = {}) {
     game = createGameForFamily(family, { variant })
     scoring = null
     deadStones = []
+    moveHistory = []
 
     const variantCfg = getVariantConfig(family, variant) || {}
     resolvedBoard = await resolveBoard(family, variantCfg)
@@ -114,12 +116,19 @@ export function createPlaySession(options = {}) {
       aiPickMove: ai
         ? () => ai.pickMove(game.getState().slice, currentPlayerIndex())
         : null,
-      onRender: draw,
+      onRender: (game, state) => draw(state),
+      onTurnChange: (player) => {
+        if (onStatus) onStatus({ text: `${player} to move`, gameOver: false })
+      },
       onGameEnd: handleGameEnd,
-      onMove: (move) => {
+      onMove: (move, player) => {
+        moveHistory.push({ move, player, notation: moveToNotation(move) })
+        if (onStatus) onStatus({ text: `${game.currentPlayer()} to move`, gameOver: false, lastMove: moveToNotation(move) })
         if (embed) embed.post('move', { move, state: summarise() })
       },
     })
+
+    if (onStatus) onStatus({ text: `${game.currentPlayer()} to move`, gameOver: false })
 
     if (embed) embed.post('ready', { family, variant, state: summarise() })
     draw()
@@ -136,7 +145,11 @@ export function createPlaySession(options = {}) {
       enterScoringPhase()
       return
     }
-    report(result, true)
+    const names = playerNames()
+    const text = result === 'draw' ? 'Draw'
+      : names.includes(result) ? `${result} wins!`
+      : result
+    report(text, true)
   }
 
   function enterScoringPhase() {
@@ -172,11 +185,12 @@ export function createPlaySession(options = {}) {
     }
   }
 
-  function draw() {
+  function draw(state = {}) {
     if (!container || !ctrl || !resolvedBoard) return
 
+    const { selected, lastMove, legalMoves = [] } = state
     const slice = game.getState().slice
-    const rendered = { ...resolvedBoard, setup: boardToFen(slice, resolvedBoard.topology) }
+    const rendered = { ...resolvedBoard, setup: boardToSetup(slice, resolvedBoard.topology) }
     const gallery = galleryIndex || []
     const pieceResult = attachPieceImages(rendered, gallery)
     const svg = renderFromEngine(rendered, {
@@ -188,6 +202,40 @@ export function createPlaySession(options = {}) {
     if (!svg) return
     container.innerHTML = svg
 
+    const svgEl = container.querySelector('svg')
+    if (svgEl) {
+      const theme = BOARD_THEMES[currentTheme] || BOARD_THEMES.classic
+      const overlay = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+      overlay.setAttribute('class', 'highlights')
+      overlay.setAttribute('pointer-events', 'none')
+
+      if (lastMove) {
+        if (lastMove.from !== null && lastMove.from !== undefined) highlightCell(overlay, lastMove.from, theme.lastMove)
+        if (lastMove.to !== null && lastMove.to !== undefined) highlightCell(overlay, lastMove.to, theme.lastMove)
+      }
+
+      if (selected !== null && selected !== undefined) {
+        highlightCell(overlay, selected, theme.highlight)
+      }
+
+      const board = slice.board || []
+      const topo = resolvedBoard.topology
+      const seenTargets = new Set()
+      for (const m of legalMoves) {
+        const target = m.to !== undefined ? m.to : m.coord
+        if (target === undefined || target < 0 || target >= (topo.rows * topo.cols)) continue
+        if (seenTargets.has(target)) continue
+        seenTargets.add(target)
+        const hasPiece = !!board[target]
+        addMoveIndicator(overlay, target, hasPiece ? theme.ring : theme.dot, hasPiece)
+      }
+
+      const piecesGroup = svgEl.querySelector('g[pointer-events="none"]')
+      if (piecesGroup) svgEl.insertBefore(overlay, piecesGroup)
+      else svgEl.appendChild(overlay)
+    }
+
+    let hoverEl = null
     for (const cell of container.querySelectorAll('.board-cell')) {
       cell.style.cursor = 'pointer'
       cell.addEventListener('click', () => {
@@ -196,6 +244,80 @@ export function createPlaySession(options = {}) {
         if (scoring) toggleDead(key)
         else ctrl.handleClick(key)
       })
+      cell.addEventListener('mouseenter', () => {
+        if (hoverEl) { hoverEl.remove(); hoverEl = null }
+        const bbox = cell.getBBox ? cell.getBBox() : null
+        if (!bbox) return
+        const el = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+        el.setAttribute('x', bbox.x)
+        el.setAttribute('y', bbox.y)
+        el.setAttribute('width', bbox.width)
+        el.setAttribute('height', bbox.height)
+        el.setAttribute('fill', 'rgba(100, 180, 255, 0.15)')
+        el.setAttribute('pointer-events', 'none')
+        el.setAttribute('class', 'board-cell-hover')
+        cell.parentNode.insertBefore(el, cell.nextSibling)
+        hoverEl = el
+      })
+      cell.addEventListener('mouseleave', () => {
+        if (hoverEl) { hoverEl.remove(); hoverEl = null }
+      })
+    }
+  }
+
+  function indexToAlgebraic(idx, topo) {
+    const cols = topo.cols || 19
+    const rows = topo.rows || 19
+    const r = Math.floor(idx / cols)
+    const c = idx % cols
+    if (r < 0 || r >= rows || c < 0 || c >= cols) return null
+    const isGo = topo.layout === 'intersections'
+    const alpha = isGo ? 'abcdefghjklmnopqrst' : 'abcdefghijklmnopqrstuvwxyz'
+    return `${alpha[c]}${rows - r}`
+  }
+
+  function findCell(idx) {
+    const sq = indexToAlgebraic(idx, resolvedBoard.topology)
+    if (!sq) return null
+    return container.querySelector(`[data-sq="${sq}"]`)
+  }
+
+  function highlightCell(overlay, idx, color) {
+    const cell = findCell(idx)
+    if (!cell) return
+    const bbox = cell.getBBox ? cell.getBBox() : null
+    if (!bbox) return
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+    rect.setAttribute('x', bbox.x)
+    rect.setAttribute('y', bbox.y)
+    rect.setAttribute('width', bbox.width)
+    rect.setAttribute('height', bbox.height)
+    rect.setAttribute('fill', color)
+    overlay.appendChild(rect)
+  }
+
+  function addMoveIndicator(overlay, idx, color, isCapture) {
+    const cell = findCell(idx)
+    if (!cell) return
+    const bbox = cell.getBBox ? cell.getBBox() : null
+    if (!bbox) return
+    const cx = bbox.x + bbox.width / 2
+    const cy = bbox.y + bbox.height / 2
+    if (isCapture) {
+      const ring = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+      ring.setAttribute('x', bbox.x)
+      ring.setAttribute('y', bbox.y)
+      ring.setAttribute('width', bbox.width)
+      ring.setAttribute('height', bbox.height)
+      ring.setAttribute('fill', color)
+      overlay.appendChild(ring)
+    } else {
+      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+      dot.setAttribute('cx', cx)
+      dot.setAttribute('cy', cy)
+      dot.setAttribute('r', bbox.width * 0.16)
+      dot.setAttribute('fill', color)
+      overlay.appendChild(dot)
     }
   }
 
@@ -209,19 +331,41 @@ export function createPlaySession(options = {}) {
   function algebraicToIndex(sq, topo) {
     const cols = topo.cols || 19
     const rows = topo.rows || 19
-    const idStyle = topo.layout === 'intersections' ? 'go' : 'algebraic'
-    const alpha = idStyle === 'go' ? 'abcdefghjklmnopqrst' : 'abcdefghijklmnopqrstuvwxyz'
-    const c = alpha.indexOf(sq[0])
+    const isGo = topo.layout === 'intersections'
+    const lower = sq[0].toLowerCase()
+    const alpha = isGo ? 'abcdefghjklmnopqrst' : 'abcdefghijklmnopqrstuvwxyz'
+    const c = alpha.indexOf(lower)
     const r = rows - parseInt(sq.slice(1), 10)
     if (c < 0 || r < 0 || r >= rows) return sq
     return r * cols + c
   }
 
-  function boardToFen(slice, topo) {
+  function boardToSetup(slice, topo) {
     const board = slice.board || []
     if (!Array.isArray(board)) return ''
     const cols = topo.cols || Math.round(Math.sqrt(board.length))
     const rows = topo.rows || Math.round(board.length / cols)
+    const isGo = topo.layout === 'intersections'
+    const alpha = isGo ? 'abcdefghjklmnopqrst' : 'abcdefghijklmnopqrstuvwxyz'
+
+    if (family === 'go' || family === 'draughts') {
+      const position = {}
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const cell = board[r * cols + c]
+          if (!cell) continue
+          const sq = `${alpha[c]}${rows - r}`
+          if (typeof cell === 'string') {
+            position[sq] = { type: 'stone', color: cell === 'black' ? 'black' : 'white' }
+          } else {
+            const color = cell.owner === 0 ? 'white' : 'black'
+            position[sq] = { type: cell.type || 'man', color }
+          }
+        }
+      }
+      return position
+    }
+
     const fenRows = []
     for (let r = 0; r < rows; r++) {
       let row = ''
@@ -248,10 +392,50 @@ export function createPlaySession(options = {}) {
     return cell.owner === 0 ? 'w' : 'b'
   }
 
+  function moveToNotation(move) {
+    const topo = resolvedBoard.topology
+    if (move.action) return move.action
+    if (move.coord !== undefined) {
+      return indexToAlgebraic(move.coord, topo) || String(move.coord)
+    }
+    const from = indexToAlgebraic(move.from, topo) || String(move.from)
+    const to = indexToAlgebraic(move.to, topo) || String(move.to)
+    const sep = move.captures && move.captures.length > 0 ? 'x' : '-'
+    return `${from}${sep}${to}`
+  }
+
+  function getFEN() {
+    if (!game || !resolvedBoard) return ''
+    return boardToFen(game.getState().slice, resolvedBoard.topology)
+  }
+
+  function boardToFen(slice, topo) {
+    const board = slice.board || []
+    if (!Array.isArray(board)) return ''
+    const cols = topo.cols || Math.round(Math.sqrt(board.length))
+    const rows = topo.rows || Math.round(board.length / cols)
+    const fenRows = []
+    for (let r = 0; r < rows; r++) {
+      let row = ''
+      let empty = 0
+      for (let c = 0; c < cols; c++) {
+        const cell = board[r * cols + c]
+        if (!cell) { empty++; continue }
+        if (empty > 0) { row += empty; empty = 0 }
+        row += cellToFenChar(cell)
+      }
+      if (empty > 0) row += empty
+      fenRows.push(row)
+    }
+    return fenRows.join('/')
+  }
+
   const session = {
     get controller() { return ctrl },
     get game() { return game },
     get scoring() { return scoring },
+    get history() { return moveHistory },
+    get fen() { return getFEN() },
     start,
     draw,
     summarise,
@@ -293,6 +477,10 @@ export async function initGamePlay(container, defaults = {}) {
   const difficultySelect = buildSelect(sidebar, 'Difficulty', DIFFICULTIES.map(d => ({ value: d, label: d[0].toUpperCase() + d.slice(1) })), params.difficulty || 'medium')
   const themeSelect = buildSelect(sidebar, 'Theme', Object.entries(BOARD_THEMES).map(([k, v]) => ({ value: k, label: v.label })), params.theme || 'classic')
 
+  const rulesEl = document.createElement('div')
+  rulesEl.className = 'game-play-rules'
+  sidebar.appendChild(rulesEl)
+
   const statusEl = document.createElement('div')
   statusEl.className = 'game-play-status'
   sidebar.appendChild(statusEl)
@@ -300,6 +488,21 @@ export async function initGamePlay(container, defaults = {}) {
   const actionsEl = document.createElement('div')
   actionsEl.className = 'game-play-actions'
   sidebar.appendChild(actionsEl)
+
+  const historyEl = document.createElement('div')
+  historyEl.className = 'game-play-history'
+  sidebar.appendChild(historyEl)
+
+  const exportEl = document.createElement('div')
+  exportEl.className = 'game-play-export'
+  const fenBtn = document.createElement('button')
+  fenBtn.className = 'btn'
+  fenBtn.textContent = 'Copy FEN'
+  fenBtn.addEventListener('click', () => {
+    if (session) navigator.clipboard.writeText(session.fen).then(() => { fenBtn.textContent = 'Copied'; setTimeout(() => { fenBtn.textContent = 'Copy FEN' }, 1500) })
+  })
+  exportEl.appendChild(fenBtn)
+  sidebar.appendChild(exportEl)
 
   let session = null
 
@@ -332,10 +535,34 @@ export async function initGamePlay(container, defaults = {}) {
     onStatus: updateStatus,
   }
 
+  function updateRules(variantKey) {
+    const vConfig = getVariantConfig(family, variantKey)
+    if (!vConfig) { rulesEl.innerHTML = ''; return }
+    const parts = []
+    if (vConfig.rule) parts.push(`<span class="rules-badge">${vConfig.rule}</span>`)
+    if (vConfig.description) parts.push(`<p class="rules-desc">${vConfig.description}</p>`)
+    rulesEl.innerHTML = parts.join('')
+  }
+
   function updateStatus(info) {
     statusEl.textContent = info.text || ''
     statusEl.classList.toggle('game-over', !!info.gameOver)
     renderActions()
+    renderHistory()
+  }
+
+  function renderHistory() {
+    if (!session) { historyEl.innerHTML = ''; return }
+    const moves = session.history
+    if (moves.length === 0) { historyEl.innerHTML = ''; return }
+    const pairs = []
+    for (let i = 0; i < moves.length; i += 2) {
+      const num = Math.floor(i / 2) + 1
+      const w = moves[i]?.notation || ''
+      const b = moves[i + 1]?.notation || ''
+      pairs.push(`<span class="move-pair">${num}. ${w} ${b}</span>`)
+    }
+    historyEl.innerHTML = pairs.join(' ')
   }
 
   function renderActions() {
@@ -362,19 +589,35 @@ export async function initGamePlay(container, defaults = {}) {
     actionsEl.appendChild(newBtn)
   }
 
-  function restart(changes) {
+  function updateURL() {
+    const params = new URLSearchParams(location.search)
+    params.set('family', family)
+    if (config.variant) params.set('variant', config.variant)
+    else params.delete('variant')
+    if (config.opponent === 'ai') params.set('opponent', 'ai')
+    else params.delete('opponent')
+    if (config.difficulty && config.difficulty !== 'medium') params.set('difficulty', config.difficulty)
+    else params.delete('difficulty')
+    if (config.theme && config.theme !== 'classic') params.set('theme', config.theme)
+    else params.delete('theme')
+    history.replaceState(null, '', '?' + params.toString())
+  }
+
+  async function restart(changes) {
     config = { ...config, ...changes }
+    updateRules(config.variant)
+    updateURL()
     session = createPlaySession(config)
-    session.start()
+    await session.start()
     renderActions()
   }
 
   variantSelect.addEventListener('change', () => restart({ variant: variantSelect.value }))
   opponentSelect.addEventListener('change', () => restart({ opponent: opponentSelect.value }))
   difficultySelect.addEventListener('change', () => restart({ difficulty: difficultySelect.value }))
-  themeSelect.addEventListener('change', () => session.setTheme(themeSelect.value))
+  themeSelect.addEventListener('change', () => { config.theme = themeSelect.value; session.setTheme(themeSelect.value); updateURL() })
 
-  restart({})
+  await restart({})
   return session
 }
 

@@ -1033,7 +1033,7 @@ function moveToSAN(move, game, rows, cols, isCapture) {
   if (move.flag === 'castle-q' || (move.flag === 'castle' && move.to < move.from)) return 'O-O-O'
 
   const piece = game.board[move.to]
-  const pieceType = piece ? MCE.pieceType(move.to, game) : null
+  const pieceType = piece ? MCE.pieceType(piece) : null
   const SYMBOLS = { k: 'K', q: 'Q', r: 'R', b: 'B', n: 'N' }
   const prefix = (pieceType && pieceType !== 'p') ? (SYMBOLS[pieceType] || pieceType.toUpperCase()) : ''
   const to = sqToAlgebraic(move.to, rows, cols)
