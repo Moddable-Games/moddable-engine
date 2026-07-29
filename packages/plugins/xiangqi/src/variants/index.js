@@ -19,19 +19,38 @@ export const standard = {
   playerNames: PLAYERS,
 }
 
-// Variants held back until the plugin models the mechanic each one needs.
-// Verified rather than assumed: each was built from its rules setup and the
-// result inspected.
-export const UNSUPPORTED = {
-  // The palace test is written for a 9x10 board (files d-f, ranks 1-3 and 8-10).
-  // On these smaller boards the general starts outside its own palace and has no
-  // legal move at all, so they cannot be registered until the palace is derived
-  // from board size rather than hardcoded.
-  minixiangqi: 'palace geometry is hardcoded to 9x10; on this 7x7 board the general starts outside it',
-  'xiangqi-42': 'palace geometry is hardcoded to 9x10; on this 7x6 board the general starts outside it',
-  'quang-trung': 'palace geometry is hardcoded to 9x10, and pawn promotion as an alternate win condition is not modelled',
+export const minixiangqi = {
+  key: 'minixiangqi',
+  setup: 'rchkhcr/p1ppp1p/7/7/7/P1PPP1P/RCHKHCR',
+  label: 'Minixiangqi',
+  group: 'Smaller Board Variants',
+  description: 'Xiangqi condensed to 7x7. No river, no advisors or elephants. Soldiers move sideways from the start.',
+  rule: 'Board: 7×7 · Win: Checkmate the General',
+  rows: 7,
+  cols: 7,
+  hasRiver: false,
+  flyingGeneralRule: true,
+  palace: { cols: [2, 4], rows: [[4, 6], [0, 2]] },
+  playerNames: PLAYERS,
+}
 
-  // These parse from their setup but would play to the wrong rules.
+export const xiangqi42 = {
+  key: 'xiangqi-42',
+  setup: 'rhakahr/1c3c1/p2p2p/P2P2P/1C3C1/RHAKAHR',
+  label: 'Xiangqi 42',
+  group: 'Smaller Board Variants',
+  description: 'Compact 7x6 board (42 intersections). No river, no elephants. Fast tactical play.',
+  rule: 'Board: 7×6 · Win: Checkmate the General',
+  rows: 6,
+  cols: 7,
+  hasRiver: false,
+  flyingGeneralRule: true,
+  palace: { cols: [2, 4], rows: [[3, 5], [0, 2]] },
+  playerNames: PLAYERS,
+}
+
+export const UNSUPPORTED = {
+  'quang-trung': 'pawn promotion as an alternate win condition is not modelled',
   janggi: 'palace diagonals, the Korean elephant move and the bikjang rule are not modelled',
   'manchu-plus': 'the Banner piece, combining chariot, cannon and horse, is not a modelled piece type',
   'yang-qi': 'substitutes FIDE pieces and extends the cannon to diagonals',

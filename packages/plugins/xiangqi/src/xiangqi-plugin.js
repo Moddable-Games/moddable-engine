@@ -10,6 +10,12 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
 
   const config = { ...defaults, ...variantConfig }
 
+  const palace = config.palace || {
+    cols: [3, 5],
+    rows: [[config.rows - 3, config.rows - 1], [0, 2]],
+  }
+  const riverRow = config.river != null ? config.river : Math.floor(config.rows / 2)
+
   let topology = null
 
   // Symbols match the setup FEN and pieces.vocabulary in moddable-rules, so a
@@ -39,14 +45,14 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
   }
 
   function inPalace(r, c, playerIndex) {
-    if (c < 3 || c > 5) return false
-    if (playerIndex === 0) return r >= 7 && r <= 9
-    return r >= 0 && r <= 2
+    if (c < palace.cols[0] || c > palace.cols[1]) return false
+    const [lo, hi] = palace.rows[playerIndex]
+    return r >= lo && r <= hi
   }
 
   function acrossRiver(r, playerIndex) {
-    if (playerIndex === 0) return r <= 4
-    return r >= 5
+    if (playerIndex === 0) return r < riverRow
+    return r >= riverRow
   }
 
   function generatePieceMoves(board, pos, piece, playerIndex) {
