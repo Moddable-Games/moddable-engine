@@ -82,6 +82,7 @@ export function createPlaySession(options = {}) {
   let deadStones = []
   let currentTheme = theme
   let resolvedBoard = null
+  let cellAlphabet = 'abcdefghijklmnopqrstuvwxyz'
   let moveHistory = []
 
   function playerNames() {
@@ -100,6 +101,8 @@ export function createPlaySession(options = {}) {
 
     const variantCfg = getVariantConfig(family, variant) || {}
     resolvedBoard = await resolveBoard(family, variantCfg)
+    const idStyle = resolvedBoard.render?.idStyle
+    cellAlphabet = idStyle === 'go' ? 'ABCDEFGHJKLMNOPQRST' : 'abcdefghijklmnopqrstuvwxyz'
     await loadGalleryIndex()
 
     ai = opponent === 'ai'
@@ -274,9 +277,7 @@ export function createPlaySession(options = {}) {
     const r = Math.floor(idx / cols)
     const c = idx % cols
     if (r < 0 || r >= rows || c < 0 || c >= cols) return null
-    const isGo = topo.layout === 'intersections'
-    const alpha = isGo ? 'abcdefghjklmnopqrst' : 'abcdefghijklmnopqrstuvwxyz'
-    return `${alpha[c]}${rows - r}`
+    return `${cellAlphabet[c]}${rows - r}`
   }
 
   function findCell(idx) {
@@ -334,10 +335,7 @@ export function createPlaySession(options = {}) {
   function algebraicToIndex(sq, topo) {
     const cols = topo.cols || 19
     const rows = topo.rows || 19
-    const isGo = topo.layout === 'intersections'
-    const lower = sq[0].toLowerCase()
-    const alpha = isGo ? 'abcdefghjklmnopqrst' : 'abcdefghijklmnopqrstuvwxyz'
-    const c = alpha.indexOf(lower)
+    const c = cellAlphabet.indexOf(sq[0])
     const r = rows - parseInt(sq.slice(1), 10)
     if (c < 0 || r < 0 || r >= rows) return sq
     return r * cols + c
