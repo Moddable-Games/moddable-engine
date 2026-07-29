@@ -14,23 +14,9 @@ describe('renderStateAsSvg', () => {
     expect(svg).toContain('<svg')
   })
 
-  it('renders mancala as SVG', () => {
-    const svg = renderStateAsSvg('mancala')
+  it('renders draughts as SVG', () => {
+    const svg = renderStateAsSvg('draughts')
     expect(svg).toContain('<svg')
-  })
-
-  it('renders morris as SVG', () => {
-    const svg = renderStateAsSvg('morris')
-    expect(svg).toContain('<svg')
-  })
-
-  it('renders hex as SVG', () => {
-    const svg = renderStateAsSvg('hex')
-    expect(svg).toContain('<svg')
-  })
-
-  it('throws for card games with no topology', () => {
-    expect(() => renderStateAsSvg('big2')).toThrow(/no topology layout/)
   })
 
   it('renders chess with pieces visible', () => {

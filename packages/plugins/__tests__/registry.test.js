@@ -60,22 +60,14 @@ describe('plugin index — built-in registration', () => {
   // Import index.js which triggers side-effect registration
   beforeAll(async () => { await import('../index.js') })
 
-  test('all 13 built-in plugins are registered', () => {
+  test('all 5 built-in plugins are registered', () => {
     const ids = getIds()
     expect(ids).toContain('chess')
     expect(ids).toContain('go')
-    expect(ids).toContain('backgammon')
-    expect(ids).toContain('mancala')
-    expect(ids).toContain('morris')
-    expect(ids).toContain('hex')
-    expect(ids).toContain('big2')
     expect(ids).toContain('draughts')
-    expect(ids).toContain('reversi')
-    expect(ids).toContain('halma')
     expect(ids).toContain('shogi')
     expect(ids).toContain('xiangqi')
-    expect(ids).toContain('race')
-    expect(ids.length).toBeGreaterThanOrEqual(13)
+    expect(ids.length).toBeGreaterThanOrEqual(5)
   })
 
   test('each registered factory is callable', () => {

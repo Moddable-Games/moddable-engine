@@ -27,8 +27,8 @@ describe('createSimulatorForFamily', () => {
     expect(typeof sim.evaluatePosition).toBe('function')
   })
 
-  it('creates simulator for mancala', () => {
-    const sim = createSimulatorForFamily('mancala')
+  it('creates simulator for draughts', () => {
+    const sim = createSimulatorForFamily('draughts')
     expect(sim.playerCount).toBe(2)
   })
 

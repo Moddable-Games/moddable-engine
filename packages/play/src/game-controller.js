@@ -197,7 +197,7 @@ export function createGameController(game, opts = {}) {
         if (state && state.board) return p.sliceName
       }
     }
-    const names = ['chess', 'go', 'draughts', 'reversi', 'halma', 'hex', 'morris', 'mancala', 'backgammon', 'race', 'shogi', 'xiangqi']
+    const names = ['chess', 'go', 'draughts', 'shogi', 'xiangqi']
     for (const name of names) {
       const state = game.getState(name)
       if (state && state.board) return name
