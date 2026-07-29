@@ -55,81 +55,71 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
     return r >= riverRow
   }
 
+  const ORTHOGONAL = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+  const DIAGONAL = [[-1, -1], [-1, 1], [1, -1], [1, 1]]
+  const KNIGHT_OFFSETS = [[-2, -1], [-2, 1], [2, -1], [2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2]]
+  const ELEPHANT_OFFSETS = [[-2, -2], [-2, 2], [2, -2], [2, 2]]
+
+  const PIECE_DEFS = config.pieces || {
+    general: { movement: 'step', dirs: ORTHOGONAL, constraint: 'palace' },
+    advisor: { movement: 'step', dirs: DIAGONAL, constraint: 'palace' },
+    elephant: { movement: 'blocked-leap', dirs: ELEPHANT_OFFSETS, constraint: 'own-side', blockAt: 0.5 },
+    horse: { movement: 'blocked-knight', dirs: KNIGHT_OFFSETS },
+    chariot: { movement: 'slide', dirs: ORTHOGONAL },
+    cannon: { movement: 'cannon', dirs: ORTHOGONAL },
+    soldier: { movement: 'soldier' },
+  }
+
   function generatePieceMoves(board, pos, piece, playerIndex) {
+    const def = PIECE_DEFS[piece.type]
+    if (!def) return []
     const [r, c] = rowCol(pos)
     const moves = []
+    const advancement = config.advancement
+      ? config.advancement[playerIndex]
+      : (playerIndex === 0 ? -1 : 1)
 
-    switch (piece.type) {
-      case 'general': {
-        for (const [dr, dc] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
-          const nr = r + dr
-          const nc = c + dc
+    switch (def.movement) {
+      case 'step': {
+        for (const [dr, dc] of def.dirs) {
+          const nr = r + dr, nc = c + dc
           if (!inBounds(nr, nc)) continue
-          if (!inPalace(nr, nc, playerIndex)) continue
+          if (def.constraint === 'palace' && !inPalace(nr, nc, playerIndex)) continue
           const idx = cellIndex(nr, nc)
-          if (board[idx] === null || board[idx].owner !== playerIndex) {
-            moves.push({ from: pos, to: idx })
-          }
+          if (board[idx] === null || board[idx].owner !== playerIndex) moves.push({ from: pos, to: idx })
         }
         break
       }
-
-      case 'advisor': {
-        for (const [dr, dc] of [[-1, -1], [-1, 1], [1, -1], [1, 1]]) {
-          const nr = r + dr
-          const nc = c + dc
+      case 'blocked-leap': {
+        for (const [dr, dc] of def.dirs) {
+          const nr = r + dr, nc = c + dc
           if (!inBounds(nr, nc)) continue
-          if (!inPalace(nr, nc, playerIndex)) continue
-          const idx = cellIndex(nr, nc)
-          if (board[idx] === null || board[idx].owner !== playerIndex) {
-            moves.push({ from: pos, to: idx })
-          }
-        }
-        break
-      }
-
-      case 'elephant': {
-        for (const [dr, dc] of [[-2, -2], [-2, 2], [2, -2], [2, 2]]) {
-          const nr = r + dr
-          const nc = c + dc
-          if (!inBounds(nr, nc)) continue
-          if (config.hasRiver && acrossRiver(nr, playerIndex)) continue
-          const blockR = r + dr / 2
-          const blockC = c + dc / 2
+          if (def.constraint === 'own-side' && config.hasRiver && acrossRiver(nr, playerIndex)) continue
+          const blockR = r + Math.round(dr * def.blockAt)
+          const blockC = c + Math.round(dc * def.blockAt)
           if (board[cellIndex(blockR, blockC)] !== null) continue
           const idx = cellIndex(nr, nc)
-          if (board[idx] === null || board[idx].owner !== playerIndex) {
-            moves.push({ from: pos, to: idx })
-          }
+          if (board[idx] === null || board[idx].owner !== playerIndex) moves.push({ from: pos, to: idx })
         }
         break
       }
-
-      case 'horse': {
-        const horseMoves = [[-2, -1], [-2, 1], [2, -1], [2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2]]
-        for (const [dr, dc] of horseMoves) {
-          const nr = r + dr
-          const nc = c + dc
+      case 'blocked-knight': {
+        for (const [dr, dc] of def.dirs) {
+          const nr = r + dr, nc = c + dc
           if (!inBounds(nr, nc)) continue
-          const blockR = r + (dr > 0 ? 1 : dr < 0 ? -1 : 0)
-          const blockC = c + (dc > 0 ? 1 : dc < 0 ? -1 : 0)
           const legBlock = Math.abs(dr) > Math.abs(dc)
             ? cellIndex(r + (dr > 0 ? 1 : -1), c)
             : cellIndex(r, c + (dc > 0 ? 1 : -1))
           if (board[legBlock] !== null) continue
           const idx = cellIndex(nr, nc)
-          if (board[idx] === null || board[idx].owner !== playerIndex) {
-            moves.push({ from: pos, to: idx })
-          }
+          if (board[idx] === null || board[idx].owner !== playerIndex) moves.push({ from: pos, to: idx })
         }
         break
       }
-
-      case 'chariot': {
-        for (const [dr, dc] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+      case 'slide': {
+        for (const [dr, dc] of def.dirs) {
           for (let dist = 1; dist < Math.max(config.rows, config.cols); dist++) {
-            const nr = r + dr * dist
-            const nc = c + dc * dist
+            const nr = r + dr * dist, nc = c + dc * dist
             if (!inBounds(nr, nc)) break
             const idx = cellIndex(nr, nc)
             if (board[idx] !== null) {
@@ -141,55 +131,38 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
         }
         break
       }
-
       case 'cannon': {
-        for (const [dr, dc] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+        for (const [dr, dc] of def.dirs) {
           let foundScreen = false
           for (let dist = 1; dist < Math.max(config.rows, config.cols); dist++) {
-            const nr = r + dr * dist
-            const nc = c + dc * dist
+            const nr = r + dr * dist, nc = c + dc * dist
             if (!inBounds(nr, nc)) break
             const idx = cellIndex(nr, nc)
             if (!foundScreen) {
-              if (board[idx] !== null) {
-                foundScreen = true
-              } else {
-                if (!config.cannonJumpToMove) {
-                  moves.push({ from: pos, to: idx })
-                }
-              }
+              if (board[idx] !== null) { foundScreen = true }
+              else if (!config.cannonJumpToMove) moves.push({ from: pos, to: idx })
             } else {
               if (board[idx] !== null) {
                 if (board[idx].owner !== playerIndex) moves.push({ from: pos, to: idx })
                 break
               }
-              if (config.cannonJumpToMove) {
-                moves.push({ from: pos, to: idx })
-              }
+              if (config.cannonJumpToMove) moves.push({ from: pos, to: idx })
             }
           }
-          if (!config.cannonJumpToMove) continue
         }
         break
       }
-
       case 'soldier': {
-        const fwd = playerIndex === 0 ? -1 : 1
-        const nr = r + fwd
+        const nr = r + advancement
         if (inBounds(nr, c)) {
           const idx = cellIndex(nr, c)
-          if (board[idx] === null || board[idx].owner !== playerIndex) {
-            moves.push({ from: pos, to: idx })
-          }
+          if (board[idx] === null || board[idx].owner !== playerIndex) moves.push({ from: pos, to: idx })
         }
         if (acrossRiver(r, playerIndex)) {
           for (const dc of [-1, 1]) {
-            const nc = c + dc
-            if (!inBounds(r, nc)) continue
-            const idx = cellIndex(r, nc)
-            if (board[idx] === null || board[idx].owner !== playerIndex) {
-              moves.push({ from: pos, to: idx })
-            }
+            if (!inBounds(r, c + dc)) continue
+            const idx = cellIndex(r, c + dc)
+            if (board[idx] === null || board[idx].owner !== playerIndex) moves.push({ from: pos, to: idx })
           }
         }
         break

@@ -43,11 +43,12 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
   }
 
   function flipDirs(dirs, playerIndex) {
-    if (playerIndex === 0) return dirs
+    const adv = config.advancement ? config.advancement[playerIndex] : (playerIndex === 0 ? -1 : 1)
+    if (adv === -1) return dirs
     return dirs.map(([dr, dc]) => [-dr, dc])
   }
 
-  const PIECE_MOVES = {
+  const DEFAULT_PIECE_MOVES = {
     king: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]],
     rook: 'slide_orthogonal',
     bishop: 'slide_diagonal',
@@ -63,6 +64,8 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     promoted_lance: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, 0]],
     promoted_pawn: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, 0]],
   }
+
+  const PIECE_MOVES = config.pieceMoves || DEFAULT_PIECE_MOVES
 
   function getPromotedType(type) {
     if (type.startsWith('promoted_')) return null
@@ -132,7 +135,7 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
         }
       }
     } else if (moveDef === 'slide_forward') {
-      const dr = playerIndex === 0 ? -1 : 1
+      const dr = config.advancement ? config.advancement[playerIndex] : (playerIndex === 0 ? -1 : 1)
       for (let dist = 1; dist < config.rows; dist++) {
         const nr = r + dr * dist
         if (!inBounds(nr, c)) break
