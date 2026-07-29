@@ -1,6 +1,7 @@
 import { renderFromEngine, attachPieceImages } from '../packages/render/src/render-engine.js'
 import { algebraicId, algebraicToIndex } from '../packages/topologies/grid/index.js'
 import MCE, { createGameController, aiPickMove } from '../packages/plugins/chess/src/mce/index.js'
+import { BOARD_THEMES, DARK_THEMES, loadGalleryIndex as loadGallery, getGalleryIndex } from './play-shared.js'
 
 let ctrl = null
 let currentVariant = 'standard'
@@ -21,16 +22,6 @@ const ANIM_STYLES = { slide: 'Slide', arc: 'Arc', bounce: 'Bounce', warp: 'Warp'
 let animSpeed = localStorage.getItem('mce-anim-speed') || 'normal'
 let animStyle = localStorage.getItem('mce-anim-style') || 'slide'
 
-const BOARD_THEMES = {
-  classic: { light: '#f0d9b5', dark: '#b58863', highlight: 'rgba(255,255,0,0.4)', lastMove: 'rgba(100,180,255,0.3)', dot: 'rgba(0,0,0,0.2)', ring: 'rgba(0,0,0,0.2)', label: 'Classic' },
-  cosmic: { light: '#2d3760', dark: '#141c37', highlight: 'rgba(111,181,255,0.35)', lastMove: 'rgba(111,181,255,0.2)', dot: 'rgba(255,255,255,0.25)', ring: 'rgba(255,255,255,0.3)', label: 'Cosmic Dark' },
-  wood: { light: '#deb887', dark: '#8b5e3c', highlight: 'rgba(255,215,0,0.4)', lastMove: 'rgba(139,90,43,0.3)', dot: 'rgba(0,0,0,0.2)', ring: 'rgba(0,0,0,0.25)', label: 'Classic Wood' },
-  marble: { light: '#f2f0ec', dark: '#b8b5af', highlight: 'rgba(100,149,237,0.35)', lastMove: 'rgba(100,149,237,0.2)', dot: 'rgba(0,0,0,0.15)', ring: 'rgba(0,0,0,0.2)', label: 'Marble' },
-  neon: { light: '#1a1a2e', dark: '#0f0f1a', highlight: 'rgba(0,255,136,0.3)', lastMove: 'rgba(0,200,255,0.25)', dot: 'rgba(0,255,136,0.4)', ring: 'rgba(255,0,128,0.5)', label: 'Neon' },
-  minimal: { light: '#fafafa', dark: '#e8e8e8', highlight: 'rgba(66,133,244,0.3)', lastMove: 'rgba(66,133,244,0.15)', dot: 'rgba(0,0,0,0.12)', ring: 'rgba(0,0,0,0.15)', label: 'Minimal' },
-  transparent: { light: 'rgba(128,128,128,0.12)', dark: 'rgba(128,128,128,0.3)', highlight: 'rgba(111,181,255,0.35)', lastMove: 'rgba(111,181,255,0.2)', dot: 'rgba(128,128,128,0.4)', ring: 'rgba(128,128,128,0.45)', label: 'Transparent' },
-}
-const DARK_THEMES = ['cosmic', 'neon', 'transparent']
 let currentTheme = localStorage.getItem('mce-board-theme') || 'classic'
 
 const PIECE_STYLES = {
@@ -67,7 +58,7 @@ export async function initChessPlay(container) {
   if (fullscreenMode) document.body.classList.add('chess-fullscreen-mode')
   initEmbedMessageListener()
 
-  galleryIndex = await fetch('../pieces/gallery-index.json').then(r => r.json()).catch(() => null)
+  galleryIndex = await loadGallery()
   await loadRecolouredPieces()
 
   container.innerHTML = buildUI()

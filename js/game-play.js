@@ -15,28 +15,9 @@ import '../packages/plugins/draughts/index.js'
 import '../packages/plugins/xiangqi/index.js'
 import '../packages/plugins/shogi/index.js'
 
-const BOARD_THEMES = {
-  classic: { label: 'Classic', highlight: 'rgba(255,255,0,0.4)', lastMove: 'rgba(100,180,255,0.3)', dot: 'rgba(0,0,0,0.25)', ring: 'rgba(0,0,0,0.25)' },
-  cosmic: { label: 'Cosmic Dark', highlight: 'rgba(111,181,255,0.35)', lastMove: 'rgba(111,181,255,0.2)', dot: 'rgba(255,255,255,0.25)', ring: 'rgba(255,255,255,0.3)' },
-  wood: { label: 'Classic Wood', highlight: 'rgba(255,215,0,0.4)', lastMove: 'rgba(139,90,43,0.3)', dot: 'rgba(0,0,0,0.2)', ring: 'rgba(0,0,0,0.25)' },
-  marble: { label: 'Marble', highlight: 'rgba(100,149,237,0.35)', lastMove: 'rgba(100,149,237,0.2)', dot: 'rgba(0,0,0,0.15)', ring: 'rgba(0,0,0,0.2)' },
-  neon: { label: 'Neon', highlight: 'rgba(0,255,136,0.3)', lastMove: 'rgba(0,200,255,0.25)', dot: 'rgba(0,255,136,0.4)', ring: 'rgba(255,0,128,0.5)' },
-  minimal: { label: 'Minimal', highlight: 'rgba(66,133,244,0.3)', lastMove: 'rgba(66,133,244,0.15)', dot: 'rgba(0,0,0,0.12)', ring: 'rgba(0,0,0,0.15)' },
-}
+import { BOARD_THEMES, RULES_BASE, loadGalleryIndex, getGalleryIndex } from './play-shared.js'
 
 const DIFFICULTIES = ['beginner', 'easy', 'medium', 'hard', 'expert']
-
-const RULES_BASE = location.hostname === 'engine.moddable.games'
-  ? 'https://rules.moddable.games/'
-  : '../../moddable-rules/'
-
-let galleryIndex = null
-async function loadGalleryIndex() {
-  if (galleryIndex) return galleryIndex
-  try { galleryIndex = await fetch('../pieces/gallery-index.json').then(r => r.json()) }
-  catch { galleryIndex = [] }
-  return galleryIndex
-}
 
 async function loadFamilyConfig(family) {
   const basePath = RULES_BASE + 'games/'
@@ -197,7 +178,7 @@ export function createPlaySession(options = {}) {
     const { selected, lastMove, legalMoves = [] } = state
     const slice = game.getState().slice
     const rendered = { ...resolvedBoard, setup: boardToSetup(slice, resolvedBoard.topology) }
-    const gallery = galleryIndex || []
+    const gallery = getGalleryIndex() || []
     const pieceResult = attachPieceImages(rendered, gallery)
     const svg = renderFromEngine(rendered, {
       pieceImages: pieceResult.images || {},
