@@ -6,6 +6,8 @@ import { createGame } from '../../play/src/sdk.js'
 
 import '../go/index.js'
 import '../draughts/index.js'
+import '../xiangqi/index.js'
+import '../shogi/index.js'
 
 // The starting position for every variant is content, owned by moddable-rules,
 // and is the exact string the published board diagram is drawn from. These
