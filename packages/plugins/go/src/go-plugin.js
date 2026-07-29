@@ -296,14 +296,16 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
   }
 
   function gridNeighbours(idx, slice) {
-    const size = Math.round(Math.sqrt(slice.board.length))
-    const row = Math.floor(idx / size)
-    const col = idx % size
+    if (topology && topology.neighbours) return topology.neighbours(idx)
+    const cols = slice._cols || Math.round(Math.sqrt(slice.board.length))
+    const rows = Math.round(slice.board.length / cols)
+    const row = Math.floor(idx / cols)
+    const col = idx % cols
     const n = []
-    if (row > 0) n.push(idx - size)
-    if (row < size - 1) n.push(idx + size)
+    if (row > 0) n.push(idx - cols)
+    if (row < rows - 1) n.push(idx + cols)
     if (col > 0) n.push(idx - 1)
-    if (col < size - 1) n.push(idx + 1)
+    if (col < cols - 1) n.push(idx + 1)
     return n
   }
 
