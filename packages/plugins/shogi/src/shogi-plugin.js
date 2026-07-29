@@ -12,9 +12,7 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
   let topology = null
 
   // Symbols match the setup SFEN/FEN used by the variant frontmatter in
-  // moddable-rules, so a position read from the rules parses here and renders
-  // through the same piece mapping the board diagram uses.
-  const VOCABULARY = {
+  const DEFAULT_VOCABULARY = {
     king: { symbols: { 0: 'K', 1: 'k' } },
     rook: { symbols: { 0: 'R', 1: 'r' } },
     bishop: { symbols: { 0: 'B', 1: 'b' } },
@@ -24,6 +22,8 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     lance: { symbols: { 0: 'L', 1: 'l' } },
     pawn: { symbols: { 0: 'P', 1: 'p' } },
   }
+
+  const VOCABULARY = config.vocabulary || DEFAULT_VOCABULARY
 
   function cellIndex(row, col) {
     return row * config.cols + col

@@ -38,10 +38,12 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
 
   let topology = null
 
-  const VOCABULARY = {
+  const DEFAULT_VOCABULARY = {
     man: { symbols: { 0: 'w', 1: 'b' } },
     king: { symbols: { 0: 'W', 1: 'B' } },
   }
+
+  const VOCABULARY = config.vocabulary || DEFAULT_VOCABULARY
 
   function cellIndex(row, col) {
     return row * config.cols + col

@@ -18,11 +18,7 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
 
   let topology = null
 
-  // Symbols match the setup FEN and pieces.vocabulary in moddable-rules, so a
-  // position read from the rules parses here and renders through the same piece
-  // mapping the board diagram uses. The soldier is P, not S, because that is
-  // what the canonical Xiangqi FEN uses.
-  const VOCABULARY = {
+  const DEFAULT_VOCABULARY = {
     general: { symbols: { 0: 'K', 1: 'k' } },
     advisor: { symbols: { 0: 'A', 1: 'a' } },
     elephant: { symbols: { 0: 'E', 1: 'e' } },
@@ -31,6 +27,8 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
     cannon: { symbols: { 0: 'C', 1: 'c' } },
     soldier: { symbols: { 0: 'P', 1: 'p' } },
   }
+
+  const VOCABULARY = config.vocabulary || DEFAULT_VOCABULARY
 
   function cellIndex(row, col) {
     return row * config.cols + col

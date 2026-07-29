@@ -14,6 +14,7 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
   }
 
   const config = { ...defaults, ...variantConfig }
+  const playerColours = config.playerColours || ['black', 'white']
 
   const hooks = {
     init: defaultInit,
@@ -92,8 +93,8 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
   function simulatePlacement(coord, slice, full) {
     const board = [...slice.board]
     const playerIndex = full && full.__players ? full.__players.currentIndex : 0
-    const currentColour = playerIndex === 0 ? 'black' : 'white'
-    const opponentColour = currentColour === 'black' ? 'white' : 'black'
+    const currentColour = playerColours[playerIndex]
+    const opponentColour = playerColours[1 - playerIndex]
     board[coord] = currentColour
     const captured = config.captures === false
       ? []
@@ -115,8 +116,8 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
 
     const board = [...slice.board]
     const playerIndex = full.__players.currentIndex
-    const currentColour = playerIndex === 0 ? 'black' : 'white'
-    const opponentColour = currentColour === 'black' ? 'white' : 'black'
+    const currentColour = playerColours[playerIndex]
+    const opponentColour = playerColours[1 - playerIndex]
 
     board[move.coord] = currentColour
 
@@ -228,8 +229,8 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
   function wouldBeSuicide(coord, slice, full) {
     const board = [...slice.board]
     const playerIndex = full.__players.currentIndex
-    const currentColour = playerIndex === 0 ? 'black' : 'white'
-    const opponentColour = currentColour === 'black' ? 'white' : 'black'
+    const currentColour = playerColours[playerIndex]
+    const opponentColour = playerColours[1 - playerIndex]
 
     board[coord] = currentColour
 
