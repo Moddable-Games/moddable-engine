@@ -19,27 +19,25 @@ import { BOARD_THEMES, RULES_BASE, loadGalleryIndex, getGalleryIndex } from './p
 
 const DIFFICULTIES = ['beginner', 'easy', 'medium', 'hard', 'expert']
 
-async function loadFamilyConfig(family) {
-  const basePath = RULES_BASE + 'games/'
-  const familyMd = await fetch(basePath + family + '/content/rulebook.md').then(r => r.text())
-  const familyFm = parseFrontmatter(familyMd).meta || {}
-  return familyFm
-}
-
 async function resolveBoard(family, variantConfig) {
-  const familyFm = await loadFamilyConfig(family)
-  const familyEngine = familyFm.engine || {}
-  const size = variantConfig.size || variantConfig.rows || familyEngine.topology?.rows || 19
-  const cols = variantConfig.cols || variantConfig.size || familyEngine.topology?.cols || size
-  const variantEngine = {
-    topology: { ...familyEngine.topology, rows: size, cols },
-  }
-  const surfaceRef = familyEngine.surface
+  const basePath = RULES_BASE + 'games/'
+  const variantSlug = variantConfig.key || 'standard'
+  const familyPath = family + '/content/rulebook.md'
+  const variantPath = family + '/content/variants/' + variantSlug + '.md'
+
+  const [familyMd, variantMd] = await Promise.all([
+    fetch(basePath + familyPath).then(r => r.text()),
+    fetch(basePath + variantPath).then(r => r.text()).catch(() => ''),
+  ])
+
+  const familyFm = parseFrontmatter(familyMd).meta || {}
+  const variantFm = variantMd ? (parseFrontmatter(variantMd).meta || {}) : {}
+  const surfaceRef = variantFm.engine?.surface || familyFm.engine?.surface
   const surface = resolveSurface(surfaceRef)
   const { resolved } = cascadeResolve({
     surface,
-    family: { engine: familyEngine, meta: { label: familyFm.title || '' } },
-    variant: { engine: variantEngine, meta: { label: variantConfig.label || '' } },
+    family: { engine: familyFm.engine || {}, meta: { label: familyFm.title || '' } },
+    variant: { engine: variantFm.engine || {}, meta: { label: variantFm.title || variantConfig.label || '' } },
   })
   return resolved
 }
