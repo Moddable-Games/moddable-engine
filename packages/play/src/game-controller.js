@@ -50,7 +50,7 @@ export function createGameController(game, opts = {}) {
   }
 
   function getLegalMovesFrom(pos) {
-    return getLegalMoves().filter(m => m.from === pos)
+    return getLegalMoves().filter(m => String(m.from) === String(pos))
   }
 
   function isGameOverCheck() {
