@@ -78,7 +78,11 @@ export function elementsToFragment(elements) {
 export function elementToSvg(el) {
   if (!el || !el.tag) return ''
   const { tag, attrs = {}, text, children } = el
-  const attrStr = Object.entries(attrs)
+  const finalAttrs = { ...attrs }
+  if (!finalAttrs['pointer-events'] && !(finalAttrs.class && finalAttrs.class.includes('board-cell'))) {
+    finalAttrs['pointer-events'] = 'none'
+  }
+  const attrStr = Object.entries(finalAttrs)
     .map(([k, v]) => `${k}="${esc(String(v))}"`)
     .join(' ')
   const open = attrStr ? `<${tag} ${attrStr}` : `<${tag}`
