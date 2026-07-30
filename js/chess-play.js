@@ -204,6 +204,8 @@ function startGame() {
     onAnimateMove: (move, g, done) => {
       const duration = ANIM_SPEEDS[animSpeed] || 0
       if (duration === 0) { done(); return }
+      const vcAnim = MCE.getVariantConfig ? MCE.getVariantConfig(currentVariant) : null
+      if (vcAnim && vcAnim.visibility) { done(); return }
       const flp = ctrl?.getState()?.flipped || false
       const fromPos = getCellCenter(move.from, flp, rows, cols)
       const toPos = getCellCenter(move.to, flp, rows, cols)
