@@ -668,7 +668,7 @@ const OP_HANDLERS = {
     const grouped = op.grouped === true
     const out = grouped ? [] : elements
     const line = (x1, y1, x2, y2) => {
-      const attrs = { x1, y1, x2, y2 }
+      const attrs = { x1, y1, x2, y2, 'pointer-events': 'none' }
       if (!grouped) { attrs.stroke = stroke; attrs['stroke-width'] = width }
       out.push({ tag: 'line', attrs })
     }
