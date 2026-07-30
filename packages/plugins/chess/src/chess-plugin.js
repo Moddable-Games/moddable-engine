@@ -44,6 +44,12 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       builtPieces.set(name, null)
       return null
     }
+    if (pConfig.type === 'compose' && Array.isArray(pConfig.parts)) {
+      const parts = pConfig.parts.map(p => typeof p === 'string' ? buildPiece(p) : fromConfig(p)).filter(Boolean)
+      const composed = compose(...parts)
+      builtPieces.set(name, composed)
+      return composed
+    }
     const primitive = fromConfig(pConfig)
     builtPieces.set(name, primitive)
     return primitive
