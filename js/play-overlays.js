@@ -37,9 +37,9 @@ export function paintFog(overlay, bbox, color = '#1a1a2e', opacity = '0.92') {
   overlay.appendChild(rect)
 }
 
-export function createOverlay() {
+export function createOverlay(className = 'highlights') {
   const g = document.createElementNS(SVG_NS, 'g')
-  g.setAttribute('class', 'highlights')
+  g.setAttribute('class', className)
   g.setAttribute('pointer-events', 'none')
   return g
 }

@@ -3,6 +3,7 @@ import { algebraicId, algebraicToIndex } from '../packages/topologies/grid/index
 import MCE, { createGameController, aiPickMove } from '../packages/plugins/chess/src/mce/index.js'
 import { BOARD_THEMES, DARK_THEMES, loadGalleryIndex as loadGallery, getGalleryIndex } from './play-shared.js'
 import { createCellAddressing } from './play-cells.js'
+import { paintHighlight, paintIndicator, paintFog, createOverlay } from './play-overlays.js'
 
 let ctrl = null
 let cells = null
@@ -270,20 +271,18 @@ function renderBoard(game, state, rows, cols) {
   }
 
   if (svgEl) {
-    const overlay = document.createElementNS('http://www.w3.org/2000/svg', 'g')
-    overlay.setAttribute('class', 'play-overlay')
-    overlay.setAttribute('pointer-events', 'none')
+    const overlay = createOverlay('play-overlay')
     const piecesLayer = svgEl.querySelector('g[pointer-events="none"]')
     const insertBefore = piecesLayer || svgEl.lastChild
 
     const theme = BOARD_THEMES[currentTheme] || BOARD_THEMES.classic
     if (lastMove) {
-      addHighlight(overlay, lastMove.from, rows, cols, theme.lastMove, flipped)
-      addHighlight(overlay, lastMove.to, rows, cols, theme.lastMove, flipped)
+      paintHighlight(overlay, cells.bbox(lastMove.from, boardSvgContainer), theme.lastMove)
+      paintHighlight(overlay, cells.bbox(lastMove.to, boardSvgContainer), theme.lastMove)
     }
 
     if (selected !== null) {
-      addHighlight(overlay, selected, rows, cols, theme.highlight, flipped)
+      paintHighlight(overlay, cells.bbox(selected, boardSvgContainer), theme.highlight)
     }
 
     const seenTargets = new Set()
@@ -291,24 +290,7 @@ function renderBoard(game, state, rows, cols) {
       if (seenTargets.has(m.to)) continue
       seenTargets.add(m.to)
       const hasPiece = board[m.to] !== null
-      const bbox = cells.bbox(m.to, boardSvgContainer)
-      if (!bbox) continue
-      if (hasPiece) {
-        const ring = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-        ring.setAttribute('x', bbox.x)
-        ring.setAttribute('y', bbox.y)
-        ring.setAttribute('width', bbox.width)
-        ring.setAttribute('height', bbox.height)
-        ring.setAttribute('fill', theme.ring)
-        overlay.appendChild(ring)
-      } else {
-        const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-        dot.setAttribute('cx', bbox.x + bbox.width / 2)
-        dot.setAttribute('cy', bbox.y + bbox.height / 2)
-        dot.setAttribute('r', bbox.width * 0.16)
-        dot.setAttribute('fill', theme.dot)
-        overlay.appendChild(dot)
-      }
+      paintIndicator(overlay, cells.bbox(m.to, boardSvgContainer), hasPiece ? theme.ring : theme.dot, hasPiece)
     }
 
     // Effect overlays (poison, immune, petrify)
@@ -330,16 +312,7 @@ function renderBoard(game, state, rows, cols) {
       if (fogMask) {
         for (let i = 0; i < fogMask.length; i++) {
           if (fogMask[i]) continue
-          const fbb = cells.bbox(i, boardSvgContainer)
-          if (!fbb) continue
-          const fog = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-          fog.setAttribute('x', fbb.x)
-          fog.setAttribute('y', fbb.y)
-          fog.setAttribute('width', fbb.width)
-          fog.setAttribute('height', fbb.height)
-          fog.setAttribute('fill', '#1a1a2e')
-          fog.setAttribute('opacity', '0.92')
-          overlay.appendChild(fog)
+          paintFog(overlay, cells.bbox(i, boardSvgContainer))
         }
       }
     }
@@ -842,17 +815,6 @@ function captureBurst(cx, cy, tileSize) {
   requestAnimationFrame(frame)
 }
 
-function addHighlight(overlay, idx, rows, cols, color, flipped) {
-  const bb = cells.bbox(idx, boardSvgContainer)
-  if (!bb) return
-  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-  rect.setAttribute('x', bb.x)
-  rect.setAttribute('y', bb.y)
-  rect.setAttribute('width', bb.width)
-  rect.setAttribute('height', bb.height)
-  rect.setAttribute('fill', color)
-  overlay.appendChild(rect)
-}
 
 async function loadRecolouredPieces() {
   const style = PIECE_STYLES[currentPieceStyle]
