@@ -18,6 +18,7 @@ import '../packages/plugins/shogi/index.js'
 import { BOARD_THEMES, RULES_BASE, loadGalleryIndex, getGalleryIndex } from './play-shared.js'
 import { createCellAddressing } from './play-cells.js'
 import { paintHighlight, paintIndicator, createOverlay } from './play-overlays.js'
+import { bindBoardInteraction } from './play-interaction.js'
 
 const DIFFICULTIES = ['beginner', 'easy', 'medium', 'hard', 'expert']
 
@@ -224,34 +225,12 @@ export function createPlaySession(options = {}) {
       else svgEl.appendChild(overlay)
     }
 
-    let hoverEl = null
-    for (const cell of container.querySelectorAll('.board-cell')) {
-      cell.style.cursor = 'pointer'
-      cell.addEventListener('click', () => {
-        const sq = cell.getAttribute('data-sq')
-        const key = coerceKey(sq)
+    bindBoardInteraction(container, cells, {
+      onCellClick: (key) => {
         if (scoring) toggleDead(key)
         else ctrl.handleClick(key)
-      })
-      cell.addEventListener('mouseenter', () => {
-        if (hoverEl) { hoverEl.remove(); hoverEl = null }
-        const bbox = cell.getBBox ? cell.getBBox() : null
-        if (!bbox) return
-        const el = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-        el.setAttribute('x', bbox.x)
-        el.setAttribute('y', bbox.y)
-        el.setAttribute('width', bbox.width)
-        el.setAttribute('height', bbox.height)
-        el.setAttribute('fill', 'rgba(100, 180, 255, 0.15)')
-        el.setAttribute('pointer-events', 'none')
-        el.setAttribute('class', 'board-cell-hover')
-        cell.parentNode.insertBefore(el, cell.nextSibling)
-        hoverEl = el
-      })
-      cell.addEventListener('mouseleave', () => {
-        if (hoverEl) { hoverEl.remove(); hoverEl = null }
-      })
-    }
+      },
+    })
   }
 
   function findCell(idx) {
