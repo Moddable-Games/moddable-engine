@@ -4,6 +4,7 @@ import MCE, { createGameController, aiPickMove } from '../packages/plugins/chess
 import { BOARD_THEMES, DARK_THEMES, loadGalleryIndex as loadGallery, getGalleryIndex } from './play-shared.js'
 import { createCellAddressing } from './play-cells.js'
 import { paintHighlight, paintIndicator, paintFog, createOverlay } from './play-overlays.js'
+import { bindBoardInteraction } from './play-interaction.js'
 
 let ctrl = null
 let cells = null
@@ -320,17 +321,10 @@ function renderBoard(game, state, rows, cols) {
     svgEl.insertBefore(overlay, insertBefore)
   }
 
-  boardSvgContainer.onclick = (e) => {
-    let el = e.target
-    while (el && el !== boardSvgContainer) {
-      if (el.getAttribute && el.getAttribute('data-sq')) {
-        const idx = cells.toIndex(el.getAttribute('data-sq'))
-        if (idx >= 0) ctrl.handleClick(idx)
-        return
-      }
-      el = el.parentNode
-    }
-  }
+  bindBoardInteraction(boardSvgContainer, cells, {
+    onCellClick: (idx) => ctrl.handleClick(idx),
+    hover: false,
+  })
 }
 
 function buildUI() {
