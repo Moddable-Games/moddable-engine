@@ -16,6 +16,7 @@ import '../packages/plugins/xiangqi/index.js'
 import '../packages/plugins/shogi/index.js'
 
 import { BOARD_THEMES, RULES_BASE, loadGalleryIndex, getGalleryIndex } from './play-shared.js'
+import { createCellAddressing } from './play-cells.js'
 
 const DIFFICULTIES = ['beginner', 'easy', 'medium', 'hard', 'expert']
 
@@ -61,7 +62,7 @@ export function createPlaySession(options = {}) {
   let deadStones = []
   let currentTheme = theme
   let resolvedBoard = null
-  let cellAlphabet = 'abcdefghijklmnopqrstuvwxyz'
+  let cells = null
   let moveHistory = []
 
   function playerNames() {
@@ -80,8 +81,12 @@ export function createPlaySession(options = {}) {
 
     const variantCfg = getVariantConfig(family, variant) || {}
     resolvedBoard = await resolveBoard(family, variantCfg)
-    const idStyle = resolvedBoard.render?.idStyle
-    cellAlphabet = idStyle === 'go' ? 'ABCDEFGHJKLMNOPQRST' : 'abcdefghijklmnopqrstuvwxyz'
+    const topo = resolvedBoard.topology
+    cells = createCellAddressing({
+      rows: topo.rows || 19,
+      cols: topo.cols || 19,
+      idStyle: resolvedBoard.render?.idStyle || 'algebraic',
+    })
     await loadGalleryIndex()
 
     ai = opponent === 'ai'
@@ -250,19 +255,8 @@ export function createPlaySession(options = {}) {
     }
   }
 
-  function indexToAlgebraic(idx, topo) {
-    const cols = topo.cols || 19
-    const rows = topo.rows || 19
-    const r = Math.floor(idx / cols)
-    const c = idx % cols
-    if (r < 0 || r >= rows || c < 0 || c >= cols) return null
-    return `${cellAlphabet[c]}${rows - r}`
-  }
-
   function findCell(idx) {
-    const sq = indexToAlgebraic(idx, resolvedBoard.topology)
-    if (!sq) return null
-    return container.querySelector(`[data-sq="${sq}"]`)
+    return cells.find(idx, container)
   }
 
   function highlightCell(overlay, idx, color) {
@@ -308,16 +302,8 @@ export function createPlaySession(options = {}) {
     const asNumber = Number(raw)
     if (!Number.isNaN(asNumber)) return asNumber
     if (!raw || raw.length < 2) return raw
-    return algebraicToIndex(raw, resolvedBoard.topology)
-  }
-
-  function algebraicToIndex(sq, topo) {
-    const cols = topo.cols || 19
-    const rows = topo.rows || 19
-    const c = cellAlphabet.indexOf(sq[0])
-    const r = rows - parseInt(sq.slice(1), 10)
-    if (c < 0 || r < 0 || r >= rows) return sq
-    return r * cols + c
+    const idx = cells.toIndex(raw)
+    return idx >= 0 ? idx : raw
   }
 
   // Driven by the vocabulary the plugin declares rather than by a family branch.
@@ -328,13 +314,12 @@ export function createPlaySession(options = {}) {
   }
 
   function moveToNotation(move) {
-    const topo = resolvedBoard.topology
     if (move.action) return move.action
     if (move.coord !== undefined) {
-      return indexToAlgebraic(move.coord, topo) || String(move.coord)
+      return cells.toId(move.coord) || String(move.coord)
     }
-    const from = indexToAlgebraic(move.from, topo) || String(move.from)
-    const to = indexToAlgebraic(move.to, topo) || String(move.to)
+    const from = cells.toId(move.from) || String(move.from)
+    const to = cells.toId(move.to) || String(move.to)
     const sep = move.captures && move.captures.length > 0 ? 'x' : '-'
     return `${from}${sep}${to}`
   }
