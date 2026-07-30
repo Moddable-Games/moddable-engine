@@ -21,6 +21,7 @@ let embedDifficulty = 'medium'
 let embedColor = 'white'
 let dropMode = null
 let gameOver = false
+let fogViewSide = null
 
 const ANIM_SPEEDS = { instant: 0, fast: 120, normal: 220, slow: 400 }
 const ANIM_STYLES = { slide: 'Slide', arc: 'Arc', bounce: 'Bounce', warp: 'Warp' }
@@ -109,9 +110,11 @@ function startGame() {
   if (opponent === 'ai') {
     players[MCE.WHITE] = humanColor === 'white' ? 'human' : 'ai'
     players[MCE.BLACK] = humanColor === 'black' ? 'human' : 'ai'
+    fogViewSide = humanColor === 'white' ? MCE.WHITE : MCE.BLACK
   } else {
     players[MCE.WHITE] = 'human'
     players[MCE.BLACK] = 'human'
+    fogViewSide = null
   }
 
   const moveLog = []
@@ -313,11 +316,8 @@ function renderBoard(game, state, rows, cols) {
     // Fog-of-war: own layer AFTER pieces so hidden pieces are actually obscured
     const vc = MCE.getVariantConfig ? MCE.getVariantConfig(currentVariant) : null
     if (vc && vc.visibility) {
-      const state = ctrl?.getState()
-      const humanSide = state?.players?.[MCE.WHITE] === 'human' ? MCE.WHITE
-        : state?.players?.[MCE.BLACK] === 'human' ? MCE.BLACK
-        : game.turn
-      const fogMask = vc.visibility(game, humanSide)
+      const viewSide = fogViewSide != null ? fogViewSide : game.turn
+      const fogMask = vc.visibility(game, viewSide)
       if (fogMask) {
         const fogOverlay = createOverlay('play-fog')
         const total = rows * cols
