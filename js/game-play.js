@@ -19,6 +19,7 @@ import { BOARD_THEMES, RULES_BASE, loadGalleryIndex, getGalleryIndex } from './p
 import { createCellAddressing } from './play-cells.js'
 import { paintHighlight, paintIndicator, createOverlay } from './play-overlays.js'
 import { bindBoardInteraction } from './play-interaction.js'
+import { renderHandPanel } from './play-hand.js'
 
 const DIFFICULTIES = ['beginner', 'easy', 'medium', 'hard', 'expert']
 
@@ -50,6 +51,7 @@ export function createPlaySession(options = {}) {
     family,
     variant,
     container,
+    handContainer = null,
     opponent = 'human',
     difficulty = 'medium',
     theme = 'classic',
@@ -231,6 +233,47 @@ export function createPlaySession(options = {}) {
         else ctrl.handleClick(key)
       },
     })
+
+    renderHand(slice, state)
+  }
+
+  function renderHand(slice, state) {
+    if (!handContainer || !slice.hands) return
+    const names = playerNames()
+    const currentIdx = names.indexOf(game.currentPlayer())
+    const plugin = pluginFor()
+    const vocab = plugin?.vocabulary || {}
+    const gallery = getGalleryIndex() || []
+    const pieceSet = resolvedBoard.pieces?.set
+
+    const sides = names.map((name, idx) => {
+      const hand = slice.hands[idx] || []
+      const counted = {}
+      for (const t of hand) counted[t] = (counted[t] || 0) + 1
+      const pieces = Object.entries(counted).map(([type, count]) => {
+        const entry = vocab[type]
+        const symbol = entry?.symbols?.[idx]
+        let image = null
+        if (pieceSet && gallery && symbol) {
+          const sets = Array.isArray(gallery) ? gallery : (gallery.sets || [])
+          const set = sets.find(s => s.id === pieceSet || s.slug === pieceSet)
+          if (set && set.path) {
+            image = `../pieces/sets/${set.path}/${symbol}.svg`
+          }
+        }
+        return { id: type, label: symbol || type, image, count }
+      })
+      return { id: name, label: name, pieces }
+    })
+
+    const dropType = state.dropType || null
+    const isHuman = !state.aiThinking
+    renderHandPanel(handContainer, {
+      sides,
+      armed: dropType,
+      enabledFor: isHuman ? names[currentIdx] : null,
+      onArm: (pieceType) => ctrl.handleHandClick(pieceType),
+    })
   }
 
   function findCell(idx) {
@@ -305,8 +348,12 @@ export async function initGamePlay(container, defaults = {}) {
   const boardArea = document.createElement('div')
   boardArea.className = 'game-play-board'
 
+  const handEl = document.createElement('div')
+  handEl.className = 'game-play-hand'
+
   container.appendChild(sidebar)
   container.appendChild(boardArea)
+  container.appendChild(handEl)
 
   const variantSelect = buildSelect(sidebar, 'Variant', variants.map(v => ({ value: v.key, label: v.label })), variant)
   const opponentSelect = buildSelect(sidebar, 'Opponent', [
@@ -367,6 +414,7 @@ export async function initGamePlay(container, defaults = {}) {
     family,
     variant,
     container: boardArea,
+    handContainer: handEl,
     opponent: opponentSelect.value === 'ai' ? 'ai' : 'human',
     difficulty: difficultySelect.value,
     theme: themeSelect.value,
