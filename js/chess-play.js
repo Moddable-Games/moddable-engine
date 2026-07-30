@@ -5,6 +5,7 @@ import { BOARD_THEMES, DARK_THEMES, loadGalleryIndex as loadGallery, getGalleryI
 import { createCellAddressing } from './play-cells.js'
 import { paintHighlight, paintIndicator, paintFog, createOverlay } from './play-overlays.js'
 import { bindBoardInteraction } from './play-interaction.js'
+import { renderHandPanel } from './play-hand.js'
 
 let ctrl = null
 let cells = null
@@ -956,58 +957,40 @@ function updateMoveList(moveLog) {
   movesEl.scrollTop = movesEl.scrollHeight
 }
 
+const CHESS_PIECE_SYMBOLS = { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' }
+const CHESS_HAND_ORDER = ['q', 'r', 'b', 'n', 'p']
+
 function renderHand(game) {
   const handEl = document.getElementById('chess-hand-panel')
   if (!handEl) return
   if (!game || !game.hand) { handEl.innerHTML = ''; return }
 
-  handEl.innerHTML = ''
   const flipped = ctrl?.getState()?.flipped || false
-  const sides = flipped ? [MCE.WHITE, MCE.BLACK] : [MCE.BLACK, MCE.WHITE]
-  const PIECE_SYMBOLS = { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' }
-  const ORDER = ['q', 'r', 'b', 'n', 'p']
+  const sideOrder = flipped ? [MCE.WHITE, MCE.BLACK] : [MCE.BLACK, MCE.WHITE]
+  const state = ctrl?.getState()
+  const isHuman = !state?.aiThinking && (state?.players?.[game.turn] === 'human' || !state?.players)
+  const enabledSide = (!gameOver && isHuman) ? game.turn : null
 
-  for (const side of sides) {
-    const hand = game.hand[side]
-    if (!hand || hand.length === 0) continue
-    const row = document.createElement('div')
-    row.className = 'hand-row'
-    const label = document.createElement('span')
-    label.className = 'hand-label'
-    label.textContent = (side === MCE.WHITE ? 'White' : 'Black') + ':'
-    row.appendChild(label)
-
+  const sides = sideOrder.map(side => {
+    const hand = game.hand[side] || []
     const counted = {}
     for (const p of hand) counted[p] = (counted[p] || 0) + 1
+    const pieces = CHESS_HAND_ORDER
+      .filter(pt => counted[pt])
+      .map(pt => ({ id: pt, label: CHESS_PIECE_SYMBOLS[pt] || pt, count: counted[pt] }))
+    return { id: side, label: side === MCE.WHITE ? 'White' : 'Black', pieces }
+  })
 
-    for (const pt of ORDER) {
-      if (!counted[pt]) continue
-      const btn = document.createElement('button')
-      btn.className = 'hand-piece'
-      if (dropMode === pt && side === game.turn) btn.classList.add('hand-piece--active')
-      btn.textContent = PIECE_SYMBOLS[pt] || pt
-      if (counted[pt] > 1) {
-        const badge = document.createElement('span')
-        badge.className = 'hand-count'
-        badge.textContent = counted[pt]
-        btn.appendChild(badge)
-      }
-      const isMyTurn = side === game.turn && !gameOver
-      const state = ctrl?.getState()
-      const isHuman = !state?.aiThinking && (state?.players?.[side] === 'human' || !state?.players)
-      if (isMyTurn && isHuman) {
-        btn.addEventListener('click', () => {
-          if (dropMode === pt) { dropMode = null } else { dropMode = pt; if (ctrl) ctrl.setSelected(null) }
-          ctrl?.render()
-          renderHand(game)
-        })
-      } else {
-        btn.disabled = true
-      }
-      row.appendChild(btn)
-    }
-    handEl.appendChild(row)
-  }
+  renderHandPanel(handEl, {
+    sides,
+    armed: dropMode,
+    enabledFor: enabledSide,
+    onArm: (pieceId) => {
+      if (dropMode === pieceId) { dropMode = null } else { dropMode = pieceId; if (ctrl) ctrl.setSelected(null) }
+      ctrl?.render()
+      renderHand(game)
+    },
+  })
 }
 
 function bindEvents(container) {
