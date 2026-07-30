@@ -2,8 +2,10 @@ import { renderFromEngine, attachPieceImages } from '../packages/render/src/rend
 import { algebraicId, algebraicToIndex } from '../packages/topologies/grid/index.js'
 import MCE, { createGameController, aiPickMove } from '../packages/plugins/chess/src/mce/index.js'
 import { BOARD_THEMES, DARK_THEMES, loadGalleryIndex as loadGallery, getGalleryIndex } from './play-shared.js'
+import { createCellAddressing } from './play-cells.js'
 
 let ctrl = null
+let cells = null
 let currentVariant = 'standard'
 let currentPieceSet = localStorage.getItem('mce-piece-set') || 'mce-fairy-complete'
 let galleryIndex = null
@@ -87,6 +89,8 @@ function startGame() {
   const vc = MCE.getVariantConfig(currentVariant)
   const rows = game.rows
   const cols = game.cols
+  const flp = ctrl?.getState()?.flipped || false
+  cells = createCellAddressing({ rows, cols, idStyle: 'algebraic', flipped: flp })
 
   const colorSelect = document.getElementById('chess-color-select')
   const opponentSelect = document.getElementById('chess-opponent-select')
@@ -222,6 +226,7 @@ function renderBoard(game, state, rows, cols) {
   if (animating) return
 
   const { selected, lastMove, flipped, getLegalMoves } = state
+  if (cells) cells.setFlipped(flipped)
   let legal = []
   if (game.duckPhase) {
     for (let i = 0; i < rows * cols; i++) {
@@ -286,16 +291,7 @@ function renderBoard(game, state, rows, cols) {
       if (seenTargets.has(m.to)) continue
       seenTargets.add(m.to)
       const hasPiece = board[m.to] !== null
-      let visualIdx = m.to
-      if (flipped) {
-        const r = Math.floor(m.to / cols)
-        const c = m.to % cols
-        visualIdx = (rows - 1 - r) * cols + (cols - 1 - c)
-      }
-      const alg = sqToAlgebraic(visualIdx, rows, cols)
-      const cell = boardSvgContainer.querySelector(`[data-sq="${alg}"]`)
-      if (!cell) continue
-      const bbox = cell.getBBox ? cell.getBBox() : null
+      const bbox = cells.bbox(m.to, boardSvgContainer)
       if (!bbox) continue
       if (hasPiece) {
         const ring = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
@@ -319,16 +315,8 @@ function renderBoard(game, state, rows, cols) {
     if (game.effects && game.effects.length > 0) {
       for (const effect of game.effects) {
         if (effect.sq === undefined) continue
-        let vIdx = effect.sq
-        if (flipped) {
-          const er = Math.floor(effect.sq / cols)
-          const ec = effect.sq % cols
-          vIdx = (rows - 1 - er) * cols + (cols - 1 - ec)
-        }
-        const ealg = sqToAlgebraic(vIdx, rows, cols)
-        const ecell = boardSvgContainer.querySelector(`[data-sq="${ealg}"]`)
-        if (!ecell || !ecell.getBBox) continue
-        const ebb = ecell.getBBox()
+        const ebb = cells.bbox(effect.sq, boardSvgContainer)
+        if (!ebb) continue
         const effectEl = renderEffectOverlay(effect, ebb.x, ebb.y, ebb.width)
         if (effectEl) overlay.appendChild(effectEl)
       }
@@ -342,16 +330,8 @@ function renderBoard(game, state, rows, cols) {
       if (fogMask) {
         for (let i = 0; i < fogMask.length; i++) {
           if (fogMask[i]) continue
-          let vIdx = i
-          if (flipped) {
-            const fr = Math.floor(i / cols)
-            const fc = i % cols
-            vIdx = (rows - 1 - fr) * cols + (cols - 1 - fc)
-          }
-          const falg = sqToAlgebraic(vIdx, rows, cols)
-          const fcell = boardSvgContainer.querySelector(`[data-sq="${falg}"]`)
-          if (!fcell || !fcell.getBBox) continue
-          const fbb = fcell.getBBox()
+          const fbb = cells.bbox(i, boardSvgContainer)
+          if (!fbb) continue
           const fog = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
           fog.setAttribute('x', fbb.x)
           fog.setAttribute('y', fbb.y)
@@ -371,14 +351,8 @@ function renderBoard(game, state, rows, cols) {
     let el = e.target
     while (el && el !== boardSvgContainer) {
       if (el.getAttribute && el.getAttribute('data-sq')) {
-        const alg = el.getAttribute('data-sq')
-        let idx = algebraicToSq(alg, rows, cols)
-        if (flipped) {
-          const r = Math.floor(idx / cols)
-          const c = idx % cols
-          idx = (rows - 1 - r) * cols + (cols - 1 - c)
-        }
-        ctrl.handleClick(idx)
+        const idx = cells.toIndex(el.getAttribute('data-sq'))
+        if (idx >= 0) ctrl.handleClick(idx)
         return
       }
       el = el.parentNode
@@ -632,20 +606,8 @@ function boardToFEN(board, rows, cols, flipped) {
 }
 
 function getCellCenter(idx, flipped, rows, cols) {
-  if (!boardSvgContainer) return null
-  const game = ctrl?.getGame()
-  if (!game) return null
-  let visualIdx = idx
-  if (flipped) {
-    const r = Math.floor(idx / cols)
-    const c = idx % cols
-    visualIdx = (rows - 1 - r) * cols + (cols - 1 - c)
-  }
-  const alg = sqToAlgebraic(visualIdx, rows, cols)
-  const cell = boardSvgContainer.querySelector(`[data-sq="${alg}"]`)
-  if (!cell || !cell.getBBox) return null
-  const bbox = cell.getBBox()
-  return { x: bbox.x + bbox.width / 2, y: bbox.y + bbox.height / 2, w: bbox.width, h: bbox.height }
+  if (!boardSvgContainer || !cells) return null
+  return cells.centre(idx, boardSvgContainer)
 }
 
 function animatePiece(fromIdx, fromPos, toPos, duration, flipped, rows, cols, onDone) {
@@ -654,12 +616,6 @@ function animatePiece(fromIdx, fromPos, toPos, duration, flipped, rows, cols, on
 
   const game = ctrl?.getGame()
   if (!game) { onDone(); return }
-  let visualIdx = fromIdx
-  if (flipped) {
-    const r = Math.floor(fromIdx / game.cols)
-    const c = fromIdx % game.cols
-    visualIdx = (game.rows - 1 - r) * game.cols + (game.cols - 1 - c)
-  }
 
   const pieceEls = svgEl.querySelectorAll('image, text')
   let pieceEl = null
@@ -887,22 +843,13 @@ function captureBurst(cx, cy, tileSize) {
 }
 
 function addHighlight(overlay, idx, rows, cols, color, flipped) {
-  let visualIdx = idx
-  if (flipped) {
-    const r = Math.floor(idx / cols)
-    const c = idx % cols
-    visualIdx = (rows - 1 - r) * cols + (cols - 1 - c)
-  }
-  const alg = sqToAlgebraic(visualIdx, rows, cols)
-  const cell = boardSvgContainer.querySelector(`[data-sq="${alg}"]`)
-  if (!cell) return
-  const bbox = cell.getBBox ? cell.getBBox() : null
-  if (!bbox) return
+  const bb = cells.bbox(idx, boardSvgContainer)
+  if (!bb) return
   const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-  rect.setAttribute('x', bbox.x)
-  rect.setAttribute('y', bbox.y)
-  rect.setAttribute('width', bbox.width)
-  rect.setAttribute('height', bbox.height)
+  rect.setAttribute('x', bb.x)
+  rect.setAttribute('y', bb.y)
+  rect.setAttribute('width', bb.width)
+  rect.setAttribute('height', bb.height)
   rect.setAttribute('fill', color)
   overlay.appendChild(rect)
 }
