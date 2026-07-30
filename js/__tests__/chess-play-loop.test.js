@@ -148,13 +148,21 @@ describeWithAssets('chess play loop — special variants', () => {
   }
 
   if (FOG.length > 0) {
-    it.each(FOG)('%s — visibility function returns mask', (variant) => {
+    it.each(FOG)('%s — visibility produces hidden cells that would be fogged', (variant) => {
       const game = MCE.createGame(variant)
       const vc = MCE.getVariantConfig(variant)
       if (!vc.visibility) return
       const mask = vc.visibility(game, game.turn)
-      expect(Array.isArray(mask)).toBe(true)
-      expect(mask.length).toBe((vc.rows || 8) * (vc.cols || 8))
+      expect(mask).toBeTruthy()
+      const total = (vc.rows || 8) * (vc.cols || 8)
+      const isVisible = mask instanceof Set
+        ? (i) => mask.has(i)
+        : (i) => !!mask[i]
+      let hidden = 0
+      for (let i = 0; i < total; i++) {
+        if (!isVisible(i)) hidden++
+      }
+      expect(hidden).toBeGreaterThan(0)
     })
   }
 

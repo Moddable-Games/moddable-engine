@@ -9,7 +9,6 @@ MCE.registerVariant('fogOfWar', {
     "rnbqkbnr/pppppppp/8/8/8/2N5/PPPPPPPP/R1BQKBNR b KQkq -": ["d7d5", "e7e5", "g8f6"],
   },
   label: 'Fog of War',
-  group: 'Alternate Rules',
   rows: 8,
   cols: 8,
   fen: null,

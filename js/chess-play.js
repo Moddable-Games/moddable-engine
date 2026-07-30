@@ -306,20 +306,29 @@ function renderBoard(game, state, rows, cols) {
       }
     }
 
-    // Fog-of-war masking
+    svgEl.insertBefore(overlay, insertBefore)
+
+    // Fog-of-war: own layer AFTER pieces so hidden pieces are actually obscured
     const vc = MCE.getVariantConfig ? MCE.getVariantConfig(currentVariant) : null
     if (vc && vc.visibility) {
-      const viewSide = game.turn
-      const fogMask = vc.visibility(game, viewSide)
+      const state = ctrl?.getState()
+      const humanSide = state?.players?.[MCE.WHITE] === 'human' ? MCE.WHITE
+        : state?.players?.[MCE.BLACK] === 'human' ? MCE.BLACK
+        : game.turn
+      const fogMask = vc.visibility(game, humanSide)
       if (fogMask) {
-        for (let i = 0; i < fogMask.length; i++) {
-          if (fogMask[i]) continue
-          paintFog(overlay, cells.bbox(i, boardSvgContainer))
+        const fogOverlay = createOverlay('play-fog')
+        const total = rows * cols
+        const isVisible = fogMask instanceof Set
+          ? (i) => fogMask.has(i)
+          : (i) => !!fogMask[i]
+        for (let i = 0; i < total; i++) {
+          if (isVisible(i)) continue
+          paintFog(fogOverlay, cells.bbox(i, boardSvgContainer))
         }
+        svgEl.appendChild(fogOverlay)
       }
     }
-
-    svgEl.insertBefore(overlay, insertBefore)
   }
 
   bindBoardInteraction(boardSvgContainer, cells, {
