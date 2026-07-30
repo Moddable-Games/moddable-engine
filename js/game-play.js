@@ -17,6 +17,7 @@ import '../packages/plugins/shogi/index.js'
 
 import { BOARD_THEMES, RULES_BASE, loadGalleryIndex, getGalleryIndex } from './play-shared.js'
 import { createCellAddressing } from './play-cells.js'
+import { paintHighlight, paintIndicator, createOverlay } from './play-overlays.js'
 
 const DIFFICULTIES = ['beginner', 'easy', 'medium', 'hard', 'expert']
 
@@ -195,17 +196,15 @@ export function createPlaySession(options = {}) {
     const svgEl = container.querySelector('svg')
     if (svgEl) {
       const theme = BOARD_THEMES[currentTheme] || BOARD_THEMES.classic
-      const overlay = document.createElementNS('http://www.w3.org/2000/svg', 'g')
-      overlay.setAttribute('class', 'highlights')
-      overlay.setAttribute('pointer-events', 'none')
+      const overlay = createOverlay()
 
       if (lastMove) {
-        if (lastMove.from !== null && lastMove.from !== undefined) highlightCell(overlay, lastMove.from, theme.lastMove)
-        if (lastMove.to !== null && lastMove.to !== undefined) highlightCell(overlay, lastMove.to, theme.lastMove)
+        if (lastMove.from !== null && lastMove.from !== undefined) paintHighlight(overlay, cells.bbox(lastMove.from, container), theme.lastMove)
+        if (lastMove.to !== null && lastMove.to !== undefined) paintHighlight(overlay, cells.bbox(lastMove.to, container), theme.lastMove)
       }
 
       if (selected !== null && selected !== undefined) {
-        highlightCell(overlay, selected, theme.highlight)
+        paintHighlight(overlay, cells.bbox(selected, container), theme.highlight)
       }
 
       const board = slice.board || []
@@ -217,7 +216,7 @@ export function createPlaySession(options = {}) {
         if (seenTargets.has(target)) continue
         seenTargets.add(target)
         const hasPiece = !!board[target]
-        addMoveIndicator(overlay, target, hasPiece ? theme.ring : theme.dot, hasPiece)
+        paintIndicator(overlay, cells.bbox(target, container), hasPiece ? theme.ring : theme.dot, hasPiece)
       }
 
       const piecesGroup = svgEl.querySelector('g[pointer-events="none"]')
@@ -259,44 +258,6 @@ export function createPlaySession(options = {}) {
     return cells.find(idx, container)
   }
 
-  function highlightCell(overlay, idx, color) {
-    const cell = findCell(idx)
-    if (!cell) return
-    const bbox = cell.getBBox ? cell.getBBox() : null
-    if (!bbox) return
-    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-    rect.setAttribute('x', bbox.x)
-    rect.setAttribute('y', bbox.y)
-    rect.setAttribute('width', bbox.width)
-    rect.setAttribute('height', bbox.height)
-    rect.setAttribute('fill', color)
-    overlay.appendChild(rect)
-  }
-
-  function addMoveIndicator(overlay, idx, color, isCapture) {
-    const cell = findCell(idx)
-    if (!cell) return
-    const bbox = cell.getBBox ? cell.getBBox() : null
-    if (!bbox) return
-    const cx = bbox.x + bbox.width / 2
-    const cy = bbox.y + bbox.height / 2
-    if (isCapture) {
-      const ring = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-      ring.setAttribute('x', bbox.x)
-      ring.setAttribute('y', bbox.y)
-      ring.setAttribute('width', bbox.width)
-      ring.setAttribute('height', bbox.height)
-      ring.setAttribute('fill', color)
-      overlay.appendChild(ring)
-    } else {
-      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-      dot.setAttribute('cx', cx)
-      dot.setAttribute('cy', cy)
-      dot.setAttribute('r', bbox.width * 0.16)
-      dot.setAttribute('fill', color)
-      overlay.appendChild(dot)
-    }
-  }
 
   function coerceKey(raw) {
     const asNumber = Number(raw)
