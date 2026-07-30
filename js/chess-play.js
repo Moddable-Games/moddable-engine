@@ -979,8 +979,8 @@ function renderHand(game) {
   const flipped = ctrl?.getState()?.flipped || false
   const sideOrder = flipped ? [MCE.WHITE, MCE.BLACK] : [MCE.BLACK, MCE.WHITE]
   const state = ctrl?.getState()
-  const isHuman = !state?.aiThinking && (state?.players?.[game.turn] === 'human' || !state?.players)
-  const enabledSide = (!gameOver && isHuman) ? game.turn : null
+  const isHumanTurn = fogViewSide != null ? game.turn === fogViewSide : true
+  const enabledSide = (!gameOver && !state?.aiThinking && isHumanTurn) ? game.turn : null
 
   const sides = sideOrder.map(side => {
     const hand = game.hand[side] || []
