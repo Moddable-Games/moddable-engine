@@ -25,7 +25,7 @@ export function paintIndicator(overlay, bbox, color, isCapture) {
   }
 }
 
-export function paintFog(overlay, bbox, color = '#1a1a2e', opacity = '0.92') {
+export function paintFog(overlay, bbox, color = '#1a1a2e', opacity = '1') {
   if (!bbox) return
   const rect = document.createElementNS(SVG_NS, 'rect')
   rect.setAttribute('x', bbox.x)

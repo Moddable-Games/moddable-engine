@@ -92,7 +92,7 @@ describe('play-overlays', () => {
       const rect = overlay.firstChild
       expect(rect.tagName).toBe('rect')
       expect(rect.getAttribute('fill')).toBe('#1a1a2e')
-      expect(rect.getAttribute('opacity')).toBe('0.92')
+      expect(rect.getAttribute('opacity')).toBe('1')
     })
 
     it('accepts custom color and opacity', () => {
