@@ -38,6 +38,7 @@ export async function loadVariantManifest() {
 // against MCE (see packages/play/__tests__/data-only-parity.test.js).
 const VERIFIED_DATA_ONLY = new Set([
   'endgame-chess', 'pawns-only', 'peasants-revolt',
+  'chigorin',
 ])
 
 export function getManifestVariants(family, registeredKeys) {

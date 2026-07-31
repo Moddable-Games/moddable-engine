@@ -15,6 +15,7 @@ const VERIFIED_DATA_ONLY = [
   { slug: 'endgame-chess', mceKey: 'endgameChess', config: { castling: false } },
   { slug: 'pawns-only', mceKey: 'pawnsOnly', config: { castling: false } },
   { slug: 'peasants-revolt', mceKey: 'peasantsRevolt', config: { castling: false } },
+  { slug: 'chigorin', mceKey: 'chigorin', config: { castling: false } },
 ]
 
 function loadFrontmatter(family, slug) {

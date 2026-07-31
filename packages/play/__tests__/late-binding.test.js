@@ -97,6 +97,7 @@ describeWithRules('late binding: frontmatter data + registry functions', () => {
       { slug: 'endgame-chess', castling: false },
       { slug: 'pawns-only', castling: false },
       { slug: 'peasants-revolt', castling: false },
+      { slug: 'chigorin', castling: false },
     ]
 
     it.each(DATA_ONLY.map(v => v.slug))('%s: instantiates, generates moves, advances state', (slug) => {
