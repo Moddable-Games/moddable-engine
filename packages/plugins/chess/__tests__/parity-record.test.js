@@ -30,4 +30,15 @@ describe('parity record schema enforcement', () => {
     const invalid = record.filter(e => e.status === 'resolved' && (!e.authority || !e.verdict))
     expect(invalid).toEqual([])
   })
+
+  it('every entry has firstSeen date', () => {
+    for (const entry of record) {
+      expect(entry.firstSeen).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    }
+  })
+
+  it('no unresolved divergences block the port', () => {
+    const blocking = record.filter(e => e.status === 'unresolved')
+    expect(blocking).toEqual([])
+  })
 })
