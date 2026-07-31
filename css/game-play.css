@@ -130,6 +130,34 @@
   pointer-events: none;
 }
 
+.game-play-choice-dialog {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  background: var(--surface-raised, #1e2140);
+  border: 1px solid var(--border, #333);
+  border-radius: 8px;
+  z-index: 100;
+}
+
+.choice-btn {
+  padding: 8px 16px;
+  background: var(--accent, #4a6cf7);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.choice-btn:hover {
+  opacity: 0.85;
+}
+
 @media (max-width: 768px) {
   .game-play {
     grid-template-columns: 1fr;

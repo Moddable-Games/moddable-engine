@@ -117,6 +117,7 @@ export function createPlaySession(options = {}) {
         if (onStatus) onStatus({ text: `${player} to move`, gameOver: false })
       },
       onGameEnd: handleGameEnd,
+      onChoiceNeeded: showChoiceDialog,
       onMove: (move, player) => {
         moveHistory.push({ move, player, notation: moveToNotation(move) })
         if (onStatus) onStatus({ text: `${game.currentPlayer()} to move`, gameOver: false, lastMove: moveToNotation(move) })
@@ -276,6 +277,22 @@ export function createPlaySession(options = {}) {
       enabledFor: isHuman ? names[currentIdx] : null,
       onArm: (pieceType) => ctrl.handleHandClick(pieceType),
     })
+  }
+
+  function showChoiceDialog(choices, player, resolve) {
+    const dialog = document.createElement('div')
+    dialog.className = 'game-play-choice-dialog'
+    for (const choice of choices) {
+      const btn = document.createElement('button')
+      btn.className = 'choice-btn'
+      btn.textContent = choice[0].toUpperCase() + choice.slice(1)
+      btn.addEventListener('click', () => {
+        dialog.remove()
+        resolve(choice)
+      })
+      dialog.appendChild(btn)
+    }
+    container.appendChild(dialog)
   }
 
   function findCell(idx) {
