@@ -172,7 +172,6 @@ const DATA_ONLY_VARIANTS = [
   { slug: 'endgame-chess', config: { castling: false } },
   { slug: 'pawns-only', config: { castling: false } },
   { slug: 'peasants-revolt', config: { castling: false } },
-  { slug: 'stalemate-wins', config: { stalemateMeaning: 'win' } },
 ]
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))

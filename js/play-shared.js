@@ -34,9 +34,10 @@ export async function loadVariantManifest() {
 
 // Variants verified to need no behaviour beyond standard chess rules.
 // Each was confirmed to differ from standard only in starting position
-// and/or castling/en-passant flags.
+// and/or castling/en-passant flags. Membership requires 10-ply parity
+// against MCE (see packages/play/__tests__/data-only-parity.test.js).
 const VERIFIED_DATA_ONLY = new Set([
-  'endgame-chess', 'pawns-only', 'peasants-revolt', 'stalemate-wins',
+  'endgame-chess', 'pawns-only', 'peasants-revolt',
 ])
 
 export function getManifestVariants(family, registeredKeys) {

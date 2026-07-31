@@ -15,7 +15,6 @@ const VERIFIED_DATA_ONLY = [
   { slug: 'endgame-chess', mceKey: 'endgameChess', config: { castling: false } },
   { slug: 'pawns-only', mceKey: 'pawnsOnly', config: { castling: false } },
   { slug: 'peasants-revolt', mceKey: 'peasantsRevolt', config: { castling: false } },
-  { slug: 'stalemate-wins', mceKey: 'stalemateWins', config: { stalemateMeaning: 'win' } },
 ]
 
 function loadFrontmatter(family, slug) {
@@ -45,6 +44,12 @@ function mceMovesToSet(moves) {
 function pluginMovesToSet(moves) {
   return new Set(moves.map(m => `${m.from}-${m.to}${m.promotion ? '=' + m.promotion : ''}`))
 }
+
+const BEHAVIOUR_KEYS = new Set([
+  'moveFilter', 'winCondition', 'legalityFilter', 'evaluate',
+  'pieceMoveOverride', 'effectsOnMove', 'onCaptured', 'statusText',
+  'stalemateMeaning', 'noCheck', 'multiMove', 'duckPhase',
+])
 
 const hasRules = fs.existsSync(RULES_DIR)
 const describeIf = hasRules ? describe : describe.skip
@@ -77,5 +82,14 @@ describeIf('VERIFIED_DATA_ONLY: 10-ply parity against MCE', () => {
       if (!pluginMove) break
       plugin.applyMove(pluginMove)
     }
+  })
+})
+
+describeIf('VERIFIED_DATA_ONLY: structural check against MCE source', () => {
+  it.each(VERIFIED_DATA_ONLY.map(v => [v.slug, v.mceKey]))('%s: MCE variant has no behaviour keys', (slug, mceKey) => {
+    const vc = MCE.variantRegistry[mceKey]
+    expect(vc).toBeDefined()
+    const behaviourFound = Object.keys(vc).filter(k => BEHAVIOUR_KEYS.has(k))
+    expect(behaviourFound).toEqual([])
   })
 })

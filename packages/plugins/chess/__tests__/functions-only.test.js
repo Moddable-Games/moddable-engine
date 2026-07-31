@@ -7,7 +7,7 @@ import { listVariants, getVariantConfig } from '../../../play/src/variant-regist
 const LEGACY_ALLOW = new Set([
   'standard', 'noCastling', 'torpedo', 'threeCheck', 'fiveCheck',
   'kingOfTheHill', 'racingKings', 'antichess', 'capablanca',
-  'losAlamos', 'horde',
+  'losAlamos', 'horde', 'stalemateWins',
 ])
 
 const DATA_KEYS = new Set([
