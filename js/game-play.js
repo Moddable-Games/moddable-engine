@@ -21,6 +21,7 @@ import { createCellAddressing } from './play-cells.js'
 import { paintHighlight, paintIndicator, createOverlay } from './play-overlays.js'
 import { bindBoardInteraction } from './play-interaction.js'
 import { renderHandPanel } from './play-hand.js'
+import { renderRulesPanel } from './play-rules.js'
 
 const DIFFICULTIES = ['beginner', 'easy', 'medium', 'hard', 'expert']
 
@@ -425,11 +426,7 @@ export async function initGamePlay(container, defaults = {}) {
 
   function updateRules(variantKey) {
     const vConfig = getVariantConfig(family, variantKey)
-    if (!vConfig) { rulesEl.innerHTML = ''; return }
-    const parts = []
-    if (vConfig.rule) parts.push(`<span class="rules-badge">${vConfig.rule}</span>`)
-    if (vConfig.description) parts.push(`<p class="rules-desc">${vConfig.description}</p>`)
-    rulesEl.innerHTML = parts.join('')
+    renderRulesPanel(rulesEl, vConfig || {})
   }
 
   function updateStatus(info) {
