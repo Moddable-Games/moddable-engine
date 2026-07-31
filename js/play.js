@@ -399,7 +399,7 @@ function resetSidebarControls() {
 }
 
 const PLAYABLE_GAMES = new Set(['chess', 'go', 'draughts', 'xiangqi', 'shogi'])
-const FAMILY_PLAY_GAMES = new Set(['chess', 'go', 'draughts', 'xiangqi', 'shogi'])
+const FAMILY_PLAY_GAMES = new Set(['go', 'draughts', 'xiangqi', 'shogi'])
 
 function updatePlayButton() {
   const group = document.getElementById('play-interactive-group')

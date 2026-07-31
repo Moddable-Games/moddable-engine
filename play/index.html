@@ -171,12 +171,16 @@ const _params = new URLSearchParams(location.search);
 const _mode = _params.get('mode');
 const _game = _params.get('game');
 const _family = _params.get('family');
+const _engine = _params.get('engine');
 const _isEmbed = _params.has('embed');
 const _hexGames = ['nukes','twilight','colony','talisman','mongo','endless'];
 const _isHexEmbed = _isEmbed && _game && _hexGames.includes(_game);
-const _isChessMode = _mode === 'play' || _mode === 'solo' || (_isEmbed && !_isHexEmbed && !_family);
-const _gameFamilies = ['chess','go','draughts','xiangqi','shogi'];
-const _isGamePlay = _family && _gameFamilies.includes(_family);
+const _isPluginChess = _family === 'chess' && _engine === 'plugin';
+const _isGamePlay = _isPluginChess || (_family && ['go','draughts','xiangqi','shogi'].includes(_family));
+const _isChessMode = !_isPluginChess && (
+  _mode === 'play' || _mode === 'solo' || _family === 'chess' ||
+  (_isEmbed && !_isHexEmbed && !_family)
+);
 if (_isGamePlay) {
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.boards-hero').style.display = 'none';
