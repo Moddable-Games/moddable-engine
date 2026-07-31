@@ -22,7 +22,7 @@ describe('parity record schema enforcement', () => {
     for (const entry of resolved) {
       expect(entry.authority).toBeTruthy()
       expect(entry.verdict).toBeTruthy()
-      expect(['a-wrong', 'b-wrong', 'both-wrong', 'rulebook-ambiguous']).toContain(entry.verdict)
+      expect(['a-wrong', 'b-wrong', 'both-wrong', 'rulebook-ambiguous', 'test-bug']).toContain(entry.verdict)
     }
   })
 

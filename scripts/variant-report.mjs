@@ -132,7 +132,8 @@ async function run() {
     : []
   const unresolved = parityRecord.filter(e => e.status === 'unresolved').length
   const resolved = parityRecord.filter(e => e.status === 'resolved').length
-  const parityAgreed = 11 - parityRecord.length
+  const realDivergences = parityRecord.filter(e => e.status === 'unresolved' || (e.verdict && e.verdict !== 'test-bug')).length
+  const parityAgreed = 11 - realDivergences
 
   console.log('')
   console.log(`Parity: ${parityAgreed}/11 agree · ${unresolved} unresolved divergences · ${resolved} resolved`)
