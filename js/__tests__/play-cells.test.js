@@ -115,6 +115,26 @@ describe('play-cells — cell addressing', () => {
     })
   })
 
+  describe('toIndex always returns a number', () => {
+    const configs = [
+      { rows: 8, cols: 8, idStyle: 'algebraic', label: '8x8 standard' },
+      { rows: 8, cols: 10, idStyle: 'algebraic', label: '8x10 capablanca' },
+      { rows: 9, cols: 9, idStyle: 'algebraic', label: '9x9 shogi' },
+      { rows: 10, cols: 9, idStyle: 'algebraic', label: '10x9 xiangqi' },
+      { rows: 19, cols: 19, idStyle: 'go', label: '19x19 go' },
+    ]
+
+    it.each(configs)('$label: every toIndex result is typeof number', (cfg) => {
+      const addr = createCellAddressing({ ...cfg, flipped: false })
+      const total = cfg.rows * cfg.cols
+      for (let i = 0; i < total; i++) {
+        const id = addr.toId(i)
+        const result = addr.toIndex(id)
+        expect(typeof result).toBe('number')
+      }
+    })
+  })
+
   describe('edge cases', () => {
     const addr = createCellAddressing({ rows: 8, cols: 8, idStyle: 'algebraic', flipped: false })
 
