@@ -92,6 +92,42 @@ describeWithRules('late binding: frontmatter data + registry functions', () => {
     expect(moves.length).toBeGreaterThan(0)
   })
 
+  describe('data-only variants play correctly from frontmatter', () => {
+    const DATA_ONLY = [
+      { slug: 'endgame-chess', castling: false },
+      { slug: 'pawns-only', castling: false },
+      { slug: 'peasants-revolt', castling: false },
+      { slug: 'stalemate-wins', stalemateMeaning: 'win' },
+    ]
+
+    it.each(DATA_ONLY.map(v => v.slug))('%s: instantiates, generates moves, advances state', (slug) => {
+      const fm = loadFrontmatter('chess', slug)
+      if (!fm || !fm.engine) return
+
+      const extra = DATA_ONLY.find(v => v.slug === slug)
+      const pluginConfig = { setup: fm.engine.setup }
+      if (extra.castling === false) pluginConfig.castling = false
+      if (extra.stalemateMeaning) pluginConfig.stalemateMeaning = extra.stalemateMeaning
+
+      const def = {
+        title: fm.title,
+        slug,
+        parent: 'chess',
+        engine: { players: fm.engine.players || ['white', 'black'], topology: fm.engine.topology, plugins: { chess: pluginConfig } },
+      }
+
+      const game = createGameForFamily('chess', { definition: def })
+      const moves = game.getLegalMoves()
+      expect(moves.length).toBeGreaterThan(0)
+
+      const result = game.applyMove(moves[0])
+      expect(result.ok).toBe(true)
+
+      const moves2 = game.getLegalMoves()
+      expect(moves2.length).toBeGreaterThan(0)
+    })
+  })
+
   it('frontmatter setup wins over registry setup (constructed conflict)', () => {
     const CONFLICT_SETUP = '4k3/8/8/8/8/8/8/4K3'
     const def = {

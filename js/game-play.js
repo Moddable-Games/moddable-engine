@@ -378,9 +378,9 @@ export async function initGamePlay(container, defaults = {}) {
   const family = params.family
   await loadVariantManifest()
   const registryVariants = listVariants(family)
-  const manifestVariants = getManifestVariants(family)
-  const seenKeys = new Set(registryVariants.map(v => v.key))
-  const variants = [...registryVariants, ...manifestVariants.filter(v => !seenKeys.has(v.key))]
+  const registeredKeys = new Set(registryVariants.map(v => v.key))
+  const manifestVariants = getManifestVariants(family, registeredKeys)
+  const variants = [...registryVariants, ...manifestVariants.filter(v => !registeredKeys.has(v.key))]
   const variant = variants.some(v => v.key === params.variant)
     ? params.variant
     : (variants[0] && variants[0].key)

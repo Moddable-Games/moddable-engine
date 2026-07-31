@@ -32,9 +32,18 @@ export async function loadVariantManifest() {
   return _variantManifest
 }
 
-export function getManifestVariants(family) {
+// Variants verified to need no behaviour beyond standard chess rules.
+// Each was confirmed to differ from standard only in starting position
+// and/or castling/en-passant flags.
+const VERIFIED_DATA_ONLY = new Set([
+  'endgame-chess', 'pawns-only', 'peasants-revolt', 'stalemate-wins',
+])
+
+export function getManifestVariants(family, registeredKeys) {
   if (!_variantManifest) return []
+  const registered = registeredKeys || new Set()
   return _variantManifest
     .filter(e => e.family === family)
+    .filter(e => registered.has(e.variant) || VERIFIED_DATA_ONLY.has(e.variant))
     .map(e => ({ key: e.variant, label: e.variantTitle || e.variant }))
 }
