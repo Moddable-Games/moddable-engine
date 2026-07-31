@@ -11,7 +11,7 @@ export const OFFSETS = {
 }
 
 function resolveLeapOffsets(input) {
-  if (typeof input === 'string') return OFFSETS[input] || []
+  if (typeof input === 'string') return OFFSETS[input] || input
   return input
 }
 
@@ -118,21 +118,26 @@ export function divergent(movePrimitive, capturePrimitive) {
   }
 }
 
-export function fromConfig(config) {
+export function fromConfig(config, resolve) {
   if (config.divergent) {
     return divergent(
-      buildPrimitive(config.divergent.move),
-      buildPrimitive(config.divergent.capture)
+      buildPrimitive(config.divergent.move, resolve),
+      buildPrimitive(config.divergent.capture, resolve)
     )
   }
   if (Array.isArray(config)) {
-    return compose(...config.map(buildPrimitive))
+    return compose(...config.map(c => buildPrimitive(c, resolve)))
   }
-  return buildPrimitive(config)
+  return buildPrimitive(config, resolve)
 }
 
-function buildPrimitive(spec) {
+function buildPrimitive(spec, resolve) {
+  if (typeof spec === 'string' && resolve) return resolve(spec)
   if (spec.type === 'leaper') return leaper(spec.offsets || spec.dirs)
   if (spec.type === 'rider') return rider(spec.dirs, { maxSteps: spec.maxSteps })
+  if (spec.type === 'compose' && Array.isArray(spec.parts)) {
+    const parts = spec.parts.map(p => typeof p === 'string' && resolve ? resolve(p) : buildPrimitive(p, resolve)).filter(Boolean)
+    return compose(...parts)
+  }
   return spec
 }

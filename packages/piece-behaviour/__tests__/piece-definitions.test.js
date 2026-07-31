@@ -199,5 +199,25 @@ describe('piece-definitions', () => {
       const moves = piece.genMoves(topology, 27, board)
       expect(moves).toHaveLength(8) // king-like
     })
+
+    it('builds compose with named parts via resolve callback', () => {
+      const pieceConfigs = {
+        bishop: { type: 'rider', dirs: 'diagonal' },
+        knight: { type: 'leaper', offsets: 'knight' },
+      }
+      const resolve = (name) => fromConfig(pieceConfigs[name], resolve)
+      const piece = fromConfig({ type: 'compose', parts: ['bishop', 'knight'] }, resolve)
+      expect(piece.type).toBe('compound')
+      const board = makeBoard()
+      const moves = piece.genMoves(topology, 27, board)
+      const bishopMoves = rider('diagonal').genMoves(topology, 27, board)
+      const knightMoves = leaper('knight').genMoves(topology, 27, board)
+      expect(moves.length).toBe(bishopMoves.length + knightMoves.length)
+    })
+
+    it('resolveLeapOffsets passes unknown strings through to topology', () => {
+      const piece = fromConfig({ type: 'leaper', offsets: 'hexKnight' })
+      expect(piece.type).toBe('leaper')
+    })
   })
 })
