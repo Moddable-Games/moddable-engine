@@ -1,0 +1,44 @@
+[
+  {
+    "variant": "racingKings",
+    "position": "8/8/8/8/8/8/krbnNBRK/qrbnNBRQ w - - 0 1",
+    "sideToMove": "white",
+    "implA": {
+      "name": "mce",
+      "moves": ["52-35", "52-37", "52-42", "52-46", "52-58", "53-39", "53-44", "53-46", "54-38", "54-46", "54-55", "54-48", "54-49", "54-50", "54-51", "54-53", "54-62", "55-46", "55-47", "55-48", "53-60", "54-56", "54-57"]
+    },
+    "implB": {
+      "name": "chess-plugin",
+      "moves": ["52-35", "52-37", "52-46", "53-39", "53-44", "53-46", "54-38", "54-46", "54-55", "54-48", "54-49", "54-50", "54-51", "54-53", "54-62", "55-46", "55-47", "55-48", "53-60", "54-56", "54-57"]
+    },
+    "difference": {
+      "onlyInA": ["52-42", "52-58"],
+      "onlyInB": []
+    },
+    "status": "unresolved",
+    "authority": null,
+    "verdict": null,
+    "note": "Plugin filters moves that give check to either king (racing kings rule). MCE does not filter for check-giving. Need to verify against games/chess/content/variants/racing-kings.md whether no-check rule is correct, and whether equalising-move rule is implemented."
+  },
+  {
+    "variant": "antichess",
+    "position": "opening + 3 plies (deterministic sequence: ply0=move[0], ply1=move[1], ply2=move[2])",
+    "sideToMove": "black",
+    "implA": {
+      "name": "mce",
+      "moveCount": 22
+    },
+    "implB": {
+      "name": "chess-plugin",
+      "moveCount": 1
+    },
+    "difference": {
+      "onlyInA": ["non-capture moves (21 of them)"],
+      "onlyInB": []
+    },
+    "status": "unresolved",
+    "authority": null,
+    "verdict": null,
+    "note": "Plugin enforces forced captures (only 1 capture available). MCE returns all 22 moves without filtering. MCE has four separate antichess rulesets (antichess/giveaway/suicide/omnicide) with the forced-capture axis as a distinction. Need to verify which ruleset MCE's 'antichess' entry implements vs what the plugin implements."
+  }
+]

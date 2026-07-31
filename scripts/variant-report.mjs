@@ -126,6 +126,16 @@ async function run() {
     console.log(fmt(Object.values(r)))
   }
 
+  const parityPath = path.resolve(ROOT, 'data/parity-record.json')
+  const parityRecord = fs.existsSync(parityPath)
+    ? JSON.parse(fs.readFileSync(parityPath, 'utf8'))
+    : []
+  const unresolved = parityRecord.filter(e => e.status === 'unresolved').length
+  const resolved = parityRecord.filter(e => e.status === 'resolved').length
+  const parityAgreed = 11 - parityRecord.length
+
+  console.log('')
+  console.log(`Parity: ${parityAgreed}/11 agree · ${unresolved} unresolved divergences · ${resolved} resolved`)
   console.log('')
   const totalPlayable = rows.reduce((s, r) => s + r.playable, 0)
   const totalRegistered = rows.reduce((s, r) => s + r.registered, 0)
