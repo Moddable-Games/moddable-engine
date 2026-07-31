@@ -135,13 +135,25 @@ async function run() {
   const realDivergences = parityRecord.filter(e => e.status === 'unresolved' || (e.verdict && e.verdict !== 'test-bug')).length
   const parityAgreed = 11 - realDivergences
 
+  const unresolvedEntries = parityRecord.filter(e => e.status === 'unresolved')
+  const oldestUnresolved = unresolvedEntries.length > 0
+    ? unresolvedEntries.reduce((oldest, e) => e.firstSeen < oldest ? e.firstSeen : oldest, unresolvedEntries[0].firstSeen)
+    : null
+
   console.log('')
-  console.log(`Parity: ${parityAgreed}/11 agree · ${unresolved} unresolved divergences · ${resolved} resolved`)
+  let parityLine = `Parity: ${parityAgreed}/11 agree · ${unresolved} unresolved divergences · ${resolved} resolved`
+  if (oldestUnresolved) parityLine += ` · oldest: ${oldestUnresolved}`
+  console.log(parityLine)
   console.log('')
   const totalPlayable = rows.reduce((s, r) => s + r.playable, 0)
   const totalRegistered = rows.reduce((s, r) => s + r.registered, 0)
   const totalBroken = rows.reduce((s, r) => s + r.broken, 0)
   console.log(`Total: ${totalPlayable}/${totalRegistered} playable, ${totalBroken} broken`)
+
+  const zeroPlayable = rows.filter(r => r.rulesDocs > 0 && r.registered === 0)
+  if (zeroPlayable.length > 0) {
+    console.log(`\nFamilies with rules docs but no playable variants: ${zeroPlayable.map(r => r.family).join(', ')}`)
+  }
 
   const allBroken = Object.entries(playability)
     .flatMap(([family, p]) => p.broken.map(b => ({ family, ...b })))
