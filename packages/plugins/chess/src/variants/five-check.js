@@ -10,9 +10,10 @@ export const fiveCheck = {
   checkThreshold: 5,
 
   winCondition(state, ctx) {
+    const threshold = ctx.config?.checkThreshold || 5
     const checks = state.checkCount || { 0: 0, 1: 0 }
-    if (checks[0] >= 5) return 'white'
-    if (checks[1] >= 5) return 'black'
+    if (checks[0] >= threshold) return 'white'
+    if (checks[1] >= threshold) return 'black'
     return null
   },
 

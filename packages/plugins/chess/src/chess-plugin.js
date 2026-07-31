@@ -499,7 +499,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       : filterLegalMoves(allMoves, slice, playerIdx)
 
     if (config.moveFilter) {
-      legal = config.moveFilter(legal, slice, { currentPlayer: playerIdx })
+      legal = config.moveFilter(legal, slice, { currentPlayer: playerIdx, config })
     }
 
     return legal
@@ -533,7 +533,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const opponent = 1 - playerIdx
 
     if (config.winCondition) {
-      const result = config.winCondition(slice, { currentPlayer: playerIdx })
+      const result = config.winCondition(slice, { currentPlayer: playerIdx, config })
       if (result !== null && result !== undefined) return result
     }
 

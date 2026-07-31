@@ -91,4 +91,26 @@ describeWithRules('late binding: frontmatter data + registry functions', () => {
     const moves = game.getLegalMoves()
     expect(moves.length).toBeGreaterThan(0)
   })
+
+  it('frontmatter setup wins over registry setup (constructed conflict)', () => {
+    const CONFLICT_SETUP = '4k3/8/8/8/8/8/8/4K3'
+    const def = {
+      title: 'Conflict Test',
+      slug: 'standard',
+      parent: 'chess',
+      engine: {
+        players: ['white', 'black'],
+        topology: { type: 'grid', rows: 8, cols: 8 },
+        plugins: { chess: { setup: CONFLICT_SETUP } },
+      },
+    }
+
+    const game = createGameForFamily('chess', { variant: 'standard', definition: def })
+    const state = game.getState().slice
+    let pieceCount = 0
+    for (const cell of state.board) {
+      if (cell !== null) pieceCount++
+    }
+    expect(pieceCount).toBe(2)
+  })
 })

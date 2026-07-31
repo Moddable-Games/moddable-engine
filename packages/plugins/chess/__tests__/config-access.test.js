@@ -13,6 +13,8 @@ const ACCEPTED_KEYS = new Set([
   'openingBook', 'torpedo', 'doubleStep', 'advancement', 'pawnConfig',
   'checkThreshold',
 ])
+// checkThreshold is read via ctx.config in winCondition, which the
+// plugin passes. It is genuinely consumed, not an allowance.
 
 // Keys consumed by the play layer (variant-definition.js strips these
 // before passing to the plugin, so they never reach createChessPlugin)
