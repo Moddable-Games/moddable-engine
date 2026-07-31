@@ -9,7 +9,7 @@ const RULES_DIR = path.resolve(ROOT, '../moddable-rules/games')
 const BOARD_INDEX = path.resolve(ROOT, 'boards/board-index.json')
 
 const FAMILY_MAP = {
-  chess: { rulesDir: 'chess', boardFamily: 'moddable-chess' },
+  chess: { rulesDir: 'chess', boardFamily: 'chess' },
   go: { rulesDir: 'go', boardFamily: 'go' },
   draughts: { rulesDir: 'draughts', boardFamily: 'draughts' },
   shogi: { rulesDir: 'shogi', boardFamily: 'shogi' },
