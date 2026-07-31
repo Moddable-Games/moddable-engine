@@ -34,7 +34,8 @@
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "build": "npm run build --workspaces",
-    "lint": "eslint packages/*/src/**/*.js"
+    "lint": "eslint packages/*/src/**/*.js",
+    "variant-report": "node --experimental-vm-modules scripts/variant-report.mjs"
   },
   "engines": {
     "node": ">=18.0.0"

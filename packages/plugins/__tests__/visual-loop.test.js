@@ -7,6 +7,7 @@ import { listVariants, getRegisteredFamilies } from '../../play/src/variant-regi
 import { createGame } from '../../play/src/sdk.js'
 import { interactionModelFor } from '../../play/src/interaction.js'
 
+import '../chess/index.js'
 import '../go/index.js'
 import '../draughts/index.js'
 import '../xiangqi/index.js'
