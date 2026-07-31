@@ -175,7 +175,7 @@ const _isEmbed = _params.has('embed');
 const _hexGames = ['nukes','twilight','colony','talisman','mongo','endless'];
 const _isHexEmbed = _isEmbed && _game && _hexGames.includes(_game);
 const _isChessMode = _mode === 'play' || _mode === 'solo' || (_isEmbed && !_isHexEmbed && !_family);
-const _gameFamilies = ['go','draughts','xiangqi','shogi'];
+const _gameFamilies = ['chess','go','draughts','xiangqi','shogi'];
 const _isGamePlay = _family && _gameFamilies.includes(_family);
 if (_isGamePlay) {
   document.addEventListener('DOMContentLoaded', () => {

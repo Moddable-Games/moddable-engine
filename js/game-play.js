@@ -10,6 +10,7 @@ import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolv
 import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
 import { boardToSetup as serialiseBoard } from '../packages/play/src/serialise.js'
 
+import '../packages/plugins/chess/index.js'
 import '../packages/plugins/go/index.js'
 import '../packages/plugins/draughts/index.js'
 import '../packages/plugins/xiangqi/index.js'
