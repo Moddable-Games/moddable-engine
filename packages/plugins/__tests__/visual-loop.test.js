@@ -1,10 +1,12 @@
 import fs from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
 import { parseFrontmatter } from '../../schema/src/parse-frontmatter.js'
 import { buildPieceImages } from '../../render/src/render-engine.js'
 import { boardToSetup } from '../../play/src/serialise.js'
 import { listVariants, getRegisteredFamilies } from '../../play/src/variant-registry.js'
 import { createGame } from '../../play/src/sdk.js'
+import { createGameForFamily } from '../../play/src/play.js'
 import { interactionModelFor } from '../../play/src/interaction.js'
 
 import '../chess/index.js'
@@ -163,5 +165,74 @@ describeWithAssets('click round-trip reaches a legal move', () => {
     expect(['move', 'choice']).toContain(commit.type)
     const move = commit.type === 'move' ? commit.move : commit.candidates[0]
     expect(game.applyMove(move).ok).toBe(true)
+  })
+})
+
+const DATA_ONLY_VARIANTS = [
+  { slug: 'endgame-chess', config: { castling: false } },
+  { slug: 'pawns-only', config: { castling: false } },
+  { slug: 'peasants-revolt', config: { castling: false } },
+  { slug: 'stalemate-wins', config: { stalemateMeaning: 'win' } },
+]
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const DATA_ONLY_RULES = path.resolve(__dirname, '../../../../moddable-rules/games')
+
+function loadDataOnlyVariant(slug, extraConfig) {
+  const varPath = path.join(DATA_ONLY_RULES, 'chess/content/variants', slug + '.md')
+  if (!fs.existsSync(varPath)) return null
+  const fm = parseFrontmatter(fs.readFileSync(varPath, 'utf8')).meta || {}
+  if (!fm.engine) return null
+  return createGameForFamily('chess', {
+    definition: {
+      title: fm.title, slug, parent: 'chess',
+      engine: { players: fm.engine.players || ['white', 'black'], topology: fm.engine.topology, plugins: { chess: { setup: fm.engine.setup, ...extraConfig } } },
+    },
+  })
+}
+
+describeWithAssets('data-only chess variants: artwork + state change', () => {
+  it.each(DATA_ONLY_VARIANTS.map(v => v.slug))('%s: every piece resolves to artwork after moves', (slug) => {
+    const pieces = hubPieces('chess')
+    if (!pieces || !pieces.set) return
+
+    const extra = DATA_ONLY_VARIANTS.find(v => v.slug === slug)
+    const game = loadDataOnlyVariant(slug, extra.config)
+    if (!game) return
+
+    const { images } = buildPieceImages(pieces.set, gallery, pieces.vocabulary || null, false)
+    const plugin = game.raw.registry.getPlugins().find(p => p.sliceName === 'chess')
+
+    let played = 0
+    for (let i = 0; i < 4; i++) {
+      const moves = game.getLegalMoves().filter(m => m.action !== 'pass' && m.action !== 'resign')
+      if (moves.length === 0) break
+      const result = game.applyMove(moves[Math.floor(moves.length / 2)])
+      if (!result || !result.ok) break
+      played++
+    }
+
+    const slice = game.getState().slice
+    const cols = slice._cols || 8
+    const rows = Math.round(slice.board.length / cols)
+    const setup = boardToSetup(slice, { rows, cols }, plugin.vocabulary)
+    const keys = setupToImageKeys(setup, pieces.vocabulary || null)
+    const unresolved = [...new Set(keys.filter(k => !images[k]))]
+
+    expect(unresolved).toEqual([])
+    expect(keys.length + played).toBeGreaterThan(0)
+  })
+
+  it.each(DATA_ONLY_VARIANTS.map(v => v.slug))('%s: state changes after moves', (slug) => {
+    const extra = DATA_ONLY_VARIANTS.find(v => v.slug === slug)
+    const game = loadDataOnlyVariant(slug, extra.config)
+    if (!game) return
+
+    const opening = JSON.stringify(game.getState().slice.board)
+    const moves = game.getLegalMoves()
+    if (moves.length === 0) return
+    game.applyMove(moves[0])
+    const after = JSON.stringify(game.getState().slice.board)
+    expect(after).not.toBe(opening)
   })
 })
