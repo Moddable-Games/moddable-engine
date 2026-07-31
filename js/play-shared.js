@@ -23,3 +23,18 @@ export async function loadGalleryIndex() {
 }
 
 export function getGalleryIndex() { return _galleryIndex }
+
+let _variantManifest = null
+export async function loadVariantManifest() {
+  if (_variantManifest) return _variantManifest
+  try { _variantManifest = await fetch(RULES_BASE + 'diagrams-manifest.json').then(r => r.json()) }
+  catch { _variantManifest = [] }
+  return _variantManifest
+}
+
+export function getManifestVariants(family) {
+  if (!_variantManifest) return []
+  return _variantManifest
+    .filter(e => e.family === family)
+    .map(e => ({ key: e.variant, label: e.variantTitle || e.variant }))
+}

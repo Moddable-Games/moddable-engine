@@ -16,7 +16,7 @@ import '../packages/plugins/draughts/index.js'
 import '../packages/plugins/xiangqi/index.js'
 import '../packages/plugins/shogi/index.js'
 
-import { BOARD_THEMES, RULES_BASE, loadGalleryIndex, getGalleryIndex } from './play-shared.js'
+import { BOARD_THEMES, RULES_BASE, loadGalleryIndex, getGalleryIndex, loadVariantManifest, getManifestVariants } from './play-shared.js'
 import { createCellAddressing } from './play-cells.js'
 import { paintHighlight, paintIndicator, createOverlay } from './play-overlays.js'
 import { bindBoardInteraction } from './play-interaction.js'
@@ -376,7 +376,11 @@ export function createPlaySession(options = {}) {
 export async function initGamePlay(container, defaults = {}) {
   const params = parseEmbedParams(location.search, { family: 'go', ...defaults })
   const family = params.family
-  const variants = listVariants(family)
+  await loadVariantManifest()
+  const registryVariants = listVariants(family)
+  const manifestVariants = getManifestVariants(family)
+  const seenKeys = new Set(registryVariants.map(v => v.key))
+  const variants = [...registryVariants, ...manifestVariants.filter(v => !seenKeys.has(v.key))]
   const variant = variants.some(v => v.key === params.variant)
     ? params.variant
     : (variants[0] && variants[0].key)
