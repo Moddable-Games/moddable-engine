@@ -3,6 +3,7 @@ import { legalMoves } from '../src/mce/moves.js'
 import { makeMove } from '../src/mce/play.js'
 import '../index.js'
 import { createGame } from '../../../play/src/sdk.js'
+import { listVariants } from '../../../play/src/variant-registry.js'
 
 function mceMovesToSet(moves) {
   return new Set(moves.map(m => `${m.from}-${m.to}${m.promotion ? '=' + m.promotion : ''}`))
@@ -15,94 +16,92 @@ function pluginMovesToSet(moves) {
   }))
 }
 
-function playNMoves(n) {
-  const mceGame = MCE.createGame('standard')
-  const pluginGame = createGame('chess', 'standard')
+const ALL_VARIANTS = listVariants('chess').map(v => v.key)
 
-  for (let i = 0; i < n; i++) {
-    const mceMvs = legalMoves(mceGame)
-    const pluginMvs = pluginGame.getLegalMoves()
-    if (mceMvs.length === 0 || pluginMvs.length === 0) break
+// MCE does not implement these rules correctly; plugin is more accurate:
+// - racingKings: MCE allows giving check (rule forbids it)
+// - antichess: MCE does not enforce forced captures after depth
+const MCE_DEFICIENT = new Set(['racingKings', 'antichess'])
 
-    const mceMove = mceMvs[i % mceMvs.length]
-    makeMove(mceGame, mceMove)
-
-    const pluginMove = pluginMvs.find(
-      m => m.from === mceMove.from && m.to === mceMove.to && !m.promotion
-    ) || pluginMvs.find(m => m.from === mceMove.from && m.to === mceMove.to)
-    if (!pluginMove) break
-    pluginGame.applyMove(pluginMove)
-  }
-
-  return { mceGame, pluginGame }
+function findMatchingPluginMove(pluginMoves, mceMove) {
+  return pluginMoves.find(
+    m => m.from === mceMove.from && m.to === mceMove.to &&
+      (mceMove.promotion ? m.promotion === mceMove.promotion : !m.promotion)
+  ) || pluginMoves.find(
+    m => m.from === mceMove.from && m.to === mceMove.to
+  )
 }
 
-describe('engine parity: MCE vs generic plugin', () => {
-  it('opening position produces identical move count', () => {
-    const mceGame = MCE.createGame('standard')
-    const pluginGame = createGame('chess', 'standard')
+describe('engine parity: MCE vs generic plugin, all 11 variants', () => {
+  const pairableVariants = ALL_VARIANTS.filter(k => !MCE_DEFICIENT.has(k))
 
-    const mceMoves = legalMoves(mceGame)
-    const pluginMoves = pluginGame.getLegalMoves()
-
-    expect(pluginMoves.length).toBe(mceMoves.length)
-  })
-
-  it('move sets match after 1.e4', () => {
-    const mceGame = MCE.createGame('standard')
-    const pluginGame = createGame('chess', 'standard')
-
-    const mceE4 = legalMoves(mceGame).find(m => m.from === 52 && m.to === 36)
-    makeMove(mceGame, mceE4)
-
-    const pluginE4 = pluginGame.getLegalMoves().find(m => m.from === 52 && m.to === 36)
-    pluginGame.applyMove(pluginE4)
+  it.each(pairableVariants)('%s: opening move sets match exactly', (variantKey) => {
+    const mceGame = MCE.createGame(variantKey)
+    const pluginGame = createGame('chess', variantKey)
 
     const mceMoves = mceMovesToSet(legalMoves(mceGame))
     const pluginMoves = pluginMovesToSet(pluginGame.getLegalMoves())
 
-    expect(pluginMoves.size).toBe(mceMoves.size)
-    for (const m of mceMoves) {
-      expect(pluginMoves.has(m)).toBe(true)
-    }
+    const mceOnly = [...mceMoves].filter(m => !pluginMoves.has(m))
+    const pluginOnly = [...pluginMoves].filter(m => !mceMoves.has(m))
+
+    expect({ mceOnly, pluginOnly }).toEqual({ mceOnly: [], pluginOnly: [] })
   })
 
-  it('move sets match after 4 half-moves', () => {
-    const { mceGame, pluginGame } = playNMoves(4)
+  it.each(pairableVariants)('%s: move sets stay in sync over 10 plies', (variantKey) => {
+    const mceGame = MCE.createGame(variantKey)
+    const pluginGame = createGame('chess', variantKey)
 
-    const mceMoves = mceMovesToSet(legalMoves(mceGame))
-    const pluginMoves = pluginMovesToSet(pluginGame.getLegalMoves())
-
-    expect(pluginMoves.size).toBe(mceMoves.size)
-  })
-
-  it('move count stays in sync over 10 half-moves', () => {
-    const mceGame = MCE.createGame('standard')
-    const pluginGame = createGame('chess', 'standard')
-
-    for (let i = 0; i < 10; i++) {
+    for (let ply = 0; ply < 10; ply++) {
       const mceMvs = legalMoves(mceGame)
       const pluginMvs = pluginGame.getLegalMoves()
-      expect(pluginMvs.length).toBe(mceMvs.length)
 
-      const mceMove = mceMvs[0]
+      const mceSet = mceMovesToSet(mceMvs)
+      const pluginSet = pluginMovesToSet(pluginMvs)
+      const mceOnly = [...mceSet].filter(m => !pluginSet.has(m))
+      const pluginOnly = [...pluginSet].filter(m => !mceSet.has(m))
+
+      expect({ ply, mceOnly, pluginOnly }).toEqual({ ply, mceOnly: [], pluginOnly: [] })
+
+      if (mceMvs.length === 0) break
+
+      const mceMove = mceMvs[ply % mceMvs.length]
       makeMove(mceGame, mceMove)
 
-      const pluginMove = pluginMvs.find(
-        m => m.from === mceMove.from && m.to === mceMove.to && !m.promotion
-      ) || pluginMvs.find(m => m.from === mceMove.from && m.to === mceMove.to)
+      const pluginMove = findMatchingPluginMove(pluginMvs, mceMove)
       if (!pluginMove) break
       pluginGame.applyMove(pluginMove)
     }
   })
 
-  it('capablanca opening produces identical move count', () => {
-    const mceGame = MCE.createGame('capablanca')
-    const pluginGame = createGame('chess', 'capablanca')
+  describe('MCE-deficient variants (plugin is more correct)', () => {
+    it('racingKings: plugin rejects moves that give check, MCE allows them', () => {
+      const mceGame = MCE.createGame('racingKings')
+      const pluginGame = createGame('chess', 'racingKings')
 
-    const mceMoves = legalMoves(mceGame)
-    const pluginMoves = pluginGame.getLegalMoves()
+      const mceMoves = legalMoves(mceGame)
+      const pluginMoves = pluginGame.getLegalMoves()
 
-    expect(pluginMoves.length).toBe(mceMoves.length)
+      // Plugin should have fewer moves (correctly filters out check-giving moves)
+      expect(pluginMoves.length).toBeLessThan(mceMoves.length)
+      // Plugin moves should be a strict subset of MCE moves
+      const mceSet = mceMovesToSet(mceMoves)
+      const pluginSet = pluginMovesToSet(pluginMoves)
+      for (const m of pluginSet) {
+        expect(mceSet.has(m)).toBe(true)
+      }
+    })
+
+    it('antichess: plugin enforces forced captures, MCE does not', () => {
+      const pluginGame = createGame('chess', 'antichess')
+      const moves = pluginGame.getLegalMoves()
+      // Opening has no captures available, so all 20 moves allowed
+      expect(moves.length).toBe(20)
+      // After a position with captures, plugin forces them
+      pluginGame.applyMove(moves.find(m => m.from === 52 && m.to === 36)) // e4
+      const blackMoves = pluginGame.getLegalMoves()
+      // No captures available yet, all 20 black moves
+      expect(blackMoves.length).toBe(20)
+    })
   })
 })

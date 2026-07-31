@@ -85,7 +85,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       }
       captureDirections[player] = [[dir, -1], [dir, 1]]
     }
-    return { forwardDir, startCells, promotionCells, captureDirections, doubleStep: true }
+    return { forwardDir, startCells, promotionCells, captureDirections, doubleStep: config.doubleStep !== false }
   }
 
   function init(pluginConfig, { request }) {

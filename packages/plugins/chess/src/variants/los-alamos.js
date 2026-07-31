@@ -10,4 +10,5 @@ export const losAlamos = {
   setup: 'rnqknr/pppppp/6/6/PPPPPP/RNQKNR',
   castling: false,
   enPassant: false,
+  doubleStep: false,
 }
