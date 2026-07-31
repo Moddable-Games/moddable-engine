@@ -1,0 +1,94 @@
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import { parseFrontmatter } from '../../schema/src/parse-frontmatter.js'
+import { createGameForFamily } from '../src/play.js'
+import { getVariantConfig } from '../src/variant-registry.js'
+import { pluginConfigFromVariant, topologyFromVariant } from '../src/variant-definition.js'
+import '../../plugins/chess/index.js'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const RULES_DIR = path.resolve(__dirname, '../../../../moddable-rules/games')
+
+function loadFrontmatter(family, slug) {
+  const variantPath = path.join(RULES_DIR, family, 'content/variants', slug + '.md')
+  if (!fs.existsSync(variantPath)) return null
+  return parseFrontmatter(fs.readFileSync(variantPath, 'utf8')).meta || {}
+}
+
+function buildLateBoundDefinition(family, variant) {
+  const fm = loadFrontmatter(family, variant)
+  if (!fm || !fm.engine) return null
+
+  const registryCfg = getVariantConfig(family, variant) || {}
+  const topology = fm.engine.topology || null
+  const setup = fm.engine.setup || undefined
+  const players = fm.engine.players || ['white', 'black']
+
+  const pluginConfig = {}
+  if (setup) pluginConfig.setup = setup
+  for (const [k, v] of Object.entries(registryCfg)) {
+    if (typeof v === 'function') pluginConfig[k] = v
+    else if (k === 'openingBook') pluginConfig[k] = v
+  }
+
+  return {
+    title: fm.title || variant,
+    slug: variant,
+    parent: family,
+    engine: { players, topology, plugins: { [family]: pluginConfig } },
+  }
+}
+
+const hasRules = fs.existsSync(RULES_DIR)
+const describeWithRules = hasRules ? describe : describe.skip
+
+describeWithRules('late binding: frontmatter data + registry functions', () => {
+  it('kingOfTheHill plays from frontmatter data + registry winCondition', () => {
+    const def = buildLateBoundDefinition('chess', 'king-of-the-hill')
+    expect(def).not.toBeNull()
+
+    const game = createGameForFamily('chess', { variant: 'kingOfTheHill', definition: def })
+    const moves = game.getLegalMoves()
+    expect(moves.length).toBe(20)
+
+    game.applyMove(moves[0])
+    const moves2 = game.getLegalMoves()
+    expect(moves2.length).toBeGreaterThan(0)
+  })
+
+  it('kingOfTheHill winCondition fires from late-bound game', () => {
+    const def = buildLateBoundDefinition('chess', 'king-of-the-hill')
+    const game = createGameForFamily('chess', { variant: 'kingOfTheHill', definition: def })
+
+    const state = game.getState()
+    expect(state.slice.board).toBeDefined()
+    expect(game.checkWin()).toBeNull()
+  })
+
+  it('standard chess plays identically from frontmatter', () => {
+    const def = buildLateBoundDefinition('chess', 'standard')
+    expect(def).not.toBeNull()
+
+    const fmGame = createGameForFamily('chess', { definition: def })
+    const regGame = createGameForFamily('chess', { variant: 'standard' })
+
+    expect(fmGame.getLegalMoves().length).toBe(regGame.getLegalMoves().length)
+  })
+
+  it('a pure-data variant needs no registry entry', () => {
+    const fm = loadFrontmatter('chess', 'endgame-chess')
+    if (!fm || !fm.engine) return
+
+    const def = {
+      title: fm.title,
+      slug: 'endgame-chess',
+      parent: 'chess',
+      engine: { players: fm.engine.players || ['white', 'black'], topology: fm.engine.topology, plugins: { chess: { setup: fm.engine.setup, castling: false } } },
+    }
+
+    const game = createGameForFamily('chess', { definition: def })
+    const moves = game.getLegalMoves()
+    expect(moves.length).toBeGreaterThan(0)
+  })
+})

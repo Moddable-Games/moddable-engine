@@ -25,6 +25,24 @@ import { renderRulesPanel } from './play-rules.js'
 
 const DIFFICULTIES = ['beginner', 'easy', 'medium', 'hard', 'expert']
 
+function buildDefinitionFromResolved(family, variant, resolved, registryCfg) {
+  const topo = resolved.topology || {}
+  const topology = topo.type ? { type: topo.type, rows: topo.rows, cols: topo.cols } : undefined
+  const players = resolved.players || ['white', 'black']
+  const setup = resolved.setup || undefined
+
+  const pluginConfig = {}
+  if (setup) pluginConfig.setup = setup
+  for (const [k, v] of Object.entries(registryCfg)) {
+    if (typeof v === 'function') pluginConfig[k] = v
+    else if (k === 'openingBook') pluginConfig[k] = v
+  }
+
+  const def = { title: resolved.meta?.label || variant, slug: variant, parent: family, engine: { players, plugins: { [family]: pluginConfig } } }
+  if (topology) def.engine.topology = topology
+  return def
+}
+
 async function resolveBoard(family, variantConfig) {
   const basePath = RULES_BASE + 'games/'
   const variantSlug = variantConfig.key || 'standard'
@@ -80,13 +98,15 @@ export function createPlaySession(options = {}) {
   }
 
   async function start() {
-    game = createGameForFamily(family, { variant })
     scoring = null
     deadStones = []
     moveHistory = []
 
     const variantCfg = getVariantConfig(family, variant) || {}
     resolvedBoard = await resolveBoard(family, variantCfg)
+
+    const frontmatterDef = buildDefinitionFromResolved(family, variant, resolvedBoard, variantCfg)
+    game = createGameForFamily(family, { variant, definition: frontmatterDef })
     const topo = resolvedBoard.topology
     cells = createCellAddressing({
       rows: topo.rows || 19,
