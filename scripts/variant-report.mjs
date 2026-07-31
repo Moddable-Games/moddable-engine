@@ -133,7 +133,8 @@ async function run() {
   const unresolved = parityRecord.filter(e => e.status === 'unresolved').length
   const resolved = parityRecord.filter(e => e.status === 'resolved').length
   const realDivergences = parityRecord.filter(e => e.status === 'unresolved' || (e.verdict && e.verdict !== 'test-bug')).length
-  const parityAgreed = 11 - realDivergences
+  const chessRegistered = (registered.chess || []).length
+  const parityAgreed = chessRegistered - realDivergences
 
   const unresolvedEntries = parityRecord.filter(e => e.status === 'unresolved')
   const oldestUnresolved = unresolvedEntries.length > 0
@@ -141,7 +142,7 @@ async function run() {
     : null
 
   console.log('')
-  let parityLine = `Parity: ${parityAgreed}/11 agree · ${unresolved} unresolved divergences · ${resolved} resolved`
+  let parityLine = `Parity: ${parityAgreed}/${chessRegistered} agree · ${unresolved} unresolved divergences · ${resolved} resolved`
   if (oldestUnresolved) parityLine += ` · oldest: ${oldestUnresolved}`
   console.log(parityLine)
   console.log('')
