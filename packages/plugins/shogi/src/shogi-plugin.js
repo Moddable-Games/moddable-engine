@@ -217,7 +217,7 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     return false
   }
 
-  return {
+  const plugin = {
     sliceName: 'shogi',
     pieceTypes: ['king', 'rook', 'bishop', 'gold', 'silver', 'knight', 'lance', 'pawn'],
     vocabulary: VOCABULARY,
@@ -228,9 +228,12 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
       topology = request('core.topology')
       const setup = pluginConfig.setup || config.setup || null
       const board = setup ? parseSetup(setup) : buildDefaultBoard()
+      const hands = config.initialHands
+        ? [config.initialHands[0] || [], config.initialHands[1] || []]
+        : [[], []]
       return {
         board,
-        hands: [[], []],
+        hands,
         _cols: config.cols,
       }
     },
@@ -309,8 +312,10 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
         }
       }
 
-      const drops = generateDropMoves(slice.board, slice.hands[playerIndex], playerIndex)
-      allMoves.push(...drops)
+      if (config.drops !== false) {
+        const drops = generateDropMoves(slice.board, slice.hands[playerIndex], playerIndex)
+        allMoves.push(...drops)
+      }
 
       return allMoves.filter(m => {
         const testBoard = slice.board.map(c => c ? { ...c } : null)
@@ -323,7 +328,17 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
             testBoard[m.to] = { ...testBoard[m.to], type: getPromotedType(testBoard[m.to].type) || testBoard[m.to].type }
           }
         }
-        return !isInCheck(testBoard, playerIndex)
+        if (isInCheck(testBoard, playerIndex)) return false
+        if (config.dropCheckmateLimit && m.action === 'drop' && m.type === 'pawn') {
+          const opponent = 1 - playerIndex
+          if (isInCheck(testBoard, opponent)) {
+            const testSlice = { ...slice, board: testBoard }
+            const oppFull = { __players: { currentIndex: opponent } }
+            const oppMoves = plugin.getLegalMoves(testSlice, oppFull)
+            if (oppMoves.length === 0) return false
+          }
+        }
+        return true
       })
     },
 
@@ -387,4 +402,6 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     }
     return board
   }
+
+  return plugin
 }

@@ -43,14 +43,40 @@ export const judkins = {
   playerNames: PLAYERS,
 }
 
+export const heian = {
+  key: 'heian-shogi',
+  setup: 'lnsgkgsnl/9/ppppppppp/9/9/PPPPPPPPP/9/LNSGKGSNL',
+  label: 'Heian Shogi',
+  group: 'Historical',
+  description: 'The earliest reconstructed form of Japanese chess. 9x8 board, no drops, no rooks or bishops.',
+  rule: 'Board: 9×8 · Win: Checkmate or bare King · No Drops',
+  rows: 8,
+  cols: 9,
+  promotionZone: 3,
+  drops: false,
+  playerNames: PLAYERS,
+}
+
+export const gorogoroPlus = {
+  key: 'gorogoro-plus',
+  setup: 'sgkgs/5/1ppp1/1PPP1/5/SGKGS',
+  label: 'Gorogoro+',
+  group: 'Smaller Board Variants',
+  description: 'Compact 5x6 shogi with no bishop or rook. Each player starts with a knight and lance in hand.',
+  rule: 'Board: 5×6 · Win: Checkmate · Drops',
+  rows: 6,
+  cols: 5,
+  promotionZone: 2,
+  initialHands: [['knight', 'lance'], ['knight', 'lance']],
+  playerNames: PLAYERS,
+}
+
 // Variants held back until the plugin models the mechanic each one needs.
 // Verified rather than assumed: each was built from its rules setup and the
 // result inspected.
 export const UNSUPPORTED = {
   // These parse and produce the right piece count, but would play to the wrong
   // rules, which is worse than being absent.
-  'heian-shogi': 'predates the drop rule; the plugin has no way to disable drops',
-  'gorogoro-plus': 'the knight and lance start in hand, and hands always start empty',
   'mortal-shogi': 'captured pieces demote along a ranking chain rather than returning to base form',
 
   // New piece types beyond king, rook, bishop, gold, silver, knight, lance, pawn.
