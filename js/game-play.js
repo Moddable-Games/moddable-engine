@@ -22,6 +22,7 @@ import { paintHighlight, paintIndicator, paintFog, createOverlay } from './play-
 import { bindBoardInteraction } from './play-interaction.js'
 import { renderHandPanel } from './play-hand.js'
 import { renderRulesPanel } from './play-rules.js'
+import { moveToSAN } from '../packages/plugins/chess/src/san.js'
 
 const DIFFICULTIES = ['beginner', 'easy', 'medium', 'hard', 'expert']
 
@@ -358,6 +359,11 @@ export function createPlaySession(options = {}) {
   }
 
   function moveToNotation(move) {
+    if (family === 'chess') {
+      const slice = game.getState().slice
+      const topo = resolvedBoard?.topology
+      return moveToSAN(move, slice.board, topo)
+    }
     if (move.action) return move.action
     if (move.coord !== undefined) {
       return cells.toId(move.coord) || String(move.coord)
