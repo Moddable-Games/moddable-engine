@@ -46,7 +46,8 @@ function pluginMovesToSet(moves) {
   return new Set(moves.map(m => `${m.from}-${m.to}${m.promotion ? '=' + m.promotion : ''}`))
 }
 
-// Derived from MCE's createVariantGame: keys that add or change behaviour.
+// Derived from MCE's createVariantGame (engine.js), play.js, variants-util.js,
+// controller.js, and ai.js. Every vc.X access that adds or changes behaviour.
 // Restriction flags (noCastling, noEnPassant, noPromotion) are excluded:
 // they disable existing mechanics and the generic plugin handles them as
 // config data (castling: false, enPassant: false).
@@ -58,6 +59,8 @@ const BEHAVIOUR_KEYS = new Set([
   'maxMovesPerTurn', 'progressiveMove', 'royalPiece',
   'promotionPieces', 'promotionRank', 'torpedo',
   'wrapFiles', 'wrapRanks', 'aiMoveCount',
+  'afterMove', 'beforeMove', 'restoreState', 'turnLogic',
+  'pieces',
 ])
 
 const hasRules = fs.existsSync(RULES_DIR)
