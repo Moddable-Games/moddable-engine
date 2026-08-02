@@ -144,7 +144,7 @@ export const sittuyin = {
 
   actions: {
     place: {
-      movesOwnPiece: false,
+      skipsCheckFilter: true,
       continuesTurn: true,
       generate(slice, playerIdx) {
         if (slice._phase !== 'placement') return []

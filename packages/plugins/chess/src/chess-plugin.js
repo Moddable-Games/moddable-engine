@@ -467,11 +467,11 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       const actionDef = actions[move.action]
       const ctx = { board, slice, playerIdx, hands, topology, getCell, setCell, allPositions }
       const result = actionDef.apply(move, ctx)
-      const newSlice = { board: result.board || board, halfmoveClock: result.halfmoveClock ?? slice.halfmoveClock, fullmoveNumber: result.fullmoveNumber ?? slice.fullmoveNumber }
+      const newSlice = { board: result.board || board, halfmoveClock: result.halfmoveClock ?? 0, fullmoveNumber: result.fullmoveNumber ?? slice.fullmoveNumber }
       if (result.hands !== undefined) newSlice.hands = result.hands
       else if (hands) newSlice.hands = hands
       if (slice.castlingRights) newSlice.castlingRights = result.castlingRights || deepCopyCastling(slice.castlingRights)
-      if (config.enPassant) newSlice.enPassantTarget = result.enPassantTarget ?? slice.enPassantTarget ?? null
+      if (config.enPassant) newSlice.enPassantTarget = result.enPassantTarget ?? null
       for (const k of Object.keys(slice)) {
         if (k.startsWith('_') && !(k in newSlice)) newSlice[k] = slice[k]
       }
@@ -641,7 +641,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
   function filterLegalMoves(moves, slice, playerIdx) {
     return moves.filter(move => {
-      if (move.action && actions[move.action] && !actions[move.action].movesOwnPiece) return true
+      if (move.action && actions[move.action] && actions[move.action].skipsCheckFilter) return true
       const testBoard = cloneBoard(slice.board)
       if (move.castle) {
         setCell(testBoard, move.to, getCell(testBoard, move.from))

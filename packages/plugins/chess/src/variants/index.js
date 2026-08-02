@@ -63,7 +63,7 @@ export const crazyhouse = {
   drops: true,
   actions: {
     drop: {
-      movesOwnPiece: false,
+      skipsCheckFilter: true,
       generate(slice, playerIdx, { allPositions, getCell, pawnConfig }) {
         if (!slice.hands) return []
         const hand = slice.hands[playerIdx]
@@ -194,7 +194,7 @@ export const duckChess = {
 
   actions: {
     blocker: {
-      movesOwnPiece: false,
+      skipsCheckFilter: true,
       continuesTurn: false,
       generate(slice, playerIdx, { allPositions, getCell }) {
         if (!slice._blockerPhase) return []
