@@ -46,10 +46,18 @@ function pluginMovesToSet(moves) {
   return new Set(moves.map(m => `${m.from}-${m.to}${m.promotion ? '=' + m.promotion : ''}`))
 }
 
+// Derived from MCE's createVariantGame: keys that add or change behaviour.
+// Restriction flags (noCastling, noEnPassant, noPromotion) are excluded:
+// they disable existing mechanics and the generic plugin handles them as
+// config data (castling: false, enPassant: false).
 const BEHAVIOUR_KEYS = new Set([
-  'moveFilter', 'winCondition', 'legalityFilter', 'evaluate',
-  'pieceMoveOverride', 'effectsOnMove', 'onCaptured', 'statusText',
-  'stalemateMeaning', 'noCheck', 'multiMove', 'duckPhase',
+  'moveFilter', 'winCondition', 'visibility', 'evaluate', 'init',
+  'positionKey', 'onEffectExpiry', 'stalemateMeaning',
+  'checkThreshold', 'noCheck', 'divergentPieces', 'pieceRoles',
+  'pawnDirection', 'pawnMoveStyle', 'pawnStartRow',
+  'maxMovesPerTurn', 'progressiveMove', 'royalPiece',
+  'promotionPieces', 'promotionRank', 'torpedo',
+  'wrapFiles', 'wrapRanks', 'aiMoveCount',
 ])
 
 const hasRules = fs.existsSync(RULES_DIR)
