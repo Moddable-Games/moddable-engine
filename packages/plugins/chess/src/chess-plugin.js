@@ -462,6 +462,22 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     if (castlingRights !== null) newSlice.castlingRights = castlingRights
     if (config.enPassant) newSlice.enPassantTarget = enPassantTarget
 
+    let effects = slice.effects ? slice.effects.map(e => ({ ...e })) : []
+    if (config.afterMove) {
+      const captured = slice.board[move.to]
+      const ctx = { playerIdx, move, captured, board, effects, topology }
+      ctx.addEffect = (effect) => effects.push(effect)
+      ctx.hasEffect = (sq, type) => effects.some(e => e.sq === sq && e.type === type)
+      ctx.removeEffect = (sq, type) => { effects = effects.filter(e => !(e.sq === sq && e.type === type)) }
+      config.afterMove(ctx)
+    }
+    effects = effects.filter(e => {
+      if (e.duration === undefined || e.duration === null) return true
+      e.duration--
+      return e.duration > 0
+    })
+    if (effects.length > 0 || slice.effects) newSlice.effects = effects
+
     return newSlice
   }
 

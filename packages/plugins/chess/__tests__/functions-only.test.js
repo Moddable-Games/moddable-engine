@@ -12,6 +12,7 @@ const LEGACY_ALLOW = new Set([
   'breakthrough', 'shatar',
   'giveaway', 'suicideChess', 'noRetreat', 'patrolChess', 'makpong',
   'gridChess', 'madrasiChess', 'weakChess',
+  'immunizationChess',
 ])
 
 const DATA_KEYS = new Set([
