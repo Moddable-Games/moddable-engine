@@ -1,4 +1,4 @@
-import { createSeededRng } from '../../core/src/xorshift.js'
+import { createSeededRng } from '../../core/index.js'
 import { getDeckConfig } from './deck-registry.js'
 
 export function createDeck(deckType, opts = {}) {

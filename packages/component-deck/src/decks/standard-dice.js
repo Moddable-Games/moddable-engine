@@ -1,5 +1,5 @@
 import { registerDeck } from '../deck-registry.js'
-import { createSeededRng } from '../../../core/src/xorshift.js'
+import { createSeededRng } from '../../../core/index.js'
 
 registerDeck('standard-dice', {
   label: 'Standard Dice',
