@@ -54,7 +54,7 @@ function genPawnMoves(g, from, r, c, side, moves) {
     const fwd = MCE.sq(nr, nc, g);
     if (!g.board[fwd]) {
       addPawnMove(from, fwd, nr, promoRow, moves, g);
-      if (r === actualStart || g.torpedo) {
+      if (!g.noDoubleStep && (r === actualStart || g.torpedo)) {
         let fwd2r = r + dr * 2, fwd2c = c + dc * 2;
         [fwd2r, fwd2c] = MCE.wrapCoords(fwd2r, fwd2c, g);
         if (MCE.onBoard(fwd2r, fwd2c, g)) {

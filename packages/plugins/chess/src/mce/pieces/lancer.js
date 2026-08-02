@@ -1,15 +1,15 @@
 import MCE from '../engine.js';
 import { Rider, Leaper, divergent } from '../movement.js';
 
-const movement = divergent(Rider('rook'), Leaper('knight'));
+const movement = divergent(Leaper('knight'), Rider('rook'));
 
 MCE.registerPiece('l', {
   name: 'Lancer',
   category: 'fairy',
-  movement: 'Slides any number of squares orthogonally (like rook)',
-  capture: 'L-shaped jump (like knight)',
+  movement: 'L-shaped jump (like knight)',
+  capture: 'Slides any number of squares orthogonally (like rook)',
   variants: ['ordaChess'],
-  primitives: { divergent: { move: { type: 'rider', dirs: 'rook' }, capture: { type: 'leaper', offsets: 'knight' } } },
+  primitives: { divergent: { move: { type: 'leaper', offsets: 'knight' }, capture: { type: 'rider', dirs: 'rook' } } },
   genMoves: movement.genMoves,
   attacks: movement.attacks,
 });

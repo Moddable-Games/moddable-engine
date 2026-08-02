@@ -152,6 +152,22 @@ describe('terminal-outcome: shatar', () => {
   })
 })
 
+describe('terminal-outcome: shatranj', () => {
+  it('fires: opponent bare king', () => {
+    const game = setupGame('shatranj', '4k3/8/8/8/8/8/8/3RK3')
+    const result = game.checkWin()
+    expect(result).toBe('white')
+  })
+})
+
+describe('terminal-outcome: chaturanga', () => {
+  it('fires: opponent bare king', () => {
+    const game = setupGame('chaturanga', '4k3/8/8/8/8/8/8/3RK3')
+    const result = game.checkWin()
+    expect(result).toBe('white')
+  })
+})
+
 describe('terminal-outcome: breakthrough', () => {
   it('fires: white pawn on far rank', () => {
     const game = createGame('chess', 'breakthrough')
@@ -372,6 +388,7 @@ const COVERED_VARIANTS = new Set([
   'breakthrough', 'kingOfTheHill', 'racingKings',
   'threeCheck', 'fiveCheck', 'horde', 'gridChess',
   'benedictChess', 'maharaja', 'atomic',
+  'shatranj', 'chaturanga',
 ])
 
 describe('registration gate: outcome-affecting variants need fixtures', () => {

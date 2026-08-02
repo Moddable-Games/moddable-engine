@@ -42,7 +42,7 @@ MCE.registerVariant('chaturanga', {
   fen: 'rnefkenr/pppppppp/8/8/8/8/PPPPPPPP/RNEFKENR w - - 0 1',
   noCastling: true,
   noEnPassant: true,
-  torpedo: false,
+  noDoubleStep: true,
   promotionPieces: ['f'],
   stalemateMeaning: 'win',
   title: 'Chaturanga',

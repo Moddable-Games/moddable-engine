@@ -109,6 +109,7 @@ function createVariantGame(variant) {
   if (vc) {
     if (vc.noCastling) g.noCastling = true;
     if (vc.noEnPassant) g.noEnPassant = true;
+    if (vc.noDoubleStep) g.noDoubleStep = true;
     if (vc.noPromotion) g.noPromotion = true;
     if (vc.noCheck) g.noCheck = true;
     if (vc.noRepetitionDraw) g.noRepetitionDraw = true;

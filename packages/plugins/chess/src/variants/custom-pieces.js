@@ -78,15 +78,30 @@ export const ordaChess = {
   setup: 'lhwykwhl/8/pppppppp/8/8/PPPPPPPP/8/RNBQKBNR',
   castling: false,
   pieces: {
-    yurt: { type: 'leaper', offsets: [[-1, -1], [-1, 1], [1, 0], [-1, 0]] },
-    lancer: { type: 'rider', dirs: 'diagonal' },
-    horde: { type: 'rider', dirs: 'orthogonal' },
+    yurt: {
+      divergent: {
+        move: { type: 'leaper', offsets: [[-1, -1], [-1, 1], [1, -1], [1, 1]] },
+        capture: { type: 'leaper', offsets: [[1, 0], [-1, 0], [0, 1], [0, -1]] },
+      },
+    },
+    lancer: {
+      divergent: {
+        move: { type: 'leaper', offsets: 'knight' },
+        capture: { type: 'rider', dirs: 'orthogonal' },
+      },
+    },
+    archer: {
+      divergent: {
+        move: { type: 'leaper', offsets: 'knight' },
+        capture: { type: 'rider', dirs: 'diagonal' },
+      },
+    },
     kheshig: { type: 'compose', parts: ['knight', { type: 'rider', dirs: 'all', maxSteps: 1 }] },
   },
   vocabulary: {
     yurt: { symbols: { 0: 'Y', 1: 'y' } },
     lancer: { symbols: { 0: 'L', 1: 'l' } },
-    horde: { symbols: { 0: 'H', 1: 'h' } },
+    archer: { symbols: { 0: 'H', 1: 'h' } },
     kheshig: { symbols: { 0: 'W', 1: 'w' } },
   },
 }

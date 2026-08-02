@@ -20,7 +20,7 @@ MCE.registerVariant('shatranj', {
   fen: 'rnekfenr/pppppppp/8/8/8/8/PPPPPPPP/RNEKFENR w - - 0 1',
   noCastling: true,
   noEnPassant: true,
-  torpedo: false,
+  noDoubleStep: true,
   promotionPieces: ['f'],
   stalemateMeaning: 'win',
   title: 'Shatranj',
