@@ -10,6 +10,7 @@ const LEGACY_ALLOW = new Set([
   'losAlamos', 'horde', 'stalemateWins', 'checklessChess',
   'extinction', 'singleCheck', 'codrus', 'omnicide',
   'breakthrough', 'shatar',
+  'giveaway', 'suicideChess', 'noRetreat',
 ])
 
 const DATA_KEYS = new Set([
