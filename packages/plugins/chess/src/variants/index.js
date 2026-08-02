@@ -19,4 +19,4 @@ export { marseillais, monsterChess, progressive, berserkChess } from './multi-mo
 export { chigorin, endgameChess, pawnsOnly, peasantsRevolt, halfChess, minichess, dianaChess, pettyChess } from './setup-only.js'
 export { almostChess, amazonChess, grand, knightmate, maharaja, hoppelPoppel, berolinaChess, leganChess, ordaChess } from './custom-pieces.js'
 export { rifle, atomic, displacementChess } from './before-move.js'
-export { shatranj, chaturanga } from './historical.js'
+export { shatranj, chaturanga, makruk, courier } from './historical.js'

@@ -6,8 +6,8 @@ describe('MCE integration', () => {
     expect(variants.length).toBe(75)
   })
 
-  test('registers 18 piece types', () => {
-    expect(Object.keys(MCE.getPieceRegistry()).length).toBe(18)
+  test('registers 20 piece types', () => {
+    expect(Object.keys(MCE.getPieceRegistry()).length).toBe(20)
   })
 
   test('standard game has 20 legal moves from start', () => {

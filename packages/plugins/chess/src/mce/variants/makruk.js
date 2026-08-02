@@ -1,10 +1,10 @@
 import MCE from '../engine.js';
 var makrukOpeningBook = {
-  "rngfkgnr/8/pppppppp/8/8/PPPPPPPP/8/RNGFKGNR w - -": ["e3e4", "d3d4", "f3f4", "c3c4"],
-  "rngfkgnr/8/pppppppp/8/4P3/PPPP1PPP/8/RNGFKGNR b - -": ["e6e5", "d6d5", "f6f5"],
-  "rngfkgnr/8/pppppppp/8/3P4/PPP1PPPP/8/RNGFKGNR b - -": ["d6d5", "e6e5", "c6c5"],
-  "rngfkgnr/8/pppp1ppp/4p3/4P3/PPPP1PPP/8/RNGFKGNR w - -": ["d3d4", "f3f4", "b1c3"],
-  "rngfkgnr/8/ppp1pppp/3p4/3P4/PPP1PPPP/8/RNGFKGNR w - -": ["e3e4", "c3c4", "b1c3"],
+  "rngkfgnr/8/pppppppp/8/8/PPPPPPPP/8/RNGFKGNR w - -": ["e3e4", "d3d4", "f3f4", "c3c4"],
+  "rngkfgnr/8/pppppppp/8/4P3/PPPP1PPP/8/RNGFKGNR b - -": ["e6e5", "d6d5", "f6f5"],
+  "rngkfgnr/8/pppppppp/8/3P4/PPP1PPPP/8/RNGFKGNR b - -": ["d6d5", "e6e5", "c6c5"],
+  "rngkfgnr/8/pppp1ppp/4p3/4P3/PPPP1PPP/8/RNGFKGNR w - -": ["d3d4", "f3f4", "b1c3"],
+  "rngkfgnr/8/ppp1pppp/3p4/3P4/PPP1PPPP/8/RNGFKGNR w - -": ["e3e4", "c3c4", "b1c3"],
 };
 
 var diagOnlyHandler = {
@@ -67,9 +67,10 @@ MCE.registerVariant('makruk', {
   group: 'Alternate Rules',
   rows: 8,
   cols: 8,
-  fen: 'rngfkgnr/8/pppppppp/8/8/PPPPPPPP/8/RNGFKGNR w - - 0 1',
+  fen: 'rngkfgnr/8/pppppppp/8/8/PPPPPPPP/8/RNGKFGNR w - - 0 1',
   noCastling: true,
   noEnPassant: true,
+  noDoubleStep: true,
   promotionRank: function(side) { return side === MCE.WHITE ? 2 : 5; },
   promotionPieces: ['f'],
   title: 'Makruk (Thai Chess)',

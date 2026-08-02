@@ -201,8 +201,12 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       return generatePawnMoves(from, slice, playerIdx)
     }
 
-    const primitive = buildPiece(piece.type)
+    let primitive = buildPiece(piece.type)
     if (!primitive) return []
+
+    if (pConfig.directional && playerIdx === 1) {
+      primitive = fromConfig({ ...pConfig, offsets: pConfig.offsets.map(([dr, dc]) => [-dr, dc]) })
+    }
 
     const viewBoard = buildViewBoard(slice.board, playerIdx)
     return primitive.genMoves(topology, from, viewBoard)
@@ -382,8 +386,12 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       return pawnAttacks(from, target, piece.owner)
     }
 
-    const primitive = buildPiece(piece.type)
+    let primitive = buildPiece(piece.type)
     if (!primitive) return false
+
+    if (pConfig.directional && piece.owner === 1) {
+      primitive = fromConfig({ ...pConfig, offsets: pConfig.offsets.map(([dr, dc]) => [-dr, dc]) })
+    }
 
     const viewBoard = buildViewBoard(board, piece.owner)
     return primitive.attacks(topology, from, target, viewBoard)
