@@ -48,9 +48,15 @@ function pluginMovesToSet(moves) {
 
 // Derived from MCE's createVariantGame (engine.js), play.js, variants-util.js,
 // controller.js, and ai.js. Every vc.X access that adds or changes behaviour.
-// Restriction flags (noCastling, noEnPassant, noPromotion) are excluded:
-// they disable existing mechanics and the generic plugin handles them as
-// config data (castling: false, enPassant: false).
+//
+// EXCLUDED (restriction flags): noCastling, noEnPassant, noPromotion.
+// Reason: these disable existing mechanics. The generic plugin handles them
+// via inverted-polarity config (castling: false, enPassant: false). A variant
+// with only restriction flags + setup is functionally data-only because the
+// plugin's defaults already include those mechanics and the flags just turn
+// them off. MCE reads them (if (vc.noCastling) g.noCastling = true) but they
+// do not ADD behaviour, they REMOVE it. On a board without rooks (pawnsOnly),
+// noCastling is redundant: findRookForSide returns -1 regardless.
 const BEHAVIOUR_KEYS = new Set([
   'moveFilter', 'winCondition', 'visibility', 'evaluate', 'init',
   'positionKey', 'onEffectExpiry', 'stalemateMeaning',

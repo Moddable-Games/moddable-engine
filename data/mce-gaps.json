@@ -1,0 +1,11 @@
+[
+  {
+    "variant": "pawnsOnly",
+    "gap": "Promotion does not trigger an instant win",
+    "rulebook": "games/chess/content/variants/pawns-only.md says 'First player to promote a pawn (or checkmate) wins'",
+    "mceState": "No winCondition declared. Promotion produces a queen; win only by checkmate",
+    "pluginState": "Same as MCE (inherits standard rules)",
+    "severity": "incorrect-outcome",
+    "discovered": "2026-08-02"
+  }
+]
