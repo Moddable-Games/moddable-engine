@@ -22,11 +22,14 @@ export function createGridTopology(config) {
     return [Math.floor(index / cols), index % cols]
   }
 
+  const wrapR = wrap === true || wrap === 'torus' || wrap === 'ranks'
+  const wrapC = wrap === true || wrap === 'torus' || wrap === 'files'
+
   function wrapCoords(r, c) {
     if (!wrap) return [r, c]
     return [
-      ((r % rows) + rows) % rows,
-      ((c % cols) + cols) % cols,
+      wrapR ? ((r % rows) + rows) % rows : r,
+      wrapC ? ((c % cols) + cols) % cols : c,
     ]
   }
 
@@ -35,7 +38,9 @@ export function createGridTopology(config) {
       return coord >= 0 && coord < rows * cols
     }
     const [r, c] = coord
-    if (wrap) return true
+    if (wrapR && wrapC) return true
+    if (wrapR) return c >= 0 && c < cols
+    if (wrapC) return r >= 0 && r < rows
     return r >= 0 && r < rows && c >= 0 && c < cols
   }
 
@@ -109,7 +114,9 @@ export function createGridTopology(config) {
   }
 
   function onBoard(r, c) {
-    if (wrap) return true
+    if (wrapR && wrapC) return true
+    if (wrapR) return c >= 0 && c < cols
+    if (wrapC) return r >= 0 && r < rows
     return r >= 0 && r < rows && c >= 0 && c < cols
   }
 

@@ -20,3 +20,16 @@ export { chigorin, endgameChess, pawnsOnly, peasantsRevolt, halfChess, minichess
 export { almostChess, amazonChess, grand, knightmate, maharaja, hoppelPoppel, berolinaChess, leganChess, ordaChess } from './custom-pieces.js'
 export { rifle, atomic, displacementChess } from './before-move.js'
 export { shatranj, chaturanga, makruk, courier } from './historical.js'
+
+export const cylinderChess = {
+  key: 'cylinderChess',
+  topology: { type: 'grid', rows: 8, cols: 8, wrap: 'files' },
+}
+
+export const toroidalChess = {
+  key: 'toroidalChess',
+  setup: 'pppppppp/rnbqkbnr/pppppppp/8/8/PPPPPPPP/RNBQKBNR/PPPPPPPP',
+  castling: false,
+  enPassant: false,
+  topology: { type: 'grid', rows: 8, cols: 8, wrap: 'torus' },
+}
