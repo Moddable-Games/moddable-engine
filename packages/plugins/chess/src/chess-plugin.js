@@ -549,6 +549,9 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       if (isInCheck(slice.board, opponent)) {
         return playerIdx === 0 ? 'white' : 'black'
       }
+      if (config.stalemateMeaning === 'win') {
+        return playerIdx === 0 ? 'white' : 'black'
+      }
       return 'draw'
     }
 
