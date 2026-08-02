@@ -38,7 +38,7 @@ const PARITY_SKIP = new Set([
   'chess960',     // nondeterministic: random starting position
   'upsideDown',   // deferred: en passant target investigation pending
   'makpong',      // no MCE equivalent with Makruk pieces
-  'diceChess',    // nondeterministic: random dice roll
+  'diceChess',    // no standard ruleset (Sunnucks documented, never codified); MCE uses different interpretation
   'crazyhouse',   // hand state shape differs from MCE (array vs keyed object)
 ])
 const ALL_VARIANTS = listVariants('chess').map(v => v.key).filter(k => !PARITY_SKIP.has(k))

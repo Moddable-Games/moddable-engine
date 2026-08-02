@@ -91,8 +91,9 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
   function init(pluginConfig, { request }) {
     topology = request('core.topology')
+    const rng = request('core.rng')
     const rawSetup = pluginConfig.setup || config.setup
-    const setupInput = typeof rawSetup === 'function' ? rawSetup() : rawSetup
+    const setupInput = typeof rawSetup === 'function' ? rawSetup(rng) : rawSetup
 
     let board
     if (typeof setupInput === 'object' && !Array.isArray(setupInput)) {

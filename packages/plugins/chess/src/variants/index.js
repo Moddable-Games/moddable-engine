@@ -34,17 +34,23 @@ export const toroidalChess = {
   topology: { type: 'grid', rows: 8, cols: 8, wrap: 'torus' },
 }
 
-const DICE_TYPES = ['pawn', 'knight', 'bishop', 'rook', 'queen', 'king']
+import { createRng } from '../../../../core/src/rng.js'
+import { createStandardDice } from '../../../../component-dice/src/standard-dice.js'
+
+const DICE_TYPES = [null, 'pawn', 'knight', 'bishop', 'rook', 'queen', 'king']
+const dicePair = createStandardDice({ count: 2, faces: 6 })
 
 export const diceChess = {
   key: 'diceChess',
 
   moveFilter(moves, state) {
-    const die1 = Math.floor(Math.random() * 6)
-    const die2 = Math.floor(Math.random() * 6)
-    if (die1 === die2) return moves
-    const allowed = new Set([DICE_TYPES[die1], DICE_TYPES[die2]])
+    const seed = (state.halfmoveClock || 0) * 97 + (state.fullmoveNumber || 1) * 31 + 7
+    const rng = createRng(seed)
+    const roll = dicePair.roll(rng)
+    if (roll[0] === roll[1]) return moves
+    const allowed = new Set([DICE_TYPES[roll[0]], DICE_TYPES[roll[1]]])
     const filtered = moves.filter(m => {
+      if (m.action === 'drop') return false
       const piece = state.board[m.from]
       return piece && allowed.has(piece.type)
     })
@@ -57,15 +63,15 @@ export const crazyhouse = {
   drops: true,
 }
 
-function randomBackRank960() {
+function randomBackRank960(rng) {
   const pieces = Array(8).fill(null)
   const empty = () => pieces.map((p, i) => p === null ? i : -1).filter(i => i >= 0)
   const darkSqs = [0, 2, 4, 6], lightSqs = [1, 3, 5, 7]
-  pieces[darkSqs[Math.floor(Math.random() * 4)]] = 'b'
-  pieces[lightSqs[Math.floor(Math.random() * 4)]] = 'b'
-  let e = empty(); pieces[e[Math.floor(Math.random() * e.length)]] = 'q'
-  e = empty(); pieces[e[Math.floor(Math.random() * e.length)]] = 'n'
-  e = empty(); pieces[e[Math.floor(Math.random() * e.length)]] = 'n'
+  pieces[darkSqs[rng.nextInt(0, 3)]] = 'b'
+  pieces[lightSqs[rng.nextInt(0, 3)]] = 'b'
+  let e = empty(); pieces[e[rng.nextInt(0, e.length - 1)]] = 'q'
+  e = empty(); pieces[e[rng.nextInt(0, e.length - 1)]] = 'n'
+  e = empty(); pieces[e[rng.nextInt(0, e.length - 1)]] = 'n'
   e = empty()
   pieces[e[0]] = 'r'; pieces[e[1]] = 'k'; pieces[e[2]] = 'r'
   return pieces.join('')
@@ -73,8 +79,9 @@ function randomBackRank960() {
 
 export const chess960 = {
   key: 'chess960',
-  setup() {
-    const rank = randomBackRank960()
+  setup(rng) {
+    if (!rng) rng = createRng(960)
+    const rank = randomBackRank960(rng)
     return rank + '/pppppppp/8/8/8/8/PPPPPPPP/' + rank.toUpperCase()
   },
 }
