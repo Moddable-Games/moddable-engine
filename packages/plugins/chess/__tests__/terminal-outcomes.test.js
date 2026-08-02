@@ -123,15 +123,15 @@ describe('terminal-outcome: codrus', () => {
 })
 
 describe('terminal-outcome: omnicide', () => {
-  it('fires: current player has no pieces', () => {
-    // White to move but has no pieces (impossible in practice but tests the condition)
-    const game = setupGame('omnicide', 'rnbqkbnr/pppppppp/8/8/8/8/8/8')
+  it('fires: opponent (next to move) has no pieces', () => {
+    // White just moved (playerJustMoved=0), black has no pieces
+    const game = setupGame('omnicide', '8/8/8/8/8/8/PPPPPPPP/RNBQKBNR', 0)
     const result = game.checkWin()
-    expect(result).toBe('white')
+    expect(result).toBe('black')
   })
 
-  it('near-miss: current player has one piece', () => {
-    const game = setupGame('omnicide', 'rnbqkbnr/pppppppp/8/8/8/8/8/4K3')
+  it('near-miss: opponent has one piece', () => {
+    const game = setupGame('omnicide', '4k3/8/8/8/8/8/PPPPPPPP/RNBQKBNR', 0)
     const result = game.checkWin()
     expect(result).toBeNull()
   })

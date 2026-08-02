@@ -10,7 +10,6 @@ export const giveaway = {
   castling: false,
   noCheck: true,
   stalemateMeaning: 'loss',
-  promotionChoices: ['queen', 'rook', 'bishop', 'knight', 'king'],
 
   moveFilter(moves, state, ctx) {
     const board = state.board
@@ -23,12 +22,12 @@ export const giveaway = {
 
   winCondition(state, ctx) {
     const board = state.board
-    const currentPlayer = ctx.currentPlayer
+    const opponent = 1 - ctx.currentPlayer
     let hasPiece = false
     for (let i = 0; i < board.length; i++) {
-      if (board[i] && board[i].owner === currentPlayer) { hasPiece = true; break }
+      if (board[i] && board[i].owner === opponent) { hasPiece = true; break }
     }
-    if (!hasPiece) return currentPlayer === 0 ? 'white' : 'black'
+    if (!hasPiece) return opponent === 0 ? 'white' : 'black'
     return null
   },
 }
@@ -44,7 +43,6 @@ export const suicideChess = {
   cols: 8,
   castling: false,
   noCheck: true,
-  promotionChoices: ['queen', 'rook', 'bishop', 'knight', 'king'],
 
   moveFilter(moves, state, ctx) {
     const board = state.board
@@ -57,12 +55,12 @@ export const suicideChess = {
 
   winCondition(state, ctx) {
     const board = state.board
-    const currentPlayer = ctx.currentPlayer
+    const opponent = 1 - ctx.currentPlayer
     let hasPiece = false
     for (let i = 0; i < board.length; i++) {
-      if (board[i] && board[i].owner === currentPlayer) { hasPiece = true; break }
+      if (board[i] && board[i].owner === opponent) { hasPiece = true; break }
     }
-    if (!hasPiece) return currentPlayer === 0 ? 'white' : 'black'
+    if (!hasPiece) return opponent === 0 ? 'white' : 'black'
     return null
   },
 }

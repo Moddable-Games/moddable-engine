@@ -18,12 +18,13 @@
     "discovered": "2026-08-02"
   },
   {
-    "variant": "antichess/giveaway/suicideChess",
+    "variant": "antichess",
     "gap": "King promotion not available",
     "rulebook": "games/chess/content/variants/antichess.md says 'Pawns may promote to King (in addition to the usual pieces)'",
-    "mceState": "Default promotionPieces ['q','r','b','n'] used. King not offered.",
-    "pluginState": "Fixed: promotionChoices includes 'king'. Plugin is now correct, MCE remains wrong.",
+    "mceState": "Default promotionPieces ['q','r','b','n']. King not offered.",
+    "pluginState": "Fixed: promotionChoices includes 'king'. Plugin is correct, MCE remains wrong.",
     "severity": "incorrect-move-generation",
-    "discovered": "2026-08-02"
+    "discovered": "2026-08-02",
+    "note": "Applies to antichess ONLY. giveaway.md and suicide-chess.md both say 'pawns promote normally'. MCE is correct for giveaway and suicideChess."
   }
 ]

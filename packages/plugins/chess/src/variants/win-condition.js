@@ -85,12 +85,12 @@ export const omnicide = {
 
   winCondition(state, ctx) {
     const board = state.board
-    const currentPlayer = ctx.currentPlayer
+    const opponent = 1 - ctx.currentPlayer
     let hasPiece = false
     for (let i = 0; i < board.length; i++) {
-      if (board[i] && board[i].owner === currentPlayer) { hasPiece = true; break }
+      if (board[i] && board[i].owner === opponent) { hasPiece = true; break }
     }
-    if (!hasPiece) return currentPlayer === 0 ? 'white' : 'black'
+    if (!hasPiece) return opponent === 0 ? 'white' : 'black'
     return null
   },
 }
