@@ -9,7 +9,7 @@ export const giveaway = {
   cols: 8,
   castling: false,
   noCheck: true,
-  stalemateMeaning: 'win',
+  stalemateMeaning: 'loss',
 
   moveFilter(moves, state, ctx) {
     const board = state.board

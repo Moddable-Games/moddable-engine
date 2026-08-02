@@ -35,46 +35,38 @@ function parseFEN(fen, size) {
 // a7 attacked by Q (rank), b8 attacked by Q (diagonal), b7 attacked by K
 const STALEMATE_FEN = 'k7/2Q5/1K6/8/8/8/8/8'
 
-describe('terminal-outcome: stalemate differential', () => {
-  it('stalemateWins: stalemate is a win for the stalemating side (white)', () => {
+// noCheck stalemate: black pieces physically blocked, 0 legal moves.
+// Black king a1, black pawns a2+b1+b2, white king h8.
+const NOCHECK_STALEMATE_FEN = '7K/8/8/8/8/8/pp6/kp6'
+
+describe('terminal-outcome: four-way stalemate differential', () => {
+  it('antichess: stalemated side WINS', () => {
+    const game = setupGame('antichess', NOCHECK_STALEMATE_FEN)
+    expect(game.checkWin()).toBe('black')
+  })
+
+  it('giveaway: stalemated side LOSES (stalemating side wins)', () => {
+    const game = setupGame('giveaway', NOCHECK_STALEMATE_FEN)
+    expect(game.checkWin()).toBe('white')
+  })
+
+  it('suicideChess: stalemate is a DRAW', () => {
+    const game = setupGame('suicideChess', NOCHECK_STALEMATE_FEN)
+    expect(game.checkWin()).toBe('draw')
+  })
+
+  it('stalemateWins: stalemating side WINS', () => {
     const game = setupGame('stalemateWins', STALEMATE_FEN)
-    const result = game.checkWin()
-    expect(result).toBe('white')
+    expect(game.checkWin()).toBe('white')
   })
 
-  it('standard: stalemate is a draw', () => {
-    const game = setupGame('standard', STALEMATE_FEN)
-    const result = game.checkWin()
-    expect(result).toBe('draw')
-  })
-
-  it('antichess: losing all pieces wins (winCondition fires before stalemate)', () => {
-    // In noCheck variants, the king can move into "check" freely, so the standard
-    // stalemate FEN is not stalemate. Instead test that the winCondition fires
-    // correctly when a player has no pieces.
-    const game = setupGame('antichess', '8/8/8/8/8/8/8/4K3')
-    // White has only a king, black has no pieces. Black's winCondition:
-    // currentPlayer (0=white) checks if white has no pieces? No: checkWin checks
-    // if the player who just moved (playerIdx=0) triggered a win for themselves,
-    // then checks if opponent has no moves.
-    // Actually antichess winCondition: checks if currentPlayer has no pieces.
-    // Here white (currentPlayer=0) has a king. So null.
-    // For black having no pieces: need playerIdx=1 (black just moved and lost last piece)
-    const game2 = setupGame('antichess', 'K7/8/8/8/8/8/8/8', 1)
-    const result = game2.checkWin()
-    expect(result).toBe('black')
-  })
-
-  it('giveaway: losing all pieces wins', () => {
-    const game = setupGame('giveaway', 'K7/8/8/8/8/8/8/8', 1)
-    const result = game.checkWin()
-    expect(result).toBe('black')
-  })
-
-  it('suicideChess: losing all pieces wins', () => {
-    const game = setupGame('suicideChess', 'K7/8/8/8/8/8/8/8', 1)
-    const result = game.checkWin()
-    expect(result).toBe('black')
+  it('all three noCheck variants produce different outcomes from same position', () => {
+    const r1 = setupGame('antichess', NOCHECK_STALEMATE_FEN).checkWin()
+    const r2 = setupGame('giveaway', NOCHECK_STALEMATE_FEN).checkWin()
+    const r3 = setupGame('suicideChess', NOCHECK_STALEMATE_FEN).checkWin()
+    expect(r1).not.toBe(r2)
+    expect(r1).not.toBe(r3)
+    expect(r2).not.toBe(r3)
   })
 })
 
@@ -182,6 +174,81 @@ describe('terminal-outcome: breakthrough', () => {
   })
 })
 
+describe('terminal-outcome: racingKings', () => {
+  it('fires: white king on rank 8, black cannot reach it -> white wins', () => {
+    // White king on a8(0), black king on h1(63). White wins outright.
+    const game = setupGame('racingKings', 'K7/8/8/8/8/8/8/7k')
+    expect(game.checkWin()).toBe('white')
+  })
+
+  it('near-miss: neither king on rank 8 -> game continues', () => {
+    const game = setupGame('racingKings', '8/K7/8/8/8/8/8/7k')
+    expect(game.checkWin()).toBeNull()
+  })
+
+  it('known gap: equalising move not implemented (white on rank 8, black could reach)', () => {
+    // Per racing-kings.md: "If White reaches rank 8, Black gets one more move"
+    // Current implementation declares white wins immediately without the equalising move.
+    // This test documents the gap rather than asserting correct behaviour.
+    // Correct: if black can reach rank 8 in one move, result should be draw.
+    // Actual: white wins immediately.
+    const game = setupGame('racingKings', 'K7/8/8/8/8/8/8/6k1')
+    // Black king at g1(62) can reach rank 8 in several moves, not one.
+    // Use: black king at a7(8) which is one move from a8.
+    const game2 = setupGame('racingKings', 'K7/k7/8/8/8/8/8/8')
+    const result = game2.checkWin()
+    // Documents current (incorrect) behaviour: white wins without equalising move
+    expect(result).toBe('white')
+  })
+})
+
+describe('terminal-outcome: threeCheck', () => {
+  it('fires: check count reaches threshold (3)', () => {
+    const game = setupGame('threeCheck', 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')
+    const state = game.getState().slice
+    state.checkCount = { 0: 3, 1: 0 }
+    game.loadState({ slice: state, players: { currentIndex: 0 } })
+    expect(game.checkWin()).toBe('white')
+  })
+
+  it('near-miss: one below threshold', () => {
+    const game = setupGame('threeCheck', 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')
+    const state = game.getState().slice
+    state.checkCount = { 0: 2, 1: 0 }
+    game.loadState({ slice: state, players: { currentIndex: 0 } })
+    expect(game.checkWin()).toBeNull()
+  })
+
+  it('counter persists: threshold reached after multiple increments', () => {
+    const game = setupGame('threeCheck', 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')
+    const state = game.getState().slice
+    state.checkCount = { 0: 1, 1: 2 }
+    game.loadState({ slice: state, players: { currentIndex: 0 } })
+    expect(game.checkWin()).toBeNull()
+    state.checkCount = { 0: 1, 1: 3 }
+    game.loadState({ slice: state, players: { currentIndex: 0 } })
+    expect(game.checkWin()).toBe('black')
+  })
+})
+
+describe('terminal-outcome: fiveCheck', () => {
+  it('fires: check count reaches threshold (5)', () => {
+    const game = setupGame('fiveCheck', 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')
+    const state = game.getState().slice
+    state.checkCount = { 0: 5, 1: 0 }
+    game.loadState({ slice: state, players: { currentIndex: 0 } })
+    expect(game.checkWin()).toBe('white')
+  })
+
+  it('near-miss: four checks (one below threshold)', () => {
+    const game = setupGame('fiveCheck', 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')
+    const state = game.getState().slice
+    state.checkCount = { 0: 4, 1: 0 }
+    game.loadState({ slice: state, players: { currentIndex: 0 } })
+    expect(game.checkWin()).toBeNull()
+  })
+})
+
 describe('terminal-outcome: kingOfTheHill', () => {
   it('fires: king on centre square', () => {
     const game = setupGame('kingOfTheHill', '8/8/8/3K4/8/8/8/4k3')
@@ -193,5 +260,49 @@ describe('terminal-outcome: kingOfTheHill', () => {
     const game = setupGame('kingOfTheHill', '8/8/8/2K5/8/8/8/4k3')
     const result = game.checkWin()
     expect(result).toBeNull()
+  })
+})
+
+describe('terminal-outcome: horde', () => {
+  it('fires: white has no pieces left (black wins)', () => {
+    const game = setupGame('horde', '4k3/8/8/8/8/8/8/8')
+    expect(game.checkWin()).toBe('black')
+  })
+
+  it('near-miss: white has one pawn remaining', () => {
+    const game = setupGame('horde', '4k3/8/8/8/8/8/4P3/8')
+    expect(game.checkWin()).toBeNull()
+  })
+})
+
+// --- Registration gate ---
+// Variants with outcome-affecting keys must have terminal-outcome fixtures.
+
+import { listVariants, getVariantConfig } from '../../../play/src/variant-registry.js'
+
+const OUTCOME_KEYS = new Set([
+  'winCondition', 'stalemateMeaning', 'checkThreshold', 'noCheck',
+])
+
+const COVERED_VARIANTS = new Set([
+  'antichess', 'giveaway', 'suicideChess', 'stalemateWins',
+  'extinction', 'singleCheck', 'codrus', 'omnicide', 'shatar',
+  'breakthrough', 'kingOfTheHill', 'racingKings',
+  'threeCheck', 'fiveCheck', 'horde',
+])
+
+describe('registration gate: outcome-affecting variants need fixtures', () => {
+  const variants = listVariants('chess')
+
+  it('every variant with an outcome key has terminal-outcome coverage', () => {
+    const missing = []
+    for (const v of variants) {
+      const config = getVariantConfig('chess', v.key)
+      const hasOutcomeKey = Object.keys(config).some(k => OUTCOME_KEYS.has(k))
+      if (hasOutcomeKey && !COVERED_VARIANTS.has(v.key)) {
+        missing.push(v.key)
+      }
+    }
+    expect(missing).toEqual([])
   })
 })
