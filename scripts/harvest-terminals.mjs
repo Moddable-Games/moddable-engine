@@ -46,7 +46,7 @@ function boardToFen(board, cols) {
   return fenRows.join('/')
 }
 
-const MCE_TYPE_MAP = { k: 'king', q: 'queen', r: 'rook', b: 'bishop', n: 'knight', p: 'pawn' }
+const MCE_TYPE_MAP = { k: 'king', q: 'queen', r: 'rook', b: 'bishop', n: 'knight', p: 'pawn', c: 'chancellor', a: 'archbishop', m: 'amazon' }
 
 function mceBoardToArray(g) {
   const board = new Array(g.rows * g.cols).fill(null)

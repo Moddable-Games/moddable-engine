@@ -77,7 +77,8 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     for (const player of [0, 1]) {
       const dir = typeof advDir === 'function' ? advDir(player) : advDir[player]
       forwardDir[player] = [dir, 0]
-      const startRow = dir === -1 ? rows - 2 : 1
+      const defaultStart = dir === -1 ? rows - 2 : 1
+      const startRow = config.pawnStartRow ? config.pawnStartRow[player] : defaultStart
       const promoRow = dir === -1 ? 0 : rows - 1
       for (let c = 0; c < cols; c++) {
         startCells[player].add(topo.toIndex(startRow, c))
@@ -211,25 +212,54 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     if (!pawnConfig) return []
     const moves = []
     const { forwardDir, startCells, promotionCells, captureDirections, doubleStep } = pawnConfig
+    const moveDirections = pawnConfig.moveDirections
 
-    const fwd = forwardDir[playerIdx]
-    const forward = topology.step(from, fwd)
-    if (forward !== null && getCell(slice.board, forward) === null) {
-      if (promotionCells[playerIdx].has(forward)) {
-        for (const promo of config.promotionChoices) {
-          moves.push({ from, to: forward, promotion: promo })
+    if (moveDirections) {
+      for (const dir of moveDirections[playerIdx]) {
+        const target = topology.step(from, dir)
+        if (target === null) continue
+        if (getCell(slice.board, target) !== null) continue
+        if (promotionCells[playerIdx].has(target)) {
+          for (const promo of config.promotionChoices) {
+            moves.push({ from, to: target, promotion: promo })
+          }
+        } else {
+          moves.push({ from, to: target })
         }
-      } else {
-        moves.push({ from, to: forward })
       }
-
       const canDoubleStep = config.torpedo
         ? doubleStep
         : doubleStep && startCells[playerIdx].has(from)
       if (canDoubleStep) {
-        const doubleForward = topology.step(forward, fwd)
-        if (doubleForward !== null && getCell(slice.board, doubleForward) === null) {
-          moves.push({ from, to: doubleForward })
+        for (const dir of moveDirections[playerIdx]) {
+          const step1 = topology.step(from, dir)
+          if (step1 === null || getCell(slice.board, step1) !== null) continue
+          const step2 = topology.step(step1, dir)
+          if (step2 !== null && getCell(slice.board, step2) === null) {
+            moves.push({ from, to: step2 })
+          }
+        }
+      }
+    } else {
+      const fwd = forwardDir[playerIdx]
+      const forward = topology.step(from, fwd)
+      if (forward !== null && getCell(slice.board, forward) === null) {
+        if (promotionCells[playerIdx].has(forward)) {
+          for (const promo of config.promotionChoices) {
+            moves.push({ from, to: forward, promotion: promo })
+          }
+        } else {
+          moves.push({ from, to: forward })
+        }
+
+        const canDoubleStep = config.torpedo
+          ? doubleStep
+          : doubleStep && startCells[playerIdx].has(from)
+        if (canDoubleStep) {
+          const doubleForward = topology.step(forward, fwd)
+          if (doubleForward !== null && getCell(slice.board, doubleForward) === null) {
+            moves.push({ from, to: doubleForward })
+          }
         }
       }
     }

@@ -325,6 +325,22 @@ describe('terminal-outcome: benedictChess', () => {
   })
 })
 
+describe('terminal-outcome: maharaja', () => {
+  it('fires: maharaja captured (black wins)', () => {
+    const game = setupGame('maharaja', 'rnbqkbnr/pppppppp/8/8/8/8/8/8')
+    expect(game.checkWin()).toBe('black')
+  })
+
+  it('near-miss: maharaja present', () => {
+    const board = new Array(64).fill(null)
+    board[60] = { type: 'amazon', owner: 0 }
+    board[4] = { type: 'king', owner: 1 }
+    const game = createGame('chess', 'maharaja')
+    game.loadState({ slice: { board, halfmoveClock: 0, fullmoveNumber: 1 }, players: { currentIndex: 0 } })
+    expect(game.checkWin()).toBeNull()
+  })
+})
+
 // --- Registration gate ---
 // Variants with outcome-affecting keys must have terminal-outcome fixtures.
 
@@ -339,7 +355,7 @@ const COVERED_VARIANTS = new Set([
   'extinction', 'singleCheck', 'codrus', 'omnicide', 'shatar',
   'breakthrough', 'kingOfTheHill', 'racingKings',
   'threeCheck', 'fiveCheck', 'horde', 'gridChess',
-  'benedictChess',
+  'benedictChess', 'maharaja',
 ])
 
 describe('registration gate: outcome-affecting variants need fixtures', () => {
