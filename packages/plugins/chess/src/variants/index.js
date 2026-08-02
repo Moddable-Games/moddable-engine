@@ -61,6 +61,32 @@ export const diceChess = {
 export const crazyhouse = {
   key: 'crazyhouse',
   drops: true,
+  actions: {
+    drop: {
+      movesOwnPiece: false,
+      generate(slice, playerIdx, { allPositions, getCell, pawnConfig }) {
+        if (!slice.hands) return []
+        const hand = slice.hands[playerIdx]
+        const uniqueTypes = [...new Set(hand)]
+        const promoRows = pawnConfig ? pawnConfig.promotionCells[playerIdx] : new Set()
+        const moves = []
+        for (const type of uniqueTypes) {
+          for (const pos of allPositions()) {
+            if (getCell(slice.board, pos) !== null) continue
+            if (type === 'pawn' && promoRows.has(pos)) continue
+            moves.push({ action: 'drop', type, to: pos })
+          }
+        }
+        return moves
+      },
+      apply(move, { board, hands, playerIdx }) {
+        board[move.to] = { type: move.type, owner: playerIdx }
+        const idx = hands[playerIdx].indexOf(move.type)
+        if (idx !== -1) hands[playerIdx].splice(idx, 1)
+        return { board, hands, halfmoveClock: 0 }
+      },
+    },
+  },
 }
 
 function randomBackRank960(rng) {
@@ -148,28 +174,45 @@ export const duckChess = {
   noCheck: true,
 
   moveFilter(moves, state) {
-    if (state._duckPhase) {
-      const placements = []
-      for (let i = 0; i < state.board.length; i++) {
-        if (state.board[i] === null) {
-          placements.push({ action: 'duck', to: i })
-        }
-      }
-      return placements
+    if (state._blockerPhase) {
+      return moves.filter(m => m.action === 'blocker')
     }
-    const duckSq = state._duckSq
-    if (duckSq !== undefined && duckSq >= 0) {
-      return moves.filter(m => m.to !== duckSq)
+    const blockerSq = state._blockerSq
+    if (blockerSq !== undefined && blockerSq >= 0) {
+      return moves.filter(m => m.action || m.to !== blockerSq)
     }
     return moves
   },
 
   turnLogic(ctx) {
-    if (!ctx.slice._duckPhase) {
-      ctx.slice._duckPhase = true
+    if (!ctx.slice._blockerPhase) {
+      ctx.slice._blockerPhase = true
       return true
     }
     return false
+  },
+
+  actions: {
+    blocker: {
+      movesOwnPiece: false,
+      continuesTurn: false,
+      generate(slice, playerIdx, { allPositions, getCell }) {
+        if (!slice._blockerPhase) return []
+        const moves = []
+        for (const pos of allPositions()) {
+          if (getCell(slice.board, pos) === null) {
+            moves.push({ action: 'blocker', to: pos })
+          }
+        }
+        return moves
+      },
+      apply(move, { board, slice }) {
+        const prev = slice._blockerSq
+        if (prev !== undefined && prev >= 0) board[prev] = null
+        board[move.to] = { type: 'blocker', owner: -1 }
+        return { board, sliceKeys: { _blockerSq: move.to, _blockerPhase: false } }
+      },
+    },
   },
 
   winCondition: kingCaptureWin,

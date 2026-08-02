@@ -101,7 +101,6 @@ export const courier = {
 
 const SITTUYIN_PAWNS_W = [16,17,18,19,28,29,30,31]
 const SITTUYIN_PAWNS_B = [32,33,34,35,40,41,42,43]
-const SITTUYIN_PIECES = ['rook', 'rook', 'knight', 'knight', 'khon', 'khon', 'ferz', 'king']
 
 export const sittuyin = {
   key: 'sittuyin',
@@ -117,45 +116,64 @@ export const sittuyin = {
     ferz: { symbols: { 0: 'F', 1: 'f' } },
     khon: { symbols: { 0: 'G', 1: 'g' } },
   },
+  placementPieces: [
+    ['rook', 'rook', 'knight', 'knight', 'khon', 'khon', 'ferz', 'king'],
+    ['rook', 'rook', 'knight', 'knight', 'khon', 'khon', 'ferz', 'king'],
+  ],
   setup() {
     const board = new Array(64).fill(null)
     for (const sq of SITTUYIN_PAWNS_W) board[sq] = { type: 'pawn', owner: 0 }
     for (const sq of SITTUYIN_PAWNS_B) board[sq] = { type: 'pawn', owner: 1 }
     return board
   },
-  _placement: true,
 
   moveFilter(moves, state) {
     if (state._phase !== 'placement') return moves
-    const playerIdx = state._placementTurn || 0
-    const placements = []
-    const toPlace = state._toPlace[playerIdx]
-    if (!toPlace || toPlace.length === 0) return moves
-
-    const type = toPlace[0]
-    const backRank = playerIdx === 0 ? 7 : 0
-    const dropRegion = playerIdx === 0
-      ? [48,49,50,51,52,53,54,55, 40,41,42,43,44,45,46,47, 16,17,18,19,20,21,22,23]
-      : [8,9,10,11,12,13,14,15, 32,33,34,35,36,37,38,39, 40,41,42,43,44,45,46,47]
-
-    for (const pos of dropRegion) {
-      if (state.board[pos] !== null) continue
-      if (type === 'rook' && Math.floor(pos / 8) !== backRank) continue
-      placements.push({ action: 'place', type, to: pos })
-    }
-    return placements
+    return []
   },
 
   turnLogic(ctx) {
     const slice = ctx.slice
     if (slice._phase !== 'placement') return false
-    const playerIdx = slice._placementTurn || 0
-    const toPlace = slice._toPlace[playerIdx]
-    if (toPlace && toPlace.length > 0) return true
-    const opponent = 1 - playerIdx
-    const oppToPlace = slice._toPlace[opponent]
-    if (oppToPlace && oppToPlace.length > 0) return true
+    const toPlace0 = slice._toPlace[0]
+    const toPlace1 = slice._toPlace[1]
+    if ((toPlace0 && toPlace0.length > 0) || (toPlace1 && toPlace1.length > 0)) return true
     slice._phase = 'play'
     return false
+  },
+
+  actions: {
+    place: {
+      movesOwnPiece: false,
+      continuesTurn: true,
+      generate(slice, playerIdx) {
+        if (slice._phase !== 'placement') return []
+        const turn = slice._placementTurn || 0
+        if (turn !== playerIdx) return []
+        const toPlace = slice._toPlace[turn]
+        if (!toPlace || toPlace.length === 0) return []
+        const type = toPlace[0]
+        const backRank = turn === 0 ? 7 : 0
+        const dropRegion = turn === 0
+          ? [48,49,50,51,52,53,54,55, 40,41,42,43,44,45,46,47, 16,17,18,19,20,21,22,23]
+          : [8,9,10,11,12,13,14,15, 32,33,34,35,36,37,38,39, 40,41,42,43,44,45,46,47]
+        const moves = []
+        for (const pos of dropRegion) {
+          if (slice.board[pos] !== null) continue
+          if (type === 'rook' && Math.floor(pos / 8) !== backRank) continue
+          moves.push({ action: 'place', type, to: pos })
+        }
+        return moves
+      },
+      apply(move, { board, slice, playerIdx }) {
+        board[move.to] = { type: move.type, owner: playerIdx }
+        const toPlace = [slice._toPlace[0].slice(), slice._toPlace[1].slice()]
+        const idx = toPlace[playerIdx].indexOf(move.type)
+        if (idx !== -1) toPlace[playerIdx].splice(idx, 1)
+        const nextTurn = toPlace[1 - playerIdx].length > 0 ? 1 - playerIdx : playerIdx
+        const phase = (toPlace[0].length === 0 && toPlace[1].length === 0) ? 'play' : 'placement'
+        return { board, sliceKeys: { _toPlace: toPlace, _placementTurn: nextTurn, _phase: phase }, halfmoveClock: 0, fullmoveNumber: 1 }
+      },
+    },
   },
 }
