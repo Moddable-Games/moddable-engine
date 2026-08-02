@@ -20,7 +20,8 @@ const LEGACY_ALLOW = new Set([
   'almostChess', 'amazonChess', 'grand', 'knightmate', 'maharaja',
   'hoppelPoppel', 'berolinaChess', 'leganChess',
   'atomic', 'shatranj', 'chaturanga', 'ordaChess',
-  'makruk', 'courier', 'toroidalChess',
+  'makruk', 'courier', 'toroidalChess', 'upsideDown', 'chess960',
+  'diceChess',
 ])
 
 const DATA_KEYS = new Set([

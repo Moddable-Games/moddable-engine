@@ -34,7 +34,8 @@ function pluginMovesToSet(moves) {
   return result
 }
 
-const ALL_VARIANTS = listVariants('chess').map(v => v.key)
+const PARITY_SKIP = new Set(['chess960', 'upsideDown', 'makpong', 'diceChess'])
+const ALL_VARIANTS = listVariants('chess').map(v => v.key).filter(k => !PARITY_SKIP.has(k))
 
 function findMatchingPluginMove(pluginMoves, mceMove) {
   return pluginMoves.find(

@@ -55,3 +55,9 @@ export const pettyChess = {
   setup: 'qnbknr/pppppp/6/PPPPPP/RNKBNQ',
   castling: false,
 }
+
+export const upsideDown = {
+  key: 'upsideDown',
+  setup: 'RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr',
+  pawnStartRow: { 0: 1, 1: 6 },
+}

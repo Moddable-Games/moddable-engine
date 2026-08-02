@@ -92,10 +92,15 @@ function playedPosition(family, key, moveCount) {
   }
 }
 
+const NONDETERMINISTIC = new Set(['diceChess', 'chess960'])
+
 function everyVariant() {
   const out = []
   for (const family of getRegisteredFamilies()) {
-    for (const variant of listVariants(family)) out.push([family, variant.key])
+    for (const variant of listVariants(family)) {
+      if (NONDETERMINISTIC.has(variant.key)) continue
+      out.push([family, variant.key])
+    }
   }
   return out
 }

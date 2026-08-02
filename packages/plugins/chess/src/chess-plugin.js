@@ -91,7 +91,8 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
   function init(pluginConfig, { request }) {
     topology = request('core.topology')
-    const setupInput = pluginConfig.setup || config.setup
+    const rawSetup = pluginConfig.setup || config.setup
+    const setupInput = typeof rawSetup === 'function' ? rawSetup() : rawSetup
 
     let board
     if (typeof setupInput === 'object' && !Array.isArray(setupInput)) {
@@ -572,7 +573,11 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       : filterLegalMoves(allMoves, slice, playerIdx)
 
     if (config.moveFilter) {
-      legal = config.moveFilter(legal, slice, { currentPlayer: playerIdx, config })
+      legal = config.moveFilter(legal, slice, {
+        currentPlayer: playerIdx,
+        config,
+        isInCheck: () => isInCheck(slice.board, playerIdx),
+      })
     }
 
     return legal
