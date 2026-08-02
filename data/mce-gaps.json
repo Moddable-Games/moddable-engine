@@ -7,5 +7,14 @@
     "pluginState": "Same as MCE (inherits standard rules)",
     "severity": "incorrect-outcome",
     "discovered": "2026-08-02"
+  },
+  {
+    "variant": "racingKings",
+    "gap": "Equalising move not implemented",
+    "rulebook": "games/chess/content/variants/racing-kings.md says 'If White reaches rank 8, Black gets one more move — if Black also reaches rank 8, the game is a draw'",
+    "mceState": "winCondition fires immediately when any king reaches rank 8 on the opponent's turn. No equalising move.",
+    "pluginState": "Same as MCE (fires immediately)",
+    "severity": "incorrect-outcome",
+    "discovered": "2026-08-02"
   }
 ]
