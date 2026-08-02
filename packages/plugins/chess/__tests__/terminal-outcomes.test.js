@@ -152,6 +152,22 @@ describe('terminal-outcome: shatar', () => {
   })
 })
 
+describe('terminal-outcome: darkChess', () => {
+  it('fires: king captured', () => {
+    const game = setupGame('darkChess', '4R3/8/8/8/8/8/8/4K3')
+    const result = game.checkWin()
+    expect(result).toBe('white')
+  })
+})
+
+describe('terminal-outcome: fogOfWar', () => {
+  it('fires: king captured', () => {
+    const game = setupGame('fogOfWar', '4R3/8/8/8/8/8/8/4K3')
+    const result = game.checkWin()
+    expect(result).toBe('white')
+  })
+})
+
 describe('terminal-outcome: shatranj', () => {
   it('fires: opponent bare king', () => {
     const game = setupGame('shatranj', '4k3/8/8/8/8/8/8/3RK3')
@@ -388,7 +404,7 @@ const COVERED_VARIANTS = new Set([
   'breakthrough', 'kingOfTheHill', 'racingKings',
   'threeCheck', 'fiveCheck', 'horde', 'gridChess',
   'benedictChess', 'maharaja', 'atomic',
-  'shatranj', 'chaturanga',
+  'shatranj', 'chaturanga', 'darkChess', 'fogOfWar',
 ])
 
 describe('registration gate: outcome-affecting variants need fixtures', () => {

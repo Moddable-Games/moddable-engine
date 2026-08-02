@@ -129,6 +129,15 @@ export function createGameForFamily(family, opts = {}) {
       return game.undo()
     },
 
+    getVisibility(viewerIndex) {
+      const slice = game.getState(family)
+      const plugin = game.registry.getPlugins().find(p => p.sliceName === family)
+      if (plugin && plugin.getVisibility) {
+        return plugin.getVisibility(slice, game.store.getAll(), viewerIndex)
+      }
+      return null
+    },
+
     get topology() {
       return game.topology
     },

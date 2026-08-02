@@ -691,6 +691,11 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return { 0: { ...rights[0] }, 1: { ...rights[1] } }
   }
 
+  function getVisibility(slice, full, viewerIndex) {
+    if (!config.visibility) return null
+    return config.visibility(slice, viewerIndex, { topology, generateMovesForPiece, allPositions, getCell })
+  }
+
   return {
     sliceName: 'chess',
     pieceTypes: Object.keys(pieceConfigs),
@@ -703,5 +708,6 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     applyMove,
     getLegalMoves,
     checkWin,
+    getVisibility,
   }
 }

@@ -40,6 +40,8 @@ const PARITY_SKIP = new Set([
   'makpong',      // no MCE equivalent with Makruk pieces
   'diceChess',    // no standard ruleset (Sunnucks documented, never codified); MCE uses different interpretation
   'crazyhouse',   // hand state shape differs from MCE (array vs keyed object)
+  'darkChess',    // visibility hook not in MCE parity scope
+  'fogOfWar',     // visibility hook not in MCE parity scope
 ])
 const ALL_VARIANTS = listVariants('chess').map(v => v.key).filter(k => !PARITY_SKIP.has(k))
 
