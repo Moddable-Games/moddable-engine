@@ -117,6 +117,9 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     if (config.enPassant) {
       state.enPassantTarget = null
     }
+    if (config.drops) {
+      state.hands = [[], []]
+    }
 
     return state
   }
@@ -161,8 +164,10 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   }
 
   function cloneBoard(board) {
-    if (Array.isArray(board)) return [...board]
-    return { ...board }
+    if (Array.isArray(board)) return board.map(c => c ? { ...c } : null)
+    const clone = {}
+    for (const k of Object.keys(board)) clone[k] = board[k] ? { ...board[k] } : null
+    return clone
   }
 
   function allPositions() {
@@ -424,6 +429,10 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
   function validateMove(move, slice, full) {
     const playerIdx = full.__players.currentIndex
+    if (move.action === 'drop') {
+      const legal = getLegalMoves(slice, full)
+      return legal.some(m => m.action === 'drop' && m.type === move.type && m.to === move.to)
+    }
     const piece = getCell(slice.board, move.from)
     if (!piece) return false
     if (piece.owner !== playerIdx) return false
@@ -441,6 +450,21 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   function applyMove(move, slice, full) {
     const playerIdx = full.__players.currentIndex
     const board = cloneBoard(slice.board)
+    const hands = config.drops ? [slice.hands[0].slice(), slice.hands[1].slice()] : null
+
+    if (move.action === 'drop') {
+      board[move.to] = { type: move.type, owner: playerIdx }
+      const idx = hands[playerIdx].indexOf(move.type)
+      if (idx !== -1) hands[playerIdx].splice(idx, 1)
+      const newSlice = { board, halfmoveClock: 0, fullmoveNumber: slice.fullmoveNumber, hands }
+      if (slice.castlingRights) newSlice.castlingRights = deepCopyCastling(slice.castlingRights)
+      if (config.enPassant) newSlice.enPassantTarget = null
+      for (const k of Object.keys(slice)) {
+        if (k.startsWith('_') && !(k in newSlice)) newSlice[k] = slice[k]
+      }
+      return { state: newSlice }
+    }
+
     const piece = getCell(board, move.from)
     let castlingRights = slice.castlingRights ? deepCopyCastling(slice.castlingRights) : null
     let enPassantTarget = null
@@ -448,6 +472,14 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
     if (getCell(board, move.to) !== null || piece.type === (config.pawnType || 'pawn')) {
       halfmoveClock = 0
+    }
+
+    if (hands) {
+      const captured = move.enPassant ? getCell(slice.board, move.captured) : getCell(slice.board, move.to)
+      if (captured && captured.owner !== playerIdx && captured.type !== (config.royalType || 'king')) {
+        const handType = captured.wasPromoted ? (config.pawnType || 'pawn') : captured.type
+        hands[playerIdx].push(handType)
+      }
     }
 
     if (config.moveApply) {
@@ -470,7 +502,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     }
 
     if (move.promotion) {
-      setCell(board, move.to, { type: move.promotion, owner: playerIdx })
+      setCell(board, move.to, { type: move.promotion, owner: playerIdx, wasPromoted: config.drops || undefined })
     }
 
     if (config.enPassant && piece.type === (config.pawnType || 'pawn') && pawnConfig) {
@@ -502,6 +534,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const newSlice = { board, halfmoveClock, fullmoveNumber }
     if (castlingRights !== null) newSlice.castlingRights = castlingRights
     if (config.enPassant) newSlice.enPassantTarget = enPassantTarget
+    if (hands) newSlice.hands = hands
     for (const k of Object.keys(slice)) {
       if (k.startsWith('_') && !(k in newSlice)) newSlice[k] = slice[k]
     }
@@ -568,6 +601,20 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       }
     }
 
+    if (config.drops && slice.hands) {
+      const hand = slice.hands[playerIdx]
+      const uniqueTypes = [...new Set(hand)]
+      const pawnType = config.pawnType || 'pawn'
+      const promoRows = pawnConfig ? pawnConfig.promotionCells[playerIdx] : new Set()
+      for (const type of uniqueTypes) {
+        for (const pos of allPositions()) {
+          if (getCell(slice.board, pos) !== null) continue
+          if (type === pawnType && promoRows.has(pos)) continue
+          allMoves.push({ action: 'drop', type, to: pos })
+        }
+      }
+    }
+
     let legal = config.noCheck
       ? allMoves
       : filterLegalMoves(allMoves, slice, playerIdx)
@@ -585,6 +632,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
   function filterLegalMoves(moves, slice, playerIdx) {
     return moves.filter(move => {
+      if (move.action === 'drop') return true
       const testBoard = cloneBoard(slice.board)
       if (move.castle) {
         setCell(testBoard, move.to, getCell(testBoard, move.from))

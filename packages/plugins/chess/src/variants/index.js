@@ -52,6 +52,11 @@ export const diceChess = {
   },
 }
 
+export const crazyhouse = {
+  key: 'crazyhouse',
+  drops: true,
+}
+
 function randomBackRank960() {
   const pieces = Array(8).fill(null)
   const empty = () => pieces.map((p, i) => p === null ? i : -1).filter(i => i >= 0)
