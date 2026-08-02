@@ -76,6 +76,9 @@ function normaliseOutcome(outcome, variant, mceGame) {
   const s = String(outcome)
   if (s === 'active' || s === 'check') return null
   if (s === 'checkmate') {
+    if (mceGame.movesThisTurn > 0) {
+      return mceGame.turn === MCE.WHITE ? 'white-wins' : 'black-wins'
+    }
     return mceGame.turn === MCE.WHITE ? 'black-wins' : 'white-wins'
   }
   if (s.endsWith('-w') || s === 'white') return 'white-wins'

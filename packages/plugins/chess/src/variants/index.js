@@ -15,3 +15,4 @@ export { extinction, singleCheck, codrus, omnicide, breakthrough, shatar } from 
 export { giveaway, suicideChess, noRetreat, patrolChess, makpong, gridChess, madrasiChess, weakChess } from './filter-variants.js'
 export { poisonChess, medusaChess, immunizationChess } from './effects.js'
 export { einsteinChess, andernachChess, benedictChess, recruitmentChess, absorptionChess } from './mutation.js'
+export { marseillais, monsterChess, progressive, berserkChess } from './multi-move.js'

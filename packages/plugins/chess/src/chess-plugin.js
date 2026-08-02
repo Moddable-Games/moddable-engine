@@ -461,6 +461,9 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const newSlice = { board, halfmoveClock, fullmoveNumber }
     if (castlingRights !== null) newSlice.castlingRights = castlingRights
     if (config.enPassant) newSlice.enPassantTarget = enPassantTarget
+    for (const k of Object.keys(slice)) {
+      if (k.startsWith('_') && !(k in newSlice)) newSlice[k] = slice[k]
+    }
 
     let effects = slice.effects ? slice.effects.map(e => ({ ...e })) : []
     if (config.afterMove) {
@@ -477,6 +480,20 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       return e.duration > 0
     })
     if (effects.length > 0 || slice.effects) newSlice.effects = effects
+
+    if (config.turnLogic) {
+      const opponent = 1 - playerIdx
+      const inCheck = isInCheck(board, opponent)
+      const movesThisTurn = (slice._movesThisTurn || 0) + 1
+      const ctx = { movesThisTurn, inCheck, playerIdx, fullmoveNumber, config, slice: newSlice }
+      const shouldContinue = config.turnLogic(ctx)
+      if (shouldContinue) {
+        newSlice._movesThisTurn = movesThisTurn
+        return { state: newSlice, continueTurn: true }
+      }
+      newSlice._movesThisTurn = 0
+      if (config.onTurnEnd) config.onTurnEnd(newSlice)
+    }
 
     return newSlice
   }
