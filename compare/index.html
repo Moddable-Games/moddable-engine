@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Surface Parity Comparison</title>
+<link rel="stylesheet" href="../css/home.css">
+<style>
+body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; background: #1a1a2e; color: #eee; }
+.compare-header { display: flex; gap: 16px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+.compare-header select, .compare-header input { padding: 6px 10px; border-radius: 4px; border: 1px solid #444; background: #2a2a3e; color: #eee; }
+.compare-container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.compare-panel { background: #2a2a3e; border-radius: 8px; padding: 16px; }
+.compare-panel h3 { margin: 0 0 12px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; }
+.compare-panel svg { width: 100%; height: auto; max-height: 60vh; }
+.compare-panel .board-container { min-height: 300px; }
+</style>
+</head>
+<body>
+<div class="compare-header">
+  <label>Variant: <select id="variant-select"></select></label>
+  <label>FEN: <input id="fen-input" type="text" size="40" placeholder="custom FEN (optional)"></label>
+  <button id="refresh-btn">Refresh</button>
+</div>
+<div class="compare-container">
+  <div class="compare-panel">
+    <h3>MCE (chess-play.js)</h3>
+    <div id="mce-board" class="board-container"></div>
+  </div>
+  <div class="compare-panel">
+    <h3>Generic (game-play.js)</h3>
+    <div id="generic-board" class="board-container"></div>
+  </div>
+</div>
+<script type="module">
+import MCE from '../packages/plugins/chess/src/mce/index.js'
+import '../packages/plugins/chess/src/mce/variants/index.js'
+import { renderFromEngine, attachPieceImages } from '../packages/render/src/render-engine.js'
+import { loadGalleryIndex, getGalleryIndex } from '../js/play-shared.js'
+
+import '../packages/plugins/chess/index.js'
+import { createGame } from '../packages/play/src/sdk.js'
+import { listVariants } from '../packages/play/src/variant-registry.js'
+import { boardToSetup } from '../packages/play/src/serialise.js'
+
+const variantSelect = document.getElementById('variant-select')
+const fenInput = document.getElementById('fen-input')
+const refreshBtn = document.getElementById('refresh-btn')
+const mceEl = document.getElementById('mce-board')
+const genericEl = document.getElementById('generic-board')
+
+const variants = listVariants('chess').map(v => v.key).sort()
+for (const v of variants) {
+  const opt = document.createElement('option')
+  opt.value = v
+  opt.textContent = v
+  variantSelect.appendChild(opt)
+}
+
+const params = new URLSearchParams(location.search)
+if (params.get('variant')) variantSelect.value = params.get('variant')
+if (params.get('fen')) fenInput.value = params.get('fen')
+
+await loadGalleryIndex()
+
+function renderMCE(variant) {
+  try {
+    const g = MCE.createGame(variant)
+    const rows = g.rows, cols = g.cols
+    const board = g.board
+    let fen = ''
+    for (let r = 0; r < rows; r++) {
+      let empty = 0
+      for (let c = 0; c < cols; c++) {
+        const p = board[r * cols + c]
+        if (!p) { empty++; continue }
+        if (empty) { fen += empty; empty = 0 }
+        fen += p
+      }
+      if (empty) fen += empty
+      if (r < rows - 1) fen += '/'
+    }
+    const resolved = {
+      topology: { type: 'grid', rows, cols },
+      setup: fen,
+      surface: { type: 'checkered' },
+    }
+    const gallery = getGalleryIndex() || []
+    const pieceResult = attachPieceImages(resolved, gallery)
+    const svg = renderFromEngine(resolved, { pieceImages: pieceResult.images || {} })
+    mceEl.innerHTML = svg || '<p>No render</p>'
+  } catch (e) {
+    mceEl.innerHTML = '<p style="color:#f66">MCE: ' + e.message + '</p>'
+  }
+}
+
+function renderGeneric(variant) {
+  try {
+    const game = createGame('chess', variant)
+    const slice = game.getState().slice
+    const topo = game.topology || { rows: 8, cols: 8 }
+    const setup = boardToSetup(slice, topo)
+    const resolved = {
+      topology: { type: 'grid', rows: topo.rows || 8, cols: topo.cols || 8 },
+      setup,
+      surface: { type: 'checkered' },
+    }
+    const gallery = getGalleryIndex() || []
+    const pieceResult = attachPieceImages(resolved, gallery)
+    const svg = renderFromEngine(resolved, { pieceImages: pieceResult.images || {} })
+    genericEl.innerHTML = svg || '<p>No render</p>'
+  } catch (e) {
+    genericEl.innerHTML = '<p style="color:#f66">Generic: ' + e.message + '</p>'
+  }
+}
+
+function render() {
+  const variant = variantSelect.value || 'standard'
+  renderMCE(variant)
+  renderGeneric(variant)
+  const p = new URLSearchParams(location.search)
+  p.set('variant', variant)
+  history.replaceState(null, '', '?' + p.toString())
+}
+
+variantSelect.addEventListener('change', render)
+refreshBtn.addEventListener('click', render)
+render()
+</script>
+</body>
+</html>
