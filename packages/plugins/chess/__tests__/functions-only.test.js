@@ -8,6 +8,7 @@ const LEGACY_ALLOW = new Set([
   'standard', 'noCastling', 'torpedo', 'threeCheck', 'fiveCheck',
   'kingOfTheHill', 'racingKings', 'antichess', 'capablanca',
   'losAlamos', 'horde', 'stalemateWins', 'checklessChess',
+  'extinction', 'singleCheck', 'codrus', 'omnicide',
 ])
 
 const DATA_KEYS = new Set([
