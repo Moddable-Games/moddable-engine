@@ -1,5 +1,6 @@
 [
   {
+    "kind": "moves",
     "variant": "racingKings",
     "position": "8/8/8/8/8/8/krbnNBRK/qrbnNBRQ w - - 0 1",
     "sideToMove": "white",
@@ -9,11 +10,12 @@
     "status": "resolved",
     "authority": "games/chess/content/variants/racing-kings.md: 'No move may give check (to either King).'",
     "verdict": "test-bug",
-    "note": "Original divergence was caused by calling MCE's raw legalMoves() instead of variantLegalMoves(). MCE has a moveFilter that enforces the no-check rule. Both implementations agree: 21 opening moves, full agreement over 10 plies.",
+    "note": "Original divergence was caused by calling MCE's raw legalMoves() instead of variantLegalMoves(). Both agree when the correct API is used.",
     "firstSeen": "2026-07-31",
     "resolvedDate": "2026-07-31"
   },
   {
+    "kind": "moves",
     "variant": "antichess",
     "position": "opening + 3 plies",
     "sideToMove": "black",
@@ -23,8 +25,21 @@
     "status": "resolved",
     "authority": "games/chess/content/variants/antichess.md: 'If a capture is available, you MUST capture.'",
     "verdict": "test-bug",
-    "note": "Original divergence was caused by calling MCE's raw legalMoves() instead of variantLegalMoves(). MCE has a moveFilter that enforces forced captures. Both implementations agree over 10 plies when the correct API is used.",
+    "note": "Original divergence was caused by calling MCE's raw legalMoves() instead of variantLegalMoves(). Both agree when the correct API is used.",
     "firstSeen": "2026-07-31",
     "resolvedDate": "2026-07-31"
+  },
+  {
+    "kind": "outcome",
+    "variant": "gridChess",
+    "position": "grid-checkmate position (to be harvested)",
+    "sideToMove": "pending",
+    "implA": { "name": "mce", "outcome": "checkmate (win for stalemating side)" },
+    "implB": { "name": "chess-plugin", "outcome": "draw (noCheck treats all no-moves as stalemate)" },
+    "status": "unresolved",
+    "authority": null,
+    "verdict": null,
+    "note": "Plugin uses noCheck:true to handle the grid-crossing constraint on attacks. Side effect: when opponent has no legal grid-crossing moves AND is in grid-check, MCE reports checkmate but the plugin reports draw/stalemate. Needs a custom checkWin or grid-aware check detection to distinguish the two cases.",
+    "firstSeen": "2026-08-02"
   }
 ]

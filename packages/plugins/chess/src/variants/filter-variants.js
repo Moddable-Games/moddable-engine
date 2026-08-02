@@ -264,6 +264,50 @@ export const weakChess = {
   },
 }
 
+function generatePieceMoves(board, from, piece, owner, cols, rows) {
+  const moves = []
+  const r = Math.floor(from / cols), c = from % cols
+  if (piece.type === 'pawn') {
+    const dir = owner === 0 ? -1 : 1
+    const fwd = from + dir * cols
+    if (fwd >= 0 && fwd < board.length && !board[fwd]) moves.push({ from, to: fwd })
+    for (const dc of [-1, 1]) {
+      const nc = c + dc
+      if (nc < 0 || nc >= cols) continue
+      const cap = (r + dir) * cols + nc
+      if (cap >= 0 && cap < board.length && board[cap] && board[cap].owner !== owner) moves.push({ from, to: cap })
+    }
+  } else {
+    const dirs = getPieceDirs(piece.type)
+    const sliding = isSlidingType(piece.type)
+    for (const [dr, dc] of dirs) {
+      let nr = r + dr, nc = c + dc
+      while (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+        const idx = nr * cols + nc
+        if (board[idx] && board[idx].owner === owner) break
+        moves.push({ from, to: idx })
+        if (board[idx] || !sliding) break
+        nr += dr; nc += dc
+      }
+    }
+  }
+  return moves
+}
+
+function getPieceDirs(type) {
+  switch (type) {
+    case 'king': case 'queen': return [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]
+    case 'rook': return [[-1,0],[1,0],[0,-1],[0,1]]
+    case 'bishop': return [[-1,-1],[-1,1],[1,-1],[1,1]]
+    case 'knight': return [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]]
+    default: return []
+  }
+}
+
+function isSlidingType(type) {
+  return type === 'rook' || type === 'bishop' || type === 'queen'
+}
+
 export const noRetreat = {
   key: 'noRetreat',
   label: 'No Retreat',
