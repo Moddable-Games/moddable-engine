@@ -96,7 +96,9 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const setupInput = typeof rawSetup === 'function' ? rawSetup(rng) : rawSetup
 
     let board
-    if (typeof setupInput === 'object' && !Array.isArray(setupInput)) {
+    if (Array.isArray(setupInput)) {
+      board = setupInput
+    } else if (typeof setupInput === 'object') {
       board = setupInput
     } else if (topology && topology.parsePosition) {
       board = topology.parsePosition(setupInput, vocabulary)
@@ -123,7 +125,6 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     }
     if (config.placementPieces) {
       state._phase = 'placement'
-      state._placementTurn = 0
       state._toPlace = [config.placementPieces[0].slice(), config.placementPieces[1].slice()]
     }
 

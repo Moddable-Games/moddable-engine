@@ -467,3 +467,18 @@ describe('action-safety: actions without skipsCheckFilter are filtered', () => {
     expect(moves.every(m => !m.action)).toBe(true)
   })
 })
+
+describe('action-safety: promotion produces choice in interaction model', () => {
+  it('pawn reaching last rank triggers choice, not auto-queen', () => {
+    const game = createGame('chess', 'standard')
+    const state = game.getState()
+    const board = state.slice.board.map(c => c ? { ...c } : null)
+    board[8] = { type: 'pawn', owner: 0 }
+    board[0] = null
+    game.loadState({ slice: { ...state.slice, board } })
+    const moves = game.getLegalMoves()
+    const promoMoves = moves.filter(m => m.from === 8 && m.to === 0)
+    expect(promoMoves.length).toBe(4)
+    expect(promoMoves.map(m => m.promotion).sort()).toEqual(['bishop', 'knight', 'queen', 'rook'])
+  })
+})

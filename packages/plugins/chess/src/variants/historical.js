@@ -129,34 +129,23 @@ export const sittuyin = {
 
   moveFilter(moves, state) {
     if (state._phase !== 'placement') return moves
-    return []
+    return moves.filter(m => m.action)
   },
 
-  turnLogic(ctx) {
-    const slice = ctx.slice
-    if (slice._phase !== 'placement') return false
-    const toPlace0 = slice._toPlace[0]
-    const toPlace1 = slice._toPlace[1]
-    if ((toPlace0 && toPlace0.length > 0) || (toPlace1 && toPlace1.length > 0)) return true
-    slice._phase = 'play'
-    return false
-  },
 
   actions: {
     place: {
       skipsCheckFilter: true,
-      continuesTurn: true,
+      continuesTurn: false,
       generate(slice, playerIdx) {
         if (slice._phase !== 'placement') return []
-        const turn = slice._placementTurn || 0
-        if (turn !== playerIdx) return []
-        const toPlace = slice._toPlace[turn]
+        const toPlace = slice._toPlace[playerIdx]
         if (!toPlace || toPlace.length === 0) return []
         const type = toPlace[0]
-        const backRank = turn === 0 ? 7 : 0
-        const dropRegion = turn === 0
-          ? [48,49,50,51,52,53,54,55, 40,41,42,43,44,45,46,47, 16,17,18,19,20,21,22,23]
-          : [8,9,10,11,12,13,14,15, 32,33,34,35,36,37,38,39, 40,41,42,43,44,45,46,47]
+        const backRank = playerIdx === 0 ? 7 : 0
+        const dropRegion = playerIdx === 0
+          ? [56,57,58,59,60,61,62,63, 48,49,50,51,52,53,54,55, 40,41,42,43,44,45,46,47]
+          : [0,1,2,3,4,5,6,7, 8,9,10,11,12,13,14,15, 16,17,18,19,20,21,22,23]
         const moves = []
         for (const pos of dropRegion) {
           if (slice.board[pos] !== null) continue
@@ -170,9 +159,8 @@ export const sittuyin = {
         const toPlace = [slice._toPlace[0].slice(), slice._toPlace[1].slice()]
         const idx = toPlace[playerIdx].indexOf(move.type)
         if (idx !== -1) toPlace[playerIdx].splice(idx, 1)
-        const nextTurn = toPlace[1 - playerIdx].length > 0 ? 1 - playerIdx : playerIdx
         const phase = (toPlace[0].length === 0 && toPlace[1].length === 0) ? 'play' : 'placement'
-        return { board, sliceKeys: { _toPlace: toPlace, _placementTurn: nextTurn, _phase: phase }, halfmoveClock: 0, fullmoveNumber: 1 }
+        return { board, sliceKeys: { _toPlace: toPlace, _phase: phase }, halfmoveClock: 0, fullmoveNumber: 1 }
       },
     },
   },
