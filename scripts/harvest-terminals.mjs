@@ -71,16 +71,23 @@ function boardsEqual(pluginBoard, mceGame) {
   return true
 }
 
-function normaliseOutcome(outcome, variant) {
+function normaliseOutcome(outcome, variant, mceGame) {
   if (!outcome) return null
   const s = String(outcome)
   if (s === 'active' || s === 'check') return null
-  if (s === 'checkmate' || s.endsWith('-w') || s === 'white') return 'white-wins'
+  if (s === 'checkmate') {
+    return mceGame.turn === MCE.WHITE ? 'black-wins' : 'white-wins'
+  }
+  if (s.endsWith('-w') || s === 'white') return 'white-wins'
   if (s.endsWith('-b') || s === 'black') return 'black-wins'
   if (s === 'stalemate') {
     const vc = MCE.variantRegistry[variant]
-    if (vc && vc.stalemateMeaning === 'win') return 'stalemated-wins'
-    if (vc && vc.stalemateMeaning === 'loss') return 'stalemated-loses'
+    if (vc && vc.stalemateMeaning === 'win') {
+      return mceGame.turn === MCE.WHITE ? 'white-wins' : 'black-wins'
+    }
+    if (vc && vc.stalemateMeaning === 'loss') {
+      return mceGame.turn === MCE.WHITE ? 'black-wins' : 'white-wins'
+    }
     return 'draw'
   }
   if (s === 'draw' || s.startsWith('draw')) return 'draw'
@@ -137,7 +144,7 @@ for (const variantKey of variants) {
 
       const beforeFen = boardToFen(pluginGame.getState().slice.board, mce.cols || 8)
       makeMove(mce, mceMove)
-      pluginGame.applyMove(pluginMove)
+      const pluginResult = pluginGame.applyMove(pluginMove)
 
       if (!boardsEqual(pluginGame.getState().slice.board, mce)) {
         results.applicationDivergences.push({
@@ -152,13 +159,13 @@ for (const variantKey of variants) {
 
       const mceVariantStatus = getVariantStatus(mce)
       const mceStatus = mceVariantStatus || getStatus(mce)
-      const pluginStatus = pluginGame.checkWin()
+      const pluginStatus = pluginResult && pluginResult.winner ? pluginResult.winner : null
       const mceTerminal = mceStatus && mceStatus !== 'active' && mceStatus !== 'check'
       const pluginTerminal = pluginStatus !== null && pluginStatus !== undefined
 
       if (mceTerminal || pluginTerminal) {
-        const mceNorm = normaliseOutcome(mceStatus, variantKey)
-        const pluginNorm = normaliseOutcome(pluginStatus, variantKey)
+        const mceNorm = normaliseOutcome(mceStatus, variantKey, mce)
+        const pluginNorm = normaliseOutcome(pluginStatus, variantKey, mce)
         if (mceNorm === pluginNorm) {
           results.fixtures.push({ variant: variantKey, seed: gameNum, ply, outcome: mceNorm, position: boardToFen(pluginGame.getState().slice.board, mce.cols || 8) })
         } else {

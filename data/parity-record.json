@@ -31,6 +31,33 @@
   },
   {
     "kind": "outcome",
+    "variant": "giveaway",
+    "position": "multiple (seeds 6, 9, 11 at 20 games)",
+    "sideToMove": "various",
+    "implA": { "name": "mce", "outcome": "stalemate (raw)" },
+    "implB": { "name": "chess-plugin", "outcome": "white/black (resolved via stalemateMeaning)" },
+    "status": "resolved",
+    "authority": "games/chess/content/variants/giveaway.md",
+    "verdict": "test-bug",
+    "note": "Two bugs in harvester: (1) normaliseOutcome mapped MCE 'stalemate' to 'stalemated-loses' without resolving to concrete winner, while plugin returned 'white'/'black' directly. Fixed by resolving stalemate through stalemateMeaning + g.turn to determine who wins. (2) Harvester called checkWin() after turn advance, causing premature stalemate detection from wrong perspective. Fixed by using applyMove() return value instead.",
+    "firstSeen": "2026-08-02",
+    "resolvedDate": "2026-08-02"
+  },
+  {
+    "kind": "outcome",
+    "variant": "antichess",
+    "position": "seed 12 ply 96",
+    "sideToMove": "n/a",
+    "implA": { "name": "mce", "outcome": "draw-material" },
+    "implB": { "name": "chess-plugin", "outcome": "null (game continues)" },
+    "status": "unresolved",
+    "authority": null,
+    "verdict": null,
+    "note": "MCE detects insufficient material draw (e.g. K vs K). Plugin does not implement material-based draw detection. Low priority: does not affect playability, only game-end detection in extreme endgames.",
+    "firstSeen": "2026-08-02"
+  },
+  {
+    "kind": "outcome",
     "variant": "gridChess",
     "position": "grid-checkmate position (to be harvested)",
     "sideToMove": "pending",

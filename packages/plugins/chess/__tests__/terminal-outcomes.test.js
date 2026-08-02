@@ -312,6 +312,19 @@ describe('terminal-outcome: horde', () => {
   })
 })
 
+describe('terminal-outcome: benedictChess', () => {
+  it('fires: opponent has no king (converted)', () => {
+    // White has both kings (original + converted). Black has no king.
+    const game = setupGame('benedictChess', '8/8/8/4K3/8/8/8/4K3')
+    expect(game.checkWin()).toBe('white')
+  })
+
+  it('near-miss: both kings present', () => {
+    const game = setupGame('benedictChess', '4k3/8/8/8/8/8/8/4K3')
+    expect(game.checkWin()).toBeNull()
+  })
+})
+
 // --- Registration gate ---
 // Variants with outcome-affecting keys must have terminal-outcome fixtures.
 
@@ -326,6 +339,7 @@ const COVERED_VARIANTS = new Set([
   'extinction', 'singleCheck', 'codrus', 'omnicide', 'shatar',
   'breakthrough', 'kingOfTheHill', 'racingKings',
   'threeCheck', 'fiveCheck', 'horde', 'gridChess',
+  'benedictChess',
 ])
 
 describe('registration gate: outcome-affecting variants need fixtures', () => {

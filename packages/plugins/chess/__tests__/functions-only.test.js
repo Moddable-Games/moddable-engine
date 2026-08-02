@@ -13,6 +13,7 @@ const LEGACY_ALLOW = new Set([
   'giveaway', 'suicideChess', 'noRetreat', 'patrolChess', 'makpong',
   'gridChess', 'madrasiChess', 'weakChess',
   'immunizationChess', 'poisonChess', 'medusaChess',
+  'benedictChess',
 ])
 
 const DATA_KEYS = new Set([

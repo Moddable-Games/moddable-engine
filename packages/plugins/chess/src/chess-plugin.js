@@ -464,7 +464,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
     let effects = slice.effects ? slice.effects.map(e => ({ ...e })) : []
     if (config.afterMove) {
-      const captured = slice.board[move.to]
+      const captured = move.enPassant ? slice.board[move.captured] : slice.board[move.to]
       const ctx = { playerIdx, move, captured, board, effects, topology }
       ctx.addEffect = (effect) => effects.push(effect)
       ctx.hasEffect = (sq, type) => effects.some(e => e.sq === sq && e.type === type)
