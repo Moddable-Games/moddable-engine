@@ -163,6 +163,107 @@ function pathIsClear(from, target, board, cols) {
   return true
 }
 
+export const gridChess = {
+  key: 'gridChess',
+  label: 'Grid Chess',
+  group: 'Alternate Rules',
+  title: 'Grid Chess',
+  description: 'Moves must cross at least one 2x2 grid line. Attacks only count if they cross a grid line.',
+  rule: 'Board: 8x8 · Win: Checkmate',
+  rows: 8,
+  cols: 8,
+  noCheck: true,
+
+  moveFilter(moves, state, ctx) {
+    const board = state.board
+    const cols = 8
+    const player = ctx.currentPlayer
+    const filtered = moves.filter(m => crossesGridLine(m.from, m.to, cols))
+    return filtered.filter(m => {
+      const testBoard = [...board]
+      testBoard[m.to] = testBoard[m.from]
+      testBoard[m.from] = null
+      if (m.promotion) testBoard[m.to] = { type: m.promotion, owner: player }
+      return !isInGridCheck(testBoard, player, cols)
+    })
+  },
+}
+
+function crossesGridLine(from, to, cols) {
+  const fr = Math.floor(from / cols), fc = from % cols
+  const tr = Math.floor(to / cols), tc = to % cols
+  return Math.floor(fr / 2) !== Math.floor(tr / 2) || Math.floor(fc / 2) !== Math.floor(tc / 2)
+}
+
+function isInGridCheck(board, player, cols) {
+  let kingPos = -1
+  for (let i = 0; i < board.length; i++) {
+    if (board[i] && board[i].type === 'king' && board[i].owner === player) { kingPos = i; break }
+  }
+  if (kingPos === -1) return false
+  const attacker = 1 - player
+  const rows = board.length / cols
+  for (let i = 0; i < board.length; i++) {
+    if (!board[i] || board[i].owner !== attacker) continue
+    if (!crossesGridLine(i, kingPos, cols)) continue
+    if (pieceAttacksSquare(board[i], i, kingPos, board, cols, rows)) return true
+  }
+  return false
+}
+
+export const madrasiChess = {
+  key: 'madrasiChess',
+  label: 'Madrasi Chess',
+  group: 'Alternate Rules',
+  title: 'Madrasi Chess',
+  description: 'Opposing pieces of the same type that attack each other are paralysed. Kings exempt.',
+  rule: 'Board: 8x8 · Win: Checkmate',
+  rows: 8,
+  cols: 8,
+
+  moveFilter(moves, state, ctx) {
+    const board = state.board
+    const cols = 8
+    const rows = board.length / cols
+    return moves.filter(m => {
+      const piece = board[m.from]
+      if (!piece || piece.type === 'king') return true
+      const enemy = 1 - piece.owner
+      for (let i = 0; i < board.length; i++) {
+        if (!board[i] || board[i].owner !== enemy || board[i].type !== piece.type) continue
+        if (pieceAttacksSquare(board[i], i, m.from, board, cols, rows)) return false
+      }
+      return true
+    })
+  },
+}
+
+export const weakChess = {
+  key: 'weakChess',
+  label: 'Weak Chess',
+  group: 'Alternate Rules',
+  title: 'Weak Chess',
+  description: 'The weakest piece type that has a legal move MUST move. Pawn < Knight < Bishop < Rook < Queen < King.',
+  rule: 'Board: 8x8 · Win: Checkmate',
+  rows: 8,
+  cols: 8,
+
+  moveFilter(moves, state, ctx) {
+    const STRENGTH = { pawn: 1, knight: 2, bishop: 3, rook: 4, queen: 5, king: 6 }
+    const board = state.board
+    let minStrength = 7
+    for (const m of moves) {
+      const piece = board[m.from]
+      const s = piece ? (STRENGTH[piece.type] || 6) : 6
+      if (s < minStrength) minStrength = s
+    }
+    return moves.filter(m => {
+      const piece = board[m.from]
+      return (piece ? (STRENGTH[piece.type] || 6) : 6) === minStrength
+    })
+  },
+}
+
 export const noRetreat = {
   key: 'noRetreat',
   label: 'No Retreat',
