@@ -42,6 +42,8 @@ const PARITY_SKIP = new Set([
   'crazyhouse',   // hand state shape differs from MCE (array vs keyed object)
   'darkChess',    // visibility hook not in MCE parity scope
   'fogOfWar',     // visibility hook not in MCE parity scope
+  'duckChess',    // two-phase turn (duck placement) not comparable to MCE's turnLogic
+  'sittuyin',     // placement phase not in MCE
 ])
 const ALL_VARIANTS = listVariants('chess').map(v => v.key).filter(k => !PARITY_SKIP.has(k))
 

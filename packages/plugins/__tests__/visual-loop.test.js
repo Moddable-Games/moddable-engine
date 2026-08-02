@@ -92,7 +92,7 @@ function playedPosition(family, key, moveCount) {
   }
 }
 
-const NONDETERMINISTIC = new Set(['chess960'])
+const NONDETERMINISTIC = new Set(['chess960', 'sittuyin'])
 
 function everyVariant() {
   const out = []

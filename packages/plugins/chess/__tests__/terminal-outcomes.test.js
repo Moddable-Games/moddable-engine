@@ -152,6 +152,14 @@ describe('terminal-outcome: shatar', () => {
   })
 })
 
+describe('terminal-outcome: duckChess', () => {
+  it('fires: king captured', () => {
+    const game = setupGame('duckChess', '4R3/8/8/8/8/8/8/4K3')
+    const result = game.checkWin()
+    expect(result).toBe('white')
+  })
+})
+
 describe('terminal-outcome: darkChess', () => {
   it('fires: king captured', () => {
     const game = setupGame('darkChess', '4R3/8/8/8/8/8/8/4K3')
@@ -404,7 +412,7 @@ const COVERED_VARIANTS = new Set([
   'breakthrough', 'kingOfTheHill', 'racingKings',
   'threeCheck', 'fiveCheck', 'horde', 'gridChess',
   'benedictChess', 'maharaja', 'atomic',
-  'shatranj', 'chaturanga', 'darkChess', 'fogOfWar',
+  'shatranj', 'chaturanga', 'darkChess', 'fogOfWar', 'duckChess',
 ])
 
 describe('registration gate: outcome-affecting variants need fixtures', () => {

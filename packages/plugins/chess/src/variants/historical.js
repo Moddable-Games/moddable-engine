@@ -98,3 +98,64 @@ export const courier = {
     schleich: { symbols: { 0: 'T', 1: 't' } },
   },
 }
+
+const SITTUYIN_PAWNS_W = [16,17,18,19,28,29,30,31]
+const SITTUYIN_PAWNS_B = [32,33,34,35,40,41,42,43]
+const SITTUYIN_PIECES = ['rook', 'rook', 'knight', 'knight', 'khon', 'khon', 'ferz', 'king']
+
+export const sittuyin = {
+  key: 'sittuyin',
+  castling: false,
+  enPassant: false,
+  doubleStep: false,
+  promotionChoices: ['ferz'],
+  pieces: {
+    ferz: { type: 'leaper', offsets: [[-1, -1], [-1, 1], [1, -1], [1, 1]] },
+    khon: { type: 'leaper', offsets: [[-1, -1], [-1, 0], [-1, 1], [1, -1], [1, 1]], directional: true },
+  },
+  vocabulary: {
+    ferz: { symbols: { 0: 'F', 1: 'f' } },
+    khon: { symbols: { 0: 'G', 1: 'g' } },
+  },
+  setup() {
+    const board = new Array(64).fill(null)
+    for (const sq of SITTUYIN_PAWNS_W) board[sq] = { type: 'pawn', owner: 0 }
+    for (const sq of SITTUYIN_PAWNS_B) board[sq] = { type: 'pawn', owner: 1 }
+    return board
+  },
+  _placement: true,
+
+  moveFilter(moves, state) {
+    if (state._phase !== 'placement') return moves
+    const playerIdx = state._placementTurn || 0
+    const placements = []
+    const toPlace = state._toPlace[playerIdx]
+    if (!toPlace || toPlace.length === 0) return moves
+
+    const type = toPlace[0]
+    const backRank = playerIdx === 0 ? 7 : 0
+    const dropRegion = playerIdx === 0
+      ? [48,49,50,51,52,53,54,55, 40,41,42,43,44,45,46,47, 16,17,18,19,20,21,22,23]
+      : [8,9,10,11,12,13,14,15, 32,33,34,35,36,37,38,39, 40,41,42,43,44,45,46,47]
+
+    for (const pos of dropRegion) {
+      if (state.board[pos] !== null) continue
+      if (type === 'rook' && Math.floor(pos / 8) !== backRank) continue
+      placements.push({ action: 'place', type, to: pos })
+    }
+    return placements
+  },
+
+  turnLogic(ctx) {
+    const slice = ctx.slice
+    if (slice._phase !== 'placement') return false
+    const playerIdx = slice._placementTurn || 0
+    const toPlace = slice._toPlace[playerIdx]
+    if (toPlace && toPlace.length > 0) return true
+    const opponent = 1 - playerIdx
+    const oppToPlace = slice._toPlace[opponent]
+    if (oppToPlace && oppToPlace.length > 0) return true
+    slice._phase = 'play'
+    return false
+  },
+}

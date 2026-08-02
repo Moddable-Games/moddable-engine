@@ -121,6 +121,14 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     if (config.drops) {
       state.hands = [[], []]
     }
+    if (config._placement) {
+      state._phase = 'placement'
+      state._placementTurn = 0
+      state._toPlace = [
+        ['rook', 'rook', 'knight', 'knight', 'khon', 'khon', 'ferz', 'king'],
+        ['rook', 'rook', 'knight', 'knight', 'khon', 'khon', 'ferz', 'king'],
+      ]
+    }
 
     return state
   }
@@ -434,6 +442,14 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       const legal = getLegalMoves(slice, full)
       return legal.some(m => m.action === 'drop' && m.type === move.type && m.to === move.to)
     }
+    if (move.action === 'duck') {
+      const legal = getLegalMoves(slice, full)
+      return legal.some(m => m.action === 'duck' && m.to === move.to)
+    }
+    if (move.action === 'place') {
+      const legal = getLegalMoves(slice, full)
+      return legal.some(m => m.action === 'place' && m.type === move.type && m.to === move.to)
+    }
     const piece = getCell(slice.board, move.from)
     if (!piece) return false
     if (piece.owner !== playerIdx) return false
@@ -460,6 +476,39 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       const newSlice = { board, halfmoveClock: 0, fullmoveNumber: slice.fullmoveNumber, hands }
       if (slice.castlingRights) newSlice.castlingRights = deepCopyCastling(slice.castlingRights)
       if (config.enPassant) newSlice.enPassantTarget = null
+      for (const k of Object.keys(slice)) {
+        if (k.startsWith('_') && !(k in newSlice)) newSlice[k] = slice[k]
+      }
+      return { state: newSlice }
+    }
+
+    if (move.action === 'place') {
+      board[move.to] = { type: move.type, owner: playerIdx }
+      const toPlace = [slice._toPlace[0].slice(), slice._toPlace[1].slice()]
+      const idx = toPlace[playerIdx].indexOf(move.type)
+      if (idx !== -1) toPlace[playerIdx].splice(idx, 1)
+      const nextTurn = toPlace[1 - playerIdx].length > 0 ? 1 - playerIdx : playerIdx
+      const newSlice = { board, halfmoveClock: 0, fullmoveNumber: 1, _toPlace: toPlace, _placementTurn: nextTurn }
+      if (toPlace[0].length === 0 && toPlace[1].length === 0) {
+        newSlice._phase = 'play'
+      } else {
+        newSlice._phase = 'placement'
+      }
+      for (const k of Object.keys(slice)) {
+        if (k.startsWith('_') && !(k in newSlice)) newSlice[k] = slice[k]
+      }
+      return { state: newSlice, continueTurn: true }
+    }
+
+    if (move.action === 'duck') {
+      const prevDuck = slice._duckSq
+      if (prevDuck !== undefined && prevDuck >= 0) board[prevDuck] = null
+      board[move.to] = { type: 'duck', owner: -1 }
+      const newSlice = { board, halfmoveClock: slice.halfmoveClock, fullmoveNumber: slice.fullmoveNumber }
+      if (slice.castlingRights) newSlice.castlingRights = deepCopyCastling(slice.castlingRights)
+      if (config.enPassant) newSlice.enPassantTarget = slice.enPassantTarget
+      newSlice._duckSq = move.to
+      newSlice._duckPhase = false
       for (const k of Object.keys(slice)) {
         if (k.startsWith('_') && !(k in newSlice)) newSlice[k] = slice[k]
       }
@@ -633,7 +682,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
   function filterLegalMoves(moves, slice, playerIdx) {
     return moves.filter(move => {
-      if (move.action === 'drop') return true
+      if (move.action === 'drop' || move.action === 'place' || move.action === 'duck') return true
       const testBoard = cloneBoard(slice.board)
       if (move.castle) {
         setCell(testBoard, move.to, getCell(testBoard, move.from))

@@ -19,7 +19,7 @@ export { marseillais, monsterChess, progressive, berserkChess } from './multi-mo
 export { chigorin, endgameChess, pawnsOnly, peasantsRevolt, halfChess, minichess, dianaChess, pettyChess, upsideDown } from './setup-only.js'
 export { almostChess, amazonChess, grand, knightmate, maharaja, hoppelPoppel, berolinaChess, leganChess, ordaChess } from './custom-pieces.js'
 export { rifle, atomic, displacementChess } from './before-move.js'
-export { shatranj, chaturanga, makruk, courier } from './historical.js'
+export { shatranj, chaturanga, makruk, courier, sittuyin } from './historical.js'
 
 export const cylinderChess = {
   key: 'cylinderChess',
@@ -138,6 +138,38 @@ export const fogOfWar = {
       }
     }
     return knowledge
+  },
+
+  winCondition: kingCaptureWin,
+}
+
+export const duckChess = {
+  key: 'duckChess',
+  noCheck: true,
+
+  moveFilter(moves, state) {
+    if (state._duckPhase) {
+      const placements = []
+      for (let i = 0; i < state.board.length; i++) {
+        if (state.board[i] === null) {
+          placements.push({ action: 'duck', to: i })
+        }
+      }
+      return placements
+    }
+    const duckSq = state._duckSq
+    if (duckSq !== undefined && duckSq >= 0) {
+      return moves.filter(m => m.to !== duckSq)
+    }
+    return moves
+  },
+
+  turnLogic(ctx) {
+    if (!ctx.slice._duckPhase) {
+      ctx.slice._duckPhase = true
+      return true
+    }
+    return false
   },
 
   winCondition: kingCaptureWin,

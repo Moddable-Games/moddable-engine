@@ -12,7 +12,7 @@ const ACCEPTED_KEYS = new Set([
   'stalemateMeaning', 'moveFilter', 'winCondition', 'evaluate',
   'openingBook', 'torpedo', 'doubleStep', 'advancement', 'pawnConfig',
   'checkThreshold', 'afterMove', 'turnLogic', 'onTurnEnd', 'pawnStartRow', 'moveApply',
-  'drops', 'visibility',
+  'drops', 'visibility', '_placement',
 ])
 // checkThreshold is read via ctx.config in winCondition, which the
 // plugin passes. It is genuinely consumed, not an allowance.
