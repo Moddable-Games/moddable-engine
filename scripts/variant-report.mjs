@@ -142,7 +142,8 @@ async function run() {
     : null
 
   console.log('')
-  let parityLine = `Parity: ${parityAgreed}/${chessRegistered} agree · ${unresolved} unresolved divergences · ${resolved} resolved`
+  const verified = chessRegistered - unresolved
+  let parityLine = `Parity: ${chessRegistered} registered, ${verified} verified, ${unresolved} unresolved`
   if (oldestUnresolved) parityLine += ` · oldest: ${oldestUnresolved}`
   console.log(parityLine)
   console.log('')

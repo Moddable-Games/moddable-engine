@@ -10,6 +10,7 @@ export const antichess = {
   castling: false,
   noCheck: true,
   stalemateMeaning: 'win',
+  promotionChoices: ['queen', 'rook', 'bishop', 'knight', 'king'],
 
   moveFilter(moves, state, ctx) {
     const board = state.board

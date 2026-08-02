@@ -10,6 +10,7 @@ export const giveaway = {
   castling: false,
   noCheck: true,
   stalemateMeaning: 'loss',
+  promotionChoices: ['queen', 'rook', 'bishop', 'knight', 'king'],
 
   moveFilter(moves, state, ctx) {
     const board = state.board
@@ -43,6 +44,7 @@ export const suicideChess = {
   cols: 8,
   castling: false,
   noCheck: true,
+  promotionChoices: ['queen', 'rook', 'bishop', 'knight', 'king'],
 
   moveFilter(moves, state, ctx) {
     const board = state.board

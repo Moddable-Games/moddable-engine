@@ -16,5 +16,14 @@
     "pluginState": "Same as MCE (fires immediately)",
     "severity": "incorrect-outcome",
     "discovered": "2026-08-02"
+  },
+  {
+    "variant": "antichess/giveaway/suicideChess",
+    "gap": "King promotion not available",
+    "rulebook": "games/chess/content/variants/antichess.md says 'Pawns may promote to King (in addition to the usual pieces)'",
+    "mceState": "Default promotionPieces ['q','r','b','n'] used. King not offered.",
+    "pluginState": "Fixed: promotionChoices includes 'king'. Plugin is now correct, MCE remains wrong.",
+    "severity": "incorrect-move-generation",
+    "discovered": "2026-08-02"
   }
 ]
