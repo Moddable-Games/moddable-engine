@@ -441,7 +441,9 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       halfmoveClock = 0
     }
 
-    if (move.castle) {
+    if (config.moveApply) {
+      config.moveApply({ move, board, piece, playerIdx, topology, setCell, getCell })
+    } else if (move.castle) {
       setCell(board, move.to, getCell(board, move.from))
       setCell(board, move.from, null)
       setCell(board, move.rookTo, getCell(board, move.rookFrom))

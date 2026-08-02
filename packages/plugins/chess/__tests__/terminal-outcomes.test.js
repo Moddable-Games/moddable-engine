@@ -325,6 +325,22 @@ describe('terminal-outcome: benedictChess', () => {
   })
 })
 
+describe('terminal-outcome: atomic', () => {
+  it('fires: white king destroyed by explosion', () => {
+    const board = new Array(64).fill(null)
+    board[4] = { type: 'king', owner: 1 }
+    board[60] = { type: 'rook', owner: 0 }
+    const game = createGame('chess', 'atomic')
+    game.loadState({ slice: { board, halfmoveClock: 0, fullmoveNumber: 1 }, players: { currentIndex: 0 } })
+    expect(game.checkWin()).toBe('black')
+  })
+
+  it('near-miss: both kings present', () => {
+    const game = setupGame('atomic', 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')
+    expect(game.checkWin()).toBeNull()
+  })
+})
+
 describe('terminal-outcome: maharaja', () => {
   it('fires: maharaja captured (black wins)', () => {
     const game = setupGame('maharaja', 'rnbqkbnr/pppppppp/8/8/8/8/8/8')
@@ -355,7 +371,7 @@ const COVERED_VARIANTS = new Set([
   'extinction', 'singleCheck', 'codrus', 'omnicide', 'shatar',
   'breakthrough', 'kingOfTheHill', 'racingKings',
   'threeCheck', 'fiveCheck', 'horde', 'gridChess',
-  'benedictChess', 'maharaja',
+  'benedictChess', 'maharaja', 'atomic',
 ])
 
 describe('registration gate: outcome-affecting variants need fixtures', () => {

@@ -18,3 +18,4 @@ export { einsteinChess, andernachChess, benedictChess, recruitmentChess, absorpt
 export { marseillais, monsterChess, progressive, berserkChess } from './multi-move.js'
 export { chigorin, endgameChess, pawnsOnly, peasantsRevolt, halfChess, minichess, dianaChess, pettyChess } from './setup-only.js'
 export { almostChess, amazonChess, grand, knightmate, maharaja, hoppelPoppel, berolinaChess, leganChess } from './custom-pieces.js'
+export { rifle, atomic, displacementChess } from './before-move.js'
