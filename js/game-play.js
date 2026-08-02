@@ -18,7 +18,7 @@ import '../packages/plugins/shogi/index.js'
 
 import { BOARD_THEMES, RULES_BASE, loadGalleryIndex, getGalleryIndex, loadVariantManifest, getManifestVariants } from './play-shared.js'
 import { createCellAddressing } from './play-cells.js'
-import { paintHighlight, paintIndicator, createOverlay } from './play-overlays.js'
+import { paintHighlight, paintIndicator, paintFog, createOverlay } from './play-overlays.js'
 import { bindBoardInteraction } from './play-interaction.js'
 import { renderHandPanel } from './play-hand.js'
 import { renderRulesPanel } from './play-rules.js'
@@ -75,6 +75,7 @@ export function createPlaySession(options = {}) {
     opponent = 'human',
     difficulty = 'medium',
     theme = 'classic',
+    colour = '0',
     embed = null,
     onStatus = null,
   } = options
@@ -88,6 +89,7 @@ export function createPlaySession(options = {}) {
   let resolvedBoard = null
   let cells = null
   let moveHistory = []
+  const fogViewSide = parseInt(colour, 10) || 0
 
   function playerNames() {
     return game.raw.definition.players.names || []
@@ -207,7 +209,18 @@ export function createPlaySession(options = {}) {
 
     const { selected, lastMove, legalMoves = [] } = state
     const slice = game.getState().slice
-    const rendered = { ...resolvedBoard, setup: boardToSetup(slice, resolvedBoard.topology) }
+    const visibility = game.getVisibility(fogViewSide)
+    let visibleSlice = slice
+    if (visibility) {
+      const board = slice.board.map((cell, i) => {
+        if (!cell) return null
+        const k = visibility.get(i)
+        if (k === 'unknown') return null
+        return cell
+      })
+      visibleSlice = { ...slice, board }
+    }
+    const rendered = { ...resolvedBoard, setup: boardToSetup(visibleSlice, resolvedBoard.topology) }
     const gallery = getGalleryIndex() || []
     const pieceResult = attachPieceImages(rendered, gallery)
     const svg = renderFromEngine(rendered, {
@@ -243,6 +256,15 @@ export function createPlaySession(options = {}) {
         seenTargets.add(target)
         const hasPiece = !!board[target]
         paintIndicator(overlay, cells.bbox(target, container), hasPiece ? theme.ring : theme.dot, hasPiece)
+      }
+
+      if (visibility) {
+        for (const [pos, knowledge] of visibility) {
+          if (knowledge === 'unknown') {
+            const bbox = cells.bbox(pos, container)
+            if (bbox) paintFog(overlay, bbox)
+          }
+        }
       }
 
       const piecesGroup = svgEl.querySelector('g[pointer-events="none"]')
@@ -404,6 +426,10 @@ export async function initGamePlay(container, defaults = {}) {
     { value: 'ai', label: 'vs AI' },
   ], params.opponent === 'ai' ? 'ai' : 'human')
   const difficultySelect = buildSelect(sidebar, 'Difficulty', DIFFICULTIES.map(d => ({ value: d, label: d[0].toUpperCase() + d.slice(1) })), params.difficulty || 'medium')
+  const colourSelect = buildSelect(sidebar, 'Play as', [
+    { value: '0', label: 'White' },
+    { value: '1', label: 'Black' },
+  ], params.colour || '0')
   const themeSelect = buildSelect(sidebar, 'Theme', Object.entries(BOARD_THEMES).map(([k, v]) => ({ value: k, label: v.label })), params.theme || 'classic')
 
   const rulesEl = document.createElement('div')
@@ -541,6 +567,7 @@ export async function initGamePlay(container, defaults = {}) {
   variantSelect.addEventListener('change', () => restart({ variant: variantSelect.value }))
   opponentSelect.addEventListener('change', () => restart({ opponent: opponentSelect.value }))
   difficultySelect.addEventListener('change', () => restart({ difficulty: difficultySelect.value }))
+  colourSelect.addEventListener('change', () => restart({ colour: colourSelect.value }))
   themeSelect.addEventListener('change', () => { config.theme = themeSelect.value; session.setTheme(themeSelect.value); updateURL() })
 
   await restart({})
