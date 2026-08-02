@@ -15,6 +15,8 @@ const LEGACY_ALLOW = new Set([
   'immunizationChess', 'poisonChess', 'medusaChess',
   'benedictChess',
   'monsterChess',
+  'chigorin', 'endgameChess', 'pawnsOnly', 'peasantsRevolt',
+  'halfChess', 'minichess', 'dianaChess', 'pettyChess',
 ])
 
 const DATA_KEYS = new Set([

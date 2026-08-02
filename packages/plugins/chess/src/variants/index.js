@@ -16,3 +16,4 @@ export { giveaway, suicideChess, noRetreat, patrolChess, makpong, gridChess, mad
 export { poisonChess, medusaChess, immunizationChess } from './effects.js'
 export { einsteinChess, andernachChess, benedictChess, recruitmentChess, absorptionChess } from './mutation.js'
 export { marseillais, monsterChess, progressive, berserkChess } from './multi-move.js'
+export { chigorin, endgameChess, pawnsOnly, peasantsRevolt, halfChess, minichess, dianaChess, pettyChess } from './setup-only.js'

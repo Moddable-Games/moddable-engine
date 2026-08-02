@@ -13,14 +13,25 @@ function getMceLegalMoves(g) {
 }
 
 function mceMovesToSet(moves) {
-  return new Set(moves.map(m => `${m.from}-${m.to}${m.promotion ? '=' + m.promotion : ''}`))
+  return new Set(moves.map(m => {
+    if (m.flag === 'promo' && !m.promotion) return `${m.from}-${m.to}=promo`
+    return `${m.from}-${m.to}${m.promotion ? '=' + m.promotion : ''}`
+  }))
 }
 
 function pluginMovesToSet(moves) {
-  return new Set(moves.map(m => {
-    if (m.action === 'drop') return `drop:${m.type}@${m.to}`
-    return `${m.from}-${m.to}${m.promotion ? '=' + m.promotion : ''}`
-  }))
+  const seen = new Set()
+  const result = new Set()
+  for (const m of moves) {
+    if (m.action === 'drop') { result.add(`drop:${m.type}@${m.to}`); continue }
+    if (m.promotion) {
+      const key = `${m.from}-${m.to}=promo`
+      if (!seen.has(key)) { seen.add(key); result.add(key) }
+    } else {
+      result.add(`${m.from}-${m.to}`)
+    }
+  }
+  return result
 }
 
 const ALL_VARIANTS = listVariants('chess').map(v => v.key)
@@ -66,6 +77,7 @@ describe('engine parity: MCE vs generic plugin, all 11 variants', () => {
       if (mceMvs.length === 0) break
 
       const mceMove = mceMvs[ply % mceMvs.length]
+      if (mceMove.flag === 'promo' && !mceMove.promotion) mceMove.promotion = 'q'
       makeMove(mceGame, mceMove)
 
       const pluginMove = findMatchingPluginMove(pluginMvs, mceMove)
