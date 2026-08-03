@@ -251,11 +251,6 @@ export function createPlaySession(options = {}) {
     const gallery = getGalleryIndex() || []
     const pieceResult = attachPieceImages(rendered, gallery)
     const pieceImages = pieceResult.images || {}
-    if (variantCfg.render?.imagePaths) {
-      for (const [fenChar, path] of Object.entries(variantCfg.render.imagePaths)) {
-        pieceImages[fenChar] = path
-      }
-    }
     const svg = renderFromEngine(rendered, {
       pieceImages,
       pieceSurfaceMap: pieceResult.surfaceMap || {},

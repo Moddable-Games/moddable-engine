@@ -34,7 +34,7 @@ export const RULES_BASE = typeof location !== 'undefined' && location.hostname =
 let _galleryIndex = null
 export async function loadGalleryIndex() {
   if (_galleryIndex) return _galleryIndex
-  try { _galleryIndex = await fetch('../pieces/gallery-index.json').then(r => r.json()) }
+  try { _galleryIndex = await fetch('../pieces/gallery-index.json?v=1.0.8').then(r => r.json()) }
   catch { _galleryIndex = [] }
   return _galleryIndex
 }

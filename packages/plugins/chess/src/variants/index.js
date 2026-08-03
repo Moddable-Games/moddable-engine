@@ -229,7 +229,7 @@ export const duckChess = {
   vocabulary: {
     blocker: { symbols: { '-1': 'D' } },
   },
-  render: { fenMap: { D: 'duck' }, imagePaths: { D: '../pieces/sets/fluent-emoji/duck.svg' } },
+  render: { fenMap: { D: 'duck' } },
 
   moveFilter(moves, state) {
     if (state._blockerPhase) {
