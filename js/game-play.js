@@ -593,46 +593,67 @@ export async function initGamePlay(container, defaults = {}) {
     ? params.variant
     : (variants[0] && variants[0].key)
 
-  const sidebar = document.createElement('aside')
-  sidebar.className = 'game-play-sidebar'
+  const leftSidebar = document.createElement('aside')
+  leftSidebar.className = 'game-play-sidebar game-play-sidebar--left'
 
   const boardArea = document.createElement('div')
   boardArea.className = 'game-play-board'
 
+  const rightSidebar = document.createElement('aside')
+  rightSidebar.className = 'game-play-sidebar game-play-sidebar--right'
+
   const handEl = document.createElement('div')
   handEl.className = 'game-play-hand'
 
-  container.appendChild(sidebar)
+  container.appendChild(leftSidebar)
   container.appendChild(boardArea)
-  container.appendChild(handEl)
+  container.appendChild(rightSidebar)
 
-  const variantSelect = buildSelect(sidebar, 'Variant', variants.map(v => ({ value: v.key, label: v.label })), variant)
-  const opponentSelect = buildSelect(sidebar, 'Opponent', [
+  const variantSelect = buildSelect(leftSidebar, 'Variant', variants.map(v => ({ value: v.key, label: v.label })), variant)
+  const opponentSelect = buildSelect(leftSidebar, 'Opponent', [
     { value: 'human', label: 'Human vs Human' },
     { value: 'ai', label: 'vs AI' },
   ], params.opponent === 'ai' ? 'ai' : 'human')
-  const difficultySelect = buildSelect(sidebar, 'Difficulty', DIFFICULTIES.map(d => ({ value: d, label: d[0].toUpperCase() + d.slice(1) })), params.difficulty || 'medium')
-  const colourSelect = buildSelect(sidebar, 'Play as', [
+  const difficultySelect = buildSelect(leftSidebar, 'Difficulty', DIFFICULTIES.map(d => ({ value: d, label: d[0].toUpperCase() + d.slice(1) })), params.difficulty || 'medium')
+  const colourSelect = buildSelect(leftSidebar, 'Play as', [
     { value: '0', label: 'White' },
     { value: '1', label: 'Black' },
   ], params.colour || '0')
-  const themeSelect = buildSelect(sidebar, 'Theme', Object.entries(BOARD_THEMES).map(([k, v]) => ({ value: k, label: v.label })), params.theme || 'classic')
+  const themeSelect = buildSelect(leftSidebar, 'Theme', Object.entries(BOARD_THEMES).map(([k, v]) => ({ value: k, label: v.label })), params.theme || 'classic')
 
   const galleryEntries = (getGalleryIndex() || [])
     .filter(s => s.id && s.label)
     .map(s => ({ value: s.id, label: s.label || s.id }))
   const pieceSetOptions = [{ value: 'auto', label: 'Auto (from rules)' }, ...galleryEntries]
-  const pieceSetSelect = buildSelect(sidebar, 'Pieces', pieceSetOptions, params.pieces || 'auto')
-  const animStyleSelect = buildSelect(sidebar, 'Animation', ANIM_THEME.styles.map(s => ({ value: s, label: s[0].toUpperCase() + s.slice(1) })), params.animStyle || ANIM_THEME.defaultStyle)
-  const animSpeedSelect = buildSelect(sidebar, 'Speed', Object.keys(ANIM_THEME.speeds).map(s => ({ value: s, label: s[0].toUpperCase() + s.slice(1) })), params.animSpeed || ANIM_THEME.defaultSpeed)
+  const pieceSetSelect = buildSelect(leftSidebar, 'Pieces', pieceSetOptions, params.pieces || 'auto')
+  const animStyleSelect = buildSelect(leftSidebar, 'Animation', ANIM_THEME.styles.map(s => ({ value: s, label: s[0].toUpperCase() + s.slice(1) })), params.animStyle || ANIM_THEME.defaultStyle)
+  const animSpeedSelect = buildSelect(leftSidebar, 'Speed', Object.keys(ANIM_THEME.speeds).map(s => ({ value: s, label: s[0].toUpperCase() + s.slice(1) })), params.animSpeed || ANIM_THEME.defaultSpeed)
 
   let engineSelect = null
   if (family === 'chess') {
-    engineSelect = buildSelect(sidebar, 'Engine', [
+    engineSelect = buildSelect(leftSidebar, 'Engine', [
       { value: 'generic', label: 'Generic' },
       { value: 'mce', label: 'MCE' },
     ], 'generic')
   }
+
+  const statusEl = document.createElement('div')
+  statusEl.className = 'game-play-status'
+  rightSidebar.appendChild(statusEl)
+
+  const actionsEl = document.createElement('div')
+  actionsEl.className = 'game-play-actions'
+  rightSidebar.appendChild(actionsEl)
+
+  rightSidebar.appendChild(handEl)
+
+  const historyEl = document.createElement('div')
+  historyEl.className = 'game-play-history'
+  rightSidebar.appendChild(historyEl)
+
+  const capturedEl = document.createElement('div')
+  capturedEl.className = 'game-play-captured'
+  rightSidebar.appendChild(capturedEl)
 
   const controlsEl = document.createElement('div')
   controlsEl.className = 'game-play-controls'
@@ -644,27 +665,7 @@ export async function initGamePlay(container, defaults = {}) {
   fullscreenBtn.textContent = 'Fullscreen'
   controlsEl.appendChild(flipBtn)
   controlsEl.appendChild(fullscreenBtn)
-  sidebar.appendChild(controlsEl)
-
-  const capturedEl = document.createElement('div')
-  capturedEl.className = 'game-play-captured'
-  sidebar.appendChild(capturedEl)
-
-  const rulesEl = document.createElement('div')
-  rulesEl.className = 'game-play-rules'
-  sidebar.appendChild(rulesEl)
-
-  const statusEl = document.createElement('div')
-  statusEl.className = 'game-play-status'
-  sidebar.appendChild(statusEl)
-
-  const actionsEl = document.createElement('div')
-  actionsEl.className = 'game-play-actions'
-  sidebar.appendChild(actionsEl)
-
-  const historyEl = document.createElement('div')
-  historyEl.className = 'game-play-history'
-  sidebar.appendChild(historyEl)
+  rightSidebar.appendChild(controlsEl)
 
   const exportEl = document.createElement('div')
   exportEl.className = 'game-play-export'
@@ -675,7 +676,11 @@ export async function initGamePlay(container, defaults = {}) {
     if (session) navigator.clipboard.writeText(session.fen).then(() => { fenBtn.textContent = 'Copied'; setTimeout(() => { fenBtn.textContent = 'Copy FEN' }, 1500) })
   })
   exportEl.appendChild(fenBtn)
-  sidebar.appendChild(exportEl)
+  rightSidebar.appendChild(exportEl)
+
+  const rulesEl = document.createElement('div')
+  rulesEl.className = 'game-play-rules'
+  rightSidebar.appendChild(rulesEl)
 
   let session = null
 
