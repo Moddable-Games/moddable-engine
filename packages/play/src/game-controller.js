@@ -334,6 +334,9 @@ export function createGameController(game, opts = {}) {
   }
 
   function checkGameEnd() {
+    const moves = getLegalMoves()
+    if (moves.length > 0 && moves.every(m => m.action && m.from === undefined)) return
+
     const plugin = findPlugin()
     if (plugin && plugin.checkWin) {
       const outcome = plugin.checkWin(game.getState(plugin.sliceName), game.store.getAll())
@@ -344,7 +347,6 @@ export function createGameController(game, opts = {}) {
       }
     }
 
-    const moves = getLegalMoves()
     if (moves.length === 0) {
       gameOver = true
       if (onGameEnd) onGameEnd('draw')
