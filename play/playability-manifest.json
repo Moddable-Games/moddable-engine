@@ -4,18 +4,19 @@
     "variant": "absorptionChess",
     "label": "Absorption Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "slug": "absorption"
   },
   {
     "family": "chess",
-    "variant": "almostChess",
+    "variant": "almost-chess",
     "label": "Almost Chess",
     "group": "Other",
     "playable": true
   },
   {
     "family": "chess",
-    "variant": "amazonChess",
+    "variant": "amazon-chess",
     "label": "Amazon Chess",
     "group": "Other",
     "playable": true
@@ -25,7 +26,8 @@
     "variant": "andernachChess",
     "label": "Andernach Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "slug": "andernach"
   },
   {
     "family": "chess",
@@ -37,7 +39,7 @@
   {
     "family": "chess",
     "variant": "atomic",
-    "label": "Atomic",
+    "label": "Atomic Chess",
     "group": "Other",
     "playable": true
   },
@@ -46,26 +48,29 @@
     "variant": "benedictChess",
     "label": "Benedict Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "slug": "benedict"
   },
   {
     "family": "chess",
     "variant": "berolinaChess",
     "label": "Berolina Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "slug": "berolina-chess"
   },
   {
     "family": "chess",
     "variant": "berserkChess",
     "label": "Berserk Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "slug": "berserk"
   },
   {
     "family": "chess",
-    "variant": "birdsChess",
-    "label": "Birds Chess",
+    "variant": "birds-chess",
+    "label": "Bird's Chess",
     "group": "Other",
     "playable": true
   },
@@ -79,20 +84,20 @@
   {
     "family": "chess",
     "variant": "capablanca",
-    "label": "Capablanca",
-    "group": "Large Boards",
-    "playable": true
-  },
-  {
-    "family": "chess",
-    "variant": "carrera",
-    "label": "Carrera",
+    "label": "Capablanca Chess",
     "group": "Other",
     "playable": true
   },
   {
     "family": "chess",
-    "variant": "chancellorChess",
+    "variant": "carrera",
+    "label": "Carrera's Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "chancellor-chess",
     "label": "Chancellor Chess",
     "group": "Other",
     "playable": true
@@ -109,14 +114,16 @@
     "variant": "checklessChess",
     "label": "Checkless Chess",
     "group": "Alternate Rules",
-    "playable": true
+    "playable": true,
+    "slug": "checkless"
   },
   {
     "family": "chess",
     "variant": "chess960",
-    "label": "Chess960",
+    "label": "Fischer Random (Chess960)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "slug": "fischer-random"
   },
   {
     "family": "chess",
@@ -135,7 +142,7 @@
   {
     "family": "chess",
     "variant": "courier",
-    "label": "Courier",
+    "label": "Courier Chess",
     "group": "Other",
     "playable": true
   },
@@ -148,7 +155,7 @@
   },
   {
     "family": "chess",
-    "variant": "cylinderChess",
+    "variant": "cylinder-chess",
     "label": "Cylinder Chess",
     "group": "Other",
     "playable": true
@@ -158,11 +165,12 @@
     "variant": "darkChess",
     "label": "Dark Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "slug": "dark-chess"
   },
   {
     "family": "chess",
-    "variant": "dianaChess",
+    "variant": "diana",
     "label": "Diana Chess",
     "group": "Other",
     "playable": true
@@ -172,32 +180,36 @@
     "variant": "diceChess",
     "label": "Dice Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "slug": "dice-chess"
   },
   {
     "family": "chess",
     "variant": "displacementChess",
     "label": "Displacement Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "slug": "displacement-chess"
   },
   {
     "family": "chess",
     "variant": "duckChess",
     "label": "Duck Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "slug": "duck-chess"
   },
   {
     "family": "chess",
     "variant": "einsteinChess",
     "label": "Einstein Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "slug": "einstein-chess"
   },
   {
     "family": "chess",
-    "variant": "endgameChess",
+    "variant": "endgame-chess",
     "label": "Endgame Chess",
     "group": "Other",
     "playable": true
@@ -214,14 +226,16 @@
     "variant": "fiveCheck",
     "label": "Five-Check",
     "group": "Tactical",
-    "playable": true
+    "playable": true,
+    "slug": "five-check"
   },
   {
     "family": "chess",
     "variant": "fogOfWar",
-    "label": "Fog Of War",
+    "label": "Fog of War Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "slug": "fog-of-war"
   },
   {
     "family": "chess",
@@ -233,7 +247,7 @@
   {
     "family": "chess",
     "variant": "grand",
-    "label": "Grand",
+    "label": "Grand Chess",
     "group": "Other",
     "playable": true
   },
@@ -242,11 +256,12 @@
     "variant": "gridChess",
     "label": "Grid Chess",
     "group": "Alternate Rules",
-    "playable": true
+    "playable": true,
+    "slug": "grid-chess"
   },
   {
     "family": "chess",
-    "variant": "halfChess",
+    "variant": "half-chess",
     "label": "Half Chess",
     "group": "Other",
     "playable": true
@@ -260,8 +275,8 @@
   },
   {
     "family": "chess",
-    "variant": "hoppelPoppel",
-    "label": "Hoppel Poppel",
+    "variant": "hoppel-poppel",
+    "label": "Hoppel-Poppel",
     "group": "Other",
     "playable": true
   },
@@ -277,12 +292,13 @@
     "variant": "immunizationChess",
     "label": "Immunization Chess",
     "group": "Alternate Rules",
-    "playable": true
+    "playable": true,
+    "slug": "immunization-chess"
   },
   {
     "family": "chess",
     "variant": "janus",
-    "label": "Janus",
+    "label": "Janus Chess",
     "group": "Other",
     "playable": true
   },
@@ -291,7 +307,8 @@
     "variant": "kingOfTheHill",
     "label": "King of the Hill",
     "group": "Tactical",
-    "playable": true
+    "playable": true,
+    "slug": "king-of-the-hill"
   },
   {
     "family": "chess",
@@ -305,13 +322,14 @@
     "variant": "leganChess",
     "label": "Legan Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "slug": "legan-chess"
   },
   {
     "family": "chess",
-    "variant": "losAlamos",
-    "label": "Los Alamos (6x6)",
-    "group": "Small Boards",
+    "variant": "los-alamos",
+    "label": "Los Alamos",
+    "group": "Other",
     "playable": true
   },
   {
@@ -319,12 +337,13 @@
     "variant": "madrasiChess",
     "label": "Madrasi Chess",
     "group": "Alternate Rules",
-    "playable": true
+    "playable": true,
+    "slug": "madrasi"
   },
   {
     "family": "chess",
     "variant": "maharaja",
-    "label": "Maharaja",
+    "label": "Maharaja & Sepoys",
     "group": "Other",
     "playable": true
   },
@@ -345,7 +364,7 @@
   {
     "family": "chess",
     "variant": "marseillais",
-    "label": "Marseillais",
+    "label": "Marseillais Chess",
     "group": "Other",
     "playable": true
   },
@@ -354,7 +373,8 @@
     "variant": "medusaChess",
     "label": "Medusa Chess",
     "group": "Alternate Rules",
-    "playable": true
+    "playable": true,
+    "slug": "medusa-chess"
   },
   {
     "family": "chess",
@@ -368,20 +388,21 @@
     "variant": "monsterChess",
     "label": "Monster Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "slug": "monster-chess"
   },
   {
     "family": "chess",
     "variant": "nightrider",
-    "label": "Nightrider",
+    "label": "Standard Nightrider Chess",
     "group": "Other",
     "playable": true
   },
   {
     "family": "chess",
-    "variant": "noCastling",
-    "label": "No Castling",
-    "group": "Classic",
+    "variant": "no-castling",
+    "label": "No Castling Chess",
+    "group": "Other",
     "playable": true
   },
   {
@@ -389,11 +410,12 @@
     "variant": "noRetreat",
     "label": "No Retreat",
     "group": "Alternate Rules",
-    "playable": true
+    "playable": true,
+    "slug": "no-retreat"
   },
   {
     "family": "chess",
-    "variant": "oblongChess",
+    "variant": "oblong-chess",
     "label": "Oblong Chess",
     "group": "Other",
     "playable": true
@@ -407,14 +429,14 @@
   },
   {
     "family": "chess",
-    "variant": "ordaChess",
+    "variant": "orda-chess",
     "label": "Orda Chess",
     "group": "Other",
     "playable": true
   },
   {
     "family": "chess",
-    "variant": "ordaMirror",
+    "variant": "orda-mirror",
     "label": "Orda Mirror",
     "group": "Other",
     "playable": true
@@ -424,25 +446,26 @@
     "variant": "patrolChess",
     "label": "Patrol Chess",
     "group": "Alternate Rules",
-    "playable": true
+    "playable": true,
+    "slug": "patrol"
   },
   {
     "family": "chess",
-    "variant": "pawnsOnly",
+    "variant": "pawns-only",
     "label": "Pawns Only",
     "group": "Other",
     "playable": true
   },
   {
     "family": "chess",
-    "variant": "peasantsRevolt",
-    "label": "Peasants Revolt",
+    "variant": "peasants-revolt",
+    "label": "Peasants' Revolt",
     "group": "Other",
     "playable": true
   },
   {
     "family": "chess",
-    "variant": "pettyChess",
+    "variant": "petty",
     "label": "Petty Chess",
     "group": "Other",
     "playable": true
@@ -452,7 +475,8 @@
     "variant": "poisonChess",
     "label": "Poison Chess",
     "group": "Tactical",
-    "playable": true
+    "playable": true,
+    "slug": "poison-chess"
   },
   {
     "family": "chess",
@@ -463,7 +487,7 @@
   },
   {
     "family": "chess",
-    "variant": "progressiveItalian",
+    "variant": "progressive-italian",
     "label": "Progressive Italian",
     "group": "Other",
     "playable": true
@@ -473,19 +497,21 @@
     "variant": "racingKings",
     "label": "Racing Kings",
     "group": "Alternate Rules",
-    "playable": true
+    "playable": true,
+    "slug": "racing-kings"
   },
   {
     "family": "chess",
     "variant": "recruitmentChess",
     "label": "Recruitment Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "slug": "recruitment-chess"
   },
   {
     "family": "chess",
     "variant": "rifle",
-    "label": "Rifle",
+    "label": "Rifle Chess",
     "group": "Other",
     "playable": true
   },
@@ -505,7 +531,7 @@
   },
   {
     "family": "chess",
-    "variant": "shatranjKamil",
+    "variant": "shatranj-kamil",
     "label": "Shatranj Kamil",
     "group": "Other",
     "playable": true
@@ -513,9 +539,10 @@
   {
     "family": "chess",
     "variant": "singleCheck",
-    "label": "Single Check",
+    "label": "Single-Check",
     "group": "Tactical",
-    "playable": true
+    "playable": true,
+    "slug": "single-check"
   },
   {
     "family": "chess",
@@ -526,15 +553,15 @@
   },
   {
     "family": "chess",
-    "variant": "stalemateWins",
+    "variant": "stalemate-wins",
     "label": "Stalemate Wins",
-    "group": "Alternate Rules",
+    "group": "Other",
     "playable": true
   },
   {
     "family": "chess",
     "variant": "standard",
-    "label": "Standard",
+    "label": "Standard Chess",
     "group": "Classic",
     "playable": true
   },
@@ -543,54 +570,58 @@
     "variant": "suicideChess",
     "label": "Suicide Chess",
     "group": "Alternate Rules",
-    "playable": true
+    "playable": true,
+    "slug": "suicide-chess"
   },
   {
     "family": "chess",
     "variant": "teleportChess",
-    "label": "Teleport Chess",
+    "label": "Teleportation Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "slug": "teleport-chess"
   },
   {
     "family": "chess",
     "variant": "threeCheck",
     "label": "Three-Check",
     "group": "Tactical",
-    "playable": true
+    "playable": true,
+    "slug": "three-check"
   },
   {
     "family": "chess",
-    "variant": "toroidalChess",
-    "label": "Toroidal Chess",
+    "variant": "toroidal-chess",
+    "label": "Gadsden's Toroidal Chess",
     "group": "Other",
     "playable": true
   },
   {
     "family": "chess",
     "variant": "torpedo",
-    "label": "Torpedo",
-    "group": "Classic",
+    "label": "Torpedo Chess",
+    "group": "Other",
     "playable": true
   },
   {
     "family": "chess",
-    "variant": "upsideDown",
-    "label": "Upside Down",
+    "variant": "upside-down",
+    "label": "Upside-Down",
     "group": "Other",
     "playable": true
   },
   {
     "family": "chess",
     "variant": "weakChess",
-    "label": "Weak Chess",
+    "label": "Weak!",
     "group": "Alternate Rules",
-    "playable": true
+    "playable": true,
+    "slug": "weak"
   },
   {
     "family": "chess",
     "variant": "wildebeest",
-    "label": "Wildebeest",
+    "label": "Standard Wildebeest Chess",
     "group": "Other",
     "playable": true
   },
@@ -688,14 +719,14 @@
   {
     "family": "go",
     "variant": "13x13",
-    "label": "Go 13×13",
+    "label": "13×13 Go",
     "group": "Standard",
     "playable": true
   },
   {
     "family": "go",
     "variant": "9x9",
-    "label": "Go 9×9",
+    "label": "9×9 Go",
     "group": "Standard",
     "playable": true
   },
@@ -730,7 +761,7 @@
   {
     "family": "go",
     "variant": "standard",
-    "label": "Go 19×19",
+    "label": "Standard Go (19×19)",
     "group": "Standard",
     "playable": true
   },

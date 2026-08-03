@@ -42,6 +42,7 @@
  */
 import { createGameForFamily, getFamilies } from '../src/play.js'
 import { listVariants, getVariantConfig } from '../src/variant-registry.js'
+import '../test-helpers/setup-rules-reader.js'
 import '../../plugins/chess/index.js'
 import '../../plugins/go/index.js'
 import '../../plugins/draughts/index.js'

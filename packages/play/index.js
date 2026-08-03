@@ -10,9 +10,12 @@ export {
   getVariantKeys,
   getVariantGroups,
   getRegisteredFamilies,
+  getManifest,
   hasVariant,
   clearVariants,
   listVariants,
+  invalidateManifest,
+  setVariantSources,
 } from './src/variant-registry.js'
 
 export {

@@ -14,6 +14,9 @@ import { writeFileSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+// Wire the rules reader before plugin registration
+import '../packages/play/test-helpers/setup-rules-reader.js'
+
 // Side-effect registration of all plugin families
 import '../packages/plugins/chess/index.js'
 import '../packages/plugins/go/index.js'
@@ -116,13 +119,15 @@ for (const family of FAMILIES) {
     const playable = runGame(family, key)
     if (playable) familyPlayable++
 
-    manifest.push({
+    const entry = {
       family,
       variant: key,
       label: v.label === key ? humanize(key) : v.label,
       group: v.group,
       playable,
-    })
+    }
+    if (v.slug && v.slug !== key) entry.slug = v.slug
+    manifest.push(entry)
   }
 
   totalVariants += variants.length

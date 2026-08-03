@@ -26,18 +26,23 @@ import { moveToSAN } from '../packages/plugins/chess/src/san.js'
 
 const DIFFICULTIES = ['beginner', 'easy', 'medium', 'hard', 'expert']
 
-function buildDefinitionFromResolved(family, variant, resolved, registryCfg) {
-  const topo = resolved.topology || {}
-  const topology = topo.type ? { type: topo.type, rows: topo.rows, cols: topo.cols } : undefined
-  const players = resolved.players || ['white', 'black']
-  const setup = resolved.setup || undefined
+const STRUCTURAL_KEYS = new Set(['topology', 'players', 'meta', 'surface', 'render', 'components'])
+const REGISTRY_PRESENTATION_KEYS = new Set(['key', 'label', 'title', 'group', 'description', 'rule', 'board', 'extends', 'hidden', 'playerNames', 'definition', 'rows', 'cols', 'size', 'notation', 'topology', 'players'])
 
-  const PLAY_ONLY_KEYS = new Set(['key', 'label', 'title', 'group', 'description', 'rule', 'board', 'extends', 'hidden', 'render', 'playerNames', 'definition', 'topology', 'rows', 'cols', 'size', 'players'])
+function buildDefinitionFromResolved(family, variant, resolved, registryCfg) {
+  const registryTopo = registryCfg.topology || {}
+  const topo = resolved.topology || {}
+  const topology = topo.type ? { ...registryTopo, ...topo } : undefined
+  const players = resolved.players || ['white', 'black']
+
   const pluginConfig = {}
-  if (setup) pluginConfig.setup = setup
   for (const [k, v] of Object.entries(registryCfg)) {
-    if (PLAY_ONLY_KEYS.has(k)) continue
+    if (REGISTRY_PRESENTATION_KEYS.has(k)) continue
     pluginConfig[k] = v
+  }
+  for (const [k, v] of Object.entries(resolved)) {
+    if (STRUCTURAL_KEYS.has(k)) continue
+    if (v !== undefined) pluginConfig[k] = v
   }
 
   const def = { title: resolved.meta?.label || variant, slug: variant, parent: family, engine: { players, plugins: { [family]: pluginConfig } } }
@@ -45,15 +50,20 @@ function buildDefinitionFromResolved(family, variant, resolved, registryCfg) {
   return def
 }
 
-async function resolveBoard(family, variantConfig) {
+async function resolveBoard(family, variantConfig, variantKey, slugOverride) {
   const basePath = RULES_BASE + 'games/'
-  const variantSlug = variantConfig.key || 'standard'
+  const variantSlug = slugOverride || variantConfig.slug || variantKey || 'standard'
   const familyPath = family + '/content/rulebook.md'
   const variantPath = family + '/content/variants/' + variantSlug + '.md'
 
   const [familyMd, variantMd] = await Promise.all([
     fetch(basePath + familyPath).then(r => r.text()),
-    fetch(basePath + variantPath).then(r => r.text()).catch(() => ''),
+    fetch(basePath + variantPath).then(r => r.ok ? r.text() : '').then(md => {
+      if (!md && variantSlug !== 'standard') {
+        console.error(`[resolveBoard] No rulebook found for ${family}/${variantSlug} — check that ${variantSlug}.md exists`)
+      }
+      return md
+    }),
   ])
 
   const familyFm = parseFrontmatter(familyMd).meta || {}
@@ -121,7 +131,9 @@ export function createPlaySession(options = {}) {
     captureHistory = []
 
     const variantCfg = getVariantConfig(family, variant) || {}
-    resolvedBoard = await resolveBoard(family, variantCfg)
+    const variantEntry = variantsForFamily(family).find(v => v.key === variant)
+    const slug = variantEntry?.slug || variant
+    resolvedBoard = await resolveBoard(family, variantCfg, variant, slug)
 
     const frontmatterDef = buildDefinitionFromResolved(family, variant, resolvedBoard, variantCfg)
     game = createGameForFamily(family, { variant, definition: frontmatterDef })
@@ -831,9 +843,9 @@ export async function initGamePlay(container, defaults = {}) {
 
   function variantsForFamily(f) {
     const playable = getPlayableVariants(f)
-    if (playable.length > 0) return playable.map(e => ({ key: e.variant, label: e.label, group: e.group, playable: true }))
+    if (playable.length > 0) return playable.map(e => ({ key: e.variant, slug: e.slug || e.variant, label: e.label, group: e.group, playable: true }))
     const registry = listVariants(f)
-    return registry.map(v => ({ key: v.key, label: v.label, group: v.group, playable: true }))
+    return registry.map(v => ({ key: v.key, slug: v.slug || v.key, label: v.label, group: v.group, playable: true }))
   }
 
   function pickVariant(f, requested) {

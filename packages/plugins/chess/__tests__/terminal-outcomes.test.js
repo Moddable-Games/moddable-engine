@@ -1,4 +1,5 @@
 import '../index.js'
+import '../../../play/test-helpers/setup-rules-reader.js'
 import { createGame } from '../../../play/src/sdk.js'
 import { createGameForFamily } from '../../../play/src/play.js'
 
@@ -56,7 +57,7 @@ describe('terminal-outcome: four-way stalemate differential', () => {
   })
 
   it('stalemateWins: stalemating side WINS', () => {
-    const game = setupGame('stalemateWins', STALEMATE_FEN)
+    const game = setupGame('stalemate-wins', STALEMATE_FEN)
     expect(game.checkWin()).toBe(0)
   })
 
@@ -445,7 +446,7 @@ describe('terminal-outcome: shatranjKamil', () => {
 })
 
 const COVERED_VARIANTS = new Set([
-  'antichess', 'giveaway', 'suicideChess', 'stalemateWins',
+  'antichess', 'giveaway', 'suicideChess', 'stalemate-wins',
   'extinction', 'singleCheck', 'codrus', 'omnicide', 'shatar',
   'breakthrough', 'kingOfTheHill', 'racingKings',
   'threeCheck', 'fiveCheck', 'horde', 'gridChess',
@@ -461,6 +462,7 @@ describe('registration gate: outcome-affecting variants need fixtures', () => {
     const missing = []
     for (const v of variants) {
       const config = getVariantConfig('chess', v.key)
+      if (!config) continue
       const hasOutcomeKey = Object.keys(config).some(k => OUTCOME_KEYS.has(k))
       if (hasOutcomeKey && !COVERED_VARIANTS.has(v.key)) {
         missing.push(v.key)

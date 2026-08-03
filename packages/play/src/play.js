@@ -1,7 +1,10 @@
 import { createGameFromDefinition } from '../../game/src/create-game.js'
 import { produce } from '../../schema/src/produce.js'
-import { getVariantConfig, hasVariant } from './variant-registry.js'
+import { getVariantConfig, hasVariant, setVariantSources as _setVariantSources } from './variant-registry.js'
 import { definitionFromVariant } from './variant-definition.js'
+import { parseFrontmatter } from '../../schema/src/parse-frontmatter.js'
+import { resolve as cascadeResolve } from '../../schema/src/cascade-resolver.js'
+import { resolveSurface } from '../../schema/src/surfaces.js'
 import { createGridTopology } from '../../topologies/grid/src/topology-grid.js'
 import { createHexTopology } from '../../topologies/hex/src/topology-hex.js'
 import { createTrackTopology } from '../../topologies/track/src/topology-track.js'
@@ -148,16 +151,89 @@ export function createGameForFamily(family, opts = {}) {
   }
 }
 
+let _readFile = null
+
+export function setRulesReader(readFn, listFn) {
+  _readFile = readFn
+  if (listFn) {
+    _setVariantSources(listFn, readFn)
+  }
+}
+
+const STRUCTURAL_KEYS = new Set(['topology', 'players', 'meta', 'surface', 'render', 'components'])
+
+function resolveFromDisk(family, variant) {
+  if (!_readFile) return null
+
+  let familyMd, variantMd
+  try { familyMd = _readFile(family, 'rulebook') } catch { return null }
+  try { variantMd = _readFile(family, variant) } catch { variantMd = '' }
+
+  const familyFm = parseFrontmatter(familyMd).meta || {}
+  const variantFm = variantMd ? (parseFrontmatter(variantMd).meta || {}) : {}
+  const surfaceRef = variantFm.engine?.surface || familyFm.engine?.surface
+  const surface = resolveSurface(surfaceRef)
+  const { resolved } = cascadeResolve({
+    surface,
+    family: { engine: familyFm.engine || {}, meta: { label: familyFm.title || '' } },
+    variant: { engine: variantFm.engine || {}, meta: { label: variantFm.title || '' } },
+  })
+  return resolved
+}
+
 function resolveMeta(family, variant) {
-  if (variant && hasVariant(family, variant)) {
-    const config = getVariantConfig(family, variant)
+  const registryConfig = variant && hasVariant(family, variant) ? getVariantConfig(family, variant) : null
+
+  if (registryConfig) {
+    const resolved = resolveFromDisk(family, variant)
+    if (resolved) {
+      const topo = resolved.topology || {}
+      const players = resolved.players || ['white', 'black']
+      const pluginConfig = {}
+      for (const [k, v] of Object.entries(resolved)) {
+        if (STRUCTURAL_KEYS.has(k)) continue
+        if (v !== undefined) pluginConfig[k] = v
+      }
+      for (const [k, v] of Object.entries(registryConfig)) {
+        if (k === 'key' || STRUCTURAL_KEYS.has(k)) continue
+        pluginConfig[k] = v
+      }
+      const def = {
+        title: resolved.meta?.label || variant,
+        slug: variant,
+        parent: family,
+        engine: { players, plugins: { [family]: pluginConfig } },
+      }
+      if (topo.type) def.engine.topology = { ...topo }
+      return def
+    }
     const defaults = DEFAULT_DEFINITIONS[family]
     const base = defaults ? (defaults.default.engine || {}) : {}
-    return definitionFromVariant(family, config, {
+    return definitionFromVariant(family, registryConfig, {
       topology: base.topology || {},
       players: base.players,
     })
   }
+
+  const resolved = variant ? resolveFromDisk(family, variant) : null
+  if (resolved) {
+    const topo = resolved.topology || {}
+    const players = resolved.players || ['white', 'black']
+    const pluginConfig = {}
+    for (const [k, v] of Object.entries(resolved)) {
+      if (STRUCTURAL_KEYS.has(k)) continue
+      if (v !== undefined) pluginConfig[k] = v
+    }
+    const def = {
+      title: resolved.meta?.label || variant,
+      slug: variant,
+      parent: family,
+      engine: { players, plugins: { [family]: pluginConfig } },
+    }
+    if (topo.type) def.engine.topology = { ...topo }
+    return def
+  }
+
   return getDefaultMeta(family, variant)
 }
 

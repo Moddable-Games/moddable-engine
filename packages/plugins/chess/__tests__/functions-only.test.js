@@ -5,25 +5,18 @@ import { listVariants, getVariantConfig } from '../../../play/src/variant-regist
 // Remove entries as they migrate to frontmatter-only data.
 // The allow-list shrinking to empty is the migration's progress bar.
 const LEGACY_ALLOW = new Set([
-  'standard', 'noCastling', 'torpedo', 'threeCheck', 'fiveCheck',
-  'kingOfTheHill', 'racingKings', 'antichess', 'capablanca',
-  'losAlamos', 'horde', 'stalemateWins', 'checklessChess',
+  'standard', 'threeCheck', 'fiveCheck',
+  'kingOfTheHill', 'racingKings', 'antichess', 'horde', 'checklessChess',
   'extinction', 'singleCheck', 'codrus', 'omnicide',
   'breakthrough', 'shatar',
   'giveaway', 'suicideChess', 'noRetreat', 'patrolChess', 'makpong',
   'gridChess', 'madrasiChess', 'weakChess',
   'immunizationChess', 'poisonChess', 'medusaChess',
-  'benedictChess',
-  'monsterChess',
-  'chigorin', 'endgameChess', 'pawnsOnly', 'peasantsRevolt',
-  'halfChess', 'minichess', 'dianaChess', 'pettyChess',
-  'almostChess', 'amazonChess', 'grand', 'knightmate', 'maharaja',
-  'hoppelPoppel', 'berolinaChess', 'leganChess',
-  'atomic', 'shatranj', 'chaturanga', 'ordaChess',
-  'makruk', 'courier', 'toroidalChess', 'upsideDown', 'chess960',
+  'benedictChess', 'monsterChess', 'maharaja',
+  'atomic', 'shatranj', 'chaturanga', 'chess960',
   'diceChess', 'crazyhouse', 'darkChess', 'fogOfWar', 'duckChess', 'sittuyin',
-  'ordaMirror', 'janus', 'chancellorChess', 'carrera', 'birdsChess',
-  'wildebeest', 'shatranjKamil', 'nightrider', 'hexapawn', 'oblongChess',
+  'hexapawn',
+  'berolinaChess', 'leganChess', 'makruk',
 ])
 
 const DATA_KEYS = new Set([
