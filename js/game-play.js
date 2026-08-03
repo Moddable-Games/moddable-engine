@@ -320,8 +320,8 @@ export function createPlaySession(options = {}) {
   function renderHand(slice, state) {
     if (!handContainer) return
     const hasHands = slice.hands && slice.hands.some(h => h && h.length > 0)
-    const hasPlacement = slice._phase === 'placement' && slice._toPlace
-    if (!hasHands && !hasPlacement) return
+    const hasPlacement = slice._phase === 'placement' && slice._toPlace && slice._toPlace.some(a => a && a.length > 0)
+    if (!hasHands && !hasPlacement) { handContainer.innerHTML = ''; return }
     const names = playerNames()
     const currentIdx = names.indexOf(game.currentPlayer())
     const plugin = pluginFor()
