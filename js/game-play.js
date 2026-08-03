@@ -16,7 +16,7 @@ import '../packages/plugins/draughts/index.js'
 import '../packages/plugins/xiangqi/index.js'
 import '../packages/plugins/shogi/index.js'
 
-import { BOARD_THEMES, RULES_BASE, ANIM_THEME, CAPTURE_BURST_THEME, loadGalleryIndex, getGalleryIndex, loadVariantManifest, getManifestVariants } from './play-shared.js'
+import { BOARD_THEMES, RULES_BASE, ANIM_THEME, CAPTURE_BURST_THEME, PIECE_STYLES, loadGalleryIndex, getGalleryIndex, loadVariantManifest, getManifestVariants } from './play-shared.js'
 import { createCellAddressing } from './play-cells.js'
 import { paintHighlight, paintIndicator, paintFog, paintEffect, createOverlay } from './play-overlays.js'
 import { bindBoardInteraction } from './play-interaction.js'
@@ -96,6 +96,7 @@ export function createPlaySession(options = {}) {
   let flipped = false
   let currentAnimStyle = options.animStyle || ANIM_THEME.defaultStyle
   let currentAnimSpeed = options.animSpeed || ANIM_THEME.defaultSpeed
+  let currentPieceStyle = options.pieceStyle || 'auto'
   let resolvedBoard = null
   let cells = null
   let moveHistory = []
@@ -285,10 +286,14 @@ export function createPlaySession(options = {}) {
     const gallery = getGalleryIndex() || []
     const pieceResult = attachPieceImages(rendered, gallery)
     const pieceImages = pieceResult.images || {}
+    const style = PIECE_STYLES[currentPieceStyle]
+    if (style && style.light) {
+      rendered.pieces = { ...rendered.pieces, borders: { white: style.light.fill, black: style.dark.fill } }
+    }
     const svg = renderFromEngine(rendered, {
       pieceImages,
       pieceSurfaceMap: pieceResult.surfaceMap || {},
-      pieceSurface: pieceResult.surface || null,
+      pieceSurface: style && style.light ? { owners: { white: style.light, black: style.dark } } : (pieceResult.surface || null),
     })
 
     if (!svg) return
@@ -296,6 +301,9 @@ export function createPlaySession(options = {}) {
 
     const svgEl = container.querySelector('svg')
     if (svgEl) {
+      svgEl.removeAttribute('width')
+      svgEl.removeAttribute('height')
+      svgEl.style.transform = flipped ? 'rotate(180deg)' : ''
       const theme = BOARD_THEMES[currentTheme] || BOARD_THEMES.classic
       const overlay = createOverlay()
 
@@ -710,6 +718,9 @@ export function createPlaySession(options = {}) {
     setPieceSet(next) {
       currentPieceSet = next; draw()
     },
+    setPieceStyle(next) {
+      if (PIECE_STYLES[next]) { currentPieceStyle = next; draw() }
+    },
     setAnimStyle(next) {
       if (ANIM_THEME.styles.includes(next)) currentAnimStyle = next
     },
@@ -718,6 +729,7 @@ export function createPlaySession(options = {}) {
     },
     flip() {
       flipped = !flipped
+      cells.setFlipped(flipped)
       if (ctrl) ctrl.setFlipped(flipped)
     },
     markDead: toggleDead,
@@ -729,7 +741,7 @@ export function createPlaySession(options = {}) {
 export async function initGamePlay(container, defaults = {}) {
   const params = parseEmbedParams(location.search, { family: 'go', ...defaults })
   const family = params.family
-  await loadVariantManifest()
+  await Promise.all([loadVariantManifest(), loadGalleryIndex()])
   const registryVariants = listVariants(family)
   const registeredKeys = new Set(registryVariants.map(v => v.key))
   const manifestVariants = getManifestVariants(family, registeredKeys)
@@ -771,6 +783,7 @@ export async function initGamePlay(container, defaults = {}) {
     .map(s => ({ value: s.id, label: s.label || s.id }))
   const pieceSetOptions = [{ value: 'auto', label: 'Auto (from rules)' }, ...galleryEntries]
   const pieceSetSelect = buildSelect(leftSidebar, 'Pieces', pieceSetOptions, params.pieces || 'auto')
+  const pieceStyleSelect = buildSelect(leftSidebar, 'Piece Colours', Object.entries(PIECE_STYLES).map(([k, v]) => ({ value: k, label: v.label })), params.pieceStyle || 'auto')
   const animStyleSelect = buildSelect(leftSidebar, 'Animation', ANIM_THEME.styles.map(s => ({ value: s, label: s[0].toUpperCase() + s.slice(1) })), params.animStyle || ANIM_THEME.defaultStyle)
   const animSpeedSelect = buildSelect(leftSidebar, 'Speed', Object.keys(ANIM_THEME.speeds).map(s => ({ value: s, label: s[0].toUpperCase() + s.slice(1) })), params.animSpeed || ANIM_THEME.defaultSpeed)
 
@@ -940,6 +953,7 @@ export async function initGamePlay(container, defaults = {}) {
   colourSelect.addEventListener('change', () => restart({ colour: colourSelect.value }))
   themeSelect.addEventListener('change', () => { config.theme = themeSelect.value; session.setTheme(themeSelect.value); updateURL() })
   pieceSetSelect.addEventListener('change', () => restart({ pieceSet: pieceSetSelect.value }))
+  pieceStyleSelect.addEventListener('change', () => { if (session) session.setPieceStyle(pieceStyleSelect.value) })
   animStyleSelect.addEventListener('change', () => { if (session) session.setAnimStyle(animStyleSelect.value) })
   animSpeedSelect.addEventListener('change', () => { if (session) session.setAnimSpeed(animSpeedSelect.value) })
   flipBtn.addEventListener('click', () => { if (session) { session.flip(); } })

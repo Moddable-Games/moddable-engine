@@ -67,12 +67,29 @@
 
 .game-play-board {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .game-play-board svg {
   width: 100%;
+  max-height: 80vh;
+  height: auto;
+}
+
+.game-play-board:fullscreen {
+  background: var(--bg, #0a0d2a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.game-play-board:fullscreen svg {
+  max-height: 95vh;
+  max-width: 95vw;
+  width: auto;
   height: auto;
 }
 

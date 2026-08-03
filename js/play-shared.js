@@ -18,6 +18,14 @@ export const ANIM_THEME = {
   easing: { slide: 'cubic-out', arc: 'ease-in-out', bounce: 'bounce', warp: 'fade' },
 }
 
+export const PIECE_STYLES = {
+  auto: { label: 'Auto', light: null, dark: null },
+  gold: { label: 'White & Gold', light: { fill: '#fff', stroke: '#000' }, dark: { fill: '#b58863', stroke: '#5c3a1e' } },
+  charcoal: { label: 'Cream & Charcoal', light: { fill: '#f5f0e8', stroke: '#333' }, dark: { fill: '#3a3a3a', stroke: '#1a1a1a' } },
+  burgundy: { label: 'White & Burgundy', light: { fill: '#fff', stroke: '#000' }, dark: { fill: '#6b1a2a', stroke: '#3d0f18' } },
+  navy: { label: 'White & Navy', light: { fill: '#fff', stroke: '#000' }, dark: { fill: '#1a3a5c', stroke: '#0d1f33' } },
+}
+
 export const CAPTURE_BURST_THEME = {
   particles: 8,
   duration: 400,
@@ -34,8 +42,14 @@ export const RULES_BASE = typeof location !== 'undefined' && location.hostname =
 let _galleryIndex = null
 export async function loadGalleryIndex() {
   if (_galleryIndex) return _galleryIndex
-  try { _galleryIndex = await fetch('../pieces/gallery-index.json?v=1.0.8').then(r => r.json()) }
-  catch { _galleryIndex = [] }
+  try {
+    const resp = await fetch('../pieces/gallery-index.json?v=1.0.8')
+    if (!resp.ok) throw new Error(`gallery-index.json: ${resp.status}`)
+    _galleryIndex = await resp.json()
+  } catch (e) {
+    console.warn('[play-shared] Gallery index load failed:', e.message)
+    _galleryIndex = []
+  }
   return _galleryIndex
 }
 

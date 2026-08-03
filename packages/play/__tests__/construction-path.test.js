@@ -102,4 +102,53 @@ describe('construction-path: play-page definition carries variant features', () 
       expect(ctrl.currentPlayer()).toBe('black')
     })
   })
+
+  describe('captured tray undo alignment', () => {
+    it('capture, undo, recapture keeps histories aligned', () => {
+      const game = createViaPlayPage('standard')
+      const moveLog = []
+      let boardSnap = null
+      const captureLog = []
+      const ctrl = createGameController(game.raw, {
+        family: 'chess',
+        players: { white: 'human', black: 'human' },
+        onRender: () => {},
+        onBeforeMove: () => {
+          const slice = game.raw.getState('chess')
+          boardSnap = slice.board ? [...slice.board] : null
+        },
+        onMove: (move, player) => {
+          moveLog.push({ move, player })
+          const isCapture = move.capture || move.enPassant
+          if (isCapture && boardSnap && move.to !== undefined) {
+            const captured = boardSnap[move.to]
+            captureLog.push(captured ? captured.type : null)
+          } else {
+            captureLog.push(null)
+          }
+          boardSnap = null
+        },
+      })
+
+      ctrl.handleClick(52); ctrl.handleClick(36)
+      ctrl.handleClick(11); ctrl.handleClick(27)
+      ctrl.handleClick(36); ctrl.handleClick(27)
+      expect(moveLog.length).toBe(3)
+      expect(captureLog.length).toBe(3)
+      expect(captureLog[2]).toBe('pawn')
+
+      ctrl.undo()
+      expect(moveLog.length).toBe(3)
+      expect(captureLog.length).toBe(3)
+
+      const undoCount = ctrl.getState().undoCount
+      const aligned = moveLog.length >= undoCount
+      expect(aligned).toBe(true)
+
+      ctrl.handleClick(36); ctrl.handleClick(27)
+      expect(moveLog.length).toBe(4)
+      expect(captureLog.length).toBe(4)
+      expect(captureLog[3]).toBe('pawn')
+    })
+  })
 })

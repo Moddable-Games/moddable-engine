@@ -58,7 +58,7 @@ function findMatchingPluginMove(pluginMoves, mceMove) {
   )
 }
 
-describe('engine parity: MCE vs generic plugin, all 11 variants', () => {
+describe('smoke test: MCE vs generic plugin move-generation parity (covers opening + 10 plies, not full-game correctness)', () => {
   it.each(ALL_VARIANTS)('%s: opening move sets match exactly', (variantKey) => {
     const mceGame = MCE.createGame(variantKey)
     const pluginGame = createGame('chess', variantKey)
