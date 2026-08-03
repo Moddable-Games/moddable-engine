@@ -9,6 +9,7 @@ import {
 } from './variant-registry.js'
 import { createMinimax, DIFFICULTIES } from '../../ai/src/minimax.js'
 import { createMCTS, MCTS_DIFFICULTIES } from '../../ai/src/mcts.js'
+import { EVALUATORS } from '../../ai/src/evaluators.js'
 import { interactionModelFor, FAMILY_INTERACTION } from './interaction.js'
 import { definitionFromVariant } from './variant-definition.js'
 
@@ -137,7 +138,15 @@ function searchDefinition(family, variant) {
 
 function variantEvaluator(family, variant) {
   const config = variant ? getVariantConfig(family, variant) : null
-  return (config && config.evaluate) || undefined
+  if (!config || !config.evaluate) return undefined
+  const baseEval = EVALUATORS[family] || null
+  const variantEval = config.evaluate
+  return (state, playerIndex) => {
+    const ctx = { currentPlayer: playerIndex, config }
+    const bonus = variantEval(state, ctx) || 0
+    const base = baseEval ? baseEval(state, playerIndex) : 0
+    return base + bonus
+  }
 }
 
 function variantOpeningBook(family, variant) {

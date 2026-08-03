@@ -147,11 +147,8 @@ iframe.contentWindow.postMessage({ type: 'chess:setTheme', theme: 'cosmic' }, '*
   analyzePosition,
   getGameStatus,
   renderSvg,
-  MCE,
-  makeMove,
-  toFEN,
-  loadFEN,
-} from 'moddable-engine/chess-sdk'</code></pre>
+  createAI,
+} from 'moddable-engine/play/sdk'</code></pre>
 
   <h3>listVariants(group?)</h3>
   <p>Returns all registered variants with metadata.</p>
@@ -182,10 +179,9 @@ const custom = renderSvg('standard', 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQK
 // or: { status: 'checkmate', gameOver: true }</code></pre>
 
   <h3>Game state management</h3>
-  <pre><code>const game = createGame('atomic')
-const moves = MCE.legalMoves(game)
-const undo = makeMove(game, moves[0])
-const fen = toFEN(game)</code></pre>
+  <pre><code>const game = createGame('chess', 'atomic')
+const moves = game.getLegalMoves()
+game.applyMove(moves[0])</code></pre>
 
   <h2 id="variants">Variant groups</h2>
   <table class="docs-table">

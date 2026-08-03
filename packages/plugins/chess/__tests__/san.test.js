@@ -28,8 +28,21 @@ describe('SAN notation', () => {
 
   it('knight move with file disambiguation', () => {
     const board = makeBoard()
-    board[42] = { type: 'knight', owner: 0 }
-    expect(moveToSAN({ from: 57, to: 42 }, board, TOPO)).toBe('Nbc3')
+    // Two knights: b1 (57) and g1 (62), both can reach f3 (45)
+    board[62] = { type: 'knight', owner: 0 }
+    const legalMoves = [{ from: 57, to: 45 }, { from: 62, to: 45 }]
+    expect(moveToSAN({ from: 57, to: 45 }, board, TOPO, legalMoves)).toBe('Nbf3')
+  })
+
+  it('knight move without disambiguation when unambiguous', () => {
+    const board = makeBoard()
+    // Only one knight on b1 (57), moving to c3 (42). No other knight can reach c3.
+    expect(moveToSAN({ from: 57, to: 42 }, board, TOPO, [{ from: 57, to: 42 }])).toBe('Nc3')
+  })
+
+  it('no disambiguation without legalMoves parameter', () => {
+    const board = makeBoard()
+    expect(moveToSAN({ from: 57, to: 42 }, board, TOPO)).toBe('Nc3')
   })
 
   it('promotion', () => {

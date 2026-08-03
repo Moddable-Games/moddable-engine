@@ -3,7 +3,7 @@ export function createPlayerSystem(config) {
   const sliceName = '__players'
 
   function initState() {
-    return { currentIndex: 0, passCount: 0, turnActions: 0, phase: null }
+    return { currentIndex: 0, passCount: 0, turnActions: 0 }
   }
 
   function current(store) {

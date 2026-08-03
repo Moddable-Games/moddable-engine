@@ -22,7 +22,6 @@
 <meta name="base-path" content="..">
 <link rel="stylesheet" href="../css/home.css?v=1.0.8">
 <link rel="stylesheet" href="../css/boards.css?v=1.0.8">
-<link rel="stylesheet" href="../css/chess-play.css?v=1.0.8">
 <link rel="stylesheet" href="../css/game-play.css?v=1.0.8">
 </head>
 <body>
@@ -171,14 +170,12 @@ const _params = new URLSearchParams(location.search);
 const _mode = _params.get('mode');
 const _game = _params.get('game');
 const _family = _params.get('family');
-const _engine = _params.get('engine');
 const _isEmbed = _params.has('embed');
 const _hexGames = ['nukes','twilight','colony','talisman','mongo','endless'];
 const _isHexEmbed = _isEmbed && _game && _hexGames.includes(_game);
-const _isPluginChess = _family === 'chess' && _engine === 'plugin';
-const _isGamePlay = _isPluginChess || (_family && ['go','draughts','xiangqi','shogi'].includes(_family));
-const _isChessMode = !_isPluginChess && (
-  _mode === 'play' || _mode === 'solo' || _family === 'chess' ||
+const _isGamePlay = (
+  (_family && ['chess','go','draughts','xiangqi','shogi'].includes(_family)) ||
+  _mode === 'play' || _mode === 'solo' ||
   (_isEmbed && !_isHexEmbed && !_family)
 );
 if (_isGamePlay) {
@@ -191,18 +188,6 @@ if (_isGamePlay) {
     document.querySelector('.boards-app').before(playContainer);
     import('../js/game-play.js').then(m => m.initGamePlay(playContainer)).catch(e => {
       console.error('[game-play] load failed:', e);
-      playContainer.textContent = 'Failed to load: ' + e.message;
-    });
-  });
-} else if (_isChessMode) {
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelector('.boards-hero').style.display = 'none';
-    document.querySelector('.boards-app').style.display = 'none';
-    const playContainer = document.createElement('div');
-    playContainer.id = 'chess-play-root';
-    document.querySelector('.boards-app').before(playContainer);
-    import('../js/chess-play.js').then(m => m.initChessPlay(playContainer)).catch(e => {
-      console.error('[chess-play] load failed:', e);
       playContainer.textContent = 'Failed to load: ' + e.message;
     });
   });

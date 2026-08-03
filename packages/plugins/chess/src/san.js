@@ -1,6 +1,6 @@
 const PIECE_SYMBOLS = { king: 'K', queen: 'Q', rook: 'R', bishop: 'B', knight: 'N' }
 
-export function moveToSAN(move, board, topology) {
+export function moveToSAN(move, board, topology, legalMoves) {
   if (!topology) return fallbackNotation(move)
   const cols = topology.cols || 8
   const rows = topology.rows || 8
@@ -25,10 +25,25 @@ export function moveToSAN(move, board, topology) {
   const symbol = (type && type !== 'pawn') ? (PIECE_SYMBOLS[type] || type[0].toUpperCase()) : ''
   const to = indexToAlgebraic(move.to, rows, cols)
   const from = indexToAlgebraic(move.from, rows, cols)
-  const captured = move.capture || move.enPassant
+  const captured = move.capture || move.enPassant || (board[move.to] && board[move.to].owner !== movedPiece?.owner)
   const captureStr = captured ? 'x' : ''
   const pawnFile = (!symbol && captured) ? from[0] : ''
-  const disambig = (symbol && symbol !== 'K') ? from[0] : ''
+
+  let disambig = ''
+  if (symbol && symbol !== 'K' && legalMoves) {
+    const ambiguous = legalMoves.filter(m =>
+      m.to === move.to && m.from !== move.from &&
+      board[m.from] && board[m.from].type === type && board[m.from].owner === movedPiece.owner
+    )
+    if (ambiguous.length > 0) {
+      const sameFile = ambiguous.some(m => m.from % cols === move.from % cols)
+      const sameRank = ambiguous.some(m => Math.floor(m.from / cols) === Math.floor(move.from / cols))
+      if (!sameFile) disambig = from[0]
+      else if (!sameRank) disambig = from[1]
+      else disambig = from
+    }
+  }
+
   const promo = move.promotion ? '=' + (PIECE_SYMBOLS[move.promotion] || move.promotion[0].toUpperCase()) : ''
 
   return symbol + disambig + pawnFile + captureStr + to + promo

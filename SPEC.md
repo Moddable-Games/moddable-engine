@@ -186,8 +186,31 @@ export default {
 }
 ```
 
-### Phase lifecycle
-Core owns the phase sequence. Plugins register handlers. Phases declared in game config frontmatter.
+### Phase convention
+A plugin with a setup/placement phase exposes `phase` on its state slice.
+The game controller skips game-end checks when `slice.phase` is present and
+not `'play'`. When placement completes, the plugin sets `phase: 'play'`
+(or removes it) and normal play begins.
+
+```js
+// In plugin init:
+state.phase = 'placement'
+
+// In action apply (when placement completes):
+return { board, sliceKeys: { phase: 'play' } }
+```
+
+This is the single home for phase state. The controller reads it generically
+from `game.getState(plugin.sliceName).phase`. Do not use `_phase`,
+`_setupStage`, or any other field name — the controller will not find it.
+
+### Optional: positionKey
+A plugin may expose `positionKey(sliceState, playerIndex) → string` for AI
+transposition table efficiency. Without it, the search hashes the full JSON
+state (~1000+ chars). With it, chess returns a 64-char FEN derivative.
+
+### Phase lifecycle (future)
+Core-owned phase sequences for multi-phase games. Not yet implemented.
 ```yaml
 phases: [play]                          # chess
 phases: [diplomatic, action, event]     # endless-skies

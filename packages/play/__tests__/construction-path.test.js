@@ -56,7 +56,7 @@ describe('construction-path: play-page definition carries variant features', () 
   it('sittuyin: actions.place and placementPieces survive the definition path', () => {
     const game = createViaPlayPage('sittuyin')
     const state = game.getState().slice
-    expect(state._phase).toBe('placement')
+    expect(state.phase).toBe('placement')
     const placeMoves = game.getLegalMoves().filter(m => m.action === 'place')
     expect(placeMoves.length).toBeGreaterThan(0)
   })

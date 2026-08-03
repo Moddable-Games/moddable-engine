@@ -314,6 +314,10 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
 
     init(pluginConfig, { request }) {
       topology = request('core.topology')
+      if (topology) {
+        if (topology.rows) config.rows = topology.rows
+        if (topology.cols) config.cols = topology.cols
+      }
       const setup = pluginConfig.setup || config.setup || null
       return {
         board: boardFromSetup(setup),

@@ -20,10 +20,10 @@ export const ANIM_THEME = {
 
 export const PIECE_STYLES = {
   auto: { label: 'Auto', light: null, dark: null },
-  gold: { label: 'White & Gold', light: { fill: '#fff', stroke: '#000' }, dark: { fill: '#b58863', stroke: '#5c3a1e' } },
-  charcoal: { label: 'Cream & Charcoal', light: { fill: '#f5f0e8', stroke: '#333' }, dark: { fill: '#3a3a3a', stroke: '#1a1a1a' } },
-  burgundy: { label: 'White & Burgundy', light: { fill: '#fff', stroke: '#000' }, dark: { fill: '#6b1a2a', stroke: '#3d0f18' } },
-  navy: { label: 'White & Navy', light: { fill: '#fff', stroke: '#000' }, dark: { fill: '#1a3a5c', stroke: '#0d1f33' } },
+  gold: { label: 'White & Gold', light: { fill: '#fff', stroke: '#000', detail: '#fff' }, dark: { fill: '#b58863', stroke: '#5c3a1e', detail: '#f5e6d0' } },
+  charcoal: { label: 'Cream & Charcoal', light: { fill: '#f5f0e8', stroke: '#333', detail: '#f5f0e8' }, dark: { fill: '#3a3a3a', stroke: '#1a1a1a', detail: '#ccc' } },
+  burgundy: { label: 'White & Burgundy', light: { fill: '#fff', stroke: '#000', detail: '#fff' }, dark: { fill: '#6b1a2a', stroke: '#3d0f18', detail: '#e8b4bf' } },
+  navy: { label: 'White & Navy', light: { fill: '#fff', stroke: '#000', detail: '#fff' }, dark: { fill: '#1a3a5c', stroke: '#0d1f33', detail: '#a8c4e0' } },
 }
 
 export const CAPTURE_BURST_THEME = {
@@ -64,9 +64,7 @@ export async function loadVariantManifest() {
 }
 
 // Variants verified to need no behaviour beyond standard chess rules.
-// Each was confirmed to differ from standard only in starting position
-// and/or castling/en-passant flags. Membership requires 10-ply parity
-// against MCE (see packages/play/__tests__/data-only-parity.test.js).
+// Each differs from standard only in starting position and/or castling/en-passant flags.
 const VERIFIED_DATA_ONLY = new Set([
   'endgame-chess', 'pawns-only', 'peasants-revolt',
   'chigorin',

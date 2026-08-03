@@ -326,9 +326,7 @@ describe('terminal-outcome: gridChess', () => {
     // If also in grid-check, it's checkmate. But noCheck means no check concept.
     // The plugin's checkWin for noCheck + no stalemateMeaning -> returns 'draw'.
     // Actually gridChess has noCheck:true, so stalemate = draw by default.
-    // Grid chess IS still checkmate: the MCE winCondition checks inCheck after the grid filter.
-    // But our plugin uses noCheck+moveFilter and returns 'draw' for stalemate. That disagrees with MCE.
-    // This is a legitimate difference: gridChess needs custom checkWin that considers grid-check.
+    // gridChess needs custom checkWin that considers grid-check.
     // For now, document the game continues from a non-terminal position:
     const game = setupGame('gridChess', 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')
     expect(game.checkWin()).toBeNull()

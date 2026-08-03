@@ -226,6 +226,10 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
 
     init(pluginConfig, { request }) {
       topology = request('core.topology')
+      if (topology) {
+        if (topology.rows) config.rows = topology.rows
+        if (topology.cols) config.cols = topology.cols
+      }
       const setup = pluginConfig.setup || config.setup || null
       const board = setup ? parseSetup(setup) : buildDefaultBoard()
       const hands = config.initialHands

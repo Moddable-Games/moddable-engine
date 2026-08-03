@@ -34,6 +34,16 @@ export function createSimulator(plugin, opts = {}) {
     }
   }
 
+  const hasMakeUnmake = !!(plugin.searchMakeMove && plugin.searchUnmakeMove)
+
+  function makeMove(state, move, playerIndex) {
+    return plugin.searchMakeMove(state, move, playerIndex)
+  }
+
+  function unmakeMove(state, move, undo) {
+    plugin.searchUnmakeMove(state, move, undo)
+  }
+
   function checkTerminal(state, playerIndex) {
     const full = getFullState(state, playerIndex)
     const winner = plugin.checkWin(state, full)
@@ -48,6 +58,12 @@ export function createSimulator(plugin, opts = {}) {
     }
 
     return { over: false, winner: null, score: null }
+  }
+
+  function checkWinOnly(state, playerIndex) {
+    if (!plugin.checkWin) return null
+    const full = getFullState(state, playerIndex)
+    return plugin.checkWin(state, full)
   }
 
   function evaluatePosition(state, playerIndex) {
@@ -85,6 +101,22 @@ export function createSimulator(plugin, opts = {}) {
     return 0
   }
 
+  const positionKey = plugin.positionKey
+    ? (state, playerIndex) => plugin.positionKey(state, playerIndex)
+    : null
+
+  const isInCheck = plugin.isInCheck
+    ? (state, playerIndex) => plugin.isInCheck(state.board, playerIndex)
+    : null
+
+  const checkWinConditionOnly = plugin.checkWinConditionOnly
+    ? (state, playerIndex) => {
+        const result = plugin.checkWinConditionOnly(state, playerIndex)
+        if (result === null || result === undefined) return null
+        return { over: true, score: scoreFromWinner(result, playerIndex) }
+      }
+    : null
+
   return {
     getLegalMoves,
     applyMove,
@@ -92,6 +124,12 @@ export function createSimulator(plugin, opts = {}) {
     evaluatePosition,
     nextPlayer,
     cloneState,
+    positionKey,
+    isInCheck,
+    checkWinConditionOnly,
+    hasMakeUnmake,
+    makeMove: hasMakeUnmake ? makeMove : null,
+    unmakeMove: hasMakeUnmake ? unmakeMove : null,
     playerCount,
     playerNames,
   }

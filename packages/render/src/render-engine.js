@@ -243,7 +243,10 @@ export function renderFromEngine(resolved, opts = {}) {
   if (topo.type === 'grid' && position && Object.keys(position).length > 0 && layout.cells) {
     const tileSize = render.cellSize || 40
     const colors = surface.colors || {}
-    parts.push(`<g pointer-events="none">${renderPiecesFromCells(position, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: resolved.pieceRotations, getOwner, pieceDefs: opts.pieceDefs, colors })}</g>`)
+    const displayPosition = opts.flipped
+      ? flipPosition(position, topo.rows || 8, topo.cols || 8)
+      : position
+    parts.push(`<g pointer-events="none">${renderPiecesFromCells(displayPosition, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: resolved.pieceRotations, getOwner, pieceDefs: opts.pieceDefs, colors })}</g>`)
   } else if (position && Object.keys(position).length > 0) {
     parts.push(`<g pointer-events="none"></g>`)
   }
@@ -254,6 +257,20 @@ export function renderFromEngine(resolved, opts = {}) {
 
   parts.push('</svg>')
   return parts.join('\n')
+}
+
+// --- Flip support ---
+
+function flipPosition(position, rows, cols) {
+  const flipped = {}
+  for (const [alg, piece] of Object.entries(position)) {
+    const file = alg.charCodeAt(0) - 97
+    const rank = parseInt(alg.slice(1), 10)
+    const newFile = cols - 1 - file
+    const newRank = rows + 1 - rank
+    flipped[`${String.fromCharCode(97 + newFile)}${newRank}`] = piece
+  }
+  return flipped
 }
 
 // --- Position parsing ---

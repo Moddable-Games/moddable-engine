@@ -138,9 +138,10 @@ export function createPlaySession(options = {}) {
       : null
 
     const names = playerNames()
+    const humanIdx = resolveHumanIndex(colour, names)
     const players = {}
     for (let i = 0; i < names.length; i++) {
-      players[names[i]] = (ai && i === 1) ? 'ai' : 'human'
+      players[names[i]] = (ai && i !== humanIdx) ? 'ai' : 'human'
     }
 
     ctrl = createGameController(game.raw, {
@@ -159,6 +160,7 @@ export function createPlaySession(options = {}) {
       onBeforeMove: (move, player) => {
         const slice = game.getState().slice
         boardSnapshot = slice.board ? [...slice.board] : null
+        boardSnapshot._legalMoves = ctrl ? ctrl.getLegalMoves() : null
       },
       onMove: (move, player) => {
         moveHistory.push({ move, player, notation: moveToNotation(move) })
@@ -275,7 +277,8 @@ export function createPlaySession(options = {}) {
       })
       visibleSlice = { ...slice, board }
     }
-    const rendered = { ...resolvedBoard, setup: boardToSetup(visibleSlice, resolvedBoard.topology) }
+    const setup = boardToSetup(visibleSlice, resolvedBoard.topology)
+    const rendered = { ...resolvedBoard, setup }
     if (currentPieceSet !== 'auto') {
       rendered.pieces = { ...rendered.pieces, set: currentPieceSet }
     }
@@ -283,17 +286,26 @@ export function createPlaySession(options = {}) {
     if (variantCfg.render?.fenMap) {
       rendered.pieces = { ...rendered.pieces, fenMap: variantCfg.render.fenMap }
     }
+    const boardTheme = BOARD_THEMES[currentTheme] || BOARD_THEMES.classic
+    rendered.surface = {
+      ...(rendered.surface || {}),
+      colors: { ...(rendered.surface?.colors || {}), 'cell-light': boardTheme.light, 'cell-dark': boardTheme.dark },
+    }
+    if (rendered.render?.ops) {
+      rendered.render = { ...rendered.render, ops: rendered.render.ops.map(op =>
+        op.op === 'cells' && op.pattern === 'checkered'
+          ? { ...op, light: boardTheme.light, dark: boardTheme.dark }
+          : op
+      ) }
+    }
     const gallery = getGalleryIndex() || []
     const pieceResult = attachPieceImages(rendered, gallery)
     const pieceImages = pieceResult.images || {}
-    const style = PIECE_STYLES[currentPieceStyle]
-    if (style && style.light) {
-      rendered.pieces = { ...rendered.pieces, borders: { white: style.light.fill, black: style.dark.fill } }
-    }
     const svg = renderFromEngine(rendered, {
       pieceImages,
       pieceSurfaceMap: pieceResult.surfaceMap || {},
-      pieceSurface: style && style.light ? { owners: { white: style.light, black: style.dark } } : (pieceResult.surface || null),
+      pieceSurface: pieceResult.surface || null,
+      flipped,
     })
 
     if (!svg) return
@@ -303,17 +315,20 @@ export function createPlaySession(options = {}) {
     if (svgEl) {
       svgEl.removeAttribute('width')
       svgEl.removeAttribute('height')
-      svgEl.style.transform = flipped ? 'rotate(180deg)' : ''
-      const theme = BOARD_THEMES[currentTheme] || BOARD_THEMES.classic
+
+      const style = PIECE_STYLES[currentPieceStyle]
+      if (style && style.light) {
+        applyPieceRecolour(svgEl, style)
+      }
       const overlay = createOverlay()
 
       if (lastMove) {
-        if (lastMove.from !== null && lastMove.from !== undefined) paintHighlight(overlay, cells.bbox(lastMove.from, container), theme.lastMove)
-        if (lastMove.to !== null && lastMove.to !== undefined) paintHighlight(overlay, cells.bbox(lastMove.to, container), theme.lastMove)
+        if (lastMove.from !== null && lastMove.from !== undefined) paintHighlight(overlay, cells.bbox(lastMove.from, container), boardTheme.lastMove)
+        if (lastMove.to !== null && lastMove.to !== undefined) paintHighlight(overlay, cells.bbox(lastMove.to, container), boardTheme.lastMove)
       }
 
       if (selected !== null && selected !== undefined) {
-        paintHighlight(overlay, cells.bbox(selected, container), theme.highlight)
+        paintHighlight(overlay, cells.bbox(selected, container), boardTheme.highlight)
       }
 
       const board = slice.board || []
@@ -325,7 +340,7 @@ export function createPlaySession(options = {}) {
         if (seenTargets.has(target)) continue
         seenTargets.add(target)
         const hasPiece = !!board[target]
-        paintIndicator(overlay, cells.bbox(target, container), hasPiece ? theme.ring : theme.dot, hasPiece)
+        paintIndicator(overlay, cells.bbox(target, container), hasPiece ? boardTheme.ring : boardTheme.dot, hasPiece)
       }
 
       if (slice.effects && slice.effects.length > 0) {
@@ -362,7 +377,7 @@ export function createPlaySession(options = {}) {
   function renderHand(slice, state) {
     if (!handContainer) return
     const hasHands = slice.hands && slice.hands.some(h => h && h.length > 0)
-    const hasPlacement = slice._phase === 'placement' && slice._toPlace && slice._toPlace.some(a => a && a.length > 0)
+    const hasPlacement = slice.phase === 'placement' && slice._toPlace && slice._toPlace.some(a => a && a.length > 0)
     if (!hasHands && !hasPlacement) { handContainer.innerHTML = ''; return }
     const names = playerNames()
     const currentIdx = names.indexOf(game.currentPlayer())
@@ -671,18 +686,66 @@ export function createPlaySession(options = {}) {
     return idx >= 0 ? idx : raw
   }
 
-  // Driven by the vocabulary the plugin declares rather than by a family branch.
-  // When this was inline, draughts men serialised to symbols that resolved to
-  // chess artwork and nothing caught it.
+  function applyPieceRecolour(svgEl, style) {
+    const ns = 'http://www.w3.org/2000/svg'
+    let defs = svgEl.querySelector('defs')
+    if (!defs) { defs = document.createElementNS(ns, 'defs'); svgEl.prepend(defs) }
+
+    for (const side of ['light', 'dark']) {
+      const colors = style[side]
+      if (!colors) continue
+      const filterId = `recolor-${side}`
+      const filter = document.createElementNS(ns, 'filter')
+      filter.setAttribute('id', filterId)
+      filter.setAttribute('color-interpolation-filters', 'sRGB')
+
+      const [r, g, b] = hexToRgb(colors.fill)
+      const [sr, sg, sb] = hexToRgb(colors.stroke)
+      const matrix = document.createElementNS(ns, 'feColorMatrix')
+      matrix.setAttribute('type', 'matrix')
+      matrix.setAttribute('values', [
+        `${(r - sr) / 255} 0 0 0 ${sr / 255}`,
+        `0 ${(g - sg) / 255} 0 0 ${sg / 255}`,
+        `0 0 ${(b - sb) / 255} 0 ${sb / 255}`,
+        `0 0 0 1 0`,
+      ].join(' '))
+      filter.appendChild(matrix)
+      defs.appendChild(filter)
+    }
+
+    const images = svgEl.querySelectorAll('image[href]')
+    for (const img of images) {
+      const href = img.getAttribute('href') || ''
+      const isDark = /\/b[A-Z]/.test(href) || /\bb[A-Z]/.test(href)
+      img.setAttribute('filter', `url(#recolor-${isDark ? 'dark' : 'light'})`)
+    }
+  }
+
+  function hexToRgb(hex) {
+    const h = hex.replace('#', '')
+    const n = h.length === 3
+      ? parseInt(h[0]+h[0]+h[1]+h[1]+h[2]+h[2], 16)
+      : parseInt(h, 16)
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+  }
+
+  function resolveHumanIndex(colour, names) {
+    if (colour === '0' || colour === '1') return parseInt(colour, 10)
+    const idx = names.indexOf(colour)
+    if (idx !== -1) return idx
+    throw new Error(`[game-play] Invalid colour value: "${colour}". Expected "0", "1", or a player name (${names.join(', ')})`)
+  }
+
   function boardToSetup(slice, topo) {
     return serialiseBoard(slice, topo, (pluginFor() || {}).vocabulary || {})
   }
 
   function moveToNotation(move) {
     if (family === 'chess') {
-      const slice = game.getState().slice
+      const board = boardSnapshot || game.getState().slice?.board
       const topo = resolvedBoard?.topology
-      return moveToSAN(move, slice.board, topo)
+      const legal = boardSnapshot?._legalMoves || null
+      return moveToSAN(move, board, topo, legal)
     }
     if (move.action) return move.action
     if (move.coord !== undefined) {
@@ -778,22 +841,11 @@ export async function initGamePlay(container, defaults = {}) {
   ], params.colour || '0')
   const themeSelect = buildSelect(leftSidebar, 'Theme', Object.entries(BOARD_THEMES).map(([k, v]) => ({ value: k, label: v.label })), params.theme || 'classic')
 
-  const galleryEntries = (getGalleryIndex() || [])
-    .filter(s => s.id && s.label)
-    .map(s => ({ value: s.id, label: s.label || s.id }))
-  const pieceSetOptions = [{ value: 'auto', label: 'Auto (from rules)' }, ...galleryEntries]
-  const pieceSetSelect = buildSelect(leftSidebar, 'Pieces', pieceSetOptions, params.pieces || 'auto')
+  const pieceSetSelect = buildSelect(leftSidebar, 'Pieces', [{ value: 'auto', label: 'Auto (from rules)' }], params.pieces || 'auto')
   const pieceStyleSelect = buildSelect(leftSidebar, 'Piece Colours', Object.entries(PIECE_STYLES).map(([k, v]) => ({ value: k, label: v.label })), params.pieceStyle || 'auto')
   const animStyleSelect = buildSelect(leftSidebar, 'Animation', ANIM_THEME.styles.map(s => ({ value: s, label: s[0].toUpperCase() + s.slice(1) })), params.animStyle || ANIM_THEME.defaultStyle)
   const animSpeedSelect = buildSelect(leftSidebar, 'Speed', Object.keys(ANIM_THEME.speeds).map(s => ({ value: s, label: s[0].toUpperCase() + s.slice(1) })), params.animSpeed || ANIM_THEME.defaultSpeed)
 
-  let engineSelect = null
-  if (family === 'chess') {
-    engineSelect = buildSelect(leftSidebar, 'Engine', [
-      { value: 'generic', label: 'Generic' },
-      { value: 'mce', label: 'MCE' },
-    ], 'generic')
-  }
 
   const statusEl = document.createElement('div')
   statusEl.className = 'game-play-status'
@@ -869,6 +921,7 @@ export async function initGamePlay(container, defaults = {}) {
     pieceSet: pieceSetSelect.value,
     opponent: opponentSelect.value === 'ai' ? 'ai' : 'human',
     difficulty: difficultySelect.value,
+    colour: colourSelect.value,
     theme: themeSelect.value,
     embed: params.embed ? bridge : null,
     onStatus: updateStatus,
@@ -938,9 +991,44 @@ export async function initGamePlay(container, defaults = {}) {
     history.replaceState(null, '', '?' + params.toString())
   }
 
+  function populatePieceSetSelect(variantKey) {
+    const gallery = getGalleryIndex() || []
+    if (gallery.length === 0) {
+      console.error('[game-play] Piece gallery loaded 0 entries — fetch may have failed')
+      return
+    }
+    const needed = getVariantPieceKeys(family, variantKey)
+    const compatible = gallery.filter(s => {
+      if (!s.id || !s.pieces) return false
+      for (const key of needed) {
+        if (!s.pieces[key]) return false
+      }
+      return true
+    })
+    const current = pieceSetSelect.value
+    pieceSetSelect.innerHTML = ''
+    const autoOpt = document.createElement('option')
+    autoOpt.value = 'auto'
+    autoOpt.textContent = 'Auto (from rules)'
+    pieceSetSelect.appendChild(autoOpt)
+    for (const s of compatible) {
+      const o = document.createElement('option')
+      o.value = s.id
+      o.textContent = s.name || s.id
+      pieceSetSelect.appendChild(o)
+    }
+    if (compatible.some(s => s.id === current)) {
+      pieceSetSelect.value = current
+    } else {
+      pieceSetSelect.value = 'auto'
+      config.pieceSet = 'auto'
+    }
+  }
+
   async function restart(changes) {
     config = { ...config, ...changes }
     updateRules(config.variant)
+    populatePieceSetSelect(config.variant)
     updateURL()
     session = createPlaySession(config)
     await session.start()
@@ -961,19 +1049,6 @@ export async function initGamePlay(container, defaults = {}) {
     if (boardArea.requestFullscreen) boardArea.requestFullscreen()
     else if (boardArea.webkitRequestFullscreen) boardArea.webkitRequestFullscreen()
   })
-  if (engineSelect) {
-    engineSelect.addEventListener('change', (e) => {
-      if (e.target.value === 'mce') {
-        const p = new URLSearchParams(location.search)
-        p.set('mode', 'play')
-        p.set('family', 'chess')
-        p.set('variant', config.variant || 'standard')
-        p.delete('engine')
-        location.search = p.toString()
-      }
-    })
-  }
-
   await restart({})
   return session
 }
@@ -996,6 +1071,42 @@ function buildSelect(parent, label, options, selected) {
   group.appendChild(sel)
   parent.appendChild(group)
   return sel
+}
+
+function getVariantPieceKeys(family, variantKey) {
+  const vCfg = getVariantConfig(family, variantKey) || {}
+  const fen = vCfg.setup || vCfg.fen
+  if (typeof fen !== 'string') {
+    const keys = new Set(['wK', 'wP', 'bK', 'bP'])
+    if (vCfg.placementPieces) {
+      const vocab = vCfg.vocabulary || {}
+      for (const side of vCfg.placementPieces) {
+        for (const type of side) {
+          const entry = vocab[type]
+          if (entry?.symbols) {
+            keys.add('w' + entry.symbols[0])
+            keys.add('b' + entry.symbols[1].toUpperCase())
+          } else {
+            const sym = type[0].toUpperCase()
+            keys.add('w' + sym)
+            keys.add('b' + sym)
+          }
+        }
+      }
+    }
+    return keys
+  }
+  const fenPieces = fen.split(' ')[0].replace(/[\d\/\[\]+,;:.\-]/g, '')
+  const chars = new Set(fenPieces.split(''))
+  const keys = new Set()
+  for (const ch of chars) {
+    if (ch === ch.toUpperCase() && ch !== ch.toLowerCase()) {
+      keys.add('w' + ch)
+    } else if (ch === ch.toLowerCase() && ch !== ch.toUpperCase()) {
+      keys.add('b' + ch.toUpperCase())
+    }
+  }
+  return keys
 }
 
 export { BOARD_THEMES, DIFFICULTIES, FAMILY_INTERACTION, getVariantConfig }

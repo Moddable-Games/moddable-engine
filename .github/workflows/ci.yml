@@ -1,0 +1,79 @@
+# CI — runs on every push and PR to dev/main.
+# GATE: all three jobs must pass for a PR to merge.
+# Configure branch protection on dev and main to require the "gate" status check.
+name: CI
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci --ignore-scripts
+      - name: Unit tests (run in band to avoid performance test flake)
+        run: npx jest --no-coverage --runInBand
+        env:
+          NODE_OPTIONS: '--experimental-vm-modules'
+
+  playability-standard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci --ignore-scripts
+      - name: Playability Standard (items 1-3, all families)
+        run: npx jest packages/play/__tests__/playability-standard.test.js --no-coverage --forceExit
+        env:
+          NODE_OPTIONS: '--experimental-vm-modules'
+
+  playwright:
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci --ignore-scripts
+      - run: npm i @playwright/test
+      - run: npx playwright install --with-deps chromium
+      - name: Start dev server
+        run: npx serve . -l 8080 &
+      - name: Wait for server
+        run: npx wait-on http://localhost:8080 --timeout 10000
+      - name: Playwright playability (item 4, all families)
+        run: npx playwright test e2e/playability.spec.cjs
+        env:
+          BASE_URL: http://localhost:8080
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: test-results/
+
+  # Gate job: branch protection should require this check.
+  # All CI jobs must pass for this to succeed.
+  gate:
+    runs-on: ubuntu-latest
+    needs: [unit-tests, playability-standard, playwright]
+    if: always()
+    steps:
+      - name: Check all jobs passed
+        run: |
+          if [ "${{ needs.unit-tests.result }}" != "success" ] || \
+             [ "${{ needs.playability-standard.result }}" != "success" ] || \
+             [ "${{ needs.playwright.result }}" != "success" ]; then
+            echo "One or more CI jobs failed. Blocking merge."
+            exit 1
+          fi
+          echo "All CI jobs passed."

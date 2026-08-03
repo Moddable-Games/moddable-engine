@@ -128,7 +128,7 @@ export const sittuyin = {
   },
 
   moveFilter(moves, state) {
-    if (state._phase !== 'placement') return moves
+    if (state.phase !== 'placement') return moves
     return moves.filter(m => m.action)
   },
 
@@ -138,7 +138,7 @@ export const sittuyin = {
       skipsCheckFilter: true,
       continuesTurn: false,
       generate(slice, playerIdx) {
-        if (slice._phase !== 'placement') return []
+        if (slice.phase !== 'placement') return []
         const toPlace = slice._toPlace[playerIdx]
         if (!toPlace || toPlace.length === 0) return []
         const uniqueTypes = [...new Set(toPlace)]
@@ -162,7 +162,7 @@ export const sittuyin = {
         const idx = toPlace[playerIdx].indexOf(move.type)
         if (idx !== -1) toPlace[playerIdx].splice(idx, 1)
         const phase = (toPlace[0].length === 0 && toPlace[1].length === 0) ? 'play' : 'placement'
-        return { board, sliceKeys: { _toPlace: toPlace, _phase: phase }, halfmoveClock: 0, fullmoveNumber: 1 }
+        return { board, sliceKeys: { _toPlace: toPlace, phase }, halfmoveClock: 0, fullmoveNumber: 1 }
       },
     },
   },
