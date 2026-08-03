@@ -28,7 +28,7 @@ import { createGameForFamily } from '../packages/play/src/play.js'
 import { listVariants, getVariantConfig } from '../packages/play/src/variant-registry.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const OUTPUT = resolve(__dirname, '..', 'play', 'playability-manifest.json')
+const OUTPUT = process.env.MANIFEST_OUT || resolve(__dirname, '..', 'play', 'playability-manifest.json')
 
 const FAMILIES = ['chess', 'go', 'draughts', 'xiangqi', 'shogi']
 const MAX_PLIES = 200

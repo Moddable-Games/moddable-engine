@@ -1,14 +1,15 @@
 /**
- * Guard test: the published playability manifest must match expected counts.
+ * Guard test: the published playability manifest must match expected counts
+ * AND must be fresh (match what gen-playability-manifest.mjs would produce).
  *
- * This asserts the ARTEFACT the browser consumes, not the Node-injected path.
  * If this test fails, regenerate with:
  *   NODE_OPTIONS='--experimental-vm-modules' node scripts/gen-playability-manifest.mjs
  *
  * Update EXPECTED_PLAYABLE when intentionally adding or removing variants.
  */
-import { readFileSync } from 'fs'
+import { readFileSync, unlinkSync } from 'fs'
 import { join } from 'path'
+import { execSync } from 'child_process'
 
 const MANIFEST_PATH = join(process.cwd(), 'play', 'playability-manifest.json')
 
@@ -54,4 +55,24 @@ describe('variant count guard (published manifest)', () => {
     const playable = manifest.filter(e => e.playable)
     expect(playable.length).toBe(total)
   })
+
+  it('committed manifest is fresh (matches what gen-playability-manifest.mjs produces)', () => {
+    const committed = readFileSync(MANIFEST_PATH, 'utf8').trim()
+    const tmpPath = join(process.cwd(), 'play', '.manifest-freshness-check.json')
+    try {
+      execSync(
+        `node scripts/gen-playability-manifest.mjs`,
+        { cwd: process.cwd(), stdio: 'pipe', env: { ...process.env, NODE_OPTIONS: '--experimental-vm-modules', MANIFEST_OUT: tmpPath } }
+      )
+      const fresh = readFileSync(tmpPath, 'utf8').trim()
+      expect(fresh).toBe(committed)
+    } catch (e) {
+      if (e.status) {
+        throw new Error('gen-playability-manifest.mjs failed: ' + (e.stderr?.toString() || e.message).slice(0, 300))
+      }
+      throw e
+    } finally {
+      try { unlinkSync(tmpPath) } catch {}
+    }
+  }, 120_000)
 })

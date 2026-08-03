@@ -98,3 +98,5 @@ snapshots/
 
 # Export sync cache
 .export-cache.json
+test-results/
+play/.manifest-freshness-check.json
