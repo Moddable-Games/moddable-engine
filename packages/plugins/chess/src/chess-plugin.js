@@ -35,6 +35,18 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   const pieceConfigs = { ...STANDARD_PIECES, ...config.pieces }
   const vocabulary = { ...DEFAULT_VOCABULARY, ...config.vocabulary }
 
+  const _symbolsSeen = new Map()
+  for (const [type, def] of Object.entries(vocabulary)) {
+    if (!def.symbols) continue
+    for (const [owner, symbol] of Object.entries(def.symbols)) {
+      const existing = _symbolsSeen.get(symbol)
+      if (existing) {
+        throw new Error(`Vocabulary symbol collision: "${symbol}" claimed by both ${existing} and ${type} (owner ${owner})`)
+      }
+      _symbolsSeen.set(symbol, type)
+    }
+  }
+
   const builtPieces = new Map()
 
   function buildPiece(name) {

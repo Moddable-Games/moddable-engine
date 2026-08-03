@@ -50,27 +50,41 @@ for (const key of variants) {
       }
       const move = moves[Math.floor(Math.random() * moves.length)]
       const result = game.applyMove(move)
+      if (!result || !result.ok) {
+        outcome = 'move-rejected'
+        break
+      }
       plies++
-      if (result && result.winner) {
+      if (result.winner) {
         outcome = `winner:${result.winner}`
         break
       }
-      if (result && result.continueTurn) {
+      if (result.continueTurn) {
         let subPlies = 0
-        while (result.continueTurn && subPlies < 20) {
+        while (subPlies < 50) {
           const subMoves = game.getLegalMoves()
-          if (subMoves.length === 0) break
+          if (subMoves.length === 0) { outcome = 'deadlock-continuation'; break }
           const sub = game.applyMove(subMoves[Math.floor(Math.random() * subMoves.length)])
           subPlies++
-          if (sub && sub.winner) { outcome = `winner:${sub.winner}`; break }
-          if (!sub || !sub.continueTurn) break
+          if (!sub || !sub.ok) { outcome = 'move-rejected'; break }
+          if (sub.winner) { outcome = `winner:${sub.winner}`; break }
+          if (!sub.continueTurn) break
         }
         if (outcome) break
+        if (subPlies >= 50) { outcome = 'deadlock-continuation'; break }
       }
     }
 
-    if (!outcome) outcome = `incomplete@${MAX_PLIES}`
-    results.push({ key, status: outcome.startsWith('winner') || outcome === 'no-moves' ? 'terminal' : 'timeout', plies, outcome })
+    if (!outcome) outcome = `timeout@${MAX_PLIES}`
+
+    let status
+    if (outcome.startsWith('winner')) status = 'terminal'
+    else if (outcome === 'no-moves') status = 'terminal'
+    else if (outcome === 'move-rejected') status = 'deadlock'
+    else if (outcome === 'deadlock-continuation') status = 'deadlock'
+    else status = 'timeout'
+
+    results.push({ key, status, plies, outcome })
   } catch (e) {
     results.push({ key, status: 'error', plies: 0, outcome: e.message.slice(0, 60) })
   }

@@ -67,7 +67,9 @@ export function buildPieceImages(pieceSetId, gallery, fenOverrides, skipFenMap) 
   }
 
   if (!skipFenMap) {
-    const fenMap = fenOverrides || FEN_TO_PIECE_ID
+    const fenMap = fenOverrides
+      ? { ...FEN_TO_PIECE_ID, ...fenOverrides }
+      : FEN_TO_PIECE_ID
     for (const [fenChar, pieceId] of Object.entries(fenMap)) {
       if (images[pieceId]) images[fenChar] = images[pieceId]
       if (surfaceMap[pieceId]) surfaceMap[fenChar] = surfaceMap[pieceId]
@@ -204,6 +206,9 @@ export function renderFromEngine(resolved, opts = {}) {
 
   // Parse setup → position (grid/graph only; hex/pit/track handle internally)
   const position = parsePosition(resolved, topo)
+  if (typeof resolved.setup === 'string' && resolved.setup.includes('/') && resolved.setup.replace(/[\d/]/g, '').length > 0 && Object.keys(position).length === 0) {
+    console.warn('[render-engine] Non-empty setup produced empty position — possible fenMap or vocabulary mismatch', { setup: resolved.setup.slice(0, 40) })
+  }
 
   // Detect FEN4 for getOwner (4-player piece rotation)
   let getOwner = opts.getOwner || null

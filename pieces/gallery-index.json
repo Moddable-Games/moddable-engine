@@ -1664,6 +1664,10 @@
       "twemoji": "../twemoji/"
     },
     "pieces": {
+      "duck": {
+        "source": "fluent-emoji",
+        "file": "duck.svg"
+      },
       "wD": {
         "source": "wikimedia-fairy",
         "file": "White_dabbaba.svg"

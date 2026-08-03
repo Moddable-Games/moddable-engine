@@ -326,7 +326,10 @@ export function createPlaySession(options = {}) {
     const plugin = pluginFor()
     const vocab = plugin?.vocabulary || {}
     const gallery = getGalleryIndex() || []
-    const pieceSet = resolvedBoard.pieces?.set
+    const rendered = { ...resolvedBoard, pieces: { ...resolvedBoard.pieces } }
+    if (currentPieceSet !== 'auto') rendered.pieces.set = currentPieceSet
+    const pieceResult = attachPieceImages(rendered, gallery)
+    const pieceImages = pieceResult.images || {}
 
     const sides = names.map((name, idx) => {
       const source = hasPlacement ? (slice._toPlace[idx] || []) : (slice.hands?.[idx] || [])
@@ -335,14 +338,8 @@ export function createPlaySession(options = {}) {
       const pieces = Object.entries(counted).map(([type, count]) => {
         const entry = vocab[type]
         const symbol = entry?.symbols?.[idx]
-        let image = null
-        if (pieceSet && gallery && symbol) {
-          const sets = Array.isArray(gallery) ? gallery : (gallery.sets || [])
-          const set = sets.find(s => s.id === pieceSet || s.slug === pieceSet)
-          if (set && set.path) {
-            image = `../pieces/sets/${set.path}/${symbol}.svg`
-          }
-        }
+        const pieceId = symbol ? (idx === 0 ? 'w' : 'b') + symbol.toUpperCase() : null
+        const image = pieceImages[pieceId] || pieceImages[symbol] || null
         return { id: type, label: symbol || type, image, count }
       })
       return { id: name, label: name, pieces }
