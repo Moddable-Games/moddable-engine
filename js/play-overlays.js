@@ -37,6 +37,40 @@ export function paintFog(overlay, bbox, color = '#1a1a2e', opacity = '1') {
   overlay.appendChild(rect)
 }
 
+const EFFECT_FALLBACK = { stroke: 'rgba(255,200,50,0.7)', fill: 'rgba(255,200,50,0.1)' }
+
+const effectRegistry = new Map()
+
+export function registerEffect(type, appearance) {
+  effectRegistry.set(type, appearance)
+}
+
+export function getEffectAppearance(type) {
+  return effectRegistry.get(type) || null
+}
+
+registerEffect('immune', { stroke: 'rgba(100,200,255,0.7)', fill: 'rgba(100,200,255,0.1)' })
+registerEffect('petrified', { stroke: 'rgba(128,128,128,0.8)', fill: 'rgba(128,128,128,0.2)' })
+registerEffect('poison', { stroke: 'rgba(100,255,100,0.7)', fill: 'rgba(100,255,100,0.1)' })
+
+export function paintEffect(overlay, bbox, effect) {
+  if (!bbox) return
+  const colors = effectRegistry.get(effect.type) || EFFECT_FALLBACK
+  if (!effectRegistry.has(effect.type)) {
+    console.warn(`[play-overlays] Unknown effect type "${effect.type}" — using fallback marker`)
+  }
+  const rect = document.createElementNS(SVG_NS, 'rect')
+  rect.setAttribute('x', bbox.x + 2)
+  rect.setAttribute('y', bbox.y + 2)
+  rect.setAttribute('width', bbox.width - 4)
+  rect.setAttribute('height', bbox.height - 4)
+  rect.setAttribute('rx', 4)
+  rect.setAttribute('fill', colors.fill)
+  rect.setAttribute('stroke', colors.stroke)
+  rect.setAttribute('stroke-width', 2)
+  overlay.appendChild(rect)
+}
+
 export function createOverlay(className = 'highlights') {
   const g = document.createElementNS(SVG_NS, 'g')
   g.setAttribute('class', className)

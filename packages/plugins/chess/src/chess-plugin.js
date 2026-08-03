@@ -128,6 +128,10 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       state._toPlace = [config.placementPieces[0].slice(), config.placementPieces[1].slice()]
     }
 
+    if (config.initState) {
+      config.initState(state)
+    }
+
     return state
   }
 
@@ -175,6 +179,25 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const clone = {}
     for (const k of Object.keys(board)) clone[k] = board[k] ? { ...board[k] } : null
     return clone
+  }
+
+  function applyMoveToBoard(board, move) {
+    if (move.castle) {
+      setCell(board, move.to, getCell(board, move.from))
+      setCell(board, move.from, null)
+      setCell(board, move.rookTo, getCell(board, move.rookFrom))
+      setCell(board, move.rookFrom, null)
+    } else if (move.enPassant) {
+      setCell(board, move.to, getCell(board, move.from))
+      setCell(board, move.from, null)
+      setCell(board, move.captured, null)
+    } else {
+      setCell(board, move.to, getCell(board, move.from))
+      setCell(board, move.from, null)
+    }
+    if (move.promotion) {
+      setCell(board, move.to, { type: move.promotion, owner: getCell(board, move.to)?.owner ?? 0 })
+    }
   }
 
   function allPositions() {
@@ -442,6 +465,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       const legal = getLegalMoves(slice, full)
       return legal.some(m =>
         m.action === move.action && m.to === move.to &&
+        (move.from === undefined || m.from === move.from) &&
         (move.type === undefined || m.type === move.type)
       )
     }
@@ -619,7 +643,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
     for (const [name, actionDef] of Object.entries(actions)) {
       if (actionDef.generate) {
-        const ctx = { topology, allPositions, getCell, pawnConfig, slice, config }
+        const ctx = { topology, allPositions, getCell, pawnConfig, slice, config, normalMoves: allMoves }
         const actionMoves = actionDef.generate(slice, playerIdx, ctx)
         allMoves.push(...actionMoves)
       }
@@ -634,6 +658,11 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
         currentPlayer: playerIdx,
         config,
         isInCheck: () => isInCheck(slice.board, playerIdx),
+        givesCheck: (move) => {
+          const testBoard = cloneBoard(slice.board)
+          applyMoveToBoard(testBoard, move)
+          return isInCheck(testBoard, 1 - playerIdx)
+        },
       })
     }
 

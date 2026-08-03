@@ -2,129 +2,74 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Surface Parity Comparison</title>
-<link rel="stylesheet" href="../css/home.css">
+<title>Variant Contact Sheet</title>
 <style>
 body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; background: #1a1a2e; color: #eee; }
-.compare-header { display: flex; gap: 16px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
-.compare-header select, .compare-header input { padding: 6px 10px; border-radius: 4px; border: 1px solid #444; background: #2a2a3e; color: #eee; }
-.compare-container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-.compare-panel { background: #2a2a3e; border-radius: 8px; padding: 16px; }
-.compare-panel h3 { margin: 0 0 12px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; }
-.compare-panel svg { width: 100%; height: auto; max-height: 60vh; }
-.compare-panel .board-container { min-height: 300px; }
+h1 { font-size: 18px; margin: 0 0 16px; opacity: 0.7; font-weight: 400; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+.card { background: #2a2a3e; border-radius: 6px; padding: 10px; }
+.card svg { width: 100%; height: auto; display: block; }
+.card .label { font-size: 11px; margin-top: 6px; text-align: center; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card .error { color: #f66; font-size: 10px; font-family: monospace; white-space: pre-wrap; padding: 4px; }
+.summary { font-size: 12px; opacity: 0.5; margin-bottom: 12px; }
 </style>
 </head>
 <body>
-<div class="compare-header">
-  <label>Variant: <select id="variant-select"></select></label>
-  <label>FEN: <input id="fen-input" type="text" size="40" placeholder="custom FEN (optional)"></label>
-  <button id="refresh-btn">Refresh</button>
-</div>
-<div class="compare-container">
-  <div class="compare-panel">
-    <h3>MCE (chess-play.js)</h3>
-    <div id="mce-board" class="board-container"></div>
-  </div>
-  <div class="compare-panel">
-    <h3>Generic (game-play.js)</h3>
-    <div id="generic-board" class="board-container"></div>
-  </div>
-</div>
+<h1>Variant Contact Sheet &mdash; Generic Surface</h1>
+<div class="summary" id="summary"></div>
+<div class="grid" id="grid"></div>
 <script type="module">
-import MCE from '../packages/plugins/chess/src/mce/index.js'
-import '../packages/plugins/chess/src/mce/variants/index.js'
-import { renderFromEngine, attachPieceImages } from '../packages/render/src/render-engine.js'
-import { loadGalleryIndex, getGalleryIndex } from '../js/play-shared.js'
-
 import '../packages/plugins/chess/index.js'
 import { createGame } from '../packages/play/src/sdk.js'
 import { listVariants } from '../packages/play/src/variant-registry.js'
 import { boardToSetup } from '../packages/play/src/serialise.js'
-
-const variantSelect = document.getElementById('variant-select')
-const fenInput = document.getElementById('fen-input')
-const refreshBtn = document.getElementById('refresh-btn')
-const mceEl = document.getElementById('mce-board')
-const genericEl = document.getElementById('generic-board')
-
-const variants = listVariants('chess').map(v => v.key).sort()
-for (const v of variants) {
-  const opt = document.createElement('option')
-  opt.value = v
-  opt.textContent = v
-  variantSelect.appendChild(opt)
-}
-
-const params = new URLSearchParams(location.search)
-if (params.get('variant')) variantSelect.value = params.get('variant')
-if (params.get('fen')) fenInput.value = params.get('fen')
+import { renderFromEngine, attachPieceImages } from '../packages/render/src/render-engine.js'
+import { loadGalleryIndex, getGalleryIndex } from '../js/play-shared.js'
 
 await loadGalleryIndex()
 
-function renderMCE(variant) {
-  try {
-    const g = MCE.createGame(variant)
-    const rows = g.rows, cols = g.cols
-    const board = g.board
-    let fen = ''
-    for (let r = 0; r < rows; r++) {
-      let empty = 0
-      for (let c = 0; c < cols; c++) {
-        const p = board[r * cols + c]
-        if (!p) { empty++; continue }
-        if (empty) { fen += empty; empty = 0 }
-        fen += p
-      }
-      if (empty) fen += empty
-      if (r < rows - 1) fen += '/'
-    }
-    const resolved = {
-      topology: { type: 'grid', rows, cols },
-      setup: fen,
-      surface: { type: 'checkered' },
-    }
-    const gallery = getGalleryIndex() || []
-    const pieceResult = attachPieceImages(resolved, gallery)
-    const svg = renderFromEngine(resolved, { pieceImages: pieceResult.images || {} })
-    mceEl.innerHTML = svg || '<p>No render</p>'
-  } catch (e) {
-    mceEl.innerHTML = '<p style="color:#f66">MCE: ' + e.message + '</p>'
-  }
-}
+const variants = listVariants('chess').sort((a, b) => a.key.localeCompare(b.key))
+const grid = document.getElementById('grid')
+const summary = document.getElementById('summary')
 
-function renderGeneric(variant) {
+let ok = 0, fail = 0
+
+for (const v of variants) {
+  const card = document.createElement('div')
+  card.className = 'card'
+
   try {
-    const game = createGame('chess', variant)
+    const game = createGame('chess', v.key)
     const slice = game.getState().slice
     const topo = game.topology || { rows: 8, cols: 8 }
-    const setup = boardToSetup(slice, topo)
+    const plugin = game.raw.registry.getPlugins().find(p => p.sliceName === 'chess')
+    const vocabulary = plugin?.vocabulary || {}
+    const setup = boardToSetup(slice, topo, vocabulary)
     const resolved = {
       topology: { type: 'grid', rows: topo.rows || 8, cols: topo.cols || 8 },
+      render: { cellColor: 'checkered' },
       setup,
-      surface: { type: 'checkered' },
+      pieces: { set: 'mce-fairy-complete' },
     }
     const gallery = getGalleryIndex() || []
     const pieceResult = attachPieceImages(resolved, gallery)
     const svg = renderFromEngine(resolved, { pieceImages: pieceResult.images || {} })
-    genericEl.innerHTML = svg || '<p>No render</p>'
+    card.innerHTML = svg || '<div class="error">No render output</div>'
+    ok++
   } catch (e) {
-    genericEl.innerHTML = '<p style="color:#f66">Generic: ' + e.message + '</p>'
+    card.innerHTML = `<div class="error">${e.message}</div>`
+    fail++
   }
+
+  const label = document.createElement('div')
+  label.className = 'label'
+  label.textContent = v.key
+  label.title = v.label || v.key
+  card.appendChild(label)
+  grid.appendChild(card)
 }
 
-function render() {
-  const variant = variantSelect.value || 'standard'
-  renderMCE(variant)
-  renderGeneric(variant)
-  const p = new URLSearchParams(location.search)
-  p.set('variant', variant)
-  history.replaceState(null, '', '?' + p.toString())
-}
-
-variantSelect.addEventListener('change', render)
-refreshBtn.addEventListener('click', render)
-render()
+summary.textContent = `${variants.length} variants: ${ok} rendered, ${fail} failed`
 </script>
 </body>
 </html>

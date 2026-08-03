@@ -14,6 +14,7 @@ export function createGameController(game, opts = {}) {
   const onChoiceNeeded = opts.onChoiceNeeded || null
   const onPendingAction = opts.onPendingAction || null
   const onPendingActionEnd = opts.onPendingActionEnd || null
+  const onAnimateMove = opts.onAnimateMove || null
 
   const aiPickMove = opts.aiPickMove || null
 
@@ -61,13 +62,21 @@ export function createGameController(game, opts = {}) {
   function render() {
     if (destroyed) return
     if (onRender) {
+      let movesForDisplay = []
+      if (selected !== null) {
+        movesForDisplay = getLegalMovesFrom(selected)
+      } else if (!gameOver && !aiThinking) {
+        const all = getLegalMoves()
+        const actionOnly = all.every(m => m.action && m.from === undefined)
+        if (actionOnly) movesForDisplay = all
+      }
       onRender(game, {
         selected,
         lastMove,
         flipped,
         aiThinking,
         gameOver,
-        legalMoves: selected !== null ? getLegalMovesFrom(selected) : [],
+        legalMoves: movesForDisplay,
       })
     }
   }
@@ -77,6 +86,15 @@ export function createGameController(game, opts = {}) {
     if (!isHuman(currentPlayer())) return
 
     const moves = getLegalMoves()
+
+    if (selected === null && chainAnchor === null && !dropType) {
+      const actionHit = moves.find(m => m.action && m.from === undefined && String(m.to) === String(pos))
+      if (actionHit) {
+        executeMove(actionHit)
+        return
+      }
+    }
+
     const result = interaction.handleClick(pos, {
       selected,
       chainAnchor,
@@ -234,8 +252,15 @@ export function createGameController(game, opts = {}) {
     }
 
     if (result.continueTurn) {
-      chainAnchor = move.to !== undefined ? move.to : null
-      selected = chainAnchor
+      const nextMoves = getLegalMoves()
+      const hasFromMoves = nextMoves.some(m => m.from !== undefined)
+      if (hasFromMoves) {
+        chainAnchor = move.to !== undefined ? move.to : null
+        selected = chainAnchor
+      } else {
+        chainAnchor = null
+        selected = null
+      }
       if (onActionsChange) onActionsChange(getAvailableActions())
       render()
       return true
@@ -246,11 +271,18 @@ export function createGameController(game, opts = {}) {
     if (onTurnChange) onTurnChange(currentPlayer())
     if (onActionsChange) onActionsChange(getAvailableActions())
 
-    render()
-    checkGameEnd()
+    const afterRender = () => {
+      render()
+      checkGameEnd()
+      if (!gameOver && isAI(currentPlayer())) {
+        scheduleAIMove()
+      }
+    }
 
-    if (!gameOver && isAI(currentPlayer())) {
-      scheduleAIMove()
+    if (onAnimateMove && move.from !== undefined && move.to !== undefined) {
+      onAnimateMove(move, { lastMove, player }, afterRender)
+    } else {
+      afterRender()
     }
 
     return true
@@ -338,11 +370,19 @@ export function createGameController(game, opts = {}) {
 
     aiThinking = false
     if (onTurnChange) onTurnChange(currentPlayer())
-    render()
-    checkGameEnd()
 
-    if (!gameOver && isAI(currentPlayer())) {
-      scheduleAIMove()
+    const afterAIRender = () => {
+      render()
+      checkGameEnd()
+      if (!gameOver && isAI(currentPlayer())) {
+        scheduleAIMove()
+      }
+    }
+
+    if (onAnimateMove && move.from !== undefined && move.to !== undefined) {
+      onAnimateMove(move, { lastMove, player }, afterAIRender)
+    } else {
+      afterAIRender()
     }
   }
 
@@ -421,5 +461,6 @@ export function createGameController(game, opts = {}) {
     currentPlayer,
     render,
     destroy,
+    setRenderOpts(next) { renderOpts = { ...renderOpts, ...next } },
   }
 }

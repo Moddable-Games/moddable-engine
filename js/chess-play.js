@@ -417,6 +417,13 @@ function buildUI() {
         <option value="slow">Slow</option>
       </select>
     </div>
+    <div class="control-group">
+      <label class="control-label">Engine</label>
+      <select id="chess-engine-select">
+        <option value="mce" selected>MCE</option>
+        <option value="generic">Generic</option>
+      </select>
+    </div>
     <div class="chess-controls">
       <button id="chess-new-btn" class="btn btn-primary">New Game</button>
       <button id="chess-undo-btn" class="btn btn-outline">Undo</button>
@@ -1047,6 +1054,16 @@ function bindEvents(container) {
   container.querySelector('#chess-color-select')?.addEventListener('change', () => startGame())
   container.querySelector('#chess-opponent-select')?.addEventListener('change', () => startGame())
   container.querySelector('#chess-difficulty-select')?.addEventListener('change', () => startGame())
+  container.querySelector('#chess-engine-select')?.addEventListener('change', (e) => {
+    if (e.target.value === 'generic') {
+      const params = new URLSearchParams(location.search)
+      params.set('family', 'chess')
+      params.set('engine', 'plugin')
+      params.set('variant', currentVariant)
+      params.delete('mode')
+      location.search = params.toString()
+    }
+  })
 }
 
 function updateURL() {

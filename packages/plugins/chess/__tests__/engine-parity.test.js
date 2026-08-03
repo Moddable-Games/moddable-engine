@@ -44,6 +44,8 @@ const PARITY_SKIP = new Set([
   'fogOfWar',     // visibility hook not in MCE parity scope
   'duckChess',    // two-phase turn (duck placement) not comparable to MCE's turnLogic
   'sittuyin',     // placement phase not in MCE
+  'progressiveItalian', // no MCE equivalent (Italian rule is generic-only)
+  'teleportChess',      // deliberate divergence: MCE uses unsourced 3-per-side budget; generic uses per-piece tokens per chessvariants.com
 ])
 const ALL_VARIANTS = listVariants('chess').map(v => v.key).filter(k => !PARITY_SKIP.has(k))
 

@@ -16,9 +16,9 @@ import '../packages/plugins/draughts/index.js'
 import '../packages/plugins/xiangqi/index.js'
 import '../packages/plugins/shogi/index.js'
 
-import { BOARD_THEMES, RULES_BASE, loadGalleryIndex, getGalleryIndex, loadVariantManifest, getManifestVariants } from './play-shared.js'
+import { BOARD_THEMES, RULES_BASE, ANIM_THEME, CAPTURE_BURST_THEME, loadGalleryIndex, getGalleryIndex, loadVariantManifest, getManifestVariants } from './play-shared.js'
 import { createCellAddressing } from './play-cells.js'
-import { paintHighlight, paintIndicator, paintFog, createOverlay } from './play-overlays.js'
+import { paintHighlight, paintIndicator, paintFog, paintEffect, createOverlay } from './play-overlays.js'
 import { bindBoardInteraction } from './play-interaction.js'
 import { renderHandPanel } from './play-hand.js'
 import { renderRulesPanel } from './play-rules.js'
@@ -32,11 +32,12 @@ function buildDefinitionFromResolved(family, variant, resolved, registryCfg) {
   const players = resolved.players || ['white', 'black']
   const setup = resolved.setup || undefined
 
+  const PLAY_ONLY_KEYS = new Set(['key', 'label', 'title', 'group', 'description', 'rule', 'board', 'extends', 'hidden', 'render', 'playerNames', 'definition', 'topology', 'rows', 'cols', 'size', 'players'])
   const pluginConfig = {}
   if (setup) pluginConfig.setup = setup
   for (const [k, v] of Object.entries(registryCfg)) {
-    if (typeof v === 'function') pluginConfig[k] = v
-    else if (k === 'openingBook') pluginConfig[k] = v
+    if (PLAY_ONLY_KEYS.has(k)) continue
+    pluginConfig[k] = v
   }
 
   const def = { title: resolved.meta?.label || variant, slug: variant, parent: family, engine: { players, plugins: { [family]: pluginConfig } } }
@@ -73,12 +74,15 @@ export function createPlaySession(options = {}) {
     variant,
     container,
     handContainer = null,
+    capturedContainer = null,
     opponent = 'human',
     difficulty = 'medium',
     theme = 'classic',
     colour = '0',
+    pieceSet = 'auto',
     embed = null,
     onStatus = null,
+    onCapture = null,
   } = options
 
   let game = null
@@ -87,6 +91,11 @@ export function createPlaySession(options = {}) {
   let scoring = null
   let deadStones = []
   let currentTheme = theme
+  let currentPieceSet = pieceSet
+  let captured = { 0: [], 1: [] }
+  let flipped = false
+  let currentAnimStyle = options.animStyle || ANIM_THEME.defaultStyle
+  let currentAnimSpeed = options.animSpeed || ANIM_THEME.defaultSpeed
   let resolvedBoard = null
   let cells = null
   let moveHistory = []
@@ -143,8 +152,18 @@ export function createPlaySession(options = {}) {
       onChoiceNeeded: showChoiceDialog,
       onMove: (move, player) => {
         moveHistory.push({ move, player, notation: moveToNotation(move) })
+        const isCapture = move.capture || (move.captures && move.captures.length > 0) || move.enPassant
+        if (isCapture && onCapture) onCapture(move)
+        if (isCapture && move.to !== undefined) captureBurst(move.to)
         if (onStatus) onStatus({ text: `${game.currentPlayer()} to move`, gameOver: false, lastMove: moveToNotation(move) })
         if (embed) embed.post('move', { move, state: summarise() })
+      },
+      onAnimateMove: (move, state, done) => {
+        const variantCfg = getVariantConfig(family, variant) || {}
+        if (variantCfg.visibility) { done(); return }
+        const duration = ANIM_THEME.speeds[currentAnimSpeed] || 0
+        if (duration <= 0) { done(); return }
+        animateMove(move, duration, done)
       },
     })
 
@@ -222,6 +241,9 @@ export function createPlaySession(options = {}) {
       visibleSlice = { ...slice, board }
     }
     const rendered = { ...resolvedBoard, setup: boardToSetup(visibleSlice, resolvedBoard.topology) }
+    if (currentPieceSet !== 'auto') {
+      rendered.pieces = { ...rendered.pieces, set: currentPieceSet }
+    }
     const gallery = getGalleryIndex() || []
     const pieceResult = attachPieceImages(rendered, gallery)
     const svg = renderFromEngine(rendered, {
@@ -257,6 +279,13 @@ export function createPlaySession(options = {}) {
         seenTargets.add(target)
         const hasPiece = !!board[target]
         paintIndicator(overlay, cells.bbox(target, container), hasPiece ? theme.ring : theme.dot, hasPiece)
+      }
+
+      if (slice.effects && slice.effects.length > 0) {
+        for (const effect of slice.effects) {
+          const bbox = cells.bbox(effect.sq, container)
+          if (bbox) paintEffect(overlay, bbox, effect)
+        }
       }
 
       if (visibility) {
@@ -338,6 +367,139 @@ export function createPlaySession(options = {}) {
     container.appendChild(dialog)
   }
 
+  function animateMove(move, duration, done) {
+    if (!container || !cells || duration <= 0) { done(); return }
+    const fromPos = cells.centre(move.from, container)
+    const toPos = cells.centre(move.to, container)
+    if (!fromPos || !toPos) { done(); return }
+    if (!Number.isFinite(fromPos.x) || !Number.isFinite(fromPos.y) ||
+        !Number.isFinite(toPos.x) || !Number.isFinite(toPos.y)) {
+      console.warn('[game-play] animateMove: NaN coordinates, skipping', { from: move.from, to: move.to, fromPos, toPos })
+      done(); return
+    }
+
+    const svgEl = container.querySelector('svg')
+    if (!svgEl) { done(); return }
+
+    const pieceEls = svgEl.querySelectorAll('image')
+    let pieceEl = null
+    for (const el of pieceEls) {
+      const ix = parseFloat(el.getAttribute('x'))
+      const iy = parseFloat(el.getAttribute('y'))
+      const size = parseFloat(el.getAttribute('width'))
+      const cx = ix + size / 2
+      const cy = iy + size / 2
+      if (Math.abs(cx - fromPos.x) < size * 0.5 && Math.abs(cy - fromPos.y) < size * 0.5) {
+        pieceEl = el
+        break
+      }
+    }
+    if (!pieceEl) { done(); return }
+
+    const dx = toPos.x - fromPos.x
+    const dy = toPos.y - fromPos.y
+    const style = currentAnimStyle || ANIM_THEME.defaultStyle
+
+    if (style === 'warp') {
+      const fadeOut = duration * 0.35
+      const fadeIn = duration * 0.35
+      const start = performance.now()
+      function warpFrame(now) {
+        const elapsed = now - start
+        if (elapsed < fadeOut) {
+          pieceEl.setAttribute('opacity', 1 - elapsed / fadeOut)
+          requestAnimationFrame(warpFrame)
+        } else if (elapsed < fadeOut + 50) {
+          pieceEl.setAttribute('opacity', '0')
+          pieceEl.setAttribute('transform', `translate(${dx}, ${dy})`)
+          requestAnimationFrame(warpFrame)
+        } else if (elapsed < fadeOut + 50 + fadeIn) {
+          const tp = (elapsed - fadeOut - 50) / fadeIn
+          pieceEl.setAttribute('opacity', tp)
+          requestAnimationFrame(warpFrame)
+        } else {
+          pieceEl.setAttribute('opacity', '1')
+          done()
+        }
+      }
+      requestAnimationFrame(warpFrame)
+      return
+    }
+
+    if (style === 'arc') {
+      const dist = Math.sqrt(dx * dx + dy * dy)
+      const lift = -dist * 0.3
+      const start = performance.now()
+      function arcFrame(now) {
+        const t = Math.min((now - start) / duration, 1)
+        const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
+        const cx = dx * ease
+        const cy = dy * ease + lift * Math.sin(ease * Math.PI)
+        pieceEl.setAttribute('transform', `translate(${cx}, ${cy})`)
+        if (t < 1) requestAnimationFrame(arcFrame)
+        else done()
+      }
+      requestAnimationFrame(arcFrame)
+      return
+    }
+
+    const easeOut = t => 1 - Math.pow(1 - t, 3)
+    const bounceEase = t => {
+      const n = 7.5625, d = 2.75
+      let tl = t
+      if (tl < 1/d) return n*tl*tl
+      if (tl < 2/d) return n*(tl-=1.5/d)*tl+0.75
+      if (tl < 2.5/d) return n*(tl-=2.25/d)*tl+0.9375
+      return n*(tl-=2.625/d)*tl+0.984375
+    }
+    const easeFn = style === 'bounce' ? bounceEase : easeOut
+
+    const start = performance.now()
+    function frame(now) {
+      const t = Math.min((now - start) / duration, 1)
+      const p = easeFn(t)
+      pieceEl.setAttribute('transform', `translate(${dx * p}, ${dy * p})`)
+      if (t < 1) requestAnimationFrame(frame)
+      else done()
+    }
+    requestAnimationFrame(frame)
+  }
+
+  function captureBurst(pos) {
+    if (!container || !cells) return
+    const c = cells.centre(pos, container)
+    if (!c) return
+    if (!Number.isFinite(c.x) || !Number.isFinite(c.y)) {
+      console.warn('[game-play] captureBurst: NaN coordinates, skipping', { pos, centre: c })
+      return
+    }
+    const svgEl = container.querySelector('svg')
+    if (!svgEl) return
+    const ns = 'http://www.w3.org/2000/svg'
+    const bt = CAPTURE_BURST_THEME
+    const g = document.createElementNS(ns, 'g')
+    g.setAttribute('pointer-events', 'none')
+    for (let i = 0; i < bt.particles; i++) {
+      const angle = (Math.PI * 2 * i) / bt.particles
+      const particle = document.createElementNS(ns, 'circle')
+      particle.setAttribute('cx', c.x)
+      particle.setAttribute('cy', c.y)
+      particle.setAttribute('r', bt.radius)
+      particle.setAttribute('fill', bt.colors[i % bt.colors.length])
+      particle.setAttribute('opacity', '1')
+      g.appendChild(particle)
+      const dist = c.w * bt.spread
+      const tx = Math.cos(angle) * dist
+      const ty = Math.sin(angle) * dist
+      particle.animate([
+        { transform: 'translate(0,0)', opacity: 1 },
+        { transform: `translate(${tx}px,${ty}px)`, opacity: 0 },
+      ], { duration: bt.duration, easing: bt.easing, fill: 'forwards' })
+    }
+    svgEl.appendChild(g)
+    setTimeout(() => g.remove(), bt.duration + 50)
+  }
+
   function findCell(idx) {
     return cells.find(idx, container)
   }
@@ -395,6 +557,19 @@ export function createPlaySession(options = {}) {
     setTheme(next) {
       if (BOARD_THEMES[next]) { currentTheme = next; draw() }
     },
+    setPieceSet(next) {
+      currentPieceSet = next; draw()
+    },
+    setAnimStyle(next) {
+      if (ANIM_THEME.styles.includes(next)) currentAnimStyle = next
+    },
+    setAnimSpeed(next) {
+      if (ANIM_THEME.speeds[next] !== undefined) currentAnimSpeed = next
+    },
+    flip() {
+      flipped = !flipped
+      if (ctrl) ctrl.setFlipped(flipped)
+    },
     markDead: toggleDead,
   }
 
@@ -437,6 +612,38 @@ export async function initGamePlay(container, defaults = {}) {
     { value: '1', label: 'Black' },
   ], params.colour || '0')
   const themeSelect = buildSelect(sidebar, 'Theme', Object.entries(BOARD_THEMES).map(([k, v]) => ({ value: k, label: v.label })), params.theme || 'classic')
+
+  const galleryEntries = (getGalleryIndex() || [])
+    .filter(s => s.id && s.label)
+    .map(s => ({ value: s.id, label: s.label || s.id }))
+  const pieceSetOptions = [{ value: 'auto', label: 'Auto (from rules)' }, ...galleryEntries]
+  const pieceSetSelect = buildSelect(sidebar, 'Pieces', pieceSetOptions, params.pieces || 'auto')
+  const animStyleSelect = buildSelect(sidebar, 'Animation', ANIM_THEME.styles.map(s => ({ value: s, label: s[0].toUpperCase() + s.slice(1) })), params.animStyle || ANIM_THEME.defaultStyle)
+  const animSpeedSelect = buildSelect(sidebar, 'Speed', Object.keys(ANIM_THEME.speeds).map(s => ({ value: s, label: s[0].toUpperCase() + s.slice(1) })), params.animSpeed || ANIM_THEME.defaultSpeed)
+
+  let engineSelect = null
+  if (family === 'chess') {
+    engineSelect = buildSelect(sidebar, 'Engine', [
+      { value: 'generic', label: 'Generic' },
+      { value: 'mce', label: 'MCE' },
+    ], 'generic')
+  }
+
+  const controlsEl = document.createElement('div')
+  controlsEl.className = 'game-play-controls'
+  const flipBtn = document.createElement('button')
+  flipBtn.className = 'btn'
+  flipBtn.textContent = 'Flip'
+  const fullscreenBtn = document.createElement('button')
+  fullscreenBtn.className = 'btn'
+  fullscreenBtn.textContent = 'Fullscreen'
+  controlsEl.appendChild(flipBtn)
+  controlsEl.appendChild(fullscreenBtn)
+  sidebar.appendChild(controlsEl)
+
+  const capturedEl = document.createElement('div')
+  capturedEl.className = 'game-play-captured'
+  sidebar.appendChild(capturedEl)
 
   const rulesEl = document.createElement('div')
   rulesEl.className = 'game-play-rules'
@@ -490,6 +697,8 @@ export async function initGamePlay(container, defaults = {}) {
     variant,
     container: boardArea,
     handContainer: handEl,
+    capturedContainer: capturedEl,
+    pieceSet: pieceSetSelect.value,
     opponent: opponentSelect.value === 'ai' ? 'ai' : 'human',
     difficulty: difficultySelect.value,
     theme: themeSelect.value,
@@ -575,6 +784,26 @@ export async function initGamePlay(container, defaults = {}) {
   difficultySelect.addEventListener('change', () => restart({ difficulty: difficultySelect.value }))
   colourSelect.addEventListener('change', () => restart({ colour: colourSelect.value }))
   themeSelect.addEventListener('change', () => { config.theme = themeSelect.value; session.setTheme(themeSelect.value); updateURL() })
+  pieceSetSelect.addEventListener('change', () => restart({ pieceSet: pieceSetSelect.value }))
+  animStyleSelect.addEventListener('change', () => { if (session) session.setAnimStyle(animStyleSelect.value) })
+  animSpeedSelect.addEventListener('change', () => { if (session) session.setAnimSpeed(animSpeedSelect.value) })
+  flipBtn.addEventListener('click', () => { if (session) { session.flip(); } })
+  fullscreenBtn.addEventListener('click', () => {
+    if (boardArea.requestFullscreen) boardArea.requestFullscreen()
+    else if (boardArea.webkitRequestFullscreen) boardArea.webkitRequestFullscreen()
+  })
+  if (engineSelect) {
+    engineSelect.addEventListener('change', (e) => {
+      if (e.target.value === 'mce') {
+        const p = new URLSearchParams(location.search)
+        p.set('mode', 'play')
+        p.set('family', 'chess')
+        p.set('variant', config.variant || 'standard')
+        p.delete('engine')
+        location.search = p.toString()
+      }
+    })
+  }
 
   await restart({})
   return session

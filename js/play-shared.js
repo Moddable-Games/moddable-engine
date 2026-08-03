@@ -10,6 +10,23 @@ export const BOARD_THEMES = {
 
 export const DARK_THEMES = ['cosmic', 'neon', 'transparent']
 
+export const ANIM_THEME = {
+  speeds: { instant: 0, fast: 120, normal: 220, slow: 400 },
+  styles: ['slide', 'arc', 'bounce', 'warp'],
+  defaultSpeed: 'normal',
+  defaultStyle: 'slide',
+  easing: { slide: 'cubic-out', arc: 'ease-in-out', bounce: 'bounce', warp: 'fade' },
+}
+
+export const CAPTURE_BURST_THEME = {
+  particles: 8,
+  duration: 400,
+  radius: 3,
+  spread: 0.6,
+  colors: ['#ff6', '#f93'],
+  easing: 'ease-out',
+}
+
 export const RULES_BASE = typeof location !== 'undefined' && location.hostname === 'engine.moddable.games'
   ? 'https://rules.moddable.games/'
   : '../../moddable-rules/'

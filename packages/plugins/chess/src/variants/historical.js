@@ -99,8 +99,8 @@ export const courier = {
   },
 }
 
-const SITTUYIN_PAWNS_W = [16,17,18,19,28,29,30,31]
-const SITTUYIN_PAWNS_B = [32,33,34,35,40,41,42,43]
+const SITTUYIN_PAWNS_W = [40,41,42,43,36,37,38,39]
+const SITTUYIN_PAWNS_B = [24,25,26,27,20,21,22,23]
 
 export const sittuyin = {
   key: 'sittuyin',
