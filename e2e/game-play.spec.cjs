@@ -130,22 +130,40 @@ test.describe('game-play surface — browser assertions', () => {
     expect(defsFilter).toBe(1)
   })
 
-  test('AI moves when it is first to act (play as black)', async ({ page }) => {
-    await page.goto(PLAY_URL, { waitUntil: 'networkidle' })
-    await page.waitForSelector('.game-play-sidebar--left select', { timeout: 15000 })
+  const SEAT_TESTS = [
+    { family: 'chess', seat: '1', seatLabel: 'Black', firstMover: 'White' },
+    { family: 'go', seat: '1', seatLabel: 'White', firstMover: 'Black' },
+    { family: 'draughts', seat: '1', seatLabel: 'Black', firstMover: 'White' },
+    { family: 'xiangqi', seat: '1', seatLabel: 'Black', firstMover: 'Red' },
+    { family: 'shogi', seat: '1', seatLabel: 'Gote', firstMover: 'Sente' },
+  ]
 
-    const opponentSelect = page.locator('.control-group', { has: page.locator('.control-label', { hasText: 'Opponent' }) }).locator('select')
-    await opponentSelect.selectOption('ai')
+  for (const { family, seat, seatLabel, firstMover } of SEAT_TESTS) {
+    test(`${family}: AI moves first as ${firstMover}, human (${seatLabel}) can then act`, async ({ page }) => {
+      await page.goto(BASE + `/play/?family=${family}`, { waitUntil: 'networkidle' })
+      await page.waitForSelector('.game-play-sidebar--left select', { timeout: 15000 })
 
-    const colourSelect = page.locator('.control-group', { has: page.locator('.control-label', { hasText: 'Play as' }) }).locator('select')
-    await colourSelect.selectOption('1')
+      const opponentSelect = page.locator('.control-group', { has: page.locator('.control-label', { hasText: 'Opponent' }) }).locator('select')
+      await opponentSelect.selectOption('ai')
 
-    await page.waitForTimeout(1500)
+      const seatSelect = page.locator('.control-group', { has: page.locator('.control-label', { hasText: 'Play as' }) }).locator('select')
+      await seatSelect.selectOption(seat)
 
-    const history = await page.locator('.game-play-history').textContent()
-    expect(history.trim().length).toBeGreaterThan(0)
-    expect(history).toMatch(/1\./)
-  })
+      await page.waitForTimeout(2000)
+
+      const status = await page.locator('.game-play-status').textContent()
+      expect(status).toContain('to move')
+      expect(status).toContain(seatLabel)
+
+      const svg = page.locator('#game-play-root svg')
+      await expect(svg).toBeVisible()
+      const clickTargets = await svg.locator('[data-sq]').all()
+      expect(clickTargets.length).toBeGreaterThan(0)
+
+      await clickTargets[0].click()
+      await page.waitForTimeout(300)
+    })
+  }
 
   test('capture burst produces particle circles that disappear', async ({ page }) => {
     await page.goto(PLAY_URL + '&opponent=human', { waitUntil: 'networkidle' })

@@ -78,7 +78,7 @@ export function createPlaySession(options = {}) {
     opponent = 'human',
     difficulty = 'medium',
     theme = 'classic',
-    colour = '0',
+    seat = '0',
     pieceSet = 'auto',
     embed = null,
     onStatus = null,
@@ -102,7 +102,7 @@ export function createPlaySession(options = {}) {
   let moveHistory = []
   let boardSnapshot = null
   let captureHistory = []
-  const fogViewSide = parseInt(colour, 10) || 0
+  const fogViewSide = parseInt(seat, 10) || 0
 
   function playerNames() {
     return game.raw.definition.players.names || []
@@ -138,7 +138,7 @@ export function createPlaySession(options = {}) {
       : null
 
     const names = playerNames()
-    const humanIdx = resolveHumanIndex(colour, names)
+    const humanIdx = resolveHumanIndex(seat, names)
     const players = {}
     for (let i = 0; i < names.length; i++) {
       players[names[i]] = (ai && i !== humanIdx) ? 'ai' : 'human'
@@ -153,7 +153,7 @@ export function createPlaySession(options = {}) {
         : null,
       onRender: (game, state) => draw(state),
       onTurnChange: (player) => {
-        if (onStatus) onStatus({ text: `${player} to move`, gameOver: false })
+        if (onStatus) onStatus({ text: `${capitalize(player)} to move`, gameOver: false })
       },
       onGameEnd: handleGameEnd,
       onChoiceNeeded: showChoiceDialog,
@@ -173,7 +173,7 @@ export function createPlaySession(options = {}) {
         boardSnapshot = null
         if (isCapture && onCapture) onCapture(move)
         if (isCapture && move.to !== undefined) captureBurst(move.to)
-        if (onStatus) onStatus({ text: `${game.currentPlayer()} to move`, gameOver: false, lastMove: moveToNotation(move) })
+        if (onStatus) onStatus({ text: `${capitalize(game.currentPlayer())} to move`, gameOver: false, lastMove: moveToNotation(move) })
         if (embed) embed.post('move', { move, state: summarise() })
       },
       onAnimateMove: (move, state, done) => {
@@ -203,7 +203,7 @@ export function createPlaySession(options = {}) {
       },
     })
 
-    if (onStatus) onStatus({ text: `${game.currentPlayer()} to move`, gameOver: false })
+    if (onStatus) onStatus({ text: `${capitalize(game.currentPlayer())} to move`, gameOver: false })
 
     if (embed) embed.post('ready', { family, variant, state: summarise() })
     draw()
@@ -729,11 +729,11 @@ export function createPlaySession(options = {}) {
     return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
   }
 
-  function resolveHumanIndex(colour, names) {
-    if (colour === '0' || colour === '1') return parseInt(colour, 10)
-    const idx = names.indexOf(colour)
+  function resolveHumanIndex(seat, names) {
+    if (/^\d+$/.test(seat)) return parseInt(seat, 10)
+    const idx = names.indexOf(seat)
     if (idx !== -1) return idx
-    throw new Error(`[game-play] Invalid colour value: "${colour}". Expected "0", "1", or a player name (${names.join(', ')})`)
+    return 0
   }
 
   function boardToSetup(slice, topo) {
@@ -806,6 +806,30 @@ export async function initGamePlay(container, defaults = {}) {
   let family = params.family
   await Promise.all([loadVariantManifest(), loadPlayabilityManifest(), loadGalleryIndex()])
 
+  const FAMILY_PLAYER_NAMES = {
+    chess: ['White', 'Black'],
+    go: ['Black', 'White'],
+    draughts: ['White', 'Black'],
+    xiangqi: ['Red', 'Black'],
+    shogi: ['Sente', 'Gote'],
+  }
+
+  function seatOptionsForFamily(f) {
+    const names = FAMILY_PLAYER_NAMES[f] || ['Player 1', 'Player 2']
+    return names.map((name, i) => ({ value: String(i), label: name }))
+  }
+
+  function rebuildSeatSelect(f) {
+    const opts = seatOptionsForFamily(f)
+    seatSelect.innerHTML = ''
+    for (const opt of opts) {
+      const o = document.createElement('option')
+      o.value = opt.value
+      o.textContent = opt.label
+      seatSelect.appendChild(o)
+    }
+  }
+
   function variantsForFamily(f) {
     const playable = getPlayableVariants(f)
     if (playable.length > 0) return playable.map(e => ({ key: e.variant, label: e.label, group: e.group, playable: true }))
@@ -845,10 +869,7 @@ export async function initGamePlay(container, defaults = {}) {
     { value: 'ai', label: 'vs AI' },
   ], params.opponent === 'ai' ? 'ai' : 'human')
   const difficultySelect = buildSelect(leftSidebar, 'Difficulty', DIFFICULTIES.map(d => ({ value: d, label: d[0].toUpperCase() + d.slice(1) })), params.difficulty || 'medium')
-  const colourSelect = buildSelect(leftSidebar, 'Play as', [
-    { value: '0', label: 'White' },
-    { value: '1', label: 'Black' },
-  ], params.colour || '0')
+  const seatSelect = buildSelect(leftSidebar, 'Play as', seatOptionsForFamily(family), params.color || '0')
   const themeSelect = buildSelect(leftSidebar, 'Theme', Object.entries(BOARD_THEMES).map(([k, v]) => ({ value: k, label: v.label })), params.theme || 'classic')
 
   const pieceSetSelect = buildSelect(leftSidebar, 'Pieces', [{ value: 'auto', label: 'Auto (from rules)' }], params.pieces || 'auto')
@@ -957,7 +978,7 @@ export async function initGamePlay(container, defaults = {}) {
     pieceSet: pieceSetSelect.value,
     opponent: opponentSelect.value === 'ai' ? 'ai' : 'human',
     difficulty: difficultySelect.value,
-    colour: colourSelect.value,
+    seat: seatSelect.value,
     theme: themeSelect.value,
     embed: params.embed ? bridge : null,
     onStatus: updateStatus,
@@ -1074,14 +1095,15 @@ export async function initGamePlay(container, defaults = {}) {
   familySelect.addEventListener('change', () => {
     family = familySelect.value
     rebuildVariantSelect(family)
+    rebuildSeatSelect(family)
     const newVariant = pickVariant(family, null)
     variantSelect.value = newVariant
-    restart({ family, variant: newVariant })
+    restart({ family, variant: newVariant, seat: seatSelect.value })
   })
   variantSelect.addEventListener('change', () => restart({ variant: variantSelect.value }))
   opponentSelect.addEventListener('change', () => restart({ opponent: opponentSelect.value }))
   difficultySelect.addEventListener('change', () => restart({ difficulty: difficultySelect.value }))
-  colourSelect.addEventListener('change', () => restart({ colour: colourSelect.value }))
+  seatSelect.addEventListener('change', () => restart({ seat: seatSelect.value }))
   themeSelect.addEventListener('change', () => { config.theme = themeSelect.value; session.setTheme(themeSelect.value); updateURL() })
   pieceSetSelect.addEventListener('change', () => restart({ pieceSet: pieceSetSelect.value }))
   pieceStyleSelect.addEventListener('change', () => { if (session) session.setPieceStyle(pieceStyleSelect.value) })
@@ -1161,6 +1183,8 @@ function buildGroupedSelect(parent, label, variants, selected) {
   parent.appendChild(group)
   return sel
 }
+
+function capitalize(s) { return s ? s[0].toUpperCase() + s.slice(1) : '' }
 
 function getVariantPieceKeys(family, variantKey) {
   const vCfg = getVariantConfig(family, variantKey) || {}
