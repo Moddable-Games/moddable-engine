@@ -123,7 +123,7 @@ function runGame(family, variantKey) {
         let subPlies = 0
         while (subPlies < MAX_CONTINUATION) {
           const subMoves = game.getLegalMoves()
-          if (subMoves.length === 0) { outcome = 'deadlock-continuation'; break }
+          if (subMoves.length === 0) { outcome = 'no-moves'; break }
           const sub = game.applyMove(subMoves[Math.floor(Math.random() * subMoves.length)])
           subPlies++
           if (!sub || !sub.ok) { outcome = 'move-rejected'; break }

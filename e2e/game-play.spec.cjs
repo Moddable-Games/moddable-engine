@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test')
 
-const PLAY_URL = (process.env.BASE_URL || 'http://localhost:80/MODDABLE/moddable-engine') + '/play/?mode=game&family=chess'
+const BASE = process.env.BASE_URL || 'http://localhost:80/MODDABLE/moddable-engine'
+const PLAY_URL = BASE + '/play/?family=chess'
 
 test.describe('game-play surface — browser assertions', () => {
   test.beforeEach(async ({ page }) => {
@@ -199,5 +200,36 @@ test.describe('game-play surface — browser assertions', () => {
     }
 
     expect(sawTransform).toBe(true)
+  })
+
+  test('family picker switches game and re-renders board', async ({ page }) => {
+    await page.goto(PLAY_URL, { waitUntil: 'networkidle' })
+    await page.waitForSelector('svg rect[data-sq]', { timeout: 15000 })
+
+    const chessSvg = await page.locator('#game-play-root svg').innerHTML()
+
+    const familySelect = page.locator('.control-group', { has: page.locator('.control-label', { hasText: 'Game' }) }).locator('select')
+    await familySelect.selectOption('go')
+    await page.waitForTimeout(1000)
+
+    await page.waitForSelector('#game-play-root svg', { timeout: 10000 })
+    const goSvg = await page.locator('#game-play-root svg').innerHTML()
+
+    expect(goSvg).not.toBe(chessSvg)
+
+    const url = page.url()
+    expect(url).toContain('family=go')
+  })
+
+  test('deep link ?game=chess&variant=sittuyin loads correctly', async ({ page }) => {
+    await page.goto(BASE + '/play/?game=chess&variant=sittuyin', { waitUntil: 'networkidle' })
+    await page.waitForSelector('svg rect[data-sq]', { timeout: 15000 })
+
+    const familySelect = page.locator('.control-group', { has: page.locator('.control-label', { hasText: 'Game' }) }).locator('select')
+    const familyValue = await familySelect.evaluate(el => el.value)
+    expect(familyValue).toBe('chess')
+
+    const url = page.url()
+    expect(url).toContain('variant=sittuyin')
   })
 })

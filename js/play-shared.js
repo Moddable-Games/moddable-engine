@@ -78,3 +78,36 @@ export function getManifestVariants(family, registeredKeys) {
     .filter(e => registered.has(e.variant) || VERIFIED_DATA_ONLY.has(e.variant))
     .map(e => ({ key: e.variant, label: e.variantTitle || e.variant }))
 }
+
+let _playabilityManifest = null
+export async function loadPlayabilityManifest() {
+  if (_playabilityManifest) return _playabilityManifest
+  try {
+    const resp = await fetch('../play/playability-manifest.json')
+    if (!resp.ok) throw new Error(resp.status)
+    _playabilityManifest = await resp.json()
+  } catch {
+    _playabilityManifest = []
+  }
+  return _playabilityManifest
+}
+
+export function getPlayabilityManifest() { return _playabilityManifest || [] }
+
+export function getPlayableVariants(family) {
+  return getPlayabilityManifest().filter(e => e.family === family && e.playable)
+}
+
+export function getAllManifestVariants(family) {
+  return getPlayabilityManifest().filter(e => e.family === family)
+}
+
+export const PLAYABLE_FAMILIES = ['chess', 'go', 'draughts', 'xiangqi', 'shogi']
+
+export const FAMILY_LABELS = {
+  chess: 'Chess',
+  go: 'Go',
+  draughts: 'Draughts',
+  xiangqi: 'Xiangqi',
+  shogi: 'Shogi',
+}

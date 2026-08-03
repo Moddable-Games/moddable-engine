@@ -1,0 +1,737 @@
+[
+  {
+    "family": "chess",
+    "variant": "absorptionChess",
+    "label": "Absorption Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "almostChess",
+    "label": "Almost Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "amazonChess",
+    "label": "Amazon Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "andernachChess",
+    "label": "Andernach Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "antichess",
+    "label": "Antichess",
+    "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "atomic",
+    "label": "Atomic",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "benedictChess",
+    "label": "Benedict Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "berolinaChess",
+    "label": "Berolina Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "berserkChess",
+    "label": "Berserk Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "breakthrough",
+    "label": "Breakthrough",
+    "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "capablanca",
+    "label": "Capablanca",
+    "group": "Large Boards",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "chaturanga",
+    "label": "Chaturanga",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "checklessChess",
+    "label": "Checkless Chess",
+    "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "chess960",
+    "label": "Chess960",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "chigorin",
+    "label": "Chigorin",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "codrus",
+    "label": "Codrus",
+    "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "courier",
+    "label": "Courier",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "crazyhouse",
+    "label": "Crazyhouse",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "cylinderChess",
+    "label": "Cylinder Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "darkChess",
+    "label": "Dark Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "dianaChess",
+    "label": "Diana Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "diceChess",
+    "label": "Dice Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "displacementChess",
+    "label": "Displacement Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "duckChess",
+    "label": "Duck Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "einsteinChess",
+    "label": "Einstein Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "endgameChess",
+    "label": "Endgame Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "extinction",
+    "label": "Extinction Chess",
+    "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "fiveCheck",
+    "label": "Five-Check",
+    "group": "Tactical",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "fogOfWar",
+    "label": "Fog Of War",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "giveaway",
+    "label": "Giveaway",
+    "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "grand",
+    "label": "Grand",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "gridChess",
+    "label": "Grid Chess",
+    "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "halfChess",
+    "label": "Half Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "hoppelPoppel",
+    "label": "Hoppel Poppel",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "horde",
+    "label": "Horde Chess",
+    "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "immunizationChess",
+    "label": "Immunization Chess",
+    "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "kingOfTheHill",
+    "label": "King of the Hill",
+    "group": "Tactical",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "knightmate",
+    "label": "Knightmate",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "leganChess",
+    "label": "Legan Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "losAlamos",
+    "label": "Los Alamos (6x6)",
+    "group": "Small Boards",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "madrasiChess",
+    "label": "Madrasi Chess",
+    "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "maharaja",
+    "label": "Maharaja",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "makpong",
+    "label": "Makpong",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "makruk",
+    "label": "Makruk",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "marseillais",
+    "label": "Marseillais",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "medusaChess",
+    "label": "Medusa Chess",
+    "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "minichess",
+    "label": "Minichess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "monsterChess",
+    "label": "Monster Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "noCastling",
+    "label": "No Castling",
+    "group": "Classic",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "noRetreat",
+    "label": "No Retreat",
+    "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "omnicide",
+    "label": "Omnicide",
+    "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "ordaChess",
+    "label": "Orda Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "patrolChess",
+    "label": "Patrol Chess",
+    "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "pawnsOnly",
+    "label": "Pawns Only",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "peasantsRevolt",
+    "label": "Peasants Revolt",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "pettyChess",
+    "label": "Petty Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "poisonChess",
+    "label": "Poison Chess",
+    "group": "Tactical",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "progressive",
+    "label": "Progressive",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "progressiveItalian",
+    "label": "Progressive Italian",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "racingKings",
+    "label": "Racing Kings",
+    "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "recruitmentChess",
+    "label": "Recruitment Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "rifle",
+    "label": "Rifle",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "shatar",
+    "label": "Shatar",
+    "group": "Historical",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "shatranj",
+    "label": "Shatranj",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "singleCheck",
+    "label": "Single Check",
+    "group": "Tactical",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "sittuyin",
+    "label": "Sittuyin",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "stalemateWins",
+    "label": "Stalemate Wins",
+    "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "standard",
+    "label": "Standard",
+    "group": "Classic",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "suicideChess",
+    "label": "Suicide Chess",
+    "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "teleportChess",
+    "label": "Teleport Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "threeCheck",
+    "label": "Three-Check",
+    "group": "Tactical",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "toroidalChess",
+    "label": "Toroidal Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "torpedo",
+    "label": "Torpedo",
+    "group": "Classic",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "upsideDown",
+    "label": "Upside Down",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "weakChess",
+    "label": "Weak Chess",
+    "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "draughts",
+    "variant": "brazilian",
+    "label": "Brazilian Draughts",
+    "group": "Standard Board (8×8)",
+    "playable": true
+  },
+  {
+    "family": "draughts",
+    "variant": "canadian",
+    "label": "Canadian Draughts",
+    "group": "Large Board (12×12)",
+    "playable": true
+  },
+  {
+    "family": "draughts",
+    "variant": "czech",
+    "label": "Czech Draughts",
+    "group": "Standard Board (8×8)",
+    "playable": true
+  },
+  {
+    "family": "draughts",
+    "variant": "english",
+    "label": "English Draughts",
+    "group": "Standard Board (8×8)",
+    "playable": true
+  },
+  {
+    "family": "draughts",
+    "variant": "german",
+    "label": "German Draughts",
+    "group": "Standard Board (8×8)",
+    "playable": true
+  },
+  {
+    "family": "draughts",
+    "variant": "ghanaian",
+    "label": "Ghanaian Draughts",
+    "group": "Large Board (10×10)",
+    "playable": true
+  },
+  {
+    "family": "draughts",
+    "variant": "international",
+    "label": "International Draughts",
+    "group": "Large Board (10×10)",
+    "playable": true
+  },
+  {
+    "family": "draughts",
+    "variant": "italian",
+    "label": "Italian Draughts",
+    "group": "Standard Board (8×8)",
+    "playable": true
+  },
+  {
+    "family": "draughts",
+    "variant": "pool",
+    "label": "Pool Checkers",
+    "group": "Standard Board (8×8)",
+    "playable": true
+  },
+  {
+    "family": "draughts",
+    "variant": "russian",
+    "label": "Russian Draughts",
+    "group": "Standard Board (8×8)",
+    "playable": true
+  },
+  {
+    "family": "draughts",
+    "variant": "spanish",
+    "label": "Spanish Draughts",
+    "group": "Standard Board (8×8)",
+    "playable": true
+  },
+  {
+    "family": "draughts",
+    "variant": "spantsiretti",
+    "label": "Spantsiretti",
+    "group": "Extended Board (10×8)",
+    "playable": true
+  },
+  {
+    "family": "draughts",
+    "variant": "turkish-draughts",
+    "label": "Turkish Draughts",
+    "group": "Standard Board (8×8)",
+    "playable": true
+  },
+  {
+    "family": "go",
+    "variant": "13x13",
+    "label": "Go 13×13",
+    "group": "Standard",
+    "playable": true
+  },
+  {
+    "family": "go",
+    "variant": "9x9",
+    "label": "Go 9×9",
+    "group": "Standard",
+    "playable": true
+  },
+  {
+    "family": "go",
+    "variant": "capture-go",
+    "label": "Capture Go",
+    "group": "Teaching",
+    "playable": true
+  },
+  {
+    "family": "go",
+    "variant": "gomoku",
+    "label": "Gomoku",
+    "group": "Five in a Row",
+    "playable": true
+  },
+  {
+    "family": "go",
+    "variant": "ninuki-renju",
+    "label": "Ninuki-Renju",
+    "group": "Five in a Row",
+    "playable": true
+  },
+  {
+    "family": "go",
+    "variant": "one-colour",
+    "label": "One-Colour Go",
+    "group": "Handicap and Teaching",
+    "playable": true
+  },
+  {
+    "family": "go",
+    "variant": "standard",
+    "label": "Go 19×19",
+    "group": "Standard",
+    "playable": true
+  },
+  {
+    "family": "go",
+    "variant": "stoical",
+    "label": "Stoical Go",
+    "group": "Rule Variants",
+    "playable": true
+  },
+  {
+    "family": "go",
+    "variant": "toroidal-go",
+    "label": "Toroidal Go",
+    "group": "Rule Variants",
+    "playable": true
+  },
+  {
+    "family": "shogi",
+    "variant": "gorogoro-plus",
+    "label": "Gorogoro+",
+    "group": "Smaller Board Variants",
+    "playable": true
+  },
+  {
+    "family": "shogi",
+    "variant": "heian-shogi",
+    "label": "Heian Shogi",
+    "group": "Historical",
+    "playable": true
+  },
+  {
+    "family": "shogi",
+    "variant": "judkins-shogi",
+    "label": "Judkins' Shogi",
+    "group": "Smaller Board Variants",
+    "playable": true
+  },
+  {
+    "family": "shogi",
+    "variant": "minishogi",
+    "label": "Minishogi",
+    "group": "Smaller Board Variants",
+    "playable": true
+  },
+  {
+    "family": "shogi",
+    "variant": "standard",
+    "label": "Standard Shogi",
+    "group": "Standard Form",
+    "playable": true
+  },
+  {
+    "family": "xiangqi",
+    "variant": "minixiangqi",
+    "label": "Minixiangqi",
+    "group": "Smaller Board Variants",
+    "playable": true
+  },
+  {
+    "family": "xiangqi",
+    "variant": "standard",
+    "label": "Standard Xiangqi",
+    "group": "Chinese Chess",
+    "playable": true
+  },
+  {
+    "family": "xiangqi",
+    "variant": "xiangqi-42",
+    "label": "Xiangqi 42",
+    "group": "Smaller Board Variants",
+    "playable": true
+  }
+]

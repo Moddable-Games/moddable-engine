@@ -35,6 +35,12 @@ jobs:
         run: npx jest packages/play/__tests__/playability-standard.test.js --no-coverage --forceExit
         env:
           NODE_OPTIONS: '--experimental-vm-modules'
+      - name: Regenerate playability manifest
+        run: node scripts/gen-playability-manifest.mjs
+        env:
+          NODE_OPTIONS: '--experimental-vm-modules'
+      - name: Verify manifest is up to date
+        run: git diff --exit-code play/playability-manifest.json || (echo "Manifest is stale — run scripts/gen-playability-manifest.mjs" && exit 1)
 
   playwright:
     runs-on: ubuntu-latest
@@ -51,8 +57,8 @@ jobs:
         run: npx serve . -l 8080 &
       - name: Wait for server
         run: npx wait-on http://localhost:8080 --timeout 10000
-      - name: Playwright playability (item 4, all families)
-        run: npx playwright test e2e/playability.spec.cjs
+      - name: Playwright e2e (playability + game-play)
+        run: npx playwright test e2e/
         env:
           BASE_URL: http://localhost:8080
       - uses: actions/upload-artifact@v4

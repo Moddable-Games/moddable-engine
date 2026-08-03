@@ -167,18 +167,13 @@
 </footer>
 <script type="module">
 const _params = new URLSearchParams(location.search);
-const _mode = _params.get('mode');
 const _game = _params.get('game');
-const _family = _params.get('family');
 const _isEmbed = _params.has('embed');
 const _hexGames = ['nukes','twilight','colony','talisman','mongo','endless'];
 const _isHexEmbed = _isEmbed && _game && _hexGames.includes(_game);
-const _isGamePlay = (
-  (_family && ['chess','go','draughts','xiangqi','shogi'].includes(_family)) ||
-  _mode === 'play' || _mode === 'solo' ||
-  (_isEmbed && !_isHexEmbed && !_family)
-);
-if (_isGamePlay) {
+if (_isHexEmbed) {
+  import('../js/play.js?v=1.0.9');
+} else {
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.boards-hero').style.display = 'none';
     document.querySelector('.boards-app').style.display = 'none';
@@ -191,8 +186,6 @@ if (_isGamePlay) {
       playContainer.textContent = 'Failed to load: ' + e.message;
     });
   });
-} else {
-  import('../js/play.js?v=1.0.9');
 }
 </script>
 </body>

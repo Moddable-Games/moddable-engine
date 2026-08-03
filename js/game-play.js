@@ -16,7 +16,7 @@ import '../packages/plugins/draughts/index.js'
 import '../packages/plugins/xiangqi/index.js'
 import '../packages/plugins/shogi/index.js'
 
-import { BOARD_THEMES, RULES_BASE, ANIM_THEME, CAPTURE_BURST_THEME, PIECE_STYLES, loadGalleryIndex, getGalleryIndex, loadVariantManifest, getManifestVariants } from './play-shared.js'
+import { BOARD_THEMES, RULES_BASE, ANIM_THEME, CAPTURE_BURST_THEME, PIECE_STYLES, loadGalleryIndex, getGalleryIndex, loadVariantManifest, getManifestVariants, loadPlayabilityManifest, getPlayableVariants, getAllManifestVariants, PLAYABLE_FAMILIES, FAMILY_LABELS } from './play-shared.js'
 import { createCellAddressing } from './play-cells.js'
 import { paintHighlight, paintIndicator, paintFog, paintEffect, createOverlay } from './play-overlays.js'
 import { bindBoardInteraction } from './play-interaction.js'
@@ -802,16 +802,25 @@ export function createPlaySession(options = {}) {
 }
 
 export async function initGamePlay(container, defaults = {}) {
-  const params = parseEmbedParams(location.search, { family: 'go', ...defaults })
-  const family = params.family
-  await Promise.all([loadVariantManifest(), loadGalleryIndex()])
-  const registryVariants = listVariants(family)
-  const registeredKeys = new Set(registryVariants.map(v => v.key))
-  const manifestVariants = getManifestVariants(family, registeredKeys)
-  const variants = [...registryVariants, ...manifestVariants.filter(v => !registeredKeys.has(v.key))]
-  const variant = variants.some(v => v.key === params.variant)
-    ? params.variant
-    : (variants[0] && variants[0].key)
+  const params = parseEmbedParams(location.search, { family: 'chess', ...defaults })
+  let family = params.family
+  await Promise.all([loadVariantManifest(), loadPlayabilityManifest(), loadGalleryIndex()])
+
+  function variantsForFamily(f) {
+    const playable = getPlayableVariants(f)
+    if (playable.length > 0) return playable.map(e => ({ key: e.variant, label: e.label, group: e.group, playable: true }))
+    const registry = listVariants(f)
+    return registry.map(v => ({ key: v.key, label: v.label, group: v.group, playable: true }))
+  }
+
+  function pickVariant(f, requested) {
+    const vs = variantsForFamily(f)
+    if (requested && vs.some(v => v.key === requested)) return requested
+    const std = vs.find(v => v.key === 'standard')
+    return std ? std.key : (vs[0] && vs[0].key)
+  }
+
+  let variant = pickVariant(family, params.variant)
 
   const leftSidebar = document.createElement('aside')
   leftSidebar.className = 'game-play-sidebar game-play-sidebar--left'
@@ -829,7 +838,8 @@ export async function initGamePlay(container, defaults = {}) {
   container.appendChild(boardArea)
   container.appendChild(rightSidebar)
 
-  const variantSelect = buildSelect(leftSidebar, 'Variant', variants.map(v => ({ value: v.key, label: v.label })), variant)
+  const familySelect = buildSelect(leftSidebar, 'Game', PLAYABLE_FAMILIES.map(f => ({ value: f, label: FAMILY_LABELS[f] })), family)
+  const variantSelect = buildGroupedSelect(leftSidebar, 'Variant', variantsForFamily(family), variant)
   const opponentSelect = buildSelect(leftSidebar, 'Opponent', [
     { value: 'human', label: 'Human vs Human' },
     { value: 'ai', label: 'vs AI' },
@@ -845,6 +855,32 @@ export async function initGamePlay(container, defaults = {}) {
   const pieceStyleSelect = buildSelect(leftSidebar, 'Piece Colours', Object.entries(PIECE_STYLES).map(([k, v]) => ({ value: k, label: v.label })), params.pieceStyle || 'auto')
   const animStyleSelect = buildSelect(leftSidebar, 'Animation', ANIM_THEME.styles.map(s => ({ value: s, label: s[0].toUpperCase() + s.slice(1) })), params.animStyle || ANIM_THEME.defaultStyle)
   const animSpeedSelect = buildSelect(leftSidebar, 'Speed', Object.keys(ANIM_THEME.speeds).map(s => ({ value: s, label: s[0].toUpperCase() + s.slice(1) })), params.animSpeed || ANIM_THEME.defaultSpeed)
+
+  function rebuildVariantSelect(f) {
+    const vs = variantsForFamily(f)
+    const grouped = groupByField(vs, 'group')
+    variantSelect.innerHTML = ''
+    for (const [group, items] of grouped) {
+      if (grouped.size > 1) {
+        const optgroup = document.createElement('optgroup')
+        optgroup.label = group
+        for (const v of items) {
+          const o = document.createElement('option')
+          o.value = v.key
+          o.textContent = v.label
+          optgroup.appendChild(o)
+        }
+        variantSelect.appendChild(optgroup)
+      } else {
+        for (const v of items) {
+          const o = document.createElement('option')
+          o.value = v.key
+          o.textContent = v.label
+          variantSelect.appendChild(o)
+        }
+      }
+    }
+  }
 
 
   const statusEl = document.createElement('div')
@@ -928,7 +964,7 @@ export async function initGamePlay(container, defaults = {}) {
   }
 
   function updateRules(variantKey) {
-    const vConfig = getVariantConfig(family, variantKey)
+    const vConfig = getVariantConfig(config.family, variantKey)
     renderRulesPanel(rulesEl, vConfig || {})
   }
 
@@ -979,7 +1015,7 @@ export async function initGamePlay(container, defaults = {}) {
 
   function updateURL() {
     const params = new URLSearchParams(location.search)
-    params.set('family', family)
+    params.set('family', config.family)
     if (config.variant) params.set('variant', config.variant)
     else params.delete('variant')
     if (config.opponent === 'ai') params.set('opponent', 'ai')
@@ -997,7 +1033,7 @@ export async function initGamePlay(container, defaults = {}) {
       console.error('[game-play] Piece gallery loaded 0 entries — fetch may have failed')
       return
     }
-    const needed = getVariantPieceKeys(family, variantKey)
+    const needed = getVariantPieceKeys(config.family, variantKey)
     const compatible = gallery.filter(s => {
       if (!s.id || !s.pieces) return false
       for (const key of needed) {
@@ -1035,6 +1071,13 @@ export async function initGamePlay(container, defaults = {}) {
     renderActions()
   }
 
+  familySelect.addEventListener('change', () => {
+    family = familySelect.value
+    rebuildVariantSelect(family)
+    const newVariant = pickVariant(family, null)
+    variantSelect.value = newVariant
+    restart({ family, variant: newVariant })
+  })
   variantSelect.addEventListener('change', () => restart({ variant: variantSelect.value }))
   opponentSelect.addEventListener('change', () => restart({ opponent: opponentSelect.value }))
   difficultySelect.addEventListener('change', () => restart({ difficulty: difficultySelect.value }))
@@ -1049,7 +1092,7 @@ export async function initGamePlay(container, defaults = {}) {
     if (boardArea.requestFullscreen) boardArea.requestFullscreen()
     else if (boardArea.webkitRequestFullscreen) boardArea.webkitRequestFullscreen()
   })
-  await restart({})
+  await restart({ family, variant })
   return session
 }
 
@@ -1066,6 +1109,52 @@ function buildSelect(parent, label, options, selected) {
     o.textContent = opt.label
     if (opt.value === selected) o.selected = true
     sel.appendChild(o)
+  }
+  group.appendChild(lbl)
+  group.appendChild(sel)
+  parent.appendChild(group)
+  return sel
+}
+
+function groupByField(items, field) {
+  const groups = new Map()
+  for (const item of items) {
+    const key = item[field] || 'Other'
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key).push(item)
+  }
+  return groups
+}
+
+function buildGroupedSelect(parent, label, variants, selected) {
+  const group = document.createElement('div')
+  group.className = 'control-group'
+  const lbl = document.createElement('label')
+  lbl.className = 'control-label'
+  lbl.textContent = label
+  const sel = document.createElement('select')
+  const grouped = groupByField(variants, 'group')
+  for (const [grpName, items] of grouped) {
+    if (grouped.size > 1) {
+      const optgroup = document.createElement('optgroup')
+      optgroup.label = grpName
+      for (const v of items) {
+        const o = document.createElement('option')
+        o.value = v.key
+        o.textContent = v.label
+        if (v.key === selected) o.selected = true
+        optgroup.appendChild(o)
+      }
+      sel.appendChild(optgroup)
+    } else {
+      for (const v of items) {
+        const o = document.createElement('option')
+        o.value = v.key
+        o.textContent = v.label
+        if (v.key === selected) o.selected = true
+        sel.appendChild(o)
+      }
+    }
   }
   group.appendChild(lbl)
   group.appendChild(sel)
