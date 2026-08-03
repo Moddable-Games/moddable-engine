@@ -659,3 +659,29 @@ Every significant decision recorded with alternatives considered and why they we
 - *Big-bang cutover* — build everything, then switch all repos at once. Rejected: the highest-risk approach. If any phase fails, everything fails together. No incremental validation.
 
 **Why:** Isolation is the only approach where a failed or stalled phase does not block any other work, existing users are never affected, and each phase can be independently proven before being adopted. The existing repos become the acceptance test suite — identical output after migration means migration succeeded.
+
+---
+
+### Canonical variant patterns — 2026-08-03
+
+Two shapes exist. Copy the correct one.
+
+**Pure-config variant (no functions):** `packages/plugins/chess/src/variants/capablanca.js`
+
+- One export, named for the variant
+- Contains only: `key`, `rows`, `cols`, `setup`, `pieces`, `vocabulary`, `promotionChoices`, flags (`castling`, `enPassant`, etc.)
+- No functions of any kind
+- **Target state:** this data moves to the `.md` frontmatter in moddable-rules; the JS file is deleted. The playability manifest registers it. No engine file.
+
+**Function variant (needs JS):** `packages/plugins/chess/src/variants/king-of-the-hill.js`
+
+- One export, named for the variant
+- One file per variant — never bundle multiple variants in one file
+- Contains a `winCondition`, `moveFilter`, `afterMove`, or other hook function that cannot be expressed as data
+- Returns player indices (0, 1) or `'draw'`, never colour strings
+
+**Anti-patterns (do not copy):**
+- `custom-pieces.js` — bundles 9 unrelated variants in one file
+- `win-condition.js` — same: 6 variants in one file
+- `filter-variants.js` — same: 8 variants in one file
+- Any variant returning `'white'`/`'black'`/`'player1'` from a win check
