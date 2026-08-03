@@ -22,6 +22,8 @@ const LEGACY_ALLOW = new Set([
   'atomic', 'shatranj', 'chaturanga', 'ordaChess',
   'makruk', 'courier', 'toroidalChess', 'upsideDown', 'chess960',
   'diceChess', 'crazyhouse', 'darkChess', 'fogOfWar', 'duckChess', 'sittuyin',
+  'ordaMirror', 'janus', 'chancellorChess', 'carrera', 'birdsChess',
+  'wildebeest', 'shatranjKamil', 'nightrider', 'hexapawn', 'oblongChess',
 ])
 
 const DATA_KEYS = new Set([

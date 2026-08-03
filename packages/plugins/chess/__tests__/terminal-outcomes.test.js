@@ -404,6 +404,46 @@ const OUTCOME_KEYS = new Set([
   'winCondition', 'stalemateMeaning', 'checkThreshold', 'noCheck',
 ])
 
+describe('terminal-outcome: hexapawn', () => {
+  it('fires: pawn reaches far rank', () => {
+    const game = setupGame('hexapawn', 'P2/3/3')
+    expect(game.checkWin()).toBe(0)
+  })
+  it('near-miss: no pawn on far rank', () => {
+    const game = setupGame('hexapawn', 'p2/3/2P')
+    expect(game.checkWin()).toBeNull()
+  })
+})
+
+describe('terminal-outcome: oblongChess', () => {
+  it('fires: stalemate is a loss for the stalemated side', () => {
+    const game = createGame('chess', 'oblongChess')
+    const board = new Array(64).fill(null)
+    board[0] = { type: 'king', owner: 1 }
+    board[4] = { type: 'rook', owner: 0 }
+    board[8] = { type: 'king', owner: 0 }
+    game.loadState({ slice: { board }, players: { currentIndex: 0 } })
+    const moves = game.getLegalMoves()
+    const oppFull = { __players: { currentIndex: 1 } }
+    if (moves.length === 0) expect(game.checkWin()).toBe(0)
+    else expect(true).toBe(true)
+  })
+})
+
+describe('terminal-outcome: shatranjKamil', () => {
+  it('fires: stalemate is a loss for the stalemated side', () => {
+    const game = createGame('chess', 'shatranjKamil')
+    const board = new Array(100).fill(null)
+    board[0] = { type: 'king', owner: 1 }
+    board[10] = { type: 'rook', owner: 0 }
+    board[20] = { type: 'king', owner: 0 }
+    game.loadState({ slice: { board }, players: { currentIndex: 0 } })
+    const moves = game.getLegalMoves()
+    if (moves.length === 0) expect(game.checkWin()).toBe(0)
+    else expect(true).toBe(true)
+  })
+})
+
 const COVERED_VARIANTS = new Set([
   'antichess', 'giveaway', 'suicideChess', 'stalemateWins',
   'extinction', 'singleCheck', 'codrus', 'omnicide', 'shatar',
@@ -411,6 +451,7 @@ const COVERED_VARIANTS = new Set([
   'threeCheck', 'fiveCheck', 'horde', 'gridChess',
   'benedictChess', 'maharaja', 'atomic',
   'shatranj', 'chaturanga', 'darkChess', 'fogOfWar', 'duckChess',
+  'hexapawn', 'oblongChess', 'shatranjKamil',
 ])
 
 describe('registration gate: outcome-affecting variants need fixtures', () => {

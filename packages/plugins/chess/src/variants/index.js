@@ -20,6 +20,7 @@ export { chigorin, endgameChess, pawnsOnly, peasantsRevolt, halfChess, minichess
 export { almostChess, amazonChess, grand, knightmate, maharaja, hoppelPoppel, berolinaChess, leganChess, ordaChess } from './custom-pieces.js'
 export { rifle, atomic, displacementChess } from './before-move.js'
 export { shatranj, chaturanga, makruk, courier, sittuyin } from './historical.js'
+export { ordaMirror, janus, chancellorChess, carrera, birdsChess, wildebeest, shatranjKamil, nightrider, hexapawn, oblongChess } from './tier0-batch1.js'
 
 export const teleportChess = {
   key: 'teleportChess',

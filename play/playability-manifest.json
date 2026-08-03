@@ -64,6 +64,13 @@
   },
   {
     "family": "chess",
+    "variant": "birdsChess",
+    "label": "Birds Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
     "variant": "breakthrough",
     "label": "Breakthrough",
     "group": "Alternate Rules",
@@ -74,6 +81,20 @@
     "variant": "capablanca",
     "label": "Capablanca",
     "group": "Large Boards",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "carrera",
+    "label": "Carrera",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "chancellorChess",
+    "label": "Chancellor Chess",
+    "group": "Other",
     "playable": true
   },
   {
@@ -232,6 +253,13 @@
   },
   {
     "family": "chess",
+    "variant": "hexapawn",
+    "label": "Hexapawn",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
     "variant": "hoppelPoppel",
     "label": "Hoppel Poppel",
     "group": "Other",
@@ -249,6 +277,13 @@
     "variant": "immunizationChess",
     "label": "Immunization Chess",
     "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "janus",
+    "label": "Janus",
+    "group": "Other",
     "playable": true
   },
   {
@@ -337,6 +372,13 @@
   },
   {
     "family": "chess",
+    "variant": "nightrider",
+    "label": "Nightrider",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
     "variant": "noCastling",
     "label": "No Castling",
     "group": "Classic",
@@ -351,6 +393,13 @@
   },
   {
     "family": "chess",
+    "variant": "oblongChess",
+    "label": "Oblong Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
     "variant": "omnicide",
     "label": "Omnicide",
     "group": "Alternate Rules",
@@ -360,6 +409,13 @@
     "family": "chess",
     "variant": "ordaChess",
     "label": "Orda Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "ordaMirror",
+    "label": "Orda Mirror",
     "group": "Other",
     "playable": true
   },
@@ -449,6 +505,13 @@
   },
   {
     "family": "chess",
+    "variant": "shatranjKamil",
+    "label": "Shatranj Kamil",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
     "variant": "singleCheck",
     "label": "Single Check",
     "group": "Tactical",
@@ -522,6 +585,13 @@
     "variant": "weakChess",
     "label": "Weak Chess",
     "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "wildebeest",
+    "label": "Wildebeest",
+    "group": "Other",
     "playable": true
   },
   {
