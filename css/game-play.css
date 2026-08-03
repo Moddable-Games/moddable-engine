@@ -131,6 +131,14 @@
   padding: 8px 0;
 }
 
+.hand-piece-img {
+  width: 28px;
+  height: 28px;
+  display: block;
+  object-fit: contain;
+  pointer-events: none;
+}
+
 .game-play-controls {
   display: flex;
   gap: 8px;
@@ -154,9 +162,57 @@
 }
 
 .game-play-captured {
-  padding: 4px 0;
+  padding: 8px 0;
   font-size: 12px;
   color: var(--text-muted, #8a8580);
+  border-top: 1px solid var(--border, #2a2d4a);
+}
+
+.game-play-captured:empty {
+  display: none;
+}
+
+.captured-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+
+.captured-label {
+  font-size: 11px;
+  text-transform: capitalize;
+  color: var(--text-muted, #8a8580);
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.captured-piece {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.captured-piece-img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+.captured-piece-text {
+  font-size: 14px;
+  line-height: 1;
+  color: var(--text, #f0ede8);
+}
+
+.captured-count {
+  font-size: 9px;
+  color: var(--text-muted, #8a8580);
+  position: relative;
+  top: -4px;
+  margin-left: -2px;
 }
 
 .game-play .board-cell {

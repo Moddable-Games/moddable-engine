@@ -1,6 +1,8 @@
 const SVG_NS = 'http://www.w3.org/2000/svg'
 
-export function bindBoardInteraction(container, cells, { onCellClick, hover = true }) {
+const DEFAULT_HOVER_FILL = 'rgba(100, 180, 255, 0.15)'
+
+export function bindBoardInteraction(container, cells, { onCellClick, hover = true, hoverColor }) {
   let hoverEl = null
 
   function findCellFromEvent(e) {
@@ -31,7 +33,7 @@ export function bindBoardInteraction(container, cells, { onCellClick, hover = tr
       el.setAttribute('y', bbox.y)
       el.setAttribute('width', bbox.width)
       el.setAttribute('height', bbox.height)
-      el.setAttribute('fill', 'rgba(100, 180, 255, 0.15)')
+      el.setAttribute('fill', hoverColor || DEFAULT_HOVER_FILL)
       el.setAttribute('pointer-events', 'none')
       el.setAttribute('class', 'board-cell-hover')
       cell.parentNode.insertBefore(el, cell.nextSibling)

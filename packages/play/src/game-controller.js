@@ -6,6 +6,7 @@ export function createGameController(game, opts = {}) {
   let renderOpts = opts.renderOpts || {}
 
   const onMove = opts.onMove || null
+  const onBeforeMove = opts.onBeforeMove || null
   const onGameEnd = opts.onGameEnd || null
   const onTurnChange = opts.onTurnChange || null
   const onSelect = opts.onSelect || null
@@ -264,6 +265,7 @@ export function createGameController(game, opts = {}) {
 
   function executeMove(move) {
     const player = currentPlayer()
+    if (onBeforeMove) onBeforeMove(move, player)
     const result = game.execute(move)
 
     if (!result || !result.ok) return false
@@ -385,6 +387,7 @@ export function createGameController(game, opts = {}) {
     if (!move) { aiThinking = false; render(); return }
 
     const player = currentPlayer()
+    if (onBeforeMove) onBeforeMove(move, player)
     const result = game.execute(move)
     if (!result || !result.ok) { aiThinking = false; render(); return }
 

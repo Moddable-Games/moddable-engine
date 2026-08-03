@@ -99,6 +99,8 @@ export function createPlaySession(options = {}) {
   let resolvedBoard = null
   let cells = null
   let moveHistory = []
+  let boardSnapshot = null
+  let captureHistory = []
   const fogViewSide = parseInt(colour, 10) || 0
 
   function playerNames() {
@@ -113,6 +115,9 @@ export function createPlaySession(options = {}) {
     scoring = null
     deadStones = []
     moveHistory = []
+    captured = { 0: [], 1: [] }
+    boardSnapshot = null
+    captureHistory = []
 
     const variantCfg = getVariantConfig(family, variant) || {}
     resolvedBoard = await resolveBoard(family, variantCfg)
@@ -150,9 +155,19 @@ export function createPlaySession(options = {}) {
       },
       onGameEnd: handleGameEnd,
       onChoiceNeeded: showChoiceDialog,
+      onBeforeMove: (move, player) => {
+        const slice = game.getState().slice
+        boardSnapshot = slice.board ? [...slice.board] : null
+      },
       onMove: (move, player) => {
         moveHistory.push({ move, player, notation: moveToNotation(move) })
         const isCapture = move.capture || (move.captures && move.captures.length > 0) || move.enPassant
+        if (isCapture && boardSnapshot) {
+          detectCaptures(move, player, boardSnapshot)
+        } else {
+          captureHistory.push({ side: playerNames().indexOf(player), pieces: [] })
+        }
+        boardSnapshot = null
         if (isCapture && onCapture) onCapture(move)
         if (isCapture && move.to !== undefined) captureBurst(move.to)
         if (onStatus) onStatus({ text: `${game.currentPlayer()} to move`, gameOver: false, lastMove: moveToNotation(move) })
@@ -165,12 +180,31 @@ export function createPlaySession(options = {}) {
         if (duration <= 0) { done(); return }
         animateMove(move, duration, done)
       },
+      onUndo: () => {
+        // Controller undoes 1 or 2 moves; sync our histories to match
+        // The controller's undoStack length after undo tells us the move count
+        const undoCount = ctrl.getState().undoCount
+        while (moveHistory.length > undoCount) moveHistory.pop()
+        while (captureHistory.length > undoCount) captureHistory.pop()
+        // Rebuild captured state from remaining history
+        captured = { 0: [], 1: [] }
+        for (const entry of captureHistory) {
+          for (const piece of entry.pieces) {
+            const capturer = piece._capturer !== undefined ? piece._capturer : entry.side
+            const clean = { ...piece }
+            delete clean._capturer
+            captured[capturer].push(clean)
+          }
+        }
+        renderCaptured()
+      },
     })
 
     if (onStatus) onStatus({ text: `${game.currentPlayer()} to move`, gameOver: false })
 
     if (embed) embed.post('ready', { family, variant, state: summarise() })
     draw()
+    if (capturedContainer) capturedContainer.innerHTML = ''
     return session
   }
 
@@ -340,7 +374,10 @@ export function createPlaySession(options = {}) {
         const entry = vocab[type]
         const symbol = entry?.symbols?.[idx]
         const pieceId = symbol ? (idx === 0 ? 'w' : 'b') + symbol.toUpperCase() : null
-        const image = pieceImages[pieceId] || pieceImages[symbol] || null
+        const image = pieceImages[pieceId]
+          || pieceImages[symbol]
+          || (symbol && pieceImages[symbol.toUpperCase()])
+          || null
         return { id: type, label: symbol || type, image, count }
       })
       return { id: name, label: name, pieces }
@@ -354,6 +391,114 @@ export function createPlaySession(options = {}) {
       enabledFor: isHuman ? names[currentIdx] : null,
       onArm: (pieceType) => ctrl.handleHandClick(pieceType),
     })
+  }
+
+  function detectCaptures(move, player, prevBoard) {
+    const names = playerNames()
+    const playerIdx = names.indexOf(player)
+    const entry = { side: playerIdx, pieces: [] }
+
+    if (move.enPassant && move.captured !== undefined) {
+      const piece = prevBoard[move.captured]
+      if (piece) {
+        entry.pieces.push(piece)
+        captured[playerIdx].push(piece)
+      }
+    } else if (move.captures && move.captures.length > 0) {
+      for (const pos of move.captures) {
+        const piece = prevBoard[pos]
+        if (piece) {
+          const capturer = typeof piece.owner === 'number'
+            ? (piece.owner === 0 ? 1 : 0)
+            : playerIdx
+          entry.pieces.push({ ...piece, _capturer: capturer })
+          captured[capturer].push(piece)
+        }
+      }
+    } else if (move.to !== undefined) {
+      const piece = prevBoard[move.to]
+      if (piece) {
+        entry.pieces.push(piece)
+        captured[playerIdx].push(piece)
+      }
+    }
+
+    captureHistory.push(entry)
+    renderCaptured()
+  }
+
+  function renderCaptured() {
+    if (!capturedContainer) return
+    capturedContainer.innerHTML = ''
+
+    const names = playerNames()
+    const plugin = pluginFor()
+    const vocab = plugin?.vocabulary || {}
+    const gallery = getGalleryIndex() || []
+    const rendered = { ...resolvedBoard, pieces: { ...resolvedBoard.pieces } }
+    if (currentPieceSet !== 'auto') rendered.pieces.set = currentPieceSet
+    const pieceResult = attachPieceImages(rendered, gallery)
+    const pieceImages = pieceResult.images || {}
+
+    const hasPieces = captured[0].length > 0 || captured[1].length > 0
+    if (!hasPieces) return
+
+    for (let side = 0; side < 2; side++) {
+      const pieces = captured[side]
+      if (pieces.length === 0) continue
+
+      const row = document.createElement('div')
+      row.className = 'captured-row'
+
+      const label = document.createElement('span')
+      label.className = 'captured-label'
+      label.textContent = (names[side] || `Player ${side + 1}`) + ':'
+      row.appendChild(label)
+
+      const counted = {}
+      for (const piece of pieces) {
+        const entry = vocab[piece.type]
+        const opOwner = typeof piece.owner === 'number' ? piece.owner : (side === 0 ? 1 : 0)
+        const symbol = entry?.symbols?.[opOwner]
+        const key = symbol || piece.type
+        if (!counted[key]) counted[key] = { symbol, owner: opOwner, type: piece.type, count: 0 }
+        counted[key].count++
+      }
+
+      for (const [key, info] of Object.entries(counted)) {
+        const el = document.createElement('span')
+        el.className = 'captured-piece'
+
+        const pieceId = info.symbol
+          ? (info.owner === 0 ? 'w' : 'b') + info.symbol.toUpperCase()
+          : null
+        const imgSrc = pieceImages[pieceId] || pieceImages[info.symbol] || null
+
+        if (imgSrc) {
+          const img = document.createElement('img')
+          img.src = imgSrc
+          img.alt = info.symbol || info.type
+          img.className = 'captured-piece-img'
+          el.appendChild(img)
+        } else {
+          const txt = document.createElement('span')
+          txt.className = 'captured-piece-text'
+          txt.textContent = info.symbol || info.type
+          el.appendChild(txt)
+        }
+
+        if (info.count > 1) {
+          const badge = document.createElement('span')
+          badge.className = 'captured-count'
+          badge.textContent = info.count
+          el.appendChild(badge)
+        }
+
+        row.appendChild(el)
+      }
+
+      capturedContainer.appendChild(row)
+    }
   }
 
   function showChoiceDialog(choices, player, resolve) {

@@ -30,17 +30,34 @@ describe('engine#78: no hardcoded presentation values in surface code', () => {
       }
     })
 
+    it(`${file}: no rgba() colour literals outside theme/overlay files`, () => {
+      const violations = []
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]
+        if (line.trimStart().startsWith('//')) continue
+        if (line.includes('import')) continue
+        if (line.includes('BOARD_THEMES') || line.includes('theme.')) continue
+        if (line.trimStart().startsWith('const ') || line.trimStart().startsWith('export const ')) continue
+        const rgbaMatches = line.match(/rgba?\([^)]+\)/g)
+        if (rgbaMatches) {
+          violations.push({ line: i + 1, text: line.trim(), matches: rgbaMatches })
+        }
+      }
+      if (violations.length > 0) {
+        const details = violations.map(v => `  L${v.line}: ${v.matches.join(', ')} — ${v.text.slice(0, 80)}`).join('\n')
+        fail(`rgba() colour literals found (move to theme/registry):\n${details}`)
+      }
+    })
+
     it(`${file}: no bare ms duration literals outside theme references`, () => {
       const violations = []
-      const durationPattern = /\b\d{2,4}\b/g
-      const allowedContexts = ['ANIM_THEME', 'CAPTURE_BURST_THEME', 'setTimeout', 'setInterval', 'length', 'index', 'idx', 'pos', '.from', '.to']
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i]
         if (line.trimStart().startsWith('//')) continue
         if (line.includes('ANIM_THEME') || line.includes('CAPTURE_BURST_THEME')) continue
         if (line.includes('duration') && (line.includes('bt.') || line.includes('ANIM'))) continue
         const match = line.match(/duration\s*[:=]\s*(\d{2,4})\b/)
-        if (match && !allowedContexts.some(ctx => line.includes(ctx))) {
+        if (match) {
           violations.push({ line: i + 1, text: line.trim() })
         }
       }
