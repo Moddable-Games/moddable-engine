@@ -23,6 +23,7 @@
     "twemoji": "../twemoji/"
   },
   "pieces": {
+    "duck": { "source": "fluent-emoji", "file": "duck.svg" },
     "wD": { "source": "wikimedia-fairy", "file": "White_dabbaba.svg" },
     "bD": { "source": "wikimedia-fairy", "file": "Black_dabbaba.svg" },
     "wJ": { "source": "wikimedia-fairy", "file": "White_chess_giraffe.svg" },

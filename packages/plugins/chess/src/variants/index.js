@@ -229,6 +229,7 @@ export const duckChess = {
   vocabulary: {
     blocker: { symbols: { '-1': 'D' } },
   },
+  render: { fenMap: { D: 'duck' } },
 
   moveFilter(moves, state) {
     if (state._blockerPhase) {

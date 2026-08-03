@@ -244,6 +244,10 @@ export function createPlaySession(options = {}) {
     if (currentPieceSet !== 'auto') {
       rendered.pieces = { ...rendered.pieces, set: currentPieceSet }
     }
+    const variantCfg = getVariantConfig(family, variant) || {}
+    if (variantCfg.render?.fenMap) {
+      rendered.pieces = { ...rendered.pieces, fenMap: variantCfg.render.fenMap }
+    }
     const gallery = getGalleryIndex() || []
     const pieceResult = attachPieceImages(rendered, gallery)
     const svg = renderFromEngine(rendered, {
@@ -313,7 +317,10 @@ export function createPlaySession(options = {}) {
   }
 
   function renderHand(slice, state) {
-    if (!handContainer || !slice.hands) return
+    if (!handContainer) return
+    const hasHands = slice.hands && slice.hands.some(h => h && h.length > 0)
+    const hasPlacement = slice._phase === 'placement' && slice._toPlace
+    if (!hasHands && !hasPlacement) return
     const names = playerNames()
     const currentIdx = names.indexOf(game.currentPlayer())
     const plugin = pluginFor()
@@ -322,9 +329,9 @@ export function createPlaySession(options = {}) {
     const pieceSet = resolvedBoard.pieces?.set
 
     const sides = names.map((name, idx) => {
-      const hand = slice.hands[idx] || []
+      const source = hasPlacement ? (slice._toPlace[idx] || []) : (slice.hands?.[idx] || [])
       const counted = {}
-      for (const t of hand) counted[t] = (counted[t] || 0) + 1
+      for (const t of source) counted[t] = (counted[t] || 0) + 1
       const pieces = Object.entries(counted).map(([type, count]) => {
         const entry = vocab[type]
         const symbol = entry?.symbols?.[idx]

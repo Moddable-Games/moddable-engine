@@ -68,7 +68,11 @@ export function createGameController(game, opts = {}) {
       } else if (!gameOver && !aiThinking) {
         const all = getLegalMoves()
         const actionOnly = all.every(m => m.action && m.from === undefined)
-        if (actionOnly) movesForDisplay = all
+        if (actionOnly) {
+          movesForDisplay = dropType
+            ? all.filter(m => m.type === dropType)
+            : all
+        }
       }
       onRender(game, {
         selected,
@@ -76,6 +80,7 @@ export function createGameController(game, opts = {}) {
         flipped,
         aiThinking,
         gameOver,
+        dropType,
         legalMoves: movesForDisplay,
       })
     }
@@ -87,10 +92,29 @@ export function createGameController(game, opts = {}) {
 
     const moves = getLegalMoves()
 
-    if (selected === null && chainAnchor === null && !dropType) {
-      const actionHit = moves.find(m => m.action && m.from === undefined && String(m.to) === String(pos))
-      if (actionHit) {
-        executeMove(actionHit)
+    if (selected === null && chainAnchor === null) {
+      const actionHits = moves.filter(m => m.action && m.from === undefined && String(m.to) === String(pos))
+      if (actionHits.length > 0) {
+        if (dropType) {
+          const match = actionHits.find(m => m.type === dropType)
+          if (match) { dropType = null; executeMove(match); return }
+          dropType = null
+          render()
+          return
+        }
+        const uniqueTypes = [...new Set(actionHits.map(m => m.type).filter(Boolean))]
+        if (uniqueTypes.length <= 1) {
+          executeMove(actionHits[0])
+          return
+        }
+        if (onChoiceNeeded) {
+          onChoiceNeeded(uniqueTypes, currentPlayer(), (chosen) => {
+            const match = actionHits.find(m => m.type === chosen)
+            if (match) executeMove(match)
+          })
+          return
+        }
+        executeMove(actionHits[0])
         return
       }
     }
@@ -163,8 +187,16 @@ export function createGameController(game, opts = {}) {
   function handleHandClick(pieceType) {
     if (destroyed || gameOver) return
     if (!isHuman(currentPlayer())) return
-    if (!interaction.handleHandClick) return
     const moves = getLegalMoves()
+    const hasActionType = moves.some(m => m.action && m.from === undefined && m.type === pieceType)
+    if (hasActionType) {
+      dropType = pieceType
+      selected = null
+      if (onDropArmed) onDropArmed(pieceType)
+      render()
+      return
+    }
+    if (!interaction.handleHandClick) return
     applyInteractionResult(interaction.handleHandClick(pieceType, { moves, dropType }), moves)
   }
 
