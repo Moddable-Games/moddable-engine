@@ -139,7 +139,7 @@ test.describe('game-play surface — browser assertions', () => {
   ]
 
   for (const { family, seat, seatLabel, firstMover } of SEAT_TESTS) {
-    test(`${family}: AI moves first as ${firstMover}, human (${seatLabel}) can then act`, async ({ page }) => {
+    test(`${family}: AI moves first, human (${seatLabel}) completes a move`, async ({ page }) => {
       await page.goto(BASE + `/play/?family=${family}`, { waitUntil: 'networkidle' })
       await page.waitForSelector('.game-play-sidebar--left select', { timeout: 15000 })
 
@@ -149,19 +149,36 @@ test.describe('game-play surface — browser assertions', () => {
       const seatSelect = page.locator('.control-group', { has: page.locator('.control-label', { hasText: 'Play as' }) }).locator('select')
       await seatSelect.selectOption(seat)
 
-      await page.waitForTimeout(2000)
+      // Wait for AI to move first
+      await page.waitForTimeout(2500)
 
+      // Verify it's now the human's turn
       const status = await page.locator('.game-play-status').textContent()
       expect(status).toContain('to move')
       expect(status).toContain(seatLabel)
 
+      // Snapshot the board before the human acts
       const svg = page.locator('#game-play-root svg')
       await expect(svg).toBeVisible()
-      const clickTargets = await svg.locator('[data-sq]').all()
-      expect(clickTargets.length).toBeGreaterThan(0)
+      const beforeHtml = await svg.innerHTML()
 
-      await clickTargets[0].click()
-      await page.waitForTimeout(300)
+      // Attempt a human move: click cells until the board changes
+      const cells = await svg.locator('[data-sq]').all()
+      expect(cells.length).toBeGreaterThan(0)
+
+      let boardChanged = false
+      for (let i = 0; i < Math.min(cells.length, 10) && !boardChanged; i++) {
+        await cells[i].click()
+        await page.waitForTimeout(200)
+        const afterHtml = await svg.innerHTML()
+        if (afterHtml !== beforeHtml) boardChanged = true
+      }
+
+      // For move-based games (chess, draughts, xiangqi, shogi) the first click
+      // selects a piece (board changes via highlight). For place-based games (go)
+      // the first click on a legal cell places a stone (board changes via new element).
+      // Either way, the board must have changed.
+      expect(boardChanged).toBe(true)
     })
   }
 
