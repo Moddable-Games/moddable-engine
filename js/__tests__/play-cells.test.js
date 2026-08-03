@@ -43,14 +43,14 @@ describe('play-cells — cell addressing', () => {
     const addr = createCellAddressing({ rows: 19, cols: 19, idStyle: 'go', flipped: false })
 
     it('skips I in the alphabet', () => {
-      expect(addr.toId(0)).toBe('A19')
-      expect(addr.toId(8)).toBe('J19')
-      expect(addr.toId(7)).toBe('H19')
+      expect(addr.toId(0)).toBe('a19')
+      expect(addr.toId(8)).toBe('j19')
+      expect(addr.toId(7)).toBe('h19')
     })
 
     it('I does not appear in any cell id', () => {
       for (let i = 0; i < 361; i++) {
-        expect(addr.toId(i)).not.toContain('I')
+        expect(addr.toId(i)).not.toContain('i')
       }
     })
 

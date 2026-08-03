@@ -19,7 +19,7 @@ export const extinction = {
         if (board[i] && board[i].owner === player) has[board[i].type] = true
       }
       for (const t of types) {
-        if (!has[t]) return player === 0 ? 'black' : 'white'
+        if (!has[t]) return 1 - player
       }
     }
     return null
@@ -40,8 +40,8 @@ export const singleCheck = {
   winCondition(state, ctx) {
     const threshold = ctx.config?.checkThreshold || 1
     const checks = state.checkCount || { 0: 0, 1: 0 }
-    if (checks[0] >= threshold) return 'white'
-    if (checks[1] >= threshold) return 'black'
+    if (checks[0] >= threshold) return 0
+    if (checks[1] >= threshold) return 1
     return null
   },
 }
@@ -66,8 +66,8 @@ export const codrus = {
       if (board[i].owner === 0) whiteKing = true
       else blackKing = true
     }
-    if (!whiteKing) return 'white'
-    if (!blackKing) return 'black'
+    if (!whiteKing) return 0
+    if (!blackKing) return 1
     return null
   },
 }
@@ -90,7 +90,7 @@ export const omnicide = {
     for (let i = 0; i < board.length; i++) {
       if (board[i] && board[i].owner === opponent) { hasPiece = true; break }
     }
-    if (!hasPiece) return opponent === 0 ? 'white' : 'black'
+    if (!hasPiece) return opponent
     return null
   },
 }
@@ -114,9 +114,9 @@ export const breakthrough = {
     const cols = 7
     for (let c = 0; c < cols; c++) {
       const topPiece = board[c]
-      if (topPiece && topPiece.type === 'pawn' && topPiece.owner === 0) return 'white'
+      if (topPiece && topPiece.type === 'pawn' && topPiece.owner === 0) return 0
       const botPiece = board[(6) * cols + c]
-      if (botPiece && botPiece.type === 'pawn' && botPiece.owner === 1) return 'black'
+      if (botPiece && botPiece.type === 'pawn' && botPiece.owner === 1) return 1
     }
     return null
   },
@@ -141,10 +141,10 @@ export const shatar = {
       if (board[i].owner === 0) { wCount++; if (board[i].type === 'king') wKing = true }
       else { bCount++; if (board[i].type === 'king') bKing = true }
     }
-    if (!wKing) return 'black'
-    if (!bKing) return 'white'
-    if (wCount === 1 && wKing) return 'black'
-    if (bCount === 1 && bKing) return 'white'
+    if (!wKing) return 1
+    if (!bKing) return 0
+    if (wCount === 1 && wKing) return 1
+    if (bCount === 1 && bKing) return 0
     return null
   },
 }

@@ -99,7 +99,7 @@ describe('go scoring', () => {
       )
       expect(result.scores.white).toBe(6.5)
       expect(result.scores.black).toBe(0)
-      expect(result.winner).toBe('white')
+      expect(result.winner).toBe(1)
     })
 
     it('counts territory for the enclosing colour', () => {
@@ -151,7 +151,7 @@ describe('go scoring', () => {
       expect(result.territory.white).toBe(1)
       expect(result.scores.white).toBe(2)
       expect(result.scores.black).toBe(1)
-      expect(result.winner).toBe('white')
+      expect(result.winner).toBe(1)
     })
 
     it('reports a draw when scores are level', () => {

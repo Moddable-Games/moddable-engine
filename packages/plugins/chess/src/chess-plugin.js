@@ -857,16 +857,15 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
     if (oppMoves.length === 0) {
       if (config.noCheck) {
-        if (config.stalemateMeaning === 'win') return opponent === 0 ? 'white' : 'black'
-        if (config.stalemateMeaning === 'loss') return playerIdx === 0 ? 'white' : 'black'
+        if (config.stalemateMeaning === 'win') return opponent
+        if (config.stalemateMeaning === 'loss') return playerIdx
         return 'draw'
       }
       if (isInCheck(slice.board, opponent)) {
-        return playerIdx === 0 ? 'white' : 'black'
+        return playerIdx
       }
-      if (config.stalemateMeaning === 'win' || config.stalemateMeaning === 'loss') {
-        return playerIdx === 0 ? 'white' : 'black'
-      }
+      if (config.stalemateMeaning === 'win') return opponent
+      if (config.stalemateMeaning === 'loss') return playerIdx
       return 'draw'
     }
 

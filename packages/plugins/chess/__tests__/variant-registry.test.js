@@ -63,7 +63,7 @@ describe('variant-registry', () => {
     it('threeCheck winCondition triggers at 3 checks', () => {
       const config = getVariantConfig('threeCheck')
       const result = config.winCondition({ checkCount: { 0: 3, 1: 1 } }, { currentPlayer: 0 })
-      expect(result).toBe('white')
+      expect(result).toBe(0)
     })
 
     it('threeCheck winCondition returns null below threshold', () => {
@@ -78,7 +78,7 @@ describe('variant-registry', () => {
       board[27] = { type: 'king', owner: 0 }
       board[63] = { type: 'king', owner: 1 }
       const result = config.winCondition({ board }, { currentPlayer: 1 })
-      expect(result).toBe('white')
+      expect(result).toBe(0)
     })
 
     it('antichess moveFilter forces captures', () => {

@@ -174,8 +174,8 @@ function kingCaptureWin(state) {
     if (board[i].owner === 0) whiteKing = true
     else blackKing = true
   }
-  if (!whiteKing) return 'black'
-  if (!blackKing) return 'white'
+  if (!whiteKing) return 1
+  if (!blackKing) return 0
   return null
 }
 

@@ -7,5 +7,5 @@ export const stalemateWins = {
   rule: 'Board: 8x8 · Win: Checkmate or stalemate opponent',
   rows: 8,
   cols: 8,
-  stalemateMeaning: 'win',
+  stalemateMeaning: 'loss',
 }

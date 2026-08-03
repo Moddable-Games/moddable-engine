@@ -194,8 +194,8 @@ export const benedictChess = {
         else blackKing = true
       }
     }
-    if (!whiteKing) return 'black'
-    if (!blackKing) return 'white'
+    if (!whiteKing) return 1
+    if (!blackKing) return 0
     return null
   },
 }

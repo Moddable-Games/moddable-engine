@@ -320,6 +320,7 @@ function translateOp(decl, ctx) {
           return {
             op: 'cells',
             interactive: true,
+            idStyle,
             _prefixRect: { op: 'rect', attrs: { x: ox, y: oy, width: cols * cellSize, height: rows * cellSize, fill: voidFill } },
             fill(r, c) {
               const cell = cellMap[r] && cellMap[r][c]
@@ -371,7 +372,7 @@ function translateOp(decl, ctx) {
         if (decl.typeColors) for (const [t, v] of Object.entries(decl.typeColors)) typeColors[t] = colors[v] || v
         if (decl.typeStrokes) for (const [t, v] of Object.entries(decl.typeStrokes)) typeStrokes[t] = colors[v] || v
         const decorationDefs = decl.decorations || {}
-        const result = { op: 'cells', interactive: true }
+        const result = { op: 'cells', interactive: true, idStyle }
         result.fill = (r, c) => {
           const cell = map[r] && map[r][c]
           if (!cell) return null
@@ -415,7 +416,7 @@ function translateOp(decl, ctx) {
           }
         }
         const decorationDefs = decl.decorations || {}
-        const result = { op: 'cells', interactive: true }
+        const result = { op: 'cells', interactive: true, idStyle }
         result.fill = (r, c) => {
           const cell = map[r] && map[r][c]
           if (!cell) return null

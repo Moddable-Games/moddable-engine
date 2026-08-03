@@ -68,7 +68,7 @@ export const maharaja = {
         break
       }
     }
-    if (!hasMaharaja) return 'black'
+    if (!hasMaharaja) return 1
     return null
   },
 }

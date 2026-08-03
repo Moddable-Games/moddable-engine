@@ -42,12 +42,12 @@ const NOCHECK_STALEMATE_FEN = '7K/8/8/8/8/8/pp6/kp6'
 describe('terminal-outcome: four-way stalemate differential', () => {
   it('antichess: stalemated side WINS', () => {
     const game = setupGame('antichess', NOCHECK_STALEMATE_FEN)
-    expect(game.checkWin()).toBe('black')
+    expect(game.checkWin()).toBe(1)
   })
 
   it('giveaway: stalemated side LOSES (stalemating side wins)', () => {
     const game = setupGame('giveaway', NOCHECK_STALEMATE_FEN)
-    expect(game.checkWin()).toBe('white')
+    expect(game.checkWin()).toBe(0)
   })
 
   it('suicideChess: stalemate is a DRAW', () => {
@@ -57,7 +57,7 @@ describe('terminal-outcome: four-way stalemate differential', () => {
 
   it('stalemateWins: stalemating side WINS', () => {
     const game = setupGame('stalemateWins', STALEMATE_FEN)
-    expect(game.checkWin()).toBe('white')
+    expect(game.checkWin()).toBe(0)
   })
 
   it('all three noCheck variants produce different outcomes from same position', () => {
@@ -77,7 +77,7 @@ describe('terminal-outcome: extinction', () => {
     // White has all types except knight (lost both). Black has all types.
     const game = setupGame('extinction', 'rnbqkb1r/pppppppp/8/8/8/8/PPPPPPPP/R1BQKB1R')
     const result = game.checkWin()
-    expect(result).toBe('black')
+    expect(result).toBe(1)
   })
 
   it('near-miss: one knight remains', () => {
@@ -95,7 +95,7 @@ describe('terminal-outcome: singleCheck', () => {
     state.checkCount = { 0: 1, 1: 0 }
     game.loadState({ slice: state })
     const result = game.checkWin()
-    expect(result).toBe('white')
+    expect(result).toBe(0)
   })
 
   it('near-miss: no checks yet', () => {
@@ -112,7 +112,7 @@ describe('terminal-outcome: codrus', () => {
   it('fires: black king captured (black wins by losing king)', () => {
     const game = setupGame('codrus', 'rnbq1bnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')
     const result = game.checkWin()
-    expect(result).toBe('black')
+    expect(result).toBe(1)
   })
 
   it('near-miss: both kings present', () => {
@@ -127,7 +127,7 @@ describe('terminal-outcome: omnicide', () => {
     // White just moved (playerJustMoved=0), black has no pieces
     const game = setupGame('omnicide', '8/8/8/8/8/8/PPPPPPPP/RNBQKBNR', 0)
     const result = game.checkWin()
-    expect(result).toBe('black')
+    expect(result).toBe(1)
   })
 
   it('near-miss: opponent has one piece', () => {
@@ -142,7 +142,7 @@ describe('terminal-outcome: shatar', () => {
     // Black has only a king. White has king + queen.
     const game = setupGame('shatar', '4k3/8/8/8/8/8/8/3QK3')
     const result = game.checkWin()
-    expect(result).toBe('white')
+    expect(result).toBe(0)
   })
 
   it('near-miss: opponent king + pawn', () => {
@@ -156,7 +156,7 @@ describe('terminal-outcome: duckChess', () => {
   it('fires: king captured', () => {
     const game = setupGame('duckChess', '4R3/8/8/8/8/8/8/4K3')
     const result = game.checkWin()
-    expect(result).toBe('white')
+    expect(result).toBe(0)
   })
 })
 
@@ -164,7 +164,7 @@ describe('terminal-outcome: darkChess', () => {
   it('fires: king captured', () => {
     const game = setupGame('darkChess', '4R3/8/8/8/8/8/8/4K3')
     const result = game.checkWin()
-    expect(result).toBe('white')
+    expect(result).toBe(0)
   })
 })
 
@@ -172,7 +172,7 @@ describe('terminal-outcome: fogOfWar', () => {
   it('fires: king captured', () => {
     const game = setupGame('fogOfWar', '4R3/8/8/8/8/8/8/4K3')
     const result = game.checkWin()
-    expect(result).toBe('white')
+    expect(result).toBe(0)
   })
 })
 
@@ -180,7 +180,7 @@ describe('terminal-outcome: shatranj', () => {
   it('fires: opponent bare king', () => {
     const game = setupGame('shatranj', '4k3/8/8/8/8/8/8/3RK3')
     const result = game.checkWin()
-    expect(result).toBe('white')
+    expect(result).toBe(0)
   })
 })
 
@@ -188,7 +188,7 @@ describe('terminal-outcome: chaturanga', () => {
   it('fires: opponent bare king', () => {
     const game = setupGame('chaturanga', '4k3/8/8/8/8/8/8/3RK3')
     const result = game.checkWin()
-    expect(result).toBe('white')
+    expect(result).toBe(0)
   })
 })
 
@@ -200,7 +200,7 @@ describe('terminal-outcome: breakthrough', () => {
     board[48] = { type: 'pawn', owner: 1 }
     game.loadState({ slice: { board, _cols: 7 } })
     const result = game.checkWin()
-    expect(result).toBe('white')
+    expect(result).toBe(0)
   })
 
   it('near-miss: no pawn on far rank', () => {
@@ -218,7 +218,7 @@ describe('terminal-outcome: racingKings', () => {
   it('fires: white king on rank 8, black cannot reach it -> white wins', () => {
     // White king on a8(0), black king on h1(63). White wins outright.
     const game = setupGame('racingKings', 'K7/8/8/8/8/8/8/7k')
-    expect(game.checkWin()).toBe('white')
+    expect(game.checkWin()).toBe(0)
   })
 
   it('near-miss: neither king on rank 8 -> game continues', () => {
@@ -238,7 +238,7 @@ describe('terminal-outcome: racingKings', () => {
     const game2 = setupGame('racingKings', 'K7/k7/8/8/8/8/8/8')
     const result = game2.checkWin()
     // Documents current (incorrect) behaviour: white wins without equalising move
-    expect(result).toBe('white')
+    expect(result).toBe(0)
   })
 })
 
@@ -248,7 +248,7 @@ describe('terminal-outcome: threeCheck', () => {
     const state = game.getState().slice
     state.checkCount = { 0: 3, 1: 0 }
     game.loadState({ slice: state, players: { currentIndex: 0 } })
-    expect(game.checkWin()).toBe('white')
+    expect(game.checkWin()).toBe(0)
   })
 
   it('near-miss: one below threshold', () => {
@@ -267,7 +267,7 @@ describe('terminal-outcome: threeCheck', () => {
     expect(game.checkWin()).toBeNull()
     state.checkCount = { 0: 1, 1: 3 }
     game.loadState({ slice: state, players: { currentIndex: 0 } })
-    expect(game.checkWin()).toBe('black')
+    expect(game.checkWin()).toBe(1)
   })
 })
 
@@ -277,7 +277,7 @@ describe('terminal-outcome: fiveCheck', () => {
     const state = game.getState().slice
     state.checkCount = { 0: 5, 1: 0 }
     game.loadState({ slice: state, players: { currentIndex: 0 } })
-    expect(game.checkWin()).toBe('white')
+    expect(game.checkWin()).toBe(0)
   })
 
   it('near-miss: four checks (one below threshold)', () => {
@@ -293,7 +293,7 @@ describe('terminal-outcome: kingOfTheHill', () => {
   it('fires: king on centre square', () => {
     const game = setupGame('kingOfTheHill', '8/8/8/3K4/8/8/8/4k3')
     const result = game.checkWin()
-    expect(result).toBe('white')
+    expect(result).toBe(0)
   })
 
   it('near-miss: king adjacent to centre', () => {
@@ -341,7 +341,7 @@ describe('terminal-outcome: gridChess', () => {
 describe('terminal-outcome: horde', () => {
   it('fires: white has no pieces left (black wins)', () => {
     const game = setupGame('horde', '4k3/8/8/8/8/8/8/8')
-    expect(game.checkWin()).toBe('black')
+    expect(game.checkWin()).toBe(1)
   })
 
   it('near-miss: white has one pawn remaining', () => {
@@ -354,7 +354,7 @@ describe('terminal-outcome: benedictChess', () => {
   it('fires: opponent has no king (converted)', () => {
     // White has both kings (original + converted). Black has no king.
     const game = setupGame('benedictChess', '8/8/8/4K3/8/8/8/4K3')
-    expect(game.checkWin()).toBe('white')
+    expect(game.checkWin()).toBe(0)
   })
 
   it('near-miss: both kings present', () => {
@@ -370,7 +370,7 @@ describe('terminal-outcome: atomic', () => {
     board[60] = { type: 'rook', owner: 0 }
     const game = createGame('chess', 'atomic')
     game.loadState({ slice: { board, halfmoveClock: 0, fullmoveNumber: 1 }, players: { currentIndex: 0 } })
-    expect(game.checkWin()).toBe('black')
+    expect(game.checkWin()).toBe(1)
   })
 
   it('near-miss: both kings present', () => {
@@ -382,7 +382,7 @@ describe('terminal-outcome: atomic', () => {
 describe('terminal-outcome: maharaja', () => {
   it('fires: maharaja captured (black wins)', () => {
     const game = setupGame('maharaja', 'rnbqkbnr/pppppppp/8/8/8/8/8/8')
-    expect(game.checkWin()).toBe('black')
+    expect(game.checkWin()).toBe(1)
   })
 
   it('near-miss: maharaja present', () => {

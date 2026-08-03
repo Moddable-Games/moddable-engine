@@ -132,7 +132,7 @@ describe('draughts variants', () => {
       state.slice.board[55] = { type: 'man', owner: 0 }
       state.slice.board[44] = { type: 'man', owner: 1 }
       game.loadState(state)
-      expect(game.checkWin()).toBe('white')
+      expect(game.checkWin()).toBe(0)
     })
 
     it('reports the winner using the definition player names', () => {
@@ -141,7 +141,7 @@ describe('draughts variants', () => {
       state.slice.board = new Array(64).fill(null)
       state.slice.board[50] = { type: 'man', owner: 0 }
       game.loadState(state)
-      expect(game.checkWin()).toBe('white')
+      expect(game.checkWin()).toBe(0)
     })
   })
 })

@@ -217,7 +217,7 @@ describe('plugin-shogi', () => {
       board[14] = { type: 'gold', owner: 0 }
       const state = { board, hands: [[], []], _cols: 5 }
       const result = plugin.checkWin(state, makeContext(0))
-      expect(result).toBe('player1')
+      expect(result).toBe(0)
     })
 
     it('returns null during play', () => {

@@ -221,10 +221,8 @@ export function createPlaySession(options = {}) {
       enterScoringPhase()
       return
     }
-    const names = playerNames()
     const text = result === 'draw' ? 'Draw'
-      : names.includes(result) ? `${result} wins!`
-      : result
+      : `${capitalize(result)} wins!`
     report(text, true)
   }
 
@@ -235,7 +233,8 @@ export function createPlaySession(options = {}) {
       return
     }
     scoring = plugin.score({ ...game.getState().slice, deadStones })
-    report(`${scoring.winner} by ${scoring.margin}`, true)
+    const winnerName = normaliseOutcome(scoring.winner, playerNames())
+    report(`${capitalize(winnerName)} by ${scoring.margin}`, true)
     draw()
   }
 

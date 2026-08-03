@@ -132,7 +132,7 @@ describe('plugin-chess', () => {
       // Qxf7# — white queen captures f7 pawn, checkmate
       const result = game.execute({ from: 31, to: 13 }) // Qxf7#
       expect(result.ok).toBe(true)
-      expect(result.winner).toBe('white')
+      expect(result.winner).toBe(0)
     })
   })
 

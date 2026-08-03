@@ -59,8 +59,8 @@ export const atomic = {
       }
     }
     if (!whiteKing && !blackKing) return 'draw'
-    if (!whiteKing) return 'black'
-    if (!blackKing) return 'white'
+    if (!whiteKing) return 1
+    if (!blackKing) return 0
     return null
   },
 }

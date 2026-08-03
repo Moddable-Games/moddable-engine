@@ -197,8 +197,8 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
     }
 
     if (config.captureTarget) {
-      if ((slice.captures[0] || 0) >= config.captureTarget) return 'black'
-      if ((slice.captures[1] || 0) >= config.captureTarget) return 'white'
+      if ((slice.captures[0] || 0) >= config.captureTarget) return 0
+      if ((slice.captures[1] || 0) >= config.captureTarget) return 1
     }
 
     if (config.allowPass !== false && slice.passes >= 2) {

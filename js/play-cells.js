@@ -1,5 +1,5 @@
 const STANDARD_ALPHA = 'abcdefghijklmnopqrstuvwxyz'
-const GO_ALPHA = 'ABCDEFGHJKLMNOPQRST'
+const GO_ALPHA = 'abcdefghjklmnopqrst'
 
 export function createCellAddressing({ rows, cols, idStyle, flipped = false }) {
   const alpha = idStyle === 'go' ? GO_ALPHA : STANDARD_ALPHA

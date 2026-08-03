@@ -31,7 +31,7 @@ export const antichess = {
         break
       }
     }
-    if (!hasPiece) return opponent === 0 ? 'white' : 'black'
+    if (!hasPiece) return opponent
     return null
   },
 

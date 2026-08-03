@@ -127,7 +127,7 @@ describe('chess with composed rules', () => {
     game.execute({ from: 9, to: 17 })
     const result = game.execute({ from: 31, to: 13 })
     expect(result.ok).toBe(true)
-    expect(result.winner).toBe('white')
+    expect(result.winner).toBe(0)
   })
 
   it('disabling castling via rule override removes castling moves', () => {

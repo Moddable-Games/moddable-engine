@@ -26,14 +26,7 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
   }
 
   function winnerName(playerIndex) {
-    if (Array.isArray(config.playerNames) && config.playerNames[playerIndex]) {
-      return config.playerNames[playerIndex]
-    }
-    const declared = context.definition
-      && context.definition.players
-      && context.definition.players.names
-    if (Array.isArray(declared) && declared[playerIndex]) return declared[playerIndex]
-    return playerIndex === 0 ? 'player1' : 'player2'
+    return playerIndex
   }
 
   let topology = null

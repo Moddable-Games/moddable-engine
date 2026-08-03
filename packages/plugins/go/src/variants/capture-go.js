@@ -19,8 +19,8 @@ export const captureGo = {
 
   winCondition(slice) {
     const target = 1
-    if ((slice.captures[0] || 0) >= target) return 'black'
-    if ((slice.captures[1] || 0) >= target) return 'white'
+    if ((slice.captures[0] || 0) >= target) return 0
+    if ((slice.captures[1] || 0) >= target) return 1
     const full = slice.board.every(cell => cell !== null)
     if (full) return 'draw'
     return null

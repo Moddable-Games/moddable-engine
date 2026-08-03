@@ -31,7 +31,7 @@ function winnerFromRuns(slice, exactly) {
   if (!colour) return null
 
   const run = longestRun(slice.board, last, colour, cols, rows)
-  if (exactly ? run === 5 : run >= 5) return colour
+  if (exactly ? run === 5 : run >= 5) return colour === 'black' ? 0 : 1
   return null
 }
 
@@ -60,7 +60,7 @@ export const gomoku = {
 
   winCondition(slice) {
     const winner = winnerFromRuns(slice, true)
-    if (winner) return winner
+    if (winner !== null) return winner
     if (slice.board.every(cell => cell !== null)) return 'draw'
     return null
   },
@@ -112,9 +112,9 @@ export const ninukiRenju = {
 
   winCondition(slice) {
     const winner = winnerFromRuns(slice, false)
-    if (winner) return winner
-    if ((slice.captures[0] || 0) >= 10) return 'black'
-    if ((slice.captures[1] || 0) >= 10) return 'white'
+    if (winner !== null) return winner
+    if ((slice.captures[0] || 0) >= 10) return 0
+    if ((slice.captures[1] || 0) >= 10) return 1
     if (slice.board.every(cell => cell !== null)) return 'draw'
     return null
   },

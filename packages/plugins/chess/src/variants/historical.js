@@ -6,10 +6,10 @@ const bareKingWin = (state) => {
     if (board[i].owner === 0) { wCount++; if (board[i].type === 'king') wKing = true }
     else { bCount++; if (board[i].type === 'king') bKing = true }
   }
-  if (!wKing) return 'black'
-  if (!bKing) return 'white'
-  if (wCount === 1 && wKing) return 'black'
-  if (bCount === 1 && bKing) return 'white'
+  if (!wKing) return 1
+  if (!bKing) return 0
+  if (wCount === 1 && wKing) return 1
+  if (bCount === 1 && bKing) return 0
   return null
 }
 

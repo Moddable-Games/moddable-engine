@@ -27,7 +27,7 @@ export const giveaway = {
     for (let i = 0; i < board.length; i++) {
       if (board[i] && board[i].owner === opponent) { hasPiece = true; break }
     }
-    if (!hasPiece) return opponent === 0 ? 'white' : 'black'
+    if (!hasPiece) return opponent
     return null
   },
 }
@@ -60,7 +60,7 @@ export const suicideChess = {
     for (let i = 0; i < board.length; i++) {
       if (board[i] && board[i].owner === opponent) { hasPiece = true; break }
     }
-    if (!hasPiece) return opponent === 0 ? 'white' : 'black'
+    if (!hasPiece) return opponent
     return null
   },
 }

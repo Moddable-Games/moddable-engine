@@ -350,12 +350,12 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
       const playerIndex = full.__players.currentIndex
       const opponent = 1 - playerIndex
 
-      if (findKing(slice.board, opponent) === -1) return playerIndex === 0 ? 'player1' : 'player2'
+      if (findKing(slice.board, opponent) === -1) return playerIndex
 
       if (isInCheck(slice.board, opponent)) {
         const oppFull = { __players: { currentIndex: opponent } }
         const oppMoves = this.getLegalMoves(slice, oppFull)
-        if (oppMoves.length === 0) return playerIndex === 0 ? 'player1' : 'player2'
+        if (oppMoves.length === 0) return playerIndex
       }
 
       return null

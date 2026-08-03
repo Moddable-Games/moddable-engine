@@ -15,7 +15,7 @@ export const kingOfTheHill = {
     for (const sq of CENTER_SQUARES) {
       const piece = board[sq]
       if (piece && piece.type === 'king') {
-        return piece.owner === 0 ? 'white' : 'black'
+        return piece.owner
       }
     }
     return null

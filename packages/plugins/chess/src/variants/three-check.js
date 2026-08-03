@@ -12,8 +12,8 @@ export const threeCheck = {
   winCondition(state, ctx) {
     const threshold = ctx.config?.checkThreshold || 3
     const checks = state.checkCount || { 0: 0, 1: 0 }
-    if (checks[0] >= threshold) return 'white'
-    if (checks[1] >= threshold) return 'black'
+    if (checks[0] >= threshold) return 0
+    if (checks[1] >= threshold) return 1
     return null
   },
 

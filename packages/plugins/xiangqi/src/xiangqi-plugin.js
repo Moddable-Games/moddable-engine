@@ -278,13 +278,13 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
       const opponent = 1 - playerIndex
 
       if (findGeneral(slice.board, opponent) === -1) {
-        return playerIndex === 0 ? 'player1' : 'player2'
+        return playerIndex
       }
 
       if (isInCheck(slice.board, opponent)) {
         const oppFull = { __players: { currentIndex: opponent } }
         const oppMoves = this.getLegalMoves(slice, oppFull)
-        if (oppMoves.length === 0) return playerIndex === 0 ? 'player1' : 'player2'
+        if (oppMoves.length === 0) return playerIndex
       }
 
       return null

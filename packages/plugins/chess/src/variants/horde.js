@@ -12,7 +12,7 @@ export const horde = {
   winCondition(state, ctx) {
     const board = state.board
     const whiteHasPieces = board.some(p => p && p.owner === 0)
-    if (!whiteHasPieces) return 'black'
+    if (!whiteHasPieces) return 1
     return null
   },
 

@@ -28,7 +28,7 @@ export const racingKings = {
     for (let c = 0; c < cols; c++) {
       const piece = board[c]
       if (piece && piece.type === 'king') {
-        return piece.owner === 0 ? 'white' : 'black'
+        return piece.owner
       }
     }
     return null
