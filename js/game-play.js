@@ -131,7 +131,8 @@ export function createPlaySession(options = {}) {
     captureHistory = []
 
     const variantCfg = getVariantConfig(family, variant) || {}
-    const variantEntry = variantsForFamily(family).find(v => v.key === variant)
+    const playable = getPlayableVariants(family)
+    const variantEntry = playable.find(e => e.variant === variant)
     const slug = variantEntry?.slug || variant
     resolvedBoard = await resolveBoard(family, variantCfg, variant, slug)
 
