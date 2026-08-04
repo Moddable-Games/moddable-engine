@@ -34,7 +34,7 @@ export function createSimulator(plugin, opts = {}) {
     }
   }
 
-  const hasMakeUnmake = !!(plugin.searchMakeMove && plugin.searchUnmakeMove)
+  const hasMakeUnmake = false
 
   function makeMove(state, move, playerIndex) {
     return plugin.searchMakeMove(state, move, playerIndex)
