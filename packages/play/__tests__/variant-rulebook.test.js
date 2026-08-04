@@ -7,7 +7,7 @@ import '../../plugins/xiangqi/index.js'
 import '../../plugins/shogi/index.js'
 import { getVariantKeys, getRegisteredFamilies } from '../src/variant-registry.js'
 
-const RULES_ROOT = join(process.cwd(), '..', 'moddable-rules', 'games')
+const RULES_ROOT = process.env.MODDABLE_RULES_DIR || join(process.cwd(), '..', 'moddable-rules', 'games')
 const MAX_MISSING = 31
 
 describe('variant-rulebook ratchet', () => {

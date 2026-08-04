@@ -8,7 +8,7 @@ import { pluginConfigFromVariant, topologyFromVariant } from '../src/variant-def
 import '../../plugins/chess/index.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const RULES_DIR = path.resolve(__dirname, '../../../../moddable-rules/games')
+const RULES_DIR = process.env.MODDABLE_RULES_DIR || path.resolve(__dirname, '../../../../moddable-rules/games')
 
 function loadFrontmatter(family, slug) {
   const variantPath = path.join(RULES_DIR, family, 'content/variants', slug + '.md')

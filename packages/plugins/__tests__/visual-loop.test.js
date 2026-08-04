@@ -181,7 +181,7 @@ const DATA_ONLY_VARIANTS = [
 ]
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const DATA_ONLY_RULES = path.resolve(__dirname, '../../../../moddable-rules/games')
+const DATA_ONLY_RULES = process.env.MODDABLE_RULES_DIR || path.resolve(__dirname, '../../../../moddable-rules/games')
 
 function loadDataOnlyVariant(slug, extraConfig) {
   const varPath = path.join(DATA_ONLY_RULES, 'chess/content/variants', slug + '.md')
