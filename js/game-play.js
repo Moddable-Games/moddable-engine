@@ -17,7 +17,7 @@ import '../packages/plugins/xiangqi/index.js'
 import '../packages/plugins/shogi/index.js'
 
 import { BOARD_THEMES, RULES_BASE, ANIM_THEME, CAPTURE_BURST_THEME, PIECE_STYLES, loadGalleryIndex, getGalleryIndex, loadVariantManifest, getManifestVariants, loadPlayabilityManifest, getPlayableVariants, getAllManifestVariants, PLAYABLE_FAMILIES, FAMILY_LABELS } from './play-shared.js'
-import { createCellAddressing } from './play-cells.js'
+import { createCellAddressing, createDirectAddressing } from './play-cells.js'
 import { paintHighlight, paintIndicator, paintFog, paintEffect, createOverlay } from './play-overlays.js'
 import { bindBoardInteraction } from './play-interaction.js'
 import { renderHandPanel } from './play-hand.js'
@@ -26,7 +26,7 @@ import { moveToSAN } from '../packages/plugins/chess/src/san.js'
 
 const DIFFICULTIES = ['beginner', 'easy', 'medium', 'hard', 'expert']
 
-const STRUCTURAL_KEYS = new Set(['topology', 'players', 'meta', 'surface', 'render', 'components'])
+const STRUCTURAL_KEYS = new Set(['topology', 'players', 'meta', 'surface', 'render', 'components', 'pieces'])
 const REGISTRY_PRESENTATION_KEYS = new Set(['key', 'label', 'title', 'group', 'description', 'rule', 'board', 'extends', 'hidden', 'playerNames', 'definition', 'rows', 'cols', 'size', 'notation', 'topology', 'players'])
 
 function buildDefinitionFromResolved(family, variant, resolved, registryCfg) {
@@ -43,6 +43,12 @@ function buildDefinitionFromResolved(family, variant, resolved, registryCfg) {
   for (const [k, v] of Object.entries(resolved)) {
     if (STRUCTURAL_KEYS.has(k)) continue
     if (v !== undefined) pluginConfig[k] = v
+  }
+  const pluginBlock = resolved.plugins?.[family]
+  if (pluginBlock) {
+    for (const [k, v] of Object.entries(pluginBlock)) {
+      if (v !== undefined) pluginConfig[k] = v
+    }
   }
 
   const def = { title: resolved.meta?.label || variant, slug: variant, parent: family, engine: { players, plugins: { [family]: pluginConfig } } }
@@ -139,11 +145,20 @@ export function createPlaySession(options = {}) {
     const frontmatterDef = buildDefinitionFromResolved(family, variant, resolvedBoard, variantCfg)
     game = createGameForFamily(family, { variant, definition: frontmatterDef })
     const topo = resolvedBoard.topology
-    cells = createCellAddressing({
-      rows: topo.rows || 19,
-      cols: topo.cols || 19,
-      idStyle: resolvedBoard.render?.idStyle || 'algebraic',
-    })
+    if (topo.type === 'grid' && topo.rows && topo.cols) {
+      cells = createCellAddressing({
+        rows: topo.rows,
+        cols: topo.cols,
+        idStyle: resolvedBoard.render?.idStyle || 'algebraic',
+      })
+    } else if (topo.type === 'grid' && !topo.rows && !topo.cols) {
+      // Irregular grids (cells-only, e.g. crazy-38s) — use direct addressing
+      cells = createDirectAddressing()
+    } else {
+      // Non-grid topologies (hex, graph, track, etc.) — use direct addressing
+      // Their SVG data-sq values match the move identifiers directly
+      cells = createDirectAddressing()
+    }
     await loadGalleryIndex()
 
     ai = opponent === 'ai'
@@ -344,11 +359,12 @@ export function createPlaySession(options = {}) {
       }
 
       const board = slice.board || []
-      const topo = resolvedBoard.topology
       const seenTargets = new Set()
       for (const m of legalMoves) {
         const target = m.to !== undefined ? m.to : m.coord
-        if (target === undefined || target < 0 || target >= (topo.rows * topo.cols)) continue
+        if (target === undefined || target === null) continue
+        // For grid mode, validate numeric bounds; for direct mode, accept any non-null key
+        if (typeof target === 'number' && (target < 0 || target >= board.length)) continue
         if (seenTargets.has(target)) continue
         seenTargets.add(target)
         const hasPiece = !!board[target]

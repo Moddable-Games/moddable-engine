@@ -39,7 +39,15 @@ export function cellToSymbol(cell, vocabulary = {}) {
 
 export function boardToSetup(slice, topo = {}, vocabulary = {}) {
   const board = slice.board || []
-  if (!Array.isArray(board)) return ''
+  if (!Array.isArray(board)) {
+    const entries = []
+    for (const [coord, cell] of Object.entries(board)) {
+      if (!cell) continue
+      const sym = cellToSymbol(cell, vocabulary)
+      if (sym) entries.push(`${coord}:${sym}`)
+    }
+    return entries.join(',')
+  }
   const cols = topo.cols || Math.round(Math.sqrt(board.length))
   const rows = topo.rows || Math.round(board.length / cols)
 

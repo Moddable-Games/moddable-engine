@@ -68,11 +68,24 @@ export function createGameController(game, opts = {}) {
         movesForDisplay = getLegalMovesFrom(selected)
       } else if (!gameOver && !aiThinking) {
         const all = getLegalMoves()
+        // Determine if moves are "from-less" — placement moves have no from property.
+        // This includes: Go stone placement (coord), duck placement (action + to),
+        // sittuyin placement, crazyhouse drops (when armed).
+        // The routing rule is a property of the move shape, not a list of variant names.
+        const hasFrom = all.some(m => m.from !== undefined)
         const actionOnly = all.every(m => m.action && m.from === undefined)
         if (actionOnly) {
           movesForDisplay = dropType
             ? all.filter(m => m.type === dropType)
             : all
+        } else if (!hasFrom) {
+          // All moves are from-less placements — show all targets
+          movesForDisplay = dropType
+            ? all.filter(m => m.type === dropType)
+            : all
+        } else if (dropType) {
+          // Drop armed: show targets for the armed type
+          movesForDisplay = all.filter(m => m.drop === dropType || m.type === dropType)
         }
       }
       onRender(game, {
@@ -381,7 +394,8 @@ export function createGameController(game, opts = {}) {
     let move = null
     if (aiPickMove) {
       move = aiPickMove(game, { difficulty: aiDifficulty })
-    } else {
+    }
+    if (!move) {
       const moves = getLegalMoves()
       if (moves.length > 0) {
         move = moves[Math.floor(Math.random() * moves.length)]

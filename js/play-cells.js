@@ -1,7 +1,19 @@
 const STANDARD_ALPHA = 'abcdefghijklmnopqrstuvwxyz'
 const GO_ALPHA = 'abcdefghjklmnopqrst'
 
+/**
+ * Cell addressing for grid-based topologies (chess, go, draughts, etc.)
+ * Converts between integer board indices and algebraic notation (e.g. "a1", "e4").
+ */
 export function createCellAddressing({ rows, cols, idStyle, flipped = false }) {
+  if (!rows || !cols) {
+    throw new Error(
+      `createCellAddressing requires rows and cols for grid mode. ` +
+      `Received rows=${rows}, cols=${cols}. ` +
+      `For non-grid topologies (hex, graph), use createDirectAddressing instead.`
+    )
+  }
+
   const alpha = idStyle === 'go' ? GO_ALPHA : STANDARD_ALPHA
 
   function visualIndex(logicalIdx) {
@@ -58,5 +70,65 @@ export function createCellAddressing({ rows, cols, idStyle, flipped = false }) {
     flipped = f
   }
 
-  return { toId, toIndex, find, bbox, centre, setFlipped, get flipped() { return flipped } }
+  return {
+    mode: 'grid',
+    toId,
+    toIndex,
+    find,
+    bbox,
+    centre,
+    setFlipped,
+    get flipped() { return flipped },
+  }
+}
+
+/**
+ * Cell addressing for non-grid topologies (hex, graph, etc.)
+ * Uses string keys directly — the SVG data-sq attribute IS the cell identifier,
+ * matching the keys used by plugin moves (e.g. "0,1" for hex axial coordinates).
+ * No coordinate computation; just direct DOM lookup by key.
+ */
+export function createDirectAddressing({ flipped = false } = {}) {
+
+  // In direct mode, the "id" IS the key (e.g. "0,1" for hex)
+  function toId(key) {
+    return typeof key === 'number' ? null : key
+  }
+
+  // In direct mode, the "index" IS the key string
+  function toIndex(id) {
+    return id
+  }
+
+  function find(key, container) {
+    if (key == null) return null
+    return container.querySelector(`[data-sq="${key}"]`)
+  }
+
+  function bbox(key, container) {
+    const el = find(key, container)
+    if (!el || !el.getBBox) return null
+    return el.getBBox()
+  }
+
+  function centre(key, container) {
+    const b = bbox(key, container)
+    if (!b) return null
+    return { x: b.x + b.width / 2, y: b.y + b.height / 2, w: b.width, h: b.height }
+  }
+
+  function setFlipped(f) {
+    flipped = f
+  }
+
+  return {
+    mode: 'direct',
+    toId,
+    toIndex,
+    find,
+    bbox,
+    centre,
+    setFlipped,
+    get flipped() { return flipped },
+  }
 }

@@ -795,7 +795,7 @@ const OP_HANDLERS = {
     }
     if (emitTo === 'cells') return
     if (op.grouped) {
-      elements.push({ tag: 'g', attrs: { fill: 'transparent' }, children })
+      elements.push({ tag: 'g', attrs: { fill: 'transparent', 'pointer-events': 'all' }, children })
     } else {
       for (const el of children) elements.push(el)
     }

@@ -98,11 +98,11 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
   function derivePawnConfig(topo) {
     if (config.pawnConfig) return config.pawnConfig
-    if (topo && topo.rows !== undefined && topo.cols !== undefined) {
-      return deriveGridPawnConfig(topo)
-    }
     if (config.hexPawnConfig && topo && topo.getAllCells) {
       return deriveHexPawnConfig(topo, config.hexPawnConfig)
+    }
+    if (topo && topo.rows !== undefined && topo.cols !== undefined) {
+      return deriveGridPawnConfig(topo)
     }
     return null
   }

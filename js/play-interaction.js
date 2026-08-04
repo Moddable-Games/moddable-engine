@@ -17,8 +17,10 @@ export function bindBoardInteraction(container, cells, { onCellClick, hover = tr
   container.onclick = (e) => {
     const cell = findCellFromEvent(e)
     if (!cell) return
-    const idx = cells.toIndex(cell.getAttribute('data-sq'))
-    if (idx >= 0 && onCellClick) onCellClick(idx)
+    const key = cells.toIndex(cell.getAttribute('data-sq'))
+    // Grid mode returns -1 for invalid; direct mode returns the string key
+    if (key === -1 || key === null || key === undefined) return
+    if (onCellClick) onCellClick(key)
   }
 
   if (hover) {

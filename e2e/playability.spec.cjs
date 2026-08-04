@@ -231,3 +231,29 @@ test.describe('Playability — xiangqi', () => {
     await page.waitForTimeout(300)
   })
 })
+
+test.describe('Topology coverage — piece count at opening', () => {
+  test.beforeEach(async ({ page }) => {
+    page.on('pageerror', err => console.log('[PAGE ERROR]', err.message))
+  })
+
+  const TOPOLOGY_TESTS = [
+    { family: 'chess', variant: 'standard', topology: 'grid', expectedPieces: 32 },
+    { family: 'chess', variant: 'glinski', topology: 'hex', expectedPieces: 36 },
+    { family: 'chess', variant: 'mccooey', topology: 'hex', expectedPieces: 32 },
+    { family: 'chess', variant: 'brusky', topology: 'hex', expectedPieces: 38 },
+    { family: 'chess', variant: 'de-vasa', topology: 'hex', expectedPieces: 36 },
+    { family: 'chess', variant: 'shafran', topology: 'hex', expectedPieces: 36 },
+    { family: 'chess', variant: 'mini-hexchess', topology: 'hex', expectedPieces: 23 },
+  ]
+
+  for (const { family, variant, topology, expectedPieces } of TOPOLOGY_TESTS) {
+    test(`${topology}/${variant}: renders ${expectedPieces} pieces at opening`, async ({ page }) => {
+      await page.goto(url(family, variant), { waitUntil: 'networkidle' })
+      await waitForBoard(page)
+      await page.waitForTimeout(1000)
+      const pieceCount = await page.locator('#game-play-root svg g[pointer-events="none"] image').count()
+      expect(pieceCount).toBe(expectedPieces)
+    })
+  }
+})
