@@ -145,7 +145,7 @@ export function createHexTopology(config) {
     const results = []
     let q = a.q + d.q, r = a.r + d.r
     let steps = 0
-    const limit = maxSteps || radius * 2
+    const limit = maxSteps || (radius ? radius * 2 : cells.size)
     while (steps < limit) {
       const k = key(q, r)
       if (!cells.has(k)) break
