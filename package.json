@@ -4,7 +4,9 @@
   "description": "Micro-kernel master engine for all Moddable Games titles",
   "type": "module",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "packages/topologies/*",
+    "packages/plugins/*"
   ],
   "exports": {
     "./core": "./packages/core/index.js",
