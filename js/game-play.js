@@ -203,6 +203,14 @@ export function createPlaySession(options = {}) {
       ? createAI(family, variant, { difficulty, definition: frontmatterDef })
       : null
 
+    if (ai) {
+      const aiBoard = ai.simulator.getLegalMoves(game.getState().slice, 0)
+      const gameBoard = game.getLegalMoves()
+      if (aiBoard.length !== gameBoard.length) {
+        console.error(`[AI GUARD] Instance mismatch for ${family}/${variant}: AI sees ${aiBoard.length} moves, game sees ${gameBoard.length}. AI is searching a different board.`)
+      }
+    }
+
     const names = playerNames()
     const humanIdx = resolveHumanIndex(seat, names)
     const players = {}
@@ -221,11 +229,14 @@ export function createPlaySession(options = {}) {
             const move = ai.pickMove(slice, idx)
             if (!move) return null
             const legalMoves = game.getLegalMoves()
-            const isLegal = legalMoves.some(m =>
-              m.from === move.from && m.to === move.to &&
-              (!m.promotion || m.promotion === move.promotion))
+            const isLegal = legalMoves.some(m => {
+              if (m.coord !== undefined) return m.coord === move.coord
+              if (m.action) return m.action === move.action && m.to === move.to
+              return m.from === move.from && m.to === move.to &&
+                (!m.promotion || m.promotion === move.promotion)
+            })
             if (!isLegal) {
-              console.warn(`[AI] move rejected (illegal), falling back to random legal`)
+              console.warn(`[AI] illegal move rejected for ${family}/${variant}: ${JSON.stringify(move)}`)
               return null
             }
             return move
