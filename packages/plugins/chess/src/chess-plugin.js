@@ -435,6 +435,20 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return view
   }
 
+  let _vbCache = null
+  let _vbCacheBoard = null
+  let _vbCachePlayer = -1
+
+  function getCachedViewBoard(board, playerIdx) {
+    if (_vbCacheBoard === board && _vbCachePlayer === playerIdx) {
+      return _vbCache
+    }
+    _vbCache = buildViewBoard(board, playerIdx)
+    _vbCacheBoard = board
+    _vbCachePlayer = playerIdx
+    return _vbCache
+  }
+
   function generateMovesForPiece(from, slice, playerIdx) {
     const piece = getCell(slice.board, from)
     if (!piece) return []
@@ -452,7 +466,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       primitive = fromConfig({ ...pConfig, offsets: pConfig.offsets.map(([dr, dc]) => [-dr, dc]) })
     }
 
-    const viewBoard = buildViewBoard(slice.board, playerIdx)
+    const viewBoard = getCachedViewBoard(slice.board, playerIdx)
     return primitive.genMoves(topology, from, viewBoard)
   }
 

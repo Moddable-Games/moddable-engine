@@ -76,8 +76,13 @@ export function createMinimax(simulator, opts = {}) {
     const useMakeUnmake = simulator.hasMakeUnmake
     const scratch = useMakeUnmake ? simulator.cloneState(state) : state
 
-    const moves = simulator.getLegalMoves(scratch, playerIndex)
-    if (moves.length === 0) return null
+    let moves
+    try {
+      moves = simulator.getLegalMoves(scratch, playerIndex)
+    } catch (e) {
+      return null
+    }
+    if (!moves || moves.length === 0) return null
     if (moves.length === 1) return moves[0]
 
     const bookMove = probeBook(scratch, playerIndex, moves)
@@ -119,7 +124,8 @@ export function createMinimax(simulator, opts = {}) {
       if (bestResults[0].score >= 90000) break
     }
 
-    return selectMove(bestResults, topN, spread)
+    const result = selectMove(bestResults, topN, spread)
+    return result || moves[0]
   }
 
   function negamax(state, currentPlayer, maximizingPlayer, depth, alpha, beta, ply) {

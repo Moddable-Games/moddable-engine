@@ -43,7 +43,9 @@ export function createMCTS(simulator, opts = {}) {
       backpropagate(node, score)
     }
 
-    if (root.children.length === 0) return null
+    if (root.children.length === 0) {
+      return root.untriedMoves.length > 0 ? root.untriedMoves[0] : null
+    }
 
     let bestChild = root.children[0]
     let bestVisits = bestChild.visits
