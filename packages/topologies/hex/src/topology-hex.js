@@ -24,10 +24,18 @@ const HEX_DIAGONALS = [
   { q: -2, r: 1 }, { q: -1, r: 2 }, { q: 1, r: 1 },
 ]
 
+const HEX_KNIGHT_OFFSETS = [
+  { q: 2, r: -1 }, { q: 1, r: -2 }, { q: -1, r: -1 },
+  { q: -2, r: 1 }, { q: -1, r: 2 }, { q: 1, r: 1 },
+  { q: 2, r: 1 }, { q: 1, r: 2 }, { q: -1, r: 1 },
+  { q: -2, r: -1 }, { q: -1, r: -2 }, { q: 1, r: -1 },
+]
+
 const DIRECTION_CATEGORIES = {
   orthogonal: DIRECTIONS,
   diagonal: HEX_DIAGONALS,
   all: [...DIRECTIONS, ...HEX_DIAGONALS],
+  'hex-knight': HEX_KNIGHT_OFFSETS,
 }
 
 export function createHexTopology(config) {
