@@ -24,13 +24,7 @@ for a fixed number of turns, affecting pieces that occupy or enter that cell.
 
 ## Where effects are generated
 
-Engine-native path (generic plugin, used by game-play.js):
 - `packages/plugins/chess/src/variants/effects.js`
-
-MCE adapter path (legacy, used by chess-play.js):
-- `packages/plugins/chess/src/mce/variants/poison-chess.js`
-- `packages/plugins/chess/src/mce/variants/medusa-chess.js`
-- `packages/plugins/chess/src/mce/variants/immunization-chess.js`
 
 ## Effect lifecycle
 

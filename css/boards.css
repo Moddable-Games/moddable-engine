@@ -28,28 +28,6 @@
   top: 64px;
 }
 
-.sidebar-tabs {
-  display: flex;
-  border-bottom: 1px solid var(--border-subtle);
-}
-.sidebar-tab {
-  flex: 1;
-  padding: 12px 8px;
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
-  border-bottom: 2px solid transparent;
-}
-.sidebar-tab:hover { color: var(--text-secondary); }
-.sidebar-tab.active {
-  color: var(--cosmic-glow);
-  border-bottom-color: var(--cosmic-glow);
-}
 
 .sidebar-panel {
   display: none;
@@ -101,12 +79,6 @@
 }
 .control-row .control-group { flex: 1; }
 
-.editor-hint {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 16px;
-  line-height: 1.5;
-}
 
 .btn {
   display: inline-block;
@@ -135,11 +107,6 @@
   color: var(--cosmic-glow);
 }
 
-.export-buttons {
-  display: flex;
-  gap: 8px;
-}
-.export-buttons .btn { flex: 1; text-align: center; }
 
 .boards-canvas {
   display: flex;
@@ -294,34 +261,6 @@
   color: #f1c40f;
 }
 
-.static-placeholder {
-  text-align: center;
-  padding: 48px 24px;
-  color: var(--text-muted);
-}
-.static-icon {
-  font-size: 48px;
-  margin-bottom: 12px;
-  opacity: 0.4;
-}
-.static-label {
-  font-size: 18px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
-}
-.static-note {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin-bottom: 12px;
-}
-.static-path {
-  font-size: 10px;
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-  opacity: 0.6;
-  word-break: break-all;
-}
 
 .piece-picker {
   display: flex;
@@ -566,13 +505,6 @@
 
 /* ─── Character Sheet (rpg-chargen) ─────────────────────────────────────── */
 .rpg-chargen { width: 100%; }
-.chargen-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 0;
-  flex-wrap: wrap;
-}
 .chargen-mode {
   display: flex;
   gap: 0;
@@ -784,42 +716,3 @@
 .chargen-prev:disabled, .chargen-next:disabled { opacity: 0.3; cursor: default; }
 .chargen-page-info { font-size: 12px; color: #888; }
 
-.render-mode-toggle {
-  display: flex;
-  gap: 0;
-  border-radius: 6px;
-  overflow: hidden;
-  border: 1px solid var(--border-subtle);
-}
-.mode-btn {
-  flex: 1;
-  padding: 6px 12px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border: none;
-  background: var(--bg-card);
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-.mode-btn:hover {
-  background: var(--bg-surface);
-  color: var(--text-primary);
-}
-.mode-btn.active {
-  background: var(--cosmic-glow, #4a6fff);
-  color: #fff;
-}
-.schema-badge {
-  display: inline-block;
-  font-size: 9px;
-  font-weight: 600;
-  padding: 2px 5px;
-  border-radius: 3px;
-  background: var(--cosmic-glow, #4a6fff);
-  color: #fff;
-  margin-left: 6px;
-  vertical-align: middle;
-}

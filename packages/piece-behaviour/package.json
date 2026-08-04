@@ -3,9 +3,5 @@
   "version": "0.1.0",
   "type": "module",
   "main": "index.js",
-  "exports": { ".": "./index.js" },
-  "dependencies": {
-    "@moddable/core": "^0.1.0",
-    "@moddable/topology-grid": "^0.1.0"
-  }
+  "exports": { ".": "./index.js" }
 }

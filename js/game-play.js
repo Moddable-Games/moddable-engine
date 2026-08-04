@@ -62,6 +62,55 @@ const FAMILY_AI_OPTIONS = {
     { value: 'hard', label: 'Hard — deeper search' },
     { value: 'expert', label: 'Expert — deepest search' },
   ],
+  reversi: [
+    { value: 'beginner', label: 'Beginner — random' },
+    { value: 'easy', label: 'Easy — corner bias' },
+    { value: 'medium', label: 'Medium — positional' },
+    { value: 'hard', label: 'Hard — deep positional' },
+    { value: 'expert', label: 'Expert — full strength' },
+  ],
+  halma: [
+    { value: 'beginner', label: 'Beginner — random hops' },
+    { value: 'easy', label: 'Easy — advance bias' },
+    { value: 'medium', label: 'Medium — distance eval' },
+    { value: 'hard', label: 'Hard — deeper search' },
+    { value: 'expert', label: 'Expert — full strength' },
+  ],
+  mancala: [
+    { value: 'beginner', label: 'Beginner — random' },
+    { value: 'easy', label: 'Easy — seed count' },
+    { value: 'medium', label: 'Medium — capture aware' },
+    { value: 'hard', label: 'Hard — deeper search' },
+    { value: 'expert', label: 'Expert — full strength' },
+  ],
+  hex: [
+    { value: 'beginner', label: 'Beginner — random' },
+    { value: 'easy', label: 'Easy — MCTS 300 iter' },
+    { value: 'medium', label: 'Medium — MCTS 800 iter' },
+    { value: 'hard', label: 'Hard — MCTS 2k iter' },
+    { value: 'expert', label: 'Expert — MCTS 5k iter' },
+  ],
+  morris: [
+    { value: 'beginner', label: 'Beginner — random' },
+    { value: 'easy', label: 'Easy — mill count' },
+    { value: 'medium', label: 'Medium — mobility' },
+    { value: 'hard', label: 'Hard — deeper search' },
+    { value: 'expert', label: 'Expert — full strength' },
+  ],
+  backgammon: [
+    { value: 'beginner', label: 'Beginner — random' },
+    { value: 'easy', label: 'Easy — pip count' },
+    { value: 'medium', label: 'Medium — positional' },
+    { value: 'hard', label: 'Hard — deeper search' },
+    { value: 'expert', label: 'Expert — full strength' },
+  ],
+  race: [
+    { value: 'beginner', label: 'Beginner — random' },
+    { value: 'easy', label: 'Easy — advance bias' },
+    { value: 'medium', label: 'Medium — position eval' },
+    { value: 'hard', label: 'Hard — deeper search' },
+    { value: 'expert', label: 'Expert — full strength' },
+  ],
 }
 
 const STRUCTURAL_KEYS = new Set(['topology', 'players', 'meta', 'surface', 'render', 'components', 'pieces', 'plugins'])
