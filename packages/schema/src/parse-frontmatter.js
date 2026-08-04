@@ -208,6 +208,9 @@ function parseValue(raw) {
   if (raw.startsWith('[') && raw.endsWith(']')) {
     return parseInlineArray(raw)
   }
+  if (raw.startsWith('{') && raw.endsWith('}')) {
+    return parseInlineObject(raw)
+  }
   return raw
 }
 
@@ -218,13 +221,32 @@ function parseInlineArray(raw) {
   return items.map(s => parseValue(s.trim()))
 }
 
+function parseInlineObject(raw) {
+  const inner = raw.slice(1, -1).trim()
+  if (inner === '') return {}
+  const result = {}
+  const pairs = splitRespectingBrackets(inner)
+  for (const pair of pairs) {
+    const colonIdx = pair.indexOf(':')
+    if (colonIdx === -1) continue
+    let key = pair.slice(0, colonIdx).trim()
+    if ((key.startsWith('"') && key.endsWith('"')) ||
+        (key.startsWith("'") && key.endsWith("'"))) {
+      key = key.slice(1, -1)
+    }
+    const val = pair.slice(colonIdx + 1).trim()
+    result[key] = parseValue(val)
+  }
+  return result
+}
+
 function splitRespectingBrackets(str) {
   const results = []
   let depth = 0
   let current = ''
   for (const ch of str) {
-    if (ch === '[') { depth++; current += ch }
-    else if (ch === ']') { depth--; current += ch }
+    if (ch === '[' || ch === '{') { depth++; current += ch }
+    else if (ch === ']' || ch === '}') { depth--; current += ch }
     else if (ch === ',' && depth === 0) { results.push(current); current = '' }
     else { current += ch }
   }

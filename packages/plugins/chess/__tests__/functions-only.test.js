@@ -24,7 +24,7 @@ const DATA_KEYS = new Set([
   'promotionChoices', 'castling', 'enPassant', 'doubleStep',
   'torpedo', 'noCheck', 'stalemateMeaning', 'royalType',
   'pawnType', 'rookType', 'advancement', 'pawnConfig',
-  'checkThreshold',
+  'pawnStartRow', 'promotionRow', 'checkThreshold',
   'label', 'title', 'group', 'description', 'rule', 'board',
   'extends', 'hidden', 'playerNames', 'players',
 ])

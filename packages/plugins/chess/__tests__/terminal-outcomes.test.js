@@ -445,6 +445,45 @@ describe('terminal-outcome: shatranjKamil', () => {
   })
 })
 
+describe('terminal-outcome: empire', () => {
+  it('fires: faceoff on open file loses for the mover', () => {
+    const game = createGame('chess', 'empire')
+    const board = new Array(64).fill(null)
+    board[60] = { type: 'king', owner: 0 }
+    board[4] = { type: 'emperor', owner: 1 }
+    game.loadState({ slice: { board, halfmoveClock: 0, fullmoveNumber: 1 }, players: { currentIndex: 0 } })
+    expect(game.checkWin()).toBe(1)
+  })
+  it('near-miss: piece between royals blocks faceoff', () => {
+    const game = createGame('chess', 'empire')
+    const board = new Array(64).fill(null)
+    board[60] = { type: 'king', owner: 0 }
+    board[4] = { type: 'emperor', owner: 1 }
+    board[28] = { type: 'pawn', owner: 0 }
+    game.loadState({ slice: { board, halfmoveClock: 0, fullmoveNumber: 1 }, players: { currentIndex: 0 } })
+    expect(game.checkWin()).toBeNull()
+  })
+})
+
+describe('terminal-outcome: khans-chess', () => {
+  it('fires: white king reaches rank 8', () => {
+    const game = createGame('chess', 'khans-chess')
+    const board = new Array(64).fill(null)
+    board[3] = { type: 'king', owner: 0 }
+    board[63] = { type: 'king', owner: 1 }
+    game.loadState({ slice: { board, halfmoveClock: 0, fullmoveNumber: 1 }, players: { currentIndex: 0 } })
+    expect(game.checkWin()).toBe(0)
+  })
+  it('near-miss: king not on back rank', () => {
+    const game = createGame('chess', 'khans-chess')
+    const board = new Array(64).fill(null)
+    board[11] = { type: 'king', owner: 0 }
+    board[52] = { type: 'king', owner: 1 }
+    game.loadState({ slice: { board, halfmoveClock: 0, fullmoveNumber: 1 }, players: { currentIndex: 0 } })
+    expect(game.checkWin()).toBeNull()
+  })
+})
+
 const COVERED_VARIANTS = new Set([
   'antichess', 'giveaway', 'suicideChess', 'stalemate-wins',
   'extinction', 'singleCheck', 'codrus', 'omnicide', 'shatar',
@@ -453,6 +492,7 @@ const COVERED_VARIANTS = new Set([
   'benedictChess', 'maharaja', 'atomic',
   'shatranj', 'chaturanga', 'darkChess', 'fogOfWar', 'duckChess',
   'hexapawn', 'oblongChess', 'shatranjKamil',
+  'empire', 'khans-chess',
 ])
 
 describe('registration gate: outcome-affecting variants need fixtures', () => {

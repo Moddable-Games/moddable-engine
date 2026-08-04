@@ -37,7 +37,7 @@ export const progressive = {
 }
 
 export const progressiveItalian = {
-  key: 'progressiveItalian',
+  key: 'progressive-italian',
 
   turnLogic(ctx) {
     const { movesThisTurn, slice } = ctx

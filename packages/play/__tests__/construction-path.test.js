@@ -1,29 +1,27 @@
 import '../../plugins/chess/index.js'
+import '../test-helpers/setup-rules-reader.js'
 import { getVariantConfig } from '../src/variant-registry.js'
 import { createGameForFamily } from '../src/play.js'
 import { createGameController } from '../src/game-controller.js'
+import { definitionFromVariant } from '../src/variant-definition.js'
 
-const PLAY_ONLY_KEYS = new Set(['key', 'label', 'title', 'group', 'description', 'rule', 'board', 'extends', 'hidden', 'render', 'playerNames', 'definition', 'topology', 'rows', 'cols', 'size', 'players'])
-
-function buildDefinitionFromResolved(family, variant, registryCfg) {
-  const pluginConfig = {}
-  for (const [k, v] of Object.entries(registryCfg)) {
-    if (PLAY_ONLY_KEYS.has(k)) continue
-    pluginConfig[k] = v
-  }
-  return {
-    title: variant, slug: variant, parent: family,
-    engine: { topology: { type: 'grid', rows: 8, cols: 8 }, players: ['white', 'black'], plugins: { [family]: pluginConfig } },
-  }
-}
+const CHESS_DEFAULTS = { topology: { type: 'grid', rows: 8, cols: 8 }, players: ['white', 'black'] }
 
 function createViaPlayPage(variant) {
-  const registryCfg = getVariantConfig('chess', variant) || {}
-  const def = buildDefinitionFromResolved('chess', variant, registryCfg)
-  return createGameForFamily('chess', { variant, definition: def })
+  return createGameForFamily('chess', { variant })
 }
 
 describe('construction-path: play-page definition carries variant features', () => {
+  it('cylinder-chess: topology.wrap survives the definition path', () => {
+    const game = createGameForFamily('chess', { variant: 'cylinder-chess' })
+    expect(game.raw.topology.wrap).toBe('files')
+  })
+
+  it('toroidal-chess: topology.wrap survives the definition path', () => {
+    const game = createGameForFamily('chess', { variant: 'toroidal-chess' })
+    expect(game.raw.topology.wrap).toBe('torus')
+  })
+
   it('teleportChess: actions and initState survive the definition path', () => {
     const game = createViaPlayPage('teleportChess')
     const moves = game.getLegalMoves()
@@ -67,6 +65,16 @@ describe('construction-path: play-page definition carries variant features', () 
     expect(visibility).not.toBeNull()
     const unknownCount = [...visibility.values()].filter(v => v === 'unknown').length
     expect(unknownCount).toBeGreaterThan(0)
+  })
+
+  it('ouk-chaktrang: kingLeap action and once-only state survive the definition path', () => {
+    const game = createViaPlayPage('ouk-chaktrang')
+    const leaps = game.getLegalMoves().filter(m => m.action === 'kingLeap')
+    expect(leaps.length).toBeGreaterThan(0)
+    game.applyMove(leaps[0])
+    game.applyMove(game.getLegalMoves()[0])
+    const leaps2 = game.getLegalMoves().filter(m => m.action === 'kingLeap')
+    expect(leaps2.length).toBe(0)
   })
 
   it('progressive: turnLogic survives the definition path', () => {

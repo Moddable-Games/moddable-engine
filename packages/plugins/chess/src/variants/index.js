@@ -16,6 +16,9 @@ export { shatranj, chaturanga, sittuyin } from './historical.js'
 export { berolinaChess, leganChess, makruk } from './pawn-config-variants.js'
 export { hexapawn } from './hexapawn.js'
 export { maharaja } from './maharaja.js'
+export { empire } from './empire.js'
+export { khansChess } from './khans-chess.js'
+export { oukChaktrang } from './ouk-chaktrang.js'
 
 export const teleportChess = {
   key: 'teleportChess',

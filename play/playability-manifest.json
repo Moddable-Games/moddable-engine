@@ -38,6 +38,13 @@
   },
   {
     "family": "chess",
+    "variant": "asean",
+    "label": "ASEAN Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
     "variant": "atomic",
     "label": "Atomic Chess",
     "group": "Other",
@@ -209,6 +216,13 @@
   },
   {
     "family": "chess",
+    "variant": "empire",
+    "label": "Empire Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
     "variant": "endgame-chess",
     "label": "Endgame Chess",
     "group": "Other",
@@ -299,6 +313,13 @@
     "family": "chess",
     "variant": "janus",
     "label": "Janus Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "khans-chess",
+    "label": "Khan's Chess",
     "group": "Other",
     "playable": true
   },
@@ -438,6 +459,13 @@
     "family": "chess",
     "variant": "orda-mirror",
     "label": "Orda Mirror",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "ouk-chaktrang",
+    "label": "Ouk Chaktrang (Cambodian Chess)",
     "group": "Other",
     "playable": true
   },
@@ -600,6 +628,20 @@
     "family": "chess",
     "variant": "torpedo",
     "label": "Torpedo Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "turkish-great-chess-iii",
+    "label": "Turkish Great Chess III",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "turkish-great-chess-iv",
+    "label": "Turkish Great Chess IV",
     "group": "Other",
     "playable": true
   },
