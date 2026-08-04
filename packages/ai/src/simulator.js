@@ -67,12 +67,19 @@ export function createSimulator(plugin, opts = {}) {
   }
 
   function evaluatePosition(state, playerIndex) {
-    if (evaluate) return evaluate(state, playerIndex)
+    let score = 0
+    if (evaluate) {
+      score = evaluate(state, playerIndex)
+    } else {
+      const terminal = checkTerminal(state, playerIndex)
+      if (terminal.over) return terminal.score
+    }
 
-    const terminal = checkTerminal(state, playerIndex)
-    if (terminal.over) return terminal.score
+    const myMoves = getLegalMoves(state, playerIndex)
+    const oppMoves = getLegalMoves(state, (playerIndex + 1) % playerCount)
+    score += (myMoves.length - oppMoves.length) * 5
 
-    return 0
+    return score
   }
 
   function nextPlayer(playerIndex, continueTurn) {

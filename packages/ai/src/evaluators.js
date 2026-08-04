@@ -1,7 +1,11 @@
 export const PIECE_VALUES = {
   king: 20000, queen: 900, rook: 500, bishop: 330, knight: 320, pawn: 100,
-  archbishop: 650, chancellor: 830, sage: 150,
-  man: 100,
+  archbishop: 650, chancellor: 830, cardinal: 650, marshal: 830,
+  wazir: 830, shahzadeh: 830, rani: 150,
+  fil: 330, dahja: 330, ratha: 500,
+  sage: 150, man: 100,
+  gold: 420, silver: 400, lance: 250, promotedPawn: 420,
+  advisor: 200, guard: 250, cannon: 450, elephant: 200,
 }
 
 const PST_PAWN = [
