@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: Moddable-Games/moddable-rules
-          path: ../moddable-rules
+          path: moddable-rules
           ref: dev
       - uses: actions/setup-node@v4
         with:
@@ -27,6 +27,7 @@ jobs:
         run: npx jest --no-coverage --runInBand
         env:
           NODE_OPTIONS: '--experimental-vm-modules'
+          MODDABLE_RULES_DIR: ${{ github.workspace }}/moddable-rules/games
 
   playability-standard:
     runs-on: ubuntu-latest
@@ -35,7 +36,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: Moddable-Games/moddable-rules
-          path: ../moddable-rules
+          path: moddable-rules
           ref: dev
       - uses: actions/setup-node@v4
         with:
@@ -45,10 +46,12 @@ jobs:
         run: npx jest packages/play/__tests__/playability-standard.test.js --no-coverage --forceExit
         env:
           NODE_OPTIONS: '--experimental-vm-modules'
+          MODDABLE_RULES_DIR: ${{ github.workspace }}/moddable-rules/games
       - name: Regenerate playability manifest
         run: node scripts/gen-playability-manifest.mjs
         env:
           NODE_OPTIONS: '--experimental-vm-modules'
+          MODDABLE_RULES_DIR: ${{ github.workspace }}/moddable-rules/games
       - name: Verify manifest is up to date
         run: git diff --exit-code play/playability-manifest.json || (echo "Manifest is stale — run scripts/gen-playability-manifest.mjs" && exit 1)
 
