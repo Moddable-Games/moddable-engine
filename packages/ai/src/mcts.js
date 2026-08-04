@@ -15,6 +15,7 @@ export function createMCTS(simulator, opts = {}) {
   const maxRolloutDepth = opts.maxRolloutDepth || 100
 
   const evaluate = opts.evaluate || null
+  const rolloutPolicy = opts.rolloutPolicy || null
 
   function search(state, playerIndex) {
     const root = createNode(null, null, state, playerIndex)
@@ -113,8 +114,10 @@ export function createMCTS(simulator, opts = {}) {
       const moves = simulator.getLegalMoves(current, player)
       if (moves.length === 0) return 0.5
 
-      const randomMove = moves[Math.floor(Math.random() * moves.length)]
-      const { state: newState, continueTurn } = simulator.applyMove(current, randomMove, player)
+      const selectedMove = rolloutPolicy
+        ? rolloutPolicy(current, player, moves)
+        : moves[Math.floor(Math.random() * moves.length)]
+      const { state: newState, continueTurn } = simulator.applyMove(current, selectedMove, player)
       current = newState
       player = simulator.nextPlayer(player, continueTurn)
       depth++
