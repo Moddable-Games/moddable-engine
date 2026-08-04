@@ -389,7 +389,8 @@ export function createPlaySession(options = {}) {
         }
       }
 
-      const piecesGroup = svgEl.querySelector('g[pointer-events="none"]')
+      const allGroups = svgEl.querySelectorAll('g[pointer-events="none"]')
+      const piecesGroup = allGroups.length > 0 ? allGroups[allGroups.length - 1] : null
       if (piecesGroup) svgEl.insertBefore(overlay, piecesGroup)
       else svgEl.appendChild(overlay)
     }
