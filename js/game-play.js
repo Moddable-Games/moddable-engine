@@ -113,7 +113,7 @@ const FAMILY_AI_OPTIONS = {
   ],
 }
 
-const STRUCTURAL_KEYS = new Set(['topology', 'players', 'meta', 'surface', 'render', 'components', 'pieces', 'plugins'])
+const STRUCTURAL_KEYS = new Set(['topology', 'players', 'meta', 'surface', 'render', 'components', 'plugins'])
 const REGISTRY_PRESENTATION_KEYS = new Set(['key', 'label', 'title', 'group', 'description', 'rule', 'board', 'extends', 'hidden', 'playerNames', 'definition', 'rows', 'cols', 'size', 'notation', 'topology', 'players'])
 
 function buildDefinitionFromResolved(family, variant, resolved, registryCfg) {

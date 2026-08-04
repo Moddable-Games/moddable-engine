@@ -13,8 +13,8 @@ import '../../plugins/shogi/index.js'
 
 const CASES = [
   ['chess', 'standard'],
-  ['chess', 'grandChess'],
-  ['chess', 'turkishGreatChessIV'],
+  ['chess', 'grand'],
+  ['chess', 'turkish-great-chess-iv'],
   ['chess', 'capablanca'],
   ['xiangqi', 'standard'],
   ['shogi', 'standard'],
