@@ -1,5 +1,6 @@
 # Claude Code local context
 CLAUDE.md
+.claude/
 
 # Dependencies
 node_modules/
