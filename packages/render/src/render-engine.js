@@ -147,6 +147,13 @@ export function renderFromEngine(resolved, opts = {}) {
     if (topo.grid) render._hexes = topo.grid.map(c => Array.isArray(c) ? { q: c[0], r: c[1] } : c)
     else if (topo.shape === 'triangular' && topo.sideLength) render._hexes = generateTriangularHexGrid(topo.sideLength)
     else if (topo.shape === 'hexagonal' && topo.radius) render._hexRadius = topo.radius
+    else if (topo.shape === 'rhombus' && topo.size) {
+      const hexes = []
+      for (let q = 0; q < topo.size; q++) {
+        for (let r = 0; r < topo.size; r++) hexes.push({ q, r })
+      }
+      render._hexes = hexes
+    }
     else if (topo.rows && topo.cols) { render._hexRows = topo.rows; render._hexCols = topo.cols }
   }
 

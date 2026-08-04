@@ -7,7 +7,7 @@
 <meta name="description" content="Interactive board rendering for all published game variants. Select any game, see its board rendered live.">
 <meta property="og:title" content="Play &mdash; Moddable Engine">
 <meta property="og:description" content="Interactive board rendering for all published game variants. Select any game, see its board rendered live.">
-<meta property="og:image" content="https://engine.moddable.games/og/play.png?v=1.0.13">
+<meta property="og:image" content="https://engine.moddable.games/og/play.png?v=1.0.14">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:url" content="https://engine.moddable.games/play/">
@@ -16,13 +16,13 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Play &mdash; Moddable Engine">
 <meta name="twitter:description" content="Interactive board rendering for all published game variants. Select any game, see its board rendered live.">
-<meta name="twitter:image" content="https://engine.moddable.games/og/play.png?v=1.0.13">
+<meta name="twitter:image" content="https://engine.moddable.games/og/play.png?v=1.0.14">
 <meta name="theme-color" content="#0a0d2a">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <meta name="base-path" content="..">
-<link rel="stylesheet" href="../css/home.css?v=1.0.13">
-<link rel="stylesheet" href="../css/boards.css?v=1.0.13">
-<link rel="stylesheet" href="../css/game-play.css?v=1.0.13">
+<link rel="stylesheet" href="../css/home.css?v=1.0.14">
+<link rel="stylesheet" href="../css/boards.css?v=1.0.14">
+<link rel="stylesheet" href="../css/game-play.css?v=1.0.14">
 </head>
 <body>
 
@@ -161,7 +161,7 @@
     </div>
     <div class="footer-bottom">
       <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
-      <span class="footer-version">v1.0.13</span>
+      <span class="footer-version">v1.0.14</span>
     </div>
   </div>
 </footer>
@@ -172,7 +172,7 @@ const _isEmbed = _params.has('embed');
 const _hexGames = ['nukes','twilight','colony','talisman','mongo','endless'];
 const _isHexEmbed = _isEmbed && _game && _hexGames.includes(_game);
 if (_isHexEmbed) {
-  import('../js/play.js?v=1.0.13');
+  import('../js/play.js?v=1.0.14');
 } else {
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.boards-hero').style.display = 'none';
@@ -181,7 +181,7 @@ if (_isHexEmbed) {
     playContainer.id = 'game-play-root';
     playContainer.className = 'game-play';
     document.querySelector('.boards-app').before(playContainer);
-    import('../js/game-play.js?v=1.0.13').then(m => m.initGamePlay(playContainer)).catch(e => {
+    import('../js/game-play.js?v=1.0.14').then(m => m.initGamePlay(playContainer)).catch(e => {
       console.error('[game-play] load failed:', e);
       playContainer.textContent = 'Failed to load: ' + e.message;
     });
