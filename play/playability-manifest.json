@@ -90,6 +90,13 @@
   },
   {
     "family": "chess",
+    "variant": "byzantine-chess",
+    "label": "Byzantine Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
     "variant": "capablanca",
     "label": "Capablanca Chess",
     "group": "Other",
@@ -136,6 +143,13 @@
     "family": "chess",
     "variant": "chigorin",
     "label": "Chigorin",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "circular-chess",
+    "label": "Circular Chess",
     "group": "Other",
     "playable": true
   },
@@ -616,6 +630,13 @@
     "group": "Tactical",
     "playable": true,
     "slug": "three-check"
+  },
+  {
+    "family": "chess",
+    "variant": "toroidal-byzantine",
+    "label": "Toroidal Byzantine Chess",
+    "group": "Other",
+    "playable": true
   },
   {
     "family": "chess",

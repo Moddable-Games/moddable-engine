@@ -101,7 +101,31 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     if (topo && topo.rows !== undefined && topo.cols !== undefined) {
       return deriveGridPawnConfig(topo)
     }
+    if (config.hexPawnConfig && topo && topo.getAllCells) {
+      return deriveHexPawnConfig(topo, config.hexPawnConfig)
+    }
     return null
+  }
+
+  function deriveHexPawnConfig(topo, hexConfig) {
+    const forwardDir = {}
+    const startCells = { 0: new Set(), 1: new Set() }
+    const promotionCells = { 0: new Set(), 1: new Set() }
+    const captureDirections = {}
+
+    for (const player of [0, 1]) {
+      forwardDir[player] = hexConfig.forwardDir[player]
+      captureDirections[player] = hexConfig.captureDirections[player]
+      if (hexConfig.startCells && hexConfig.startCells[player]) {
+        for (const cell of hexConfig.startCells[player]) startCells[player].add(cell)
+      }
+      if (hexConfig.promotionCells && hexConfig.promotionCells[player]) {
+        for (const cell of hexConfig.promotionCells[player]) promotionCells[player].add(cell)
+      }
+    }
+
+    const doubleStep = hexConfig.doubleStep || { 0: false, 1: false }
+    return { forwardDir, startCells, promotionCells, captureDirections, doubleStep }
   }
 
   function deriveGridPawnConfig(topo) {

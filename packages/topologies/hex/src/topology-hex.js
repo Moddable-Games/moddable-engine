@@ -426,7 +426,9 @@ export function createHexTopology(config) {
 
   function step(from, direction) {
     const a = typeof from === 'string' ? parse(from) : from
-    const d = typeof direction === 'number' ? DIRECTIONS[direction] : direction
+    const d = typeof direction === 'number' ? DIRECTIONS[direction]
+      : Array.isArray(direction) ? { q: direction[0], r: direction[1] }
+      : direction
     const k = key(a.q + d.q, a.r + d.r)
     return cells.has(k) ? k : null
   }
