@@ -160,7 +160,7 @@ export function setRulesReader(readFn, listFn) {
   }
 }
 
-const STRUCTURAL_KEYS = new Set(['topology', 'players', 'meta', 'surface', 'render', 'components'])
+const STRUCTURAL_KEYS = new Set(['topology', 'players', 'meta', 'surface', 'render', 'components', 'plugins'])
 
 function resolveFromDisk(family, variant) {
   if (!_readFile) return null
@@ -190,6 +190,9 @@ function resolveMeta(family, variant) {
       const topo = resolved.topology || {}
       const players = resolved.players || ['white', 'black']
       const pluginConfig = {}
+      if (resolved.plugins && resolved.plugins[family]) {
+        Object.assign(pluginConfig, resolved.plugins[family])
+      }
       for (const [k, v] of Object.entries(resolved)) {
         if (STRUCTURAL_KEYS.has(k)) continue
         if (v !== undefined) pluginConfig[k] = v
@@ -220,6 +223,9 @@ function resolveMeta(family, variant) {
     const topo = resolved.topology || {}
     const players = resolved.players || ['white', 'black']
     const pluginConfig = {}
+    if (resolved.plugins && resolved.plugins[family]) {
+      Object.assign(pluginConfig, resolved.plugins[family])
+    }
     for (const [k, v] of Object.entries(resolved)) {
       if (STRUCTURAL_KEYS.has(k)) continue
       if (v !== undefined) pluginConfig[k] = v

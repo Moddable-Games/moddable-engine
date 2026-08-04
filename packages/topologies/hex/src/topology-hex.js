@@ -31,10 +31,15 @@ const DIRECTION_CATEGORIES = {
 }
 
 export function createHexTopology(config) {
-  const { radius, size, shape = 'hexagonal', orientation = 'pointy' } = config
+  const { radius, size, shape = 'hexagonal', orientation = 'pointy', grid } = config
   const cells = new Map()
 
-  if (shape === 'rhombus' && size) {
+  if (grid && Array.isArray(grid)) {
+    for (const coord of grid) {
+      const [q, r] = Array.isArray(coord) ? coord : [coord.q, coord.r]
+      cells.set(key(q, r), { q, r, ring: Math.max(Math.abs(q), Math.abs(r), Math.abs(-q - r)) })
+    }
+  } else if (shape === 'rhombus' && size) {
     generateRhombus(size, cells)
   } else {
     generateHexGrid(radius, cells)
@@ -360,7 +365,18 @@ export function createHexTopology(config) {
     const symbolMap = buildHexSymbolMap(vocabulary)
     const cellStates = {}
 
-    if (shape === 'rhombus' && size) {
+    if (notation.includes(':')) {
+      const entries = notation.match(/-?\d+,-?\d+:[a-zA-Z]/g)
+      if (entries) {
+        for (const entry of entries) {
+          const colonIdx = entry.lastIndexOf(':')
+          const coord = entry.slice(0, colonIdx)
+          const ch = entry.slice(colonIdx + 1)
+          const piece = symbolMap.fromSymbol(ch)
+          if (piece && cells.has(coord)) cellStates[coord] = piece
+        }
+      }
+    } else if (shape === 'rhombus' && size) {
       const rowStrings = notation.split('/')
       for (let r = 0; r < rowStrings.length && r < size; r++) {
         let q = 0

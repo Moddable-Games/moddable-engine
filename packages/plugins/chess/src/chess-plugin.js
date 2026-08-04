@@ -119,8 +119,21 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       if (hexConfig.startCells && hexConfig.startCells[player]) {
         for (const cell of hexConfig.startCells[player]) startCells[player].add(cell)
       }
-      if (hexConfig.promotionCells && hexConfig.promotionCells[player]) {
-        for (const cell of hexConfig.promotionCells[player]) promotionCells[player].add(cell)
+    }
+
+    if (hexConfig.promotionCells) {
+      for (const player of [0, 1]) {
+        if (hexConfig.promotionCells[player]) {
+          for (const cell of hexConfig.promotionCells[player]) promotionCells[player].add(cell)
+        }
+      }
+    } else {
+      for (const cell of topo.getAllCells()) {
+        for (const player of [0, 1]) {
+          if (topo.step(cell, forwardDir[player]) === null) {
+            promotionCells[player].add(cell)
+          }
+        }
       }
     }
 

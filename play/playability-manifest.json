@@ -90,6 +90,13 @@
   },
   {
     "family": "chess",
+    "variant": "brusky",
+    "label": "Brusky's Hexagonal Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
     "variant": "byzantine-chess",
     "label": "Byzantine Chess",
     "group": "Other",
@@ -191,6 +198,13 @@
   },
   {
     "family": "chess",
+    "variant": "de-vasa",
+    "label": "De Vasa's Hexagonal Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
     "variant": "diana",
     "label": "Diana Chess",
     "group": "Other",
@@ -270,6 +284,13 @@
     "variant": "giveaway",
     "label": "Giveaway",
     "group": "Alternate Rules",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "glinski",
+    "label": "Glinski's Hexagonal Chess",
+    "group": "Other",
     "playable": true
   },
   {
@@ -405,11 +426,25 @@
   },
   {
     "family": "chess",
+    "variant": "mccooey",
+    "label": "McCooey's Hexagonal Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
     "variant": "medusaChess",
     "label": "Medusa Chess",
     "group": "Alternate Rules",
     "playable": true,
     "slug": "medusa-chess"
+  },
+  {
+    "family": "chess",
+    "variant": "mini-hexchess",
+    "label": "Mini Hexchess",
+    "group": "Other",
+    "playable": true
   },
   {
     "family": "chess",
@@ -554,6 +589,13 @@
     "family": "chess",
     "variant": "rifle",
     "label": "Rifle Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "shafran",
+    "label": "Shafran's Hexagonal Chess",
     "group": "Other",
     "playable": true
   },
