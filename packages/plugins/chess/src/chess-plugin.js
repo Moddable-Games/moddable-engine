@@ -436,15 +436,16 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   }
 
   let _vbCache = null
-  let _vbCacheBoard = null
+  let _vbCacheGeneration = -1
   let _vbCachePlayer = -1
+  let _currentGeneration = 0
 
   function getCachedViewBoard(board, playerIdx) {
-    if (_vbCacheBoard === board && _vbCachePlayer === playerIdx) {
+    if (_vbCacheGeneration === _currentGeneration && _vbCachePlayer === playerIdx) {
       return _vbCache
     }
     _vbCache = buildViewBoard(board, playerIdx)
-    _vbCacheBoard = board
+    _vbCacheGeneration = _currentGeneration
     _vbCachePlayer = playerIdx
     return _vbCache
   }
@@ -852,6 +853,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   }
 
   function getLegalMoves(slice, full) {
+    _currentGeneration++
     const playerIdx = full.__players.currentIndex
     const allMoves = []
 

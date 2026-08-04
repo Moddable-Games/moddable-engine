@@ -50,20 +50,21 @@ for (const family of AI_FAMILIES) {
         expect(move).toBeDefined()
       })
 
-      it(`${variantKey}: AI returns move after one human move`, () => {
+      it(`${variantKey}: AI returns move for 10 alternating plies`, () => {
         const game = createGame(family, variantKey)
-        const moves = game.getLegalMoves()
-        if (moves.length === 0) return
-
-        game.applyMove(moves[0])
-        const state2 = game.getState()
-        const moves2 = game.getLegalMoves()
-        if (moves2.length === 0) return
-
         const ai = createAI(family, variantKey, { difficulty: 'easy' })
-        const move = ai.pickMove(state2.slice, 1)
-        expect(move).not.toBeNull()
-        expect(move).toBeDefined()
+
+        for (let ply = 0; ply < 10; ply++) {
+          const state = game.getState()
+          const moves = game.getLegalMoves()
+          if (moves.length === 0) break
+
+          const playerIdx = ply % 2
+          const move = ai.pickMove(state.slice, playerIdx)
+          expect(move).not.toBeNull()
+          expect(move).toBeDefined()
+          game.applyMove(move)
+        }
       })
     }
   })
