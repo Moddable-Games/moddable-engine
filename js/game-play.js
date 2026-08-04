@@ -215,7 +215,21 @@ export function createPlaySession(options = {}) {
       players,
       aiDifficulty: difficulty,
       aiPickMove: ai
-        ? () => ai.pickMove(game.getState().slice, currentPlayerIndex())
+        ? () => {
+            const slice = game.getState().slice
+            const idx = currentPlayerIndex()
+            const move = ai.pickMove(slice, idx)
+            if (!move) return null
+            const legalMoves = game.getLegalMoves()
+            const isLegal = legalMoves.some(m =>
+              m.from === move.from && m.to === move.to &&
+              (!m.promotion || m.promotion === move.promotion))
+            if (!isLegal) {
+              console.warn(`[AI] move rejected (illegal), falling back to random legal`)
+              return null
+            }
+            return move
+          }
         : null,
       onRender: (game, state) => draw(state),
       onTurnChange: (player) => {
