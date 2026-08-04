@@ -181,6 +181,9 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
   function init(pluginConfig, { request }) {
     topology = request('core.topology')
+    if (topology && topology.getAllCells && !topology.rows && pieceConfigs.knight && pieceConfigs.knight.offsets === 'knight') {
+      pieceConfigs.knight = { ...pieceConfigs.knight, offsets: 'hex-knight' }
+    }
     const rng = request('core.rng')
     const rawSetup = pluginConfig.setup || config.setup
     const setupInput = typeof rawSetup === 'function' ? rawSetup(rng) : rawSetup

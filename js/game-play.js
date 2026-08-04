@@ -26,6 +26,44 @@ import { moveToSAN } from '../packages/plugins/chess/src/san.js'
 
 const DIFFICULTIES = ['beginner', 'easy', 'medium', 'hard', 'expert']
 
+const FAMILY_AI_OPTIONS = {
+  chess: [
+    { value: 'beginner', label: 'Beginner — random captures' },
+    { value: 'easy', label: 'Easy — shallow tactics' },
+    { value: 'medium', label: 'Medium — 5-ply search' },
+    { value: 'hard', label: 'Hard — deep search' },
+    { value: 'expert', label: 'Expert — full strength' },
+  ],
+  go: [
+    { value: 'beginner', label: 'Beginner — random' },
+    { value: 'easy', label: 'Easy — random' },
+    { value: 'medium', label: 'Medium — weak MCTS' },
+    { value: 'hard', label: 'Hard — MCTS 2k iter' },
+    { value: 'expert', label: 'Expert — MCTS 5k iter' },
+  ],
+  draughts: [
+    { value: 'beginner', label: 'Beginner — random captures' },
+    { value: 'easy', label: 'Easy — material count' },
+    { value: 'medium', label: 'Medium — material count' },
+    { value: 'hard', label: 'Hard — deeper search' },
+    { value: 'expert', label: 'Expert — deepest search' },
+  ],
+  shogi: [
+    { value: 'beginner', label: 'Beginner — random captures' },
+    { value: 'easy', label: 'Easy — material count' },
+    { value: 'medium', label: 'Medium — material count' },
+    { value: 'hard', label: 'Hard — deeper search' },
+    { value: 'expert', label: 'Expert — deepest search' },
+  ],
+  xiangqi: [
+    { value: 'beginner', label: 'Beginner — random captures' },
+    { value: 'easy', label: 'Easy — material count' },
+    { value: 'medium', label: 'Medium — material count' },
+    { value: 'hard', label: 'Hard — deeper search' },
+    { value: 'expert', label: 'Expert — deepest search' },
+  ],
+}
+
 const STRUCTURAL_KEYS = new Set(['topology', 'players', 'meta', 'surface', 'render', 'components', 'pieces', 'plugins'])
 const REGISTRY_PRESENTATION_KEYS = new Set(['key', 'label', 'title', 'group', 'description', 'rule', 'board', 'extends', 'hidden', 'playerNames', 'definition', 'rows', 'cols', 'size', 'notation', 'topology', 'players'])
 
@@ -899,7 +937,10 @@ export async function initGamePlay(container, defaults = {}) {
     { value: 'human', label: 'Human vs Human' },
     { value: 'ai', label: 'vs AI' },
   ], params.opponent === 'ai' ? 'ai' : 'human')
-  const difficultySelect = buildSelect(leftSidebar, 'Difficulty', DIFFICULTIES.map(d => ({ value: d, label: d[0].toUpperCase() + d.slice(1) })), params.difficulty || 'medium')
+  function difficultyOptionsFor(f) {
+    return FAMILY_AI_OPTIONS[f] || DIFFICULTIES.map(d => ({ value: d, label: d[0].toUpperCase() + d.slice(1) }))
+  }
+  const difficultySelect = buildSelect(leftSidebar, 'Difficulty', difficultyOptionsFor(family), params.difficulty || 'medium')
   const seatSelect = buildSelect(leftSidebar, 'Play as', seatOptionsForFamily(family), params.color || '0')
   const themeSelect = buildSelect(leftSidebar, 'Theme', Object.entries(BOARD_THEMES).map(([k, v]) => ({ value: k, label: v.label })), params.theme || 'classic')
 
@@ -1127,6 +1168,15 @@ export async function initGamePlay(container, defaults = {}) {
     family = familySelect.value
     rebuildVariantSelect(family)
     rebuildSeatSelect(family)
+    const opts = difficultyOptionsFor(family)
+    difficultySelect.innerHTML = ''
+    for (const opt of opts) {
+      const o = document.createElement('option')
+      o.value = opt.value
+      o.textContent = opt.label
+      if (opt.value === 'medium') o.selected = true
+      difficultySelect.appendChild(o)
+    }
     const newVariant = pickVariant(family, null)
     variantSelect.value = newVariant
     restart({ family, variant: newVariant, seat: seatSelect.value })
