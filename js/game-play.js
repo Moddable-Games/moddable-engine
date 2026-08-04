@@ -26,7 +26,7 @@ import { moveToSAN } from '../packages/plugins/chess/src/san.js'
 
 const DIFFICULTIES = ['beginner', 'easy', 'medium', 'hard', 'expert']
 
-const STRUCTURAL_KEYS = new Set(['topology', 'players', 'meta', 'surface', 'render', 'components', 'pieces'])
+const STRUCTURAL_KEYS = new Set(['topology', 'players', 'meta', 'surface', 'render', 'components', 'pieces', 'plugins'])
 const REGISTRY_PRESENTATION_KEYS = new Set(['key', 'label', 'title', 'group', 'description', 'rule', 'board', 'extends', 'hidden', 'playerNames', 'definition', 'rows', 'cols', 'size', 'notation', 'topology', 'players'])
 
 function buildDefinitionFromResolved(family, variant, resolved, registryCfg) {
@@ -187,8 +187,10 @@ export function createPlaySession(options = {}) {
       onChoiceNeeded: showChoiceDialog,
       onBeforeMove: (move, player) => {
         const slice = game.getState().slice
-        boardSnapshot = slice.board ? [...slice.board] : null
-        boardSnapshot._legalMoves = ctrl ? ctrl.getLegalMoves() : null
+        boardSnapshot = slice.board
+          ? (Array.isArray(slice.board) ? [...slice.board] : { ...slice.board })
+          : null
+        if (boardSnapshot) boardSnapshot._legalMoves = ctrl ? ctrl.getLegalMoves() : null
       },
       onMove: (move, player) => {
         moveHistory.push({ move, player, notation: moveToNotation(move) })
