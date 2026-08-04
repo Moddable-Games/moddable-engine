@@ -200,7 +200,7 @@ export function createPlaySession(options = {}) {
     await loadGalleryIndex()
 
     ai = opponent === 'ai'
-      ? createAI(family, variant, { difficulty })
+      ? createAI(family, variant, { difficulty, definition: frontmatterDef })
       : null
 
     const names = playerNames()
