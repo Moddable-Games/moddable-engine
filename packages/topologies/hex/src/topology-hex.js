@@ -25,10 +25,10 @@ const HEX_DIAGONALS = [
 ]
 
 const HEX_KNIGHT_OFFSETS = [
-  { q: 2, r: -1 }, { q: 1, r: -2 }, { q: -1, r: -1 },
-  { q: -2, r: 1 }, { q: -1, r: 2 }, { q: 1, r: 1 },
-  { q: 2, r: 1 }, { q: 1, r: 2 }, { q: -1, r: 1 },
-  { q: -2, r: -1 }, { q: -1, r: -2 }, { q: 1, r: -1 },
+  { q: 2, r: 1 }, { q: 3, r: -1 }, { q: 3, r: -2 },
+  { q: 2, r: -3 }, { q: 1, r: -3 }, { q: -1, r: -2 },
+  { q: -2, r: -1 }, { q: -3, r: 1 }, { q: -3, r: 2 },
+  { q: -2, r: 3 }, { q: -1, r: 3 }, { q: 1, r: 2 },
 ]
 
 const DIRECTION_CATEGORIES = {
