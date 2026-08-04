@@ -24,10 +24,6 @@ const SKIP = new Set([
   'chess:duckChess',
   'chess:sittuyin',
   'chess:diceChess',
-  'chess:marseillais',
-  'chess:monsterChess',
-  'chess:progressive',
-  'chess:progressive-italian',
   'go:one-colour-go',
   'go:stoical-go',
 ])
@@ -45,12 +41,14 @@ for (const family of AI_FAMILIES) {
       it(`${variantKey}: AI plays 5 plies as seat 0 (first mover)`, () => {
         const game = createGame(family, variantKey)
         const ai = createAI(family, variantKey, { difficulty: 'easy' })
+        const names = game.raw.definition?.players?.names || ['white', 'black']
 
         for (let ply = 0; ply < 5; ply++) {
           const state = game.getState()
           const moves = game.getLegalMoves()
           if (moves.length === 0) break
-          const move = ai.pickMove(state.slice, ply % 2)
+          const idx = names.indexOf(game.raw.currentPlayer())
+          const move = ai.pickMove(state.slice, idx)
           expect(move).not.toBeNull()
           expect(move).toBeDefined()
           const isLegal = moves.some(m => {
@@ -66,13 +64,20 @@ for (const family of AI_FAMILIES) {
       it(`${variantKey}: AI responds as seat 1 (second mover)`, () => {
         const game = createGame(family, variantKey)
         const ai = createAI(family, variantKey, { difficulty: 'easy' })
+        const names = game.raw.definition?.players?.names || ['white', 'black']
 
-        // Human (seat 0) makes first move
-        const moves0 = game.getLegalMoves()
-        if (moves0.length === 0) return
-        game.applyMove(moves0[0])
+        // Human (seat 0) completes their full turn (may be multiple moves)
+        for (let i = 0; i < 10; i++) {
+          const idx = names.indexOf(game.raw.currentPlayer())
+          if (idx !== 0) break
+          const moves = game.getLegalMoves()
+          if (moves.length === 0) return
+          game.applyMove(moves[0])
+        }
 
         // AI (seat 1) must respond
+        const idx = names.indexOf(game.raw.currentPlayer())
+        if (idx !== 1) return
         const state = game.getState()
         const moves1 = game.getLegalMoves()
         if (moves1.length === 0) return
