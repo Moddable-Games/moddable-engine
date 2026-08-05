@@ -1,5 +1,3 @@
-export { standard, go13, go9, oneColour } from './standard.js'
 export { captureGo } from './capture-go.js'
 export { stoical } from './stoical.js'
-export { toroidal } from './toroidal.js'
 export { gomoku, ninukiRenju, longestRun } from './gomoku.js'

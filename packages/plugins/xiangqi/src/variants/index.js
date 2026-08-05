@@ -1,20 +1,5 @@
-// Variant parameters follow the xiangqi hub in moddable-rules. setup is copied
-// verbatim from each variant's frontmatter and is the same string the published
-// board diagram is drawn from.
-
-const PLAYERS = ['red', 'black']
-
-export const standard = {
-  key: 'standard',
-}
-
-export const minixiangqi = {
-  key: 'minixiangqi',
-}
-
-export const xiangqi42 = {
-  key: 'xiangqi-42',
-}
+// All xiangqi variant data migrated to frontmatter.
+// Variants registered via playable: true in their .md files.
 
 export const UNSUPPORTED = {
   'quang-trung': 'pawn promotion as an alternate win condition is not modelled',

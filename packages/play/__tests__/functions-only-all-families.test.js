@@ -11,6 +11,7 @@
  * adds JS config.
  */
 import { listVariants, getVariantConfig } from '../../play/src/variant-registry.js'
+import '../test-helpers/setup-rules-reader.js'
 import '../../plugins/chess/index.js'
 import '../../plugins/go/index.js'
 import '../../plugins/draughts/index.js'
