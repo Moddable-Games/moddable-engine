@@ -755,7 +755,7 @@
     "family": "draughts",
     "variant": "english",
     "label": "English Draughts",
-    "group": "Standard Board (8×8)",
+    "group": "Other",
     "playable": true
   },
   {
@@ -881,7 +881,7 @@
     "family": "go",
     "variant": "toroidal-go",
     "label": "Toroidal Go",
-    "group": "Rule Variants",
+    "group": "Other",
     "playable": true
   },
   {
@@ -909,7 +909,7 @@
     "family": "shogi",
     "variant": "minishogi",
     "label": "Minishogi",
-    "group": "Smaller Board Variants",
+    "group": "Other",
     "playable": true
   },
   {
@@ -923,7 +923,7 @@
     "family": "xiangqi",
     "variant": "minixiangqi",
     "label": "Minixiangqi",
-    "group": "Smaller Board Variants",
+    "group": "Other",
     "playable": true
   },
   {

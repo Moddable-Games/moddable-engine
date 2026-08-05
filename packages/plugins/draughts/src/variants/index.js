@@ -13,21 +13,6 @@ const PLAYERS = ['white', 'black']
 
 export const english = {
   key: 'english',
-  setup: '1b1b1b1b/b1b1b1b1/1b1b1b1b/8/8/w1w1w1w1/1w1w1w1w/w1w1w1w1',
-  label: 'English Draughts',
-  group: 'Standard Board (8×8)',
-  description: 'The most widely known form: diagonal movement, men capture forwards only, and kings do not fly.',
-  rule: 'Board: 8×8 · 12 pieces · No flying kings',
-  rows: 8,
-  cols: 8,
-  piecesPerPlayer: 12,
-  directions: 'diagonal',
-  manCapture: 'forward',
-  manMove: 'forward',
-  forcedCapture: true,
-  maximalCapture: false,
-  flyingKings: false,
-  playerNames: PLAYERS,
 }
 
 export const international = {

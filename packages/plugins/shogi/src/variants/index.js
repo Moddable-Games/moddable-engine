@@ -19,15 +19,6 @@ export const standard = {
 
 export const minishogi = {
   key: 'minishogi',
-  setup: 'rbsgk/4p/5/P4/KGSBR',
-  label: 'Minishogi',
-  group: 'Smaller Board Variants',
-  description: 'Shogi condensed to a 5×5 board with five pieces a side. Drops and promotion are unchanged.',
-  rule: 'Board: 5×5 · Win: Capture the King · Drops',
-  rows: 5,
-  cols: 5,
-  promotionZone: 1,
-  playerNames: PLAYERS,
 }
 
 export const judkins = {

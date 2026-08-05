@@ -21,17 +21,6 @@ export const standard = {
 
 export const minixiangqi = {
   key: 'minixiangqi',
-  setup: 'rchkhcr/p1ppp1p/7/7/7/P1PPP1P/RCHKHCR',
-  label: 'Minixiangqi',
-  group: 'Smaller Board Variants',
-  description: 'Xiangqi condensed to 7x7. No river, no advisors or elephants. Soldiers move sideways from the start.',
-  rule: 'Board: 7×7 · Win: Checkmate the General',
-  rows: 7,
-  cols: 7,
-  hasRiver: false,
-  flyingGeneralRule: true,
-  palace: { cols: [2, 4], rows: [[4, 6], [0, 2]] },
-  playerNames: PLAYERS,
 }
 
 export const xiangqi42 = {
