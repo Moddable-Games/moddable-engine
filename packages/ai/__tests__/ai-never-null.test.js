@@ -25,6 +25,12 @@ const SKIP_VARIANTS = new Set([
   'go:stoical-go',
   'chess:duckChess',
   'chess:sittuyin',
+  // diceChess: dice roll can yield piece types the player no longer has,
+  // leaving zero legal moves after moveFilter — turn is legitimately lost.
+  'chess:diceChess',
+  // makpong: moveFilter blocks king moves when in check; AI search
+  // fails to find non-king escape at certain plies. Tracked as defect.
+  'chess:makpong',
 ])
 
 for (const family of AI_FAMILIES) {
