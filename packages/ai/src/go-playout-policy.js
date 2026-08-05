@@ -145,6 +145,41 @@ function stoneCount(board) {
  * Returns a function (state, playerIndex, legalMoves, simulator) => move
  * that selects a move using weighted random sampling with Go heuristics.
  */
+/**
+ * Create an expansion policy for MCTS that applies line penalties.
+ * Returns a function (state, playerIndex, moves) => weights[]
+ * Used to bias which untried moves get expanded first.
+ */
+export function createGoExpansionPolicy() {
+  return function goExpansionPolicy(state, playerIndex, moves) {
+    const board = state.board
+    const size = board.length
+    const cols = state.cols || Math.round(Math.sqrt(size))
+    const stones = stoneCount(board)
+    const fillRatio = stones / size
+    const isOpening = fillRatio < 0.25
+
+    const weights = new Array(moves.length)
+    for (let i = 0; i < moves.length; i++) {
+      const move = moves[i]
+      if (move.action === 'pass') {
+        weights[i] = 0.1
+        continue
+      }
+      let w = 1.0
+      if (isOpening) {
+        const line = lineNumber(move.coord, cols, size)
+        if (line === 1) w = 0.05
+        else if (line === 2) w = 0.2
+        else if (line === 3) w = 1.5
+        else if (line === 4) w = 1.8
+      }
+      weights[i] = w
+    }
+    return weights
+  }
+}
+
 export function createGoPlayoutPolicy() {
   return function goPlayoutPolicy(state, playerIndex, legalMoves) {
     const board = state.board

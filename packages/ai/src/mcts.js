@@ -16,6 +16,7 @@ export function createMCTS(simulator, opts = {}) {
 
   const evaluate = opts.evaluate || null
   const rolloutPolicy = opts.rolloutPolicy || null
+  const expansionPolicy = opts.expansionPolicy || null
 
   function search(state, playerIndex) {
     const root = createNode(null, null, state, playerIndex)
@@ -91,13 +92,31 @@ export function createMCTS(simulator, opts = {}) {
   }
 
   function expand(node) {
-    const idx = Math.floor(Math.random() * node.untriedMoves.length)
+    let idx
+    if (expansionPolicy && node.untriedMoves.length > 1) {
+      idx = weightedExpansionPick(node.untriedMoves, node.state, node.playerIndex)
+    } else {
+      idx = Math.floor(Math.random() * node.untriedMoves.length)
+    }
     const move = node.untriedMoves.splice(idx, 1)[0]
     const { state: newState, continueTurn } = simulator.applyMove(node.state, move, node.playerIndex)
     const nextPlayer = simulator.nextPlayer(node.playerIndex, continueTurn)
     const child = createNode(node, move, newState, nextPlayer)
     node.children.push(child)
     return child
+  }
+
+  function weightedExpansionPick(moves, state, playerIndex) {
+    const weights = expansionPolicy(state, playerIndex, moves)
+    let total = 0
+    for (let i = 0; i < weights.length; i++) total += weights[i]
+    if (total <= 0) return Math.floor(Math.random() * moves.length)
+    let r = Math.random() * total
+    for (let i = 0; i < weights.length; i++) {
+      r -= weights[i]
+      if (r <= 0) return i
+    }
+    return moves.length - 1
   }
 
   function randomRollout(state, currentPlayer, rootPlayer) {

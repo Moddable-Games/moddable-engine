@@ -10,7 +10,7 @@ import {
 import { createMinimax, DIFFICULTIES } from '../../ai/src/minimax.js'
 import { createMCTS, MCTS_DIFFICULTIES } from '../../ai/src/mcts.js'
 import { EVALUATORS } from '../../ai/src/evaluators.js'
-import { createGoPlayoutPolicy } from '../../ai/src/go-playout-policy.js'
+import { createGoPlayoutPolicy, createGoExpansionPolicy } from '../../ai/src/go-playout-policy.js'
 import { interactionModelFor, FAMILY_INTERACTION } from './interaction.js'
 import { definitionFromVariant } from './variant-definition.js'
 
@@ -77,6 +77,7 @@ export function createAI(family, variant, opts = {}) {
   const mctsOpts = { difficulty, ...opts.searchOpts }
   if (family === 'go') {
     mctsOpts.rolloutPolicy = createGoPlayoutPolicy()
+    mctsOpts.expansionPolicy = createGoExpansionPolicy()
   }
 
   const engine = useMcts
