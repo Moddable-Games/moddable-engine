@@ -1,0 +1,29 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "entry": [
+    "js/home.js",
+    "js/api.js",
+    "js/boards.js",
+    "js/create.js",
+    "js/gallery.js",
+    "js/tiles.js",
+    "js/play.js",
+    "js/game-play.js",
+    "packages/play/src/sdk.js",
+    "scripts/*.mjs"
+  ],
+  "project": [
+    "js/**/*.js",
+    "packages/**/*.js",
+    "scripts/**/*.mjs"
+  ],
+  "jest": {
+    "entry": [
+      "**/__tests__/**/*.{js,mjs}",
+      "**/*.test.{js,mjs}"
+    ]
+  },
+  "ignoreDependencies": [
+    "@moddable/core"
+  ]
+}

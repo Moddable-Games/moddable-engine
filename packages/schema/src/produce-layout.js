@@ -723,8 +723,7 @@ function produceTrackLayout(topo, colors, render) {
 //
 // Verbatim geometry from the historical backgammon provider — byte-identity
 // contract. Colors arrive from frontmatter (frame, felt, point-a, point-b)
-// and are normalized to camelCase. Checker face colours are fixed piece
-// styling (annotated → piece-theme later).
+// and are normalized to camelCase.
 // Runtime pass-through: render._parsedSetup {dark[], light[]}, _pieceImages.
 
 function backgammonOps(colors, render) {
@@ -797,7 +796,6 @@ function backgammonOps(colors, render) {
           if (img) {
             el('image', { href: img, x: cx - pieceSize / 2, y: cy - pieceSize / 2, width: pieceSize, height: pieceSize })
           } else {
-            // Fixed checker face colours (→ piece-theme)
             el('circle', { cx, cy, r: pieceSize / 2 - 1, fill: isDarkPiece ? '#191716' : '#F8F6F2', stroke: isDarkPiece ? '#4d433a' : '#5E5854', 'stroke-width': 1.5 })
           }
           if (j === 0 && overflow > 0) {

@@ -20,13 +20,10 @@
     "./rpg": "./packages/rpg/index.js",
     "./ai": "./packages/ai/index.js",
     "./render": "./packages/render/index.js",
-    "./surface": "./packages/surface/index.js",
     "./schema": "./packages/schema/index.js",
     "./game": "./packages/game/index.js",
     "./rule": "./packages/rule/index.js",
     "./piece-behaviour": "./packages/piece-behaviour/index.js",
-    "./board-theme": "./packages/board-theme/index.js",
-    "./piece-theme": "./packages/piece-theme/index.js",
     "./play": "./packages/play/index.js",
     "./hex-sdk": "./packages/hex-generators/src/sdk.js",
     "./go-sdk": "./packages/plugins/go/index.js",
@@ -45,5 +42,8 @@
     "type": "git",
     "url": "git+https://github.com/Moddable-Games/moddable-engine.git"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "knip": "^6.31.0"
+  }
 }
