@@ -169,7 +169,6 @@ function kingCaptureWin(state) {
 
 export const darkChess = {
   key: 'darkChess',
-  noCheck: true,
 
   visibility(slice, viewerIndex, { allPositions, getCell }) {
     const knowledge = new Map()
@@ -189,7 +188,6 @@ export const darkChess = {
 
 export const fogOfWar = {
   key: 'fogOfWar',
-  noCheck: true,
 
   visibility(slice, viewerIndex, { topology, generateMovesForPiece, allPositions, getCell }) {
     const knowledge = new Map()

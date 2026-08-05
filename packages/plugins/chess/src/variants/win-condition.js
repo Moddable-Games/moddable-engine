@@ -1,13 +1,5 @@
 export const extinction = {
   key: 'extinction',
-  label: 'Extinction Chess',
-  group: 'Alternate Rules',
-  title: 'Extinction Chess',
-  description: 'You lose when any one piece type is completely eliminated from your army.',
-  rule: 'Board: 8x8 · Win: Eliminate a piece type',
-  rows: 8,
-  cols: 8,
-  noCheck: true,
 
   winCondition(state, ctx) {
     const board = state.board
@@ -28,14 +20,6 @@ export const extinction = {
 
 export const singleCheck = {
   key: 'singleCheck',
-  label: 'Single Check',
-  group: 'Tactical',
-  title: 'Single Check',
-  description: 'Deliver just one check to win instantly.',
-  rule: 'Board: 8x8 · Win: Checkmate or 1 check',
-  rows: 8,
-  cols: 8,
-  checkThreshold: 1,
 
   winCondition(state, ctx) {
     const threshold = ctx.config?.checkThreshold || 1
@@ -48,15 +32,6 @@ export const singleCheck = {
 
 export const codrus = {
   key: 'codrus',
-  label: 'Codrus',
-  group: 'Alternate Rules',
-  title: 'Codrus',
-  description: 'Lose your king to win. No check concept. Arrange for your king to be captured.',
-  rule: 'Board: 8x8 · Win: Lose your king',
-  rows: 8,
-  cols: 8,
-  noCheck: true,
-  castling: false,
 
   winCondition(state, ctx) {
     const board = state.board
@@ -74,14 +49,6 @@ export const codrus = {
 
 export const omnicide = {
   key: 'omnicide',
-  label: 'Omnicide',
-  group: 'Alternate Rules',
-  title: 'Omnicide',
-  description: 'Lose all your pieces to win. Captures are NOT forced (unlike Antichess). The king is just another piece.',
-  rule: 'Board: 8x8 · Win: Lose all pieces',
-  rows: 8,
-  cols: 8,
-  noCheck: true,
 
   winCondition(state, ctx) {
     const board = state.board
@@ -124,14 +91,6 @@ export const breakthrough = {
 
 export const shatar = {
   key: 'shatar',
-  label: 'Shatar',
-  group: 'Historical',
-  title: 'Shatar (Mongolian Chess)',
-  description: 'Mongolian chess. No check concept. Win by capturing the king or baring it (leaving only the king).',
-  rule: 'Board: 8x8 · Win: Capture king or bare it',
-  rows: 8,
-  cols: 8,
-  noCheck: true,
 
   winCondition(state, ctx) {
     const board = state.board

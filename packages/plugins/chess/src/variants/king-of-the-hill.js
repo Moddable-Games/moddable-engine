@@ -2,13 +2,6 @@ const CENTER_SQUARES = [27, 28, 35, 36]
 
 export const kingOfTheHill = {
   key: 'kingOfTheHill',
-  label: 'King of the Hill',
-  group: 'Tactical',
-  title: 'King of the Hill',
-  description: 'Standard rules, plus an instant win if your king reaches any of the four centre squares (d4, d5, e4, e5).',
-  rule: 'Board: 8x8 · Win: Checkmate or king reaches centre',
-  rows: 8,
-  cols: 8,
 
   winCondition(state, ctx) {
     const board = state.board
@@ -40,8 +33,4 @@ export const kingOfTheHill = {
     return score
   },
 
-  openingBook: {
-    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -': ['e2e4', 'd2d4'],
-    'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3': ['e7e5', 'd7d5'],
-  },
 }

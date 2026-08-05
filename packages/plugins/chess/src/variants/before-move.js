@@ -19,7 +19,6 @@ export const rifle = {
 
 export const atomic = {
   key: 'atomic',
-  noCheck: true,
 
   moveApply({ move, board, piece, playerIdx, topology, setCell, getCell }) {
     const target = getCell(board, move.to)

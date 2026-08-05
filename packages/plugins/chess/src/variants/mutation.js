@@ -111,7 +111,6 @@ function attacksSquare(from, type, owner, target, board, movedFrom, movedTo, col
 
 export const benedictChess = {
   key: 'benedictChess',
-  noCheck: true,
 
   moveFilter(moves, state, ctx) {
     const board = state.board

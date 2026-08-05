@@ -11,7 +11,6 @@ export const marseillais = {
 
 export const monsterChess = {
   key: 'monsterChess',
-  setup: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/R3K2R',
 
   turnLogic(ctx) {
     const { movesThisTurn, inCheck, playerIdx } = ctx

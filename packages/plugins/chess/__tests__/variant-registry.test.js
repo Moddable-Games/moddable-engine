@@ -14,8 +14,7 @@ describe('variant-registry', () => {
   it('retrieves registered variants', () => {
     const config = getVariantConfig('standard')
     expect(config).not.toBeNull()
-    expect(config.label).toBe('Standard')
-    expect(config.group).toBe('Classic')
+    expect(config.key).toBe('standard')
   })
 
   it('returns null for unknown variants', () => {
@@ -66,10 +65,10 @@ describe('variant-registry', () => {
       expect(filtered[0].to).toBe(43)
     })
 
-    it('racingKings has custom setup', () => {
+    it('racingKings has moveFilter and winCondition', () => {
       const config = getVariantConfig('racingKings')
-      expect(config.setup).toBe('8/8/8/8/8/8/krbnNBRK/qrbnNBRQ')
-      expect(config.castling).toBe(false)
+      expect(typeof config.moveFilter).toBe('function')
+      expect(typeof config.winCondition).toBe('function')
     })
   })
 })

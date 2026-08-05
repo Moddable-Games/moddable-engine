@@ -1,13 +1,5 @@
 export const fiveCheck = {
   key: 'fiveCheck',
-  label: 'Five-Check',
-  group: 'Tactical',
-  title: 'Five-Check',
-  description: 'Extended Three-Check. Five checks wins instead of three.',
-  rule: 'Board: 8x8 · Win: Checkmate or 5 checks',
-  rows: 8,
-  cols: 8,
-  checkThreshold: 5,
 
   winCondition(state, ctx) {
     const threshold = ctx.config?.checkThreshold || 5

@@ -33,7 +33,7 @@
     "family": "chess",
     "variant": "antichess",
     "label": "Antichess",
-    "group": "Alternate Rules",
+    "group": "Other",
     "playable": true
   },
   {
@@ -134,7 +134,7 @@
     "family": "chess",
     "variant": "checklessChess",
     "label": "Checkless Chess",
-    "group": "Alternate Rules",
+    "group": "Other",
     "playable": true,
     "slug": "checkless"
   },
@@ -164,7 +164,7 @@
     "family": "chess",
     "variant": "codrus",
     "label": "Codrus",
-    "group": "Alternate Rules",
+    "group": "Other",
     "playable": true
   },
   {
@@ -260,14 +260,14 @@
     "family": "chess",
     "variant": "extinction",
     "label": "Extinction Chess",
-    "group": "Alternate Rules",
+    "group": "Other",
     "playable": true
   },
   {
     "family": "chess",
     "variant": "fiveCheck",
     "label": "Five-Check",
-    "group": "Tactical",
+    "group": "Other",
     "playable": true,
     "slug": "five-check"
   },
@@ -283,7 +283,7 @@
     "family": "chess",
     "variant": "giveaway",
     "label": "Giveaway",
-    "group": "Alternate Rules",
+    "group": "Other",
     "playable": true
   },
   {
@@ -304,7 +304,7 @@
     "family": "chess",
     "variant": "gridChess",
     "label": "Grid Chess",
-    "group": "Alternate Rules",
+    "group": "Other",
     "playable": true,
     "slug": "grid-chess"
   },
@@ -333,14 +333,14 @@
     "family": "chess",
     "variant": "horde",
     "label": "Horde Chess",
-    "group": "Alternate Rules",
+    "group": "Other",
     "playable": true
   },
   {
     "family": "chess",
     "variant": "immunizationChess",
     "label": "Immunization Chess",
-    "group": "Alternate Rules",
+    "group": "Other",
     "playable": true,
     "slug": "immunization-chess"
   },
@@ -362,7 +362,7 @@
     "family": "chess",
     "variant": "kingOfTheHill",
     "label": "King of the Hill",
-    "group": "Tactical",
+    "group": "Other",
     "playable": true,
     "slug": "king-of-the-hill"
   },
@@ -392,7 +392,7 @@
     "family": "chess",
     "variant": "madrasiChess",
     "label": "Madrasi Chess",
-    "group": "Alternate Rules",
+    "group": "Other",
     "playable": true,
     "slug": "madrasi"
   },
@@ -435,7 +435,7 @@
     "family": "chess",
     "variant": "medusaChess",
     "label": "Medusa Chess",
-    "group": "Alternate Rules",
+    "group": "Other",
     "playable": true,
     "slug": "medusa-chess"
   },
@@ -479,7 +479,7 @@
     "family": "chess",
     "variant": "noRetreat",
     "label": "No Retreat",
-    "group": "Alternate Rules",
+    "group": "Other",
     "playable": true,
     "slug": "no-retreat"
   },
@@ -494,7 +494,7 @@
     "family": "chess",
     "variant": "omnicide",
     "label": "Omnicide",
-    "group": "Alternate Rules",
+    "group": "Other",
     "playable": true
   },
   {
@@ -522,7 +522,7 @@
     "family": "chess",
     "variant": "patrolChess",
     "label": "Patrol Chess",
-    "group": "Alternate Rules",
+    "group": "Other",
     "playable": true,
     "slug": "patrol"
   },
@@ -551,7 +551,7 @@
     "family": "chess",
     "variant": "poisonChess",
     "label": "Poison Chess",
-    "group": "Tactical",
+    "group": "Other",
     "playable": true,
     "slug": "poison-chess"
   },
@@ -573,7 +573,7 @@
     "family": "chess",
     "variant": "racingKings",
     "label": "Racing Kings",
-    "group": "Alternate Rules",
+    "group": "Other",
     "playable": true,
     "slug": "racing-kings"
   },
@@ -603,7 +603,7 @@
     "family": "chess",
     "variant": "shatar",
     "label": "Shatar",
-    "group": "Historical",
+    "group": "Other",
     "playable": true
   },
   {
@@ -624,7 +624,7 @@
     "family": "chess",
     "variant": "singleCheck",
     "label": "Single-Check",
-    "group": "Tactical",
+    "group": "Other",
     "playable": true,
     "slug": "single-check"
   },
@@ -646,14 +646,14 @@
     "family": "chess",
     "variant": "standard",
     "label": "Standard Chess",
-    "group": "Classic",
+    "group": "Other",
     "playable": true
   },
   {
     "family": "chess",
     "variant": "suicideChess",
     "label": "Suicide Chess",
-    "group": "Alternate Rules",
+    "group": "Other",
     "playable": true,
     "slug": "suicide-chess"
   },
@@ -669,7 +669,7 @@
     "family": "chess",
     "variant": "threeCheck",
     "label": "Three-Check",
-    "group": "Tactical",
+    "group": "Other",
     "playable": true,
     "slug": "three-check"
   },
@@ -719,7 +719,7 @@
     "family": "chess",
     "variant": "weakChess",
     "label": "Weak!",
-    "group": "Alternate Rules",
+    "group": "Other",
     "playable": true,
     "slug": "weak"
   },

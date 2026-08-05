@@ -110,6 +110,18 @@ function expandRankWidth(rank) {
         i++
       }
       width += parseInt(numStr, 10)
+    } else if (rank[i] === '+') {
+      // Promotion prefix: +X or +[XY] = 1 cell
+      i++
+      if (i < rank.length) {
+        if (rank[i] === '[') {
+          const close = rank.indexOf(']', i)
+          i = close === -1 ? i + 1 : close + 1
+        } else {
+          i++
+        }
+      }
+      width += 1
     } else {
       // Any letter counts as 1 cell
       width += 1

@@ -1,15 +1,5 @@
 export const racingKings = {
   key: 'racingKings',
-  label: 'Racing Kings',
-  group: 'Alternate Rules',
-  title: 'Racing Kings',
-  description: 'No checks allowed at any point. Both sides race their king to rank 8. First to arrive wins.',
-  rule: 'Board: 8x8 · Win: King reaches rank 8',
-  rows: 8,
-  cols: 8,
-  setup: '8/8/8/8/8/8/krbnNBRK/qrbnNBRQ',
-  castling: false,
-  noCheck: true,
 
   moveFilter(moves, state, ctx) {
     return moves.filter(m => {
@@ -49,9 +39,6 @@ export const racingKings = {
     return (oppKingRank - myKingRank) * 300
   },
 
-  openingBook: {
-    '8/8/8/8/8/8/krbnNBRK/qrbnNBRQ w - -': ['h2g3', 'g2f3', 'h2h3'],
-  },
 }
 
 function isKingAttacked(board, player, ctx) {

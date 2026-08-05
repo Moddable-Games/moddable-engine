@@ -1,15 +1,5 @@
 export const giveaway = {
   key: 'giveaway',
-  label: 'Giveaway',
-  group: 'Alternate Rules',
-  title: 'Giveaway Chess',
-  description: 'Captures mandatory. Lose all pieces to win. Stalemate is a loss for the stalemated player.',
-  rule: 'Board: 8x8 · Win: Lose all pieces (stalemate = loss)',
-  rows: 8,
-  cols: 8,
-  castling: false,
-  noCheck: true,
-  stalemateMeaning: 'loss',
 
   moveFilter(moves, state, ctx) {
     const board = state.board
@@ -34,15 +24,6 @@ export const giveaway = {
 
 export const suicideChess = {
   key: 'suicideChess',
-  label: 'Suicide Chess',
-  group: 'Alternate Rules',
-  title: 'Suicide Chess',
-  description: 'Captures mandatory. Lose all pieces to win. Stalemate is a draw.',
-  rule: 'Board: 8x8 · Win: Lose all pieces (stalemate = draw)',
-  rows: 8,
-  cols: 8,
-  castling: false,
-  noCheck: true,
 
   moveFilter(moves, state, ctx) {
     const board = state.board
@@ -168,14 +149,6 @@ function pathIsClear(from, target, board, cols) {
 
 export const gridChess = {
   key: 'gridChess',
-  label: 'Grid Chess',
-  group: 'Alternate Rules',
-  title: 'Grid Chess',
-  description: 'Moves must cross at least one 2x2 grid line. Attacks only count if they cross a grid line.',
-  rule: 'Board: 8x8 · Win: Checkmate',
-  rows: 8,
-  cols: 8,
-  noCheck: true,
 
   moveFilter(moves, state, ctx) {
     const board = state.board
