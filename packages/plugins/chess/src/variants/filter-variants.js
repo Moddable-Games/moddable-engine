@@ -63,26 +63,6 @@ export const patrolChess = {
 
 export const makpong = {
   key: 'makpong',
-  setup: 'rngkfgnr/8/pppppppp/8/8/PPPPPPPP/8/RNGKFGNR',
-  castling: false,
-  enPassant: false,
-  doubleStep: false,
-  promotionChoices: ['ferz'],
-  pieces: {
-    ferz: { type: 'leaper', offsets: [[-1, -1], [-1, 1], [1, -1], [1, 1]] },
-    khon: { type: 'leaper', offsets: [[-1, -1], [-1, 0], [-1, 1], [1, -1], [1, 1]], directional: true },
-  },
-  vocabulary: {
-    ferz: { symbols: { 0: 'F', 1: 'f' } },
-    khon: { symbols: { 0: 'G', 1: 'g' } },
-  },
-  pawnConfig: {
-    forwardDir: { 0: [-1, 0], 1: [1, 0] },
-    startCells: { 0: new Set([40,41,42,43,44,45,46,47]), 1: new Set([16,17,18,19,20,21,22,23]) },
-    promotionCells: { 0: new Set([16,17,18,19,20,21,22,23]), 1: new Set([40,41,42,43,44,45,46,47]) },
-    captureDirections: { 0: [[-1, -1], [-1, 1]], 1: [[1, -1], [1, 1]] },
-    doubleStep: false,
-  },
 
   moveFilter(moves, state, ctx) {
     if (!ctx.isInCheck()) return moves

@@ -1,6 +1,6 @@
 import { createGameFromDefinition } from '../../game/src/create-game.js'
 import { produce } from '../../schema/src/produce.js'
-import { getVariantConfig, hasVariant, setVariantSources as _setVariantSources } from './variant-registry.js'
+import { getVariantConfig, hasVariant, getSlugForKey, setVariantSources as _setVariantSources } from './variant-registry.js'
 import { definitionFromVariant } from './variant-definition.js'
 import { parseFrontmatter } from '../../schema/src/parse-frontmatter.js'
 import { resolve as cascadeResolve } from '../../schema/src/cascade-resolver.js'
@@ -165,9 +165,10 @@ export const STRUCTURAL_KEYS = new Set(['topology', 'players', 'meta', 'surface'
 function resolveFromDisk(family, variant) {
   if (!_readFile) return null
 
+  const slug = getSlugForKey(family, variant)
   let familyMd, variantMd
   try { familyMd = _readFile(family, 'rulebook') } catch { return null }
-  try { variantMd = _readFile(family, variant) } catch { variantMd = '' }
+  try { variantMd = _readFile(family, slug) } catch { variantMd = '' }
 
   if (!variantMd && variant && variant !== 'standard') return null
 

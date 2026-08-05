@@ -1,5 +1,19 @@
 import { rider, leaper, compose, divergent, fromConfig, OFFSETS } from '../../../piece-behaviour/index.js'
 
+function normalizePawnConfig(pc) {
+  if (!pc) return pc
+  const result = { ...pc }
+  for (const k of ['startCells', 'promotionCells']) {
+    if (result[k] && typeof result[k] === 'object') {
+      for (const side of Object.keys(result[k])) {
+        const v = result[k][side]
+        if (Array.isArray(v)) result[k] = { ...result[k], [side]: new Set(v.map(Number)) }
+      }
+    }
+  }
+  return result
+}
+
 const DEFAULT_VOCABULARY = {
   king:   { symbols: { 0: 'K', 1: 'k' } },
   queen:  { symbols: { 0: 'Q', 1: 'q' } },
@@ -97,7 +111,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   let pawnConfig = null
 
   function derivePawnConfig(topo) {
-    if (config.pawnConfig) return config.pawnConfig
+    if (config.pawnConfig) return normalizePawnConfig(config.pawnConfig)
     if (config.hexPawnConfig && topo && topo.getAllCells) {
       return deriveHexPawnConfig(topo, config.hexPawnConfig)
     }

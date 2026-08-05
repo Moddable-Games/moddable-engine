@@ -13,7 +13,6 @@ export { einsteinChess, andernachChess, benedictChess, recruitmentChess, absorpt
 export { marseillais, monsterChess, progressive, progressiveItalian, berserkChess } from './multi-move.js'
 export { rifle, atomic, displacementChess } from './before-move.js'
 export { shatranj, chaturanga, sittuyin } from './historical.js'
-export { berolinaChess, leganChess, makruk } from './pawn-config-variants.js'
 export { hexapawn } from './hexapawn.js'
 export { maharaja } from './maharaja.js'
 export { empire } from './empire.js'
@@ -102,7 +101,7 @@ export const diceChess = {
 
 export const crazyhouse = {
   key: 'crazyhouse',
-  drops: true,
+
   actions: {
     drop: {
       skipsCheckFilter: true,
@@ -211,11 +210,6 @@ export const fogOfWar = {
 
 export const duckChess = {
   key: 'duckChess',
-  noCheck: true,
-  vocabulary: {
-    blocker: { symbols: { '-1': 'D' } },
-  },
-  render: { fenMap: { D: 'duck' } },
 
   moveFilter(moves, state) {
     if (state._blockerPhase) {

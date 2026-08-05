@@ -5,11 +5,9 @@ import { listVariants, getVariantConfig } from '../../../play/src/variant-regist
 // Remove entries as they migrate to frontmatter-only data.
 // The allow-list shrinking to empty is the migration's progress bar.
 const LEGACY_ALLOW = new Set([
-  'breakthrough', 'makpong', 'maharaja',
-  'shatranj', 'chaturanga', 'chess960',
-  'diceChess', 'crazyhouse', 'duckChess', 'sittuyin',
+  'breakthrough', 'maharaja',
+  'chess960', 'diceChess',
   'hexapawn',
-  'berolinaChess', 'leganChess', 'makruk',
 ])
 
 const DATA_KEYS = new Set([

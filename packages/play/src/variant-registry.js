@@ -56,6 +56,14 @@ export function getRegisteredFamilies() {
   return [...registries.keys()]
 }
 
+export function getSlugForKey(family, key) {
+  const manifest = getManifest(family)
+  for (const entry of [...manifest.playable, ...manifest.unplayable]) {
+    if (entry.key === key) return entry.slug
+  }
+  return key
+}
+
 export function listVariants(family, group) {
   const manifest = getManifest(family)
   const results = []

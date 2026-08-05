@@ -15,39 +15,11 @@ const bareKingWin = (state) => {
 
 export const shatranj = {
   key: 'shatranj',
-  setup: 'rnekfenr/pppppppp/8/8/8/8/PPPPPPPP/RNEKFENR',
-  castling: false,
-  enPassant: false,
-  doubleStep: false,
-  stalemateMeaning: 'win',
-  promotionChoices: ['ferz'],
-  pieces: {
-    ferz: { type: 'leaper', offsets: [[-1, -1], [-1, 1], [1, -1], [1, 1]] },
-    alfil: { type: 'leaper', offsets: [[-2, -2], [-2, 2], [2, -2], [2, 2]] },
-  },
-  vocabulary: {
-    ferz: { symbols: { 0: 'F', 1: 'f' } },
-    alfil: { symbols: { 0: 'E', 1: 'e' } },
-  },
   winCondition: bareKingWin,
 }
 
 export const chaturanga = {
   key: 'chaturanga',
-  setup: 'rnefkenr/pppppppp/8/8/8/8/PPPPPPPP/RNEFKENR',
-  castling: false,
-  enPassant: false,
-  doubleStep: false,
-  stalemateMeaning: 'win',
-  promotionChoices: ['ferz'],
-  pieces: {
-    ferz: { type: 'leaper', offsets: [[-1, -1], [-1, 1], [1, -1], [1, 1]] },
-    alfil: { type: 'leaper', offsets: [[-2, -2], [-2, 2], [2, -2], [2, 2]] },
-  },
-  vocabulary: {
-    ferz: { symbols: { 0: 'F', 1: 'f' } },
-    alfil: { symbols: { 0: 'E', 1: 'e' } },
-  },
   winCondition: bareKingWin,
 }
 
@@ -56,22 +28,7 @@ const SITTUYIN_PAWNS_B = [24,25,26,27,20,21,22,23]
 
 export const sittuyin = {
   key: 'sittuyin',
-  castling: false,
-  enPassant: false,
-  doubleStep: false,
-  promotionChoices: ['ferz'],
-  pieces: {
-    ferz: { type: 'leaper', offsets: [[-1, -1], [-1, 1], [1, -1], [1, 1]] },
-    khon: { type: 'leaper', offsets: [[-1, -1], [-1, 0], [-1, 1], [1, -1], [1, 1]], directional: true },
-  },
-  vocabulary: {
-    ferz: { symbols: { 0: 'F', 1: 'f' } },
-    khon: { symbols: { 0: 'G', 1: 'g' } },
-  },
-  placementPieces: [
-    ['rook', 'rook', 'knight', 'knight', 'khon', 'khon', 'ferz', 'king'],
-    ['rook', 'rook', 'knight', 'knight', 'khon', 'khon', 'ferz', 'king'],
-  ],
+
   setup() {
     const board = new Array(64).fill(null)
     for (const sq of SITTUYIN_PAWNS_W) board[sq] = { type: 'pawn', owner: 0 }
@@ -83,7 +40,6 @@ export const sittuyin = {
     if (state.phase !== 'placement') return moves
     return moves.filter(m => m.action)
   },
-
 
   actions: {
     place: {
