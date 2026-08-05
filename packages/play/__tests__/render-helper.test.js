@@ -1,3 +1,4 @@
+import '../test-helpers/setup-rules-reader.js'
 import { renderStateAsSvg } from '../src/render-helper.js'
 import { createGameForFamily } from '../src/play.js'
 import '../../plugins/chess/index.js'

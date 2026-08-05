@@ -1,9 +1,9 @@
 import { registerVariant, getVariantConfig, getAllVariants, getVariantGroups } from '../index.js'
-import { standard, threeCheck, fiveCheck, kingOfTheHill, antichess, racingKings } from '../src/variants/index.js'
+import { threeCheck, fiveCheck, kingOfTheHill, antichess, racingKings } from '../src/variants/index.js'
 
 describe('variant-registry', () => {
   beforeAll(() => {
-    registerVariant('standard', standard)
+    registerVariant('standard', { key: 'standard' })
     registerVariant('threeCheck', threeCheck)
     registerVariant('fiveCheck', fiveCheck)
     registerVariant('kingOfTheHill', kingOfTheHill)

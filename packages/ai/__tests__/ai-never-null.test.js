@@ -1,13 +1,11 @@
 /**
  * Guard: AI must never return null when legal moves exist.
  *
- * For every registered variant, the AI must return a move:
- *   1. From the starting position
- *   2. After one human move has been applied
+ * Fast mode (default, CI): one representative variant per family, 10 plies.
+ * Full mode (AI_FULL_SWEEP=1): every registered variant, 10 plies.
  *
- * Condition 2 is what Turkish Great Chess IV fails — the opening book
- * provides move 1 but the search times out on 14×14 without completing
- * a single iteration, returning null.
+ * The property being verified: given legal moves exist, the AI always
+ * returns one of them. A null return hangs the game.
  */
 import { createGame, createAI, listVariants } from '../../play/src/sdk.js'
 import { getFamilies } from '../../play/src/play.js'
@@ -25,32 +23,54 @@ const SKIP_VARIANTS = new Set([
   'go:stoical-go',
   'chess:duckChess',
   'chess:sittuyin',
-  // diceChess: dice roll can yield piece types the player no longer has,
-  // leaving zero legal moves after moveFilter — turn is legitimately lost.
   'chess:diceChess',
-  // makpong: moveFilter blocks king moves when in check; AI search
-  // fails to find non-king escape at certain plies. Tracked as defect.
   'chess:makpong',
 ])
 
+// Selected for mechanism coverage, not name diversity:
+//   grid: standard, antichess, english, xiangqi, shogi
+//   hex topology: glinski
+//   drops (from hand): crazyhouse
+//   actions (custom moves): ouk-chaktrang (kingLeap)
+//   multi-move turns: marseillais (2 moves per turn)
+//   visibility/fog: fogOfWar (partial information)
+//   large board: grand (10x10)
+//   per-family: go, draughts, xiangqi, shogi each have at least one
+const REPRESENTATIVE = {
+  chess: ['standard', 'crazyhouse', 'glinski', 'ouk-chaktrang', 'marseillais', 'fogOfWar', 'grand'],
+  go: ['standard', 'capture-go'],
+  draughts: ['english', 'international'],
+  xiangqi: ['standard'],
+  shogi: ['standard'],
+}
+
+const FULL_SWEEP = process.env.AI_FULL_SWEEP === '1'
+
+function variantsForFamily(family) {
+  if (FULL_SWEEP) {
+    return listVariants(family)
+      .filter(v => !SKIP_VARIANTS.has(`${family}:${v.key || v}`))
+  }
+  return (REPRESENTATIVE[family] || []).map(key => ({ key }))
+}
+
 for (const family of AI_FAMILIES) {
-  const variants = listVariants(family)
+  const variants = variantsForFamily(family)
   if (variants.length === 0) continue
 
-  describe(`AI never-null: ${family}`, () => {
+  describe(`AI never-null: ${family}${FULL_SWEEP ? ' (full sweep)' : ''}`, () => {
     for (const v of variants) {
-      const key = `${family}:${v.key || v}`
-      if (SKIP_VARIANTS.has(key)) continue
-
       const variantKey = v.key || v
+      const key = `${family}:${variantKey}`
+      if (SKIP_VARIANTS.has(key)) continue
 
       it(`${variantKey}: AI returns move from start`, () => {
         const game = createGame(family, variantKey)
-        const state = game.getState()
         const moves = game.getLegalMoves()
         if (moves.length === 0) return
 
         const ai = createAI(family, variantKey, { difficulty: 'easy' })
+        const state = game.getState()
         const move = ai.pickMove(state.slice, 0)
         expect(move).not.toBeNull()
         expect(move).toBeDefined()

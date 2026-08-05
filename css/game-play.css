@@ -1,11 +1,10 @@
 .game-play {
   display: grid;
   grid-template-columns: 200px 1fr 200px;
-  gap: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
-  padding-top: 100px;
+  gap: 0;
+  width: 100%;
+  padding: 0;
+  padding-top: 80px;
   min-height: 500px;
 }
 
@@ -13,6 +12,11 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding: 16px;
+}
+
+.game-play-sidebar--left {
+  padding-left: 20px;
 }
 
 .game-play-sidebar .control-group {
@@ -60,6 +64,7 @@
 }
 
 .game-play-sidebar--right {
+  padding-right: 20px;
   position: sticky;
   top: 100px;
   align-self: start;
@@ -271,7 +276,6 @@
 @media (max-width: 960px) {
   .game-play {
     grid-template-columns: 180px 1fr 180px;
-    gap: 12px;
   }
 }
 

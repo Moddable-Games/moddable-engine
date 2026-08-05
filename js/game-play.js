@@ -189,6 +189,12 @@ async function resolveBoard(family, variantConfig, variantKey, slugOverride) {
     }
   }
 
+  resolved._variantMeta = {
+    board: variantFm.board || familyFm.board || '',
+    win: variantFm.win || familyFm.win || '',
+    special: variantFm.special || '',
+    title: variantFm.title || '',
+  }
   return resolved
 }
 
@@ -933,6 +939,7 @@ export function createPlaySession(options = {}) {
     get history() { return moveHistory },
     get fen() { return getFEN() },
     get setup() { return resolvedBoard?.setup || null },
+    get variantMeta() { return resolvedBoard?._variantMeta || null },
     start,
     draw,
     summarise,
@@ -1152,9 +1159,9 @@ export async function initGamePlay(container, defaults = {}) {
     onStatus: updateStatus,
   }
 
-  function updateRules(variantKey) {
-    const vConfig = getVariantConfig(config.family, variantKey)
-    renderRulesPanel(rulesEl, vConfig || {})
+  function updateRules() {
+    const meta = session?.variantMeta
+    renderRulesPanel(rulesEl, meta || {})
   }
 
   function updateStatus(info) {
@@ -1252,10 +1259,10 @@ export async function initGamePlay(container, defaults = {}) {
 
   async function restart(changes) {
     config = { ...config, ...changes }
-    updateRules(config.variant)
     updateURL()
     session = createPlaySession(config)
     await session.start()
+    updateRules()
     populatePieceSetSelect(config.variant, session.setup)
     renderActions()
   }

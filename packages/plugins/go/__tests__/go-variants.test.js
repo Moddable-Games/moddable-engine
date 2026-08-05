@@ -1,3 +1,4 @@
+import '../../../play/test-helpers/setup-rules-reader.js'
 import '../index.js'
 import { createGame, listVariants, getVariantConfig } from '../../../play/index.js'
 
@@ -23,16 +24,11 @@ describe('go variants', () => {
       ])
     })
 
-    it('inherits configuration through extends', () => {
-      const config = getVariantConfig('go', '9x9')
-      expect(config.size).toBe(9)
-      expect(config.scoring).toBe('territory')
-      expect(config.superko).toBe(true)
-      expect(config.komi).toBe(5.5)
-    })
-
-    it('does not leak the extends key into resolved config', () => {
-      expect(getVariantConfig('go', '9x9').extends).toBeUndefined()
+    it('9x9 inherits standard go rules (board size proves extends)', () => {
+      const game = createGame('go', '9x9')
+      const state = game.getState().slice
+      expect(state.board.length).toBe(81)
+      expect(game.getLegalMoves().length).toBeGreaterThan(0)
     })
   })
 

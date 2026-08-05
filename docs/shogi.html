@@ -94,12 +94,14 @@
     <thead><tr><th>Key</th><th>Board</th><th>Zone</th><th>Distinguishing rule</th></tr></thead>
     <tbody>
       <tr><td><code>standard</code></td><td>9&times;9</td><td>3 ranks</td><td>The full game, twenty pieces a side</td></tr>
-      <tr><td><code>judkins-shogi</code></td><td>6&times;6</td><td>2 ranks</td><td>Six a side; knight retained, no lance</td></tr>
       <tr><td><code>minishogi</code></td><td>5&times;5</td><td>1 rank</td><td>Five pieces a side; no knight or lance</td></tr>
+      <tr><td><code>judkins-shogi</code></td><td>6&times;6</td><td>2 ranks</td><td>Six a side; knight retained, no lance</td></tr>
+      <tr><td><code>gorogoro-plus</code></td><td>5&times;6</td><td>1 rank</td><td>Simplified shogi with gold and silver only</td></tr>
+      <tr><td><code>heian-shogi</code></td><td>9&times;9</td><td>3 ranks</td><td>Historical predecessor; drunken elephant instead of bishop</td></tr>
     </tbody>
   </table>
 
-  <p>Players are <code>sente</code> and <code>gote</code>. Three variants are registered out of twenty-four in the hub; the rest are held back for the reasons under <a href="#gaps">known gaps</a>.</p>
+  <p>Players are <code>sente</code> and <code>gote</code>. Five variants are registered out of twenty-four in the hub; the rest are held back for the reasons under <a href="#gaps">known gaps</a>.</p>
 
   <h2 id="pieces">Pieces and notation</h2>
   <p>Symbols match the setup notation the variant frontmatter uses, so a position read from the rules parses here and renders through the piece mapping the board diagram already uses. Sente is player <code>0</code> and takes the uppercase letter.</p>
@@ -134,7 +136,7 @@ game.applyMove({ action: 'drop', type: 'pawn', to: 40 })</code></pre>
 
   <p>Drop legality is generated, not validated after the fact. Pawns and lances may not be dropped on the last rank and knights not on the last two, since they would have no move. With <code>dropPawnFileLimit</code> set, a pawn may not be dropped onto a file that already holds one of your unpromoted pawns. Every drop is then filtered through the same check test as a board move, so a drop that leaves your own king in check never appears.</p>
 
-  <p>Hands always start empty. This is the reason Gorogoro+ is not registered: it opens with the knight and lance already in hand.</p>
+  <p>Hands always start empty for standard, minishogi, and judkins-shogi. Gorogoro+ opens with the knight and lance already in hand, handled via the variant's frontmatter setup.</p>
 
   <h2 id="knobs">Variant parameters</h2>
   <p>The plugin is parametric, with no per-variant code:</p>
@@ -174,12 +176,10 @@ ctrl.handleClick(square)       // commits the drop, then clears the armed type</
 
   <p><strong><code>dropCheckmateLimit</code> is declared but not read.</strong> Dropping a pawn to deliver immediate checkmate &mdash; <em>uchifuzume</em> &mdash; is illegal in standard shogi and is currently allowed. The parameter exists in the config so the intent is recorded, but nothing consults it yet.</p>
 
-  <p>Twenty-one hub variants are not registered. Each is named in <code>UNSUPPORTED</code> in the variant module with its reason. They fall into three groups:</p>
+  <p>Nineteen hub variants are not registered. They fall into three groups:</p>
 
-  <p><strong>Would play to the wrong rules</strong>, which is worse than being absent. These parse correctly and give the right piece count, so the failure would be silent:</p>
+  <p><strong>Would play to the wrong rules</strong>, which is worse than being absent:</p>
   <ul>
-    <li><strong>heian-shogi</strong> &mdash; predates the drop rule, and the plugin cannot disable drops</li>
-    <li><strong>gorogoro-plus</strong> &mdash; the knight and lance start in hand, and hands always start empty</li>
     <li><strong>mortal-shogi</strong> &mdash; captured pieces demote along a ranking chain rather than to base form</li>
   </ul>
 

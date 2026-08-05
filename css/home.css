@@ -371,6 +371,7 @@ a { color: inherit; text-decoration: none; }
   transition: border-color 0.2s;
 }
 .family-chip:hover { border-color: var(--border-glow); }
+.family-chip--pending { opacity: 0.5; border-style: dashed; }
 .family-symbol {
   font-size: 18px;
   color: var(--cosmic-glow);
@@ -391,7 +392,7 @@ a { color: inherit; text-decoration: none; }
 .topologies-inner { max-width: 1200px; margin: 0 auto; }
 .topo-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
 .topo-card {
@@ -462,6 +463,23 @@ a { color: inherit; text-decoration: none; }
   inset: 20px;
   background: var(--cosmic-bright);
   border-radius: 50%;
+}
+.topo-visual--tableau {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.topo-visual--tableau::before, .topo-visual--tableau::after {
+  content: '';
+  width: 18px;
+  height: 26px;
+  border: 2px solid var(--cosmic-bright);
+  border-radius: 3px;
+}
+.topo-visual--tableau::after {
+  transform: rotate(10deg);
+  margin-left: -8px;
 }
 .topo-name {
   font-family: var(--font-display);

@@ -59,6 +59,8 @@
     <li><a href="chess.html">Chess</a></li>
     <li><a href="go.html">Go</a></li>
     <li><a href="draughts.html">Draughts</a></li>
+    <li><a href="shogi.html">Shogi</a></li>
+    <li><a href="xiangqi.html">Xiangqi</a></li>
     <li><a href="hexmaps.html">Hex Maps</a></li>
   </ul>
   <div class="docs-toc-title" style="margin-top:20px">On this page</div>
@@ -166,7 +168,27 @@ engine:
       <tr>
         <td><a href="chess.html">Chess</a></td>
         <td>Consumers</td>
-        <td>Embed protocol, SDK reference, 75 variants, AI, puzzles API</td>
+        <td>Embed protocol, SDK reference, 100 variants, AI, puzzles API</td>
+      </tr>
+      <tr>
+        <td><a href="go.html">Go</a></td>
+        <td>Consumers</td>
+        <td>Embed protocol, SDK reference, 9 variants, territory/area scoring, AI</td>
+      </tr>
+      <tr>
+        <td><a href="draughts.html">Draughts</a></td>
+        <td>Consumers</td>
+        <td>Embed protocol, SDK reference, 13 variants, parametric capture rules</td>
+      </tr>
+      <tr>
+        <td><a href="shogi.html">Shogi</a></td>
+        <td>Consumers</td>
+        <td>Embed protocol, SDK reference, 5 variants, drops, promotion zones</td>
+      </tr>
+      <tr>
+        <td><a href="xiangqi.html">Xiangqi</a></td>
+        <td>Consumers</td>
+        <td>Embed protocol, SDK reference, 3 variants, palace/river/cannon rules</td>
       </tr>
       <tr>
         <td><a href="hexmaps.html">Hex Maps</a></td>
@@ -177,7 +199,7 @@ engine:
   </table>
 
   <h2 id="current-coverage">Current coverage</h2>
-  <p>The engine currently handles board rendering for <strong>293 game variants</strong> across <strong>42 families</strong> and <strong>5 topology types</strong>, plus <strong>3 RPG systems</strong> (D&amp;D 5e, Ironsworn, Starforged) via manifest-driven oracle/entity providers. Play (move execution, AI) is architecturally complete but not yet wired to the frontend.</p>
+  <p>The engine renders boards for <strong>293 game variants</strong> across <strong>42 families</strong> and <strong>6 topology types</strong>, plus <strong>3 RPG systems</strong> (D&amp;D 5e, Ironsworn, Starforged) via manifest-driven oracle/entity providers. Five families (chess, draughts, go, shogi, xiangqi) are fully playable with move execution, AI, embed protocol, and SDK.</p>
 
   <table class="docs-table">
     <thead>
@@ -186,7 +208,7 @@ engine:
     <tbody>
       <tr><td>Schema (parse, validate, produce)</td><td>Complete</td><td>113</td></tr>
       <tr><td>Core (state, pipeline, events)</td><td>Complete</td><td>157</td></tr>
-      <tr><td>Topologies (5 types)</td><td>Complete</td><td>165</td></tr>
+      <tr><td>Topologies (6 types)</td><td>Complete</td><td>165</td></tr>
       <tr><td>Plugins (13 families)</td><td>Complete</td><td>375</td></tr>
       <tr><td>Rules (composable, parametric)</td><td>Complete</td><td>118</td></tr>
       <tr><td>Render (SVG generation)</td><td>Complete</td><td>34</td></tr>

@@ -23,9 +23,6 @@ import '../../plugins/xiangqi/index.js'
 
 const LEGACY_ALLOW = {
   chess: new Set([
-    'breakthrough', 'maharaja',
-    'chess960', 'diceChess',
-    'hexapawn',
   ]),
   go: new Set([
   ]),
@@ -40,7 +37,7 @@ const LEGACY_ALLOW = {
 // Ratchet ceilings: the maximum number of legacy entries allowed per family.
 // Lower these as migrations land. A PR that increases any ceiling MUST be rejected.
 const LEGACY_CEILING = {
-  chess: 5,
+  chess: 0,
   go: 0,
   draughts: 0,
   shogi: 0,
@@ -110,6 +107,6 @@ describe('functions-only: summary', () => {
       console.log(`    ${family}: ${count}/${ceiling}`)
     }
     console.log(`    TOTAL: ${total}`)
-    expect(total).toBe(5)
+    expect(total).toBe(0)
   })
 })

@@ -8,11 +8,21 @@ Every game in the Moddable Games collection — from standard chess to Endless S
 
 ## Status
 
-**All classic game families implemented.** 13 plugins covering 154 variants across chess, go, draughts, reversi, mancala, backgammon, morris, hex, big 2, halma, shogi, xiangqi, and race games. Rules are a first-class resource type: parametric, composable, topology-agnostic. Shared rules (capture, promotion, repetition, turn-continuation) work across all families. 1725 tests across 116 suites, all passing.
+**Five families playable today** — chess (100 variants), draughts (13), go (9), shogi (5), xiangqi (3). 130 registered variants total, 129 of which carry zero declarative JavaScript: games are defined entirely in frontmatter. A further eight plugins exist for reversi, mancala, backgammon, morris, hex, halma, big 2, and race games, with playable variants to follow.
 
-Current milestone: **Playable and embeddable parity across families.** The play surface (interaction, embed protocol, variant registry, SDK) is family-agnostic and lives in `packages/play`. Chess, Go and draughts are playable and embeddable; the remaining families reach parity by registering variants against the same kit rather than by writing another play page.
+Rules are implemented as plugin hooks — move filters, win conditions, turn logic, post-move effects. Each family currently defines its own. Lifting these into a shared, composable rule layer is the next architectural step (#88).
+
+The play surface (interaction, embed protocol, variant registry, SDK) is family-agnostic and lives in `packages/play`. All five playable families share the same kit: embed, play page, simulator, and headless SDK. ~2700 tests across ~110 suites, all passing.
 
 Read [`SPEC.md`](./SPEC.md) before contributing anything.
+
+---
+
+## The proof
+
+Draughts has 13 playable variants (English, International, Turkish, Russian, Canadian, Brazilian, Italian, Spanish, Czech, German, Ghanaian, Pool, Spantsiretti). There is no variant code directory. Each variant is a set of declarative keys in a `.md` file. The same is true for shogi (5 variants) and xiangqi (3 variants).
+
+Chess has 100 variants. 99 have no data in their JS registry entry. The one exception (Breakthrough) carries board dimensions because it uses a non-standard grid.
 
 ---
 
@@ -29,7 +39,7 @@ moddable-engine/
     topology-graph/      ← arbitrary node-edge + position notation
     topology-tableau/    ← card table layouts (radial, tableau, wall, linear)
     piece-behaviour/     ← movement primitives + composable definitions (rider, leaper, compose, divergent)
-    rule/                ← rule registry, composition engine, parametric rule implementations
+    rule/                ← rule registry, composition engine (test-proven, not yet consumed by plugins)
     render/              ← topology-agnostic SVG board renderer
     surface/             ← board as resource type (frame, surface, divider, generators, filters)
     schema/              ← frontmatter → game definitions
@@ -41,19 +51,19 @@ moddable-engine/
     component-dice/      ← standard dice (roll, doubles, movesFromRoll, expression parser, odds)
     hex-generators/      ← hex map generation (Catan, Twilight, Colony, etc.)
     rpg/                 ← RPG entity search, oracle rolls, card data, manifest loader
-    plugin-go/           ← Go + atari-go
-    plugin-hex/          ← Hex + swap rule
-    plugin-mancala/      ← Kalah + Oware
-    plugin-morris/       ← Nine Men's + Six Men's
-    plugin-backgammon/   ← Standard + nackgammon
-    plugin-big2/         ← Big 2 + President
-    plugin-chess/        ← Standard chess + Glinski hex (topology-agnostic, rule-composed)
-    plugin-draughts/     ← 20 variants (English, International, Turkish, Lasca...)
-    plugin-reversi/      ← 3 variants (standard, anti-reversi, mini)
-    plugin-halma/        ← 2 variants (standard, 4-player)
-    plugin-shogi/        ← 4 variants (standard, minishogi, chu-shogi, kyoto)
-    plugin-xiangqi/      ← 2 variants (xiangqi, janggi)
-    plugin-race/         ← 9 variants (pachisi, chaupar, landlords-game)
+    plugin-chess/        ← 100 variants (topology-agnostic, hook-composed)
+    plugin-draughts/     ← 13 variants (all frontmatter-only, no variant code)
+    plugin-go/           ← 9 variants (capture-go, gomoku, stoical have JS hooks)
+    plugin-shogi/        ← 5 variants (all frontmatter-only, no variant code)
+    plugin-xiangqi/      ← 3 variants (all frontmatter-only, no variant code)
+    plugin-reversi/      ← plugin only (variants not yet registered)
+    plugin-mancala/      ← plugin only
+    plugin-backgammon/   ← plugin only
+    plugin-morris/       ← plugin only
+    plugin-hex/          ← plugin only
+    plugin-halma/        ← plugin only
+    plugin-big2/         ← plugin only
+    plugin-race/         ← plugin only
   SPEC.md                ← architecture spec — read this first
   package.json           ← workspace root
 ```
@@ -65,13 +75,13 @@ moddable-engine/
 | Layer | Package(s) | Purpose |
 |---|---|---|
 | 0 | `@moddable/core` | State, moves, players, history, events, RNG, timer, plugin registry |
-| 1 | `@moddable/topology-*` | Coordinate systems: grid, hex, track, pit, graph, tableau |
+| 1 | `@moddable/topology-*` | Coordinate systems: grid, hex, track, pit, graph, tableau (6 types) |
 | 2 | `@moddable/piece-behaviour` | Movement primitives + composable piece definitions |
-| 2 | `@moddable/rule` | Rule registry, composition engine, parametric rules |
+| 2 | `@moddable/rule` | Rule registry and composition engine (proven in tests, not yet consumed by plugins — see #88) |
 | 3 | `@moddable/render` | Topology-agnostic SVG board renderer |
 | 4 | `@moddable/schema` | Frontmatter → game definitions (done) |
 | 5 | `@moddable/component-*` | Non-spatial structure: deck, dice, timer |
-| 6 | `@moddable/plugin-*` | Game families (go, hex, mancala, morris, backgammon, big2, chess) |
+| 6 | `@moddable/plugin-*` | Game families — 5 playable (chess, draughts, go, shogi, xiangqi) + 8 in progress |
 | 7 | Game configs | Frontmatter only — no code |
 
 ---
@@ -79,8 +89,8 @@ moddable-engine/
 ## Key principles
 
 - If you have to mention a game's name to explain what a piece of code does, that code is in the wrong layer.
-- Topologies are the universal adapter layer for geometry. Rules are the universal adapter layer for behaviour.
-- Rules must be parametric containers that assume nothing — never hardcode "standard" as baseline.
+- Topologies are the universal adapter layer for geometry. Rules will be the universal adapter layer for behaviour (#88).
+- Plugin hooks (moveFilter, winCondition, turnLogic, afterMove) implement rules per family today.
 - No if/else for topology type anywhere in the codebase.
 - Five independent axes compose freely: topology × pieces × rules × components × themes.
 
@@ -107,6 +117,14 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ---
 
 ## Changelog
+
+#### 2026-08-05
+- Split chess variant files: every variant now in its own kebab-case file (53 files, no multi-variant bundles)
+- Deleted standard.js (key-only no-op, now frontmatter-only like all other data-only variants)
+- Corrected conformance: chess is 99/100 (only breakthrough carries data), not 95/100. Total: 129/130 frontmatter-only
+- Fixed 5 test suites that were silently providing zero coverage (play-kit, simulator-helper, render-helper, go-variants, go-playout-policy) by adding the missing setup-rules-reader import
+- Removed UNSUPPORTED doc objects from draughts test (documentation lives in moddable-rules frontmatter)
+- Documentation overhaul (#91): corrected rules claim, family/variant counts, homepage stats, SPEC status header. Families section now distinguishes playable (5) from plugin-only (8)
 
 #### 2026-07-27
 - Family-agnostic play kit in `packages/play`: interaction models (move, place, chain, drop), generic `game:*` embed protocol with per-family aliases, family-scoped variant registry with `extends` inheritance, and a headless SDK covering every family

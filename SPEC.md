@@ -1,6 +1,7 @@
 # moddable-engine — Phase 1 Architecture Spec
 
-**Status:** Agreed 2026-06-26. No code until this spec is committed and stable.
+**Status:** Agreed 2026-06-26. Implementation complete for core, topologies, schema, play, and plugins. The rule composition layer (section 0.6) is built and tested but not yet consumed by plugins (#88). The phase model described in moddable-ops#28 was retired; current state is tracked in moddable-ops#87.
+
 **Repo:** `Moddable-Games/moddable-engine`
 
 ---

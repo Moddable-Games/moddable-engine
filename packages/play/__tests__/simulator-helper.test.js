@@ -1,3 +1,4 @@
+import '../test-helpers/setup-rules-reader.js'
 import { createSimulatorForFamily } from '../src/simulator-helper.js'
 import { createGameForFamily } from '../src/play.js'
 import '../../plugins/chess/index.js'

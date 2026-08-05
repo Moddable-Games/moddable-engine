@@ -93,10 +93,12 @@
     <thead><tr><th>Key</th><th>Board</th><th>Distinguishing rule</th></tr></thead>
     <tbody>
       <tr><td><code>standard</code></td><td>9&times;10</td><td>River, palace confinement, flying general, cannon screen capture</td></tr>
+      <tr><td><code>minixiangqi</code></td><td>7&times;7</td><td>Reduced board, no river; elephants and advisors move freely</td></tr>
+      <tr><td><code>xiangqi-42</code></td><td>7&times;6</td><td>Minimal board (42 points), fast games</td></tr>
     </tbody>
   </table>
 
-  <p>One variant is registered. Eight more exist in the hub and are held back for the reasons under <a href="#gaps">known gaps</a> &mdash; a deliberately short list, because each exclusion was checked by building the variant from its rules setup and inspecting the result rather than reasoning about it.</p>
+  <p>Three variants are registered. Six more exist in the hub and are held back for the reasons under <a href="#gaps">known gaps</a>.</p>
 
   <h2 id="pieces">Pieces and notation</h2>
   <p>The plugin declares one vocabulary, and it is the same vocabulary the variant frontmatter uses. Symbols are the canonical Xiangqi FEN letters, so a position read from the rules parses here and renders through the piece mapping the board diagram already uses. Red is player <code>0</code> and takes the uppercase letter.</p>
@@ -157,19 +159,11 @@ ai.pickMove(game.getState().slice, 0)</code></pre>
 
   <h2 id="gaps">Known gaps</h2>
 
-  <p><strong>The palace is hardcoded to 9&times;10.</strong> <code>inPalace</code> tests files d&ndash;f and ranks 1&ndash;3 or 8&ndash;10 as fixed numbers. On a smaller board the general starts outside its own palace and has no legal move at all:</p>
-
-  <pre><code>xiangqi/minixiangqi   pieces 24/24  moves 15  general at r6c3 inPalace=false
-xiangqi/xiangqi-42    pieces 24/24  moves 23  general at r5c3 inPalace=false</code></pre>
-
-  <p>Deriving the palace from board size is a small, contained change and would unlock three variants at once. It is the single largest blocker on this family.</p>
-
-  <p>Eight hub variants are not registered. Each is named in <code>UNSUPPORTED</code> in the variant module with its reason, so the gap is visible in code rather than silently missing:</p>
+  <p>Six hub variants are not registered. Each is documented in the rulebook frontmatter (<code>engine.unsupported</code>) with its reason:</p>
   <ul>
-    <li><strong>minixiangqi</strong> and <strong>xiangqi-42</strong> &mdash; palace geometry, as above</li>
-    <li><strong>quang-trung</strong> &mdash; palace geometry, and pawn promotion as an alternate win condition</li>
+    <li><strong>quang-trung</strong> &mdash; pawn promotion as an alternate win condition is not modelled</li>
     <li><strong>janggi</strong> &mdash; palace diagonals, the Korean elephant move, and the bikjang rule</li>
-    <li><strong>manchu-plus</strong> &mdash; the Banner, combining chariot, cannon and horse in one piece</li>
+    <li><strong>manchu-plus</strong> &mdash; the Banner piece (chariot + cannon + horse combined) is not a modelled piece type</li>
     <li><strong>yang-qi</strong> &mdash; substitutes FIDE pieces and extends the cannon to diagonals</li>
     <li><strong>jieqi</strong> &mdash; hidden information: pieces start face down and reveal on first move</li>
     <li><strong>san-kwo-ki</strong> &mdash; three-player hexagonal trisected board (see engine issue #26)</li>

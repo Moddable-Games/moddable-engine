@@ -74,10 +74,63 @@ export function createSimulator(plugin, opts = {}) {
       const terminal = checkTerminal(state, playerIndex)
       if (terminal.over) return terminal.score
     }
-    const myMoves = getLegalMoves(state, playerIndex)
-    const oppMoves = getLegalMoves(state, (playerIndex + 1) % playerCount)
-    score += (myMoves.length - oppMoves.length) * 5
+    score += pseudoMobility(state, playerIndex)
     return score
+  }
+
+  function pseudoMobility(state, playerIndex) {
+    const board = state.board
+    if (!board || !Array.isArray(board)) return 0
+    const size = board.length
+    const cols = state._cols || (size === 64 ? 8 : size === 81 ? 9 : size === 90 ? 9 : Math.round(Math.sqrt(size)))
+    const rows = size / cols
+    let myMobility = 0
+    let oppMobility = 0
+    for (let i = 0; i < size; i++) {
+      const piece = board[i]
+      if (!piece) continue
+      const r = Math.floor(i / cols), c = i % cols
+      const count = pseudoReach(piece.type, r, c, rows, cols, board, piece.owner)
+      if (piece.owner === playerIndex) myMobility += count
+      else oppMobility += count
+    }
+    return (myMobility - oppMobility) * 3
+  }
+
+  function pseudoReach(type, r, c, rows, cols, board, owner) {
+    switch (type) {
+      case 'pawn': return 2
+      case 'knight': {
+        let n = 0
+        for (const [dr, dc] of [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]]) {
+          const nr = r + dr, nc = c + dc
+          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) n++
+        }
+        return n
+      }
+      case 'king': return 8
+      case 'rook': case 'chariot': case 'lance':
+        return slideCount(r, c, rows, cols, board, [[0,1],[0,-1],[1,0],[-1,0]])
+      case 'bishop': case 'fil':
+        return slideCount(r, c, rows, cols, board, [[1,1],[1,-1],[-1,1],[-1,-1]])
+      case 'queen': case 'chancellor': case 'archbishop': case 'amazon':
+        return slideCount(r, c, rows, cols, board, [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]])
+      case 'gold': case 'silver': return 6
+      default: return 4
+    }
+  }
+
+  function slideCount(r, c, rows, cols, board, dirs) {
+    let count = 0
+    for (const [dr, dc] of dirs) {
+      let nr = r + dr, nc = c + dc
+      while (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+        count++
+        if (board[nr * cols + nc]) break
+        nr += dr; nc += dc
+      }
+    }
+    return count
   }
 
   function nextPlayer(playerIndex, continueTurn) {

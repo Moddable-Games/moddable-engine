@@ -1,28 +1,3 @@
-const bareKingWin = (state) => {
-  const board = state.board
-  let wCount = 0, bCount = 0, wKing = false, bKing = false
-  for (let i = 0; i < board.length; i++) {
-    if (!board[i]) continue
-    if (board[i].owner === 0) { wCount++; if (board[i].type === 'king') wKing = true }
-    else { bCount++; if (board[i].type === 'king') bKing = true }
-  }
-  if (!wKing) return 1
-  if (!bKing) return 0
-  if (wCount === 1 && wKing) return 1
-  if (bCount === 1 && bKing) return 0
-  return null
-}
-
-export const shatranj = {
-  key: 'shatranj',
-  winCondition: bareKingWin,
-}
-
-export const chaturanga = {
-  key: 'chaturanga',
-  winCondition: bareKingWin,
-}
-
 const SITTUYIN_PAWNS_W = [40,41,42,43,36,37,38,39]
 const SITTUYIN_PAWNS_B = [24,25,26,27,20,21,22,23]
 

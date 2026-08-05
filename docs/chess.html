@@ -6,7 +6,7 @@
 <title>Chess — Moddable Engine</title>
 <meta name="description" content="Chess SDK, embed protocol, and variant reference for the Moddable Engine.">
 <meta property="og:title" content="Chess — Moddable Engine">
-<meta property="og:description" content="75 chess variants with AI, embed support, and a headless SDK for server-side consumers.">
+<meta property="og:description" content="100 chess variants with AI, embed support, and a headless SDK for server-side consumers.">
 <meta property="og:image" content="https://engine.moddable.games/og/docs.png?v=1.0.14">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -15,7 +15,7 @@
 <meta property="og:site_name" content="Moddable Engine">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Chess — Moddable Engine">
-<meta name="twitter:description" content="75 chess variants with AI, embed support, and a headless SDK for server-side consumers.">
+<meta name="twitter:description" content="100 chess variants with AI, embed support, and a headless SDK for server-side consumers.">
 <meta name="twitter:image" content="https://engine.moddable.games/og/docs.png?v=1.0.14">
 <meta name="theme-color" content="#0a0d2a">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
@@ -57,13 +57,15 @@
     <li><a href="chess.html" class="active">Chess</a></li>
     <li><a href="go.html">Go</a></li>
     <li><a href="draughts.html">Draughts</a></li>
+    <li><a href="shogi.html">Shogi</a></li>
+    <li><a href="xiangqi.html">Xiangqi</a></li>
     <li><a href="hexmaps.html">Hex Maps</a></li>
   </ul>
   <div class="docs-toc-title" style="margin-top:20px">On this page</div>
   <ul class="docs-toc-list">
     <li><a href="#embed">Embed via iframe</a></li>
     <li><a href="#sdk">Chess SDK</a></li>
-    <li><a href="#variants">Variant groups</a></li>
+    <li><a href="#variants">Variants</a></li>
     <li><a href="#ai">AI difficulties</a></li>
     <li><a href="#puzzles">Puzzle API</a></li>
   </ul>
@@ -71,7 +73,7 @@
 <div class="docs-body">
 
   <h1>Chess</h1>
-  <p class="docs-lede">75 chess variants with AI, embed support, and a headless SDK for server-side consumers.</p>
+  <p class="docs-lede">100 chess variants with AI, embed support, and a headless SDK for server-side consumers.</p>
 
   <h2 id="embed">Embed via iframe</h2>
   <p>Drop a board into any page with a single iframe. The embed is fully responsive and touch-ready.</p>
@@ -152,8 +154,7 @@ iframe.contentWindow.postMessage({ type: 'chess:setTheme', theme: 'cosmic' }, '*
 
   <h3>listVariants(group?)</h3>
   <p>Returns all registered variants with metadata.</p>
-  <pre><code>const all = listVariants()          // 75 variants
-const tactical = listVariants('Tactical')  // filtered by group
+  <pre><code>const all = listVariants()          // 100 variants
 // [{ key, label, group, board, description, rule }]</code></pre>
 
   <h3>getLegalMoves(variant, fen?)</h3>
@@ -183,17 +184,111 @@ const custom = renderSvg('standard', 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQK
 const moves = game.getLegalMoves()
 game.applyMove(moves[0])</code></pre>
 
-  <h2 id="variants">Variant groups</h2>
+  <h2 id="variants">Variants</h2>
+  <p><strong>100 variants</strong> registered and playable. Use the <code>key</code> as the <code>variant</code> URL parameter or SDK argument.</p>
   <table class="docs-table">
-    <thead><tr><th>Group</th><th>Count</th><th>Examples</th></tr></thead>
+    <thead><tr><th>Key</th><th>Board</th><th>Distinguishing rule</th></tr></thead>
     <tbody>
-      <tr><td>Classic</td><td>5</td><td>Standard, Chess960, Torpedo, No Castling</td></tr>
-      <tr><td>Tactical</td><td>12</td><td>Atomic, King of the Hill, Three-Check, Grid Chess</td></tr>
-      <tr><td>Alternate Rules</td><td>22</td><td>Antichess, Racing Kings, Crazyhouse, Duck Chess</td></tr>
-      <tr><td>Small Boards</td><td>8</td><td>Los Alamos, Minichess, Diana, Petty</td></tr>
-      <tr><td>Large Boards</td><td>5</td><td>Capablanca, Grand, Courier</td></tr>
-      <tr><td>Asymmetric</td><td>8</td><td>Horde, Maharaja, Orda, Chigorin</td></tr>
-      <tr><td>Historical</td><td>6</td><td>Makruk, Shatar, Shatranj</td></tr>
+      <tr><td><code>standard</code></td><td>8&times;8</td><td>Standard FIDE rules</td></tr>
+      <tr><td><code>absorptionChess</code></td><td>8&times;8</td><td>Capturing piece gains the victim's movement abilities</td></tr>
+      <tr><td><code>almost-chess</code></td><td>8&times;8</td><td>White's Queen replaced by a Chancellor (R+N)</td></tr>
+      <tr><td><code>amazon-chess</code></td><td>8&times;8</td><td>Queens replaced by Amazons (Q+N)</td></tr>
+      <tr><td><code>andernachChess</code></td><td>8&times;8</td><td>Capturing piece changes colour</td></tr>
+      <tr><td><code>antichess</code></td><td>8&times;8</td><td>Captures mandatory; first to lose all pieces wins</td></tr>
+      <tr><td><code>asean</code></td><td>8&times;8</td><td>Southeast Asian rules: Makruk-family pieces, rank-6 promotion</td></tr>
+      <tr><td><code>atomic</code></td><td>8&times;8</td><td>Captures explode all adjacent non-pawn pieces</td></tr>
+      <tr><td><code>benedictChess</code></td><td>8&times;8</td><td>No captures; attacked enemies convert to your colour</td></tr>
+      <tr><td><code>berolinaChess</code></td><td>8&times;8</td><td>Pawns move diagonal, capture straight (inverted)</td></tr>
+      <tr><td><code>berserkChess</code></td><td>8&times;8</td><td>Check grants one bonus move</td></tr>
+      <tr><td><code>birds-chess</code></td><td>8&times;10</td><td>1874 variant with Guard (R+N) and Equerry (B+N)</td></tr>
+      <tr><td><code>breakthrough</code></td><td>7&times;7</td><td>Pawns only; first to reach the far rank wins</td></tr>
+      <tr><td><code>brusky</code></td><td>hex</td><td>Horizontal 84-hex board, 10 pawns per side</td></tr>
+      <tr><td><code>byzantine-chess</code></td><td>4&times;16</td><td>Circular board, Shatranj pieces, stalemate wins</td></tr>
+      <tr><td><code>capablanca</code></td><td>8&times;10</td><td>Archbishop (B+N) and Chancellor (R+N) on a wider board</td></tr>
+      <tr><td><code>carrera</code></td><td>8&times;10</td><td>1617 variant with Champion (R+N) and Centaur (B+N)</td></tr>
+      <tr><td><code>chancellor-chess</code></td><td>9&times;9</td><td>Chancellor (R+N) added on 9&times;9</td></tr>
+      <tr><td><code>chaturanga</code></td><td>8&times;8</td><td>Ancient Indian ancestor; weak counsellor, leaping elephant</td></tr>
+      <tr><td><code>checklessChess</code></td><td>8&times;8</td><td>Cannot give check unless it is checkmate</td></tr>
+      <tr><td><code>chess960</code></td><td>8&times;8</td><td>Randomised back rank (960 positions)</td></tr>
+      <tr><td><code>chigorin</code></td><td>8&times;8</td><td>White's Bishops replaced by Knights</td></tr>
+      <tr><td><code>circular-chess</code></td><td>4&times;16</td><td>64 squares in 4 concentric rings; no castling</td></tr>
+      <tr><td><code>codrus</code></td><td>8&times;8</td><td>Win by getting your own King captured</td></tr>
+      <tr><td><code>courier</code></td><td>8&times;12</td><td>Medieval 1202 variant on a 12-wide board</td></tr>
+      <tr><td><code>crazyhouse</code></td><td>8&times;8</td><td>Captured pieces switch sides and can be dropped</td></tr>
+      <tr><td><code>cylinder-chess</code></td><td>8&times;8</td><td>a-file wraps to h-file</td></tr>
+      <tr><td><code>darkChess</code></td><td>8&times;8</td><td>Total fog; only see your own pieces' squares</td></tr>
+      <tr><td><code>de-vasa</code></td><td>hex</td><td>81-hex rhombus board</td></tr>
+      <tr><td><code>diana</code></td><td>6&times;6</td><td>No queens or knights; bishops and rooks only</td></tr>
+      <tr><td><code>diceChess</code></td><td>8&times;8</td><td>Die roll constrains which piece type must move</td></tr>
+      <tr><td><code>displacementChess</code></td><td>8&times;8</td><td>Swap positions with adjacent friendly pieces</td></tr>
+      <tr><td><code>duckChess</code></td><td>8&times;8</td><td>Place a blocking duck on any empty square after each move</td></tr>
+      <tr><td><code>einsteinChess</code></td><td>8&times;8</td><td>Non-capturing moves demote; captures promote</td></tr>
+      <tr><td><code>empire</code></td><td>8&times;8</td><td>Asymmetric: FIDE Kingdom vs Empire dynasty</td></tr>
+      <tr><td><code>endgame-chess</code></td><td>8&times;8</td><td>Kings and pawns only from move one</td></tr>
+      <tr><td><code>extinction</code></td><td>8&times;8</td><td>Lose any piece type entirely and you lose</td></tr>
+      <tr><td><code>fiveCheck</code></td><td>8&times;8</td><td>Five checks wins</td></tr>
+      <tr><td><code>fogOfWar</code></td><td>8&times;8</td><td>See only squares your pieces can move to</td></tr>
+      <tr><td><code>giveaway</code></td><td>8&times;8</td><td>Forced captures; stalemate is a loss</td></tr>
+      <tr><td><code>glinski</code></td><td>hex</td><td>91-cell hexagonal board; three bishops per side</td></tr>
+      <tr><td><code>grand</code></td><td>10&times;10</td><td>Marshal and Cardinal; pawns start on rank 3</td></tr>
+      <tr><td><code>gridChess</code></td><td>8&times;8</td><td>Moves must cross a 2&times;2 grid line</td></tr>
+      <tr><td><code>half-chess</code></td><td>4&times;8</td><td>4-rank board; armies start adjacent</td></tr>
+      <tr><td><code>hexapawn</code></td><td>3&times;3</td><td>Six pawns; reach far rank wins</td></tr>
+      <tr><td><code>hoppel-poppel</code></td><td>8&times;8</td><td>Knights capture like bishops; bishops capture like knights</td></tr>
+      <tr><td><code>horde</code></td><td>8&times;8</td><td>White: full army vs Black: 36 pawns</td></tr>
+      <tr><td><code>immunizationChess</code></td><td>8&times;8</td><td>Captures grant adjacent enemies temporary immunity</td></tr>
+      <tr><td><code>janus</code></td><td>8&times;10</td><td>Two Januses (B+N) on a 10-wide board</td></tr>
+      <tr><td><code>khans-chess</code></td><td>8&times;8</td><td>Asymmetric: FIDE vs Mongol Horde with divergent movers</td></tr>
+      <tr><td><code>kingOfTheHill</code></td><td>8&times;8</td><td>King reaching d4/d5/e4/e5 wins instantly</td></tr>
+      <tr><td><code>knightmate</code></td><td>8&times;8</td><td>Knight is royal; Kings move as knights</td></tr>
+      <tr><td><code>leganChess</code></td><td>8&times;8</td><td>Berolina pawns; King and Queen swap squares</td></tr>
+      <tr><td><code>los-alamos</code></td><td>6&times;6</td><td>First computer chess (1956); no Bishops</td></tr>
+      <tr><td><code>madrasiChess</code></td><td>8&times;8</td><td>Same-type opposing pieces paralyse each other</td></tr>
+      <tr><td><code>maharaja</code></td><td>8&times;8</td><td>One Amazon (Q+N) vs a full army</td></tr>
+      <tr><td><code>makpong</code></td><td>8&times;8</td><td>King cannot move out of check; must block or capture</td></tr>
+      <tr><td><code>makruk</code></td><td>8&times;8</td><td>Thai chess; Khon moves 5 directions, rank-6 promotion</td></tr>
+      <tr><td><code>marseillais</code></td><td>8&times;8</td><td>Two moves per turn (except White's first)</td></tr>
+      <tr><td><code>mccooey</code></td><td>hex</td><td>91-hex board; diagonal pawn captures, stalemate draws</td></tr>
+      <tr><td><code>medusaChess</code></td><td>8&times;8</td><td>Queen petrifies attacked enemies for 2 turns</td></tr>
+      <tr><td><code>mini-hexchess</code></td><td>hex</td><td>37-hex board; no Queen piece</td></tr>
+      <tr><td><code>minichess</code></td><td>5&times;5</td><td>Gardner's 5&times;5 with all piece types</td></tr>
+      <tr><td><code>monsterChess</code></td><td>8&times;8</td><td>White moves twice but starts with only K, R, pawns</td></tr>
+      <tr><td><code>nightrider</code></td><td>8&times;8</td><td>Knights replaced by Nightriders (chained knight-leaps)</td></tr>
+      <tr><td><code>no-castling</code></td><td>8&times;8</td><td>Standard chess without castling</td></tr>
+      <tr><td><code>noRetreat</code></td><td>8&times;8</td><td>Pieces cannot move toward their own starting rank</td></tr>
+      <tr><td><code>oblong-chess</code></td><td>16&times;4</td><td>Historical 4&times;16 board; Shatranj pieces</td></tr>
+      <tr><td><code>omnicide</code></td><td>8&times;8</td><td>Lose all pieces to win; captures NOT forced</td></tr>
+      <tr><td><code>orda-chess</code></td><td>8&times;8</td><td>Asymmetric: standard vs Horde with divergent movers</td></tr>
+      <tr><td><code>orda-mirror</code></td><td>8&times;8</td><td>Both players use the Horde army</td></tr>
+      <tr><td><code>ouk-chaktrang</code></td><td>8&times;8</td><td>Cambodian chess; King may leap as Knight on first move</td></tr>
+      <tr><td><code>patrolChess</code></td><td>8&times;8</td><td>Can only capture when defended by a friendly piece</td></tr>
+      <tr><td><code>pawns-only</code></td><td>8&times;8</td><td>Kings and pawns only; first to promote wins</td></tr>
+      <tr><td><code>peasants-revolt</code></td><td>8&times;8</td><td>White: K+8P vs Black: K+2N+8P</td></tr>
+      <tr><td><code>petty</code></td><td>5&times;6</td><td>All piece types on 5&times;6; single copies</td></tr>
+      <tr><td><code>poisonChess</code></td><td>8&times;8</td><td>Capture squares become poisoned for 3 turns</td></tr>
+      <tr><td><code>progressive</code></td><td>8&times;8</td><td>Moves escalate: 1, 2, 3, 4... Check ends turn early</td></tr>
+      <tr><td><code>progressive-italian</code></td><td>8&times;8</td><td>Progressive; no check until final move of turn</td></tr>
+      <tr><td><code>racingKings</code></td><td>8&times;8</td><td>No checks; race your King to rank 8</td></tr>
+      <tr><td><code>recruitmentChess</code></td><td>8&times;8</td><td>Captured piece defects to vacated square</td></tr>
+      <tr><td><code>rifle</code></td><td>8&times;8</td><td>Capturing piece stays on its square</td></tr>
+      <tr><td><code>shafran</code></td><td>hex</td><td>70-hex board with 9 files; castling permitted</td></tr>
+      <tr><td><code>shatar</code></td><td>8&times;8</td><td>Mongolian chess; mate must include shak; bare king draws</td></tr>
+      <tr><td><code>shatranj</code></td><td>8&times;8</td><td>Medieval Islamic chess; bare king and stalemate win</td></tr>
+      <tr><td><code>shatranj-kamil</code></td><td>10&times;10</td><td>10&times;10 Arabic variant with War Machines</td></tr>
+      <tr><td><code>singleCheck</code></td><td>8&times;8</td><td>One check wins</td></tr>
+      <tr><td><code>sittuyin</code></td><td>8&times;8</td><td>Burmese chess; placement opening phase</td></tr>
+      <tr><td><code>stalemate-wins</code></td><td>8&times;8</td><td>Stalemate is a win instead of a draw</td></tr>
+      <tr><td><code>suicideChess</code></td><td>8&times;8</td><td>Forced captures; stalemate is a draw</td></tr>
+      <tr><td><code>teleportChess</code></td><td>8&times;8</td><td>3 teleports per game; move any piece to any empty square</td></tr>
+      <tr><td><code>threeCheck</code></td><td>8&times;8</td><td>Three checks wins</td></tr>
+      <tr><td><code>toroidal-byzantine</code></td><td>4&times;16</td><td>Circular board with radial wraparound</td></tr>
+      <tr><td><code>toroidal-chess</code></td><td>8&times;8</td><td>All four edges wrap (torus topology)</td></tr>
+      <tr><td><code>torpedo</code></td><td>8&times;8</td><td>Pawns can double-step from any rank</td></tr>
+      <tr><td><code>turkish-great-chess-iii</code></td><td>12&times;12</td><td>Ottoman 12&times;12 with multiple rook-type pieces</td></tr>
+      <tr><td><code>turkish-great-chess-iv</code></td><td>14&times;14</td><td>14&times;14 with mixed Indian/Persian piece names</td></tr>
+      <tr><td><code>upside-down</code></td><td>8&times;8</td><td>Pieces start on the opponent's back rank</td></tr>
+      <tr><td><code>weakChess</code></td><td>8&times;8</td><td>Weakest piece type must move first</td></tr>
+      <tr><td><code>wildebeest</code></td><td>10&times;11</td><td>Camels and Wildebeests (N+Camel) on 11&times;10</td></tr>
     </tbody>
   </table>
 

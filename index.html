@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Moddable Engine — Universal Game Engine</title>
-<meta name="description" content="One engine for every board game. 13 families, 154 variants, 5 topologies. Any game expressible as configuration, not code.">
+<meta name="description" content="One engine for every board game. 5 playable families, 130 variants, 6 topologies. Games are configuration files, not code.">
 <meta property="og:title" content="Moddable Engine — Universal Game Engine">
-<meta property="og:description" content="One engine for every board game. 13 families, 154 variants, 5 topologies. Any game expressible as configuration, not code.">
+<meta property="og:description" content="One engine for every board game. 5 playable families, 130 variants, 6 topologies. Games are configuration files, not code.">
 <meta property="og:image" content="https://engine.moddable.games/og/home.png?v=1.0.14">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -15,7 +15,7 @@
 <meta property="og:site_name" content="Moddable Engine">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Moddable Engine — Universal Game Engine">
-<meta name="twitter:description" content="One engine for every board game. 13 families, 154 variants, 5 topologies. Any game expressible as configuration, not code.">
+<meta name="twitter:description" content="One engine for every board game. 5 playable families, 130 variants, 6 topologies. Games are configuration files, not code.">
 <meta name="twitter:image" content="https://engine.moddable.games/og/home.png?v=1.0.14">
 <meta name="theme-color" content="#0a0d2a">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -51,7 +51,7 @@
   <div class="hero-content">
     <div class="hero-eyebrow">Universal Game Engine</div>
     <h1 class="hero-title">Any game.<br>Any topology.<br>Zero game-specific code.</h1>
-    <p class="hero-lede">One micro-kernel engine that plays chess, go, draughts, reversi, mancala, backgammon, shogi, xiangqi, and every variant in between. Games are configuration files. The engine does the rest.</p>
+    <p class="hero-lede">One micro-kernel engine playing chess, go, draughts, shogi, and xiangqi across 130 variants. 129 carry zero JavaScript: thirteen draughts variants, five shogi variants, three xiangqi variants expressed in declarative frontmatter alone. Games are configuration files. The engine does the rest.</p>
     <div class="hero-actions">
       <a href="https://github.com/Moddable-Games/moddable-engine" class="btn btn--primary" target="_blank" rel="noopener">View Source</a>
       <a href="play/" class="btn btn--ghost">Play a Game</a>
@@ -62,24 +62,24 @@
 <section class="stats">
   <div class="stats-inner">
     <div class="stat">
-      <span class="stat-value">1166</span>
+      <span class="stat-value">2700+</span>
       <span class="stat-label">Tests passing</span>
     </div>
     <div class="stat">
-      <span class="stat-value">13</span>
-      <span class="stat-label">Game families</span>
+      <span class="stat-value">5</span>
+      <span class="stat-label">Playable families</span>
     </div>
     <div class="stat">
-      <span class="stat-value">154</span>
+      <span class="stat-value">130</span>
       <span class="stat-label">Variants</span>
     </div>
     <div class="stat">
-      <span class="stat-value">5</span>
-      <span class="stat-label">Topologies</span>
+      <span class="stat-value">99%</span>
+      <span class="stat-label">Frontmatter-only</span>
     </div>
     <div class="stat">
-      <span class="stat-value">96</span>
-      <span class="stat-label">Piece sets</span>
+      <span class="stat-value">6</span>
+      <span class="stat-label">Topologies</span>
     </div>
   </div>
 </section>
@@ -148,29 +148,33 @@
 
 <section class="families">
   <div class="families-inner">
-    <h2 class="section-heading">13 Game Families</h2>
-    <p class="section-sub">Each plugin handles all variants in its family. Same engine, different configuration.</p>
+    <h2 class="section-heading">5 Playable Families</h2>
+    <p class="section-sub">Each family has a full play surface: variant registry, embed protocol, interaction model, headless SDK.</p>
     <div class="family-grid">
-      <div class="family-chip"><span class="family-symbol">&#x265A;</span> Chess <span class="family-count">75</span></div>
-      <div class="family-chip"><span class="family-symbol">&#x25CB;</span> Go <span class="family-count">14</span></div>
-      <div class="family-chip"><span class="family-symbol">&#x26C0;</span> Draughts <span class="family-count">20</span></div>
-      <div class="family-chip"><span class="family-symbol">&#x25C9;</span> Reversi <span class="family-count">3</span></div>
-      <div class="family-chip"><span class="family-symbol">&#x2B22;</span> Hex <span class="family-count">1</span></div>
-      <div class="family-chip"><span class="family-symbol">&#x26AB;</span> Mancala <span class="family-count">8</span></div>
-      <div class="family-chip"><span class="family-symbol">&#x25A0;</span> Morris <span class="family-count">7</span></div>
-      <div class="family-chip"><span class="family-symbol">&#x2680;</span> Backgammon <span class="family-count">8</span></div>
-      <div class="family-chip"><span class="family-symbol">&#x2660;</span> Big 2 <span class="family-count">1</span></div>
-      <div class="family-chip"><span class="family-symbol">&#x25B2;</span> Halma <span class="family-count">2</span></div>
-      <div class="family-chip"><span class="family-symbol">&#x5C06;</span> Shogi <span class="family-count">4</span></div>
-      <div class="family-chip"><span class="family-symbol">&#x8ECA;</span> Xiangqi <span class="family-count">2</span></div>
-      <div class="family-chip"><span class="family-symbol">&#x2316;</span> Race <span class="family-count">9</span></div>
+      <div class="family-chip"><span class="family-symbol">&#x265A;</span> Chess <span class="family-count">100</span></div>
+      <div class="family-chip"><span class="family-symbol">&#x26C0;</span> Draughts <span class="family-count">13</span></div>
+      <div class="family-chip"><span class="family-symbol">&#x25CB;</span> Go <span class="family-count">9</span></div>
+      <div class="family-chip"><span class="family-symbol">&#x5C06;</span> Shogi <span class="family-count">5</span></div>
+      <div class="family-chip"><span class="family-symbol">&#x8ECA;</span> Xiangqi <span class="family-count">3</span></div>
+    </div>
+    <h3 class="section-sub" style="margin-top: 2rem;">Plugins in progress</h3>
+    <p class="section-sub">Engine logic complete, playable variants to follow.</p>
+    <div class="family-grid">
+      <div class="family-chip family-chip--pending"><span class="family-symbol">&#x25C9;</span> Reversi</div>
+      <div class="family-chip family-chip--pending"><span class="family-symbol">&#x26AB;</span> Mancala</div>
+      <div class="family-chip family-chip--pending"><span class="family-symbol">&#x2680;</span> Backgammon</div>
+      <div class="family-chip family-chip--pending"><span class="family-symbol">&#x25A0;</span> Morris</div>
+      <div class="family-chip family-chip--pending"><span class="family-symbol">&#x2B22;</span> Hex</div>
+      <div class="family-chip family-chip--pending"><span class="family-symbol">&#x25B2;</span> Halma</div>
+      <div class="family-chip family-chip--pending"><span class="family-symbol">&#x2660;</span> Big 2</div>
+      <div class="family-chip family-chip--pending"><span class="family-symbol">&#x2316;</span> Race</div>
     </div>
   </div>
 </section>
 
 <section class="topologies">
   <div class="topologies-inner">
-    <h2 class="section-heading">5 Topology Types</h2>
+    <h2 class="section-heading">6 Topology Types</h2>
     <p class="section-sub">The universal adapter layer. Every package above topologies defines a contract. Topologies implement it. Higher packages never know which topology they consume.</p>
     <div class="topo-grid">
       <div class="topo-card">
@@ -202,6 +206,12 @@
         <h4 class="topo-name">Graph</h4>
         <p class="topo-desc">Arbitrary node-edge structures. Morris, alquerque, custom boards.</p>
         <span class="topo-count">7 variants</span>
+      </div>
+      <div class="topo-card">
+        <div class="topo-visual topo-visual--tableau"></div>
+        <h4 class="topo-name">Tableau</h4>
+        <p class="topo-desc">Card table layouts. Radial, tableau, wall, linear arrangements for deck games.</p>
+        <span class="topo-count">40 variants</span>
       </div>
     </div>
   </div>

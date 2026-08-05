@@ -1,3 +1,4 @@
+import '../test-helpers/setup-rules-reader.js'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
