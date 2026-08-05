@@ -30,21 +30,17 @@ const LEGACY_ALLOW = {
   ]),
   go: new Set([
     'standard', '13x13', '9x9', 'one-colour',
-    'capture-go', 'stoical',
+    'stoical',
     'gomoku', 'ninuki-renju',
   ]),
   draughts: new Set([
     'international', 'brazilian', 'canadian',
-    'russian', 'spantsiretti', 'pool', 'german',
-    'spanish', 'czech', 'italian', 'turkish-draughts',
+    'russian', 'spantsiretti', 'pool',
     'ghanaian',
   ]),
   shogi: new Set([
-    'standard', 'judkins-shogi',
-    'heian-shogi', 'gorogoro-plus',
   ]),
   xiangqi: new Set([
-    'standard', 'xiangqi-42',
   ]),
 }
 
@@ -52,10 +48,10 @@ const LEGACY_ALLOW = {
 // Lower these as migrations land. A PR that increases any ceiling MUST be rejected.
 const LEGACY_CEILING = {
   chess: 14,
-  go: 8,
-  draughts: 12,
-  shogi: 4,
-  xiangqi: 2,
+  go: 7,
+  draughts: 7,
+  shogi: 0,
+  xiangqi: 0,
 }
 
 // Keys that are always acceptable in a registry entry (not data).
@@ -121,6 +117,6 @@ describe('functions-only: summary', () => {
       console.log(`    ${family}: ${count}/${ceiling}`)
     }
     console.log(`    TOTAL: ${total}`)
-    expect(total).toBe(40)
+    expect(total).toBe(28)
   })
 })

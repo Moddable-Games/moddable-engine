@@ -168,6 +168,27 @@ async function resolveBoard(family, variantConfig, variantKey, slugOverride) {
     family: { engine: familyFm.engine || {}, meta: { label: familyFm.title || '' } },
     variant: { engine: variantFm.engine || {}, meta: { label: variantFm.title || variantConfig.label || '' } },
   })
+
+  const pluginBlock = resolved.plugins?.[family]
+  if (pluginBlock?.extends) {
+    const parentSlug = pluginBlock.extends
+    const parentPath = family + '/content/variants/' + parentSlug + '.md'
+    const parentMd = await fetch(basePath + parentPath).then(r => r.ok ? r.text() : '')
+    if (parentMd) {
+      const parentFm = parseFrontmatter(parentMd).meta || {}
+      const parentSurface = resolveSurface(parentFm.engine?.surface || familyFm.engine?.surface)
+      const { resolved: parentResolved } = cascadeResolve({
+        surface: parentSurface,
+        family: { engine: familyFm.engine || {}, meta: { label: familyFm.title || '' } },
+        variant: { engine: parentFm.engine || {}, meta: { label: parentFm.title || '' } },
+      })
+      const parentPlugin = parentResolved.plugins?.[family] || {}
+      const merged = { ...parentPlugin, ...pluginBlock }
+      delete merged.extends
+      resolved.plugins[family] = merged
+    }
+  }
+
   return resolved
 }
 

@@ -6,15 +6,6 @@ const PLAYERS = ['sente', 'gote']
 
 export const standard = {
   key: 'standard',
-  setup: 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL',
-  label: 'Standard Shogi',
-  group: 'Standard Form',
-  description: 'The full game: captured pieces change allegiance and may be dropped back onto the board on any later turn.',
-  rule: 'Board: 9×9 · Win: Capture the King · Drops',
-  rows: 9,
-  cols: 9,
-  promotionZone: 3,
-  playerNames: PLAYERS,
 }
 
 export const minishogi = {
@@ -23,43 +14,14 @@ export const minishogi = {
 
 export const judkins = {
   key: 'judkins-shogi',
-  setup: 'rbsgkn/5p/6/6/P5/NKGSBR',
-  label: "Judkins' Shogi",
-  group: 'Smaller Board Variants',
-  description: 'A 6×6 condensation retaining every piece type, giving fast tactical play.',
-  rule: 'Board: 6×6 · Win: Capture the King · Drops',
-  rows: 6,
-  cols: 6,
-  promotionZone: 2,
-  playerNames: PLAYERS,
 }
 
 export const heian = {
   key: 'heian-shogi',
-  setup: 'lnsgkgsnl/9/ppppppppp/9/9/PPPPPPPPP/9/LNSGKGSNL',
-  label: 'Heian Shogi',
-  group: 'Historical',
-  description: 'The earliest reconstructed form of Japanese chess. 9x8 board, no drops, no rooks or bishops.',
-  rule: 'Board: 9×8 · Win: Checkmate or bare King · No Drops',
-  rows: 8,
-  cols: 9,
-  promotionZone: 3,
-  drops: false,
-  playerNames: PLAYERS,
 }
 
 export const gorogoroPlus = {
   key: 'gorogoro-plus',
-  setup: 'sgkgs/5/1ppp1/1PPP1/5/SGKGS',
-  label: 'Gorogoro+',
-  group: 'Smaller Board Variants',
-  description: 'Compact 5x6 shogi with no bishop or rook. Each player starts with a knight and lance in hand.',
-  rule: 'Board: 5×6 · Win: Checkmate · Drops',
-  rows: 6,
-  cols: 5,
-  promotionZone: 2,
-  initialHands: [['knight', 'lance'], ['knight', 'lance']],
-  playerNames: PLAYERS,
 }
 
 // Variants held back until the plugin models the mechanic each one needs.

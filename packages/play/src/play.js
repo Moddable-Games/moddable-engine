@@ -180,6 +180,19 @@ function resolveFromDisk(family, variant) {
     family: { engine: familyFm.engine || {}, meta: { label: familyFm.title || '' } },
     variant: { engine: variantFm.engine || {}, meta: { label: variantFm.title || '' } },
   })
+
+  const pluginBlock = resolved.plugins?.[family]
+  if (pluginBlock?.extends) {
+    const parentResolved = resolveFromDisk(family, pluginBlock.extends)
+    if (parentResolved) {
+      const parentPlugin = parentResolved.plugins?.[family] || {}
+      const merged = { ...parentPlugin, ...pluginBlock }
+      delete merged.extends
+      if (!resolved.plugins) resolved.plugins = {}
+      resolved.plugins[family] = merged
+    }
+  }
+
   return resolved
 }
 

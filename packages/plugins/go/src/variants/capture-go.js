@@ -1,15 +1,5 @@
 export const captureGo = {
   key: 'capture-go',
-  label: 'Capture Go',
-  group: 'Teaching',
-  description: 'The first player to capture any opponent stone wins immediately. No territory counting, no endgame, no passing. Also known as Atari Go.',
-  rule: 'Board: 9×9 · Win: First capture',
-  size: 9,
-  komi: 0,
-  scoring: 'capture',
-  captureTarget: 1,
-  allowPass: false,
-  superko: false,
 
   hooks: {
     moveFilter(moves) {

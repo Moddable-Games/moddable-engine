@@ -748,7 +748,7 @@
     "family": "draughts",
     "variant": "czech",
     "label": "Czech Draughts",
-    "group": "Standard Board (8×8)",
+    "group": "Other",
     "playable": true
   },
   {
@@ -762,7 +762,7 @@
     "family": "draughts",
     "variant": "german",
     "label": "German Draughts",
-    "group": "Standard Board (8×8)",
+    "group": "Other",
     "playable": true
   },
   {
@@ -783,7 +783,7 @@
     "family": "draughts",
     "variant": "italian",
     "label": "Italian Draughts",
-    "group": "Standard Board (8×8)",
+    "group": "Other",
     "playable": true
   },
   {
@@ -804,7 +804,7 @@
     "family": "draughts",
     "variant": "spanish",
     "label": "Spanish Draughts",
-    "group": "Standard Board (8×8)",
+    "group": "Other",
     "playable": true
   },
   {
@@ -818,7 +818,7 @@
     "family": "draughts",
     "variant": "turkish-draughts",
     "label": "Turkish Draughts",
-    "group": "Standard Board (8×8)",
+    "group": "Other",
     "playable": true
   },
   {
@@ -839,7 +839,7 @@
     "family": "go",
     "variant": "capture-go",
     "label": "Capture Go",
-    "group": "Teaching",
+    "group": "Other",
     "playable": true
   },
   {
@@ -888,21 +888,21 @@
     "family": "shogi",
     "variant": "gorogoro-plus",
     "label": "Gorogoro+",
-    "group": "Smaller Board Variants",
+    "group": "Other",
     "playable": true
   },
   {
     "family": "shogi",
     "variant": "heian-shogi",
     "label": "Heian Shogi",
-    "group": "Historical",
+    "group": "Other",
     "playable": true
   },
   {
     "family": "shogi",
     "variant": "judkins-shogi",
     "label": "Judkins' Shogi",
-    "group": "Smaller Board Variants",
+    "group": "Other",
     "playable": true
   },
   {
@@ -916,7 +916,7 @@
     "family": "shogi",
     "variant": "standard",
     "label": "Standard Shogi",
-    "group": "Standard Form",
+    "group": "Other",
     "playable": true
   },
   {
@@ -930,14 +930,14 @@
     "family": "xiangqi",
     "variant": "standard",
     "label": "Standard Xiangqi",
-    "group": "Chinese Chess",
+    "group": "Other",
     "playable": true
   },
   {
     "family": "xiangqi",
     "variant": "xiangqi-42",
     "label": "Xiangqi 42",
-    "group": "Smaller Board Variants",
+    "group": "Other",
     "playable": true
   }
 ]
