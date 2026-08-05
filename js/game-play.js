@@ -128,6 +128,7 @@ function buildDefinitionFromResolved(family, variant, resolved, registryCfg) {
   }
   for (const [k, v] of Object.entries(resolved)) {
     if (STRUCTURAL_KEYS.has(k)) continue
+    if (k === 'pieces' && v && (v.set || v.vocabulary)) continue
     if (v !== undefined) pluginConfig[k] = v
   }
   const pluginBlock = resolved.plugins?.[family]
@@ -910,6 +911,7 @@ export function createPlaySession(options = {}) {
     get scoring() { return scoring },
     get history() { return moveHistory },
     get fen() { return getFEN() },
+    get setup() { return resolvedBoard?.setup || null },
     start,
     draw,
     summarise,
@@ -1193,13 +1195,13 @@ export async function initGamePlay(container, defaults = {}) {
     history.replaceState(null, '', '?' + params.toString())
   }
 
-  function populatePieceSetSelect(variantKey) {
+  function populatePieceSetSelect(variantKey, setupFen) {
     const gallery = getGalleryIndex() || []
     if (gallery.length === 0) {
       console.error('[game-play] Piece gallery loaded 0 entries — fetch may have failed')
       return
     }
-    const needed = getVariantPieceKeys(config.family, variantKey)
+    const needed = getVariantPieceKeys(config.family, variantKey, setupFen)
     const compatible = gallery.filter(s => {
       if (!s.id || !s.pieces) return false
       for (const key of needed) {
@@ -1230,10 +1232,10 @@ export async function initGamePlay(container, defaults = {}) {
   async function restart(changes) {
     config = { ...config, ...changes }
     updateRules(config.variant)
-    populatePieceSetSelect(config.variant)
     updateURL()
     session = createPlaySession(config)
     await session.start()
+    populatePieceSetSelect(config.variant, session.setup)
     renderActions()
   }
 
@@ -1340,9 +1342,9 @@ function buildGroupedSelect(parent, label, variants, selected) {
 
 function capitalize(s) { return s ? s[0].toUpperCase() + s.slice(1) : '' }
 
-function getVariantPieceKeys(family, variantKey) {
+function getVariantPieceKeys(family, variantKey, fallbackSetup) {
   const vCfg = getVariantConfig(family, variantKey) || {}
-  const fen = vCfg.setup || vCfg.fen
+  const fen = vCfg.setup || vCfg.fen || fallbackSetup
   if (typeof fen !== 'string') {
     const keys = new Set(['wK', 'wP', 'bK', 'bP'])
     if (vCfg.placementPieces) {

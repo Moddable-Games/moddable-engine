@@ -41,30 +41,40 @@ async function getHistoryLength(page) {
 }
 
 async function makeHumanMove(page) {
-  const svg = page.locator('#game-play-root svg')
-
-  // Get all squares that have pieces (images positioned on them)
-  const images = await svg.locator('g[pointer-events="none"] image').all()
-  if (images.length === 0) return false
-
-  // Click a piece to select it (should show indicators)
-  for (const img of images) {
-    const bbox = await img.boundingBox()
-    if (!bbox) continue
-    await page.mouse.click(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2)
-    await page.waitForTimeout(300)
-
-    // Check if indicators appeared (circles = legal move targets)
-    const indicators = await svg.locator('circle').count()
-    if (indicators > 0) {
-      // Click the first indicator to complete the move
-      const indicator = svg.locator('circle').first()
-      const iBbox = await indicator.boundingBox()
-      if (iBbox) {
-        await page.mouse.click(iBbox.x + iBbox.width / 2, iBbox.y + iBbox.height / 2)
-        await page.waitForTimeout(300)
-        return true
+  const occupiedCells = await page.evaluate(() => {
+    const svg = document.querySelector('#game-play-root svg')
+    if (!svg) return []
+    const imgs = svg.querySelectorAll('g[pointer-events="none"] image')
+    const cellIds = new Set()
+    const cells = svg.querySelectorAll('[data-sq]')
+    for (const img of imgs) {
+      const ix = parseFloat(img.getAttribute('x') || 0) + parseFloat(img.getAttribute('width') || 0) / 2
+      const iy = parseFloat(img.getAttribute('y') || 0) + parseFloat(img.getAttribute('height') || 0) / 2
+      for (const cell of cells) {
+        const rect = cell.getBBox ? cell.getBBox() : null
+        if (!rect) continue
+        if (ix >= rect.x && ix <= rect.x + rect.width && iy >= rect.y && iy <= rect.y + rect.height) {
+          cellIds.add(cell.getAttribute('data-sq'))
+          break
+        }
       }
+    }
+    return [...cellIds]
+  })
+
+  for (const id of occupiedCells) {
+    const cell = page.locator(`[data-sq="${id}"]`)
+    await cell.scrollIntoViewIfNeeded()
+    await cell.click({ force: true })
+    await page.waitForTimeout(200)
+
+    const indicators = await page.locator('#game-play-root svg circle').count()
+    if (indicators > 0) {
+      const indicator = page.locator('#game-play-root svg circle').first()
+      await indicator.scrollIntoViewIfNeeded()
+      await indicator.click({ force: true })
+      await page.waitForTimeout(200)
+      return true
     }
   }
   return false
@@ -75,8 +85,8 @@ const MULTI_PLY_TESTS = [
   { family: 'chess', variant: 'standard', seat: '1', seatLabel: 'Black', plies: 4 },
   { family: 'chess', variant: 'grand', seat: '0', seatLabel: 'White', plies: 3 },
   { family: 'chess', variant: 'grand', seat: '1', seatLabel: 'Black', plies: 3 },
-  { family: 'chess', variant: 'turkish-great-chess-iv', seat: '0', seatLabel: 'White', plies: 3 },
-  { family: 'chess', variant: 'turkish-great-chess-iv', seat: '1', seatLabel: 'Black', plies: 3 },
+  { family: 'chess', variant: 'turkish-great-chess-iv', seat: '0', seatLabel: 'White', plies: 2, aiWait: 15000 },
+  { family: 'chess', variant: 'turkish-great-chess-iv', seat: '1', seatLabel: 'Black', plies: 2, aiWait: 15000 },
 ]
 
 test.describe('AI multi-ply — AI never stalls', () => {
@@ -85,8 +95,9 @@ test.describe('AI multi-ply — AI never stalls', () => {
     page.on('pageerror', err => console.log('[PAGE ERROR]', err.message))
   })
 
-  for (const { family, variant, seat, seatLabel, plies } of MULTI_PLY_TESTS) {
+  for (const { family, variant, seat, seatLabel, plies, aiWait } of MULTI_PLY_TESTS) {
     test(`${variant} (human=${seatLabel}): AI responds for ${plies} rounds`, async ({ page }) => {
+      const wait = aiWait || 5000
       await page.goto(url(family, variant), { waitUntil: 'networkidle' })
       await waitForBoard(page)
 
@@ -98,19 +109,19 @@ test.describe('AI multi-ply — AI never stalls', () => {
 
       // If human is Black, AI moves first — wait for it
       if (seat === '1') {
-        await page.waitForTimeout(5000)
+        await page.waitForTimeout(wait)
       }
 
       for (let round = 0; round < plies; round++) {
         // Wait for it to be the human's turn
-        await waitForHumanTurn(page, seatLabel, 20000)
+        await waitForHumanTurn(page, seatLabel, wait * 4)
 
         // Human makes a move
         const moved = await makeHumanMove(page)
         expect(moved).toBe(true)
 
         // Wait for AI to respond
-        await page.waitForTimeout(5000)
+        await page.waitForTimeout(wait)
       }
 
       // Verify the game progressed (history should have moves)

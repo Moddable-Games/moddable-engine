@@ -243,7 +243,7 @@ test.describe('game-play surface — browser assertions', () => {
 
     const chessSvg = await page.locator('#game-play-root svg').innerHTML()
 
-    const familySelect = page.locator('.control-group', { has: page.locator('.control-label', { hasText: 'Game' }) }).locator('select')
+    const familySelect = page.locator('.game-play-sidebar--left .control-group', { has: page.locator('.control-label', { hasText: 'Game' }) }).locator('select').first()
     await familySelect.selectOption('go')
     await page.waitForTimeout(1000)
 
@@ -260,7 +260,7 @@ test.describe('game-play surface — browser assertions', () => {
     await page.goto(BASE + '/play/?game=chess&variant=sittuyin', { waitUntil: 'networkidle' })
     await page.waitForSelector('svg rect[data-sq]', { timeout: 15000 })
 
-    const familySelect = page.locator('.control-group', { has: page.locator('.control-label', { hasText: 'Game' }) }).locator('select')
+    const familySelect = page.locator('.game-play-sidebar--left .control-group', { has: page.locator('.control-label', { hasText: 'Game' }) }).locator('select').first()
     const familyValue = await familySelect.evaluate(el => el.value)
     expect(familyValue).toBe('chess')
 

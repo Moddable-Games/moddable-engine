@@ -230,6 +230,7 @@ function resolveMeta(family, variant) {
     }
     for (const [k, v] of Object.entries(resolved)) {
       if (STRUCTURAL_KEYS.has(k)) continue
+      if (k === 'pieces' && v && (v.set || v.vocabulary)) continue
       if (v !== undefined) pluginConfig[k] = v
     }
     const def = {
