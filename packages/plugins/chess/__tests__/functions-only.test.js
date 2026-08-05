@@ -6,12 +6,11 @@ import { listVariants, getVariantConfig } from '../../../play/src/variant-regist
 // The allow-list shrinking to empty is the migration's progress bar.
 const LEGACY_ALLOW = new Set([
   'standard', 'threeCheck', 'fiveCheck',
-  'kingOfTheHill', 'racingKings', 'antichess', 'horde', 'checklessChess',
+  'kingOfTheHill', 'racingKings', 'antichess', 'horde',
   'extinction', 'singleCheck', 'codrus', 'omnicide',
   'breakthrough', 'shatar',
-  'giveaway', 'suicideChess', 'noRetreat', 'patrolChess', 'makpong',
-  'gridChess', 'madrasiChess', 'weakChess',
-  'immunizationChess', 'poisonChess', 'medusaChess',
+  'giveaway', 'suicideChess', 'makpong',
+  'gridChess',
   'benedictChess', 'monsterChess', 'maharaja',
   'atomic', 'shatranj', 'chaturanga', 'chess960',
   'diceChess', 'crazyhouse', 'darkChess', 'fogOfWar', 'duckChess', 'sittuyin',

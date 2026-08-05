@@ -1,12 +1,5 @@
 export const checklessChess = {
   key: 'checklessChess',
-  label: 'Checkless Chess',
-  group: 'Alternate Rules',
-  title: 'Checkless Chess',
-  description: 'You may not give check unless the move is checkmate.',
-  rule: 'Board: 8x8 · Win: Checkmate',
-  rows: 8,
-  cols: 8,
 
   moveFilter(moves, state, ctx) {
     const board = state.board

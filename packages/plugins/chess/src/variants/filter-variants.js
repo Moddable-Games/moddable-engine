@@ -67,13 +67,6 @@ export const suicideChess = {
 
 export const patrolChess = {
   key: 'patrolChess',
-  label: 'Patrol Chess',
-  group: 'Alternate Rules',
-  title: 'Patrol Chess',
-  description: 'A piece can only capture if it is defended by a friendly piece. Non-capturing moves unrestricted.',
-  rule: 'Board: 8x8 · Win: Checkmate',
-  rows: 8,
-  cols: 8,
 
   moveFilter(moves, state, ctx) {
     const board = state.board
@@ -223,13 +216,6 @@ function isInGridCheck(board, player, cols) {
 
 export const madrasiChess = {
   key: 'madrasiChess',
-  label: 'Madrasi Chess',
-  group: 'Alternate Rules',
-  title: 'Madrasi Chess',
-  description: 'Opposing pieces of the same type that attack each other are paralysed. Kings exempt.',
-  rule: 'Board: 8x8 · Win: Checkmate',
-  rows: 8,
-  cols: 8,
 
   moveFilter(moves, state, ctx) {
     const board = state.board
@@ -250,13 +236,6 @@ export const madrasiChess = {
 
 export const weakChess = {
   key: 'weakChess',
-  label: 'Weak Chess',
-  group: 'Alternate Rules',
-  title: 'Weak Chess',
-  description: 'The weakest piece type that has a legal move MUST move. Pawn < Knight < Bishop < Rook < Queen < King.',
-  rule: 'Board: 8x8 · Win: Checkmate',
-  rows: 8,
-  cols: 8,
 
   moveFilter(moves, state, ctx) {
     const STRENGTH = { pawn: 1, knight: 2, bishop: 3, rook: 4, queen: 5, king: 6 }
@@ -320,13 +299,6 @@ function isSlidingType(type) {
 
 export const noRetreat = {
   key: 'noRetreat',
-  label: 'No Retreat',
-  group: 'Alternate Rules',
-  title: 'No Retreat Chess',
-  description: 'Pieces cannot move backward toward their starting rank.',
-  rule: 'Board: 8x8 · Win: Checkmate',
-  rows: 8,
-  cols: 8,
 
   moveFilter(moves, state, ctx) {
     const cols = 8

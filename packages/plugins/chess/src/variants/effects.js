@@ -1,12 +1,5 @@
 export const poisonChess = {
   key: 'poisonChess',
-  label: 'Poison Chess',
-  group: 'Tactical',
-  title: 'Poison Chess',
-  description: 'Capture squares become poisoned for 3 turns. Non-king pieces landing on poison are destroyed.',
-  rule: 'Board: 8x8 · Win: Checkmate',
-  rows: 8,
-  cols: 8,
 
   afterMove(ctx) {
     const { move, captured, board, effects, topology, playerIdx } = ctx
@@ -38,13 +31,6 @@ export const poisonChess = {
 
 export const medusaChess = {
   key: 'medusaChess',
-  label: 'Medusa Chess',
-  group: 'Alternate Rules',
-  title: 'Medusa Chess',
-  description: 'After the queen moves, all enemy pieces she attacks become petrified for 2 turns. Kings immune.',
-  rule: 'Board: 8x8 · Win: Checkmate',
-  rows: 8,
-  cols: 8,
 
   afterMove(ctx) {
     const { move, board, effects, topology, playerIdx } = ctx
@@ -82,13 +68,6 @@ export const medusaChess = {
 
 export const immunizationChess = {
   key: 'immunizationChess',
-  label: 'Immunization Chess',
-  group: 'Alternate Rules',
-  title: 'Immunization Chess',
-  description: 'Captured piece makes adjacent enemies immune for 2 rounds.',
-  rule: 'Board: 8x8 · Win: Checkmate',
-  rows: 8,
-  cols: 8,
 
   afterMove(ctx) {
     const { move, captured, board, effects, topology, playerIdx } = ctx
