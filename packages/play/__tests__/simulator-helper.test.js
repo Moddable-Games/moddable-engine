@@ -1,5 +1,8 @@
 import { createSimulatorForFamily } from '../src/simulator-helper.js'
 import { createGameForFamily } from '../src/play.js'
+import '../../plugins/chess/index.js'
+import '../../plugins/go/index.js'
+import '../../plugins/draughts/index.js'
 
 describe('createSimulatorForFamily', () => {
   it('creates a simulator for chess with correct interface', () => {

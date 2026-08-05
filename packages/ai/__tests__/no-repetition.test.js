@@ -19,7 +19,7 @@ const CASES = [
   ['xiangqi', 'standard'],
   ['shogi', 'standard'],
   ['draughts', 'international'],
-  ['go', 'atari-go'],
+  ['go', 'capture-go'],
 ]
 
 describe('AI no-repetition guard', () => {

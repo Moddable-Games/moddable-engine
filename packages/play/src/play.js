@@ -160,7 +160,7 @@ export function setRulesReader(readFn, listFn) {
   }
 }
 
-const STRUCTURAL_KEYS = new Set(['topology', 'players', 'meta', 'surface', 'render', 'components', 'plugins'])
+export const STRUCTURAL_KEYS = new Set(['topology', 'players', 'meta', 'surface', 'render', 'components', 'plugins'])
 
 function resolveFromDisk(family, variant) {
   if (!_readFile) return null
@@ -168,6 +168,8 @@ function resolveFromDisk(family, variant) {
   let familyMd, variantMd
   try { familyMd = _readFile(family, 'rulebook') } catch { return null }
   try { variantMd = _readFile(family, variant) } catch { variantMd = '' }
+
+  if (!variantMd && variant && variant !== 'standard') return null
 
   const familyFm = parseFrontmatter(familyMd).meta || {}
   const variantFm = variantMd ? (parseFrontmatter(variantMd).meta || {}) : {}
@@ -238,6 +240,10 @@ function resolveMeta(family, variant) {
     }
     if (topo.type) def.engine.topology = { ...topo }
     return def
+  }
+
+  if (variant) {
+    throw new Error(`Unknown variant "${variant}" for family "${family}". Not in registry and not found on disk.`)
   }
 
   return getDefaultMeta(family, variant)

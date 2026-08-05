@@ -416,9 +416,9 @@ describe('terminal-outcome: hexapawn', () => {
   })
 })
 
-describe('terminal-outcome: oblongChess', () => {
+describe('terminal-outcome: oblong-chess', () => {
   it('fires: stalemate is a loss for the stalemated side', () => {
-    const game = createGame('chess', 'oblongChess')
+    const game = createGame('chess', 'oblong-chess')
     const board = new Array(64).fill(null)
     board[0] = { type: 'king', owner: 1 }
     board[4] = { type: 'rook', owner: 0 }
@@ -431,9 +431,9 @@ describe('terminal-outcome: oblongChess', () => {
   })
 })
 
-describe('terminal-outcome: shatranjKamil', () => {
+describe('terminal-outcome: shatranj-kamil', () => {
   it('fires: stalemate is a loss for the stalemated side', () => {
-    const game = createGame('chess', 'shatranjKamil')
+    const game = createGame('chess', 'shatranj-kamil')
     const board = new Array(100).fill(null)
     board[0] = { type: 'king', owner: 1 }
     board[10] = { type: 'rook', owner: 0 }
@@ -491,7 +491,7 @@ const COVERED_VARIANTS = new Set([
   'threeCheck', 'fiveCheck', 'horde', 'gridChess',
   'benedictChess', 'maharaja', 'atomic',
   'shatranj', 'chaturanga', 'darkChess', 'fogOfWar', 'duckChess',
-  'hexapawn', 'oblongChess', 'shatranjKamil',
+  'hexapawn', 'oblong-chess', 'shatranj-kamil',
   'empire', 'khans-chess',
 ])
 

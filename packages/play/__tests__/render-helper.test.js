@@ -1,5 +1,8 @@
 import { renderStateAsSvg } from '../src/render-helper.js'
 import { createGameForFamily } from '../src/play.js'
+import '../../plugins/chess/index.js'
+import '../../plugins/go/index.js'
+import '../../plugins/draughts/index.js'
 
 describe('renderStateAsSvg', () => {
   it('renders chess initial position as SVG', () => {
