@@ -734,14 +734,14 @@
     "family": "draughts",
     "variant": "brazilian",
     "label": "Brazilian Draughts",
-    "group": "Standard Board (8×8)",
+    "group": "Other",
     "playable": true
   },
   {
     "family": "draughts",
     "variant": "canadian",
     "label": "Canadian Draughts",
-    "group": "Large Board (12×12)",
+    "group": "Other",
     "playable": true
   },
   {
@@ -769,14 +769,14 @@
     "family": "draughts",
     "variant": "ghanaian",
     "label": "Ghanaian Draughts",
-    "group": "Large Board (10×10)",
+    "group": "Other",
     "playable": true
   },
   {
     "family": "draughts",
     "variant": "international",
     "label": "International Draughts",
-    "group": "Large Board (10×10)",
+    "group": "Other",
     "playable": true
   },
   {
@@ -790,14 +790,14 @@
     "family": "draughts",
     "variant": "pool",
     "label": "Pool Checkers",
-    "group": "Standard Board (8×8)",
+    "group": "Other",
     "playable": true
   },
   {
     "family": "draughts",
     "variant": "russian",
     "label": "Russian Draughts",
-    "group": "Standard Board (8×8)",
+    "group": "Other",
     "playable": true
   },
   {
@@ -811,7 +811,7 @@
     "family": "draughts",
     "variant": "spantsiretti",
     "label": "Spantsiretti",
-    "group": "Extended Board (10×8)",
+    "group": "Other",
     "playable": true
   },
   {
@@ -825,14 +825,14 @@
     "family": "go",
     "variant": "13x13",
     "label": "13×13 Go",
-    "group": "Standard",
+    "group": "Other",
     "playable": true
   },
   {
     "family": "go",
     "variant": "9x9",
     "label": "9×9 Go",
-    "group": "Standard",
+    "group": "Other",
     "playable": true
   },
   {
@@ -846,35 +846,35 @@
     "family": "go",
     "variant": "gomoku",
     "label": "Gomoku",
-    "group": "Five in a Row",
+    "group": "Other",
     "playable": true
   },
   {
     "family": "go",
     "variant": "ninuki-renju",
     "label": "Ninuki-Renju",
-    "group": "Five in a Row",
+    "group": "Other",
     "playable": true
   },
   {
     "family": "go",
     "variant": "one-colour",
     "label": "One-Colour Go",
-    "group": "Handicap and Teaching",
+    "group": "Other",
     "playable": true
   },
   {
     "family": "go",
     "variant": "standard",
     "label": "Standard Go (19×19)",
-    "group": "Standard",
+    "group": "Other",
     "playable": true
   },
   {
     "family": "go",
     "variant": "stoical",
     "label": "Stoical Go",
-    "group": "Rule Variants",
+    "group": "Other",
     "playable": true
   },
   {

@@ -15,102 +15,12 @@ export const english = {
   key: 'english',
 }
 
-export const international = {
-  key: 'international',
-  setup: '1b1b1b1b1b/b1b1b1b1b1/1b1b1b1b1b/b1b1b1b1b1/10/10/1w1w1w1w1w/w1w1w1w1w1/1w1w1w1w1w/w1w1w1w1w1',
-  label: 'International Draughts',
-  group: 'Large Board (10×10)',
-  description: 'The competitive standard: flying kings, men capture in every direction, and the longest capture chain is compulsory.',
-  rule: 'Board: 10×10 · 20 pieces · Longest chain compulsory',
-  rows: 10,
-  cols: 10,
-  piecesPerPlayer: 20,
-  directions: 'diagonal',
-  manCapture: 'all',
-  manMove: 'forward',
-  captureBackward: true,
-  forcedCapture: true,
-  maximalCapture: true,
-  flyingKings: true,
-  removeImmediately: false,
-  playerNames: PLAYERS,
-}
-
-export const brazilian = {
-  key: 'brazilian',
-  setup: '1b1b1b1b/b1b1b1b1/1b1b1b1b/8/8/w1w1w1w1/1w1w1w1w/w1w1w1w1',
-  extends: 'international',
-  label: 'Brazilian Draughts',
-  group: 'Standard Board (8×8)',
-  description: 'International rules played on the 8×8 board: flying kings, majority capture, and delayed removal.',
-  rule: 'Board: 8×8 · 12 pieces · International rules',
-  rows: 8,
-  cols: 8,
-  piecesPerPlayer: 12,
-}
-
-export const canadian = {
-  key: 'canadian',
-  setup: '1b1b1b1b1b1b/b1b1b1b1b1b1/1b1b1b1b1b1b/b1b1b1b1b1b1/1b1b1b1b1b1b/12/12/w1w1w1w1w1w1/1w1w1w1w1w1w/w1w1w1w1w1w1/1w1w1w1w1w1w/w1w1w1w1w1w1',
-  extends: 'international',
-  label: 'Canadian Draughts',
-  group: 'Large Board (12×12)',
-  description: 'International rules on the largest standard board, with thirty pieces a side.',
-  rule: 'Board: 12×12 · 30 pieces · International rules',
-  rows: 12,
-  cols: 12,
-  piecesPerPlayer: 30,
-}
-
-export const russian = {
-  key: 'russian',
-  setup: '1b1b1b1b/b1b1b1b1/1b1b1b1b/8/8/w1w1w1w1/1w1w1w1w/w1w1w1w1',
-  label: 'Russian Draughts',
-  group: 'Standard Board (8×8)',
-  description: 'Men capture backwards, a man promoting mid-chain continues as a king, and the capture chosen is free.',
-  rule: 'Board: 8×8 · 12 pieces · Mid-jump promotion',
-  rows: 8,
-  cols: 8,
-  piecesPerPlayer: 12,
-  directions: 'diagonal',
-  manCapture: 'all',
-  manMove: 'forward',
-  captureBackward: true,
-  forcedCapture: true,
-  maximalCapture: false,
-  flyingKings: true,
-  promotionDuring: true,
-  playerNames: PLAYERS,
-}
-
-// The prose in this variant's rules file still says four rows and twenty pieces
-// a side, which on an eight-row board would leave no opening move. The setup FEN
-// below is taken verbatim from the same file and is the playable reading. Now
-// that the position is read from the FEN rather than derived from piece counts,
-// the prose discrepancy no longer affects play, but it is still worth correcting
-// in moddable-rules.
-export const spantsiretti = {
-  key: 'spantsiretti',
-  setup: '1b1b1b1b1b/b1b1b1b1b1/1b1b1b1b1b/10/10/w1w1w1w1w1/1w1w1w1w1w/w1w1w1w1w1',
-  extends: 'russian',
-  label: 'Spantsiretti',
-  group: 'Extended Board (10×8)',
-  description: 'Russian Draughts rules on a wider 10×8 board.',
-  rule: 'Board: 10×8 · 15 pieces · Russian rules',
-  rows: 8,
-  cols: 10,
-  piecesPerPlayer: 15,
-}
-
-export const pool = {
-  key: 'pool',
-  setup: '1b1b1b1b/b1b1b1b1/1b1b1b1b/8/8/w1w1w1w1/1w1w1w1w/w1w1w1w1',
-  extends: 'russian',
-  label: 'Pool Checkers',
-  group: 'Standard Board (8×8)',
-  description: 'Men capture in both directions, kings fly, and a man promoting mid-chain continues. The US tournament standard.',
-  rule: 'Board: 8×8 · 12 pieces · Flying kings',
-}
+export const international = { key: 'international' }
+export const brazilian = { key: 'brazilian' }
+export const canadian = { key: 'canadian' }
+export const russian = { key: 'russian' }
+export const spantsiretti = { key: 'spantsiretti' }
+export const pool = { key: 'pool' }
 
 export const german = {
   key: 'german',
@@ -132,18 +42,7 @@ export const turkish = {
   key: 'turkish-draughts',
 }
 
-export const ghanaian = {
-  key: 'ghanaian',
-  setup: '1b1b1b1b1b/b1b1b1b1b1/1b1b1b1b1b/b1b1b1b1b1/10/10/1w1w1w1w1w/w1w1w1w1w1/1w1w1w1w1w/w1w1w1w1w1',
-  extends: 'international',
-  label: 'Ghanaian Draughts',
-  group: 'Large Board (10×10)',
-  description: 'Men capture forwards only, and a player reduced to a single piece has lost.',
-  rule: 'Board: 10×10 · 20 pieces · One piece remaining loses',
-  manCapture: 'forward',
-  captureBackward: false,
-  loseOnSinglePiece: true,
-}
+export const ghanaian = { key: 'ghanaian' }
 
 // Variants held back from the registry until the plugin models the mechanic
 // each one turns on. Listed so the gap is visible rather than silently missing.

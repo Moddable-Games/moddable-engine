@@ -29,14 +29,8 @@ const LEGACY_ALLOW = {
     'berolinaChess', 'leganChess', 'makruk',
   ]),
   go: new Set([
-    'standard', '13x13', '9x9', 'one-colour',
-    'stoical',
-    'gomoku', 'ninuki-renju',
   ]),
   draughts: new Set([
-    'international', 'brazilian', 'canadian',
-    'russian', 'spantsiretti', 'pool',
-    'ghanaian',
   ]),
   shogi: new Set([
   ]),
@@ -48,8 +42,8 @@ const LEGACY_ALLOW = {
 // Lower these as migrations land. A PR that increases any ceiling MUST be rejected.
 const LEGACY_CEILING = {
   chess: 14,
-  go: 7,
-  draughts: 7,
+  go: 0,
+  draughts: 0,
   shogi: 0,
   xiangqi: 0,
 }
@@ -117,6 +111,6 @@ describe('functions-only: summary', () => {
       console.log(`    ${family}: ${count}/${ceiling}`)
     }
     console.log(`    TOTAL: ${total}`)
-    expect(total).toBe(28)
+    expect(total).toBe(14)
   })
 })
