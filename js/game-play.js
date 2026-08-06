@@ -63,11 +63,11 @@ const FAMILY_AI_OPTIONS = {
     { value: 'expert', label: 'Expert — deepest search' },
   ],
   reversi: [
-    { value: 'beginner', label: 'Beginner — random' },
-    { value: 'easy', label: 'Easy — corner bias' },
-    { value: 'medium', label: 'Medium — positional' },
-    { value: 'hard', label: 'Hard — deep positional' },
-    { value: 'expert', label: 'Expert — full strength' },
+    { value: 'beginner', label: 'Beginner — shallow, noisy' },
+    { value: 'easy', label: 'Easy — shallow' },
+    { value: 'medium', label: 'Medium — 5-ply positional' },
+    { value: 'hard', label: 'Hard — 5-ply deterministic' },
+    { value: 'expert', label: 'Expert — full depth (3s)' },
   ],
   halma: [
     { value: 'beginner', label: 'Beginner — random hops' },
@@ -985,6 +985,7 @@ export async function initGamePlay(container, defaults = {}) {
     draughts: ['White', 'Black'],
     xiangqi: ['Red', 'Black'],
     shogi: ['Sente', 'Gote'],
+    reversi: ['Black', 'White'],
   }
 
   function seatOptionsForFamily(f) {

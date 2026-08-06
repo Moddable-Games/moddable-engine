@@ -12,6 +12,7 @@ import { createPitTopology } from '../../topologies/pit/src/topology-pit.js'
 import { createGraphTopology } from '../../topologies/graph/src/topology-graph.js'
 import { createTableauTopology } from '../../topologies/tableau/src/topology-tableau.js'
 import { createGoPlugin } from '../../plugins/go/src/go-plugin.js'
+import { createReversiPlugin } from '../../plugins/reversi/src/reversi-plugin.js'
 import { createDraughtsPlugin } from '../../plugins/draughts/src/draughts-plugin.js'
 import { createShogiPlugin } from '../../plugins/shogi/src/shogi-plugin.js'
 import { createXiangqiPlugin } from '../../plugins/xiangqi/src/xiangqi-plugin.js'
@@ -31,6 +32,7 @@ const PLUGIN_FACTORIES = {
   chess: createChessPlugin,
   draughts: createDraughtsPlugin,
   go: createGoPlugin,
+  reversi: createReversiPlugin,
   shogi: createShogiPlugin,
   xiangqi: createXiangqiPlugin,
 }

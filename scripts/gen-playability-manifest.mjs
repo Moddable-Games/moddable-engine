@@ -23,6 +23,7 @@ import '../packages/plugins/go/index.js'
 import '../packages/plugins/draughts/index.js'
 import '../packages/plugins/xiangqi/index.js'
 import '../packages/plugins/shogi/index.js'
+import '../packages/plugins/reversi/index.js'
 
 import { createGameForFamily } from '../packages/play/src/play.js'
 import { listVariants, getVariantConfig } from '../packages/play/src/variant-registry.js'
@@ -30,7 +31,7 @@ import { listVariants, getVariantConfig } from '../packages/play/src/variant-reg
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUTPUT = process.env.MANIFEST_OUT || resolve(__dirname, '..', 'play', 'playability-manifest.json')
 
-const FAMILIES = ['chess', 'go', 'draughts', 'xiangqi', 'shogi']
+const FAMILIES = ['chess', 'go', 'draughts', 'xiangqi', 'shogi', 'reversi']
 const MAX_PLIES = 200
 const MAX_CONTINUATION = 50
 const MAX_PLACEMENT = 100

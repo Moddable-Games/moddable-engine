@@ -133,6 +133,7 @@ export const FAMILY_INTERACTION = {
   go: 'place',
   shogi: 'drop',
   xiangqi: 'move',
+  reversi: 'place',
 }
 
 export function interactionModelFor(family, override) {
