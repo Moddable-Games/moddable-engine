@@ -1229,7 +1229,7 @@ export async function initGamePlay(container, defaults = {}) {
       console.error('[game-play] Piece gallery loaded 0 entries — fetch may have failed')
       return
     }
-    const needed = getVariantPieceKeys(config.family, variantKey, setupFen)
+    const needed = getVariantPieceKeys(config.family, variantKey, setupFen, resolvedBoard)
     const compatible = gallery.filter(s => {
       if (!s.id || !s.pieces) return false
       for (const key of needed) {
@@ -1370,14 +1370,16 @@ function buildGroupedSelect(parent, label, variants, selected) {
 
 function capitalize(s) { return s ? s[0].toUpperCase() + s.slice(1) : '' }
 
-function getVariantPieceKeys(family, variantKey, fallbackSetup) {
+function getVariantPieceKeys(family, variantKey, fallbackSetup, resolved) {
   const vCfg = getVariantConfig(family, variantKey) || {}
-  const fen = vCfg.setup || vCfg.fen || fallbackSetup
+  const pluginBlock = resolved?.plugins?.[family] || {}
+  const fen = vCfg.setup || vCfg.fen || pluginBlock.setup || fallbackSetup
   if (typeof fen !== 'string') {
     const keys = new Set(['wK', 'wP', 'bK', 'bP'])
-    if (vCfg.placementPieces) {
-      const vocab = vCfg.vocabulary || {}
-      for (const side of vCfg.placementPieces) {
+    const placementPieces = vCfg.placementPieces || pluginBlock.placementPieces
+    if (placementPieces) {
+      const vocab = vCfg.vocabulary || pluginBlock.vocabulary || {}
+      for (const side of placementPieces) {
         for (const type of side) {
           const entry = vocab[type]
           if (entry?.symbols) {
