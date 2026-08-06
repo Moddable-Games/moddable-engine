@@ -84,7 +84,7 @@ export function createAI(family, variant, opts = {}) {
     ? createMCTS(simulator, mctsOpts)
     : createMinimax(simulator, {
         difficulty,
-        openingBook: variantOpeningBook(family, variant),
+        openingBook: variantOpeningBook(family, variant, opts.definition),
         ...opts.searchOpts,
       })
 
@@ -156,8 +156,11 @@ function variantEvaluator(family, variant) {
   }
 }
 
-function variantOpeningBook(family, variant) {
-  const config = variant ? getVariantConfig(family, variant) : null
+function variantOpeningBook(family, variant, definition) {
+  if (!variant) return undefined
+  const book = definition?.engine?.plugins?.[family]?.openingBook
+  if (book) return book
+  const config = getVariantConfig(family, variant)
   return (config && config.openingBook) || undefined
 }
 

@@ -92,4 +92,44 @@ value: null
     const { meta } = parseFrontmatter(content)
     expect(meta.value).toBeNull()
   })
+
+  test('block-form and inline-form quoted keys parse identically', () => {
+    const blockForm = `---
+symbols:
+  "0": F
+  "1": f
+---
+`
+    const inlineForm = `---
+symbols: {"0": F, "1": f}
+---
+`
+    const unquotedForm = `---
+symbols:
+  0: F
+  1: f
+---
+`
+    const block = parseFrontmatter(blockForm).meta
+    const inline = parseFrontmatter(inlineForm).meta
+    const unquoted = parseFrontmatter(unquotedForm).meta
+
+    expect(block.symbols).toEqual({ 0: 'F', 1: 'f' })
+    expect(inline.symbols).toEqual({ 0: 'F', 1: 'f' })
+    expect(unquoted.symbols).toEqual({ 0: 'F', 1: 'f' })
+  })
+
+  test('FEN strings as quoted block keys parse without embedded quotes', () => {
+    const content = `---
+openingBook:
+  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -":
+    - e2e4
+    - d2d4
+---
+`
+    const { meta } = parseFrontmatter(content)
+    const keys = Object.keys(meta.openingBook)
+    expect(keys[0]).toBe('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -')
+    expect(meta.openingBook[keys[0]]).toEqual(['e2e4', 'd2d4'])
+  })
 })

@@ -1,4 +1,8 @@
 import { createOpeningBook } from '../src/opening-book.js'
+import { resolveFromDisk, setRulesReader } from '../../play/src/play.js'
+import { createAI } from '../../play/src/sdk.js'
+import '../../plugins/chess/index.js'
+import '../../play/test-helpers/setup-rules-reader.js'
 
 describe('AI — opening book', () => {
   const bookData = {
@@ -74,5 +78,53 @@ describe('AI — opening book', () => {
       const book = createOpeningBook(bookData)
       expect(book.getVariants()).toEqual(['standard', 'kingOfTheHill', 'antichess'])
     })
+  })
+})
+
+describe('AI — opening book from frontmatter', () => {
+  const VARIANTS_WITH_BOOKS = ['standard', 'threeCheck', 'kingOfTheHill', 'antichess', 'horde', 'racingKings']
+
+  for (const variant of VARIANTS_WITH_BOOKS) {
+    it(`${variant}: opening book lookup by starting FEN returns moves`, () => {
+      const resolved = resolveFromDisk('chess', variant)
+      expect(resolved).not.toBeNull()
+      const openingBook = resolved.plugins?.chess?.openingBook
+      expect(openingBook).toBeDefined()
+
+      const firstKey = Object.keys(openingBook)[0]
+      expect(firstKey).not.toContain('"')
+
+      const book = createOpeningBook(openingBook)
+      const moves = book.getAllMoves(firstKey)
+      expect(moves.length).toBeGreaterThan(0)
+      for (const move of moves) {
+        expect(typeof move).toBe('string')
+        expect(move.length).toBeGreaterThanOrEqual(4)
+      }
+    })
+  }
+})
+
+describe('AI — opening book via definition (browser path)', () => {
+  it('resolves book from definition when _readFile is unset', () => {
+    const resolved = resolveFromDisk('chess', 'standard')
+    const openingBook = resolved.plugins.chess.openingBook
+
+    const definition = {
+      title: 'Standard Chess',
+      slug: 'standard',
+      parent: 'chess',
+      engine: {
+        topology: { type: 'grid', rows: 8, cols: 8 },
+        players: ['white', 'black'],
+        plugins: { chess: { setup: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', openingBook } },
+      },
+    }
+
+    // Simulate browser: no filesystem reader available
+    setRulesReader(null, null)
+    const ai = createAI('chess', 'standard', { definition, difficulty: 'beginner' })
+    expect(ai).toBeDefined()
+    expect(ai.search).toBe('minimax')
   })
 })
