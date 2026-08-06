@@ -2,14 +2,15 @@ import { createGameForFamily, getFamilies, hasFamily, getPlugin } from '../src/p
 
 describe('play — universal game factory', () => {
   describe('registry', () => {
-    it('lists all 5 families', () => {
+    it('lists all 6 families', () => {
       const families = getFamilies()
-      expect(families.length).toBe(5)
+      expect(families.length).toBe(6)
       expect(families).toContain('chess')
       expect(families).toContain('go')
       expect(families).toContain('draughts')
       expect(families).toContain('shogi')
       expect(families).toContain('xiangqi')
+      expect(families).toContain('reversi')
     })
 
     it('hasFamily returns true for registered families', () => {

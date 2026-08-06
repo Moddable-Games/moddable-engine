@@ -146,8 +146,8 @@ describe('play kit', () => {
       })
     })
 
-    it('defaults opponent to human outside embed mode', () => {
-      expect(parseEmbedParams('?family=go').opponent).toBe('human')
+    it('defaults opponent to ai', () => {
+      expect(parseEmbedParams('?family=go').opponent).toBe('ai')
     })
 
     it('builds an embed url', () => {

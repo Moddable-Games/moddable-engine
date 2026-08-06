@@ -19,6 +19,7 @@ const EXPECTED_PLAYABLE = {
   go: 9,
   shogi: 5,
   xiangqi: 3,
+  reversi: 3,
 }
 
 describe('variant count guard (published manifest)', () => {
