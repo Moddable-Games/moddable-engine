@@ -940,6 +940,7 @@ export function createPlaySession(options = {}) {
     get fen() { return getFEN() },
     get setup() { return resolvedBoard?.setup || null },
     get variantMeta() { return resolvedBoard?._variantMeta || null },
+    get resolved() { return resolvedBoard },
     start,
     draw,
     summarise,
@@ -1229,7 +1230,7 @@ export async function initGamePlay(container, defaults = {}) {
       console.error('[game-play] Piece gallery loaded 0 entries — fetch may have failed')
       return
     }
-    const needed = getVariantPieceKeys(config.family, variantKey, setupFen, resolvedBoard)
+    const needed = getVariantPieceKeys(config.family, variantKey, setupFen, session?.resolved)
     const compatible = gallery.filter(s => {
       if (!s.id || !s.pieces) return false
       for (const key of needed) {
@@ -1383,8 +1384,9 @@ function getVariantPieceKeys(family, variantKey, fallbackSetup, resolved) {
         for (const type of side) {
           const entry = vocab[type]
           if (entry?.symbols) {
-            keys.add('w' + entry.symbols[0])
-            keys.add('b' + entry.symbols[1].toUpperCase())
+            const syms = Object.values(entry.symbols)
+            if (syms[0]) keys.add('w' + syms[0])
+            if (syms[1]) keys.add('b' + syms[1].toUpperCase())
           } else {
             const sym = type[0].toUpperCase()
             keys.add('w' + sym)
