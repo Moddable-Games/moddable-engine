@@ -1,4 +1,4 @@
-import { createGameForFamily, getFamilies, hasFamily, defaultPlayersFor, defaultTopologyFor } from './play.js'
+import { createGameForFamily, getFamilies, hasFamily, defaultPlayersFor, defaultTopologyFor, resolveFromDisk } from './play.js'
 import { createSimulatorForFamily } from './simulator-helper.js'
 import { renderStateAsSvg } from './render-helper.js'
 import {
@@ -157,7 +157,13 @@ function variantEvaluator(family, variant) {
 }
 
 function variantOpeningBook(family, variant) {
-  const config = variant ? getVariantConfig(family, variant) : null
+  if (!variant) return undefined
+  const resolved = resolveFromDisk(family, variant)
+  if (resolved) {
+    const book = resolved.plugins?.[family]?.openingBook
+    if (book) return book
+  }
+  const config = getVariantConfig(family, variant)
   return (config && config.openingBook) || undefined
 }
 

@@ -164,7 +164,7 @@ export function setRulesReader(readFn, listFn) {
 
 export const STRUCTURAL_KEYS = new Set(['topology', 'players', 'meta', 'surface', 'render', 'components', 'plugins'])
 
-function resolveFromDisk(family, variant) {
+export function resolveFromDisk(family, variant) {
   if (!_readFile) return null
 
   const slug = getSlugForKey(family, variant)

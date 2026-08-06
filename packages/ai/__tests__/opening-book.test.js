@@ -1,4 +1,7 @@
 import { createOpeningBook } from '../src/opening-book.js'
+import { resolveFromDisk } from '../../play/src/play.js'
+import '../../plugins/chess/index.js'
+import '../../play/test-helpers/setup-rules-reader.js'
 
 describe('AI — opening book', () => {
   const bookData = {
@@ -75,4 +78,28 @@ describe('AI — opening book', () => {
       expect(book.getVariants()).toEqual(['standard', 'kingOfTheHill', 'antichess'])
     })
   })
+})
+
+describe('AI — opening book from frontmatter', () => {
+  const VARIANTS_WITH_BOOKS = ['standard', 'threeCheck', 'kingOfTheHill', 'antichess', 'horde', 'racingKings']
+
+  for (const variant of VARIANTS_WITH_BOOKS) {
+    it(`${variant}: opening book lookup by starting FEN returns moves`, () => {
+      const resolved = resolveFromDisk('chess', variant)
+      expect(resolved).not.toBeNull()
+      const openingBook = resolved.plugins?.chess?.openingBook
+      expect(openingBook).toBeDefined()
+
+      const firstKey = Object.keys(openingBook)[0]
+      expect(firstKey).not.toContain('"')
+
+      const book = createOpeningBook(openingBook)
+      const moves = book.getAllMoves(firstKey)
+      expect(moves.length).toBeGreaterThan(0)
+      for (const move of moves) {
+        expect(typeof move).toBe('string')
+        expect(move.length).toBeGreaterThanOrEqual(4)
+      }
+    })
+  }
 })

@@ -28,6 +28,14 @@ function parseYaml(lines) {
   return parseBlock(lines, 0, lines.length, 0)
 }
 
+function unquoteKey(key) {
+  if ((key.startsWith('"') && key.endsWith('"')) ||
+      (key.startsWith("'") && key.endsWith("'"))) {
+    return key.slice(1, -1)
+  }
+  return key
+}
+
 function parseBlock(lines, start, end, baseIndent) {
   const result = {}
   let i = start
@@ -49,7 +57,7 @@ function parseBlock(lines, start, end, baseIndent) {
     const colonIdx = trimmed.indexOf(':')
     if (colonIdx === -1) { i++; continue }
 
-    const key = trimmed.slice(0, colonIdx).trim()
+    const key = unquoteKey(trimmed.slice(0, colonIdx).trim())
     const rawValue = trimmed.slice(colonIdx + 1).trim()
 
     if (rawValue === '' || rawValue === '|' || rawValue === '>') {
@@ -99,7 +107,7 @@ function parseList(lines, start, end, baseIndent) {
       i++
     } else {
       const itemObj = {}
-      const firstKey = itemContent.slice(0, itemColonIdx).trim()
+      const firstKey = unquoteKey(itemContent.slice(0, itemColonIdx).trim())
       const firstVal = itemContent.slice(itemColonIdx + 1).trim()
 
       if (firstVal === '' || firstVal === '|' || firstVal === '>') {
@@ -133,7 +141,7 @@ function parseList(lines, start, end, baseIndent) {
         const pColon = pTrimmed.indexOf(':')
         if (pColon === -1) { i++; continue }
 
-        const pKey = pTrimmed.slice(0, pColon).trim()
+        const pKey = unquoteKey(pTrimmed.slice(0, pColon).trim())
         const pRawVal = pTrimmed.slice(pColon + 1).trim()
 
         if (pRawVal === '' || pRawVal === '|' || pRawVal === '>') {
@@ -229,11 +237,7 @@ function parseInlineObject(raw) {
   for (const pair of pairs) {
     const colonIdx = pair.indexOf(':')
     if (colonIdx === -1) continue
-    let key = pair.slice(0, colonIdx).trim()
-    if ((key.startsWith('"') && key.endsWith('"')) ||
-        (key.startsWith("'") && key.endsWith("'"))) {
-      key = key.slice(1, -1)
-    }
+    const key = unquoteKey(pair.slice(0, colonIdx).trim())
     const val = pair.slice(colonIdx + 1).trim()
     result[key] = parseValue(val)
   }
