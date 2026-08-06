@@ -118,6 +118,14 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Changelog
 
+#### 2026-08-06
+- CI pipeline fully green for the first time (PR #92 merged): unit-tests (3021), playability-standard, Playwright e2e (50 tests)
+- Fixed: jest/@jest/globals removed by knip cleanup restored to root devDependencies
+- Fixed: Playwright CI serves engine + rules as siblings so RULES_BASE resolves correctly
+- Fixed: AI NPS floor lowered to 150 for CI (catches catastrophic regressions, survives runner variance)
+- Fixed: sittuyin piece set filtering regression (placementPieces read from resolved frontmatter)
+- moddable-rules dev merged to main (22 commits: playable:true, engine plugin blocks)
+
 #### 2026-08-05
 - Split chess variant files: every variant now in its own kebab-case file (53 files, no multi-variant bundles)
 - Deleted standard.js (key-only no-op, now frontmatter-only like all other data-only variants)
