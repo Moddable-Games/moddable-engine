@@ -1,0 +1,296 @@
+family	slug	attribution_type	rules_wordcount	attribution_verbatim
+agon	standard	ABSENT	0	ABSENT
+chess	carrera	ABSENT	0	ABSENT
+chess	senterej	ABSENT	0	ABSENT
+dou-shou-qi	standard	ABSENT	0	ABSENT
+dungeon-chess	compact	ABSENT	0	ABSENT
+dungeon-chess	four-player	ABSENT	0	ABSENT
+dungeon-chess	two-player	ABSENT	0	ABSENT
+econopoly	standard	ABSENT	0	ABSENT
+fanorona	standard	ABSENT	0	ABSENT
+hex	13x13	ABSENT	0	ABSENT
+hex	14x14	ABSENT	0	ABSENT
+hex	19x19	ABSENT	0	ABSENT
+hex	9x9	ABSENT	0	ABSENT
+nukes	standard	ABSENT	0	ABSENT
+nyout	standard	ABSENT	0	ABSENT
+royal-ur	standard	ABSENT	0	ABSENT
+senet	standard	ABSENT	0	ABSENT
+shogi	annan-shogi	ABSENT	0	ABSENT
+shogi	chu-shogi	ABSENT	0	ABSENT
+shogi	heian-shogi	ABSENT	0	ABSENT
+shogi	judkins-shogi	ABSENT	0	ABSENT
+shogi	yari-shogi	ABSENT	0	ABSENT
+surakarta	standard	ABSENT	0	ABSENT
+tafl	brandubh	ABSENT	0	ABSENT
+tafl	hnefatafl	ABSENT	0	ABSENT
+tafl	standard	ABSENT	0	ABSENT
+tafl	tawlbwrdd	ABSENT	0	ABSENT
+chess	avalanche	ABSENT	9	ABSENT
+chess	birds-chess	ABSENT	9	ABSENT
+chess	hostage-chess	ABSENT	9	ABSENT
+chess	janus	ABSENT	9	ABSENT
+chess	omega-chess	ABSENT	9	ABSENT
+chess	pocket-knight	ABSENT	9	ABSENT
+chess	cylindrical-chess	ABSENT	13	ABSENT
+chess	kriegspiel	ABSENT	22	ABSENT
+hex	y-large	ABSENT	34	ABSENT
+hex	y-small	ABSENT	34	ABSENT
+chess	glinski	ABSENT	61	ABSENT
+hex	y-game	ABSENT	61	ABSENT
+hex	standard	ABSENT	66	ABSENT
+chess	byzantine-chess	ABSENT	67	ABSENT
+shogi	wa-shogi	ABSENT	81	ABSENT
+chess	circular-chess	ABSENT	88	ABSENT
+nukes	asymmetric-powers	ABSENT	100	ABSENT
+chess	anti-king-chess-2	ABSENT	127	ABSENT
+nukes	siege	ABSENT	163	ABSENT
+nukes	fallout	ABSENT	392	ABSENT
+backgammon	acey-deucey	general	0	Acey-Deucey. US military tradition, early 20th century. Public domain. Source: Wikipedia (CC-BY-SA).
+backgammon	fevga	general	0	Fevga. Traditional game, Greece. Part of the Tavli family. Public domain. Source: Wikipedia (CC-BY-SA).
+backgammon	nardi	general	0	Nardi (Long Nardi). Traditional game, Caucasus and Russia. Public domain. Source: Wikipedia (CC-BY-SA).
+backgammon	plakoto	general	0	Plakoto. Traditional game, Greece. Part of the Tavli family. Public domain. Source: Wikipedia (CC-BY-SA).
+backgammon	standard	general	0	Standard Backgammon. Public domain rules. Source: US Backgammon Federation official rules; Wikipedia (CC-BY-SA).
+chaupar	standard	general	0	Chaupar. Public domain. Sources: Wikipedia (CC-BY-SA); mastersofgames.com Chaupar rules (starting positions, super-pieces, split throws, tohd, home order); trackawesomelist Chaupar entry; labforadvancedstudy/books.
+chess	placement-chess	general	0	Bronstein version attributed to David Bronstein, Soviet-era grandmaster and chess theorist. CVP version published on the Chess Variant Pages (chessvariants.com). Public domain rule sets.
+morris	morabaraba	general	0	Morabaraba. South African national game. Public domain. Source: Mind Sports South Africa official rules; Wikipedia (CC-BY-SA).
+morris	shax	general	0	Shax. Traditional game, Somalia. Public domain. Source: Wikipedia (CC-BY-SA); academic literature on East African board games.
+shogi	standard	general	0	Standard Shogi. Ancient origin; public domain. Sources: GNU Shogi Manual (GNU Project, public domain); mastersofgames.com rules reference; pychess.org variants documentation.
+xiangqi	standard	general	0	Xiangqi. Public domain. Ancient Chinese origin, no copyright concern. Rules in accordance with the World Xiangqi Federation (WXF) standard.
+chess	chigorin	general	11	Named after Mikhail Chigorin. Variant design is traditional. Public domain.
+chess	amazon-chess	general	12	Traditional fairy chess piece. Variant is public domain.
+chess	brusky	general	12	Yakov Brusky. Public domain rules.
+chess	king-of-the-hill	general	14	Popularised on Lichess and Chess.com. Public domain.
+chess	three-check	general	14	Traditional variant. Popularised on Lichess. Public domain.
+chess	de-vasa	general	16	Helge E. de Vasa. Public domain rules.
+chess	mccooey	general	16	Dave McCooey. Published on chessvariants.com. Public domain rules.
+chess	shafran	general	16	Boris Shafran. Public domain rules.
+chess	pawns-only	general	28	Traditional variant. Public domain.
+chess	sittuyin	general	34	Traditional Burmese chess, played for centuries in Myanmar. Public domain.
+chess	endgame-chess	general	35	Traditional variant. Public domain.
+chess	peasants-revolt	general	35	Traditional asymmetric variant. Public domain.
+asalto	royal-garrison	general	36	Royal Garrison. Extended variant of Asalto. Victorian board game. Public domain rule set.
+chess	single-check	general	38	Traditional variant. Public domain.
+chess	stalemate-wins	general	39	Traditional rule modification. Public domain.
+chess	maharaja	general	43	Traditional Indian variant ("Maharaja and the Sepoys"), 19th century. Public domain.
+chess	five-check	general	45	Traditional variant (extension of Three-Check). Public domain.
+chess	legan-chess	general	46	Named after Vladimír Legan. Public domain.
+chess	petty	general	47	Traditional small chess variant. Public domain.
+chess	torpedo	general	48	Variant popularised on Lichess. Public domain.
+backgammon	hypergammon	general	49	Hypergammon. Modern tournament variant, origin unknown (popularised in the 1990s). Public domain rules. Source: Wikipedia (CC-BY-SA).
+chess	diana	general	49	Traditional variant, 19th century. Public domain.
+chess	suicide-chess	general	56	Traditional variant. Public domain.
+draughts	thai	general	56	Traditional variant (Makhos / หมากฮอส). Public domain. Source: Wikipedia (CC-BY-SA).
+chess	hoppel-poppel	general	58	Traditional German variant. The name means "Hippety-Hop" in German. Public domain.
+chess	horde	general	59	Popularised on Lichess. Public domain.
+chess	monster-chess	general	60	Traditional variant. Public domain.
+chess	upside-down	general	60	Traditional variant. Public domain.
+chess	codrus	general	66	Named after King Codrus of Athens. Traditional variant. Public domain.
+chess	recruitment-chess	general	66	Modern variant. Public domain.
+chess	antichess	general	69	Also known as "Losing Chess," "Giveaway Chess," or "Suicide Chess." Traditional variant, 19th century. Public domain.
+chess	half-chess	general	70	Traditional mini-chess variant. Public domain.
+chess	giveaway	general	71	Traditional variant. Also known as "Giveaway Chess." Public domain.
+chess	marseillais	general	73	Originated in Marseille, France, early 20th century. Public domain.
+chess	medusa-chess	general	73	Modern variant. Public domain.
+go	rengo	general	73	Traditional team format. Japanese term (連碁). Public domain. Played at the European Go Congress and many club events.
+chess	teleport-chess	general	74	Modern variant. Public domain.
+chess	makruk	general	75	Traditional Thai chess. Played for over 500 years in Thailand. Public domain.
+go	stoical	general	76	Modern variant. Public domain. Source: Sensei's Library.
+chess	displacement-chess	general	77	Modern variant. Public domain.
+chess	shatar	general	77	Traditional Mongolian chess. Played for centuries in Mongolia. Public domain.
+chess	immunization-chess	general	78	Modern variant. Public domain.
+go	tibetan	general	82	Traditional Tibetan game (Mig Mang). Public domain. Source: Wikipedia, academic ethnographic sources.
+chess	berserk	general	84	Modern variant, popularised on online chess platforms (2000s). Public domain rules.
+chess	makpong	general	85	Traditional Thai variant of Makruk. Public domain.
+go	phantom-go	general	85	Variant with active competitive community. Source: Sensei's Library (OPL 1.0).
+draughts	canadian	general	87	Traditional variant. Public domain. Source: Wikipedia (CC-BY-SA).
+chess	poison-chess	general	91	Modern variant. Public domain.
+chess	rifle	general	95	Traditional variant. Also known as "Stationary Capture Chess." Public domain.
+go	toroidal-go	general	95	Variant with active competitive community. Source: Sensei's Library (OPL 1.0).
+chess	progressive	general	97	Traditional variant (Italian Progressive rules). Public domain.
+chess	no-retreat	general	105	Traditional variant, 20th century. Public domain.
+chess	cylinder-chess	general	112	Traditional variant with roots in 19th-century chess composition. Public domain.
+draughts	czech	general	115	Traditional variant. Public domain. Source: Wikipedia (CC-BY-SA).
+chess	atomic	general	116	Traditional variant. Popularised on Lichess and Chess.com. Public domain.
+draughts	spantsiretti	general	118	Traditional variant. Public domain. Sources: Checkers &amp; Draughts Wiki — Portable Draughts Notation article (GameType 41: Spantsiretti, Russian draughts 10×8); mlwi.magix.net — international/Polish checkers variants page; mig0/Games-Checkers repository (lists russian_10x8 / spantsiretti as a supported variant).
+draughts	ghanaian	general	128	Traditional variant. Public domain. Sources: Damii Ghana Draughts History &amp; Rules (gamesfromeverywhere.com, archived via docslide.us); apkpure.com — X Ghanaian Draughts app description (mkisly.bcheckers).
+shogi	hasami-shogi	general	144	Hasami Shogi (Variant 1). Public domain. Sources: steventran619/Hasami-Shogi implementation documentation; ryan-gallagher-atx/Hasami-Shogi-Game (OSU CS162 final project); OlliePoole/Hasami-Shogi iOS implementation.
+mancala	toguz-korgool	general	193	Toguz Korgool. Traditional game, Kyrgyzstan and Central Asia. Public domain. Source: Wikipedia (CC-BY-SA); World Intellectual Board Games Federation rules.
+draughts	turkish-draughts	general	223	Traditional variant. Public domain. Source: Wikipedia (CC-BY-SA).
+asalto	standard	specific	0	Asalto (Officers and Sepoys). Traditional Victorian board game, published widely from the 1870s. Predecessor: Fox and Geese. Public domain rule set.
+backgammon	chouette	specific	0	Chouette. Traditional multiplayer Backgammon format. Public domain. Source: Wikipedia (CC-BY-SA); Bray, Chris — *Backgammon to Win* (rules sections).
+chess	alice	specific	0	Alice Chess, invented by V. R. Parton, 1953. Published in *Alices Abenteuer im Schachland* and referenced in Hooper &amp; Whyld, *The Oxford Companion to Chess* (1987, p. 10) and Pritchard, *Encyclopedia of Chess Variants* (1994, pp. 3–5). Public domain. Fairy-Stockfish implements Alice Chess under the same rules.
+chess	archchess	specific	0	Archchess (*Arcisacchiere*) by Francesco Piacenza, 1683. Rules documented at chessvariants.com/historic.dir/arch.html (Hans Bodlaender, from Gollon via Greenwood, 1997).
+chess	asean	specific	0	Codified by the ASEAN Chess Federation for regional competitive play. Public domain rule set.
+chess	blind-chess	specific	0	Banqi is a traditional Chinese game. Rules from en.wikipedia.org/wiki/Banqi.
+chess	breakthrough	specific	0	Dan Troyka, 2000. Public domain.
+chess	centennial-chess	specific	0	Centennial Chess was created by John William Brown. Entry in the 1999 Large Variant Contest. Source: chessvariants.com/large.dir/contest/cenchess.html
+chess	chak	specific	0	Designed by Corey Clark. Published via Shogun of Games. Official rules at shogunofgames.com. Public domain rule set.
+chess	chancellor-chess	specific	0	Chancellor Chess by Ben Foster, published 1889. Rules from chessvariants.com/large.dir/chancellor.html (Hans Bodlaender, 1997).
+chess	chennis	specific	0	Designed by Corey Clark. Published via Shogun of Games. Public domain rule set.
+chess	citadel-chess	specific	0	Citadel Chess documented at chessvariants.com/historic.dir/citadel.html (Hans Bodlaender, from Gollon/Murray/Pritchard).
+chess	congo	specific	0	Congo was invented by Demian Freeling in 1982. Rules copyright Mindsports, used with permission. Documented at chessvariants.com/ms.dir/congo.html (by Christian Freeling and Hans Bodlaender).
+chess	crazy-38s	specific	0	Crazy 38's was designed by Ben Good. Entry submitted to the 38 Squares Contest, January 1998. Source: chessvariants.com/38.dir/crazy/crazy38s.html
+chess	delirious-bughouse	specific	0	Delirious Bughouse was developed by Alberto Vieira Ferreira Monteiro and Carlos Eugenio Lossio Seiblitz Filho, with earlier assistance from Oscar Luiz Vieira Ferreira and Carlos Vieira Ferreira. Final form achieved around 1984. Source: chessvariants.com/multiplayer.dir/delbug.html
+chess	djambi	specific	0	Djambi was designed by Jean Anesto (1975). Rules documented from chessvariants.com/multiplayer.dir/djambi.html (Hans Bodlaender, January 11, 2012).
+chess	empire	specific	0	Designed by Corey Clark. Published 2019. Rules available via Shogun of Games and Lichess. Public domain rule set.
+chess	flip-chess	specific	0	Flip Chess was created by John William Brown, 1999. Described as an 'acclaimed 38 square variant.' Java applet implementation by Ed Friedlander. Source: chessvariants.com/play/erf/FlipChss.html
+chess	four-handed-chess	specific	0	Rules documented from Wikipedia (en.wikipedia.org/wiki/Chaturaji), citing H.J.R. Murray, *A History of Chess* (1913); Al-Biruni, *India* (c. 1030 CE); D.B. Pritchard, *The Encyclopedia of Chess Variants* (1994).
+chess	grande-acedrex	specific	0	Grande Acedrex is documented in the *Libro de los Juegos* by Alfonso X of Castile, c. 1283. Rules from chessvariants.com/historic.dir/acedrex.html (Hans Bodlaender, from Murray, Gollon, and Pritchard).
+chess	grasshopper	specific	0	Grasshopper invented by T. R. Dawson, *Fairy Chess Review* (1913, problem no. 1). Public domain. Implemented in Fairy-Stockfish and Zillions of Games.
+chess	gygax	specific	0	Designed by Gary Gygax. Published in *Dragon Magazine* No. 100 (TSR Inc., August 1985), pages 34–40. Game rules are not subject to copyright. \n \n Authoritative secondary source: Edward Jackman with Hans Bodlaender, *Dragonchess*, chessvariants.com (1995–1996), which addresses ambiguities in Gygax's original description. This rulebook follows chessvariants.com where it conflicts with later re-descriptions, including a naming correction for Hero, Thief, Cleric, and Paladin relative to the Wikipedia article on Dragonchess.
+chess	hexapawn	specific	0	Hexapawn was invented by Martin Gardner, published in *Scientific American*, March 1962 (reprinted in *The Unexpected Hanging and Other Mathematical Diversions*). Chessvariants.com page written by Robert Price.
+chess	hole-chess	specific	0	Hole Chess was created by Gary K. Gifford, December 2003. Entry in the Chess Variants 44-Square Contest. Source: chessvariants.com/44.dir/hole-chess.html
+chess	khans-chess	specific	0	Khan's Chess was designed by Couch Tomato (2023–24). Rules documented from the PyChess variant guide at pychess.org/variants/khans.
+chess	mansindam	specific	0	Mansindam (Pantheon Tale) was designed by Couch Tomato. Rules documented from the PyChess variant guide at pychess.org/variants/mansindam. Piece names use both the English labels and Korean/Chinese character names as given in that source.
+chess	metamachy	specific	0	Metamachy was designed by Jean-Louis Cazaux (France, 2012). Rules sourced from The Chess Variant Pages at chessvariants.com/rules/metamachy.
+chess	nightrider	specific	0	Nightrider piece invented by T. R. Dawson, 1925. Public domain. Rules in the public domain. Implemented in Fairy-Stockfish, Green Chess, and Zillions of Games.
+chess	oblong-chess	specific	0	Oblong Chess is a historical Shatranj variant approximately one thousand years old. Written by Hans Bodlaender. Source: chessvariants.com/historic.dir/oblong.html (created November 1995).
+chess	orda-mirror	specific	0	Designed by Corey Clark. Published via Shogun of Games. Official rules at shogunofgames.com. Public domain rule set.
+chess	ouk-chaktrang	specific	0	Traditional Cambodian game. Modern competitive rules codified by the Asian Chess Federation. Fully public domain.
+chess	raumschach	specific	0	Raumschach was invented by Ferdinand Maack (Germany, 1907). Rules sourced from The Chess Variant Pages at chessvariants.com/3d.dir/3d5.html.
+chess	rollerball	specific	0	Rollerball by Jean-Louis Cazaux, invented 1999, entered in the 40-squares contest. Rules and starting-position diagram documented at chessvariants.com/40.dir/rollerball/index.html.
+chess	s-chess	specific	0	Designed by Yasser Seirawan and Jonathan Tisdall. Publicly released 2007. Open rules available at seirawanchess.com. Public domain rule set.
+chess	shako	specific	0	Designed by Jean-Louis Cazaux. Published 2000. Cazaux, J.L. and Schmittberger, R., “A World of Chess,” McFarland, 2017. Public domain rule set.
+chess	shatranj-kamil	specific	0	Shatranj Kamil (War Machine version) documented at chessvariants.com/historic.dir/shkam2.html (Hans Bodlaender, from Gollon/Murray). Camel version at chessvariants.com/historic.dir/shkam1.html.
+chess	shinobi	specific	0	Designed by Corey Clark. Published via Shogun of Games. Official rules at shogunofgames.com. Public domain rule set.
+chess	shinobiplus	specific	0	Shinobi Chess+ was designed by Couch Tomato (2021). Rules documented from pychess.org/variants/shinobiplus.
+chess	shogun	specific	0	Designed by Corey Clark. Published via Shogun of Games. Official rules at shogunofgames.com.
+chess	spartan	specific	0	Designed by Steven Streetman. Published 2010. Official rules at spartanchess.com. Public domain rule set.
+chess	stupidhouse	specific	0	Stupidhouse is a Bughouse variant documented on chessvariants.com.
+chess	synochess	specific	0	Designed by Corey Clark. Published via Shogun of Games. Official rules at shogunofgames.com.
+chess	tamerlane	specific	0	Tamerlane Chess. Origin: Central Asia, 14th century, attributed to Timur (Tamerlane). Rules documented in medieval manuscripts, now in the public domain. Sources: Murray, H.J.R., A History of Chess (1913), pp. 344–345; Maastricht University and the Ludii Project, Shatranj al-Kabir.lud (Apache 2.0, citing Murray 1913); Wikipedia, Tamerlane Chess (CC-BY-SA). \n \n </div>
+chess	tandem-chess	specific	0	Rules documented from chessvariants.com/multiplayer.dir/tandem.html (Hans Bodlaender, 1996; edited John William Brown).
+chess	toroidal-byzantine	specific	0	Toroidal Byzantine Chess invented by Anatoly Khalfine and Ernst Saperow, circa 1999–2001. Source: chessvariants.org/shape.dir/toroidalbyzantinechess.html, including its overview text and interactive setup diagram. Byzantine Chess foundation: chessvariants.com/historic.dir/byzantine.html.
+chess	toroidal-chess	specific	0	Gadsden's Toroidal Chess was invented around 1990 by Richard Gadsden and Phil Roberts. Source: chessvariants.com/other.dir/torus.html, including the inventor's own description and interactive setup diagram.
+chess	ultima	specific	0	Designed by Robert Abbott. Published in 1962 in Abbott’s New Card Games. Public domain.
+chess	wildebeest	specific	0	Wildebeest Chess designed by R. Wayne Schmittberger. Published in *New Rules for Classic Games* (Wiley, 1992). Rules described as public domain by multiple open-source implementations (Jocly, zrflib). Primary sources: Wikipedia *(Wildebeest chess)*; Jocly source (`wildebeest.js`).
+halma	standard-2p	specific	0	Halma. Invented 1883, George Howard Monks, Boston. Public domain. Rules confirmed from Ludeme/Ludii (Maastricht University game research library) and Atvriders/cards-and-such halma-quiz (independent rules confirmation). Piece count independently confirmed by jeromydarling/heritage-parlor.
+halma	standard-4p	specific	0	Halma. Invented 1883, George Howard Monks, Boston. Public domain. Rules confirmed from Ludeme/Ludii (Maastricht University game research library) and jeromydarling/heritage-parlor (independent rules and piece count confirmation).
+landlords-game	prosperity	specific	0	Prosperity. Published by the Adgame Company (Inc.), Washington, D.C., 1932. Designed by Elizabeth Magie Phillips. US Patent 1,509,312 (filed 1923, granted 1924). Public domain (patent expired 1941). Sources: landlordsgame.info (board photographs and patent drawings); US Patent 1,509,312 (public domain).
+lattaque	aviation	specific	0	Aviation. Published by H.P. Gibson & Sons Ltd., London. Part of the Gibson hidden-rank warfare series alongside L’Attaque, Dover Patrol, and Tri-Tactics. Also included as the air component of Tri-Tactics (revised edition uses “Battle of Britain” theme with different piece names). Public domain rule set. Source: original H.P. Gibson Aviation rulebook (scanned from physical copy, 2004 digitisation).
+lattaque	dover-patrol	specific	0	The “Dover Patrol” or Naval Tactics. Published by H.P. Gibson & Sons Ltd., London. Part of the Gibson hidden-rank warfare series alongside L’Attaque, Aviation, and Tri-Tactics. Public domain rule set. Source: original H.P. Gibson & Sons rulebook (scanned from physical copy).
+lattaque	standard	specific	0	L'Attaque. Designed by Hermance Edan. French patent No. 396,795 filed 26 November 1908. First published 1910 by Au Jeu Retrouvé, France. Rights acquired 1925 by H.P. Gibson & Sons, London. Public domain rule set. Sources: Wikipedia (L'Attaque); Solomon, Eric, *Games & Puzzles* No. 24 (May 1974); V&A Museum collection; patent diagram (lake positions confirmed from original patent No. 396,795).
+lattaque	tri-tactics	specific	0	“Tri-Tactics” or The Great Game of Tactics on Land, Sea and in the Air (Revised Edition). Published by H.P. Gibson & Sons Ltd., London. Part of the Gibson hidden-rank warfare series alongside L’Attaque, Dover Patrol, and Aviation/Battle of Britain. Public domain rule set. Source: original H.P. Gibson & Sons revised-edition rulebook (scanned from physical copy) and Value Table card.
+mancala	bao	specific	0	Bao. Traditional game, Tanzania and East Africa. Public domain. Sources: de Voogt, Alex — *Mancala Board Games* (1997); Wikipedia (CC-BY-SA).
+morris	lasker-morris	specific	0	Lasker Morris. Designed by Emanuel Lasker, World Chess Champion. Public domain rules. Source: Wikipedia (CC-BY-SA); Murray, H.J.R. — *A History of Board-Games Other Than Chess* (1952, Oxford University Press).
+morris	nine-mens-morris	specific	0	Nine Men's Morris. Traditional game, Roman origin, medieval Europe. Public domain. Source: Murray, H.J.R. — *A History of Board-Games Other Than Chess* (1952, Oxford University Press); Wikipedia (CC-BY-SA).
+morris	six-mens-morris	specific	0	Six Men's Morris. Traditional game, medieval Europe. Public domain. Source: Murray, H.J.R. — *A History of Board-Games Other Than Chess* (1952, Oxford University Press); Wikipedia (CC-BY-SA).
+morris	three-mens-morris	specific	0	Three Men's Morris. Traditional game, Roman and medieval European origin. Public domain. Source: Murray, H.J.R. — *A History of Board-Games Other Than Chess* (1952, Oxford University Press); Wikipedia (CC-BY-SA).
+morris	twelve-mens-morris	specific	0	Twelve Men's Morris. Traditional game. Public domain. Source: Murray, H.J.R. — *A History of Board-Games Other Than Chess* (1952, Oxford University Press); Wikipedia (CC-BY-SA).
+pachisi	standard	specific	0	Pachisi. Public domain (origin c. 500 CE, precursors to c. 1100 BCE). Sources: Wikipedia (CC-BY-SA); jkc33/senior-project, MIT licence; edm00se/awesome-board-games (public domain listing); labforadvancedstudy/books (historical context).
+pachisi	two-player	specific	0	Pachisi. Public domain. Two-player rules from Wikipedia (CC-BY-SA).
+shogi	four-player-shogi	specific	0	Designed by Michael Shipley, 1999. Rules documented from chessvariants.com/shogivariants.dir/fourplayer.html.
+shogi	kyoto-shogi	specific	0	Kyoto Shogi. Invented by Tamiya Katsuya, c. 1976. Rules published freely since at least the 1980s; game mechanics are not copyrightable. Sources: pychess.org/variants/kyotoshogi; Fairy-Stockfish variants.ini engine definition.
+shogi	maka-dai-dai-shogi	specific	0	Maka-Dai-Dai Shogi is a historical Japanese chess variant of unknown precise origin. Rules documented from chessvariants.com/rules/maka-dai-dai-shogi, authored by H. G. Muller.
+shogi	minishogi	specific	0	Minishogi. Invented (or rediscovered) c. 1970 by Shigenobu Kusumoto of Osaka. Rules freely published since then; game mechanics are not copyrightable. Sources: pychess.org/variants/minishogi; Fairy-Stockfish variants.ini engine definition.
+shogi	tai-shogi	specific	0	Tai Shogi is documented in historical Japanese manuscripts. English documentation is limited; the primary Japanese-language source is referenced via chessvariants.com/link/TaiShogi.
+shogi	taikyoku-shogi	specific	0	Taikyoku Shogi is documented in a single known Japanese manuscript. English transcription by L. Lynn Smith, with thanks to Patrick Davin. Source: chessvariants.com/shogivariants.dir/taikyoku_english.html
+stern-halma	standard-2p	specific	0	Stern-Halma. Originated in Germany, 1892. Public domain. Rules confirmed from mastersofgames.com, Wikipedia, and BGG.
+stern-halma	standard-3p	specific	0	Stern-Halma. Originated in Germany, 1892. Public domain. Rules confirmed from mastersofgames.com, Wikipedia, and BGG.
+stern-halma	standard-4p	specific	0	Stern-Halma. Originated in Germany, 1892. Public domain. Rules confirmed from mastersofgames.com, Wikipedia, and BGG.
+stern-halma	standard-6p	specific	0	Stern-Halma. Originated in Germany, 1892. Public domain. Rules confirmed from mastersofgames.com, Wikipedia, and BGG.
+stern-halma	super-chinese-checkers	specific	0	Super Chinese Checkers. Variant of Stern-Halma with extended hop rule. Public domain. Rules confirmed from BGG (BoardGameGeek Sternhalma variants discussion).
+xiangqi	janggi	specific	0	Janggi (장기). Public domain. Traditional Korean origin, ancient derivation from Xiangqi. Rules consistent with the Korean Janggi Association standard.
+xiangqi	yang-qi	specific	0	Yáng Qí was designed by Fergus Duniho. WWW page created June 9, 2001; last modified June 21, 2001. Rules documented from chessvariants.com/xiangqivariants.dir/yangqi.html.
+go	9x9	specific	7	Standard board size recognised by all major Go federations. Public domain.
+chess	mini-hexchess	specific	13	Dave McCooey, 1997. Published on chessvariants.com. Public domain rules.
+shogi	mortal-shogi	specific	15	Designed by Roberto Lavieri and Fergus Duniho. Rules documented from chessvariants.com/shogivariants.dir/mortalshogi.html.
+chess	almost-chess	specific	16	Ralph Betza, 1977. Public domain.
+go	13x13	specific	16	Standard board size recognised by all major Go federations. Public domain.
+shogi	hex-shogi-91	specific	21	Designed by Fergus Duniho. Rules documented from chessvariants.com/hexagonal.dir/hexshogi/hexshogi91.html. \n \n *Note: The original build spec described this as a 3-player game. The actual game is 2-player.*
+chess	courier	specific	23	First documented 1202 (Wirnt von Gravenberg). Public domain.
+chess	klein-bottle-chess	specific	23	Klein Bottle Chess invented by Alberto Monteiro. Source: chessvariants.com/shape.dir/x_klein.html (mirrored at oocities.org/albmont/x_klein.htm, which includes the fuller technical description used for this rewrite). Related to Möbius Strip Chess and Gadsden's Toroidal Chess (Torus Chess) by the same author/family of variants, all built on the underlying Cylindrical 8×14 board.
+chess	mobius-strip-chess	specific	23	Möbius Strip Chess invented by Alberto Monteiro. Source: chessvariants.com/shape.dir/x_moeb.html.
+xiangqi	jieqi	specific	23	Jieqi is a public domain variant of Xiangqi with historical roots. Rules documented from pychess.org/variants/jieqi.
+chess	no-castling	specific	24	Proposed by Vladimir Kramnik, 2019. Tested at Chess.com events. Public domain.
+backgammon	nackgammon	specific	25	Nackgammon. Designed by Nick Ballard, USA, 1990s. Public domain rules. Source: Wikipedia (CC-BY-SA).
+chess	racing-kings	specific	28	Vernon R. Parton, 1961. Public domain.
+pachisi	seven-shell	specific	28	Seven-Shell Pachisi. Public domain. Throw table from Wikipedia (CC-BY-SA), Pachisi article, seven-cowrie variant section.
+chess	turkish-great-chess-iv	specific	36	Turkish Great Chess, Variation IV. John Gollon's version, sourced from H. J. R. Murray's *A History of Chess*. Documented by John Ayer on chessvariants.com/large.dir/greatchessiv.html.
+chess	fischer-random	specific	37	Bobby Fischer, 1996. Public domain.
+chess	turkish-great-chess-iii	specific	38	Turkish Great Chess, Variation III. John Gollon's version, sourced from H. J. R. Murray's *A History of Chess*. Documented by John Ayer on chessvariants.com/large.dir/greatchessiii.html.
+chess	romanchenkos-chess	specific	40	Romanchenko's Chess was created by Soviet chess trainer V. Romanchenko. Jocly implementation by Michel Gutierrez and Jérôme Choain. Source: chessvariants.com/play/jocly/romanchenko-chess
+chess	spherical-chess	specific	40	Spherical Chess is a family of chess variants invented independently multiple times between 1950 and 2014. Surveyed by Fergus Duniho. Source: chessvariants.com/boardrules.dir/spherical.html (last modified July 29, 2021).
+xiangqi	quang-trung	specific	40	Quang Trung Chess was designed by Vu Q. Vo. WWW page created May 12, 1999; last modified November 27, 2000. Rules documented from chessvariants.com/large.dir/contest/qtchess.html.
+chess	capablanca	specific	44	José Raúl Capablanca, c. 1920. Public domain.
+landlords-game	monarch-of-the-world	specific	45	Monarch of the World. Rules from the Economic Game Company edition, New York, 1906. Designed by Elizabeth J. Magie. Public domain. Source: landlordsgame.info/rules/lg-1906_rulebook.html (transcription via hoelzl/L3 public repository).
+chess	minichess	specific	46	Martin Gardner, 1969 (Scientific American). Public domain.
+chess	turkish-great-chess-ii	specific	46	Turkish Great Chess, Variation II (Atranj / Qatranj). Described by H. J. R. Murray in *A History of Chess*; source is Indian. Documented by John Ayer on chessvariants.com/large.dir/greatchessii.html.
+shogi	sankaku-shogi	specific	46	Designed by L. Lynn Smith, 2004. Rules documented from chessvariants.com/44.dir/sankaku-shogi.html.
+chess	balbos-chess	specific	47	Balbo’s Chess by M.G. Balbo, 1974. Documented at chessvariants.com/shape.dir/balbo.html (Hans Bodlaender and Fergus Duniho, from Pritchard’s *Encyclopedia of Chess Variants*).
+xiangqi	manchu-plus	specific	48	Manchu Chess is a historical Qing Dynasty game, public domain. The Manchu+ adaptation is documented from pychess.org/variants/manchu.
+chess	berolina-chess	specific	50	Invented by Edmund Hebermann in Berlin, 1926. Public domain.
+shogi	sho-shogi	specific	50	Sho Shogi is a historical game, public domain. Rules documented from pychess.org/variants/shoshogi and H.J.R. Murray, *A History of Chess* (Oxford University Press, 1913).
+chess	gustav-iii-chess	specific	51	Created by Gustav Johan Billberg, 1839. Jocly implementation developed by Michel Gutierrez and Jean-Louis Cazaux. Source: chessvariants.com/play/jocly/gustav3-chess
+chess	shatranj	specific	52	Rules documented in medieval Arabic manuscripts and in H.J.R. Murray, *A History of Chess* (Oxford University Press, 1913). Public domain.
+shogi	cannon-shogi	specific	52	Cannon Shogi was invented by Peter Michaelsen (February 1998). Public domain. Rules documented from pychess.org/variants/cannonshogi.
+go	gomoku	specific	53	Ancient Chinese placement game. Public domain. Origin: Japan, around 1905. Source: Murray 1951: 50.
+chess	knightmate	specific	55	Bruce Zimov, 1972. Public domain.
+chess	grand	specific	58	Christian Freeling, 1984. Public domain.
+chess	fanorona-chess	specific	59	Fanorona Chess was created by Peter Aronson, 2004. Source: chessvariants.com/other.dir/fanorona-chess.html
+chess	los-alamos	specific	61	Paul Stein and Mark Wells, Los Alamos National Laboratory, 1956. Public domain.
+go	sunjang	specific	62	Traditional Korean variant. Public domain. Historically the dominant form of Go in Korea until approximately 1920. Source: Wikipedia, Korean Baduk Association historical archives.
+chess	omnicide	specific	65	Modern variant. Distinct from Antichess by the absence of forced captures. Public domain.
+go	capture-go	specific	69	Teaching variant used worldwide. Public domain. Recommended by all major Go federations as an introductory format. Source: Sensei's Library.
+go	one-colour	specific	70	Training variant used by professional Go players. Public domain. Source: Sensei's Library.
+chess	checkless	specific	71	Traditional variant. Earliest documented reference in Max Lange, 1857. Public domain.
+chess	einstein-chess	specific	74	Invented by B. Iqbal, 2005. Public domain.
+draughts	spanish	specific	75	Traditional variant. Public domain. Governed by the Federación Española de Damas. Source: Wikipedia (CC-BY-SA).
+chess	crazyhouse	specific	76	Traditional variant. Derives from Shogi's drop mechanic applied to Western chess. Popularised on Lichess and FICS. Public domain.
+chess	xiang-fu	specific	77	Xiang Fu was designed by Eventlesstew for the PyChess Variant Design Contest. Board corrected to 9×9 (not 9×10 as originally described). Rules documented from pychess.org/variants/xiangfu.
+xiangqi	san-kwo-ki	specific	79	Rules documented from chessvariants.com/xiangqivariants.dir/chin3pl.html, citing H.J.R. Murray, *A History of Chess* (1913), pp. 133–134, and O. von Möllendorff, "Das Schachspiel der Chinesen" (1876). Starting position cross-checked against Murray's reproduced diagram and Hans Bodlaender's redrawn version (Steven Leary's Chinese Chess FAQ), 2026-07.
+reversi	anti-reversi	specific	82	Anti-Reversi (Reversed Reversi). Public domain variant of Reversi (c. 1883).
+chess	chaturanga	specific	83	Rules transcribed from two sources via the Ludii Game Corpus, Maastricht University: \n - Manasollasa ruleset, citing Bock-Raming 1996 (Sanskrit scholarship on the 12th-century Manasollasa text) \n - al-Adli ruleset, citing H.J.R. Murray, *A History of Chess* (Oxford University Press, 1913, public domain) \n \n Both underlying texts are public domain. Chaturanga as a game system dates to c. 600 CE and is not subject to copyright.
+reversi	six-by-six	specific	83	Six-by-Six Reversi. Public domain variant. Rules identical to Reversi (c. 1883).
+shogi	tenjiku-shogi	specific	86	Medieval Japanese game. Rules documented from chessvariants.com/rules/tenjiku-shogi (H. G. Muller; revised A. M. DeWitt, 2026).
+chess	andernach	specific	89	Created for a chess composition event in Andernach, Germany, 1993. Public domain rules.
+chess	extinction	specific	89	R. Wayne Schmittberger, 1985. Public domain.
+chess	duck-chess	specific	92	Dr Tim Paulden, 2016. Public domain.
+draughts	pool	specific	100	Traditional variant. Public domain. Governed by the American Pool Checkers Association (est. 1966). Source: Wikipedia (CC-BY-SA).
+xiangqi	minixiangqi	specific	100	Minixiangqi was invented by Shigenobu Kusumoto, Osaka, Japan, 1973. Public domain. Rules documented from pychess.org/variants/minixiangqi.
+shogi	gorogoro-plus	specific	103	Gorogoro+ is a Shogi family variant. Rules documented from pychess.org/variants/gorogoroplus.
+chess	patrol	specific	105	Frederik Hendrik von Meyenfeldt, 1975. Public domain rules.
+draughts	diagonal	specific	106	Historical variant, documented from at least the 19th century. Public domain. Sources: Ludeme/Ludii — Diagonal Draughts.lud (SHA 9405c8a7, Maastricht University Ludii Project); J.P. Neto, *World Abstract Games* — Checkers page (jpneto.github.io).
+chess	orda-chess	specific	108	Designed by Couch Tomato (2020). Popularised on Pychess. Public domain.
+chess	los-alamos-vierschach	specific	110	Los Alamos Vierschach was designed by Jörg Knappen as a non-competing entry to the 84 Squares Contest. HTML by Hans Bodlaender. Source: chessvariants.com/large.dir/contest84/losalamos4.html
+draughts	german	specific	112	Traditional variant. Public domain. Rules documented in Parlett, D. (1999) *The Oxford History of Board Games*, p. 252. Sources: Ludeme/Ludii — Damenspiel.lud (SHA 47b7ccc6, Maastricht University Ludii Project); Checkers &amp; Draughts Wiki — Deutsches Damespiel article.
+draughts	dameo	specific	113	Dameo. Invented by Christian Freeling (2000). Rules in the public domain; game rules are not subject to copyright. Source: Wikipedia — Dameo article (CC-BY-SA 4.0).
+chess	benedict	specific	115	C. S. Elliott, 1971. Named after Benedict Arnold. Public domain rules.
+draughts	english	specific	115	English Draughts. Public domain. Rules standardised by the World Draughts Federation (FMJD) and the English Draughts Association.
+chess	vierschach	specific	117	Invented by Dr. G. Arthur Lutze (1813–1870). Documented by Theodor Müller-Alfeld and Heinz Machatscheck. Rules documented from chessvariants.com/multiplayer.dir/vierschach.html (Jörg Knappen, 2002).
+draughts	italian	specific	118	Traditional variant. Public domain. Governed by the Federazione Italiana Dama (FID). Source: Wikipedia (CC-BY-SA).
+draughts	russian	specific	118	Traditional variant. Public domain. Governed by the Russian Draughts Federation. Source: Wikipedia (CC-BY-SA).
+go	standard	specific	122	Traditional game originating in China approximately 4,000 years ago. Known as Weiqi (Chinese), Baduk (Korean), Igo (Japanese). Public domain. Rules standardised by the International Go Federation.
+chess	weak	specific	124	Ralph Betza, 1970s–80s. Published in *NOST-algia* newsletter. Public domain.
+draughts	brazilian	specific	127	Traditional variant. Public domain. Governed by the Confederação Brasileira de Jogo de Damas. Source: Wikipedia (CC-BY-SA).
+shogi	dai-shogi	specific	127	Historical Japanese game, medieval period. Rules documented from chessvariants.com/rules/dai-shogi (H. G. Muller, 2015).
+chess	madrasi	specific	128	Abdul Jabbar Karwatkar, 1979. Named after his home city of Madras (now Chennai), India. Public domain rules.
+go	renju	specific	130	Competitive variant of Gomoku. Rules governed by the Renju International Federation. Public domain. The Renju International Federation was founded in Stockholm, Sweden on August 8, 1988.
+mancala	kalah	specific	130	Kalah. Designed by William Julius Champion Jr., USA, 1940s. Public domain rules. Source: Wikipedia (CC-BY-SA).
+mancala	ayo	specific	134	Ayo. Traditional game, Yoruba people, Nigeria. Public domain. Source: Wikipedia (CC-BY-SA); Russ, Laurence — *The Complete Mancala Games Book* (1984).
+reversi	standard	specific	134	Reversi. Public domain. Invented by Lewis Waterman and John Mollett, England, c. 1883.
+xiangqi	xiangqi-42	specific	134	Xiangqi 42 was invented by Robert Price as an entry in the Chess Variant Pages 42-squares contest. WWW page created October 17, 2001. Rules documented from chessvariants.com/42.dir/xiangqi42.html.
+chess	fog-of-war	specific	138	Jens Bæk Nielsen and Torben Osted, 1989. Popularised on Chess.com. Public domain rules.
+chess	grid-chess	specific	139	Walter Stead, 1953. Published in fairy chess circles. Public domain.
+chess	dark-chess	specific	140	Modern variant. Distinguished from Fog of War by its stricter visibility rules. Public domain.
+draughts	alquerque	specific	142	Traditional game. Public domain. Documented in Libro de los Juegos (Alfonso X, 1283). Source: Wikipedia (CC-BY-SA), Murray's A History of Board Games Other Than Chess (1952).
+chess	dice-chess	specific	143	Ancient origins (11th–14th century Europe, earlier roots in India/Burma). Modern codification by Anne Sunnucks, *The Encyclopaedia of Chess*, 1970. Public domain.
+chess	dragon-chess	specific	146	Dragon Chess was created by Grandmaster Miguel Illescas. Rules documented from pychess.org/variants/dragon.
+draughts	international	specific	150	Traditional variant. Public domain. Rules standardised by the World Draughts Federation (FMJD). Source: FMJD Official Rules, Wikipedia (CC-BY-SA).
+shogi	tori-shogi	specific	152	Tori Shogi was invented by Toyota Genryu (1799). Public domain. Rules documented from pychess.org/variants/torishogi.
+mancala	oware	specific	160	Oware. Traditional game, Ghana and West Africa. Public domain. Source: Wikipedia (CC-BY-SA); Russ, Laurence — *The Complete Mancala Games Book* (1984).
+mancala	pallanguzhi	specific	162	Pallanguzhi. Traditional game, Tamil Nadu, India. Public domain. Source: Wikipedia (CC-BY-SA); Russ, Laurence — *The Complete Mancala Games Book* (1984).
+shogi	dobutsu	specific	177	Dobutsu Shogi was invented by Madoka Kitao (北尾まどか). Public domain. Rules documented from pychess.org/variants/dobutsu.
+mancala	congkak	specific	191	Congkak. Traditional game, Malay Archipelago. Public domain. Source: Wikipedia (CC-BY-SA); Russ, Laurence — *The Complete Mancala Games Book* (1984).
+go	ninuki-renju	specific	192	Japanese competitive game. Organised by the Ninuki Renju Sha, Japan, 1923-1940. Direct historical precursor to Pente (1977). Public domain. Sources: Renju International Federation (renju.se); Wikipedia (Pente article, Gomoku article).
+draughts	frisian	specific	202	Traditional variant from Friesland, Netherlands. Public domain. Recognised by the World Draughts Federation (FMJD). Source: Wikipedia (CC-BY-SA).
+mancala	sungka	specific	202	Sungka. Traditional game, Philippines. Public domain. Source: Wikipedia (CC-BY-SA); Russ, Laurence — *The Complete Mancala Games Book* (1984).
+draughts	bashni	specific	217	Traditional Russian variant. Public domain. Pre-dates Lasca (1911). Source: Wikipedia (CC-BY-SA).
+chess	absorption	specific	233	Described in *The Encyclopedia of Chess Variants* by David Pritchard (1994). Also known as Cannibal Chess (though that name more properly refers to the replacement variant where capturing substitutes movement rather than adding it). Public domain.
+chess	yalta-chess	specific	254	Yalta Chess documented by Daniel Lindström; WWW page by David Howe, created May 12, 1997. Rules and board graphic documented from chessvariants.com/multiplayer.dir/yalta.html. Board shape (hexagonal Y-trisection, not circular), player colours, and back-rank order confirmed against the primary source's diagrams, 2026-07.
+draughts	lasca	specific	287	Invented by Emanuel Lasker (World Chess Champion), 1911. Public domain. Source: Wikipedia + Lasker 1911 (CC-BY-SA).
+landlords-game	single-tax	specific	363	Single Tax. Rules from the Economic Game Company edition, New York, 1906. Designed by Elizabeth J. Magie. Public domain. Sources: landlordsgame.info/rules/lg-1906_rulebook.html (transcription via hoelzl/L3 public repository); Wikipedia: The Landlord's Game (CC-BY-SA).
+landlords-game	1906-commercial	specific	370	1906 Commercial Edition. Rules from the Economic Game Company edition, New York, 1906. Designed by Elizabeth J. Magie. Public domain. Source: landlordsgame.info/rules/lg-1906_rulebook.html (transcription via hoelzl/L3 public repository).
+landlords-game	1904-original	specific	395	1904 Original. Rules from US Patent 748,626, granted January 5, 1904. Designed by Elizabeth J. Magie. Public domain (patent expired 1921). Sources: US Patent 748,626 (public domain); hoelzl/L3 GitHub repository patent transcription, sourced from landlordsgame.info.
+chess	standard	specific	419	Origins in 6th-century India (Chaturanga). Modern rules standardised by FIDE. Public domain.

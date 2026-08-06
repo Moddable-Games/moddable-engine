@@ -1,5 +1,6 @@
 # Claude Code local context
 CLAUDE.md
+.claude/
 
 # Dependencies
 node_modules/
@@ -98,3 +99,5 @@ snapshots/
 
 # Export sync cache
 .export-cache.json
+test-results/
+play/.manifest-freshness-check.json

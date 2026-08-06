@@ -26,17 +26,17 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
   }
 
   function winnerName(playerIndex) {
-    if (Array.isArray(config.playerNames) && config.playerNames[playerIndex]) {
-      return config.playerNames[playerIndex]
-    }
-    const declared = context.definition
-      && context.definition.players
-      && context.definition.players.names
-    if (Array.isArray(declared) && declared[playerIndex]) return declared[playerIndex]
-    return playerIndex === 0 ? 'player1' : 'player2'
+    return playerIndex
   }
 
   let topology = null
+
+  const DEFAULT_VOCABULARY = {
+    man: { symbols: { 0: 'w', 1: 'b' } },
+    king: { symbols: { 0: 'W', 1: 'B' } },
+  }
+
+  const VOCABULARY = config.vocabulary || DEFAULT_VOCABULARY
 
   function cellIndex(row, col) {
     return row * config.cols + col
@@ -276,6 +276,20 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
     return board
   }
 
+  // The starting position is content, not code: it lives in the variant's
+  // frontmatter in moddable-rules and is the same string the board diagram is
+  // drawn from. Parsing it through topology.parsePosition means the played
+  // board and the published diagram cannot drift apart. buildSetupBoard below
+  // is retained only for callers that supply no setup at all.
+  function boardFromSetup(setup) {
+    if (!setup) return buildSetupBoard()
+    if (Array.isArray(setup)) return setup
+    if (topology && topology.parsePosition) {
+      return topology.parsePosition(setup, VOCABULARY)
+    }
+    return buildSetupBoard()
+  }
+
   function capturesAKing(move, board) {
     const captured = move.captures || move.captured || []
     return captured.some(pos => {
@@ -287,17 +301,19 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
   return {
     sliceName: 'draughts',
     pieceTypes: ['man', 'king'],
-    vocabulary: {
-      man: { symbols: { 0: 'w', 1: 'b' } },
-      king: { symbols: { 0: 'W', 1: 'B' } },
-    },
+    vocabulary: VOCABULARY,
     config,
     rules: ['capture.replacement', 'forced-capture', 'chain-capture', 'promotion.rank-reach'],
 
     init(pluginConfig, { request }) {
       topology = request('core.topology')
+      if (topology) {
+        if (topology.rows) config.rows = topology.rows
+        if (topology.cols) config.cols = topology.cols
+      }
+      const setup = pluginConfig.setup || config.setup || null
       return {
-        board: buildSetupBoard(),
+        board: boardFromSetup(setup),
         _cols: config.cols,
         _chainActive: false,
         _chainFrom: null,

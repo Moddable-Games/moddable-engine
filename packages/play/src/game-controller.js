@@ -6,6 +6,7 @@ export function createGameController(game, opts = {}) {
   let renderOpts = opts.renderOpts || {}
 
   const onMove = opts.onMove || null
+  const onBeforeMove = opts.onBeforeMove || null
   const onGameEnd = opts.onGameEnd || null
   const onTurnChange = opts.onTurnChange || null
   const onSelect = opts.onSelect || null
@@ -14,6 +15,7 @@ export function createGameController(game, opts = {}) {
   const onChoiceNeeded = opts.onChoiceNeeded || null
   const onPendingAction = opts.onPendingAction || null
   const onPendingActionEnd = opts.onPendingActionEnd || null
+  const onAnimateMove = opts.onAnimateMove || null
 
   const aiPickMove = opts.aiPickMove || null
 
@@ -50,7 +52,7 @@ export function createGameController(game, opts = {}) {
   }
 
   function getLegalMovesFrom(pos) {
-    return getLegalMoves().filter(m => m.from === pos)
+    return getLegalMoves().filter(m => String(m.from) === String(pos))
   }
 
   function isGameOverCheck() {
@@ -61,13 +63,39 @@ export function createGameController(game, opts = {}) {
   function render() {
     if (destroyed) return
     if (onRender) {
+      let movesForDisplay = []
+      if (selected !== null) {
+        movesForDisplay = getLegalMovesFrom(selected)
+      } else if (!gameOver && !aiThinking) {
+        const all = getLegalMoves()
+        // Determine if moves are "from-less" — placement moves have no from property.
+        // This includes: Go stone placement (coord), duck placement (action + to),
+        // sittuyin placement, crazyhouse drops (when armed).
+        // The routing rule is a property of the move shape, not a list of variant names.
+        const hasFrom = all.some(m => m.from !== undefined)
+        const actionOnly = all.every(m => m.action && m.from === undefined)
+        if (actionOnly) {
+          movesForDisplay = dropType
+            ? all.filter(m => m.type === dropType)
+            : all
+        } else if (!hasFrom) {
+          // All moves are from-less placements — show all targets
+          movesForDisplay = dropType
+            ? all.filter(m => m.type === dropType)
+            : all
+        } else if (dropType) {
+          // Drop armed: show targets for the armed type
+          movesForDisplay = all.filter(m => m.drop === dropType || m.type === dropType)
+        }
+      }
       onRender(game, {
         selected,
         lastMove,
         flipped,
         aiThinking,
         gameOver,
-        legalMoves: selected !== null ? getLegalMovesFrom(selected) : [],
+        dropType,
+        legalMoves: movesForDisplay,
       })
     }
   }
@@ -77,6 +105,34 @@ export function createGameController(game, opts = {}) {
     if (!isHuman(currentPlayer())) return
 
     const moves = getLegalMoves()
+
+    if (selected === null && chainAnchor === null) {
+      const actionHits = moves.filter(m => m.action && m.from === undefined && String(m.to) === String(pos))
+      if (actionHits.length > 0) {
+        if (dropType) {
+          const match = actionHits.find(m => m.type === dropType)
+          if (match) { dropType = null; executeMove(match); return }
+          dropType = null
+          render()
+          return
+        }
+        const uniqueTypes = [...new Set(actionHits.map(m => m.type).filter(Boolean))]
+        if (uniqueTypes.length <= 1) {
+          executeMove(actionHits[0])
+          return
+        }
+        if (onChoiceNeeded) {
+          onChoiceNeeded(uniqueTypes, currentPlayer(), (chosen) => {
+            const match = actionHits.find(m => m.type === chosen)
+            if (match) executeMove(match)
+          })
+          return
+        }
+        executeMove(actionHits[0])
+        return
+      }
+    }
+
     const result = interaction.handleClick(pos, {
       selected,
       chainAnchor,
@@ -145,8 +201,16 @@ export function createGameController(game, opts = {}) {
   function handleHandClick(pieceType) {
     if (destroyed || gameOver) return
     if (!isHuman(currentPlayer())) return
-    if (!interaction.handleHandClick) return
     const moves = getLegalMoves()
+    const hasActionType = moves.some(m => m.action && m.from === undefined && m.type === pieceType)
+    if (hasActionType) {
+      dropType = pieceType
+      selected = null
+      if (onDropArmed) onDropArmed(pieceType)
+      render()
+      return
+    }
+    if (!interaction.handleHandClick) return
     applyInteractionResult(interaction.handleHandClick(pieceType, { moves, dropType }), moves)
   }
 
@@ -197,7 +261,7 @@ export function createGameController(game, opts = {}) {
         if (state && state.board) return p.sliceName
       }
     }
-    const names = ['chess', 'go', 'draughts', 'reversi', 'halma', 'hex', 'morris', 'mancala', 'backgammon', 'race', 'shogi', 'xiangqi']
+    const names = ['chess', 'go', 'draughts', 'shogi', 'xiangqi']
     for (const name of names) {
       const state = game.getState(name)
       if (state && state.board) return name
@@ -214,6 +278,7 @@ export function createGameController(game, opts = {}) {
 
   function executeMove(move) {
     const player = currentPlayer()
+    if (onBeforeMove) onBeforeMove(move, player)
     const result = game.execute(move)
 
     if (!result || !result.ok) return false
@@ -234,8 +299,15 @@ export function createGameController(game, opts = {}) {
     }
 
     if (result.continueTurn) {
-      chainAnchor = move.to !== undefined ? move.to : null
-      selected = chainAnchor
+      const nextMoves = getLegalMoves()
+      const hasFromMoves = nextMoves.some(m => m.from !== undefined)
+      if (hasFromMoves) {
+        chainAnchor = move.to !== undefined ? move.to : null
+        selected = chainAnchor
+      } else {
+        chainAnchor = null
+        selected = null
+      }
       if (onActionsChange) onActionsChange(getAvailableActions())
       render()
       return true
@@ -246,11 +318,18 @@ export function createGameController(game, opts = {}) {
     if (onTurnChange) onTurnChange(currentPlayer())
     if (onActionsChange) onActionsChange(getAvailableActions())
 
-    render()
-    checkGameEnd()
+    const afterRender = () => {
+      render()
+      checkGameEnd()
+      if (!gameOver && isAI(currentPlayer())) {
+        scheduleAIMove()
+      }
+    }
 
-    if (!gameOver && isAI(currentPlayer())) {
-      scheduleAIMove()
+    if (onAnimateMove && move.from !== undefined && move.to !== undefined) {
+      onAnimateMove(move, { lastMove, player }, afterRender)
+    } else {
+      afterRender()
     }
 
     return true
@@ -271,6 +350,13 @@ export function createGameController(game, opts = {}) {
 
   function checkGameEnd() {
     const plugin = findPlugin()
+    if (plugin) {
+      const slice = game.getState(plugin.sliceName)
+      if (slice && slice.phase && slice.phase !== 'play') return
+    }
+
+    const moves = getLegalMoves()
+
     if (plugin && plugin.checkWin) {
       const outcome = plugin.checkWin(game.getState(plugin.sliceName), game.store.getAll())
       if (outcome !== null && outcome !== undefined) {
@@ -280,7 +366,6 @@ export function createGameController(game, opts = {}) {
       }
     }
 
-    const moves = getLegalMoves()
     if (moves.length === 0) {
       gameOver = true
       if (onGameEnd) onGameEnd('draw')
@@ -309,7 +394,8 @@ export function createGameController(game, opts = {}) {
     let move = null
     if (aiPickMove) {
       move = aiPickMove(game, { difficulty: aiDifficulty })
-    } else {
+    }
+    if (!move) {
       const moves = getLegalMoves()
       if (moves.length > 0) {
         move = moves[Math.floor(Math.random() * moves.length)]
@@ -319,6 +405,7 @@ export function createGameController(game, opts = {}) {
     if (!move) { aiThinking = false; render(); return }
 
     const player = currentPlayer()
+    if (onBeforeMove) onBeforeMove(move, player)
     const result = game.execute(move)
     if (!result || !result.ok) { aiThinking = false; render(); return }
 
@@ -338,11 +425,19 @@ export function createGameController(game, opts = {}) {
 
     aiThinking = false
     if (onTurnChange) onTurnChange(currentPlayer())
-    render()
-    checkGameEnd()
 
-    if (!gameOver && isAI(currentPlayer())) {
-      scheduleAIMove()
+    const afterAIRender = () => {
+      render()
+      checkGameEnd()
+      if (!gameOver && isAI(currentPlayer())) {
+        scheduleAIMove()
+      }
+    }
+
+    if (onAnimateMove && move.from !== undefined && move.to !== undefined) {
+      onAnimateMove(move, { lastMove, player }, afterAIRender)
+    } else {
+      afterAIRender()
     }
   }
 
@@ -421,5 +516,6 @@ export function createGameController(game, opts = {}) {
     currentPlayer,
     render,
     destroy,
+    setRenderOpts(next) { renderOpts = { ...renderOpts, ...next } },
   }
 }

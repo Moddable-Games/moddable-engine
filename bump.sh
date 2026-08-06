@@ -19,7 +19,7 @@ esac
 NEW="$MAJOR.$MINOR.$PATCH"
 echo "$NEW" > version.txt
 
-find . -name "*.html" -not -path "./node_modules/*" -not -path "./packages/*" | while read -r file; do
+find . \( -name "*.html" -o -name "*.js" \) -not -path "./node_modules/*" -not -path "./packages/*" | while read -r file; do
   sed -i '' "s/\?v=$CURRENT/?v=$NEW/g" "$file"
   sed -i '' "s/>v$CURRENT</>v$NEW</g" "$file"
 done

@@ -135,6 +135,22 @@ describe('plugin-shogi', () => {
       const rank0Drops = pawnDrops.filter(m => Math.floor(m.to / 5) === 0)
       expect(rank0Drops.length).toBe(0)
     })
+
+    it('cannot drop pawn for immediate checkmate (uchifuzume)', () => {
+      const plugin = createShogiPlugin({ rows: 5, cols: 5, promotionZone: 1 })
+      const board = new Array(25).fill(null)
+      board[2] = { type: 'king', owner: 1 }   // opponent king at (0,2)
+      board[6] = { type: 'gold', owner: 0 }   // gold at (1,1) covers (0,1)
+      board[8] = { type: 'gold', owner: 0 }   // gold at (1,3) covers (0,3)
+      board[11] = { type: 'rook', owner: 0 }  // rook at (2,1) defends gold, covers file 1
+      board[12] = { type: 'rook', owner: 0 }  // rook at (2,2) covers file 2 (prevents king capturing pawn)
+      board[13] = { type: 'rook', owner: 0 }  // rook at (2,3) defends gold, covers file 3
+      board[24] = { type: 'king', owner: 0 }  // own king far away
+      const state = { board, hands: [['pawn'], []], _cols: 5 }
+      const moves = plugin.getLegalMoves(state, makeContext(0))
+      const pawnAt7 = moves.find(m => m.action === 'drop' && m.type === 'pawn' && m.to === 7)
+      expect(pawnAt7).toBeUndefined()
+    })
   })
 
   describe('promotion', () => {
@@ -201,7 +217,7 @@ describe('plugin-shogi', () => {
       board[14] = { type: 'gold', owner: 0 }
       const state = { board, hands: [[], []], _cols: 5 }
       const result = plugin.checkWin(state, makeContext(0))
-      expect(result).toBe('player1')
+      expect(result).toBe(0)
     })
 
     it('returns null during play', () => {

@@ -31,23 +31,12 @@ function winnerFromRuns(slice, exactly) {
   if (!colour) return null
 
   const run = longestRun(slice.board, last, colour, cols, rows)
-  if (exactly ? run === 5 : run >= 5) return colour
+  if (exactly ? run === 5 : run >= 5) return colour === 'black' ? 0 : 1
   return null
 }
 
 export const gomoku = {
   key: 'gomoku',
-  label: 'Gomoku',
-  group: 'Five in a Row',
-  description: 'Stones are placed and never captured. The first player to form an unbroken line of exactly five wins; longer overlines do not count.',
-  rule: 'Board: 15×15 · Win: Five in an unbroken row',
-  size: 15,
-  komi: 0,
-  scoring: 'none',
-  captures: false,
-  allowPass: false,
-  suicideAllowed: true,
-  superko: false,
 
   hooks: {
     moveFilter(moves) {
@@ -60,7 +49,7 @@ export const gomoku = {
 
   winCondition(slice) {
     const winner = winnerFromRuns(slice, true)
-    if (winner) return winner
+    if (winner !== null) return winner
     if (slice.board.every(cell => cell !== null)) return 'draw'
     return null
   },
@@ -95,13 +84,6 @@ function pairCaptures(coord, board, opponentColour, slice) {
 
 export const ninukiRenju = {
   key: 'ninuki-renju',
-  extends: 'gomoku',
-  label: 'Ninuki-Renju',
-  group: 'Five in a Row',
-  description: 'Five in a row wins, and pairs of stones flanked on both ends are captured. Ten captured stones also wins.',
-  rule: 'Board: 15×15 · Win: Five in a row or ten captured stones',
-  captures: 'pairs',
-  captureTarget: 10,
 
   hooks: {
     moveFilter(moves) {
@@ -112,9 +94,9 @@ export const ninukiRenju = {
 
   winCondition(slice) {
     const winner = winnerFromRuns(slice, false)
-    if (winner) return winner
-    if ((slice.captures[0] || 0) >= 10) return 'black'
-    if ((slice.captures[1] || 0) >= 10) return 'white'
+    if (winner !== null) return winner
+    if ((slice.captures[0] || 0) >= 10) return 0
+    if ((slice.captures[1] || 0) >= 10) return 1
     if (slice.board.every(cell => cell !== null)) return 'draw'
     return null
   },

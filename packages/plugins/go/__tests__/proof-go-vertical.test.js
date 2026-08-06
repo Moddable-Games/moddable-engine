@@ -1,8 +1,6 @@
 import { createGameFromDefinition } from '../../../game/index.js'
 import { createGridTopology } from '../../../topologies/grid/index.js'
 import { createGoPlugin } from '../index.js'
-import { createThemeResolver } from '../../../board-theme/index.js'
-import { createPieceResolver } from '../../../piece-theme/index.js'
 import { createBoardRenderer } from '../../../render/index.js'
 
 const goDefinition = {
@@ -14,32 +12,16 @@ const goDefinition = {
   render: { alternating: false },
 }
 
-const stoneManifest = {
-  id: 'glass-stones',
-  name: 'Glass Stones',
-  pieces: {
-    stone: { element: 'circle', attrs: { r: 14 } },
-  },
-  owners: {
-    black: { fill: '#1a1a1a', stroke: '#000' },
-    white: { fill: '#fafafa', stroke: '#999' },
-  },
-  fallback: { element: 'circle', attrs: { r: 8 } },
-}
 
 describe('proof: Go full vertical', () => {
-  let game, themeResolver, pieceResolver, renderer
+  let game, renderer
 
   beforeEach(() => {
-    themeResolver = createThemeResolver()
-    pieceResolver = createPieceResolver(stoneManifest)
     renderer = createBoardRenderer()
 
     game = createGameFromDefinition(goDefinition, {
       topologies: { grid: (config) => createGridTopology(config) },
       pluginFactories: { go: (cfg, ctx) => createGoPlugin(cfg, ctx) },
-      boardTheme: themeResolver.resolve('wood'),
-      pieceResolver,
     })
   })
 
@@ -155,52 +137,7 @@ describe('proof: Go full vertical', () => {
     })
   })
 
-  describe('themed rendering', () => {
-    it('produces SVG with board theme applied', () => {
-      game.execute({ coord: 40 })
-      game.execute({ coord: 41 })
-
-      const layout = game.getLayout()
-      const theme = game.boardTheme
-      const svg = renderer.render(layout, {
-        theme,
-        pieces: {
-          40: { color: 'black' },
-          41: { color: 'white' },
-        },
-      })
-
-      expect(svg).toContain('<svg')
-      expect(svg).toContain('</svg>')
-      // Wood theme colours
-      expect(svg).toContain('#d4a76a')
-      // Pieces present
-      expect(svg).toContain('class="pieces"')
-    })
-
-    it('piece resolver provides correct render data', () => {
-      const blackStone = pieceResolver.resolve('stone', 'black')
-      expect(blackStone.element).toBe('circle')
-      expect(blackStone.attrs.r).toBe(14)
-      expect(blackStone.attrs.fill).toBe('#1a1a1a')
-
-      const whiteStone = pieceResolver.resolve('stone', 'white')
-      expect(whiteStone.attrs.fill).toBe('#fafafa')
-    })
-
-    it('renders with different themes', () => {
-      game.execute({ coord: 0 })
-
-      const layout = game.getLayout()
-      const minimalTheme = themeResolver.resolve('minimal')
-      const svg = renderer.render(layout, {
-        theme: minimalTheme,
-        pieces: { 0: { color: 'black' } },
-      })
-
-      expect(svg).toContain('#f5f5f5') // minimal uniform colour
-    })
-
+  describe('rendering', () => {
     it('layout uses uniform cellType for Go (no alternating)', () => {
       const layout = game.getLayout()
       const cells = layout.getCells()

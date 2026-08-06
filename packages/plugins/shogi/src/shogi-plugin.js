@@ -11,6 +11,20 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
 
   let topology = null
 
+  // Symbols match the setup SFEN/FEN used by the variant frontmatter in
+  const DEFAULT_VOCABULARY = {
+    king: { symbols: { 0: 'K', 1: 'k' } },
+    rook: { symbols: { 0: 'R', 1: 'r' } },
+    bishop: { symbols: { 0: 'B', 1: 'b' } },
+    gold: { symbols: { 0: 'G', 1: 'g' } },
+    silver: { symbols: { 0: 'S', 1: 's' } },
+    knight: { symbols: { 0: 'N', 1: 'n' } },
+    lance: { symbols: { 0: 'L', 1: 'l' } },
+    pawn: { symbols: { 0: 'P', 1: 'p' } },
+  }
+
+  const VOCABULARY = config.vocabulary || DEFAULT_VOCABULARY
+
   function cellIndex(row, col) {
     return row * config.cols + col
   }
@@ -29,11 +43,12 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
   }
 
   function flipDirs(dirs, playerIndex) {
-    if (playerIndex === 0) return dirs
+    const adv = config.advancement ? config.advancement[playerIndex] : (playerIndex === 0 ? -1 : 1)
+    if (adv === -1) return dirs
     return dirs.map(([dr, dc]) => [-dr, dc])
   }
 
-  const PIECE_MOVES = {
+  const DEFAULT_PIECE_MOVES = {
     king: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]],
     rook: 'slide_orthogonal',
     bishop: 'slide_diagonal',
@@ -49,6 +64,8 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     promoted_lance: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, 0]],
     promoted_pawn: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, 0]],
   }
+
+  const PIECE_MOVES = config.pieceMoves || DEFAULT_PIECE_MOVES
 
   function getPromotedType(type) {
     if (type.startsWith('promoted_')) return null
@@ -118,7 +135,7 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
         }
       }
     } else if (moveDef === 'slide_forward') {
-      const dr = playerIndex === 0 ? -1 : 1
+      const dr = config.advancement ? config.advancement[playerIndex] : (playerIndex === 0 ? -1 : 1)
       for (let dist = 1; dist < config.rows; dist++) {
         const nr = r + dr * dist
         if (!inBounds(nr, c)) break
@@ -200,29 +217,27 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     return false
   }
 
-  return {
+  const plugin = {
     sliceName: 'shogi',
     pieceTypes: ['king', 'rook', 'bishop', 'gold', 'silver', 'knight', 'lance', 'pawn'],
-    vocabulary: {
-      king: { symbols: { 0: 'K', 1: 'k' } },
-      rook: { symbols: { 0: 'R', 1: 'r' } },
-      bishop: { symbols: { 0: 'B', 1: 'b' } },
-      gold: { symbols: { 0: 'G', 1: 'g' } },
-      silver: { symbols: { 0: 'S', 1: 's' } },
-      knight: { symbols: { 0: 'N', 1: 'n' } },
-      lance: { symbols: { 0: 'L', 1: 'l' } },
-      pawn: { symbols: { 0: 'P', 1: 'p' } },
-    },
+    vocabulary: VOCABULARY,
     config,
     rules: ['capture.recruit', 'promotion.zone', 'check', 'checkmate'],
 
     init(pluginConfig, { request }) {
       topology = request('core.topology')
+      if (topology) {
+        if (topology.rows) config.rows = topology.rows
+        if (topology.cols) config.cols = topology.cols
+      }
       const setup = pluginConfig.setup || config.setup || null
       const board = setup ? parseSetup(setup) : buildDefaultBoard()
+      const hands = config.initialHands
+        ? [config.initialHands[0] || [], config.initialHands[1] || []]
+        : [[], []]
       return {
         board,
-        hands: [[], []],
+        hands,
         _cols: config.cols,
       }
     },
@@ -301,8 +316,10 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
         }
       }
 
-      const drops = generateDropMoves(slice.board, slice.hands[playerIndex], playerIndex)
-      allMoves.push(...drops)
+      if (config.drops !== false) {
+        const drops = generateDropMoves(slice.board, slice.hands[playerIndex], playerIndex)
+        allMoves.push(...drops)
+      }
 
       return allMoves.filter(m => {
         const testBoard = slice.board.map(c => c ? { ...c } : null)
@@ -315,7 +332,17 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
             testBoard[m.to] = { ...testBoard[m.to], type: getPromotedType(testBoard[m.to].type) || testBoard[m.to].type }
           }
         }
-        return !isInCheck(testBoard, playerIndex)
+        if (isInCheck(testBoard, playerIndex)) return false
+        if (config.dropCheckmateLimit && m.action === 'drop' && m.type === 'pawn') {
+          const opponent = 1 - playerIndex
+          if (isInCheck(testBoard, opponent)) {
+            const testSlice = { ...slice, board: testBoard }
+            const oppFull = { __players: { currentIndex: opponent } }
+            const oppMoves = plugin.getLegalMoves(testSlice, oppFull)
+            if (oppMoves.length === 0) return false
+          }
+        }
+        return true
       })
     },
 
@@ -323,12 +350,12 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
       const playerIndex = full.__players.currentIndex
       const opponent = 1 - playerIndex
 
-      if (findKing(slice.board, opponent) === -1) return playerIndex === 0 ? 'player1' : 'player2'
+      if (findKing(slice.board, opponent) === -1) return playerIndex
 
       if (isInCheck(slice.board, opponent)) {
         const oppFull = { __players: { currentIndex: opponent } }
         const oppMoves = this.getLegalMoves(slice, oppFull)
-        if (oppMoves.length === 0) return playerIndex === 0 ? 'player1' : 'player2'
+        if (oppMoves.length === 0) return playerIndex
       }
 
       return null
@@ -339,8 +366,46 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     return new Array(config.rows * config.cols).fill(null)
   }
 
+  // The starting position comes from the variant's frontmatter in
+  // moddable-rules, the same string the published board diagram is drawn from.
+  // A "+" prefix marks a promoted piece. The plugin models promotion as a
+  // distinct piece type rather than a flag, so the marker is resolved to the
+  // promoted type: a piece carrying only a flag would be moved as though it
+  // were unpromoted.
   function parseSetup(setup) {
     if (Array.isArray(setup)) return setup
-    return new Array(config.rows * config.cols).fill(null)
+    if (!setup || !topology || !topology.parsePosition) {
+      return new Array(config.rows * config.cols).fill(null)
+    }
+
+    // Strip the promotion markers so the notation is plain enough for
+    // parsePosition, recording which piece each one applied to.
+    const promotedAt = new Set()
+    let plain = ''
+    let pieceIndex = 0
+    for (const ch of setup) {
+      if (ch === '+') {
+        promotedAt.add(pieceIndex)
+        continue
+      }
+      plain += ch
+      if (ch !== '/' && !(ch >= '0' && ch <= '9')) pieceIndex++
+    }
+
+    const board = topology.parsePosition(plain, VOCABULARY)
+    if (promotedAt.size === 0) return board
+
+    let seen = 0
+    for (let i = 0; i < board.length; i++) {
+      if (!board[i]) continue
+      if (promotedAt.has(seen)) {
+        const promotedType = getPromotedType(board[i].type)
+        if (promotedType) board[i] = { ...board[i], type: promotedType }
+      }
+      seen++
+    }
+    return board
   }
+
+  return plugin
 }

@@ -14,6 +14,7 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
   }
 
   const config = { ...defaults, ...variantConfig }
+  const playerColours = config.playerColours || ['black', 'white']
 
   const hooks = {
     init: defaultInit,
@@ -92,8 +93,8 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
   function simulatePlacement(coord, slice, full) {
     const board = [...slice.board]
     const playerIndex = full && full.__players ? full.__players.currentIndex : 0
-    const currentColour = playerIndex === 0 ? 'black' : 'white'
-    const opponentColour = currentColour === 'black' ? 'white' : 'black'
+    const currentColour = playerColours[playerIndex]
+    const opponentColour = playerColours[1 - playerIndex]
     board[coord] = currentColour
     const captured = config.captures === false
       ? []
@@ -115,8 +116,8 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
 
     const board = [...slice.board]
     const playerIndex = full.__players.currentIndex
-    const currentColour = playerIndex === 0 ? 'black' : 'white'
-    const opponentColour = currentColour === 'black' ? 'white' : 'black'
+    const currentColour = playerColours[playerIndex]
+    const opponentColour = playerColours[1 - playerIndex]
 
     board[move.coord] = currentColour
 
@@ -196,8 +197,8 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
     }
 
     if (config.captureTarget) {
-      if ((slice.captures[0] || 0) >= config.captureTarget) return 'black'
-      if ((slice.captures[1] || 0) >= config.captureTarget) return 'white'
+      if ((slice.captures[0] || 0) >= config.captureTarget) return 0
+      if ((slice.captures[1] || 0) >= config.captureTarget) return 1
     }
 
     if (config.allowPass !== false && slice.passes >= 2) {
@@ -228,8 +229,8 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
   function wouldBeSuicide(coord, slice, full) {
     const board = [...slice.board]
     const playerIndex = full.__players.currentIndex
-    const currentColour = playerIndex === 0 ? 'black' : 'white'
-    const opponentColour = currentColour === 'black' ? 'white' : 'black'
+    const currentColour = playerColours[playerIndex]
+    const opponentColour = playerColours[1 - playerIndex]
 
     board[coord] = currentColour
 
@@ -296,14 +297,16 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
   }
 
   function gridNeighbours(idx, slice) {
-    const size = Math.round(Math.sqrt(slice.board.length))
-    const row = Math.floor(idx / size)
-    const col = idx % size
+    if (topology && topology.neighbours) return topology.neighbours(idx)
+    const cols = slice._cols || Math.round(Math.sqrt(slice.board.length))
+    const rows = Math.round(slice.board.length / cols)
+    const row = Math.floor(idx / cols)
+    const col = idx % cols
     const n = []
-    if (row > 0) n.push(idx - size)
-    if (row < size - 1) n.push(idx + size)
+    if (row > 0) n.push(idx - cols)
+    if (row < rows - 1) n.push(idx + cols)
     if (col > 0) n.push(idx - 1)
-    if (col < size - 1) n.push(idx + 1)
+    if (col < cols - 1) n.push(idx + 1)
     return n
   }
 
@@ -320,7 +323,9 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
     sliceName: 'go',
     pieceTypes: ['stone'],
     vocabulary: {
-      stone: { symbols: { 0: 'X', 1: 'O' } },
+      // b and w match the vocabulary the go hub declares in moddable-rules, so
+      // the symbol a stone serialises to is the one the piece set resolves.
+      stone: { symbols: { 0: 'b', 1: 'w' } },
     },
     config,
 

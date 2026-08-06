@@ -128,17 +128,9 @@ registerInteractionModel('chain', chainModel)
 registerInteractionModel('drop', dropModel)
 
 export const FAMILY_INTERACTION = {
-  backgammon: 'move',
-  big2: 'place',
   chess: 'drop',
   draughts: 'chain',
   go: 'place',
-  halma: 'move',
-  hex: 'place',
-  mancala: 'place',
-  morris: 'place',
-  race: 'move',
-  reversi: 'place',
   shogi: 'drop',
   xiangqi: 'move',
 }

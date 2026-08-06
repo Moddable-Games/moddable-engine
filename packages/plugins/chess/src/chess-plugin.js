@@ -1,5 +1,19 @@
 import { rider, leaper, compose, divergent, fromConfig, OFFSETS } from '../../../piece-behaviour/index.js'
 
+function normalizePawnConfig(pc) {
+  if (!pc) return pc
+  const result = { ...pc }
+  for (const k of ['startCells', 'promotionCells']) {
+    if (result[k] && typeof result[k] === 'object') {
+      for (const side of Object.keys(result[k])) {
+        const v = result[k][side]
+        if (Array.isArray(v)) result[k] = { ...result[k], [side]: new Set(v.map(Number)) }
+      }
+    }
+  }
+  return result
+}
+
 const DEFAULT_VOCABULARY = {
   king:   { symbols: { 0: 'K', 1: 'k' } },
   queen:  { symbols: { 0: 'Q', 1: 'q' } },
@@ -20,11 +34,24 @@ const STANDARD_PIECES = {
 
 const DEFAULT_SETUP = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
 
+function resolveCastling(raw) {
+  if (raw === undefined || raw === null) return true
+  if (typeof raw === 'boolean') return raw
+  if (typeof raw === 'object') return raw
+  return raw !== false
+}
+
+function resolvePromotionChoices(raw) {
+  if (!raw) return ['queen', 'rook', 'bishop', 'knight']
+  if (Array.isArray(raw)) return raw
+  return raw
+}
+
 export function createChessPlugin(variantConfig = {}, context = {}) {
   const config = {
     setup: variantConfig.setup || DEFAULT_SETUP,
-    promotionChoices: variantConfig.promotionChoices || ['queen', 'rook', 'bishop', 'knight'],
-    castling: variantConfig.castling !== false,
+    promotionChoices: resolvePromotionChoices(variantConfig.promotionChoices),
+    castling: resolveCastling(variantConfig.castling),
     enPassant: variantConfig.enPassant !== false,
     royalType: variantConfig.royalType || 'king',
     pawnType: variantConfig.pawnType || 'pawn',
@@ -35,6 +62,31 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   const pieceConfigs = { ...STANDARD_PIECES, ...config.pieces }
   const vocabulary = { ...DEFAULT_VOCABULARY, ...config.vocabulary }
 
+  const _symbolsSeen = new Map()
+  for (const [type, def] of Object.entries(vocabulary)) {
+    if (!def.symbols) continue
+    for (const [owner, symbol] of Object.entries(def.symbols)) {
+      const existing = _symbolsSeen.get(symbol)
+      if (existing) {
+        throw new Error(`Vocabulary symbol collision: "${symbol}" claimed by both ${existing} and ${type} (owner ${owner})`)
+      }
+      _symbolsSeen.set(symbol, type)
+    }
+  }
+
+  function getPromotionChoices(playerIdx) {
+    const pc = config.promotionChoices
+    if (Array.isArray(pc)) return pc
+    return pc[playerIdx] || ['queen', 'rook', 'bishop', 'knight']
+  }
+
+  function isCastlingEnabled(playerIdx) {
+    const c = config.castling
+    if (typeof c === 'boolean') return c
+    if (typeof c === 'object') return c[playerIdx] !== false
+    return true
+  }
+
   const builtPieces = new Map()
 
   function buildPiece(name) {
@@ -43,6 +95,12 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     if (!pConfig || pConfig.movement === 'pawn') {
       builtPieces.set(name, null)
       return null
+    }
+    if (pConfig.type === 'compose' && Array.isArray(pConfig.parts)) {
+      const parts = pConfig.parts.map(p => typeof p === 'string' ? buildPiece(p) : fromConfig(p)).filter(Boolean)
+      const composed = compose(...parts)
+      builtPieces.set(name, composed)
+      return composed
     }
     const primitive = fromConfig(pConfig)
     builtPieces.set(name, primitive)
@@ -53,11 +111,48 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   let pawnConfig = null
 
   function derivePawnConfig(topo) {
-    if (config.pawnConfig) return config.pawnConfig
+    if (config.pawnConfig) return normalizePawnConfig(config.pawnConfig)
+    if (config.hexPawnConfig && topo && topo.getAllCells) {
+      return deriveHexPawnConfig(topo, config.hexPawnConfig)
+    }
     if (topo && topo.rows !== undefined && topo.cols !== undefined) {
       return deriveGridPawnConfig(topo)
     }
     return null
+  }
+
+  function deriveHexPawnConfig(topo, hexConfig) {
+    const forwardDir = {}
+    const startCells = { 0: new Set(), 1: new Set() }
+    const promotionCells = { 0: new Set(), 1: new Set() }
+    const captureDirections = {}
+
+    for (const player of [0, 1]) {
+      forwardDir[player] = hexConfig.forwardDir[player]
+      captureDirections[player] = hexConfig.captureDirections[player]
+      if (hexConfig.startCells && hexConfig.startCells[player]) {
+        for (const cell of hexConfig.startCells[player]) startCells[player].add(cell)
+      }
+    }
+
+    if (hexConfig.promotionCells) {
+      for (const player of [0, 1]) {
+        if (hexConfig.promotionCells[player]) {
+          for (const cell of hexConfig.promotionCells[player]) promotionCells[player].add(cell)
+        }
+      }
+    } else {
+      for (const cell of topo.getAllCells()) {
+        for (const player of [0, 1]) {
+          if (topo.step(cell, forwardDir[player]) === null) {
+            promotionCells[player].add(cell)
+          }
+        }
+      }
+    }
+
+    const doubleStep = hexConfig.doubleStep || { 0: false, 1: false }
+    return { forwardDir, startCells, promotionCells, captureDirections, doubleStep }
   }
 
   function deriveGridPawnConfig(topo) {
@@ -71,23 +166,46 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     for (const player of [0, 1]) {
       const dir = typeof advDir === 'function' ? advDir(player) : advDir[player]
       forwardDir[player] = [dir, 0]
-      const startRow = dir === -1 ? rows - 2 : 1
-      const promoRow = dir === -1 ? 0 : rows - 1
+      const defaultStart = dir === -1 ? rows - 2 : 1
+      const startRow = config.pawnStartRow ? config.pawnStartRow[player] : defaultStart
+      const defaultPromo = dir === -1 ? 0 : rows - 1
+      const promoRow = config.promotionRow ? config.promotionRow[player] : defaultPromo
       for (let c = 0; c < cols; c++) {
         startCells[player].add(topo.toIndex(startRow, c))
         promotionCells[player].add(topo.toIndex(promoRow, c))
       }
       captureDirections[player] = [[dir, -1], [dir, 1]]
     }
-    return { forwardDir, startCells, promotionCells, captureDirections, doubleStep: true }
+    let doubleStep
+    if (typeof config.doubleStep === 'object') {
+      doubleStep = config.doubleStep
+    } else {
+      const val = config.doubleStep !== false
+      doubleStep = { 0: val, 1: val }
+    }
+    const result = { forwardDir, startCells, promotionCells, captureDirections, doubleStep }
+    if (config.pawnMoveDirections) result.moveDirections = config.pawnMoveDirections
+    if (config.pawnCaptureDirections) {
+      for (const [p, dirs] of Object.entries(config.pawnCaptureDirections)) {
+        captureDirections[p] = dirs
+      }
+    }
+    return result
   }
 
   function init(pluginConfig, { request }) {
     topology = request('core.topology')
-    const setupInput = pluginConfig.setup || config.setup
+    if (topology && topology.getAllCells && !topology.rows && pieceConfigs.knight && pieceConfigs.knight.offsets === 'knight') {
+      pieceConfigs.knight = { ...pieceConfigs.knight, offsets: 'hex-knight' }
+    }
+    const rng = request('core.rng')
+    const rawSetup = pluginConfig.setup || config.setup
+    const setupInput = typeof rawSetup === 'function' ? rawSetup(rng) : rawSetup
 
     let board
-    if (typeof setupInput === 'object' && !Array.isArray(setupInput)) {
+    if (Array.isArray(setupInput)) {
+      board = setupInput
+    } else if (typeof setupInput === 'object') {
       board = setupInput
     } else if (topology && topology.parsePosition) {
       board = topology.parsePosition(setupInput, vocabulary)
@@ -104,10 +222,24 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     }
 
     if (config.castling) {
-      state.castlingRights = { 0: { king: true, queen: true }, 1: { king: true, queen: true } }
+      state.castlingRights = {
+        0: isCastlingEnabled(0) ? { king: true, queen: true } : { king: false, queen: false },
+        1: isCastlingEnabled(1) ? { king: true, queen: true } : { king: false, queen: false },
+      }
     }
     if (config.enPassant) {
       state.enPassantTarget = null
+    }
+    if (config.drops) {
+      state.hands = [[], []]
+    }
+    if (config.placementPieces) {
+      state.phase = 'placement'
+      state._toPlace = [config.placementPieces[0].slice(), config.placementPieces[1].slice()]
+    }
+
+    if (config.initState) {
+      config.initState(state)
     }
 
     return state
@@ -153,8 +285,141 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   }
 
   function cloneBoard(board) {
-    if (Array.isArray(board)) return [...board]
-    return { ...board }
+    if (Array.isArray(board)) return board.map(c => c ? { ...c } : null)
+    const clone = {}
+    for (const k of Object.keys(board)) clone[k] = board[k] ? { ...board[k] } : null
+    return clone
+  }
+
+  function applyMoveToBoard(board, move) {
+    if (move.castle) {
+      setCell(board, move.to, getCell(board, move.from))
+      setCell(board, move.from, null)
+      setCell(board, move.rookTo, getCell(board, move.rookFrom))
+      setCell(board, move.rookFrom, null)
+    } else if (move.enPassant) {
+      setCell(board, move.to, getCell(board, move.from))
+      setCell(board, move.from, null)
+      setCell(board, move.captured, null)
+    } else {
+      setCell(board, move.to, getCell(board, move.from))
+      setCell(board, move.from, null)
+    }
+    if (move.promotion) {
+      setCell(board, move.to, { type: move.promotion, owner: getCell(board, move.to)?.owner ?? 0 })
+    }
+  }
+
+  function searchMakeMove(state, move, playerIdx) {
+    const undo = {
+      fromPiece: state.board[move.from],
+      toPiece: state.board[move.to],
+      castlingRights: state.castlingRights,
+      enPassantTarget: state.enPassantTarget,
+      halfmoveClock: state.halfmoveClock,
+      fullmoveNumber: state.fullmoveNumber,
+    }
+    if (move.castle) {
+      undo.rookFromPiece = state.board[move.rookFrom]
+      undo.rookToPiece = state.board[move.rookTo]
+      state.board[move.to] = state.board[move.from]
+      state.board[move.from] = null
+      state.board[move.rookTo] = state.board[move.rookFrom]
+      state.board[move.rookFrom] = null
+    } else if (move.enPassant) {
+      undo.capturedPiece = state.board[move.captured]
+      undo.capturedPos = move.captured
+      state.board[move.to] = state.board[move.from]
+      state.board[move.from] = null
+      state.board[move.captured] = null
+    } else {
+      state.board[move.to] = state.board[move.from]
+      state.board[move.from] = null
+    }
+    if (move.promotion) {
+      undo.promotedFrom = state.board[move.to]
+      state.board[move.to] = { type: move.promotion, owner: playerIdx }
+    }
+
+    const piece = state.board[move.to]
+    if (piece && state.castlingRights) {
+      const cr = state.castlingRights
+      let changed = false
+      const royalType = config.royalType || 'king'
+      const rookType = config.rookType || 'rook'
+      if (piece.type === royalType) {
+        if (cr[playerIdx]?.king || cr[playerIdx]?.queen) {
+          state.castlingRights = { ...cr, [playerIdx]: { king: false, queen: false } }
+          changed = true
+        }
+      }
+      if (!changed && piece.type === rookType && topology) {
+        const cols = topology.cols
+        const advDir = config.advancement || { 0: -1, 1: 1 }
+        const advancement = typeof advDir === 'function' ? advDir(playerIdx) : advDir[playerIdx]
+        const backRank = advancement === -1 ? (topology.rows - 1) * cols : 0
+        if (move.from === backRank + cols - 1 && cr[playerIdx]?.king) {
+          state.castlingRights = { ...cr, [playerIdx]: { ...cr[playerIdx], king: false } }
+        } else if (move.from === backRank && cr[playerIdx]?.queen) {
+          state.castlingRights = { ...cr, [playerIdx]: { ...cr[playerIdx], queen: false } }
+        }
+      }
+      if (undo.toPiece && undo.toPiece.type === rookType && topology) {
+        const opponent = 1 - playerIdx
+        const cols = topology.cols
+        const advDir = config.advancement || { 0: -1, 1: 1 }
+        const advancement = typeof advDir === 'function' ? advDir(opponent) : advDir[opponent]
+        const backRank = advancement === -1 ? (topology.rows - 1) * cols : 0
+        if (move.to === backRank + cols - 1 && cr[opponent]?.king) {
+          state.castlingRights = { ...(state.castlingRights || cr), [opponent]: { ...(state.castlingRights || cr)[opponent], king: false } }
+        } else if (move.to === backRank && cr[opponent]?.queen) {
+          state.castlingRights = { ...(state.castlingRights || cr), [opponent]: { ...(state.castlingRights || cr)[opponent], queen: false } }
+        }
+      }
+    }
+
+    state.enPassantTarget = null
+    if (piece && piece.type === (config.pawnType || 'pawn') && config.enPassant) {
+      const diff = Math.abs(move.to - move.from)
+      const cols = topology ? topology.cols : 8
+      if (diff === cols * 2) {
+        state.enPassantTarget = (move.from + move.to) / 2
+      }
+    }
+
+    if (undo.toPiece || (piece && piece.type === (config.pawnType || 'pawn'))) {
+      state.halfmoveClock = 0
+    } else {
+      state.halfmoveClock = undo.halfmoveClock + 1
+    }
+    state.fullmoveNumber = playerIdx === 1 ? undo.fullmoveNumber + 1 : undo.fullmoveNumber
+
+    if (config.checkThreshold && state.checkCount) {
+      undo.checkCount = state.checkCount
+      const opponent = 1 - playerIdx
+      if (isInCheck(state.board, opponent)) {
+        state.checkCount = { ...state.checkCount, [playerIdx]: state.checkCount[playerIdx] + 1 }
+      }
+    }
+
+    return undo
+  }
+
+  function searchUnmakeMove(state, move, undo) {
+    state.board[move.from] = undo.fromPiece
+    state.board[move.to] = undo.toPiece
+    if (move.castle) {
+      state.board[move.rookFrom] = undo.rookFromPiece
+      state.board[move.rookTo] = undo.rookToPiece
+    }
+    if (move.enPassant) {
+      state.board[undo.capturedPos] = undo.capturedPiece
+    }
+    state.castlingRights = undo.castlingRights
+    state.enPassantTarget = undo.enPassantTarget
+    state.halfmoveClock = undo.halfmoveClock
+    state.fullmoveNumber = undo.fullmoveNumber
+    if (undo.checkCount !== undefined) state.checkCount = undo.checkCount
   }
 
   function allPositions() {
@@ -184,6 +449,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return view
   }
 
+
   function generateMovesForPiece(from, slice, playerIdx) {
     const piece = getCell(slice.board, from)
     if (!piece) return []
@@ -194,8 +460,12 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       return generatePawnMoves(from, slice, playerIdx)
     }
 
-    const primitive = buildPiece(piece.type)
+    let primitive = buildPiece(piece.type)
     if (!primitive) return []
+
+    if (pConfig.directional && playerIdx === 1) {
+      primitive = fromConfig({ ...pConfig, offsets: pConfig.offsets.map(([dr, dc]) => [-dr, dc]) })
+    }
 
     const viewBoard = buildViewBoard(slice.board, playerIdx)
     return primitive.genMoves(topology, from, viewBoard)
@@ -205,25 +475,55 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     if (!pawnConfig) return []
     const moves = []
     const { forwardDir, startCells, promotionCells, captureDirections, doubleStep } = pawnConfig
+    const moveDirections = pawnConfig.moveDirections
 
-    const fwd = forwardDir[playerIdx]
-    const forward = topology.step(from, fwd)
-    if (forward !== null && getCell(slice.board, forward) === null) {
-      if (promotionCells[playerIdx].has(forward)) {
-        for (const promo of config.promotionChoices) {
-          moves.push({ from, to: forward, promotion: promo })
+    if (moveDirections) {
+      for (const dir of moveDirections[playerIdx]) {
+        const target = topology.step(from, dir)
+        if (target === null) continue
+        if (getCell(slice.board, target) !== null) continue
+        if (promotionCells[playerIdx].has(target)) {
+          for (const promo of getPromotionChoices(playerIdx)) {
+            moves.push({ from, to: target, promotion: promo })
+          }
+        } else {
+          moves.push({ from, to: target })
         }
-      } else {
-        moves.push({ from, to: forward })
       }
-
+      const playerDoubleStep = typeof doubleStep === 'object' ? doubleStep[playerIdx] : doubleStep
       const canDoubleStep = config.torpedo
-        ? doubleStep
-        : doubleStep && startCells[playerIdx].has(from)
+        ? playerDoubleStep
+        : playerDoubleStep && startCells[playerIdx].has(from)
       if (canDoubleStep) {
-        const doubleForward = topology.step(forward, fwd)
-        if (doubleForward !== null && getCell(slice.board, doubleForward) === null) {
-          moves.push({ from, to: doubleForward })
+        for (const dir of moveDirections[playerIdx]) {
+          const step1 = topology.step(from, dir)
+          if (step1 === null || getCell(slice.board, step1) !== null) continue
+          const step2 = topology.step(step1, dir)
+          if (step2 !== null && getCell(slice.board, step2) === null) {
+            moves.push({ from, to: step2 })
+          }
+        }
+      }
+    } else {
+      const fwd = forwardDir[playerIdx]
+      const forward = topology.step(from, fwd)
+      if (forward !== null && getCell(slice.board, forward) === null) {
+        if (promotionCells[playerIdx].has(forward)) {
+          for (const promo of getPromotionChoices(playerIdx)) {
+            moves.push({ from, to: forward, promotion: promo })
+          }
+        } else {
+          moves.push({ from, to: forward })
+        }
+
+        const canDoubleStep = config.torpedo
+          ? doubleStep
+          : doubleStep && startCells[playerIdx].has(from)
+        if (canDoubleStep) {
+          const doubleForward = topology.step(forward, fwd)
+          if (doubleForward !== null && getCell(slice.board, doubleForward) === null) {
+            moves.push({ from, to: doubleForward })
+          }
         }
       }
     }
@@ -236,7 +536,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       const targetPiece = getCell(slice.board, target)
       if (targetPiece !== null && targetPiece.owner !== playerIdx) {
         if (promotionCells[playerIdx].has(target)) {
-          for (const promo of config.promotionChoices) {
+          for (const promo of getPromotionChoices(playerIdx)) {
             moves.push({ from, to: target, capture: true, promotion: promo })
           }
         } else {
@@ -254,7 +554,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   }
 
   function generateCastlingMoves(kingFrom, slice, playerIdx) {
-    if (!config.castling || !slice.castlingRights) return []
+    if (!config.castling || !isCastlingEnabled(playerIdx) || !slice.castlingRights) return []
     const rights = slice.castlingRights[playerIdx]
     if (!rights || (!rights.king && !rights.queen)) return []
     if (!topology || topology.cols === undefined) return []
@@ -346,8 +646,12 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       return pawnAttacks(from, target, piece.owner)
     }
 
-    const primitive = buildPiece(piece.type)
+    let primitive = buildPiece(piece.type)
     if (!primitive) return false
+
+    if (pConfig.directional && piece.owner === 1) {
+      primitive = fromConfig({ ...pConfig, offsets: pConfig.offsets.map(([dr, dc]) => [-dr, dc]) })
+    }
 
     const viewBoard = buildViewBoard(board, piece.owner)
     return primitive.attacks(topology, from, target, viewBoard)
@@ -377,8 +681,18 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return isSquareAttacked(board, kingPos, playerIdx)
   }
 
+  const actions = config.actions || {}
+
   function validateMove(move, slice, full) {
     const playerIdx = full.__players.currentIndex
+    if (move.action && actions[move.action]) {
+      const legal = getLegalMoves(slice, full)
+      return legal.some(m =>
+        m.action === move.action && m.to === move.to &&
+        (move.from === undefined || m.from === move.from) &&
+        (move.type === undefined || m.type === move.type)
+      )
+    }
     const piece = getCell(slice.board, move.from)
     if (!piece) return false
     if (piece.owner !== playerIdx) return false
@@ -396,6 +710,25 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   function applyMove(move, slice, full) {
     const playerIdx = full.__players.currentIndex
     const board = cloneBoard(slice.board)
+    const hands = config.drops ? [slice.hands[0].slice(), slice.hands[1].slice()] : null
+
+    if (move.action && actions[move.action]) {
+      const actionDef = actions[move.action]
+      const ctx = { board, slice, playerIdx, hands, topology, getCell, setCell, allPositions }
+      const result = actionDef.apply(move, ctx)
+      const newSlice = { board: result.board || board, halfmoveClock: result.halfmoveClock ?? 0, fullmoveNumber: result.fullmoveNumber ?? slice.fullmoveNumber }
+      if (result.hands !== undefined) newSlice.hands = result.hands
+      else if (hands) newSlice.hands = hands
+      if (slice.castlingRights) newSlice.castlingRights = result.castlingRights || deepCopyCastling(slice.castlingRights)
+      if (config.enPassant) newSlice.enPassantTarget = result.enPassantTarget ?? null
+      for (const k of Object.keys(slice)) {
+        if (k.startsWith('_') && !(k in newSlice)) newSlice[k] = slice[k]
+      }
+      if (result.sliceKeys) Object.assign(newSlice, result.sliceKeys)
+      const continueTurn = actionDef.continuesTurn === true || (typeof actionDef.continuesTurn === 'function' && actionDef.continuesTurn(newSlice))
+      return { state: newSlice, continueTurn }
+    }
+
     const piece = getCell(board, move.from)
     let castlingRights = slice.castlingRights ? deepCopyCastling(slice.castlingRights) : null
     let enPassantTarget = null
@@ -405,7 +738,17 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       halfmoveClock = 0
     }
 
-    if (move.castle) {
+    if (hands) {
+      const captured = move.enPassant ? getCell(slice.board, move.captured) : getCell(slice.board, move.to)
+      if (captured && captured.owner !== playerIdx && captured.type !== (config.royalType || 'king')) {
+        const handType = captured.wasPromoted ? (config.pawnType || 'pawn') : captured.type
+        hands[playerIdx].push(handType)
+      }
+    }
+
+    if (config.moveApply) {
+      config.moveApply({ move, board, piece, playerIdx, topology, setCell, getCell })
+    } else if (move.castle) {
       setCell(board, move.to, getCell(board, move.from))
       setCell(board, move.from, null)
       setCell(board, move.rookTo, getCell(board, move.rookFrom))
@@ -423,7 +766,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     }
 
     if (move.promotion) {
-      setCell(board, move.to, { type: move.promotion, owner: playerIdx })
+      setCell(board, move.to, { type: move.promotion, owner: playerIdx, wasPromoted: config.drops || undefined })
     }
 
     if (config.enPassant && piece.type === (config.pawnType || 'pawn') && pawnConfig) {
@@ -455,6 +798,42 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const newSlice = { board, halfmoveClock, fullmoveNumber }
     if (castlingRights !== null) newSlice.castlingRights = castlingRights
     if (config.enPassant) newSlice.enPassantTarget = enPassantTarget
+    if (hands) newSlice.hands = hands
+    for (const k of Object.keys(slice)) {
+      if (k.startsWith('_') && !(k in newSlice)) newSlice[k] = slice[k]
+    }
+    if (slice.phase && !('phase' in newSlice)) newSlice.phase = slice.phase
+
+    let effects = slice.effects ? slice.effects.map(e => ({ ...e })) : []
+    if (config.afterMove) {
+      const captured = move.enPassant ? slice.board[move.captured] : slice.board[move.to]
+      const ctx = { playerIdx, move, captured, board, effects, topology, slice: newSlice, piece }
+      ctx.addEffect = (effect) => effects.push(effect)
+      ctx.hasEffect = (sq, type) => effects.some(e => e.sq === sq && e.type === type)
+      ctx.removeEffect = (sq, type) => { effects = effects.filter(e => !(e.sq === sq && e.type === type)) }
+      ctx.setSlice = (key, value) => { newSlice[key] = value }
+      config.afterMove(ctx)
+    }
+    effects = effects.filter(e => {
+      if (e.duration === undefined || e.duration === null) return true
+      e.duration--
+      return e.duration > 0
+    })
+    if (effects.length > 0 || slice.effects) newSlice.effects = effects
+
+    if (config.turnLogic) {
+      const opponent = 1 - playerIdx
+      const inCheck = isInCheck(board, opponent)
+      const movesThisTurn = (slice.movesThisTurn || 0) + 1
+      const ctx = { movesThisTurn, inCheck, playerIdx, fullmoveNumber, config, slice: newSlice }
+      const shouldContinue = config.turnLogic(ctx)
+      if (shouldContinue) {
+        newSlice.movesThisTurn = movesThisTurn
+        return { state: newSlice, continueTurn: true }
+      }
+      newSlice.movesThisTurn = 0
+      if (config.onTurnEnd) config.onTurnEnd(newSlice)
+    }
 
     return newSlice
   }
@@ -488,12 +867,29 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       }
     }
 
+    for (const [name, actionDef] of Object.entries(actions)) {
+      if (actionDef.generate) {
+        const ctx = { topology, allPositions, getCell, pawnConfig, slice, config, normalMoves: allMoves }
+        const actionMoves = actionDef.generate(slice, playerIdx, ctx)
+        allMoves.push(...actionMoves)
+      }
+    }
+
     let legal = config.noCheck
       ? allMoves
       : filterLegalMoves(allMoves, slice, playerIdx)
 
     if (config.moveFilter) {
-      legal = config.moveFilter(legal, slice, { currentPlayer: playerIdx })
+      legal = config.moveFilter(legal, slice, {
+        currentPlayer: playerIdx,
+        config,
+        isInCheck: () => isInCheck(slice.board, playerIdx),
+        givesCheck: (move) => {
+          const testBoard = cloneBoard(slice.board)
+          applyMoveToBoard(testBoard, move)
+          return isInCheck(testBoard, 1 - playerIdx)
+        },
+      })
     }
 
     return legal
@@ -501,25 +897,51 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
   function filterLegalMoves(moves, slice, playerIdx) {
     return moves.filter(move => {
-      const testBoard = cloneBoard(slice.board)
+      if (move.action && actions[move.action] && actions[move.action].skipsCheckFilter) return true
+      const board = slice.board
+      const fromPiece = board[move.from]
+      const toPiece = board[move.to]
+      let rookFrom, rookTo, capturedPiece, capturedPos
       if (move.castle) {
-        setCell(testBoard, move.to, getCell(testBoard, move.from))
-        setCell(testBoard, move.from, null)
-        setCell(testBoard, move.rookTo, getCell(testBoard, move.rookFrom))
-        setCell(testBoard, move.rookFrom, null)
+        rookFrom = board[move.rookFrom]
+        rookTo = board[move.rookTo]
+        board[move.to] = board[move.from]
+        board[move.from] = null
+        board[move.rookTo] = board[move.rookFrom]
+        board[move.rookFrom] = null
       } else if (move.enPassant) {
-        setCell(testBoard, move.to, getCell(testBoard, move.from))
-        setCell(testBoard, move.from, null)
-        setCell(testBoard, move.captured, null)
+        capturedPiece = board[move.captured]
+        capturedPos = move.captured
+        board[move.to] = board[move.from]
+        board[move.from] = null
+        board[move.captured] = null
       } else {
-        setCell(testBoard, move.to, getCell(testBoard, move.from))
-        setCell(testBoard, move.from, null)
+        board[move.to] = board[move.from]
+        board[move.from] = null
       }
       if (move.promotion) {
-        setCell(testBoard, move.to, { type: move.promotion, owner: playerIdx })
+        board[move.to] = { type: move.promotion, owner: playerIdx }
       }
-      return !isInCheck(testBoard, playerIdx)
+      const inCheck = isInCheck(board, playerIdx)
+      board[move.from] = fromPiece
+      board[move.to] = toPiece
+      if (move.castle) {
+        board[move.rookFrom] = rookFrom
+        board[move.rookTo] = rookTo
+      }
+      if (move.enPassant) {
+        board[capturedPos] = capturedPiece
+      }
+      return !inCheck
     })
+  }
+
+  function checkWinConditionOnly(slice, playerIdx) {
+    if (!config.winCondition) return null
+    const result = config.winCondition(slice, { currentPlayer: playerIdx, config })
+    if (result !== null && result !== undefined) return result
+    if (slice.halfmoveClock >= 100) return 'draw'
+    return null
   }
 
   function checkWin(slice, full) {
@@ -527,7 +949,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const opponent = 1 - playerIdx
 
     if (config.winCondition) {
-      const result = config.winCondition(slice, { currentPlayer: playerIdx })
+      const result = config.winCondition(slice, { currentPlayer: playerIdx, config })
       if (result !== null && result !== undefined) return result
     }
 
@@ -536,13 +958,15 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
     if (oppMoves.length === 0) {
       if (config.noCheck) {
-        return config.stalemateMeaning === 'win'
-          ? (opponent === 0 ? 'white' : 'black')
-          : 'draw'
+        if (config.stalemateMeaning === 'win') return opponent
+        if (config.stalemateMeaning === 'loss') return playerIdx
+        return 'draw'
       }
       if (isInCheck(slice.board, opponent)) {
-        return playerIdx === 0 ? 'white' : 'black'
+        return playerIdx
       }
+      if (config.stalemateMeaning === 'win') return opponent
+      if (config.stalemateMeaning === 'loss') return playerIdx
       return 'draw'
     }
 
@@ -553,6 +977,48 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
   function deepCopyCastling(rights) {
     return { 0: { ...rights[0] }, 1: { ...rights[1] } }
+  }
+
+  function getVisibility(slice, full, viewerIndex) {
+    if (!config.visibility) return null
+    return config.visibility(slice, viewerIndex, { topology, generateMovesForPiece, allPositions, getCell })
+  }
+
+  function positionKey(slice, playerIndex) {
+    const board = slice.board
+    const size = Array.isArray(board) ? board.length : 64
+    const cols = topology ? topology.cols : 8
+    const rows = topology ? topology.rows : 8
+    const parts = []
+    for (let r = 0; r < rows; r++) {
+      let empty = 0
+      for (let c = 0; c < cols; c++) {
+        const cell = board[r * cols + c]
+        if (!cell) { empty++; continue }
+        if (empty > 0) { parts.push(empty); empty = 0 }
+        const entry = vocabulary[cell.type]
+        const sym = entry?.symbols?.[cell.owner]
+        parts.push(sym || cell.type[0])
+      }
+      if (empty > 0) parts.push(empty)
+      if (r < rows - 1) parts.push('/')
+    }
+    parts.push(' ')
+    parts.push(playerIndex === 0 ? 'w' : 'b')
+    if (slice.castlingRights) {
+      let c = ''
+      if (slice.castlingRights[0]?.king) c += 'K'
+      if (slice.castlingRights[0]?.queen) c += 'Q'
+      if (slice.castlingRights[1]?.king) c += 'k'
+      if (slice.castlingRights[1]?.queen) c += 'q'
+      parts.push(' ')
+      parts.push(c || '-')
+    }
+    if (slice.enPassantTarget !== undefined) {
+      parts.push(' ')
+      parts.push(slice.enPassantTarget !== null ? String(slice.enPassantTarget) : '-')
+    }
+    return parts.join('')
   }
 
   return {
@@ -567,5 +1033,11 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     applyMove,
     getLegalMoves,
     checkWin,
+    checkWinConditionOnly,
+    getVisibility,
+    positionKey,
+    isInCheck,
+    searchMakeMove,
+    searchUnmakeMove,
   }
 }

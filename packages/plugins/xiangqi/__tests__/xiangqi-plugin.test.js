@@ -196,7 +196,7 @@ describe('plugin-xiangqi', () => {
       board[13] = { type: 'chariot', owner: 0 }
       const state = { board, _cols: 9 }
       const result = plugin.checkWin(state, makeContext(0))
-      expect(result).toBe('player1')
+      expect(result).toBe(0)
     })
 
     it('returns null during play', () => {

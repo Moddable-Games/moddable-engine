@@ -398,8 +398,8 @@ function resetSidebarControls() {
   document.getElementById('chargen-group').style.display = 'none'
 }
 
-const PLAYABLE_GAMES = new Set(['chess', 'go', 'draughts'])
-const FAMILY_PLAY_GAMES = new Set(['go', 'draughts'])
+const PLAYABLE_GAMES = new Set(['chess', 'go', 'draughts', 'xiangqi', 'shogi'])
+const FAMILY_PLAY_GAMES = new Set(['go', 'draughts', 'xiangqi', 'shogi'])
 
 function updatePlayButton() {
   const group = document.getElementById('play-interactive-group')

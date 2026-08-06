@@ -67,7 +67,9 @@ export function buildPieceImages(pieceSetId, gallery, fenOverrides, skipFenMap) 
   }
 
   if (!skipFenMap) {
-    const fenMap = fenOverrides || FEN_TO_PIECE_ID
+    const fenMap = fenOverrides
+      ? { ...FEN_TO_PIECE_ID, ...fenOverrides }
+      : FEN_TO_PIECE_ID
     for (const [fenChar, pieceId] of Object.entries(fenMap)) {
       if (images[pieceId]) images[fenChar] = images[pieceId]
       if (surfaceMap[pieceId]) surfaceMap[fenChar] = surfaceMap[pieceId]
@@ -145,6 +147,13 @@ export function renderFromEngine(resolved, opts = {}) {
     if (topo.grid) render._hexes = topo.grid.map(c => Array.isArray(c) ? { q: c[0], r: c[1] } : c)
     else if (topo.shape === 'triangular' && topo.sideLength) render._hexes = generateTriangularHexGrid(topo.sideLength)
     else if (topo.shape === 'hexagonal' && topo.radius) render._hexRadius = topo.radius
+    else if (topo.shape === 'rhombus' && topo.size) {
+      const hexes = []
+      for (let q = 0; q < topo.size; q++) {
+        for (let r = 0; r < topo.size; r++) hexes.push({ q, r })
+      }
+      render._hexes = hexes
+    }
     else if (topo.rows && topo.cols) { render._hexRows = topo.rows; render._hexCols = topo.cols }
   }
 
@@ -204,6 +213,9 @@ export function renderFromEngine(resolved, opts = {}) {
 
   // Parse setup → position (grid/graph only; hex/pit/track handle internally)
   const position = parsePosition(resolved, topo)
+  if (typeof resolved.setup === 'string' && resolved.setup.includes('/') && resolved.setup.replace(/[\d/]/g, '').length > 0 && Object.keys(position).length === 0) {
+    console.warn('[render-engine] Non-empty setup produced empty position — possible fenMap or vocabulary mismatch', { setup: resolved.setup.slice(0, 40) })
+  }
 
   // Detect FEN4 for getOwner (4-player piece rotation)
   let getOwner = opts.getOwner || null
@@ -238,7 +250,10 @@ export function renderFromEngine(resolved, opts = {}) {
   if (topo.type === 'grid' && position && Object.keys(position).length > 0 && layout.cells) {
     const tileSize = render.cellSize || 40
     const colors = surface.colors || {}
-    parts.push(`<g pointer-events="none">${renderPiecesFromCells(position, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: resolved.pieceRotations, getOwner, pieceDefs: opts.pieceDefs, colors })}</g>`)
+    const displayPosition = opts.flipped
+      ? flipPosition(position, topo.rows || 8, topo.cols || 8)
+      : position
+    parts.push(`<g pointer-events="none">${renderPiecesFromCells(displayPosition, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: resolved.pieceRotations, getOwner, pieceDefs: opts.pieceDefs, colors })}</g>`)
   } else if (position && Object.keys(position).length > 0) {
     parts.push(`<g pointer-events="none"></g>`)
   }
@@ -249,6 +264,20 @@ export function renderFromEngine(resolved, opts = {}) {
 
   parts.push('</svg>')
   return parts.join('\n')
+}
+
+// --- Flip support ---
+
+function flipPosition(position, rows, cols) {
+  const flipped = {}
+  for (const [alg, piece] of Object.entries(position)) {
+    const file = alg.charCodeAt(0) - 97
+    const rank = parseInt(alg.slice(1), 10)
+    const newFile = cols - 1 - file
+    const newRank = rows + 1 - rank
+    flipped[`${String.fromCharCode(97 + newFile)}${newRank}`] = piece
+  }
+  return flipped
 }
 
 // --- Position parsing ---

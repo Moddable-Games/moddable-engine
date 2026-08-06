@@ -24,17 +24,30 @@ const HEX_DIAGONALS = [
   { q: -2, r: 1 }, { q: -1, r: 2 }, { q: 1, r: 1 },
 ]
 
+const HEX_KNIGHT_OFFSETS = [
+  { q: 2, r: 1 }, { q: 3, r: -1 }, { q: 3, r: -2 },
+  { q: 2, r: -3 }, { q: 1, r: -3 }, { q: -1, r: -2 },
+  { q: -2, r: -1 }, { q: -3, r: 1 }, { q: -3, r: 2 },
+  { q: -2, r: 3 }, { q: -1, r: 3 }, { q: 1, r: 2 },
+]
+
 const DIRECTION_CATEGORIES = {
   orthogonal: DIRECTIONS,
   diagonal: HEX_DIAGONALS,
   all: [...DIRECTIONS, ...HEX_DIAGONALS],
+  'hex-knight': HEX_KNIGHT_OFFSETS,
 }
 
 export function createHexTopology(config) {
-  const { radius, size, shape = 'hexagonal', orientation = 'pointy' } = config
+  const { radius, size, shape = 'hexagonal', orientation = 'pointy', grid } = config
   const cells = new Map()
 
-  if (shape === 'rhombus' && size) {
+  if (grid && Array.isArray(grid)) {
+    for (const coord of grid) {
+      const [q, r] = Array.isArray(coord) ? coord : [coord.q, coord.r]
+      cells.set(key(q, r), { q, r, ring: Math.max(Math.abs(q), Math.abs(r), Math.abs(-q - r)) })
+    }
+  } else if (shape === 'rhombus' && size) {
     generateRhombus(size, cells)
   } else {
     generateHexGrid(radius, cells)
@@ -132,7 +145,7 @@ export function createHexTopology(config) {
     const results = []
     let q = a.q + d.q, r = a.r + d.r
     let steps = 0
-    const limit = maxSteps || radius * 2
+    const limit = maxSteps || (radius ? radius * 2 : cells.size)
     while (steps < limit) {
       const k = key(q, r)
       if (!cells.has(k)) break
@@ -360,7 +373,18 @@ export function createHexTopology(config) {
     const symbolMap = buildHexSymbolMap(vocabulary)
     const cellStates = {}
 
-    if (shape === 'rhombus' && size) {
+    if (notation.includes(':')) {
+      const entries = notation.match(/-?\d+,-?\d+:[a-zA-Z]/g)
+      if (entries) {
+        for (const entry of entries) {
+          const colonIdx = entry.lastIndexOf(':')
+          const coord = entry.slice(0, colonIdx)
+          const ch = entry.slice(colonIdx + 1)
+          const piece = symbolMap.fromSymbol(ch)
+          if (piece && cells.has(coord)) cellStates[coord] = piece
+        }
+      }
+    } else if (shape === 'rhombus' && size) {
       const rowStrings = notation.split('/')
       for (let r = 0; r < rowStrings.length && r < size; r++) {
         let q = 0
@@ -426,7 +450,9 @@ export function createHexTopology(config) {
 
   function step(from, direction) {
     const a = typeof from === 'string' ? parse(from) : from
-    const d = typeof direction === 'number' ? DIRECTIONS[direction] : direction
+    const d = typeof direction === 'number' ? DIRECTIONS[direction]
+      : Array.isArray(direction) ? { q: direction[0], r: direction[1] }
+      : direction
     const k = key(a.q + d.q, a.r + d.r)
     return cells.has(k) ? k : null
   }

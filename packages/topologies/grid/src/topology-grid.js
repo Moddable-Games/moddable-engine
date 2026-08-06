@@ -22,11 +22,14 @@ export function createGridTopology(config) {
     return [Math.floor(index / cols), index % cols]
   }
 
+  const wrapR = wrap === true || wrap === 'torus' || wrap === 'ranks'
+  const wrapC = wrap === true || wrap === 'torus' || wrap === 'files'
+
   function wrapCoords(r, c) {
     if (!wrap) return [r, c]
     return [
-      ((r % rows) + rows) % rows,
-      ((c % cols) + cols) % cols,
+      wrapR ? ((r % rows) + rows) % rows : r,
+      wrapC ? ((c % cols) + cols) % cols : c,
     ]
   }
 
@@ -35,7 +38,9 @@ export function createGridTopology(config) {
       return coord >= 0 && coord < rows * cols
     }
     const [r, c] = coord
-    if (wrap) return true
+    if (wrapR && wrapC) return true
+    if (wrapR) return c >= 0 && c < cols
+    if (wrapC) return r >= 0 && r < rows
     return r >= 0 && r < rows && c >= 0 && c < cols
   }
 
@@ -109,7 +114,9 @@ export function createGridTopology(config) {
   }
 
   function onBoard(r, c) {
-    if (wrap) return true
+    if (wrapR && wrapC) return true
+    if (wrapR) return c >= 0 && c < cols
+    if (wrapC) return r >= 0 && r < rows
     return r >= 0 && r < rows && c >= 0 && c < cols
   }
 
@@ -668,7 +675,7 @@ const OP_HANDLERS = {
     const grouped = op.grouped === true
     const out = grouped ? [] : elements
     const line = (x1, y1, x2, y2) => {
-      const attrs = { x1, y1, x2, y2 }
+      const attrs = { x1, y1, x2, y2, 'pointer-events': 'none' }
       if (!grouped) { attrs.stroke = stroke; attrs['stroke-width'] = width }
       out.push({ tag: 'line', attrs })
     }
@@ -788,7 +795,7 @@ const OP_HANDLERS = {
     }
     if (emitTo === 'cells') return
     if (op.grouped) {
-      elements.push({ tag: 'g', attrs: { fill: 'transparent' }, children })
+      elements.push({ tag: 'g', attrs: { fill: 'transparent', 'pointer-events': 'all' }, children })
     } else {
       for (const el of children) elements.push(el)
     }

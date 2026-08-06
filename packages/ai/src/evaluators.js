@@ -1,30 +1,77 @@
 export const PIECE_VALUES = {
   king: 20000, queen: 900, rook: 500, bishop: 330, knight: 320, pawn: 100,
-  archbishop: 650, chancellor: 830, sage: 150,
-  man: 100, 'king': 300,
+  archbishop: 650, chancellor: 830, cardinal: 650, marshal: 830,
+  wazir: 830, shahzadeh: 830, rani: 150,
+  fil: 330, dahja: 330, ratha: 500,
+  sage: 150, man: 100,
+  gold: 420, silver: 400, lance: 250, promotedPawn: 420,
+  advisor: 200, guard: 250, cannon: 450, elephant: 200,
 }
 
-const PST_CENTER_BONUS = [
-  0, 0, 0, 0, 0, 0, 0, 0,
-  0, 5, 5, 5, 5, 5, 5, 0,
-  0, 5, 10, 10, 10, 10, 5, 0,
-  0, 5, 10, 20, 20, 10, 5, 0,
-  0, 5, 10, 20, 20, 10, 5, 0,
-  0, 5, 10, 10, 10, 10, 5, 0,
-  0, 5, 5, 5, 5, 5, 5, 0,
-  0, 0, 0, 0, 0, 0, 0, 0,
+const PST_PAWN = [
+   0,  0,  0,  0,  0,  0,  0,  0,
+  50, 50, 50, 50, 50, 50, 50, 50,
+  10, 10, 20, 30, 30, 20, 10, 10,
+   5,  5, 10, 25, 25, 10,  5,  5,
+   0,  0,  0, 20, 20,  0,  0,  0,
+   5, -5,-10,  0,  0,-10, -5,  5,
+   5, 10, 10,-20,-20, 10, 10,  5,
+   0,  0,  0,  0,  0,  0,  0,  0,
 ]
+
+const PST_KNIGHT = [
+  -50,-40,-30,-30,-30,-30,-40,-50,
+  -40,-20,  0,  0,  0,  0,-20,-40,
+  -30,  0, 10, 15, 15, 10,  0,-30,
+  -30,  5, 15, 20, 20, 15,  5,-30,
+  -30,  0, 15, 20, 20, 15,  0,-30,
+  -30,  5, 10, 15, 15, 10,  5,-30,
+  -40,-20,  0,  5,  5,  0,-20,-40,
+  -50,-40,-30,-30,-30,-30,-40,-50,
+]
+
+const PST_BISHOP = [
+  -20,-10,-10,-10,-10,-10,-10,-20,
+  -10,  0,  0,  0,  0,  0,  0,-10,
+  -10,  0, 10, 10, 10, 10,  0,-10,
+  -10,  5,  5, 10, 10,  5,  5,-10,
+  -10,  0,  5, 10, 10,  5,  0,-10,
+  -10, 10,  5, 10, 10,  5, 10,-10,
+  -10,  5,  0,  0,  0,  0,  5,-10,
+  -20,-10,-10,-10,-10,-10,-10,-20,
+]
+
+const PST_KING = [
+  -30,-40,-40,-50,-50,-40,-40,-30,
+  -30,-40,-40,-50,-50,-40,-40,-30,
+  -30,-40,-40,-50,-50,-40,-40,-30,
+  -30,-40,-40,-50,-50,-40,-40,-30,
+  -20,-30,-30,-40,-40,-30,-30,-20,
+  -10,-20,-20,-20,-20,-20,-20,-10,
+   20, 20,  0,  0,  0,  0, 20, 20,
+   20, 30, 10,  0,  0, 10, 30, 20,
+]
+
+const PST = { pawn: PST_PAWN, knight: PST_KNIGHT, bishop: PST_BISHOP, king: PST_KING }
+
+function pstBonus(type, sq, owner) {
+  const table = PST[type]
+  if (!table) return 0
+  const idx = owner === 0 ? sq : (56 - (sq & ~7)) + (sq & 7)
+  return table[idx] || 0
+}
 
 export function chessEvaluate(state, playerIndex) {
   let score = 0
   const board = state.board
   if (!board) return 0
+  const is8x8 = board.length === 64
 
   for (let i = 0; i < board.length; i++) {
     const piece = board[i]
     if (!piece) continue
     const value = PIECE_VALUES[piece.type] || 100
-    const positional = board.length === 64 ? (PST_CENTER_BONUS[i] || 0) : 0
+    const positional = is8x8 ? pstBonus(piece.type, i, piece.owner) : 0
     if (piece.owner === playerIndex) {
       score += value + positional
     } else {
@@ -32,7 +79,7 @@ export function chessEvaluate(state, playerIndex) {
     }
   }
 
-  return score / 10000
+  return score
 }
 
 export function reversiEvaluate(state, playerIndex) {
@@ -45,15 +92,15 @@ export function reversiEvaluate(state, playerIndex) {
     if (board[i] === null) continue
     const row = Math.floor(i / size)
     const col = i % size
-    let weight = 1
+    let weight = 100
 
     const isCorner = (row === 0 || row === size - 1) && (col === 0 || col === size - 1)
     const isEdge = row === 0 || row === size - 1 || col === 0 || col === size - 1
     const isXSquare = (row === 1 || row === size - 2) && (col === 1 || col === size - 2)
 
-    if (isCorner) weight = 25
-    else if (isXSquare) weight = -5
-    else if (isEdge) weight = 5
+    if (isCorner) weight = 2500
+    else if (isXSquare) weight = -500
+    else if (isEdge) weight = 500
 
     if (board[i] === playerIndex) {
       score += weight
@@ -62,9 +109,7 @@ export function reversiEvaluate(state, playerIndex) {
     }
   }
 
-  const total = board.filter(c => c !== null).length
-  const mobility = total < board.length * 0.8 ? 1 : 0
-  return score / 100 + mobility * 0.01
+  return score
 }
 
 export function draughtsEvaluate(state, playerIndex) {
@@ -90,7 +135,7 @@ export function draughtsEvaluate(state, playerIndex) {
     }
   }
 
-  return score / 1000
+  return score
 }
 
 export function mancalaEvaluate(state, playerIndex) {
@@ -108,7 +153,7 @@ export function mancalaEvaluate(state, playerIndex) {
   const mySeeds = myPits.reduce((a, b) => a + b, 0)
   const oppSeeds = oppPits.reduce((a, b) => a + b, 0)
 
-  return (storeAdv * 3 + (mySeeds - oppSeeds)) / 50
+  return (storeAdv * 3 + (mySeeds - oppSeeds)) * 20
 }
 
 export function goEvaluate(state, playerIndex) {
@@ -127,7 +172,7 @@ export function goEvaluate(state, playerIndex) {
   const myCaps = captures[playerIndex] || 0
   const oppCaps = captures[1 - playerIndex] || 0
 
-  return ((myStones - oppStones) + (myCaps - oppCaps) * 2) / state.board.length
+  return ((myStones - oppStones) + (myCaps - oppCaps) * 2) * 100
 }
 
 export function halmaEvaluate(state, playerIndex) {
@@ -146,7 +191,7 @@ export function halmaEvaluate(state, playerIndex) {
     score -= distToTarget
   }
 
-  return score / (rows * cols)
+  return score * 10
 }
 
 export function raceEvaluate(state, playerIndex) {
@@ -166,7 +211,7 @@ export function raceEvaluate(state, playerIndex) {
     else if (piece.state === 'active') oppScore += piece.position
   }
 
-  return (score - oppScore) / 400
+  return score - oppScore
 }
 
 export function shogiEvaluate(state, playerIndex) {
@@ -190,10 +235,10 @@ export function shogiEvaluate(state, playerIndex) {
 
   const myHand = state.hands ? state.hands[playerIndex] : []
   const oppHand = state.hands ? state.hands[1 - playerIndex] : []
-  for (const type of myHand) score += (values[type] || 100) * 0.8
-  for (const type of oppHand) score -= (values[type] || 100) * 0.8
+  for (const type of myHand) score += Math.round((values[type] || 100) * 0.8)
+  for (const type of oppHand) score -= Math.round((values[type] || 100) * 0.8)
 
-  return score / 10000
+  return score
 }
 
 export function xiangqiEvaluate(state, playerIndex) {
@@ -212,7 +257,7 @@ export function xiangqiEvaluate(state, playerIndex) {
     else score -= value
   }
 
-  return score / 10000
+  return score
 }
 
 export const EVALUATORS = {

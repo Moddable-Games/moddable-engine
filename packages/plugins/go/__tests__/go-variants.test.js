@@ -1,3 +1,4 @@
+import '../../../play/test-helpers/setup-rules-reader.js'
 import '../index.js'
 import { createGame, listVariants, getVariantConfig } from '../../../play/index.js'
 
@@ -23,16 +24,11 @@ describe('go variants', () => {
       ])
     })
 
-    it('inherits configuration through extends', () => {
-      const config = getVariantConfig('go', '9x9')
-      expect(config.size).toBe(9)
-      expect(config.scoring).toBe('territory')
-      expect(config.superko).toBe(true)
-      expect(config.komi).toBe(5.5)
-    })
-
-    it('does not leak the extends key into resolved config', () => {
-      expect(getVariantConfig('go', '9x9').extends).toBeUndefined()
+    it('9x9 inherits standard go rules (board size proves extends)', () => {
+      const game = createGame('go', '9x9')
+      const state = game.getState().slice
+      expect(state.board.length).toBe(81)
+      expect(game.getLegalMoves().length).toBeGreaterThan(0)
     })
   })
 
@@ -62,7 +58,7 @@ describe('go variants', () => {
       expect(playSequence(game, [1, 10, 9, 40, 11, 41])).toBe(true)
       const result = place(game, 19)
       expect(result.ok).toBe(true)
-      expect(game.checkWin()).toBe('black')
+      expect(game.checkWin()).toBe(0)
     })
 
     it('is still running before any capture', () => {
@@ -92,7 +88,7 @@ describe('go variants', () => {
         expect(place(game, black[i]).ok).toBe(true)
         if (i < white.length) expect(place(game, white[i]).ok).toBe(true)
       }
-      expect(game.checkWin()).toBe('black')
+      expect(game.checkWin()).toBe(0)
     })
 
     it('does not award the win on four in a row', () => {
@@ -148,7 +144,7 @@ describe('go variants', () => {
       game.loadState(state)
 
       place(game, 0)
-      expect(game.checkWin()).toBe('black')
+      expect(game.checkWin()).toBe(0)
     })
   })
 

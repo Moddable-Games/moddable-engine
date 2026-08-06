@@ -7,5 +7,3 @@ export * from './src/variants/index.js'
 
 const { longestRun, ...variants } = goVariants
 registerVariants('go', variants)
-
-export { goVariants as variants }

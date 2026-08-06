@@ -1,6 +1,7 @@
 # moddable-engine — Phase 1 Architecture Spec
 
-**Status:** Agreed 2026-06-26. No code until this spec is committed and stable.
+**Status:** Agreed 2026-06-26. Implementation complete for core, topologies, schema, play, and plugins. The rule composition layer (section 0.6) is built and tested but not yet consumed by plugins (#88). The phase model described in moddable-ops#28 was retired; current state is tracked in moddable-ops#87.
+
 **Repo:** `Moddable-Games/moddable-engine`
 
 ---
@@ -186,8 +187,31 @@ export default {
 }
 ```
 
-### Phase lifecycle
-Core owns the phase sequence. Plugins register handlers. Phases declared in game config frontmatter.
+### Phase convention
+A plugin with a setup/placement phase exposes `phase` on its state slice.
+The game controller skips game-end checks when `slice.phase` is present and
+not `'play'`. When placement completes, the plugin sets `phase: 'play'`
+(or removes it) and normal play begins.
+
+```js
+// In plugin init:
+state.phase = 'placement'
+
+// In action apply (when placement completes):
+return { board, sliceKeys: { phase: 'play' } }
+```
+
+This is the single home for phase state. The controller reads it generically
+from `game.getState(plugin.sliceName).phase`. Do not use `_phase`,
+`_setupStage`, or any other field name — the controller will not find it.
+
+### Optional: positionKey
+A plugin may expose `positionKey(sliceState, playerIndex) → string` for AI
+transposition table efficiency. Without it, the search hashes the full JSON
+state (~1000+ chars). With it, chess returns a 64-char FEN derivative.
+
+### Phase lifecycle (future)
+Core-owned phase sequences for multi-phase games. Not yet implemented.
 ```yaml
 phases: [play]                          # chess
 phases: [diplomatic, action, event]     # endless-skies
@@ -636,3 +660,29 @@ Every significant decision recorded with alternatives considered and why they we
 - *Big-bang cutover* — build everything, then switch all repos at once. Rejected: the highest-risk approach. If any phase fails, everything fails together. No incremental validation.
 
 **Why:** Isolation is the only approach where a failed or stalled phase does not block any other work, existing users are never affected, and each phase can be independently proven before being adopted. The existing repos become the acceptance test suite — identical output after migration means migration succeeded.
+
+---
+
+### Canonical variant patterns — 2026-08-03
+
+Two shapes exist. Copy the correct one.
+
+**Pure-config variant (no functions):** `packages/plugins/chess/src/variants/capablanca.js`
+
+- One export, named for the variant
+- Contains only: `key`, `rows`, `cols`, `setup`, `pieces`, `vocabulary`, `promotionChoices`, flags (`castling`, `enPassant`, etc.)
+- No functions of any kind
+- **Target state:** this data moves to the `.md` frontmatter in moddable-rules; the JS file is deleted. The playability manifest registers it. No engine file.
+
+**Function variant (needs JS):** `packages/plugins/chess/src/variants/king-of-the-hill.js`
+
+- One export, named for the variant
+- One file per variant — never bundle multiple variants in one file
+- Contains a `winCondition`, `moveFilter`, `afterMove`, or other hook function that cannot be expressed as data
+- Returns player indices (0, 1) or `'draw'`, never colour strings
+
+**Anti-patterns (do not copy):**
+- `custom-pieces.js` — bundles 9 unrelated variants in one file
+- `win-condition.js` — same: 6 variants in one file
+- `filter-variants.js` — same: 8 variants in one file
+- Any variant returning `'white'`/`'black'`/`'player1'` from a win check

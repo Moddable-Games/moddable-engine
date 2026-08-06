@@ -103,6 +103,28 @@ describe('chess variants', () => {
     })
   })
 
+  describe('compose with named parts', () => {
+    it('archbishop via { type: compose, parts: [bishop, knight] } generates both move types', () => {
+      const baseVocab = createChessPlugin().vocabulary
+      const game = createChessGame(
+        { setup: '7k/8/8/3A4/8/8/8/K7' },
+        {
+          pieces: {
+            archbishop: { type: 'compose', parts: ['bishop', 'knight'] },
+          },
+          vocabulary: {
+            ...baseVocab,
+            archbishop: { symbols: { 0: 'A', 1: 'a' } },
+          },
+        }
+      )
+      const moves = game.getLegalMoves().filter(m => m.from === 27)
+      expect(moves.length).toBeGreaterThan(8)
+      expect(moves.find(m => m.to === 12)).toBeDefined()
+      expect(moves.find(m => m.to === 18)).toBeDefined()
+    })
+  })
+
   describe('chess960-style castling (rook not on corner)', () => {
     it('finds rook dynamically by scanning from king outward', () => {
       const game = createChessGame(

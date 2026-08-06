@@ -245,6 +245,33 @@ function translateOp(decl, ctx) {
         color: colors[decl.color] || decl.color,
         width: decl.width,
       }
+    case 'lines': {
+      let segments = decl.segments || []
+      if (decl.derive === 'palace-diagonals' && decl.regions) {
+        segments = decl.regions.flatMap(region => {
+          const r0 = region.rows[0], r1 = region.rows[1]
+          const c0 = region.cols[0], c1 = region.cols[1]
+          return [
+            { from: { row: r0, col: c0 }, to: { row: r1, col: c1 } },
+            { from: { row: r0, col: c1 }, to: { row: r1, col: c0 } },
+          ]
+        })
+      }
+      const lineColor = colors[decl.color] || decl.color || colors.stroke || '#333'
+      const lineWidth = decl.width || 2
+      const children = segments.map(seg => ({
+        tag: 'line',
+        attrs: {
+          x1: gx + seg.from.col * cellSize,
+          y1: gy + seg.from.row * cellSize,
+          x2: gx + seg.to.col * cellSize,
+          y2: gy + seg.to.row * cellSize,
+          stroke: lineColor,
+          'stroke-width': lineWidth,
+        },
+      }))
+      return { op: 'group', attrs: {}, children }
+    }
     case 'texts': {
       if (decl.river) {
         const rt = decl.river.rows[0], rb = decl.river.rows[1]
@@ -293,6 +320,7 @@ function translateOp(decl, ctx) {
           return {
             op: 'cells',
             interactive: true,
+            idStyle,
             _prefixRect: { op: 'rect', attrs: { x: ox, y: oy, width: cols * cellSize, height: rows * cellSize, fill: voidFill } },
             fill(r, c) {
               const cell = cellMap[r] && cellMap[r][c]
@@ -344,7 +372,7 @@ function translateOp(decl, ctx) {
         if (decl.typeColors) for (const [t, v] of Object.entries(decl.typeColors)) typeColors[t] = colors[v] || v
         if (decl.typeStrokes) for (const [t, v] of Object.entries(decl.typeStrokes)) typeStrokes[t] = colors[v] || v
         const decorationDefs = decl.decorations || {}
-        const result = { op: 'cells', interactive: true }
+        const result = { op: 'cells', interactive: true, idStyle }
         result.fill = (r, c) => {
           const cell = map[r] && map[r][c]
           if (!cell) return null
@@ -388,7 +416,7 @@ function translateOp(decl, ctx) {
           }
         }
         const decorationDefs = decl.decorations || {}
-        const result = { op: 'cells', interactive: true }
+        const result = { op: 'cells', interactive: true, idStyle }
         result.fill = (r, c) => {
           const cell = map[r] && map[r][c]
           if (!cell) return null
@@ -695,8 +723,7 @@ function produceTrackLayout(topo, colors, render) {
 //
 // Verbatim geometry from the historical backgammon provider — byte-identity
 // contract. Colors arrive from frontmatter (frame, felt, point-a, point-b)
-// and are normalized to camelCase. Checker face colours are fixed piece
-// styling (annotated → piece-theme later).
+// and are normalized to camelCase.
 // Runtime pass-through: render._parsedSetup {dark[], light[]}, _pieceImages.
 
 function backgammonOps(colors, render) {
@@ -769,7 +796,6 @@ function backgammonOps(colors, render) {
           if (img) {
             el('image', { href: img, x: cx - pieceSize / 2, y: cy - pieceSize / 2, width: pieceSize, height: pieceSize })
           } else {
-            // Fixed checker face colours (→ piece-theme)
             el('circle', { cx, cy, r: pieceSize / 2 - 1, fill: isDarkPiece ? '#191716' : '#F8F6F2', stroke: isDarkPiece ? '#4d433a' : '#5E5854', 'stroke-width': 1.5 })
           }
           if (j === 0 && overflow > 0) {

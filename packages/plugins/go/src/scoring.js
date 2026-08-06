@@ -99,8 +99,8 @@ export function scoreGame(slice, options = {}) {
 
   const margin = Math.abs(blackScore - whiteScore)
   let winner = 'draw'
-  if (blackScore > whiteScore) winner = BLACK
-  else if (whiteScore > blackScore) winner = WHITE
+  if (blackScore > whiteScore) winner = 0
+  else if (whiteScore > blackScore) winner = 1
 
   return {
     method,

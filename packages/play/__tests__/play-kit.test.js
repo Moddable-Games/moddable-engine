@@ -1,3 +1,4 @@
+import '../test-helpers/setup-rules-reader.js'
 import '../../plugins/go/index.js'
 import '../../plugins/draughts/index.js'
 

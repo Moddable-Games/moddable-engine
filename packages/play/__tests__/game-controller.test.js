@@ -221,4 +221,88 @@ describe('game-controller', () => {
       expect(renders.length).toBe(countBefore)
     })
   })
+
+  describe('onAnimateMove', () => {
+    it('invokes onAnimateMove before re-render when a from-to move is executed', () => {
+      const game = createChessGame()
+      const animCalls = []
+      const renders = []
+      const ctrl = createGameController(game, {
+        players: { white: 'human', black: 'human' },
+        onRender: () => renders.push(renders.length),
+        onAnimateMove: (move, state, done) => {
+          animCalls.push({ move, renderCountAtCall: renders.length })
+          done()
+        },
+      })
+      const rendersBefore = renders.length
+      ctrl.handleClick(52)
+      ctrl.handleClick(44)
+      expect(animCalls.length).toBe(1)
+      expect(animCalls[0].move.from).toBe(52)
+      expect(animCalls[0].move.to).toBe(44)
+      expect(animCalls[0].renderCountAtCall).toBe(rendersBefore + 1)
+      expect(renders.length).toBeGreaterThan(animCalls[0].renderCountAtCall)
+    })
+  })
+
+  describe('teleport interaction', () => {
+    it('selecting a piece includes its teleport targets in legal moves', () => {
+      const game = createChessGame({ initState: (state) => {
+        const tokens = new Array(state.board.length).fill(false)
+        for (let i = 0; i < state.board.length; i++) {
+          const p = state.board[i]
+          if (p && p.type !== 'pawn' && p.type !== 'king') tokens[i] = true
+        }
+        state._teleportTokens = tokens
+      }, actions: {
+        teleport: {
+          skipsCheckFilter: false,
+          generate(slice, playerIdx, { allPositions, getCell, normalMoves }) {
+            const tokens = slice._teleportTokens
+            if (!tokens) return []
+            const existing = new Set()
+            if (normalMoves) {
+              for (const m of normalMoves) existing.add(m.from + ':' + m.to)
+            }
+            const moves = []
+            const empty = []
+            for (const pos of allPositions()) {
+              if (getCell(slice.board, pos) === null) empty.push(pos)
+            }
+            for (const pos of allPositions()) {
+              if (!tokens[pos]) continue
+              const piece = getCell(slice.board, pos)
+              if (!piece || piece.owner !== playerIdx) continue
+              for (const target of empty) {
+                if (existing.has(pos + ':' + target)) continue
+                moves.push({ action: 'teleport', from: pos, to: target })
+              }
+            }
+            return moves
+          },
+          apply(move, { board, slice }) {
+            const piece = board[move.from]
+            board[move.from] = null
+            board[move.to] = piece
+            const tokens = [...slice._teleportTokens]
+            tokens[move.from] = false
+            tokens[move.to] = false
+            return { board, halfmoveClock: 0, sliceKeys: { _teleportTokens: tokens } }
+          },
+        },
+      } })
+      const selections = []
+      const ctrl = createGameController(game, {
+        players: { white: 'human', black: 'human' },
+        onSelect: (pos, piece, targets) => selections.push({ pos, targets }),
+      })
+      ctrl.handleClick(59)
+      expect(selections.length).toBe(1)
+      const targets = selections[0].targets
+      const teleportTargets = targets.filter(m => m.action === 'teleport')
+      expect(teleportTargets.length).toBeGreaterThan(0)
+      expect(teleportTargets.every(m => m.from === 59)).toBe(true)
+    })
+  })
 })

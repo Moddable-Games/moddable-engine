@@ -61,8 +61,8 @@ describe('proof: Go complete games', () => {
       const game = createGoGame(5, {
         hooks: {
           checkWin: (slice) => {
-            if (slice.captures[0] > 0) return 'black'
-            if (slice.captures[1] > 0) return 'white'
+            if (slice.captures[0] > 0) return 0
+            if (slice.captures[1] > 0) return 1
             return null
           },
         },
@@ -78,7 +78,7 @@ describe('proof: Go complete games', () => {
       game.execute({ coord: 2 })  // black (filler)
       const result = game.execute({ coord: 13 }) // white captures
 
-      expect(result.winner).toBe('white')
+      expect(result.winner).toBe(1)
     })
   })
 

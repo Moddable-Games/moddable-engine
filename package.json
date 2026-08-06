@@ -4,7 +4,9 @@
   "description": "Micro-kernel master engine for all Moddable Games titles",
   "type": "module",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "packages/topologies/*",
+    "packages/plugins/*"
   ],
   "exports": {
     "./core": "./packages/core/index.js",
@@ -18,15 +20,11 @@
     "./rpg": "./packages/rpg/index.js",
     "./ai": "./packages/ai/index.js",
     "./render": "./packages/render/index.js",
-    "./surface": "./packages/surface/index.js",
     "./schema": "./packages/schema/index.js",
     "./game": "./packages/game/index.js",
     "./rule": "./packages/rule/index.js",
     "./piece-behaviour": "./packages/piece-behaviour/index.js",
-    "./board-theme": "./packages/board-theme/index.js",
-    "./piece-theme": "./packages/piece-theme/index.js",
     "./play": "./packages/play/index.js",
-    "./chess-sdk": "./packages/plugins/chess/src/sdk.js",
     "./hex-sdk": "./packages/hex-generators/src/sdk.js",
     "./go-sdk": "./packages/plugins/go/index.js",
     "./draughts-sdk": "./packages/plugins/draughts/index.js"
@@ -34,7 +32,8 @@
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "build": "npm run build --workspaces",
-    "lint": "eslint packages/*/src/**/*.js"
+    "lint": "eslint packages/*/src/**/*.js",
+    "variant-report": "node --experimental-vm-modules scripts/variant-report.mjs"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -43,5 +42,11 @@
     "type": "git",
     "url": "git+https://github.com/Moddable-Games/moddable-engine.git"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "@playwright/test": "^1.62.1",
+    "jest": "^29.7.0",
+    "knip": "^6.31.0"
+  }
 }

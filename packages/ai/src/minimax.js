@@ -3,6 +3,14 @@ const TT_LOWER = 1
 const TT_UPPER = 2
 const TT_SIZE = 1 << 18
 
+const PIECE_ORDER = { pawn: 100, knight: 320, bishop: 330, rook: 500, queen: 900, king: 20000, archbishop: 650, chancellor: 830 }
+
+function historyIndex(move) {
+  const from = (move.from !== undefined ? move.from : 0) & 63
+  const to = (move.to !== undefined ? move.to : 0) & 63
+  return (from << 6) | to
+}
+
 const DIFFICULTIES = {
   beginner: { timeMs: 200, maxDepth: 2, topN: 5, spread: 0.5 },
   easy: { timeMs: 400, maxDepth: 3, topN: 4, spread: 1.0 },
@@ -22,23 +30,65 @@ export function createMinimax(simulator, opts = {}) {
 
   const orderMoves = opts.orderMoves || null
   const isCapture = opts.isCapture || defaultIsCapture
-  const isQuiet = opts.isQuiet || null
+  const openingBook = opts.openingBook || null
 
   let tt = new Array(TT_SIZE).fill(null)
   let ttGeneration = 0
   let deadline = 0
   let nodesSearched = 0
 
+  const killers = new Array(64).fill(null).map(() => [null, null])
+  const history = new Int32Array(4096)
+
+  function resetSearchState() {
+    for (let i = 0; i < 64; i++) { killers[i][0] = null; killers[i][1] = null }
+    history.fill(0)
+  }
+
+  function probeBook(state, playerIndex, moves) {
+    if (!openingBook || !simulator.positionKey) return null
+    const key = simulator.positionKey(state, playerIndex)
+    const entries = openingBook[key]
+    if (!entries || entries.length === 0) return null
+    const notation = entries[Math.floor(Math.random() * entries.length)]
+    const fromCol = notation.charCodeAt(0) - 97
+    const fromRow = 8 - parseInt(notation[1])
+    const toCol = notation.charCodeAt(2) - 97
+    const toRow = 8 - parseInt(notation[3])
+    const from = fromRow * 8 + fromCol
+    const to = toRow * 8 + toCol
+    const promo = notation.length > 4 ? notation[4] : null
+    for (const m of moves) {
+      if (m.from === from && m.to === to) {
+        if (promo && m.promotion !== promo) continue
+        return m
+      }
+    }
+    return null
+  }
+
   function search(state, playerIndex) {
     ttGeneration++
     deadline = Date.now() + timeMs
     nodesSearched = 0
+    resetSearchState()
 
-    const moves = simulator.getLegalMoves(state, playerIndex)
-    if (moves.length === 0) return null
+    const useMakeUnmake = simulator.hasMakeUnmake
+    const scratch = useMakeUnmake ? simulator.cloneState(state) : state
+
+    let moves
+    try {
+      moves = simulator.getLegalMoves(scratch, playerIndex)
+    } catch (e) {
+      return null
+    }
+    if (!moves || moves.length === 0) return null
     if (moves.length === 1) return moves[0]
 
-    const effectiveMaxDepth = getEffectiveDepth(state, maxDepth)
+    const bookMove = probeBook(scratch, playerIndex, moves)
+    if (bookMove) return bookMove
+
+    const effectiveMaxDepth = getEffectiveDepth(scratch, maxDepth)
     let bestResults = moves.map(m => ({ move: m, score: -Infinity }))
 
     for (let depth = 1; depth <= effectiveMaxDepth; depth++) {
@@ -46,14 +96,25 @@ export function createMinimax(simulator, opts = {}) {
 
       const depthResults = []
       let aborted = false
+      let alpha = -Infinity
+      const beta = Infinity
 
       for (const move of orderedMoves(moves, bestResults)) {
         if (Date.now() >= deadline) { aborted = true; break }
 
-        const { state: newState, continueTurn } = simulator.applyMove(state, move, playerIndex)
-        const nextPlayer = simulator.nextPlayer(playerIndex, continueTurn)
-        const score = -negamax(newState, nextPlayer, playerIndex, depth - 1, -Infinity, Infinity)
+        let score
+        if (useMakeUnmake) {
+          const undo = simulator.makeMove(scratch, move, playerIndex)
+          const nextPlayer = simulator.nextPlayer(playerIndex, false)
+          score = -negamax(scratch, nextPlayer, playerIndex, depth - 1, -beta, -alpha, 1)
+          simulator.unmakeMove(scratch, move, undo)
+        } else {
+          const { state: newState, continueTurn } = simulator.applyMove(scratch, move, playerIndex)
+          const nextPlayer = simulator.nextPlayer(playerIndex, continueTurn)
+          score = -negamax(newState, nextPlayer, playerIndex, depth - 1, -beta, -alpha, 1)
+        }
         depthResults.push({ move, score })
+        if (score > alpha) alpha = score
       }
 
       if (!aborted && depthResults.length === moves.length) {
@@ -63,24 +124,25 @@ export function createMinimax(simulator, opts = {}) {
       if (bestResults[0].score >= 90000) break
     }
 
-    return selectMove(bestResults, topN, spread)
+    const result = selectMove(bestResults, topN, spread)
+    return result || moves[0]
   }
 
-  function negamax(state, currentPlayer, maximizingPlayer, depth, alpha, beta) {
+  function negamax(state, currentPlayer, maximizingPlayer, depth, alpha, beta, ply) {
     nodesSearched++
     if (Date.now() >= deadline) return 0
 
-    const terminal = simulator.checkTerminal(state, currentPlayer)
-    if (terminal.over) {
-      return terminal.score * (currentPlayer === maximizingPlayer ? 100000 : -100000)
+    if (simulator.checkWinConditionOnly) {
+      const prevPlayer = (currentPlayer + simulator.playerCount - 1) % simulator.playerCount
+      const win = simulator.checkWinConditionOnly(state, prevPlayer)
+      if (win) {
+        const winnerIsMe = win.score > 0
+        return winnerIsMe ? -100000 : 100000
+      }
     }
 
     if (depth <= 0) {
-      if (isQuiet) {
-        return quiesce(state, currentPlayer, maximizingPlayer, alpha, beta, 6)
-      }
-      const eval_ = simulator.evaluatePosition(state, currentPlayer)
-      return eval_ * (currentPlayer === maximizingPlayer ? 1 : -1) * 1000
+      return quiesce(state, currentPlayer, maximizingPlayer, alpha, beta, 2)
     }
 
     const hash = hashState(state, currentPlayer)
@@ -98,33 +160,61 @@ export function createMinimax(simulator, opts = {}) {
     }
 
     const moves = simulator.getLegalMoves(state, currentPlayer)
-    if (moves.length === 0) return 0
+    if (moves.length === 0) {
+      if (simulator.isInCheck && simulator.isInCheck(state, currentPlayer)) {
+        return -100000
+      }
+      return 0
+    }
 
-    const ordered = orderMovesForSearch(moves, ttBestMove, state, currentPlayer)
+    const safePly = ply < 64 ? ply : 63
+    const ordered = orderMovesForSearch(moves, ttBestMove, state, currentPlayer, safePly)
     let best = -Infinity
     let bestMove = ordered[0]
     let flag = TT_UPPER
 
-    for (const move of ordered) {
-      if (Date.now() >= deadline) break
+    if (simulator.hasMakeUnmake) {
+      for (const move of ordered) {
+        if (Date.now() >= deadline) break
+        const undo = simulator.makeMove(state, move, currentPlayer)
+        const nextPlayer = simulator.nextPlayer(currentPlayer, false)
+        const score = -negamax(state, nextPlayer, maximizingPlayer, depth - 1, -beta, -alpha, ply + 1)
+        simulator.unmakeMove(state, move, undo)
 
-      const { state: newState, continueTurn } = simulator.applyMove(state, move, currentPlayer)
-      const nextPlayer = simulator.nextPlayer(currentPlayer, continueTurn)
-      const score = -negamax(newState, nextPlayer, maximizingPlayer, depth - 1, -beta, -alpha)
-
-      if (score > best) {
-        best = score
-        bestMove = move
+        if (score > best) { best = score; bestMove = move }
+        if (score > alpha) { alpha = score; flag = TT_EXACT }
+        if (alpha >= beta) {
+          flag = TT_LOWER
+          if (!isCapture(move, state.board)) {
+            if (!movesEqual(move, killers[safePly][0])) {
+              killers[safePly][1] = killers[safePly][0]
+              killers[safePly][0] = move
+            }
+            history[historyIndex(move)] += depth * depth
+          }
+          break
+        }
       }
+    } else {
+      for (const move of ordered) {
+        if (Date.now() >= deadline) break
+        const { state: newState, continueTurn } = simulator.applyMove(state, move, currentPlayer)
+        const nextPlayer = simulator.nextPlayer(currentPlayer, continueTurn)
+        const score = -negamax(newState, nextPlayer, maximizingPlayer, depth - 1, -beta, -alpha, ply + 1)
 
-      if (score > alpha) {
-        alpha = score
-        flag = TT_EXACT
-      }
-
-      if (alpha >= beta) {
-        flag = TT_LOWER
-        break
+        if (score > best) { best = score; bestMove = move }
+        if (score > alpha) { alpha = score; flag = TT_EXACT }
+        if (alpha >= beta) {
+          flag = TT_LOWER
+          if (!isCapture(move)) {
+            if (!movesEqual(move, killers[safePly][0])) {
+              killers[safePly][1] = killers[safePly][0]
+              killers[safePly][0] = move
+            }
+            history[historyIndex(move)] += depth * depth
+          }
+          break
+        }
       }
     }
 
@@ -133,47 +223,80 @@ export function createMinimax(simulator, opts = {}) {
   }
 
   function quiesce(state, currentPlayer, maximizingPlayer, alpha, beta, maxQuiesce) {
-    const standPat = simulator.evaluatePosition(state, currentPlayer) *
-      (currentPlayer === maximizingPlayer ? 1 : -1) * 1000
+    nodesSearched++
+    const standPat = simulator.evaluatePosition(state, currentPlayer)
 
     if (standPat >= beta) return standPat
     if (standPat > alpha) alpha = standPat
     if (maxQuiesce <= 0) return standPat
+    if (Date.now() >= deadline) return standPat
+    if (standPat + 1000 < alpha) return standPat
 
     const moves = simulator.getLegalMoves(state, currentPlayer)
-    const captures = moves.filter(m => isCapture(m, state))
+    if (moves.length === 0) {
+      if (simulator.isInCheck && simulator.isInCheck(state, currentPlayer)) return -100000
+      return 0
+    }
+    const board = state && state.board ? state.board : null
+    const captures = moves.filter(m => isCapture(m, board))
     if (captures.length === 0) return standPat
 
-    for (const move of captures) {
-      if (Date.now() >= deadline) break
-
-      const { state: newState, continueTurn } = simulator.applyMove(state, move, currentPlayer)
-      const nextPlayer = simulator.nextPlayer(currentPlayer, continueTurn)
-      const score = -quiesce(newState, nextPlayer, maximizingPlayer, -beta, -alpha, maxQuiesce - 1)
-
-      if (score >= beta) return score
-      if (score > alpha) alpha = score
+    if (simulator.hasMakeUnmake) {
+      for (const move of captures) {
+        if (Date.now() >= deadline) break
+        const undo = simulator.makeMove(state, move, currentPlayer)
+        const nextPlayer = simulator.nextPlayer(currentPlayer, false)
+        const score = -quiesce(state, nextPlayer, maximizingPlayer, -beta, -alpha, maxQuiesce - 1)
+        simulator.unmakeMove(state, move, undo)
+        if (score >= beta) return score
+        if (score > alpha) alpha = score
+      }
+    } else {
+      for (const move of captures) {
+        if (Date.now() >= deadline) break
+        const { state: newState, continueTurn } = simulator.applyMove(state, move, currentPlayer)
+        const nextPlayer = simulator.nextPlayer(currentPlayer, continueTurn)
+        const score = -quiesce(newState, nextPlayer, maximizingPlayer, -beta, -alpha, maxQuiesce - 1)
+        if (score >= beta) return score
+        if (score > alpha) alpha = score
+      }
     }
 
     return alpha
   }
 
-  function orderMovesForSearch(moves, ttBestMove, state, playerIndex) {
+  function orderMovesForSearch(moves, ttBestMove, state, playerIndex, ply) {
     if (orderMoves) return orderMoves(moves, state, playerIndex, ttBestMove)
 
+    const plyKillers = ply !== undefined ? killers[ply] : [null, null]
+    const board = state && state.board ? state.board : null
+
     return moves.slice().sort((a, b) => {
-      const scoreA = moveOrderScore(a, ttBestMove)
-      const scoreB = moveOrderScore(b, ttBestMove)
-      return scoreB - scoreA
+      return moveOrderScore(b, ttBestMove, board, plyKillers) -
+             moveOrderScore(a, ttBestMove, board, plyKillers)
     })
   }
 
-  function moveOrderScore(move, ttBestMove) {
-    if (ttBestMove && movesEqual(move, ttBestMove)) return 100000
-    if (isCapture(move)) return 10000
-    if (move.promote) return 9000
-    if (move.castle) return 500
-    return 0
+  function moveOrderScore(move, ttBestMove, board, plyKillers) {
+    if (ttBestMove && movesEqual(move, ttBestMove)) return 200000
+
+    if (isCapture(move, board)) {
+      const victim = board && move.to !== undefined ? board[move.to] : null
+      const attacker = board && move.from !== undefined ? board[move.from] : null
+      const victimVal = victim ? (PIECE_ORDER[victim.type] || 100) : 100
+      const attackerVal = attacker ? (PIECE_ORDER[attacker.type] || 100) : 100
+      return 100000 + victimVal - (attackerVal >> 3)
+    }
+
+    if (move.promotion) return 90000
+
+    if (plyKillers[0] && movesEqual(move, plyKillers[0])) return 80000
+    if (plyKillers[1] && movesEqual(move, plyKillers[1])) return 70000
+
+    if (move.castle) return 60000
+
+    const histIdx = historyIndex(move)
+    return history[histIdx] || 0
   }
 
   function orderedMoves(moves, previousResults) {
@@ -211,7 +334,9 @@ export function createMinimax(simulator, opts = {}) {
   }
 
   function hashState(state, playerIndex) {
-    const str = JSON.stringify(state) + playerIndex
+    const str = simulator.positionKey
+      ? simulator.positionKey(state, playerIndex)
+      : JSON.stringify(state) + playerIndex
     let hash = 0
     for (let i = 0; i < str.length; i++) {
       hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0
@@ -236,8 +361,12 @@ export function createMinimax(simulator, opts = {}) {
   return { search, clearTT, getStats }
 }
 
-function defaultIsCapture(move) {
-  return !!(move.captures && move.captures.length > 0) || !!move.capture
+function defaultIsCapture(move, board) {
+  if (move.captures && move.captures.length > 0) return true
+  if (move.capture) return true
+  if (move.enPassant) return true
+  if (board && move.to !== undefined && board[move.to]) return true
+  return false
 }
 
 export { DIFFICULTIES }

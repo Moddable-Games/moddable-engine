@@ -9,7 +9,10 @@ import { schema as pitSchema } from '../../topologies/pit/src/topology-pit.js'
 import { schema as graphSchema } from '../../topologies/graph/src/topology-graph.js'
 
 const ALL_TOPOLOGIES = [gridSchema, hexSchema, trackSchema, pitSchema, graphSchema]
-const RULES_DIR = '/Applications/MAMP/htdocs/MODDABLE/moddable-rules/games'
+import { resolveRulesDir } from '../src/rules-dir.js'
+
+const RULES_DIR = resolveRulesDir()
+const describeWithRules = RULES_DIR ? describe : describe.skip
 
 describe('enrichMeta', () => {
   test('adds engine block to existing meta', () => {
@@ -112,11 +115,11 @@ describe('serializeFrontmatter', () => {
   })
 })
 
-describe('enrichDryRun against real files', () => {
+describeWithRules('enrichDryRun against real files', () => {
   const enrichOpts = { topologySchemas: ALL_TOPOLOGIES }
 
   test('already-enriched files are detected', async () => {
-    const path = join(RULES_DIR, 'moddable-chess', 'content', 'variants', 'standard.md')
+    const path = join(RULES_DIR, 'chess', 'content', 'variants', 'standard.md')
     const result = await enrichDryRun(path, enrichOpts)
     expect(result.wouldChange).toBe(false)
     expect(result.reason).toBe('already-enriched')

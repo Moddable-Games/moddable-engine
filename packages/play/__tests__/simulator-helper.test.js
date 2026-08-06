@@ -1,5 +1,9 @@
+import '../test-helpers/setup-rules-reader.js'
 import { createSimulatorForFamily } from '../src/simulator-helper.js'
 import { createGameForFamily } from '../src/play.js'
+import '../../plugins/chess/index.js'
+import '../../plugins/go/index.js'
+import '../../plugins/draughts/index.js'
 
 describe('createSimulatorForFamily', () => {
   it('creates a simulator for chess with correct interface', () => {
@@ -27,8 +31,8 @@ describe('createSimulatorForFamily', () => {
     expect(typeof sim.evaluatePosition).toBe('function')
   })
 
-  it('creates simulator for mancala', () => {
-    const sim = createSimulatorForFamily('mancala')
+  it('creates simulator for draughts', () => {
+    const sim = createSimulatorForFamily('draughts')
     expect(sim.playerCount).toBe(2)
   })
 

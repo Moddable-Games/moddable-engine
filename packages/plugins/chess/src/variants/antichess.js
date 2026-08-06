@@ -1,15 +1,5 @@
 export const antichess = {
   key: 'antichess',
-  label: 'Antichess',
-  group: 'Alternate Rules',
-  title: 'Antichess',
-  description: 'Captures are mandatory. The goal is to lose all your pieces. No check, no castling.',
-  rule: 'Board: 8x8 · Win: Lose all pieces or get stalemated',
-  rows: 8,
-  cols: 8,
-  castling: false,
-  noCheck: true,
-  stalemateMeaning: 'win',
 
   moveFilter(moves, state, ctx) {
     const board = state.board
@@ -22,15 +12,15 @@ export const antichess = {
 
   winCondition(state, ctx) {
     const board = state.board
-    const currentPlayer = ctx.currentPlayer
+    const opponent = 1 - ctx.currentPlayer
     let hasPiece = false
     for (let i = 0; i < board.length; i++) {
-      if (board[i] && board[i].owner === currentPlayer) {
+      if (board[i] && board[i].owner === opponent) {
         hasPiece = true
         break
       }
     }
-    if (!hasPiece) return currentPlayer === 0 ? 'white' : 'black'
+    if (!hasPiece) return opponent
     return null
   },
 
@@ -47,7 +37,4 @@ export const antichess = {
     return (oppCount - myCount) * 200
   },
 
-  openingBook: {
-    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -': ['e2e3', 'b2b4', 'g2g4'],
-  },
 }

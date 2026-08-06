@@ -197,7 +197,7 @@ describe('plugin-draughts', () => {
       const board = new Array(64).fill(null)
       board[28] = { type: 'king', owner: 0 }
       const state = { board, _cols: 8, _chainActive: false, _chainFrom: null }
-      expect(plugin.checkWin(state, makeContext(0))).toBe('player1')
+      expect(plugin.checkWin(state, makeContext(0))).toBe(0)
     })
 
     it('wins when opponent has no legal moves', () => {
@@ -211,7 +211,7 @@ describe('plugin-draughts', () => {
       board[62] = { type: 'man', owner: 1 }
       board[53] = { type: 'man', owner: 0 }
       const state = { board, _cols: 8, _chainActive: false, _chainFrom: null }
-      expect(plugin.checkWin(state, makeContext(0))).toBe('player1')
+      expect(plugin.checkWin(state, makeContext(0))).toBe(0)
     })
 
     it('returns null when game is ongoing', () => {

@@ -1,7 +1,10 @@
 import { createGameFromDefinition } from '../../game/src/create-game.js'
 import { produce } from '../../schema/src/produce.js'
-import { getVariantConfig, hasVariant } from './variant-registry.js'
+import { getVariantConfig, hasVariant, getSlugForKey, setVariantSources as _setVariantSources } from './variant-registry.js'
 import { definitionFromVariant } from './variant-definition.js'
+import { parseFrontmatter } from '../../schema/src/parse-frontmatter.js'
+import { resolve as cascadeResolve } from '../../schema/src/cascade-resolver.js'
+import { resolveSurface } from '../../schema/src/surfaces.js'
 import { createGridTopology } from '../../topologies/grid/src/topology-grid.js'
 import { createHexTopology } from '../../topologies/hex/src/topology-hex.js'
 import { createTrackTopology } from '../../topologies/track/src/topology-track.js'
@@ -9,18 +12,10 @@ import { createPitTopology } from '../../topologies/pit/src/topology-pit.js'
 import { createGraphTopology } from '../../topologies/graph/src/topology-graph.js'
 import { createTableauTopology } from '../../topologies/tableau/src/topology-tableau.js'
 import { createGoPlugin } from '../../plugins/go/src/go-plugin.js'
-import { createMancalaPlugin } from '../../plugins/mancala/src/mancala-plugin.js'
-import { createMorrisPlugin } from '../../plugins/morris/src/morris-plugin.js'
-import { createBackgammonPlugin } from '../../plugins/backgammon/src/backgammon-plugin.js'
 import { createDraughtsPlugin } from '../../plugins/draughts/src/draughts-plugin.js'
-import { createReversiPlugin } from '../../plugins/reversi/src/reversi-plugin.js'
-import { createHalmaPlugin } from '../../plugins/halma/src/halma-plugin.js'
 import { createShogiPlugin } from '../../plugins/shogi/src/shogi-plugin.js'
 import { createXiangqiPlugin } from '../../plugins/xiangqi/src/xiangqi-plugin.js'
-import { createRacePlugin } from '../../plugins/race/src/race-plugin.js'
-import { createHexPlugin } from '../../plugins/hex/src/hex-plugin.js'
 import { createChessPlugin } from '../../plugins/chess/src/chess-plugin.js'
-import { createBig2Plugin } from '../../plugins/big2/src/big2-plugin.js'
 import { createStandard52Deck } from '../../component-deck/src/standard-52.js'
 
 const TOPOLOGIES = {
@@ -33,17 +28,9 @@ const TOPOLOGIES = {
 }
 
 const PLUGIN_FACTORIES = {
-  backgammon: createBackgammonPlugin,
-  big2: createBig2Plugin,
   chess: createChessPlugin,
   draughts: createDraughtsPlugin,
   go: createGoPlugin,
-  halma: createHalmaPlugin,
-  hex: createHexPlugin,
-  mancala: createMancalaPlugin,
-  morris: createMorrisPlugin,
-  race: createRacePlugin,
-  reversi: createReversiPlugin,
   shogi: createShogiPlugin,
   xiangqi: createXiangqiPlugin,
 }
@@ -145,6 +132,15 @@ export function createGameForFamily(family, opts = {}) {
       return game.undo()
     },
 
+    getVisibility(viewerIndex) {
+      const slice = game.getState(family)
+      const plugin = game.registry.getPlugins().find(p => p.sliceName === family)
+      if (plugin && plugin.getVisibility) {
+        return plugin.getVisibility(slice, game.store.getAll(), viewerIndex)
+      }
+      return null
+    },
+
     get topology() {
       return game.topology
     },
@@ -155,16 +151,116 @@ export function createGameForFamily(family, opts = {}) {
   }
 }
 
+let _readFile = null
+
+export function setRulesReader(readFn, listFn) {
+  _readFile = readFn
+  if (listFn) {
+    _setVariantSources(listFn, readFn)
+  }
+}
+
+export const STRUCTURAL_KEYS = new Set(['topology', 'players', 'meta', 'surface', 'render', 'components', 'plugins'])
+
+function resolveFromDisk(family, variant) {
+  if (!_readFile) return null
+
+  const slug = getSlugForKey(family, variant)
+  let familyMd, variantMd
+  try { familyMd = _readFile(family, 'rulebook') } catch { return null }
+  try { variantMd = _readFile(family, slug) } catch { variantMd = '' }
+
+  if (!variantMd && variant && variant !== 'standard') return null
+
+  const familyFm = parseFrontmatter(familyMd).meta || {}
+  const variantFm = variantMd ? (parseFrontmatter(variantMd).meta || {}) : {}
+  const surfaceRef = variantFm.engine?.surface || familyFm.engine?.surface
+  const surface = resolveSurface(surfaceRef)
+  const { resolved } = cascadeResolve({
+    surface,
+    family: { engine: familyFm.engine || {}, meta: { label: familyFm.title || '' } },
+    variant: { engine: variantFm.engine || {}, meta: { label: variantFm.title || '' } },
+  })
+
+  const pluginBlock = resolved.plugins?.[family]
+  if (pluginBlock?.extends) {
+    const parentResolved = resolveFromDisk(family, pluginBlock.extends)
+    if (parentResolved) {
+      const parentPlugin = parentResolved.plugins?.[family] || {}
+      const merged = { ...parentPlugin, ...pluginBlock }
+      delete merged.extends
+      if (!resolved.plugins) resolved.plugins = {}
+      resolved.plugins[family] = merged
+    }
+  }
+
+  return resolved
+}
+
 function resolveMeta(family, variant) {
-  if (variant && hasVariant(family, variant)) {
-    const config = getVariantConfig(family, variant)
+  const registryConfig = variant && hasVariant(family, variant) ? getVariantConfig(family, variant) : null
+
+  if (registryConfig) {
+    const resolved = resolveFromDisk(family, variant)
+    if (resolved) {
+      const topo = resolved.topology || {}
+      const players = resolved.players || ['white', 'black']
+      const pluginConfig = {}
+      if (resolved.plugins && resolved.plugins[family]) {
+        Object.assign(pluginConfig, resolved.plugins[family])
+      }
+      for (const [k, v] of Object.entries(resolved)) {
+        if (STRUCTURAL_KEYS.has(k)) continue
+        if (v !== undefined) pluginConfig[k] = v
+      }
+      for (const [k, v] of Object.entries(registryConfig)) {
+        if (k === 'key' || STRUCTURAL_KEYS.has(k)) continue
+        pluginConfig[k] = v
+      }
+      const def = {
+        title: resolved.meta?.label || variant,
+        slug: variant,
+        parent: family,
+        engine: { players, plugins: { [family]: pluginConfig } },
+      }
+      if (topo.type) def.engine.topology = { ...topo }
+      return def
+    }
     const defaults = DEFAULT_DEFINITIONS[family]
     const base = defaults ? (defaults.default.engine || {}) : {}
-    return definitionFromVariant(family, config, {
+    return definitionFromVariant(family, registryConfig, {
       topology: base.topology || {},
       players: base.players,
     })
   }
+
+  const resolved = variant ? resolveFromDisk(family, variant) : null
+  if (resolved) {
+    const topo = resolved.topology || {}
+    const players = resolved.players || ['white', 'black']
+    const pluginConfig = {}
+    if (resolved.plugins && resolved.plugins[family]) {
+      Object.assign(pluginConfig, resolved.plugins[family])
+    }
+    for (const [k, v] of Object.entries(resolved)) {
+      if (STRUCTURAL_KEYS.has(k)) continue
+      if (k === 'pieces' && v && (v.set || v.vocabulary)) continue
+      if (v !== undefined) pluginConfig[k] = v
+    }
+    const def = {
+      title: resolved.meta?.label || variant,
+      slug: variant,
+      parent: family,
+      engine: { players, plugins: { [family]: pluginConfig } },
+    }
+    if (topo.type) def.engine.topology = { ...topo }
+    return def
+  }
+
+  if (variant) {
+    throw new Error(`Unknown variant "${variant}" for family "${family}". Not in registry and not found on disk.`)
+  }
+
   return getDefaultMeta(family, variant)
 }
 
@@ -185,35 +281,10 @@ const DEFAULT_DEFINITIONS = {
       title: 'Go 19x19',
       slug: 'standard',
       parent: 'go',
-      players: '2',
       engine: {
         topology: { type: 'grid', rows: 19, cols: 19 },
         players: ['black', 'white'],
         plugins: { go: { size: 361 } },
-      },
-    },
-    variants: {
-      '9x9': {
-        title: 'Go 9x9',
-        slug: '9x9',
-        parent: 'go',
-        players: '2',
-        engine: {
-          topology: { type: 'grid', rows: 9, cols: 9 },
-          players: ['black', 'white'],
-          plugins: { go: { size: 81 } },
-        },
-      },
-      '13x13': {
-        title: 'Go 13x13',
-        slug: '13x13',
-        parent: 'go',
-        players: '2',
-        engine: {
-          topology: { type: 'grid', rows: 13, cols: 13 },
-          players: ['black', 'white'],
-          plugins: { go: { size: 169 } },
-        },
       },
     },
   },
@@ -222,85 +293,10 @@ const DEFAULT_DEFINITIONS = {
       title: 'Standard Chess',
       slug: 'standard',
       parent: 'chess',
-      players: '2',
       engine: {
         topology: { type: 'grid', rows: 8, cols: 8 },
         players: ['white', 'black'],
         plugins: { chess: { setup: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' } },
-      },
-    },
-  },
-  mancala: {
-    default: {
-      title: 'Kalah',
-      slug: 'kalah',
-      parent: 'mancala',
-      players: '2',
-      engine: {
-        topology: { type: 'pit', pitsPerSide: 6, hasStores: true },
-        players: ['player1', 'player2'],
-        plugins: { mancala: {} },
-      },
-    },
-    variants: {
-      oware: {
-        title: 'Oware',
-        slug: 'oware',
-        parent: 'mancala',
-        players: '2',
-        engine: {
-          topology: { type: 'pit', pitsPerSide: 6, hasStores: true },
-          players: ['player1', 'player2'],
-          plugins: { mancala: { seeds: 4, captureRule: 'oware', lastSeedInStore: 'none' } },
-        },
-      },
-    },
-  },
-  morris: {
-    default: {
-      title: 'Nine Mens Morris',
-      slug: 'nine-mens',
-      parent: 'morris',
-      players: '2',
-      engine: {
-        topology: {
-          type: 'graph',
-          nodes: ['a1', 'a4', 'a7', 'b2', 'b4', 'b6', 'c3', 'c4', 'c5', 'd1', 'd2', 'd3', 'd5', 'd6', 'd7', 'e3', 'e4', 'e5', 'f2', 'f4', 'f6', 'g1', 'g4', 'g7'],
-          edges: [
-            ['a1', 'a4'], ['a4', 'a7'], ['b2', 'b4'], ['b4', 'b6'], ['c3', 'c4'], ['c4', 'c5'],
-            ['d1', 'd2'], ['d2', 'd3'], ['d5', 'd6'], ['d6', 'd7'],
-            ['e3', 'e4'], ['e4', 'e5'], ['f2', 'f4'], ['f4', 'f6'], ['g1', 'g4'], ['g4', 'g7'],
-            ['a1', 'd1'], ['d1', 'g1'], ['b2', 'd2'], ['d2', 'f2'],
-            ['c3', 'd3'], ['d3', 'e3'], ['a4', 'b4'], ['b4', 'c4'],
-            ['e4', 'f4'], ['f4', 'g4'], ['c5', 'd5'], ['d5', 'e5'],
-            ['b6', 'd6'], ['d6', 'f6'], ['a7', 'd7'], ['d7', 'g7'],
-          ],
-        },
-        players: ['player1', 'player2'],
-        plugins: {
-          morris: {
-            mills: [
-              ['a1', 'a4', 'a7'], ['b2', 'b4', 'b6'], ['c3', 'c4', 'c5'],
-              ['d1', 'd2', 'd3'], ['d5', 'd6', 'd7'],
-              ['e3', 'e4', 'e5'], ['f2', 'f4', 'f6'], ['g1', 'g4', 'g7'],
-              ['a1', 'd1', 'g1'], ['b2', 'd2', 'f2'], ['c3', 'd3', 'e3'],
-              ['a4', 'b4', 'c4'], ['e4', 'f4', 'g4'],
-              ['c5', 'd5', 'e5'], ['b6', 'd6', 'f6'], ['a7', 'd7', 'g7'],
-            ],
-          },
-        },
-      },
-    },
-  },
-  backgammon: {
-    default: {
-      title: 'Standard Backgammon',
-      slug: 'standard',
-      parent: 'backgammon',
-      players: '2',
-      engine: {
-        players: ['white', 'black'],
-        plugins: { backgammon: {} },
       },
     },
   },
@@ -309,37 +305,10 @@ const DEFAULT_DEFINITIONS = {
       title: 'English Draughts',
       slug: 'english',
       parent: 'draughts',
-      players: '2',
       engine: {
         topology: { type: 'grid', rows: 8, cols: 8 },
         players: ['white', 'black'],
         plugins: { draughts: {} },
-      },
-    },
-  },
-  reversi: {
-    default: {
-      title: 'Standard Reversi',
-      slug: 'standard',
-      parent: 'reversi',
-      players: '2',
-      engine: {
-        topology: { type: 'grid', rows: 8, cols: 8 },
-        players: ['black', 'white'],
-        plugins: { reversi: {} },
-      },
-    },
-  },
-  halma: {
-    default: {
-      title: 'Standard 2-Player Halma',
-      slug: 'standard-2p',
-      parent: 'halma',
-      players: '2',
-      engine: {
-        topology: { type: 'grid', rows: 8, cols: 8 },
-        players: ['player1', 'player2'],
-        plugins: { halma: { rows: 8, cols: 8, piecesPerPlayer: 4 } },
       },
     },
   },
@@ -348,10 +317,9 @@ const DEFAULT_DEFINITIONS = {
       title: 'Minishogi',
       slug: 'minishogi',
       parent: 'shogi',
-      players: '2',
       engine: {
         topology: { type: 'grid', rows: 5, cols: 5 },
-        players: ['player1', 'player2'],
+        players: ['sente', 'gote'],
         plugins: { shogi: { rows: 5, cols: 5, promotionZone: 1 } },
       },
     },
@@ -361,50 +329,10 @@ const DEFAULT_DEFINITIONS = {
       title: 'Standard Xiangqi',
       slug: 'standard',
       parent: 'xiangqi',
-      players: '2',
       engine: {
         topology: { type: 'grid', rows: 10, cols: 9 },
         players: ['red', 'black'],
         plugins: { xiangqi: {} },
-      },
-    },
-  },
-  race: {
-    default: {
-      title: 'Standard Pachisi',
-      slug: 'standard',
-      parent: 'pachisi',
-      players: '2-4',
-      engine: {
-        topology: { type: 'track', positions: 68 },
-        players: ['red', 'yellow', 'green', 'blue'],
-        plugins: { race: { positions: 68, piecesPerPlayer: 4, playerCount: 4 } },
-      },
-    },
-  },
-  hex: {
-    default: {
-      title: 'Hex 11x11',
-      slug: 'standard',
-      parent: 'hex',
-      players: '2',
-      engine: {
-        topology: { type: 'hex', radius: 5, shape: 'rhombus' },
-        players: ['black', 'white'],
-        plugins: { hex: { size: 11 } },
-      },
-    },
-  },
-  big2: {
-    default: {
-      title: 'Big 2',
-      slug: 'standard',
-      parent: 'big2',
-      players: '4',
-      engine: {
-        players: ['player1', 'player2', 'player3', 'player4'],
-        components: { deck: { type: 'standard-52' } },
-        plugins: { big2: { playerCount: 4 } },
       },
     },
   },

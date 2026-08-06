@@ -1,18 +1,10 @@
 export const horde = {
   key: 'horde',
-  label: 'Horde Chess',
-  group: 'Alternate Rules',
-  title: 'Horde Chess',
-  description: 'Massively asymmetric. White has 36 pawns filling ranks 1-4. Black has a normal army.',
-  rule: 'Board: 8x8 · Win: Checkmate (Black) or eliminate horde',
-  rows: 8,
-  cols: 8,
-  setup: 'rnbqkbnr/pppppppp/8/1PP2PP1/PPPPPPPP/PPPPPPPP/PPPPPPPP/PPPPPPPP',
 
   winCondition(state, ctx) {
     const board = state.board
     const whiteHasPieces = board.some(p => p && p.owner === 0)
-    if (!whiteHasPieces) return 'black'
+    if (!whiteHasPieces) return 1
     return null
   },
 
@@ -30,7 +22,4 @@ export const horde = {
     return blackMaterial * 0.3 - whitePawns * 30
   },
 
-  openingBook: {
-    'rnbqkbnr/pppppppp/8/1PP2PP1/PPPPPPPP/PPPPPPPP/PPPPPPPP/PPPPPPPP w kq -': ['f5f6', 'c5c6', 'e4e5'],
-  },
 }
