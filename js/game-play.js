@@ -205,7 +205,7 @@ export function createPlaySession(options = {}) {
     container,
     handContainer = null,
     capturedContainer = null,
-    opponent = 'human',
+    opponent = 'ai',
     difficulty = 'medium',
     theme = 'classic',
     seat = '0',
@@ -1038,9 +1038,9 @@ export async function initGamePlay(container, defaults = {}) {
   const familySelect = buildSelect(leftSidebar, 'Game', PLAYABLE_FAMILIES.map(f => ({ value: f, label: FAMILY_LABELS[f] })), family)
   const variantSelect = buildGroupedSelect(leftSidebar, 'Variant', variantsForFamily(family), variant)
   const opponentSelect = buildSelect(leftSidebar, 'Opponent', [
-    { value: 'human', label: 'Human vs Human' },
     { value: 'ai', label: 'vs AI' },
-  ], params.opponent === 'ai' ? 'ai' : 'human')
+    { value: 'human', label: 'Human vs Human' },
+  ], params.opponent === 'human' ? 'human' : 'ai')
   function difficultyOptionsFor(f) {
     return FAMILY_AI_OPTIONS[f] || DIFFICULTIES.map(d => ({ value: d, label: d[0].toUpperCase() + d.slice(1) }))
   }
@@ -1215,7 +1215,7 @@ export async function initGamePlay(container, defaults = {}) {
     params.set('family', config.family)
     if (config.variant) params.set('variant', config.variant)
     else params.delete('variant')
-    if (config.opponent === 'ai') params.set('opponent', 'ai')
+    if (config.opponent === 'human') params.set('opponent', 'human')
     else params.delete('opponent')
     if (config.difficulty && config.difficulty !== 'medium') params.set('difficulty', config.difficulty)
     else params.delete('difficulty')
