@@ -239,6 +239,9 @@ export function renderFromEngine(resolved, opts = {}) {
     parts.push(collectDefs(position, opts.pieceDefs))
   }
 
+  const flipNonGrid = opts.flipped && topo.type !== 'grid'
+  if (flipNonGrid) parts.push(`<g transform="rotate(180 ${W / 2} ${H / 2})">`)
+
   parts.push(elementsToFragment(layout.elements))
 
   if (render.overlays && render.overlays.length > 0) {
@@ -250,13 +253,17 @@ export function renderFromEngine(resolved, opts = {}) {
   if (topo.type === 'grid' && position && Object.keys(position).length > 0 && layout.cells) {
     const tileSize = render.cellSize || 40
     const colors = surface.colors || {}
+    const idStyle = (resolved.render || {}).idStyle
     const displayPosition = opts.flipped
-      ? flipPosition(position, topo.rows || 8, topo.cols || 8)
+      ? flipPosition(position, topo.rows || 8, topo.cols || 8, idStyle === 'go' ? GO_ALPHA : null)
       : position
-    parts.push(`<g pointer-events="none">${renderPiecesFromCells(displayPosition, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: resolved.pieceRotations, getOwner, pieceDefs: opts.pieceDefs, colors })}</g>`)
+    const effectiveRotations = opts.flipped ? flipRotations(resolved.pieceRotations) : resolved.pieceRotations
+    parts.push(`<g pointer-events="none">${renderPiecesFromCells(displayPosition, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: effectiveRotations, getOwner, pieceDefs: opts.pieceDefs, colors })}</g>`)
   } else if (position && Object.keys(position).length > 0) {
     parts.push(`<g pointer-events="none"></g>`)
   }
+
+  if (flipNonGrid) parts.push('</g>')
 
   if (layout.labels && layout.labels.length > 0) {
     parts.push(layout.labels.map(lbl => elementToSvg(lbl)).join(''))
@@ -268,14 +275,27 @@ export function renderFromEngine(resolved, opts = {}) {
 
 // --- Flip support ---
 
-function flipPosition(position, rows, cols) {
+function flipPosition(position, rows, cols, alpha) {
   const flipped = {}
   for (const [alg, piece] of Object.entries(position)) {
-    const file = alg.charCodeAt(0) - 97
+    const fileChar = alg[0]
+    const file = alpha ? alpha.indexOf(fileChar) : (fileChar.charCodeAt(0) - 97)
+    if (file < 0) continue
     const rank = parseInt(alg.slice(1), 10)
     const newFile = cols - 1 - file
     const newRank = rows + 1 - rank
-    flipped[`${String.fromCharCode(97 + newFile)}${newRank}`] = piece
+    const newFileChar = alpha ? alpha[newFile] : String.fromCharCode(97 + newFile)
+    if (!newFileChar) continue
+    flipped[`${newFileChar}${newRank}`] = piece
+  }
+  return flipped
+}
+
+function flipRotations(rotations) {
+  if (!rotations) return null
+  const flipped = {}
+  for (const [owner, deg] of Object.entries(rotations)) {
+    flipped[owner] = deg ? 0 : 180
   }
   return flipped
 }
@@ -348,7 +368,10 @@ function renderPiecesFromCells(position, cells, tileSize, opts) {
       const surfaceMap = opts.pieceSurfaceMap || {}
       const hasSurface = opts.pieceBorders || surfaceMap[imageKey]
       const rotations = opts.pieceRotations
-      const rot = rotations && opts.getOwner ? rotations[opts.getOwner(piece.type)] : 0
+      const ownerForRot = opts.getOwner
+        ? opts.getOwner(piece.type)
+        : (piece.type === piece.type.toUpperCase() && piece.type !== piece.type.toLowerCase() ? 'white' : 'black')
+      const rot = rotations ? (rotations[ownerForRot] || 0) : 0
       if (hasSurface) {
         const isUpper = piece.type === piece.type.toUpperCase()
         const owner = opts.getOwner ? opts.getOwner(piece.type) : (isUpper ? 'white' : 'black')

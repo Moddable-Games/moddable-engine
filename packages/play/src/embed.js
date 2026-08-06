@@ -24,7 +24,7 @@ export function parseEmbedParams(search, defaults = {}) {
     fullscreen: params.get('fullscreen') === '1',
     family: params.get('family') || params.get('game') || defaults.family || 'chess',
     variant: params.get('variant') || defaults.variant || 'standard',
-    opponent: params.get('opponent') || (embed ? 'ai' : 'human'),
+    opponent: params.get('opponent') || 'ai',
     difficulty: params.get('difficulty') || defaults.difficulty || 'medium',
     color: params.get('color') || defaults.color || null,
     pieces: params.get('pieces') || defaults.pieces || null,

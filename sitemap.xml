@@ -53,6 +53,34 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/docs/chess.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/docs/go.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/docs/draughts.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/docs/xiangqi.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/docs/shogi.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/docs/reversi.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/docs/hexmaps.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/llms.txt</loc>
     <priority>0.5</priority>
   </url>

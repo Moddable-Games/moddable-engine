@@ -885,6 +885,27 @@
     "playable": true
   },
   {
+    "family": "reversi",
+    "variant": "anti-reversi",
+    "label": "Anti-Reversi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "reversi",
+    "variant": "six-by-six",
+    "label": "Six-by-Six Reversi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "reversi",
+    "variant": "standard",
+    "label": "Standard Reversi",
+    "group": "Other",
+    "playable": true
+  },
+  {
     "family": "shogi",
     "variant": "gorogoro-plus",
     "label": "Gorogoro+",

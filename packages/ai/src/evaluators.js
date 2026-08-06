@@ -102,7 +102,8 @@ export function reversiEvaluate(state, playerIndex) {
     else if (isXSquare) weight = -500
     else if (isEdge) weight = 500
 
-    if (board[i] === playerIndex) {
+    const owner = typeof board[i] === 'object' ? board[i].owner : board[i]
+    if (owner === playerIndex) {
       score += weight
     } else {
       score -= weight

@@ -8,7 +8,7 @@ Every game in the Moddable Games collection — from standard chess to Endless S
 
 ## Status
 
-**Five families playable today** — chess (100 variants), draughts (13), go (9), shogi (5), xiangqi (3). 130 registered variants total, 129 of which carry zero declarative JavaScript: games are defined entirely in frontmatter. A further eight plugins exist for reversi, mancala, backgammon, morris, hex, halma, big 2, and race games, with playable variants to follow.
+**Six families playable today** — chess (100 variants), draughts (13), go (9), shogi (5), xiangqi (3), reversi (3). 133 registered variants total, 132 of which carry zero declarative JavaScript: games are defined entirely in frontmatter. A further seven plugins exist for mancala, backgammon, morris, hex, halma, big 2, and race games, with playable variants to follow.
 
 Rules are implemented as plugin hooks — move filters, win conditions, turn logic, post-move effects. Each family currently defines its own. Lifting these into a shared, composable rule layer is the next architectural step (#88).
 
@@ -81,7 +81,7 @@ moddable-engine/
 | 3 | `@moddable/render` | Topology-agnostic SVG board renderer |
 | 4 | `@moddable/schema` | Frontmatter → game definitions (done) |
 | 5 | `@moddable/component-*` | Non-spatial structure: deck, dice, timer |
-| 6 | `@moddable/plugin-*` | Game families — 5 playable (chess, draughts, go, shogi, xiangqi) + 8 in progress |
+| 6 | `@moddable/plugin-*` | Game families — 6 playable (chess, draughts, go, shogi, xiangqi, reversi) + 7 in progress |
 | 7 | Game configs | Frontmatter only — no code |
 
 ---
@@ -117,6 +117,14 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ---
 
 ## Changelog
+
+#### 2026-08-06
+- CI pipeline fully green for the first time (PR #92 merged): unit-tests (3021), playability-standard, Playwright e2e (50 tests)
+- Fixed: jest/@jest/globals removed by knip cleanup restored to root devDependencies
+- Fixed: Playwright CI serves engine + rules as siblings so RULES_BASE resolves correctly
+- Fixed: AI NPS floor lowered to 150 for CI (catches catastrophic regressions, survives runner variance)
+- Fixed: sittuyin piece set filtering regression (placementPieces read from resolved frontmatter)
+- moddable-rules dev merged to main (22 commits: playable:true, engine plugin blocks)
 
 #### 2026-08-05
 - Split chess variant files: every variant now in its own kebab-case file (53 files, no multi-variant bundles)

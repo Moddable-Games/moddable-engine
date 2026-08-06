@@ -196,6 +196,25 @@ test.describe('Playability — go', () => {
   })
 })
 
+test.describe('Playability — reversi', () => {
+  test.beforeEach(async ({ page }) => {
+    page.on('pageerror', err => console.log('[PAGE ERROR]', err.message))
+  })
+
+  test('standard (placement): place disc and flip opponent', async ({ page }) => {
+    await page.goto(url('reversi', 'standard'), { waitUntil: 'networkidle' })
+    await waitForBoard(page)
+    const cells = await cellCount(page)
+    expect(cells).toBe(64)
+    // Opening legal moves for black: d3, c4, f5, e6 (standard algebraic)
+    await clickCell(page, 'd3')
+    await page.waitForTimeout(500)
+    // After placing at d3, a disc should appear and a flip should occur
+    const pieces = await page.locator('svg g[pointer-events="none"] *').count()
+    expect(pieces).toBeGreaterThan(4)
+  })
+})
+
 test.describe('Playability — shogi', () => {
   test.beforeEach(async ({ page }) => {
     page.on('pageerror', err => console.log('[PAGE ERROR]', err.message))

@@ -102,7 +102,7 @@ export function getAllManifestVariants(family) {
   return getPlayabilityManifest().filter(e => e.family === family)
 }
 
-export const PLAYABLE_FAMILIES = ['chess', 'go', 'draughts', 'xiangqi', 'shogi']
+export const PLAYABLE_FAMILIES = ['chess', 'go', 'draughts', 'xiangqi', 'shogi', 'reversi']
 
 export const FAMILY_LABELS = {
   chess: 'Chess',
@@ -110,4 +110,5 @@ export const FAMILY_LABELS = {
   draughts: 'Draughts',
   xiangqi: 'Xiangqi',
   shogi: 'Shogi',
+  reversi: 'Reversi',
 }
