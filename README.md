@@ -12,7 +12,7 @@ Every game in the Moddable Games collection — from standard chess to Endless S
 
 Rules are implemented as plugin hooks — move filters, win conditions, turn logic, post-move effects. Each family currently defines its own. Lifting these into a shared, composable rule layer is the next architectural step (#88).
 
-The play surface (interaction, embed protocol, variant registry, SDK) is family-agnostic and lives in `packages/play`. All five playable families share the same kit: embed, play page, simulator, and headless SDK. ~2700 tests across ~110 suites, all passing.
+The play surface (interaction, embed protocol, variant registry, SDK) is family-agnostic and lives in `packages/play`. All six playable families share the same kit: embed, play page, simulator, and headless SDK. 3045 tests across 132 suites, all passing.
 
 Read [`SPEC.md`](./SPEC.md) before contributing anything.
 
@@ -56,7 +56,7 @@ moddable-engine/
     plugin-go/           ← 9 variants (capture-go, gomoku, stoical have JS hooks)
     plugin-shogi/        ← 5 variants (all frontmatter-only, no variant code)
     plugin-xiangqi/      ← 3 variants (all frontmatter-only, no variant code)
-    plugin-reversi/      ← plugin only (variants not yet registered)
+    plugin-reversi/      ← 3 variants (flanking capture, anti-reversi)
     plugin-mancala/      ← plugin only
     plugin-backgammon/   ← plugin only
     plugin-morris/       ← plugin only
@@ -120,6 +120,7 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 #### 2026-08-06
 - CI pipeline fully green for the first time (PR #92 merged): unit-tests (3021), playability-standard, Playwright e2e (50 tests)
+- Fixed: opening books inert since conformance migration (PR #97). Parser now strips quote chars from YAML keys; variantOpeningBook reads from definition object (browser-safe), not resolveFromDisk (Node-only)
 - Fixed: jest/@jest/globals removed by knip cleanup restored to root devDependencies
 - Fixed: Playwright CI serves engine + rules as siblings so RULES_BASE resolves correctly
 - Fixed: AI NPS floor lowered to 150 for CI (catches catastrophic regressions, survives runner variance)
