@@ -60,25 +60,34 @@ jobs:
     needs: unit-tests
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: moddable-engine
+      - uses: actions/checkout@v4
+        with:
+          repository: Moddable-Games/moddable-rules
+          path: moddable-rules
+          ref: dev
       - uses: actions/setup-node@v4
         with:
           node-version: 20
       - run: npm ci --ignore-scripts
-      - run: npm i @playwright/test
+        working-directory: moddable-engine
       - run: npx playwright install --with-deps chromium
+        working-directory: moddable-engine
       - name: Start dev server
         run: npx serve . -l 8080 &
       - name: Wait for server
-        run: npx wait-on http://localhost:8080 --timeout 10000
+        run: npx wait-on http://localhost:8080/moddable-engine/ --timeout 10000
       - name: Playwright e2e (playability + game-play)
         run: npx playwright test e2e/
+        working-directory: moddable-engine
         env:
-          BASE_URL: http://localhost:8080
+          BASE_URL: http://localhost:8080/moddable-engine
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: playwright-report
-          path: test-results/
+          path: moddable-engine/test-results/
 
   # Gate job: branch protection should require this check.
   # All CI jobs must pass for this to succeed.
