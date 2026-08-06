@@ -1,4 +1,4 @@
-import { createGameForFamily, getFamilies, hasFamily, defaultPlayersFor, defaultTopologyFor, resolveFromDisk } from './play.js'
+import { createGameForFamily, getFamilies, hasFamily, defaultPlayersFor, defaultTopologyFor } from './play.js'
 import { createSimulatorForFamily } from './simulator-helper.js'
 import { renderStateAsSvg } from './render-helper.js'
 import {
@@ -84,7 +84,7 @@ export function createAI(family, variant, opts = {}) {
     ? createMCTS(simulator, mctsOpts)
     : createMinimax(simulator, {
         difficulty,
-        openingBook: variantOpeningBook(family, variant),
+        openingBook: variantOpeningBook(family, variant, opts.definition),
         ...opts.searchOpts,
       })
 
@@ -156,13 +156,10 @@ function variantEvaluator(family, variant) {
   }
 }
 
-function variantOpeningBook(family, variant) {
+function variantOpeningBook(family, variant, definition) {
   if (!variant) return undefined
-  const resolved = resolveFromDisk(family, variant)
-  if (resolved) {
-    const book = resolved.plugins?.[family]?.openingBook
-    if (book) return book
-  }
+  const book = definition?.engine?.plugins?.[family]?.openingBook
+  if (book) return book
   const config = getVariantConfig(family, variant)
   return (config && config.openingBook) || undefined
 }

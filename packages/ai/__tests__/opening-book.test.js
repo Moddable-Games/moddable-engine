@@ -1,5 +1,6 @@
 import { createOpeningBook } from '../src/opening-book.js'
-import { resolveFromDisk } from '../../play/src/play.js'
+import { resolveFromDisk, setRulesReader } from '../../play/src/play.js'
+import { createAI } from '../../play/src/sdk.js'
 import '../../plugins/chess/index.js'
 import '../../play/test-helpers/setup-rules-reader.js'
 
@@ -102,4 +103,28 @@ describe('AI — opening book from frontmatter', () => {
       }
     })
   }
+})
+
+describe('AI — opening book via definition (browser path)', () => {
+  it('resolves book from definition when _readFile is unset', () => {
+    const resolved = resolveFromDisk('chess', 'standard')
+    const openingBook = resolved.plugins.chess.openingBook
+
+    const definition = {
+      title: 'Standard Chess',
+      slug: 'standard',
+      parent: 'chess',
+      engine: {
+        topology: { type: 'grid', rows: 8, cols: 8 },
+        players: ['white', 'black'],
+        plugins: { chess: { setup: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', openingBook } },
+      },
+    }
+
+    // Simulate browser: no filesystem reader available
+    setRulesReader(null, null)
+    const ai = createAI('chess', 'standard', { definition, difficulty: 'beginner' })
+    expect(ai).toBeDefined()
+    expect(ai.search).toBe('minimax')
+  })
 })
