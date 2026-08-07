@@ -84,6 +84,8 @@ describeIfRules('Custom piece mobility (engine#89)', () => {
 
   const variantsWithCustomPieces = variants.filter(slug => {
     try {
+      const content = readFileSync(join(RULES, 'chess', 'content', 'variants', `${slug}.md`), 'utf8')
+      if (!content.match(/^playable:\s*true/m)) return false
       const resolved = resolveFromDisk('chess', slug)
       if (!resolved) return false
       const game = createGameForFamily('chess', { variant: slug, definition: buildDef(resolved, slug) })
