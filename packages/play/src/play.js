@@ -322,7 +322,7 @@ const DEFAULT_DEFINITIONS = {
       engine: {
         topology: { type: 'grid', rows: 5, cols: 5 },
         players: ['sente', 'gote'],
-        plugins: { shogi: { rows: 5, cols: 5, promotionZone: 1 } },
+        plugins: { shogi: { rows: 5, cols: 5, promotionZone: 1, setup: 'rbsgk/4p/5/P4/KGSBR' } },
       },
     },
   },
@@ -334,7 +334,19 @@ const DEFAULT_DEFINITIONS = {
       engine: {
         topology: { type: 'grid', rows: 10, cols: 9 },
         players: ['red', 'black'],
-        plugins: { xiangqi: {} },
+        plugins: { xiangqi: { setup: 'rheakaehr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RHEAKAEHR' } },
+      },
+    },
+  },
+  reversi: {
+    default: {
+      title: 'Standard Reversi',
+      slug: 'standard',
+      parent: 'reversi',
+      engine: {
+        topology: { type: 'grid', rows: 8, cols: 8 },
+        players: ['black', 'white'],
+        plugins: { reversi: { setup: '8/8/8/3bw3/3wb3/8/8/8' } },
       },
     },
   },
