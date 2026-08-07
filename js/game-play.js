@@ -128,7 +128,13 @@ function buildDefinitionFromResolved(family, variant, resolved, registryCfg) {
   }
   for (const [k, v] of Object.entries(resolved)) {
     if (STRUCTURAL_KEYS.has(k)) continue
-    if (k === 'pieces' && v && (v.set || v.vocabulary)) continue
+    if (k === 'pieces' && v && (v.set || v.vocabulary)) {
+      const { set, vocabulary, ...movementDefs } = v
+      if (Object.keys(movementDefs).length > 0) {
+        pluginConfig.pieces = { ...pluginConfig.pieces, ...movementDefs }
+      }
+      continue
+    }
     if (v !== undefined) pluginConfig[k] = v
   }
   const pluginBlock = resolved.plugins?.[family]
