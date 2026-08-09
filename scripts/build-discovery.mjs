@@ -1,0 +1,238 @@
+#!/usr/bin/env node
+/**
+ * Generates all discovery surfaces from actual data.
+ * Run with --check to verify files are up to date (exits non-zero if stale).
+ */
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const ROOT = path.resolve(__dirname, '..')
+const CHECK_MODE = process.argv.includes('--check')
+
+function resolve(...segments) {
+  return path.resolve(ROOT, ...segments)
+}
+
+function readJSON(filePath) {
+  return JSON.parse(fs.readFileSync(resolve(filePath), 'utf-8'))
+}
+
+function countDirs(dirPath) {
+  const full = resolve(dirPath)
+  if (!fs.existsSync(full)) return 0
+  return fs.readdirSync(full, { withFileTypes: true }).filter(d => d.isDirectory()).length
+}
+
+function countFiles(dirPath, ext) {
+  const full = resolve(dirPath)
+  if (!fs.existsSync(full)) return 0
+  return fs.readdirSync(full).filter(f => f.endsWith(ext)).length
+}
+
+// --- Gather counts from real data ---
+
+const pieceIndex = readJSON('pieces/gallery-index.json')
+const pieceCount = pieceIndex.length
+
+const boardSvgCount = countFiles('boards/svgs', '.svg')
+
+const tileSets = countDirs('tiles/sets')
+
+const puzzleData = readJSON('api/puzzles/index.json')
+const standardCount = puzzleData.standard.length
+const variantCount = puzzleData.variants.length
+const puzzleTotal = standardCount + variantCount
+
+const playManifest = readJSON('play/playability-manifest.json')
+const playableVariants = playManifest.filter(v => v.playable)
+const playableFamilies = [...new Set(playableVariants.map(v => v.family))]
+
+const stats = {
+  pieces: pieceCount,
+  boards: boardSvgCount,
+  tiles: tileSets,
+  puzzles: puzzleTotal,
+  puzzleStandard: standardCount,
+  puzzleVariant: variantCount,
+  playableVariants: playableVariants.length,
+  playableFamilies: playableFamilies.length,
+  families: playableFamilies.sort(),
+}
+
+console.log('Counts from data:')
+console.log(`  Pieces: ${stats.pieces}`)
+console.log(`  Boards: ${stats.boards}`)
+console.log(`  Tiles: ${stats.tiles}`)
+console.log(`  Puzzles: ${stats.puzzles} (${stats.puzzleStandard} standard + ${stats.puzzleVariant} variant)`)
+console.log(`  Playable: ${stats.playableVariants} variants across ${stats.playableFamilies} families`)
+
+// --- Generate files ---
+
+const outputs = []
+
+// 1. api/stats.json
+const boardFamilies = [...new Set(
+  readJSON('api/boards/index.json').boards.map(b => (b.id || '').split('--')[0])
+)].filter(Boolean).length
+
+const statsJson = {
+  generated: new Date().toISOString().slice(0, 10),
+  pieces: stats.pieces,
+  boards: stats.boards,
+  boardFamilies,
+  tiles: stats.tiles,
+  puzzles: stats.puzzles,
+  puzzlesByType: { standard: stats.puzzleStandard, variants: stats.puzzleVariant },
+  playableVariants: stats.playableVariants,
+  playableFamilies: stats.playableFamilies,
+}
+outputs.push({ path: 'api/stats.json', content: JSON.stringify(statsJson, null, 2) + '\n' })
+
+// 2. api/index.json
+const existingIndex = readJSON('api/index.json')
+existingIndex.endpoints = existingIndex.endpoints.map(ep => {
+  if (ep.path.includes('pieces')) {
+    ep.count = stats.pieces
+    ep.description = `Piece gallery — ${stats.pieces} SVG sets across chess, shogi, xiangqi, Go, draughts, backgammon`
+  } else if (ep.path.includes('boards')) {
+    ep.count = stats.boards
+    ep.description = `Board gallery — ${stats.boards} rendered SVG diagrams spanning 42 game families`
+  } else if (ep.path.includes('tiles')) {
+    ep.count = stats.tiles
+    ep.description = `Tile gallery — ${stats.tiles} hex tile sets for strategy maps`
+  } else if (ep.path.includes('puzzles')) {
+    ep.count = stats.puzzles
+    ep.description = `Chess puzzles — ${stats.puzzles.toLocaleString()} tactical puzzles with FEN, solutions, and difficulty ratings`
+  }
+  return ep
+})
+outputs.push({ path: 'api/index.json', content: JSON.stringify(existingIndex, null, 2) + '\n' })
+
+// 3. .well-known/mcp.json
+const mcpJson = readJSON('.well-known/mcp.json')
+mcpJson.description = `Universal board game engine with piece sets (${stats.pieces}), board layouts (${stats.boards}), tile galleries (${stats.tiles}), and chess puzzles (${stats.puzzles.toLocaleString()}). AI tools available via MCP.`
+outputs.push({ path: '.well-known/mcp.json', content: JSON.stringify(mcpJson, null, 2) + '\n' })
+
+// 4. llms.txt
+const llmsTxt = `# Moddable Engine
+
+> Universal board game engine with piece sets (${stats.pieces}), board layouts (${stats.boards}), hex tile galleries (${stats.tiles}), and chess puzzles (${stats.puzzles.toLocaleString()}). Topology-driven architecture renders any game from a configuration.
+
+This site hosts game engine assets and tools. Agents can consume galleries and puzzle data via the static JSON API.
+
+## Machine-Readable API
+
+All structured data is available at predictable URLs under \`/api/\`:
+
+- Discovery index: https://engine.moddable.games/api/index.json
+- Piece gallery (${stats.pieces} sets): https://engine.moddable.games/api/pieces/index.json
+- Board gallery (${stats.boards} layouts): https://engine.moddable.games/api/boards/index.json
+- Tile gallery (${stats.tiles} sets): https://engine.moddable.games/api/tiles/index.json
+- Chess puzzles (${stats.puzzles.toLocaleString()}): https://engine.moddable.games/api/puzzles/index.json
+
+## MCP Tools
+
+Interactive tools (puzzle generation, board rendering, piece lookup) are available via MCP:
+
+- MCP endpoint: https://tools.moddable.games/mcp
+- REST API: https://tools.moddable.games/api/call
+- OpenAPI spec: https://tools.moddable.games/openapi.json
+
+## Content Types
+
+- **Piece sets** — ${stats.pieces} SVG piece collections across chess, shogi, xiangqi, Go, draughts, backgammon, and more
+- **Board layouts** — ${stats.boards} rendered SVG diagrams spanning 42 game families and all supported topologies
+- **Tile sets** — ${stats.tiles} hex tile galleries for strategy map games
+- **Chess puzzles** — ${stats.puzzles.toLocaleString()} tactical puzzles (${stats.puzzleStandard.toLocaleString()} standard + ${stats.puzzleVariant} variant) with FEN, solutions, and ratings
+
+## Architecture
+
+The engine uses a topology-driven architecture. Games are defined by configuration (frontmatter), not code. Supported topologies: grid, hex, track, pit, graph, tableau. Any game expressible as a combination of topology + pieces + rules can be rendered.
+
+## Related
+
+- Rules library: https://rules.moddable.games (game rules, variants, oracle tables)
+- Tools API: https://tools.moddable.games (MCP tools for AI agents)
+
+## Licence
+
+Engine code is proprietary to Moddable Games Ltd. Piece sets carry individual licences (Apache-2.0, CC BY, etc.) noted in their manifests.
+`
+outputs.push({ path: 'llms.txt', content: llmsTxt })
+
+// 5. sitemap.xml
+const BASE = 'https://engine.moddable.games'
+const staticPages = [
+  { path: '/', priority: '1.0' },
+  { path: '/play/', priority: '0.9' },
+  { path: '/create/', priority: '0.7' },
+  { path: '/boards/', priority: '0.9' },
+  { path: '/pieces/', priority: '0.8' },
+  { path: '/tiles/', priority: '0.8' },
+  { path: '/docs/', priority: '0.8' },
+  { path: '/api/', priority: '0.8' },
+  { path: '/llms.txt', priority: '0.5' },
+  { path: '/.well-known/mcp.json', priority: '0.3' },
+]
+
+const docPages = fs.readdirSync(resolve('docs'))
+  .filter(f => f.endsWith('.html'))
+  .map(f => ({ path: `/docs/${f}`, priority: '0.7' }))
+
+const familyPages = playableFamilies.map(f => ({
+  path: `/play/?game=${f}`,
+  priority: '0.8',
+}))
+
+const allPages = [...staticPages, ...docPages, ...familyPages]
+
+const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${allPages.map(p => `  <url>
+    <loc>${BASE}${p.path}</loc>
+    <priority>${p.priority}</priority>
+  </url>`).join('\n')}
+</urlset>
+`
+outputs.push({ path: 'sitemap.xml', content: sitemapXml })
+
+// 6. Fix puzzle meta.count
+const puzzleFile = resolve('api/puzzles/index.json')
+const puzzleRaw = fs.readFileSync(puzzleFile, 'utf-8')
+const puzzleParsed = JSON.parse(puzzleRaw)
+if (puzzleParsed.meta.count !== puzzleTotal) {
+  puzzleParsed.meta.count = puzzleTotal
+  puzzleParsed.meta.standard = standardCount
+  puzzleParsed.meta.variants = variantCount
+  puzzleParsed.meta.lastUpdated = new Date().toISOString().slice(0, 10)
+  outputs.push({ path: 'api/puzzles/index.json', content: JSON.stringify(puzzleParsed, null, 2) + '\n' })
+}
+
+// --- Write or check ---
+
+let stale = 0
+for (const { path: filePath, content } of outputs) {
+  const fullPath = resolve(filePath)
+  const existing = fs.existsSync(fullPath) ? fs.readFileSync(fullPath, 'utf-8') : ''
+  if (existing === content) {
+    console.log(`  ✓ ${filePath} (up to date)`)
+    continue
+  }
+  stale++
+  if (CHECK_MODE) {
+    console.log(`  ✗ ${filePath} (STALE)`)
+  } else {
+    fs.mkdirSync(path.dirname(fullPath), { recursive: true })
+    fs.writeFileSync(fullPath, content)
+    console.log(`  → ${filePath} (updated)`)
+  }
+}
+
+if (CHECK_MODE && stale > 0) {
+  console.error(`\n${stale} file(s) are stale. Run: node scripts/build-discovery.mjs`)
+  process.exit(1)
+} else if (!CHECK_MODE) {
+  console.log(`\nDone. ${stale} file(s) updated.`)
+}

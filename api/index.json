@@ -19,41 +19,52 @@
     {
       "path": "/api/tiles/index.json",
       "type": "json",
-      "description": "Tile gallery — 7 hex tile sets for strategy maps",
-      "count": 7
+      "description": "Tile gallery — 8 hex tile sets for strategy maps",
+      "count": 8
     },
     {
       "path": "/api/puzzles/index.json",
       "type": "json",
-      "description": "Chess puzzles — 1,557 tactical puzzles with FEN, solutions, and difficulty ratings",
-      "count": 1557
+      "description": "Chess puzzles — 1,876 tactical puzzles with FEN, solutions, and difficulty ratings",
+      "count": 1876
     }
   ],
   "deprecations": [
     {
       "old": "/pieces/gallery-index.json",
       "new": "/api/pieces/index.json",
-      "consumers": ["moddable-tools", "board-studio"]
+      "consumers": [
+        "moddable-tools",
+        "board-studio"
+      ]
     },
     {
       "old": "/tiles/tile-index.json",
       "new": "/api/tiles/index.json",
-      "consumers": ["moddable-tools"]
+      "consumers": [
+        "moddable-tools"
+      ]
     },
     {
       "old": "moddable-chess/data/puzzles-standard.json",
       "new": "/api/puzzles/index.json",
-      "consumers": ["moddable-tools MCP"]
+      "consumers": [
+        "moddable-tools MCP"
+      ]
     },
     {
       "old": "moddable-chess/data/puzzles-variants.json",
       "new": "/api/puzzles/index.json",
-      "consumers": ["moddable-tools MCP"]
+      "consumers": [
+        "moddable-tools MCP"
+      ]
     },
     {
       "old": "moddable-chess/assets/pieces/gallery-index.json",
       "new": "/api/pieces/index.json",
-      "consumers": ["moddable-tools MCP"]
+      "consumers": [
+        "moddable-tools MCP"
+      ]
     }
   ],
   "sdk": {

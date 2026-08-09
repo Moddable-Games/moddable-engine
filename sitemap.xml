@@ -29,15 +29,39 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/api/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/llms.txt</loc>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/.well-known/mcp.json</loc>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/docs/chess.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/docs/draughts.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/docs/frontmatter.html</loc>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://engine.moddable.games/docs/topologies.html</loc>
+    <loc>https://engine.moddable.games/docs/go.html</loc>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://engine.moddable.games/docs/surfaces.html</loc>
+    <loc>https://engine.moddable.games/docs/hexmaps.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/docs/index.html</loc>
     <priority>0.7</priority>
   </url>
   <url>
@@ -53,19 +77,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://engine.moddable.games/docs/chess.html</loc>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://engine.moddable.games/docs/go.html</loc>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://engine.moddable.games/docs/draughts.html</loc>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://engine.moddable.games/docs/xiangqi.html</loc>
+    <loc>https://engine.moddable.games/docs/reversi.html</loc>
     <priority>0.7</priority>
   </url>
   <url>
@@ -73,23 +85,39 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://engine.moddable.games/docs/reversi.html</loc>
+    <loc>https://engine.moddable.games/docs/surfaces.html</loc>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://engine.moddable.games/docs/hexmaps.html</loc>
+    <loc>https://engine.moddable.games/docs/topologies.html</loc>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://engine.moddable.games/llms.txt</loc>
-    <priority>0.5</priority>
+    <loc>https://engine.moddable.games/docs/xiangqi.html</loc>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://engine.moddable.games/api/</loc>
+    <loc>https://engine.moddable.games/play/?game=chess</loc>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://engine.moddable.games/.well-known/mcp.json</loc>
-    <priority>0.3</priority>
+    <loc>https://engine.moddable.games/play/?game=draughts</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/play/?game=go</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/play/?game=reversi</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/play/?game=shogi</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/play/?game=xiangqi</loc>
+    <priority>0.8</priority>
   </url>
 </urlset>

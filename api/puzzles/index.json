@@ -8,9 +8,9 @@
       "engine-generated": 0
     },
     "license": "CC0 (Lichess puzzles) + Public Domain (historical) + Proprietary (engine-generated)",
-    "count": 1557,
-    "standard": 606,
-    "variants": 951,
+    "count": 1876,
+    "standard": 1118,
+    "variants": 758,
     "deduped": "2026-08-09",
     "removedDuplicates": 193,
     "polgarAdded": 200,

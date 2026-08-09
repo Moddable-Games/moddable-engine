@@ -1,0 +1,14 @@
+{
+  "generated": "2026-08-09",
+  "pieces": 115,
+  "boards": 333,
+  "boardFamilies": 33,
+  "tiles": 8,
+  "puzzles": 1876,
+  "puzzlesByType": {
+    "standard": 1118,
+    "variants": 758
+  },
+  "playableVariants": 133,
+  "playableFamilies": 6
+}
