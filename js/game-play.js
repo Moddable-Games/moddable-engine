@@ -1045,14 +1045,12 @@ export async function initGamePlay(container, defaults = {}) {
   if (params.embed) {
     leftSidebar.style.display = 'none'
     rightSidebar.style.display = 'none'
-    container.style.display = 'block'
+    container.style.gridTemplateColumns = '1fr'
     container.style.padding = '0'
-    container.style.background = 'transparent'
-    boardArea.style.margin = '0 auto'
-    boardArea.style.maxWidth = '100%'
     document.body.style.background = 'transparent'
     document.body.style.margin = '0'
     document.body.style.padding = '0'
+    document.documentElement.style.background = 'transparent'
   }
 
   const familySelect = buildSelect(leftSidebar, 'Game', PLAYABLE_FAMILIES.map(f => ({ value: f, label: FAMILY_LABELS[f] })), family)
