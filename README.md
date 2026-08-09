@@ -167,6 +167,18 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 - Headless character sheet SVG generation via export-chargen.mjs
 - Closed issues #16 (cross-repo sync) and #33 (RPG manifest v2)
 
+#### 2026-08-09
+- Added build-discovery.mjs: generates api/stats.json, api/index.json, mcp.json, llms.txt, sitemap.xml from data
+- CI gate enforces discovery surface freshness (--check mode)
+- Fixed stale counts: puzzles 1,557→1,876, tiles 7→8, puzzle meta synced
+- Sitemap now auto-generated from docs/ and playable families
+- Agent discovery: added server-card.json, api-catalog (RFC 9727), auth.md, link rel tags
+- Fixed AI difficulty ladder: medium/hard no longer share depth (now 5/7)
+- Fixed large board viewport overflow (max-width constraint)
+- Removed stale docs/effects.md
+- Closed 11 issues (#65, #70, #71, #83, #87, #90, #91, #95, #103, #105, #106)
+- Updated global CLAUDE.md: branch sync automatic at session start/end
+
 #### 2026-07-21
 - Implemented topology-tableau: card/dice/domino table layouts as a proper topology (issue #25)
 - 40 component game variants now render through the standard pipeline (no bespoke renderers)
