@@ -1042,6 +1042,13 @@ export async function initGamePlay(container, defaults = {}) {
   container.appendChild(boardArea)
   container.appendChild(rightSidebar)
 
+  if (params.embed) {
+    leftSidebar.style.display = 'none'
+    rightSidebar.style.display = 'none'
+    container.style.display = 'block'
+    boardArea.style.margin = '0 auto'
+  }
+
   const familySelect = buildSelect(leftSidebar, 'Game', PLAYABLE_FAMILIES.map(f => ({ value: f, label: FAMILY_LABELS[f] })), family)
   const variantSelect = buildGroupedSelect(leftSidebar, 'Variant', variantsForFamily(family), variant)
   const opponentSelect = buildSelect(leftSidebar, 'Opponent', [
