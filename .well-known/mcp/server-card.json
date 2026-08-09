@@ -1,0 +1,21 @@
+{
+  "name": "Moddable Games Tools",
+  "description": "83 AI-callable tools for board game engine operations: puzzle generation, board rendering, piece lookup, game analysis, and more.",
+  "url": "https://tools.moddable.games/mcp",
+  "transport": ["sse"],
+  "homepage": "https://tools.moddable.games",
+  "documentation": "https://engine.moddable.games/llms.txt",
+  "openapi": "https://tools.moddable.games/openapi.json",
+  "authentication": {
+    "type": "none",
+    "description": "Open access. No API key or authentication required."
+  },
+  "capabilities": {
+    "tools": true,
+    "resources": false,
+    "prompts": false
+  },
+  "contact": {
+    "url": "https://moddable.games"
+  }
+}

@@ -3,6 +3,12 @@ Allow: /
 
 Sitemap: https://engine.moddable.games/sitemap.xml
 
+# Agent discovery
+# MCP: https://tools.moddable.games/mcp
+# API catalog: https://engine.moddable.games/.well-known/api-catalog
+# LLM context: https://engine.moddable.games/llms.txt
+# Auth: https://engine.moddable.games/auth.md
+
 User-agent: GPTBot
 Allow: /
 

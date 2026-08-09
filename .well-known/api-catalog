@@ -1,0 +1,20 @@
+{
+  "apis": [
+    {
+      "name": "Moddable Games Tools API",
+      "description": "REST and MCP interface for board game engine operations",
+      "url": "https://tools.moddable.games/openapi.json",
+      "type": "openapi",
+      "version": "1.0.0",
+      "lifecycle": "production"
+    },
+    {
+      "name": "Moddable Engine Static API",
+      "description": "Static JSON endpoints for piece sets, board layouts, tile galleries, and chess puzzles",
+      "url": "https://engine.moddable.games/api/index.json",
+      "type": "json",
+      "version": "1.0.0",
+      "lifecycle": "production"
+    }
+  ]
+}
