@@ -9,7 +9,9 @@
     "license": "CC0 (Lichess puzzles) + Public Domain (historical) + Proprietary (engine-generated)",
     "count": 1557,
     "standard": 606,
-    "variants": 951
+    "variants": 951,
+    "deduped": "2026-08-09",
+    "removedDuplicates": 193
   },
   "standard": [
     {
@@ -11525,19 +11527,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "almostChess_8",
-      "variant": "almostChess",
-      "fen": "1C6/BB4R1/3n3r/k2Pp3/2P1p3/P3b3/R7/3K4 w - - 7 4182",
-      "solution": [
-        "b8a6"
-      ],
-      "depth": 1,
-      "distractors": 43,
-      "rating": 1200,
-      "puzzleType": "Almost Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "almostChess_9",
       "variant": "almostChess",
       "fen": "1C6/B7/2B2n1r/k2Pp3/2P1p3/P7/1R1b2R1/3K4 w - - 1 3995",
@@ -11546,6 +11535,19 @@
       ],
       "depth": 1,
       "distractors": 52,
+      "rating": 1200,
+      "puzzleType": "Almost Chess mate in 1",
+      "source": "engine-generated"
+    },
+    {
+      "id": "almostChess_8",
+      "variant": "almostChess",
+      "fen": "1C6/BB4R1/3n3r/k2Pp3/2P1p3/P3b3/R7/3K4 w - - 7 4182",
+      "solution": [
+        "b8a6"
+      ],
+      "depth": 1,
+      "distractors": 43,
       "rating": 1200,
       "puzzleType": "Almost Chess mate in 1",
       "source": "engine-generated"
@@ -11572,32 +11574,6 @@
       ],
       "depth": 1,
       "distractors": 52,
-      "rating": 1200,
-      "puzzleType": "Almost Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "almostChess_12",
-      "variant": "almostChess",
-      "fen": "6n1/B1C5/2B4r/k2Ppp2/4N3/P1P5/1R4R1/2bK4 w - e6 0 3836",
-      "solution": [
-        "a7b6"
-      ],
-      "depth": 1,
-      "distractors": 64,
-      "rating": 1200,
-      "puzzleType": "Almost Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "almostChess_13",
-      "variant": "almostChess",
-      "fen": "1C4n1/B7/2B4r/k2Pp3/4p3/P1P5/1R1b2R1/3K4 w - - 2 3940",
-      "solution": [
-        "a7b6"
-      ],
-      "depth": 1,
-      "distractors": 51,
       "rating": 1200,
       "puzzleType": "Almost Chess mate in 1",
       "source": "engine-generated"
@@ -11668,19 +11644,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "amazonChess_4",
-      "variant": "amazonChess",
-      "fen": "r2k4/p3b3/n6p/4PNrn/1p6/1P2P3/K7/6r1 b - - 0 4374",
-      "solution": [
-        "g5g2"
-      ],
-      "depth": 1,
-      "distractors": 34,
-      "rating": 1200,
-      "puzzleType": "Amazon Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "amazonChess_5",
       "variant": "amazonChess",
       "fen": "4k3/2Rn1br1/3K2p1/p5Pp/1N2PP1P/8/5B1R/3M4 w - - 3 3161",
@@ -11703,19 +11666,6 @@
       "depth": 1,
       "distractors": 27,
       "rating": 1100,
-      "puzzleType": "Amazon Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "amazonChess_7",
-      "variant": "amazonChess",
-      "fen": "5k2/5pr1/1pr2pn1/p2RpNRp/P1P1PP1P/1p6/5P2/2KM4 w - - 0 1983",
-      "solution": [
-        "d5d8"
-      ],
-      "depth": 1,
-      "distractors": 31,
-      "rating": 1200,
       "puzzleType": "Amazon Chess mate in 1",
       "source": "engine-generated"
     },
@@ -11759,19 +11709,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "amazonChess_11",
-      "variant": "amazonChess",
-      "fen": "1nbmkr2/rp2np1p/2p3pb/p2Np3/1PP2BPP/P2PP3/5P1R/R1KM1BN1 w - - 3 705",
-      "solution": [
-        "d5f6"
-      ],
-      "depth": 1,
-      "distractors": 35,
-      "rating": 1200,
-      "puzzleType": "Amazon Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "amazonChess_12",
       "variant": "amazonChess",
       "fen": "2rR2r1/4mkb1/2p2p2/p1P4P/4p3/4PP2/p1bKB1R1/8 w - - 6 4222",
@@ -11793,32 +11730,6 @@
       ],
       "depth": 1,
       "distractors": 48,
-      "rating": 1200,
-      "puzzleType": "Amazon Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "amazonChess_14",
-      "variant": "amazonChess",
-      "fen": "5bk1/2m1r3/7P/N2p4/nN5r/PP3p2/1R3R2/5K2 b - - 3 3107",
-      "solution": [
-        "h4h1"
-      ],
-      "depth": 1,
-      "distractors": 36,
-      "rating": 1200,
-      "puzzleType": "Amazon Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "amazonChess_15",
-      "variant": "amazonChess",
-      "fen": "5bk1/2m1r3/7P/N2p4/7r/PP3p2/1nN2R2/5K2 b - - 1 3184",
-      "solution": [
-        "h4h1"
-      ],
-      "depth": 1,
-      "distractors": 37,
       "rating": 1200,
       "puzzleType": "Amazon Chess mate in 1",
       "source": "engine-generated"
@@ -11876,19 +11787,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "andernachChess_5",
-      "variant": "andernachChess",
-      "fen": "r2qkbnr/p1ppp3/8/5p1p/2bn1NpP/PP4P1/1BPPbP2/RN1QK1R1 b Qkq - 2 597",
-      "solution": [
-        "d4f3"
-      ],
-      "depth": 1,
-      "distractors": 36,
-      "rating": 1200,
-      "puzzleType": "Andernach mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "andernachChess_6",
       "variant": "andernachChess",
       "fen": "4k3/r3N1pR/1p2B3/1P2P1N1/5R2/BPPP4/4K3/1N1R4 w - - 8 2839",
@@ -11910,19 +11808,6 @@
       ],
       "depth": 1,
       "distractors": 54,
-      "rating": 1200,
-      "puzzleType": "Andernach mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "andernachChess_8",
-      "variant": "andernachChess",
-      "fen": "4k3/4N1pR/1p2B3/rP2P1N1/6R1/BPPP4/4K3/1N1R4 w - - 10 2870",
-      "solution": [
-        "h7h8"
-      ],
-      "depth": 1,
-      "distractors": 56,
       "rating": 1200,
       "puzzleType": "Andernach mate in 1",
       "source": "engine-generated"
@@ -11967,32 +11852,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "andernachChess_12",
-      "variant": "andernachChess",
-      "fen": "1nb1k2r/5ppp/1rp1p2n/1pBpB3/p5BQ/1P2P1P1/P2P1N1P/RN1QK2R w KQk - 0 802",
-      "solution": [
-        "h4e7"
-      ],
-      "depth": 1,
-      "distractors": 49,
-      "rating": 1200,
-      "puzzleType": "Andernach mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "andernachChess_13",
-      "variant": "andernachChess",
-      "fen": "k7/4n3/B1N3n1/PN3p2/2p1p2p/1P5P/1B1R1K2/R7 w - - 4 2919",
-      "solution": [
-        "b5c7"
-      ],
-      "depth": 1,
-      "distractors": 50,
-      "rating": 1200,
-      "puzzleType": "Andernach mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "andernachChess_14",
       "variant": "andernachChess",
       "fen": "1C4n1/2k1br2/1R1p2p1/P1p2pp1/P5P1/2b1p3/b7/6K1 w - - 0 4620",
@@ -12001,19 +11860,6 @@
       ],
       "depth": 1,
       "distractors": 25,
-      "rating": 1100,
-      "puzzleType": "Andernach mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "andernachChess_15",
-      "variant": "andernachChess",
-      "fen": "1C4n1/2k1br2/1Rpp2p1/P4pp1/P7/2b1p1P1/b7/6K1 w - - 1 4547",
-      "solution": [
-        "b6b7"
-      ],
-      "depth": 1,
-      "distractors": 24,
       "rating": 1100,
       "puzzleType": "Andernach mate in 1",
       "source": "engine-generated"
@@ -12032,32 +11878,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "atomic_2",
-      "variant": "atomic",
-      "fen": "r1bqkb2/pppppp1r/5n2/1P4pp/3n4/4PPP1/P1PPB2P/RNBQK1NR b KQq - 0 8",
-      "solution": [
-        "d4e2"
-      ],
-      "depth": 1,
-      "distractors": 29,
-      "rating": 1100,
-      "puzzleType": "Detonate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "atomic_3",
-      "variant": "atomic",
-      "fen": "r1bqkb2/pppppp2/5n1r/1P4pp/3n4/B3PPP1/P1PPB2P/RN1QK1NR b KQq - 2 9",
-      "solution": [
-        "d4e2"
-      ],
-      "depth": 1,
-      "distractors": 29,
-      "rating": 1100,
-      "puzzleType": "Detonate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "atomic_4",
       "variant": "atomic",
       "fen": "r1bqkb1r/pppppp2/5n2/1P4pp/3n4/B3PPP1/P1PPB2P/RN1QK1NR w KQq - 3 10",
@@ -12066,19 +11886,6 @@
       ],
       "depth": 1,
       "distractors": 24,
-      "rating": 1100,
-      "puzzleType": "Detonate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "atomic_5",
-      "variant": "atomic",
-      "fen": "r1bqkb1r/pppppp2/5n2/1P4pp/3n4/B1N1PPP1/P1PPB2P/R2QK1NR b KQq - 4 10",
-      "solution": [
-        "d4e2"
-      ],
-      "depth": 1,
-      "distractors": 30,
       "rating": 1100,
       "puzzleType": "Detonate in 1",
       "source": "engine-generated"
@@ -12136,19 +11943,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "atomic_10",
-      "variant": "atomic",
-      "fen": "r5nr/pbpkb1p1/2np4/1p5p/P1PPPp1K/BP5N/4R1PP/1N3B1R w - - 0 21",
-      "solution": [
-        "a3d6"
-      ],
-      "depth": 1,
-      "distractors": 32,
-      "rating": 1200,
-      "puzzleType": "Detonate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "atomic_11",
       "variant": "atomic",
       "fen": "r7/p3k1b1/b6p/8/N2p2P1/5n2/4RN1K/2B5 b - - 3 31",
@@ -12158,32 +11952,6 @@
       "depth": 1,
       "distractors": 34,
       "rating": 1200,
-      "puzzleType": "Detonate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "atomic_12",
-      "variant": "atomic",
-      "fen": "1r6/p3k1b1/b6p/8/N2p2P1/5n2/4RN1K/2B5 w - - 4 32",
-      "solution": [
-        "e2e7"
-      ],
-      "depth": 1,
-      "distractors": 32,
-      "rating": 1200,
-      "puzzleType": "Detonate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "atomic_13",
-      "variant": "atomic",
-      "fen": "1r3b2/p3k3/b7/7p/N2p2P1/5n2/3NR2K/2B5 w - - 2 34",
-      "solution": [
-        "e2e7"
-      ],
-      "depth": 1,
-      "distractors": 27,
-      "rating": 1100,
       "puzzleType": "Detonate in 1",
       "source": "engine-generated"
     },
@@ -12201,14 +11969,14 @@
       "source": "engine-generated"
     },
     {
-      "id": "atomic_15",
+      "id": "atomic_12",
       "variant": "atomic",
-      "fen": "r7/p3k1b1/b6p/8/3p2P1/2N2n2/4RN1K/2B5 w - - 2 31",
+      "fen": "1r6/p3k1b1/b6p/8/N2p2P1/5n2/4RN1K/2B5 w - - 4 32",
       "solution": [
         "e2e7"
       ],
       "depth": 1,
-      "distractors": 35,
+      "distractors": 32,
       "rating": 1200,
       "puzzleType": "Detonate in 1",
       "source": "engine-generated"
@@ -12240,15 +12008,15 @@
       "source": "engine-generated"
     },
     {
-      "id": "benedictChess_3",
+      "id": "benedictChess_9",
       "variant": "benedictChess",
-      "fen": "rnBq2r1/Pp2pk2/1Bp2ppb/3Pp1nP/1P3N1P/P1P3PB/3P1P2/RN1QK1R1 b - - 8 19",
+      "fen": "rnb3r1/Pp1qpk2/1bp2ppb/3pp1nP/1P3NbP/P1P3P1/3P1PR1/RN1QK3 b - - 12 21",
       "solution": [
         "g5f3"
       ],
       "depth": 1,
-      "distractors": 25,
-      "rating": 1100,
+      "distractors": 39,
+      "rating": 1200,
       "puzzleType": "Convert in 1",
       "source": "engine-generated"
     },
@@ -12262,19 +12030,6 @@
       "depth": 1,
       "distractors": 31,
       "rating": 1200,
-      "puzzleType": "Convert in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "benedictChess_5",
-      "variant": "benedictChess",
-      "fen": "rnbqk3/Pp2p2r/1Bp2Ppb/3pp1np/1P5P/P1P3P1/3PNP2/RN1QKB1R b q - 2 16",
-      "solution": [
-        "g5f3"
-      ],
-      "depth": 1,
-      "distractors": 27,
-      "rating": 1100,
       "puzzleType": "Convert in 1",
       "source": "engine-generated"
     },
@@ -12305,110 +12060,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "benedictChess_8",
-      "variant": "benedictChess",
-      "fen": "rnbqkbn1/ppppp3/5Ppr/4P2p/8/PP6/1BPPNPPP/RN1QKB1R w KQq - 3 7",
-      "solution": [
-        "f6f7"
-      ],
-      "depth": 1,
-      "distractors": 27,
-      "rating": 1100,
-      "puzzleType": "Convert in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "benedictChess_9",
-      "variant": "benedictChess",
-      "fen": "rnb3r1/Pp1qpk2/1bp2ppb/3pp1nP/1P3NbP/P1P3P1/3P1PR1/RN1QK3 b - - 12 21",
-      "solution": [
-        "g5f3"
-      ],
-      "depth": 1,
-      "distractors": 39,
-      "rating": 1200,
-      "puzzleType": "Convert in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "benedictChess_10",
-      "variant": "benedictChess",
-      "fen": "rnbqk2r/Pp2p3/1Bp2PPb/3Pp1nP/1P3N1P/P1P3P1/3P1P2/RN1QKB1R b q - 4 17",
-      "solution": [
-        "g5f3"
-      ],
-      "depth": 1,
-      "distractors": 27,
-      "rating": 1100,
-      "puzzleType": "Convert in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "benedictChess_11",
-      "variant": "benedictChess",
-      "fen": "rnbqk1r1/Pp2p3/1Bp2Ppb/3Pp1nP/1P3N1P/P1P3P1/3P1P2/RN1QKB1R w q - 5 18",
-      "solution": [
-        "f6f7"
-      ],
-      "depth": 1,
-      "distractors": 38,
-      "rating": 1200,
-      "puzzleType": "Convert in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "benedictChess_12",
-      "variant": "benedictChess",
-      "fen": "rnbqkbn1/ppppp2r/5Pp1/4P2p/8/PP6/1BPPNPPP/RNQ1KB1R w KQq - 5 8",
-      "solution": [
-        "f6f7"
-      ],
-      "depth": 1,
-      "distractors": 26,
-      "rating": 1100,
-      "puzzleType": "Convert in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "benedictChess_13",
-      "variant": "benedictChess",
-      "fen": "r1bqkb2/Ppp1p2r/2n2Ppn/3pP2p/3B4/PP6/2PPNPPP/RNQ1KB1R w q - 2 11",
-      "solution": [
-        "f6f7"
-      ],
-      "depth": 1,
-      "distractors": 28,
-      "rating": 1100,
-      "puzzleType": "Convert in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "benedictChess_14",
-      "variant": "benedictChess",
-      "fen": "rnbqk2r/Pp2p3/1Bp2Ppb/3pp1np/1P5P/P1P3P1/3PNP2/RN1QKB1R w q - 3 17",
-      "solution": [
-        "f6f7"
-      ],
-      "depth": 1,
-      "distractors": 28,
-      "rating": 1100,
-      "puzzleType": "Convert in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "benedictChess_15",
-      "variant": "benedictChess",
-      "fen": "rnB3r1/Ppq1pk2/1bp2ppb/3Pp1nP/1P3NBP/P1P3P1/3P1P2/RN1QK1R1 b - - 10 20",
-      "solution": [
-        "g5f3"
-      ],
-      "depth": 1,
-      "distractors": 29,
-      "rating": 1100,
-      "puzzleType": "Convert in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "berolinaChess_1",
       "variant": "berolinaChess",
       "fen": "2k3r1/1bb5/1pP4p/1pP2Pp1/1rP3nP/3n2p1/4B3/1R3KNR b - - 1 3563",
@@ -12422,19 +12073,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "berolinaChess_2",
-      "variant": "berolinaChess",
-      "fen": "3k3r/1bb5/1pP3Qp/1pP2Pp1/1rP3nP/3n2p1/2p1B3/R4KNR b - - 0 3336",
-      "solution": [
-        "g4e3"
-      ],
-      "depth": 1,
-      "distractors": 49,
-      "rating": 1200,
-      "puzzleType": "Berolina Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "berolinaChess_3",
       "variant": "berolinaChess",
       "fen": "rn6/1b2qp1Q/pppbk2p/3n2pr/1pPP3P/P1N3PP/P1B5/R3KR2 w Q - 4 1942",
@@ -12443,19 +12081,6 @@
       ],
       "depth": 1,
       "distractors": 47,
-      "rating": 1200,
-      "puzzleType": "Berolina Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "berolinaChess_4",
-      "variant": "berolinaChess",
-      "fen": "rn6/1b2qp1Q/p1pbk2p/p2n2pr/1pPP3P/P5PP/P1B1N3/R3KR2 w Q - 0 2005",
-      "solution": [
-        "h7f5"
-      ],
-      "depth": 1,
-      "distractors": 43,
       "rating": 1200,
       "puzzleType": "Berolina Chess mate in 1",
       "source": "engine-generated"
@@ -12812,19 +12437,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "breakthrough_2",
-      "variant": "breakthrough",
-      "fen": "p1ppppp/pp3p1/P6/1Pp1pPp/4P2/P1pPP1P/1PP2PP b - - 0 246",
-      "solution": [
-        "c2b1"
-      ],
-      "depth": 1,
-      "distractors": 10,
-      "rating": 900,
-      "puzzleType": "Break through",
-      "source": "engine-generated"
-    },
-    {
       "id": "breakthrough_3",
       "variant": "breakthrough",
       "fen": "5pp/pP1p1p1/pPp1p2/1PP1pP1/4P1p/P1p1P1P/2P2PP w - - 0 416",
@@ -12833,32 +12445,6 @@
       ],
       "depth": 1,
       "distractors": 9,
-      "rating": 900,
-      "puzzleType": "Break through",
-      "source": "engine-generated"
-    },
-    {
-      "id": "breakthrough_4",
-      "variant": "breakthrough",
-      "fen": "5pp/1P1p1p1/Ppp1p2/2P1pP1/4P1p/P1p1P1P/2P2PP w - - 0 429",
-      "solution": [
-        "b6b7"
-      ],
-      "depth": 1,
-      "distractors": 8,
-      "rating": 900,
-      "puzzleType": "Break through",
-      "source": "engine-generated"
-    },
-    {
-      "id": "breakthrough_5",
-      "variant": "breakthrough",
-      "fen": "5pp/1P1p3/Ppp1pp1/2P1pP1/P3P1p/2p1P1P/2P2PP w - - 0 444",
-      "solution": [
-        "b6b7"
-      ],
-      "depth": 1,
-      "distractors": 6,
       "rating": 900,
       "puzzleType": "Break through",
       "source": "engine-generated"
@@ -12877,32 +12463,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "breakthrough_7",
-      "variant": "breakthrough",
-      "fen": "5pp/1P5/P1ppPp1/1PP1p2/4P1p/2p1P1P/2P2PP w - - 0 476",
-      "solution": [
-        "b6b7"
-      ],
-      "depth": 1,
-      "distractors": 7,
-      "rating": 900,
-      "puzzleType": "Break through",
-      "source": "engine-generated"
-    },
-    {
-      "id": "breakthrough_8",
-      "variant": "breakthrough",
-      "fen": "6p/1P3p1/P1PpPp1/2P1p2/4P1p/2p1P1P/2P2PP w - - 0 487",
-      "solution": [
-        "b6b7"
-      ],
-      "depth": 1,
-      "distractors": 7,
-      "rating": 900,
-      "puzzleType": "Break through",
-      "source": "engine-generated"
-    },
-    {
       "id": "breakthrough_9",
       "variant": "breakthrough",
       "fen": "p2p1pp/p6/PP1p2p/1p1P1Pp/4p2/1PpPPPP/7 b - - 0 439",
@@ -12911,19 +12471,6 @@
       ],
       "depth": 1,
       "distractors": 10,
-      "rating": 900,
-      "puzzleType": "Break through",
-      "source": "engine-generated"
-    },
-    {
-      "id": "breakthrough_10",
-      "variant": "breakthrough",
-      "fen": "p2p1pp/7/Pp1p2P/1p1P2p/4p2/1PpPPPP/7 b - - 0 458",
-      "solution": [
-        "c2c1"
-      ],
-      "depth": 1,
-      "distractors": 9,
       "rating": 900,
       "puzzleType": "Break through",
       "source": "engine-generated"
@@ -12950,32 +12497,6 @@
       ],
       "depth": 1,
       "distractors": 11,
-      "rating": 1000,
-      "puzzleType": "Break through",
-      "source": "engine-generated"
-    },
-    {
-      "id": "breakthrough_13",
-      "variant": "breakthrough",
-      "fen": "2p3p/p1p1Pp1/2p1p2/pP1p1pP/PP1p3/3P1P1/1PPPP1P w - - 0 407",
-      "solution": [
-        "e6e7"
-      ],
-      "depth": 1,
-      "distractors": 10,
-      "rating": 900,
-      "puzzleType": "Break through",
-      "source": "engine-generated"
-    },
-    {
-      "id": "breakthrough_14",
-      "variant": "breakthrough",
-      "fen": "2p3p/p1p1P2/1Pp1pp1/p2p1pP/PP1p3/3P1P1/1PPPP1P w - - 0 426",
-      "solution": [
-        "e6e7"
-      ],
-      "depth": 1,
-      "distractors": 13,
       "rating": 1000,
       "puzzleType": "Break through",
       "source": "engine-generated"
@@ -13033,32 +12554,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "capablanca_4",
-      "variant": "capablanca",
-      "fen": "r5b1n1/1pp1b2ppr/pa2k4p/2n1N1pqNP/5p1P2/RP2P4R/2P2PPCP1/5KB3 b - - 1 3146",
-      "solution": [
-        "h5d1"
-      ],
-      "depth": 1,
-      "distractors": 53,
-      "rating": 1200,
-      "puzzleType": "Capablanca mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "capablanca_5",
-      "variant": "capablanca",
-      "fen": "r5b1nr/1pp1b2pp1/pa2k4p/2n1N1pqNP/5p1P2/RP2P2C1R/2P2PP1P1/5KB3 b - - 3 3259",
-      "solution": [
-        "h5d1"
-      ],
-      "depth": 1,
-      "distractors": 54,
-      "rating": 1200,
-      "puzzleType": "Capablanca mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "capablanca_6",
       "variant": "capablanca",
       "fen": "r2b1k4/8p1/p7Pp/1p8/1P4p1R1/1B1r1p1p2/1q4P3/4K1Q3 b - - 1 6527",
@@ -13080,19 +12575,6 @@
       ],
       "depth": 1,
       "distractors": 47,
-      "rating": 1200,
-      "puzzleType": "Capablanca mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "capablanca_8",
-      "variant": "capablanca",
-      "fen": "r2b1k4/8p1/p7Pp/1p3p4/1P4N3/1B1r1p1p2/1q4P3/4K1Q1R1 b - - 11 6426",
-      "solution": [
-        "b2e2"
-      ],
-      "depth": 1,
-      "distractors": 49,
       "rating": 1200,
       "puzzleType": "Capablanca mate in 1",
       "source": "engine-generated"
@@ -13241,32 +12723,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "checklessChess_5",
-      "variant": "checklessChess",
-      "fen": "1nb3kr/5n1p/1rp2Pp1/1N1p4/pP3P1P/b1PPBK2/PN2Q3/1R3Bq1 b - - 1 3603",
-      "solution": [
-        "c8g4"
-      ],
-      "depth": 1,
-      "distractors": 26,
-      "rating": 1100,
-      "puzzleType": "Checkless Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "checklessChess_6",
-      "variant": "checklessChess",
-      "fen": "1nb3kr/5n1p/r1p2P2/1NBp2p1/NP3P1P/b1PP1K2/P3Q2q/1R3B2 w - - 2 3866",
-      "solution": [
-        "e2e8"
-      ],
-      "depth": 1,
-      "distractors": 45,
-      "rating": 1200,
-      "puzzleType": "Checkless Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "checklessChess_7",
       "variant": "checklessChess",
       "fen": "k2r4/2P5/5n2/1pB2p2/pPP3Q1/1N6/P1KN4/3RR3 w - - 5 11377",
@@ -13293,32 +12749,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "checklessChess_9",
-      "variant": "checklessChess",
-      "fen": "r1bqkbnr/pp1p1p1p/n5p1/2p1P3/6P1/1P6/P1PPP2P/RNBQKBNR b KQkq - 0 371",
-      "solution": [
-        "d8h4"
-      ],
-      "depth": 1,
-      "distractors": 29,
-      "rating": 1100,
-      "puzzleType": "Checkless Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "checklessChess_10",
-      "variant": "checklessChess",
-      "fen": "r1bqkbnr/pp1p1p2/n5pp/2p1P3/6P1/1P6/PBPPP2P/RN1QKBNR b KQkq - 1 453",
-      "solution": [
-        "d8h4"
-      ],
-      "depth": 1,
-      "distractors": 27,
-      "rating": 1100,
-      "puzzleType": "Checkless Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "checklessChess_11",
       "variant": "checklessChess",
       "fen": "r1bqkbnr/p2p1p2/np4pp/2p1P3/6P1/NP6/PBPPP2P/R2QKBNR b KQkq - 1 529",
@@ -13340,32 +12770,6 @@
       ],
       "depth": 1,
       "distractors": 39,
-      "rating": 1200,
-      "puzzleType": "Checkless Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "checklessChess_13",
-      "variant": "checklessChess",
-      "fen": "4k2r/rb6/1q1pp2p/1p1Pbp1P/P1p1n3/1p1Q1KPR/3N1P2/4R1N1 b - - 2 3833",
-      "solution": [
-        "b6f2"
-      ],
-      "depth": 1,
-      "distractors": 45,
-      "rating": 1200,
-      "puzzleType": "Checkless Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "checklessChess_14",
-      "variant": "checklessChess",
-      "fen": "4k2r/rb6/1q1pp2p/1p1Pbp1P/P3n1P1/1ppQ1K1R/3N1P2/4R1N1 b - - 0 4015",
-      "solution": [
-        "b6f2"
-      ],
-      "depth": 1,
-      "distractors": 42,
       "rating": 1200,
       "puzzleType": "Checkless Chess mate in 1",
       "source": "engine-generated"
@@ -13475,32 +12879,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "chess960_8",
-      "variant": "chess960",
-      "fen": "rb1nkrb1/1Bp2p1p/3p3P/p3p1p1/1pn5/1Pq1P1Q1/PN3PP1/R1NK1RB1 b kq - 3 760",
-      "solution": [
-        "c3d2"
-      ],
-      "depth": 1,
-      "distractors": 30,
-      "rating": 1100,
-      "puzzleType": "Fischer Random (960) mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "chess960_9",
-      "variant": "chess960",
-      "fen": "1b1nkrb1/2p2p1p/r2p3P/p3p1p1/1pn5/1Pq1PBQ1/PN3PP1/R1NK1RB1 b k - 5 825",
-      "solution": [
-        "c3d2"
-      ],
-      "depth": 1,
-      "distractors": 32,
-      "rating": 1200,
-      "puzzleType": "Fischer Random (960) mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "chess960_10",
       "variant": "chess960",
       "fen": "4n2r/8/2bp2Q1/2Pp4/p2P3k/PB3P2/6nb/3K4 w - - 0 2409",
@@ -13522,19 +12900,6 @@
       ],
       "depth": 1,
       "distractors": 25,
-      "rating": 1100,
-      "puzzleType": "Fischer Random (960) mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "chess960_12",
-      "variant": "chess960",
-      "fen": "r2krnbn/2pp1p1p/4pNp1/B4P2/pp1P4/PPP3P1/2K1PN1P/QBR1q3 b k - 0 1033",
-      "solution": [
-        "e1e2"
-      ],
-      "depth": 1,
-      "distractors": 28,
       "rating": 1100,
       "puzzleType": "Fischer Random (960) mate in 1",
       "source": "engine-generated"
@@ -13562,19 +12927,6 @@
       "depth": 1,
       "distractors": 31,
       "rating": 1200,
-      "puzzleType": "Fischer Random (960) mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "chess960_15",
-      "variant": "chess960",
-      "fen": "4R2b/2rk3r/P1b4p/1p1p4/q2nP3/B5RP/P5B1/RK3N2 b - - 0 3430",
-      "solution": [
-        "a4c2"
-      ],
-      "depth": 1,
-      "distractors": 29,
-      "rating": 1100,
       "puzzleType": "Fischer Random (960) mate in 1",
       "source": "engine-generated"
     },
@@ -13657,45 +13009,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "chigorin_7",
-      "variant": "chigorin",
-      "fen": "Rr2k1r1/2Q3b1/1P3p1n/2p5/1P2p1PP/3P3N/2N2N1P/4K2R w - - 0 2939",
-      "solution": [
-        "a8b8"
-      ],
-      "depth": 1,
-      "distractors": 45,
-      "rating": 1200,
-      "puzzleType": "Chigorin mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "chigorin_8",
-      "variant": "chigorin",
-      "fen": "Rr2k1rb/2Q5/1P3p2/2p5/1P2p1nP/N2P3N/5N1P/5K1R w - - 2 3035",
-      "solution": [
-        "a8b8"
-      ],
-      "depth": 1,
-      "distractors": 42,
-      "rating": 1200,
-      "puzzleType": "Chigorin mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "chigorin_9",
-      "variant": "chigorin",
-      "fen": "Rr2k1r1/2Q3b1/1P3p2/2p5/1P2p1nP/3P3N/2N2N1P/5K1R w - - 0 2984",
-      "solution": [
-        "a8b8"
-      ],
-      "depth": 1,
-      "distractors": 45,
-      "rating": 1200,
-      "puzzleType": "Chigorin mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "chigorin_10",
       "variant": "chigorin",
       "fen": "6n1/5k1r/1q1p4/P2b2p1/1r2P3/K6P/4R1P1/4Q3 b - - 0 4776",
@@ -13717,19 +13030,6 @@
       ],
       "depth": 1,
       "distractors": 48,
-      "rating": 1200,
-      "puzzleType": "Chigorin mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "chigorin_12",
-      "variant": "chigorin",
-      "fen": "bk2q3/6R1/p4N2/Q5N1/1p2pP2/P7/1R1P2K1/8 w - - 4 3539",
-      "solution": [
-        "a5c7"
-      ],
-      "depth": 1,
-      "distractors": 51,
       "rating": 1200,
       "puzzleType": "Chigorin mate in 1",
       "source": "engine-generated"
@@ -13761,19 +13061,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "chigorin_15",
-      "variant": "chigorin",
-      "fen": "4r2k/p7/P3N3/1pbQ3p/1P4R1/3N4/2P2P2/5K1N w - - 7 4293",
-      "solution": [
-        "d5h5"
-      ],
-      "depth": 1,
-      "distractors": 54,
-      "rating": 1200,
-      "puzzleType": "Chigorin mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "courier_1",
       "variant": "courier",
       "fen": "r1Nb2s1bbn1/np4kp2pr/2p9/P6B1p1p/3P2pS1p1P/5pPq3R/P2NP3S1P1/2R1Q1K1B1N1 b - - 0 4081",
@@ -13800,32 +13087,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "courier_3",
-      "variant": "courier",
-      "fen": "b3n1ksbr2/r1n1B2p1ppp/4s5N1/bB4p2KPP/Pp2P1P5/8SP2/1PPb1Q4R1/R1B4S1B2 w - - 1 4513",
-      "solution": [
-        "f2f8"
-      ],
-      "depth": 1,
-      "distractors": 82,
-      "rating": 1200,
-      "puzzleType": "Courier Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "courier_4",
-      "variant": "courier",
-      "fen": "b3n1k1br2/r1nBB2psppp/4s5N1/b5p2KPP/Pp2P1P5/8SP2/1PPb1Q4R1/R1B4S1B2 w - - 3 4594",
-      "solution": [
-        "f2f8"
-      ],
-      "depth": 1,
-      "distractors": 79,
-      "rating": 1200,
-      "puzzleType": "Courier Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "courier_5",
       "variant": "courier",
       "fen": "3r1q1s2Cr/pbBp4n3/n1p3R5/1p2sp1p2P1/1b1bkP2P3/P3P1PPSP2/2P1QK6/RN1B1S2NB2 w - - 3 3821",
@@ -13847,19 +13108,6 @@
       ],
       "depth": 1,
       "distractors": 58,
-      "rating": 1200,
-      "puzzleType": "Courier Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "courier_7",
-      "variant": "courier",
-      "fen": "3r3s2Cr/pbBp4n3/n1p3R5/1p2sp1p2P1/1b1bkP2P3/P3P1PPSP2/2P1QKS4q/RN1B4NB2 w - - 5 3958",
-      "solution": [
-        "e2f3"
-      ],
-      "depth": 1,
-      "distractors": 64,
       "rating": 1200,
       "puzzleType": "Courier Chess mate in 1",
       "source": "engine-generated"
@@ -13896,45 +13144,6 @@
       "fen": "r2b1sks2n1/pbp1pnp1pp1r/7p2pp/1p1p1b1Pq1B1/PQ1P1Pp3P1/1PN1P1b5/2P3P4P/R2B1S1KB1NR b - f3 0 2452",
       "solution": [
         "i5i1"
-      ],
-      "depth": 1,
-      "distractors": 60,
-      "rating": 1200,
-      "puzzleType": "Courier Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "courier_11",
-      "variant": "courier",
-      "fen": "r2b1sksb1n1/pbp1p1p1pp1r/7p2pp/1p1p1pBP4/PQ1P2S3P1/RP1nP1b5/2P2PP4P/1N1B1SK1BqNR b - - 4 1706",
-      "solution": [
-        "j1i1"
-      ],
-      "depth": 1,
-      "distractors": 63,
-      "rating": 1200,
-      "puzzleType": "Courier Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "courier_12",
-      "variant": "courier",
-      "fen": "r2b1sksbbnr/p1p1p1p1pp2/b6p2pp/1p1p1pBP4/Pn1P6P1/6S5/1PP1PPP4P/RN1BQSK1BqNR b - - 1 1155",
-      "solution": [
-        "j1i1"
-      ],
-      "depth": 1,
-      "distractors": 44,
-      "rating": 1200,
-      "puzzleType": "Courier Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "courier_13",
-      "variant": "courier",
-      "fen": "r2b1sksb1n1/pbp1p1p1pp1r/7p2pp/1p1pn2P4/PQ1P2p3P1/1P2P1b1B3/2P2PP4P/RN1B1SK1BqNR b - - 1 1948",
-      "solution": [
-        "j1i1"
       ],
       "depth": 1,
       "distractors": 60,
@@ -13982,15 +13191,28 @@
       "source": "engine-generated"
     },
     {
-      "id": "crazyhouse_2",
+      "id": "crazyhouse_9",
       "variant": "crazyhouse",
-      "fen": "1N1rkb2/1b1nn3/p3pPpN/p1PpPp1r/3q3p/2pr2pp/1BP1P3/3QKB1R w K - 0 2329",
+      "fen": "r3k1B1/1b1pb2P/pqPPNP2/1p1P3p/p4p1p/N1bN1P1P/1QK1N1rR/3RC3 w - - 0 3497",
       "solution": [
         "f6f7"
       ],
       "depth": 1,
-      "distractors": 28,
-      "rating": 1100,
+      "distractors": 51,
+      "rating": 1200,
+      "puzzleType": "Crazyhouse mate in 1",
+      "source": "engine-generated"
+    },
+    {
+      "id": "crazyhouse_10",
+      "variant": "crazyhouse",
+      "fen": "2r1kbB1/pb1p3P/1qPPNP2/1p5p/p2PQprp/2bN1P1P/2K1N1PR/1N1RC3 w - - 9 3149",
+      "solution": [
+        "f6f7"
+      ],
+      "depth": 1,
+      "distractors": 51,
+      "rating": 1200,
       "puzzleType": "Crazyhouse mate in 1",
       "source": "engine-generated"
     },
@@ -14068,45 +13290,6 @@
       ],
       "depth": 1,
       "distractors": 51,
-      "rating": 1200,
-      "puzzleType": "Crazyhouse mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "crazyhouse_9",
-      "variant": "crazyhouse",
-      "fen": "r3k1B1/1b1pb2P/pqPPNP2/1p1P3p/p4p1p/N1bN1P1P/1QK1N1rR/3RC3 w - - 0 3497",
-      "solution": [
-        "f6f7"
-      ],
-      "depth": 1,
-      "distractors": 51,
-      "rating": 1200,
-      "puzzleType": "Crazyhouse mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "crazyhouse_10",
-      "variant": "crazyhouse",
-      "fen": "2r1kbB1/pb1p3P/1qPPNP2/1p5p/p2PQprp/2bN1P1P/2K1N1PR/1N1RC3 w - - 9 3149",
-      "solution": [
-        "f6f7"
-      ],
-      "depth": 1,
-      "distractors": 51,
-      "rating": 1200,
-      "puzzleType": "Crazyhouse mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "crazyhouse_11",
-      "variant": "crazyhouse",
-      "fen": "2r1kbB1/1b1p3P/pqPPNP2/1p1P3p/p3Qprp/2bN1P1P/2K1N1PR/1N1RC3 w - - 0 3242",
-      "solution": [
-        "f6f7"
-      ],
-      "depth": 1,
-      "distractors": 55,
       "rating": 1200,
       "puzzleType": "Crazyhouse mate in 1",
       "source": "engine-generated"
@@ -14307,35 +13490,9 @@
       "source": "engine-generated"
     },
     {
-      "id": "cylinderChess_12",
-      "variant": "cylinderChess",
-      "fen": "4k3/3n2b1/5PP1/2R5/p7/P7/7K/8 w - - 3 4895",
-      "solution": [
-        "c5c8"
-      ],
-      "depth": 1,
-      "distractors": 30,
-      "rating": 1100,
-      "puzzleType": "Cylinder Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "cylinderChess_13",
       "variant": "cylinderChess",
       "fen": "6n1/8/2k5/Ppppbb2/2n1r3/2P3PP/1c2B3/R1K3RN b - - 4 4008",
-      "solution": [
-        "e5b8"
-      ],
-      "depth": 1,
-      "distractors": 57,
-      "rating": 1200,
-      "puzzleType": "Cylinder Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "cylinderChess_14",
-      "variant": "cylinderChess",
-      "fen": "6n1/8/2k5/Ppppb3/2n1r1b1/2P3PP/1c2B3/R1K1R2N b - - 6 4125",
       "solution": [
         "e5b8"
       ],
@@ -14476,19 +13633,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "dianaChess_10",
-      "variant": "dianaChess",
-      "fen": "1rk1r1/p4p/1b4/3pBP/b1p2K/1b1R2 b - - 3 1191",
-      "solution": [
-        "c2d1c"
-      ],
-      "depth": 1,
-      "distractors": 35,
-      "rating": 1200,
-      "puzzleType": "Diana Chess (6×6) mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "dianaChess_11",
       "variant": "dianaChess",
       "fen": "6/3B2/C2Knk/6/2Q1R1/6 w - - 5 1439",
@@ -14515,19 +13659,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "dianaChess_13",
-      "variant": "dianaChess",
-      "fen": "QC4/5k/2B3/3Kp1/1R4/5n w - - 0 1265",
-      "solution": [
-        "b6d5"
-      ],
-      "depth": 1,
-      "distractors": 33,
-      "rating": 1200,
-      "puzzleType": "Diana Chess (6×6) mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "dianaChess_14",
       "variant": "dianaChess",
       "fen": "4B1/1Pk1pr/3bP1/1R1RPp/B5/3K2 w - - 11 971",
@@ -14541,15 +13672,15 @@
       "source": "engine-generated"
     },
     {
-      "id": "dianaChess_15",
+      "id": "dianaChess_13",
       "variant": "dianaChess",
-      "fen": "3kB1/1P2pr/4P1/1R2Pp/BR4/b2K2 w - - 7 923",
+      "fen": "QC4/5k/2B3/3Kp1/1R4/5n w - - 0 1265",
       "solution": [
-        "b5b6q"
+        "b6d5"
       ],
       "depth": 1,
-      "distractors": 24,
-      "rating": 1100,
+      "distractors": 33,
+      "rating": 1200,
       "puzzleType": "Diana Chess (6×6) mate in 1",
       "source": "engine-generated"
     },
@@ -14562,19 +13693,6 @@
       ],
       "depth": 1,
       "distractors": 45,
-      "rating": 1200,
-      "puzzleType": "Displacement Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "displacementChess_2",
-      "variant": "displacementChess",
-      "fen": "p1n2k2/R6b/B3pB2/1bpp1pp1/P6n/3NK1PN/1Pq1Rr1P/P4P2 b - - 0 2403",
-      "solution": [
-        "f2f3"
-      ],
-      "depth": 1,
-      "distractors": 46,
       "rating": 1200,
       "puzzleType": "Displacement Chess mate in 1",
       "source": "engine-generated"
@@ -14606,19 +13724,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "displacementChess_5",
-      "variant": "displacementChess",
-      "fen": "nbpr1bpr/pn1ppppk/1p6/4q3/6P1/N2Q4/PP1PKB1P/1PNRBPRP w - - 0 1862",
-      "solution": [
-        "h2g1"
-      ],
-      "depth": 1,
-      "distractors": 31,
-      "rating": 1200,
-      "puzzleType": "Displacement Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "displacementChess_6",
       "variant": "displacementChess",
       "fen": "nbpr2pk/pn1pp1pp/1p1q4/6Q1/8/NN2R2P/bP1P1r1P/1P1KPBRP w - - 0 2605",
@@ -14627,19 +13732,6 @@
       ],
       "depth": 1,
       "distractors": 65,
-      "rating": 1200,
-      "puzzleType": "Displacement Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "displacementChess_7",
-      "variant": "displacementChess",
-      "fen": "bnpr1bpr/pn1ppppk/1p6/4q3/6P1/N2Q4/PP1PKB1P/1PRNBPRP w - - 0 1783",
-      "solution": [
-        "h2g1"
-      ],
-      "depth": 1,
-      "distractors": 32,
       "rating": 1200,
       "puzzleType": "Displacement Chess mate in 1",
       "source": "engine-generated"
@@ -14658,19 +13750,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "displacementChess_9",
-      "variant": "displacementChess",
-      "fen": "rpq1pbpr/1ppn3n/B7/1N6/Ppk1P1pb/2P4P/1R1K1PQP/BN1PR3 w - - 0 2011",
-      "solution": [
-        "a6b5"
-      ],
-      "depth": 1,
-      "distractors": 47,
-      "rating": 1200,
-      "puzzleType": "Displacement Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "displacementChess_10",
       "variant": "displacementChess",
       "fen": "rpnbpbpr/1qpp1ppn/3Qk3/p5N1/8/1P2P2P/PBP2PP1/RN1PKB1R w Q - 0 746",
@@ -14679,45 +13758,6 @@
       ],
       "depth": 1,
       "distractors": 76,
-      "rating": 1200,
-      "puzzleType": "Displacement Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "displacementChess_11",
-      "variant": "displacementChess",
-      "fen": "rpnppbpr/1qbp1ppn/3Qk3/p5N1/8/1P5P/PBP1PPP1/RN1PKB1R w Q - 0 677",
-      "solution": [
-        "d6e5"
-      ],
-      "depth": 1,
-      "distractors": 74,
-      "rating": 1200,
-      "puzzleType": "Displacement Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "displacementChess_12",
-      "variant": "displacementChess",
-      "fen": "rpq1pbrp/1ppn3n/B4b2/1N6/Ppk3p1/2P1P2P/1R1K1PQP/BN1P3R w - - 1 1853",
-      "solution": [
-        "a6b5"
-      ],
-      "depth": 1,
-      "distractors": 50,
-      "rating": 1200,
-      "puzzleType": "Displacement Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "displacementChess_13",
-      "variant": "displacementChess",
-      "fen": "rqp1pbpr/1ppn3n/B7/1N6/Ppk1P1pb/2P1R2P/1R1K1PQP/BN1P4 w - - 0 2086",
-      "solution": [
-        "a6b5"
-      ],
-      "depth": 1,
-      "distractors": 47,
       "rating": 1200,
       "puzzleType": "Displacement Chess mate in 1",
       "source": "engine-generated"
@@ -14866,19 +13906,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "endgameChess_10",
-      "variant": "endgameChess",
-      "fen": "8/8/2r1P3/1ApP4/8/p4p2/k1K5/6n1 w - - 1 1215",
-      "solution": [
-        "b5c3"
-      ],
-      "depth": 1,
-      "distractors": 21,
-      "rating": 1100,
-      "puzzleType": "Endgame Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "endgameChess_11",
       "variant": "endgameChess",
       "fen": "Q4b1k/2P5/3p2P1/5p2/4pP1p/4P1P1/7K/8 w - - 0 797",
@@ -15022,110 +14049,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "extinction_7",
-      "variant": "extinction",
-      "fen": "r1bk2nr/pp1p2b1/4pp1p/1Bp3p1/3NP3/BP1P4/P2N1PPP/q1Q1K1R1 w - - 4 20",
-      "solution": [
-        "c1a1"
-      ],
-      "depth": 1,
-      "distractors": 39,
-      "rating": 1200,
-      "puzzleType": "Extinguish in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "extinction_8",
-      "variant": "extinction",
-      "fen": "2bkr3/rp2n1b1/4pp1N/2pp2p1/1pq1P1P1/B2P1N1P/5P2/Q3K2R w - - 0 29",
-      "solution": [
-        "d3c4"
-      ],
-      "depth": 1,
-      "distractors": 34,
-      "rating": 1200,
-      "puzzleType": "Extinguish in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "extinction_9",
-      "variant": "extinction",
-      "fen": "2bkr3/rp1pn1b1/4pp1p/p1p2Np1/1PB1P1P1/B2P4/Pq1N1P1P/Q3K2R b - - 7 25",
-      "solution": [
-        "b2a1"
-      ],
-      "depth": 1,
-      "distractors": 35,
-      "rating": 1200,
-      "puzzleType": "Extinguish in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "extinction_10",
-      "variant": "extinction",
-      "fen": "r1bk3r/pp1pn1b1/4pp1p/1Bp3p1/1P1NP1P1/B2P4/P2N1P1P/q1Q1K1R1 b - - 0 21",
-      "solution": [
-        "a1c1"
-      ],
-      "depth": 1,
-      "distractors": 30,
-      "rating": 1100,
-      "puzzleType": "Extinguish in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "extinction_11",
-      "variant": "extinction",
-      "fen": "r1bk2nr/pp1p2b1/4pp1p/1Bp3p1/3NP1P1/BP1P4/P2N1P1P/q1Q1K1R1 b - g3 0 20",
-      "solution": [
-        "a1c1"
-      ],
-      "depth": 1,
-      "distractors": 23,
-      "rating": 1100,
-      "puzzleType": "Extinguish in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "extinction_12",
-      "variant": "extinction",
-      "fen": "r1bk2nr/pp1p2b1/2B1pp1p/2p3p1/3NP3/BP1P4/P2N1PPP/q1Q1K1R1 b - - 1 18",
-      "solution": [
-        "a1c1"
-      ],
-      "depth": 1,
-      "distractors": 27,
-      "rating": 1100,
-      "puzzleType": "Extinguish in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "extinction_13",
-      "variant": "extinction",
-      "fen": "r1bk3r/pp1pn1b1/4pp1p/1Bp3p1/3NP1P1/BP1P4/P2N1P1P/q1Q1K1R1 w - - 1 21",
-      "solution": [
-        "c1a1"
-      ],
-      "depth": 1,
-      "distractors": 39,
-      "rating": 1200,
-      "puzzleType": "Extinguish in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "extinction_14",
-      "variant": "extinction",
-      "fen": "r1bk3r/1p1pn1b1/4pp1p/pBp2Np1/1P2P1P1/B2P4/Pq1N1P1P/Q3K1R1 b - - 3 23",
-      "solution": [
-        "b2a1"
-      ],
-      "depth": 1,
-      "distractors": 37,
-      "rating": 1200,
-      "puzzleType": "Extinguish in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "extinction_15",
       "variant": "extinction",
       "fen": "r1bqkbnr/p1nppBp1/7p/2p5/1p2PP2/N5PN/PPPP3P/R1BQK2R w KQkq - 1 8",
@@ -15148,40 +14071,6 @@
       "depth": 1,
       "distractors": 27,
       "rating": 1100,
-      "puzzleType": "Fifth check in 1",
-      "source": "engine-generated",
-      "checkCount": {
-        "w": 1,
-        "b": 4
-      }
-    },
-    {
-      "id": "fiveCheck_2",
-      "variant": "fiveCheck",
-      "fen": "r1bqkbr1/ppppppp1/5n1p/8/1n6/1QP2PPN/PP1PP2P/RNB1KB1R w KQq - 5 351",
-      "solution": [
-        "b3f7"
-      ],
-      "depth": 1,
-      "distractors": 28,
-      "rating": 1100,
-      "puzzleType": "Fifth check in 1",
-      "source": "engine-generated",
-      "checkCount": {
-        "w": 1,
-        "b": 4
-      }
-    },
-    {
-      "id": "fiveCheck_3",
-      "variant": "fiveCheck",
-      "fen": "r1bqkb1r/ppppppp1/5n1p/8/1n3N2/1QP2PP1/PP1PP2P/RNB1KB1R w KQq - 7 430",
-      "solution": [
-        "b3f7"
-      ],
-      "depth": 1,
-      "distractors": 33,
-      "rating": 1200,
       "puzzleType": "Fifth check in 1",
       "source": "engine-generated",
       "checkCount": {
@@ -15232,23 +14121,6 @@
       ],
       "depth": 1,
       "distractors": 39,
-      "rating": 1200,
-      "puzzleType": "Fifth check in 1",
-      "source": "engine-generated",
-      "checkCount": {
-        "w": 1,
-        "b": 4
-      }
-    },
-    {
-      "id": "fiveCheck_7",
-      "variant": "fiveCheck",
-      "fen": "r2qkb2/pppbp1pr/3p1pNp/8/PP6/1P2QPP1/3PP2P/RNB1KB1R w KQq - 0 989",
-      "solution": [
-        "e3e7"
-      ],
-      "depth": 1,
-      "distractors": 40,
       "rating": 1200,
       "puzzleType": "Fifth check in 1",
       "source": "engine-generated",
@@ -15317,40 +14189,6 @@
       ],
       "depth": 1,
       "distractors": 26,
-      "rating": 1100,
-      "puzzleType": "Fifth check in 1",
-      "source": "engine-generated",
-      "checkCount": {
-        "w": 3,
-        "b": 4
-      }
-    },
-    {
-      "id": "fiveCheck_12",
-      "variant": "fiveCheck",
-      "fen": "r2k1b2/p2n1p2/bppqp3/6pr/1PP3np/3PpPP1/PB2P2P/RQ2KBNR w KQ - 1 1819",
-      "solution": [
-        "b2f6"
-      ],
-      "depth": 1,
-      "distractors": 24,
-      "rating": 1100,
-      "puzzleType": "Fifth check in 1",
-      "source": "engine-generated",
-      "checkCount": {
-        "w": 3,
-        "b": 4
-      }
-    },
-    {
-      "id": "fiveCheck_13",
-      "variant": "fiveCheck",
-      "fen": "r2k1b2/p2n1p2/bp1qp3/2p3pr/1PP3np/3PpPP1/PB2P1BP/RQ2K1NR w KQ - 0 1949",
-      "solution": [
-        "b2f6"
-      ],
-      "depth": 1,
-      "distractors": 25,
       "rating": 1100,
       "puzzleType": "Fifth check in 1",
       "source": "engine-generated",
@@ -15693,19 +14531,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "gridChess_9",
-      "variant": "gridChess",
-      "fen": "1n2r3/3nk3/rp1p2pp/3K2P1/p4B1P/q2P1P2/1pb5/4b1RR b - - 2 3431",
-      "solution": [
-        "a3d3"
-      ],
-      "depth": 1,
-      "distractors": 26,
-      "rating": 1100,
-      "puzzleType": "Grid Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "gridChess_10",
       "variant": "gridChess",
       "fen": "1kN3q1/5r2/1p5b/PP4p1/3p1pPp/2P2P1P/4r3/RKB3R1 b - - 5 3853",
@@ -15732,32 +14557,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "gridChess_12",
-      "variant": "gridChess",
-      "fen": "r1bqkr2/p1p1np2/1p2p1pB/2bpn2p/2QPN3/P7/1PP1PPPP/R2K1BNR w q - 10 805",
-      "solution": [
-        "e4f6"
-      ],
-      "depth": 1,
-      "distractors": 37,
-      "rating": 1200,
-      "puzzleType": "Grid Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "gridChess_13",
-      "variant": "gridChess",
-      "fen": "r1bqkr2/p3np2/1pp1p1pB/2bpn2p/2QPN3/P4N2/1PP1PPPP/R2K1B1R w q - 0 870",
-      "solution": [
-        "e4f6"
-      ],
-      "depth": 1,
-      "distractors": 39,
-      "rating": 1200,
-      "puzzleType": "Grid Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "gridChess_14",
       "variant": "gridChess",
       "fen": "6nr/4k1b1/p2ppp1p/P5p1/Nrb1K3/3P1PPB/2n1N2P/3R4 b - - 9 2415",
@@ -15767,19 +14566,6 @@
       "depth": 1,
       "distractors": 19,
       "rating": 1000,
-      "puzzleType": "Grid Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "gridChess_15",
-      "variant": "gridChess",
-      "fen": "1r4nr/4k1b1/p2ppp1p/P5p1/N1b1K3/3P1PPB/2n1N2P/5R2 b - - 7 2354",
-      "solution": [
-        "c4d5"
-      ],
-      "depth": 1,
-      "distractors": 24,
-      "rating": 1100,
       "puzzleType": "Grid Chess mate in 1",
       "source": "engine-generated"
     },
@@ -15875,6 +14661,19 @@
       "source": "engine-generated"
     },
     {
+      "id": "halfChess_13",
+      "variant": "halfChess",
+      "fen": "Q2Nk2c/B2p2K1/P3r3/1R6 w - - 2 1302",
+      "solution": [
+        "d4c2"
+      ],
+      "depth": 1,
+      "distractors": 23,
+      "rating": 1100,
+      "puzzleType": "Half Chess (4×8) mate in 1",
+      "source": "engine-generated"
+    },
+    {
       "id": "halfChess_8",
       "variant": "halfChess",
       "fen": "rnRqkbnr/p1pp2pP/PP1P3P/RNBQ1KbR w - - 0 179",
@@ -15932,45 +14731,6 @@
       "fen": "1Q1Nk2P/Bc1p4/PR1P1K2/3r4 w - - 3 1085",
       "solution": [
         "d4b3"
-      ],
-      "depth": 1,
-      "distractors": 14,
-      "rating": 1000,
-      "puzzleType": "Half Chess (4×8) mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "halfChess_13",
-      "variant": "halfChess",
-      "fen": "Q2Nk2c/B2p2K1/P3r3/1R6 w - - 2 1302",
-      "solution": [
-        "d4c2"
-      ],
-      "depth": 1,
-      "distractors": 23,
-      "rating": 1100,
-      "puzzleType": "Half Chess (4×8) mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "halfChess_14",
-      "variant": "halfChess",
-      "fen": "rnRqkb1r/p1ppn1pP/PP1PQ2P/RNB1K1bR b - - 3 268",
-      "solution": [
-        "b4c2"
-      ],
-      "depth": 1,
-      "distractors": 14,
-      "rating": 1000,
-      "puzzleType": "Half Chess (4×8) mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "halfChess_15",
-      "variant": "halfChess",
-      "fen": "1Q1Nk3/BR1p4/P2P1K1P/2c3r1 w - - 5 1005",
-      "solution": [
-        "d4c2"
       ],
       "depth": 1,
       "distractors": 14,
@@ -16083,45 +14843,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "hoppelPoppel_9",
-      "variant": "hoppelPoppel",
-      "fen": "1rb4r/2p4k/5p1B/3ppq1b/4P1P1/2p4B/p1N1n3/3RK3 b - - 5 2990",
-      "solution": [
-        "f5f1"
-      ],
-      "depth": 1,
-      "distractors": 49,
-      "rating": 1200,
-      "puzzleType": "Hoppel-Poppel mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "hoppelPoppel_10",
-      "variant": "hoppelPoppel",
-      "fen": "2b4r/r1p3k1/5p1B/4pq1b/4P1P1/2p4B/p1NRn3/4K3 b - - 4 3289",
-      "solution": [
-        "f5f1"
-      ],
-      "depth": 1,
-      "distractors": 49,
-      "rating": 1200,
-      "puzzleType": "Hoppel-Poppel mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "hoppelPoppel_11",
-      "variant": "hoppelPoppel",
-      "fen": "r1b4r/2p3k1/3R1p1B/4pq1b/4P1P1/2p4B/p1N1n3/4K3 b - - 2 3186",
-      "solution": [
-        "f5f1"
-      ],
-      "depth": 1,
-      "distractors": 50,
-      "rating": 1200,
-      "puzzleType": "Hoppel-Poppel mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "hoppelPoppel_12",
       "variant": "hoppelPoppel",
       "fen": "rn2kN1r/pb1p4/3Qp2p/1P3p2/5NP1/8/PP1BP3/R1KB4 w q - 1 1666",
@@ -16130,19 +14851,6 @@
       ],
       "depth": 1,
       "distractors": 45,
-      "rating": 1200,
-      "puzzleType": "Hoppel-Poppel mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "hoppelPoppel_13",
-      "variant": "hoppelPoppel",
-      "fen": "rn2kN1r/p2p4/3Qp2p/1P3p2/5NP1/2B5/PP2P1b1/R1KB4 w q - 3 1715",
-      "solution": [
-        "d6e7"
-      ],
-      "depth": 1,
-      "distractors": 49,
       "rating": 1200,
       "puzzleType": "Hoppel-Poppel mate in 1",
       "source": "engine-generated"
@@ -16177,32 +14885,6 @@
       "id": "horde_1",
       "variant": "horde",
       "fen": "r1bq1knA/ppppp3/7P/1P1P1P1p/PPP1PP1P/PPPPP1PP/PPPPPPPP/PPPPPPPP w - - 1 232",
-      "solution": [
-        "h8g6"
-      ],
-      "depth": 1,
-      "distractors": 16,
-      "rating": 1000,
-      "puzzleType": "Horde mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "horde_2",
-      "variant": "horde",
-      "fen": "r1bqk1nA/ppppp3/n6b/1PPP1pPp/PPP1PPPP/PPPPPPPP/PPPPPPPP/PPPPPPPP w q - 1 137",
-      "solution": [
-        "h8g6"
-      ],
-      "depth": 1,
-      "distractors": 18,
-      "rating": 1000,
-      "puzzleType": "Horde mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "horde_3",
-      "variant": "horde",
-      "fen": "r1bqk1nA/ppppp3/7b/1PnP1PPp/PPP1PP1P/PPPPPPPP/PPPPPPPP/PPPPPPPP w q - 0 168",
       "solution": [
         "h8g6"
       ],
@@ -16291,19 +14973,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "horde_10",
-      "variant": "horde",
-      "fen": "4k3/p2R4/P1p1P1C1/6rP/Pp2P3/1P2PP2/PPPPPP1P/PPP1PP1P w - - 0 2325",
-      "solution": [
-        "g6f6"
-      ],
-      "depth": 1,
-      "distractors": 35,
-      "rating": 1200,
-      "puzzleType": "Horde mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "horde_11",
       "variant": "horde",
       "fen": "1B1k4/N7/p2NPP2/4P2P/2P1PP1P/1PPPPP1P/P5PP/n2PP1P1 w - - 2 1836",
@@ -16377,19 +15046,6 @@
       ],
       "depth": 1,
       "distractors": 30,
-      "rating": 1100,
-      "puzzleType": "Immunization Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "immunizationChess_2",
-      "variant": "immunizationChess",
-      "fen": "rnbqkb1r/p1p2ppp/3pp2n/1p6/6P1/1PP2P2/PB1PP2P/RN1QKBNR b KQkq - 1 269",
-      "solution": [
-        "d8h4"
-      ],
-      "depth": 1,
-      "distractors": 29,
       "rating": 1100,
       "puzzleType": "Immunization Chess mate in 1",
       "source": "engine-generated"
@@ -16616,32 +15272,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "kingOfTheHill_5",
-      "variant": "kingOfTheHill",
-      "fen": "6nr/2b5/p1B2k2/P7/2p3p1/2P1pPp1/1B1P4/3K1R2 b - - 13 2126",
-      "solution": [
-        "f6e5"
-      ],
-      "depth": 1,
-      "distractors": 28,
-      "rating": 1100,
-      "puzzleType": "Reach the hill",
-      "source": "engine-generated"
-    },
-    {
-      "id": "kingOfTheHill_6",
-      "variant": "kingOfTheHill",
-      "fen": "6nr/8/p1B2k2/P7/2p2bp1/2P1pPp1/1B1P1R2/3K4 b - - 11 2069",
-      "solution": [
-        "f6e5"
-      ],
-      "depth": 1,
-      "distractors": 29,
-      "rating": 1100,
-      "puzzleType": "Reach the hill",
-      "source": "engine-generated"
-    },
-    {
       "id": "kingOfTheHill_7",
       "variant": "kingOfTheHill",
       "fen": "2b5/1pp1r3/n3k3/rpP1p3/1P1P4/P6p/RB1PR1PP/1N3K2 b - - 1 2178",
@@ -16681,32 +15311,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "kingOfTheHill_10",
-      "variant": "kingOfTheHill",
-      "fen": "2b5/1p1r4/n3k3/1pPp4/4p3/r3R2P/1R1P3P/BN2K3 b - - 1 2537",
-      "solution": [
-        "e6e5"
-      ],
-      "depth": 1,
-      "distractors": 27,
-      "rating": 1100,
-      "puzzleType": "Reach the hill",
-      "source": "engine-generated"
-    },
-    {
-      "id": "kingOfTheHill_11",
-      "variant": "kingOfTheHill",
-      "fen": "8/1b6/1P1r4/rp1p1k2/1n6/1RN4P/3P3P/2B1K3 b - - 3 3269",
-      "solution": [
-        "f5e5"
-      ],
-      "depth": 1,
-      "distractors": 31,
-      "rating": 1200,
-      "puzzleType": "Reach the hill",
-      "source": "engine-generated"
-    },
-    {
       "id": "kingOfTheHill_12",
       "variant": "kingOfTheHill",
       "fen": "8/1b6/1P3r2/rp1p1k2/1n6/1RN4P/1B1P3P/4K3 b - - 1 3202",
@@ -16716,19 +15320,6 @@
       "depth": 1,
       "distractors": 30,
       "rating": 1100,
-      "puzzleType": "Reach the hill",
-      "source": "engine-generated"
-    },
-    {
-      "id": "kingOfTheHill_13",
-      "variant": "kingOfTheHill",
-      "fen": "r5r1/1b6/1P6/1p1p1kN1/1n6/R6P/3P3P/2B1K3 b - - 9 3490",
-      "solution": [
-        "f5e5"
-      ],
-      "depth": 1,
-      "distractors": 33,
-      "rating": 1200,
       "puzzleType": "Reach the hill",
       "source": "engine-generated"
     },
@@ -16746,14 +15337,14 @@
       "source": "engine-generated"
     },
     {
-      "id": "kingOfTheHill_15",
+      "id": "kingOfTheHill_10",
       "variant": "kingOfTheHill",
-      "fen": "7r/p5k1/PR3n1p/1p1P1K2/2P1R3/1P6/7N/8 w - - 13 5156",
+      "fen": "2b5/1p1r4/n3k3/1pPp4/4p3/r3R2P/1R1P3P/BN2K3 b - - 1 2537",
       "solution": [
-        "f5e5"
+        "e6e5"
       ],
       "depth": 1,
-      "distractors": 28,
+      "distractors": 27,
       "rating": 1100,
       "puzzleType": "Reach the hill",
       "source": "engine-generated"
@@ -16829,19 +15420,6 @@
       "fen": "r1b1n1k1/2p5/1pP2p1P/p3p1p1/P1KPpq2/2b1PP1p/2k1N2P/R2R4 b - - 0 2910",
       "solution": [
         "f4f3"
-      ],
-      "depth": 1,
-      "distractors": 39,
-      "rating": 1200,
-      "puzzleType": "Mate the knight-king",
-      "source": "engine-generated"
-    },
-    {
-      "id": "knightmate_7",
-      "variant": "knightmate",
-      "fen": "r3n1k1/2p5/1pP2p1P/p3pbp1/P1KPp1q1/R1b1P2p/2k2P1P/3R1N2 b - - 10 2667",
-      "solution": [
-        "g4d1"
       ],
       "depth": 1,
       "distractors": 39,
@@ -17071,19 +15649,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "leganChess_10",
-      "variant": "leganChess",
-      "fen": "5bnr/8/8/kpQ5/1P4P1/K1pqpB2/2bP1N2/3B4 w - - 4 4972",
-      "solution": [
-        "c5a7"
-      ],
-      "depth": 1,
-      "distractors": 38,
-      "rating": 1200,
-      "puzzleType": "Legan Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "leganChess_11",
       "variant": "leganChess",
       "fen": "6n1/8/7b/kpQ2P2/bP2B2r/K3p3/1p1P4/2NB4 w - - 0 5192",
@@ -17131,19 +15696,6 @@
       ],
       "depth": 1,
       "distractors": 35,
-      "rating": 1200,
-      "puzzleType": "Legan Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "leganChess_15",
-      "variant": "leganChess",
-      "fen": "5bn1/7q/2B5/kpQ5/1P4P1/K1pPpp2/2bP1NB1/3r4 w - - 5 4612",
-      "solution": [
-        "c5b5"
-      ],
-      "depth": 1,
-      "distractors": 38,
       "rating": 1200,
       "puzzleType": "Legan Chess mate in 1",
       "source": "engine-generated"
@@ -17210,19 +15762,6 @@
       "depth": 1,
       "distractors": 17,
       "rating": 1000,
-      "puzzleType": "Los Alamos (6×6) mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "losAlamos_6",
-      "variant": "losAlamos",
-      "fen": "2q1k1/5r/2P1Np/p4K/P1n2P/1R2R1 b - - 0 1230",
-      "solution": [
-        "c2d4"
-      ],
-      "depth": 1,
-      "distractors": 21,
-      "rating": 1100,
       "puzzleType": "Los Alamos (6×6) mate in 1",
       "source": "engine-generated"
     },
@@ -17357,19 +15896,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "madrasiChess_2",
-      "variant": "madrasiChess",
-      "fen": "r1bq1b1r/2ppkpQ1/pp6/2P4p/P2Pp3/nP2P2N/4KPPP/RNB2B1R w - - 1 967",
-      "solution": [
-        "g7e5"
-      ],
-      "depth": 1,
-      "distractors": 31,
-      "rating": 1200,
-      "puzzleType": "Madrasi Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "madrasiChess_3",
       "variant": "madrasiChess",
       "fen": "k1bq4/p1p3r1/2Npppp1/2Q1P1P1/PnPK1P1p/4R2P/1P4N1/R3BB2 w - - 9 3739",
@@ -17392,58 +15918,6 @@
       "depth": 1,
       "distractors": 29,
       "rating": 1100,
-      "puzzleType": "Madrasi Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "madrasiChess_5",
-      "variant": "madrasiChess",
-      "fen": "k2q4/1bp3r1/2Npppp1/p1Q1P1P1/PnPK1P2/3BR1pP/1P6/R3N3 w - - 2 3922",
-      "solution": [
-        "c5a7"
-      ],
-      "depth": 1,
-      "distractors": 31,
-      "rating": 1200,
-      "puzzleType": "Madrasi Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "madrasiChess_6",
-      "variant": "madrasiChess",
-      "fen": "k4q2/p1p4r/bQNpppp1/1p2P1P1/PnPK1P1p/R3N2P/1P6/2B2BR1 w - - 5 3099",
-      "solution": [
-        "b6a7"
-      ],
-      "depth": 1,
-      "distractors": 31,
-      "rating": 1200,
-      "puzzleType": "Madrasi Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "madrasiChess_7",
-      "variant": "madrasiChess",
-      "fen": "k1b3q1/p1p3r1/2Npppp1/2Q1P1P1/PnPK1P1p/4R2P/1P1B2N1/R4B2 w - - 7 3680",
-      "solution": [
-        "c5a7"
-      ],
-      "depth": 1,
-      "distractors": 35,
-      "rating": 1200,
-      "puzzleType": "Madrasi Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "madrasiChess_8",
-      "variant": "madrasiChess",
-      "fen": "k1bq4/2p3r1/2Npppp1/p1Q1P1P1/PnPK1P2/3BR1pP/1P4N1/R7 w - - 0 3861",
-      "solution": [
-        "c5a7"
-      ],
-      "depth": 1,
-      "distractors": 35,
-      "rating": 1200,
       "puzzleType": "Madrasi Chess mate in 1",
       "source": "engine-generated"
     },
@@ -17513,19 +15987,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "madrasiChess_14",
-      "variant": "madrasiChess",
-      "fen": "3r2r1/2k4p/pp3p2/P6P/1Qpbpn2/3P4/R2P2PK/B2b3R b - - 1 3638",
-      "solution": [
-        "g8g2"
-      ],
-      "depth": 1,
-      "distractors": 39,
-      "rating": 1200,
-      "puzzleType": "Madrasi Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "madrasiChess_15",
       "variant": "madrasiChess",
       "fen": "r1bqkbnr/3p1ppp/4p3/pp6/Pnp5/2P1PP1P/1P1PN1P1/RNBQKB1R b KQkq - 1 418",
@@ -17578,37 +16039,11 @@
       "source": "engine-generated"
     },
     {
-      "id": "maharaja_4",
-      "variant": "maharaja",
-      "fen": "6r1/7k/3b1n1M/1pp5/p6p/8/8/7b b - - 1 2755",
-      "solution": [
-        "h7h6"
-      ],
-      "depth": 1,
-      "distractors": 42,
-      "rating": 1200,
-      "puzzleType": "Mate the Maharaja",
-      "source": "engine-generated"
-    },
-    {
       "id": "maharaja_5",
       "variant": "maharaja",
       "fen": "5Mr1/2b4k/5n2/1pp4p/p7/8/8/7b b - - 26 2595",
       "solution": [
         "g8f8"
-      ],
-      "depth": 1,
-      "distractors": 37,
-      "rating": 1200,
-      "puzzleType": "Mate the Maharaja",
-      "source": "engine-generated"
-    },
-    {
-      "id": "maharaja_6",
-      "variant": "maharaja",
-      "fen": "8/4M1rk/8/2p4n/pp5p/2b2b2/8/8 b - - 5 3316",
-      "solution": [
-        "g7e7"
       ],
       "depth": 1,
       "distractors": 37,
@@ -17747,19 +16182,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "makpong_2",
-      "variant": "makpong",
-      "fen": "7r/pr3k2/4p2n/P5pp/1q4Pp/2pP1P2/3N4/2KB1R2 b - - 3 2648",
-      "solution": [
-        "b4b2"
-      ],
-      "depth": 1,
-      "distractors": 47,
-      "rating": 1200,
-      "puzzleType": "Makpong mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "makpong_3",
       "variant": "makpong",
       "fen": "r1b1k1nr/1ppp2b1/p1P3p1/1Q2ppqp/3nP3/1P5P/P4PPR/RNB1KBN1 b kq - 2 766",
@@ -17851,19 +16273,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "makpong_10",
-      "variant": "makpong",
-      "fen": "4k3/5r1p/p1pp3b/Pp4p1/2P5/N3q3/Q2BNr2/R3K2R b - - 2 2668",
-      "solution": [
-        "e3e2"
-      ],
-      "depth": 1,
-      "distractors": 48,
-      "rating": 1200,
-      "puzzleType": "Makpong mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "makpong_11",
       "variant": "makpong",
       "fen": "3q2k1/2pb2b1/rpn4B/p2P2p1/P3p3/3BPrPP/1QP2P2/1R2K1Nn w - - 3 1724",
@@ -17885,32 +16294,6 @@
       ],
       "depth": 1,
       "distractors": 47,
-      "rating": 1200,
-      "puzzleType": "Makpong mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "makpong_13",
-      "variant": "makpong",
-      "fen": "2bk1b1r/r1p2pp1/2np3p/pp6/2Pp3q/1Q2nKPN/PP2BN1R/R1B5 b - - 3 1497",
-      "solution": [
-        "c6e5"
-      ],
-      "depth": 1,
-      "distractors": 47,
-      "rating": 1200,
-      "puzzleType": "Makpong mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "makpong_14",
-      "variant": "makpong",
-      "fen": "3k1b1r/r1p2pp1/2npb2p/ppP5/3p3q/1Q2nKPN/PP2BN1R/R1B5 b - - 0 1596",
-      "solution": [
-        "c6e5"
-      ],
-      "depth": 1,
-      "distractors": 49,
       "rating": 1200,
       "puzzleType": "Makpong mate in 1",
       "source": "engine-generated"
@@ -18059,19 +16442,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "makruk_11",
-      "variant": "makruk",
-      "fen": "2s4r/mM6/2s1k3/1pp1P1p1/5nN1/2P2PK1/m2S1R2/2NM4 b - - 0 2940",
-      "solution": [
-        "h8h3"
-      ],
-      "depth": 1,
-      "distractors": 40,
-      "rating": 1200,
-      "puzzleType": "Makruk mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "makruk_12",
       "variant": "makruk",
       "fen": "2k5/2n5/M3nmr1/1p1p2P1/SP1N4/1R4sP/R2r4/5MK1 b - - 4 4461",
@@ -18080,19 +16450,6 @@
       ],
       "depth": 1,
       "distractors": 40,
-      "rating": 1200,
-      "puzzleType": "Makruk mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "makruk_13",
-      "variant": "makruk",
-      "fen": "2k2n2/2n5/M4mr1/1p1p2P1/SP1N4/6sP/RR1r4/5MK1 b - - 2 4378",
-      "solution": [
-        "g3h2"
-      ],
-      "depth": 1,
-      "distractors": 36,
       "rating": 1200,
       "puzzleType": "Makruk mate in 1",
       "source": "engine-generated"
@@ -18184,19 +16541,6 @@
       ],
       "depth": 1,
       "distractors": 37,
-      "rating": 1200,
-      "puzzleType": "Marseillais mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "marseillais_6",
-      "variant": "marseillais",
-      "fen": "2B1k3/2Pp1N2/2bnpQ2/6P1/1P2P3/2q4p/7R/2R4K w - - 3 24",
-      "solution": [
-        "f7d6"
-      ],
-      "depth": 1,
-      "distractors": 42,
       "rating": 1200,
       "puzzleType": "Marseillais mate in 1",
       "source": "engine-generated"
@@ -18345,19 +16689,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "medusaChess_3",
-      "variant": "medusaChess",
-      "fen": "1r2kbn1/pp1b1p2/n1p3pr/6Pp/P1P1pP1N/1Ppq3P/3BP3/1R1QKB1R b K - 0 997",
-      "solution": [
-        "d3g3"
-      ],
-      "depth": 1,
-      "distractors": 43,
-      "rating": 1200,
-      "puzzleType": "Medusa Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "medusaChess_4",
       "variant": "medusaChess",
       "fen": "b7/4q3/2p4k/2p4P/5p2/6r1/1n6/7K b - - 19 5485",
@@ -18392,19 +16723,6 @@
       ],
       "depth": 1,
       "distractors": 48,
-      "rating": 1200,
-      "puzzleType": "Medusa Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "medusaChess_7",
-      "variant": "medusaChess",
-      "fen": "5k1B/3n1r2/7p/2Rp2NP/3P4/1p2Q1R1/4K3/1q2bB2 w - - 8 5145",
-      "solution": [
-        "c5c8"
-      ],
-      "depth": 1,
-      "distractors": 40,
       "rating": 1200,
       "puzzleType": "Medusa Chess mate in 1",
       "source": "engine-generated"
@@ -18683,19 +17001,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "minichess_14",
-      "variant": "minichess",
-      "fen": "3nB/k3p/4b/PR1PQ/RNa1K w - - 0 299",
-      "solution": [
-        "e2b5"
-      ],
-      "depth": 1,
-      "distractors": 18,
-      "rating": 1000,
-      "puzzleType": "Minichess (5×5) mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "minichess_15",
       "variant": "minichess",
       "fen": "1k3/1n1Bp/Q4/P1RN1/R3K w - - 7 400",
@@ -18761,32 +17066,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "monsterChess_5",
-      "variant": "monsterChess",
-      "fen": "1Rbk4/7n/p1pP4/5BP1/2p2P2/1r2p2K/4R3/8 w - - 11 30",
-      "solution": [
-        "b8c8"
-      ],
-      "depth": 1,
-      "distractors": 27,
-      "rating": 1100,
-      "puzzleType": "Monster Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "monsterChess_6",
-      "variant": "monsterChess",
-      "fen": "1Rbk4/7n/p1pP4/5BP1/2p2P2/1r2p1K1/4R3/8 w - - 12 30",
-      "solution": [
-        "b8c8"
-      ],
-      "depth": 1,
-      "distractors": 35,
-      "rating": 1200,
-      "puzzleType": "Monster Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "monsterChess_7",
       "variant": "monsterChess",
       "fen": "3rk2r/1bQ4p/4P1PP/5p2/3P1P2/R7/1K6/Rn6 w - - 5 27",
@@ -18803,19 +17082,6 @@
       "id": "monsterChess_8",
       "variant": "monsterChess",
       "fen": "4k3/p2prp1p/3P3P/1qR1p1P1/R3P3/1R2K3/P7/8 w - - 0 36",
-      "solution": [
-        "c5c8"
-      ],
-      "depth": 1,
-      "distractors": 30,
-      "rating": 1100,
-      "puzzleType": "Monster Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "monsterChess_9",
-      "variant": "monsterChess",
-      "fen": "4k3/p2prp1p/3P3P/1qR1p3/R3P1P1/1R2K3/P7/8 w - - 6 36",
       "solution": [
         "c5c8"
       ],
@@ -18855,32 +17121,6 @@
       "id": "monsterChess_12",
       "variant": "monsterChess",
       "fen": "1n1q1kr1/1b3ppp/rpP2P2/pP4P1/P1P1R1PP/3R4/7K/8 w - - 0 20",
-      "solution": [
-        "d3d8"
-      ],
-      "depth": 1,
-      "distractors": 35,
-      "rating": 1200,
-      "puzzleType": "Monster Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "monsterChess_13",
-      "variant": "monsterChess",
-      "fen": "1n1q1kr1/1b3ppp/rpP2P1n/pP2R1P1/P1P4P/3R1P2/8/7K w - - 4 19",
-      "solution": [
-        "d3d8"
-      ],
-      "depth": 1,
-      "distractors": 33,
-      "rating": 1200,
-      "puzzleType": "Monster Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "monsterChess_14",
-      "variant": "monsterChess",
-      "fen": "1n1q1kr1/1b3ppp/rpP2P1n/pP2R1P1/P1P4P/3R1P2/7K/8 w - - 5 19",
       "solution": [
         "d3d8"
       ],
@@ -18943,19 +17183,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "noCastling_4",
-      "variant": "noCastling",
-      "fen": "1r6/1b2bQ1r/7p/1p6/P3q1k1/N4N2/5P1P/2R2K1R w - - 0 4011",
-      "solution": [
-        "h2h3"
-      ],
-      "depth": 1,
-      "distractors": 45,
-      "rating": 1200,
-      "puzzleType": "No Castling mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "noCastling_5",
       "variant": "noCastling",
       "fen": "1r6/2p1b1pr/B4q1p/RP1p1b2/3Pk3/P5Q1/5P1P/1N3KNR w - - 1 2434",
@@ -18982,32 +17209,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "noCastling_7",
-      "variant": "noCastling",
-      "fen": "3qk3/pr1b2br/1p3n2/4p3/2pP1Ppp/BP1BP2P/P4KP1/RN4NR w - - 1 1192",
-      "solution": [
-        "d3g6"
-      ],
-      "depth": 1,
-      "distractors": 32,
-      "rating": 1200,
-      "puzzleType": "No Castling mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "noCastling_8",
-      "variant": "noCastling",
-      "fen": "2bqk1n1/prQn2br/1p6/4p3/2pP2pp/BP1BPP1P/P4KP1/RN4NR w - - 0 1044",
-      "solution": [
-        "d3g6"
-      ],
-      "depth": 1,
-      "distractors": 42,
-      "rating": 1200,
-      "puzzleType": "No Castling mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "noCastling_9",
       "variant": "noCastling",
       "fen": "rn2kr2/p1p2p1p/bp1P2B1/6Q1/2Pp4/PP2P1Pq/R2P3P/1NB1K1NR w Kq - 1 1148",
@@ -19029,32 +17230,6 @@
       ],
       "depth": 1,
       "distractors": 42,
-      "rating": 1200,
-      "puzzleType": "No Castling mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "noCastling_11",
-      "variant": "noCastling",
-      "fen": "rn2k2r/p1p2p1p/bp1P2p1/6Q1/2PpB3/PP2P1Pq/R2P3P/1NB1K1NR w Kkq - 1 1075",
-      "solution": [
-        "g5e7"
-      ],
-      "depth": 1,
-      "distractors": 44,
-      "rating": 1200,
-      "puzzleType": "No Castling mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "noCastling_12",
-      "variant": "noCastling",
-      "fen": "rn2k1r1/pbp2p2/3P2Bp/1p4Q1/2PP4/PP4Pq/R2P3P/1NBK2NR w q - 0 1448",
-      "solution": [
-        "g5e7"
-      ],
-      "depth": 1,
-      "distractors": 41,
       "rating": 1200,
       "puzzleType": "No Castling mate in 1",
       "source": "engine-generated"
@@ -19177,19 +17352,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "noRetreat_7",
-      "variant": "noRetreat",
-      "fen": "1rbq1b1r/ppp1ppp1/n6n/3p4/PP1kN2P/B2P3N/R1P1PP1P/3QKBR1 w - - 1 596",
-      "solution": [
-        "d1a1"
-      ],
-      "depth": 1,
-      "distractors": 28,
-      "rating": 1100,
-      "puzzleType": "No Retreat mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "noRetreat_8",
       "variant": "noRetreat",
       "fen": "1r1q1b1r/ppp5/n2p3n/3p1pp1/PPPk1PbP/B2P3N/R2QP2P/4KBR1 w - f6 0 908",
@@ -19198,32 +17360,6 @@
       ],
       "depth": 1,
       "distractors": 23,
-      "rating": 1100,
-      "puzzleType": "No Retreat mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "noRetreat_9",
-      "variant": "noRetreat",
-      "fen": "1r3b1r/pppq4/n2p3n/1P1p1pp1/P1Pk1PbP/B2P3N/R2QP2P/4KBR1 w - - 1 973",
-      "solution": [
-        "e2e3"
-      ],
-      "depth": 1,
-      "distractors": 29,
-      "rating": 1100,
-      "puzzleType": "No Retreat mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "noRetreat_10",
-      "variant": "noRetreat",
-      "fen": "1r1q1b1r/ppp2pp1/n2p3n/3p4/PPPk2bP/B2P3N/R3PP1P/3QKBR1 w - - 0 748",
-      "solution": [
-        "d1a1"
-      ],
-      "depth": 1,
-      "distractors": 26,
       "rating": 1100,
       "puzzleType": "No Retreat mate in 1",
       "source": "engine-generated"
@@ -19238,19 +17374,6 @@
       "depth": 1,
       "distractors": 28,
       "rating": 1100,
-      "puzzleType": "No Retreat mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "noRetreat_12",
-      "variant": "noRetreat",
-      "fen": "3r1r2/2N2k2/4pn2/ppp5/PP2pP1p/2Bp3P/4n1KP/1q6 b - - 1 2499",
-      "solution": [
-        "b1g1"
-      ],
-      "depth": 1,
-      "distractors": 33,
-      "rating": 1200,
       "puzzleType": "No Retreat mate in 1",
       "source": "engine-generated"
     },
@@ -19276,19 +17399,6 @@
       ],
       "depth": 1,
       "distractors": 24,
-      "rating": 1100,
-      "puzzleType": "No Retreat mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "noRetreat_15",
-      "variant": "noRetreat",
-      "fen": "5r2/2N2k2/5P2/pPp1p2n/1P1rp2p/3p3P/4n1KP/2q5 b - - 0 2889",
-      "solution": [
-        "c1g1"
-      ],
-      "depth": 1,
-      "distractors": 27,
       "rating": 1100,
       "puzzleType": "No Retreat mate in 1",
       "source": "engine-generated"
@@ -19372,19 +17482,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "ordaChess_7",
-      "variant": "ordaChess",
-      "fen": "4l1h1/4k2l/2p1p3/1hP1PPpp/1P1p3P/3P4/1p1K4/1R1a3a b - - 0 3701",
-      "solution": [
-        "h1f3"
-      ],
-      "depth": 1,
-      "distractors": 35,
-      "rating": 1200,
-      "puzzleType": "Orda Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "ordaChess_8",
       "variant": "ordaChess",
       "fen": "1hak1yQ1/1l6/pNp1p1p1/1P3p1p/1P4Pa/3PPPNB/7K/2B1R3 b - - 0 1855",
@@ -19419,19 +17516,6 @@
       ],
       "depth": 1,
       "distractors": 32,
-      "rating": 1200,
-      "puzzleType": "Orda Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "ordaChess_11",
-      "variant": "ordaChess",
-      "fen": "a5Q1/3k4/4N3/3P2pB/7p/2a2p2/5K2/3r2N1 w - - 2 4140",
-      "solution": [
-        "g8d8"
-      ],
-      "depth": 1,
-      "distractors": 31,
       "rating": 1200,
       "puzzleType": "Orda Chess mate in 1",
       "source": "engine-generated"
@@ -19554,19 +17638,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "patrolChess_6",
-      "variant": "patrolChess",
-      "fen": "6k1/8/1p1b1r2/pP1PR2p/P1KPp1bP/R5P1/3qB3/1N3n2 b - - 19 4272",
-      "solution": [
-        "d2b4"
-      ],
-      "depth": 1,
-      "distractors": 48,
-      "rating": 1200,
-      "puzzleType": "Patrol Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "patrolChess_7",
       "variant": "patrolChess",
       "fen": "4n2b/8/2pk3P/C4Qp1/pP2P3/N1BP1p2/R4K2/3B1b2 w - - 2 4572",
@@ -19653,19 +17724,6 @@
       ],
       "depth": 1,
       "distractors": 26,
-      "rating": 1100,
-      "puzzleType": "Patrol Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "patrolChess_14",
-      "variant": "patrolChess",
-      "fen": "2r2b2/4p2B/p5pn/2p2PNk/1ppPP2P/PP5K/1R4RP/1NB5 w - - 0 1894",
-      "solution": [
-        "h7g6"
-      ],
-      "depth": 1,
-      "distractors": 30,
       "rating": 1100,
       "puzzleType": "Patrol Chess mate in 1",
       "source": "engine-generated"
@@ -19822,19 +17880,6 @@
       ],
       "depth": 1,
       "distractors": 17,
-      "rating": 1000,
-      "puzzleType": "Pawns Only mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "pawnsOnly_12",
-      "variant": "pawnsOnly",
-      "fen": "6k1/8/3N3P/pPp5/P6P/3p4/3n4/4a2K b - - 1 1144",
-      "solution": [
-        "e1f3"
-      ],
-      "depth": 1,
-      "distractors": 16,
       "rating": 1000,
       "puzzleType": "Pawns Only mate in 1",
       "source": "engine-generated"
@@ -20100,19 +18145,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "pettyChess_3",
-      "variant": "pettyChess",
-      "fen": "2bkr1/1p1P1p/q1p2P/2n2p/1K4 b - - 0 749",
-      "solution": [
-        "a3b2"
-      ],
-      "depth": 1,
-      "distractors": 27,
-      "rating": 1100,
-      "puzzleType": "Petty Chess (5×6) mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "pettyChess_4",
       "variant": "pettyChess",
       "fen": "q1b2r/1pP1kp/p2n1N/P2KPP/R2Q2 b - - 0 331",
@@ -20134,19 +18166,6 @@
       ],
       "depth": 1,
       "distractors": 15,
-      "rating": 1000,
-      "puzzleType": "Petty Chess (5×6) mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "pettyChess_6",
-      "variant": "pettyChess",
-      "fen": "1qb1r1/pppkPp/n2P2/RP1PQP/1NKBN1 w - - 1 163",
-      "solution": [
-        "e1f3"
-      ],
-      "depth": 1,
-      "distractors": 16,
       "rating": 1000,
       "puzzleType": "Petty Chess (5×6) mate in 1",
       "source": "engine-generated"
@@ -20230,19 +18249,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "pettyChess_13",
-      "variant": "pettyChess",
-      "fen": "q1b1r1/1p1k2/NB1ppp/PK1QPP/R5 w - - 0 274",
-      "solution": [
-        "d2d3"
-      ],
-      "depth": 1,
-      "distractors": 27,
-      "rating": 1100,
-      "puzzleType": "Petty Chess (5×6) mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "pettyChess_14",
       "variant": "pettyChess",
       "fen": "1Nb1k1/qp4/3pPp/PK2P1/R5 b - - 1 405",
@@ -20290,19 +18296,6 @@
       ],
       "depth": 1,
       "distractors": 43,
-      "rating": 1200,
-      "puzzleType": "Poison mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "poisonChess_3",
-      "variant": "poisonChess",
-      "fen": "5b2/6k1/PBR3P1/1p1pp1R1/P3P3/8/4Kp2/3c4 b - - 2 3528",
-      "solution": [
-        "f2f1q"
-      ],
-      "depth": 1,
-      "distractors": 31,
       "rating": 1200,
       "puzzleType": "Poison mate in 1",
       "source": "engine-generated"
@@ -20451,19 +18444,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "poisonChess_15",
-      "variant": "poisonChess",
-      "fen": "4k3/7r/4P3/2BP4/1p5N/NB6/P1p3R1/2R1K3 w - - 4 3203",
-      "solution": [
-        "g2g8"
-      ],
-      "depth": 1,
-      "distractors": 42,
-      "rating": 1200,
-      "puzzleType": "Poison mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "progressive_1",
       "variant": "progressive",
       "fen": "r2r2k1/1P5p/7P/6p1/p1p2Pb1/B5p1/R3P1B1/5KNR b - - 9 8",
@@ -20568,19 +18548,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "progressive_9",
-      "variant": "progressive",
-      "fen": "r3kbnr/3b1ppp/2p5/qp1pp2P/pn1P2P1/P4P1N/N1P1P2R/R1BQKB2 b Qk e6 0 4",
-      "solution": [
-        "b4d3"
-      ],
-      "depth": 1,
-      "distractors": 35,
-      "rating": 1200,
-      "puzzleType": "Progressive mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "progressive_10",
       "variant": "progressive",
       "fen": "r4kr1/8/ppnbPp2/7Q/2NBP1R1/P5p1/4K1Pn/1R4N1 w - - 4 8",
@@ -20589,19 +18556,6 @@
       ],
       "depth": 1,
       "distractors": 59,
-      "rating": 1200,
-      "puzzleType": "Progressive mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "progressive_11",
-      "variant": "progressive",
-      "fen": "r4kr1/8/ppnbPp2/7Q/2NBP2R/P5p1/4K1Pn/1R4N1 w - - 3 8",
-      "solution": [
-        "h5f7"
-      ],
-      "depth": 1,
-      "distractors": 55,
       "rating": 1200,
       "puzzleType": "Progressive mate in 1",
       "source": "engine-generated"
@@ -20711,19 +18665,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "racingKings_5",
-      "variant": "racingKings",
-      "fen": "4r1R1/5K2/8/3N1N2/8/1k5q/1b6/6Q1 w - - 0 7865",
-      "solution": [
-        "f7e8"
-      ],
-      "depth": 1,
-      "distractors": 41,
-      "rating": 1200,
-      "puzzleType": "Race to rank 8",
-      "source": "engine-generated"
-    },
-    {
       "id": "racingKings_6",
       "variant": "racingKings",
       "fen": "8/R6K/2rb4/4k3/8/rq4N1/8/1B6 w - - 43 8198",
@@ -20763,19 +18704,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "racingKings_9",
-      "variant": "racingKings",
-      "fen": "8/1k3B2/8/4Q2q/2rNK3/8/R5R1/8 b - - 9 6663",
-      "solution": [
-        "b7c8"
-      ],
-      "depth": 1,
-      "distractors": 19,
-      "rating": 1000,
-      "puzzleType": "Race to rank 8",
-      "source": "engine-generated"
-    },
-    {
       "id": "racingKings_10",
       "variant": "racingKings",
       "fen": "6B1/1k6/7q/5Q2/3NK3/1r6/R1R5/8 b - - 3 6371",
@@ -20802,15 +18730,15 @@
       "source": "engine-generated"
     },
     {
-      "id": "racingKings_12",
+      "id": "racingKings_9",
       "variant": "racingKings",
-      "fen": "8/1k3B2/8/2r4q/3NKQ2/8/R5R1/8 b - - 11 6772",
+      "fen": "8/1k3B2/8/4Q2q/2rNK3/8/R5R1/8 b - - 9 6663",
       "solution": [
         "b7c8"
       ],
       "depth": 1,
-      "distractors": 24,
-      "rating": 1100,
+      "distractors": 19,
+      "rating": 1000,
       "puzzleType": "Race to rank 8",
       "source": "engine-generated"
     },
@@ -20837,19 +18765,6 @@
       "depth": 1,
       "distractors": 36,
       "rating": 1200,
-      "puzzleType": "Race to rank 8",
-      "source": "engine-generated"
-    },
-    {
-      "id": "racingKings_15",
-      "variant": "racingKings",
-      "fen": "8/2k5/2N5/2q5/8/4n3/5K2/2r2B2 b - - 6 7539",
-      "solution": [
-        "c7c8"
-      ],
-      "depth": 1,
-      "distractors": 28,
-      "rating": 1100,
       "puzzleType": "Race to rank 8",
       "source": "engine-generated"
     },
@@ -20958,19 +18873,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "recruitmentChess_9",
-      "variant": "recruitmentChess",
-      "fen": "rnqk2r1/pppP4/6pb/n3np1p/P2pP3/1PP2PPb/R2PBK1P/2BQ2NR w - f6 0 1579",
-      "solution": [
-        "d7c8q"
-      ],
-      "depth": 1,
-      "distractors": 29,
-      "rating": 1100,
-      "puzzleType": "Recruitment mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "recruitmentChess_10",
       "variant": "recruitmentChess",
       "fen": "2k2N1r/2r3pp/1p1PPp1R/ppqQBpp1/3NP3/p2P4/nb1Pn1bK/Rba1P3 w - - 1 4323",
@@ -20992,19 +18894,6 @@
       ],
       "depth": 1,
       "distractors": 39,
-      "rating": 1200,
-      "puzzleType": "Recruitment mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "recruitmentChess_12",
-      "variant": "recruitmentChess",
-      "fen": "2k2p1r/3r2pp/1p1PNppR/ppqQBp2/4P3/p2P1N2/nb1Pn1bK/Rba1P3 w - - 1 4123",
-      "solution": [
-        "d5a8"
-      ],
-      "depth": 1,
-      "distractors": 36,
       "rating": 1200,
       "puzzleType": "Recruitment mate in 1",
       "source": "engine-generated"
@@ -21036,19 +18925,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "recruitmentChess_15",
-      "variant": "recruitmentChess",
-      "fen": "r3qN2/2P2rk1/1Pp1p1Np/Bbpp1P2/PnP3Pb/2p1N1PP/4P3/1rQK1BNR b - - 1 2278",
-      "solution": [
-        "b1c1"
-      ],
-      "depth": 1,
-      "distractors": 42,
-      "rating": 1200,
-      "puzzleType": "Recruitment mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "rifle_1",
       "variant": "rifle",
       "fen": "rnbqkbnr/2pppp2/B6p/pp5Q/4P3/8/PPPPKPPP/RNB3NR w kq b6 0 251",
@@ -21057,19 +18933,6 @@
       ],
       "depth": 1,
       "distractors": 41,
-      "rating": 1200,
-      "puzzleType": "Rifle mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "rifle_2",
-      "variant": "rifle",
-      "fen": "rnbqkbnr/1ppppp2/B6p/p6Q/4P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 212",
-      "solution": [
-        "h5f7"
-      ],
-      "depth": 1,
-      "distractors": 45,
       "rating": 1200,
       "puzzleType": "Rifle mate in 1",
       "source": "engine-generated"
@@ -21096,19 +18959,6 @@
       ],
       "depth": 1,
       "distractors": 35,
-      "rating": 1200,
-      "puzzleType": "Rifle mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "rifle_5",
-      "variant": "rifle",
-      "fen": "3k3r/1r3p1p/N1Q2b2/p3p3/P4Pp1/1pP1P2b/RB1P3P/1NKB1q2 b - - 4 2302",
-      "solution": [
-        "f1d1"
-      ],
-      "depth": 1,
-      "distractors": 36,
       "rating": 1200,
       "puzzleType": "Rifle mate in 1",
       "source": "engine-generated"
@@ -21148,19 +18998,6 @@
       ],
       "depth": 1,
       "distractors": 40,
-      "rating": 1200,
-      "puzzleType": "Rifle mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "rifle_9",
-      "variant": "rifle",
-      "fen": "1rbk3r/3p2pp/p5P1/2n1p2P/1NP2pnq/3B1P2/PP2N3/5KR1 b - - 8 2775",
-      "solution": [
-        "g4e3"
-      ],
-      "depth": 1,
-      "distractors": 39,
       "rating": 1200,
       "puzzleType": "Rifle mate in 1",
       "source": "engine-generated"
@@ -21226,19 +19063,6 @@
       ],
       "depth": 1,
       "distractors": 37,
-      "rating": 1200,
-      "puzzleType": "Rifle mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "rifle_15",
-      "variant": "rifle",
-      "fen": "r1b1k1nr/p1q1pp1p/npp4P/3pb1p1/2P5/PP1P1P2/3NP1P1/1RBQKBNR b Kkq c3 0 612",
-      "solution": [
-        "e5g3"
-      ],
-      "depth": 1,
-      "distractors": 38,
       "rating": 1200,
       "puzzleType": "Rifle mate in 1",
       "source": "engine-generated"
@@ -21356,14 +19180,14 @@
       }
     },
     {
-      "id": "singleCheck_3",
+      "id": "singleCheck_5",
       "variant": "singleCheck",
-      "fen": "rnbqk2r/4pp1p/1p3R2/pPpp1P2/Q1P3N1/B2PP3/P2KB3/RN4r1 b q - 2 2538",
+      "fen": "rnbqkb1r/ppp1pppp/5n2/3p4/5P2/1P2P3/P1PP2PP/RNBQKBNR w KQkq - 1 326",
       "solution": [
-        "g1d1"
+        "f1b5"
       ],
       "depth": 1,
-      "distractors": 33,
+      "distractors": 31,
       "rating": 1200,
       "puzzleType": "Check in 1",
       "source": "engine-generated",
@@ -21373,31 +19197,14 @@
       }
     },
     {
-      "id": "singleCheck_4",
+      "id": "singleCheck_12",
       "variant": "singleCheck",
-      "fen": "rnbqk2r/4pp1p/1p5b/pPpp1P2/Q1P3N1/B2PP3/P2KB2R/RN5r w q - 5 2339",
-      "solution": [
-        "g4f6"
-      ],
-      "depth": 1,
-      "distractors": 29,
-      "rating": 1100,
-      "puzzleType": "Check in 1",
-      "source": "engine-generated",
-      "checkCount": {
-        "w": 0,
-        "b": 0
-      }
-    },
-    {
-      "id": "singleCheck_5",
-      "variant": "singleCheck",
-      "fen": "rnbqkb1r/ppp1pppp/5n2/3p4/5P2/1P2P3/P1PP2PP/RNBQKBNR w KQkq - 1 326",
+      "fen": "rnbqkb1r/1p2pp1p/5n2/p1pp2p1/5P1P/BP2PN2/P1PP2P1/RN1QKB1R w KQkq g6 0 611",
       "solution": [
         "f1b5"
       ],
       "depth": 1,
-      "distractors": 31,
+      "distractors": 34,
       "rating": 1200,
       "puzzleType": "Check in 1",
       "source": "engine-generated",
@@ -21449,125 +19256,6 @@
       ],
       "depth": 1,
       "distractors": 27,
-      "rating": 1100,
-      "puzzleType": "Check in 1",
-      "source": "engine-generated",
-      "checkCount": {
-        "w": 0,
-        "b": 0
-      }
-    },
-    {
-      "id": "singleCheck_9",
-      "variant": "singleCheck",
-      "fen": "rnbqkb1r/pp2pppp/5n2/2pp4/5P2/1P2PN2/P1PP2PP/RNBQKB1R w KQkq c6 0 417",
-      "solution": [
-        "f1b5"
-      ],
-      "depth": 1,
-      "distractors": 31,
-      "rating": 1200,
-      "puzzleType": "Check in 1",
-      "source": "engine-generated",
-      "checkCount": {
-        "w": 0,
-        "b": 0
-      }
-    },
-    {
-      "id": "singleCheck_10",
-      "variant": "singleCheck",
-      "fen": "rnbqkb1r/1p2pppp/5n2/p1pp4/5P2/BP2PN2/P1PP2PP/RN1QKB1R w KQkq a6 0 514",
-      "solution": [
-        "f1b5"
-      ],
-      "depth": 1,
-      "distractors": 31,
-      "rating": 1200,
-      "puzzleType": "Check in 1",
-      "source": "engine-generated",
-      "checkCount": {
-        "w": 0,
-        "b": 0
-      }
-    },
-    {
-      "id": "singleCheck_11",
-      "variant": "singleCheck",
-      "fen": "rnbqk2r/4pp1p/1p6/pPpp1Pb1/Q1P3N1/B2PP3/P2KBR2/RN5r w q - 3 2230",
-      "solution": [
-        "g4f6"
-      ],
-      "depth": 1,
-      "distractors": 27,
-      "rating": 1100,
-      "puzzleType": "Check in 1",
-      "source": "engine-generated",
-      "checkCount": {
-        "w": 0,
-        "b": 0
-      }
-    },
-    {
-      "id": "singleCheck_12",
-      "variant": "singleCheck",
-      "fen": "rnbqkb1r/1p2pp1p/5n2/p1pp2p1/5P1P/BP2PN2/P1PP2P1/RN1QKB1R w KQkq g6 0 611",
-      "solution": [
-        "f1b5"
-      ],
-      "depth": 1,
-      "distractors": 34,
-      "rating": 1200,
-      "puzzleType": "Check in 1",
-      "source": "engine-generated",
-      "checkCount": {
-        "w": 0,
-        "b": 0
-      }
-    },
-    {
-      "id": "singleCheck_13",
-      "variant": "singleCheck",
-      "fen": "r1bq3r/3kpp1p/np3R2/pPpp1P2/Q1PP4/B3P3/P2KBN2/RN4r1 b - - 2 2756",
-      "solution": [
-        "g1d1"
-      ],
-      "depth": 1,
-      "distractors": 35,
-      "rating": 1200,
-      "puzzleType": "Check in 1",
-      "source": "engine-generated",
-      "checkCount": {
-        "w": 0,
-        "b": 0
-      }
-    },
-    {
-      "id": "singleCheck_14",
-      "variant": "singleCheck",
-      "fen": "rnbq3r/3kpp1p/1p3R2/pPpp1P2/Q1PP2N1/B3P3/P2KB3/RN4r1 b - - 0 2641",
-      "solution": [
-        "g1d1"
-      ],
-      "depth": 1,
-      "distractors": 31,
-      "rating": 1200,
-      "puzzleType": "Check in 1",
-      "source": "engine-generated",
-      "checkCount": {
-        "w": 0,
-        "b": 0
-      }
-    },
-    {
-      "id": "singleCheck_15",
-      "variant": "singleCheck",
-      "fen": "rnbqk2r/4pp1p/1p5b/pPpp1P2/2P3N1/B2PP3/P2KBR2/RN1Q3r w q - 1 2118",
-      "solution": [
-        "g4f6"
-      ],
-      "depth": 1,
-      "distractors": 30,
       "rating": 1100,
       "puzzleType": "Check in 1",
       "source": "engine-generated",
@@ -21759,19 +19447,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "stalemateWins_15",
-      "variant": "stalemateWins",
-      "fen": "1R6/R2r1k2/5p2/7P/2N1P1B1/2P2P1P/4nK2/8 w - - 4 4168",
-      "solution": [
-        "a7d7"
-      ],
-      "depth": 1,
-      "distractors": 44,
-      "rating": 1200,
-      "puzzleType": "Stalemate Wins mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "standard_1",
       "variant": "standard",
       "fen": "1n6/8/1q1bbpr1/2Pppk1p/1pQ2PrP/8/4KB2/1R1N1BN1 w - - 2 3854",
@@ -21793,19 +19468,6 @@
       ],
       "depth": 1,
       "distractors": 27,
-      "rating": 1100,
-      "puzzleType": "Standard mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "standard_3",
-      "variant": "standard",
-      "fen": "1rb2bnr/pp4p1/n2p1p2/7p/R1p2kP1/5P2/1PPPK1BP/2BQ2NR w - - 0 846",
-      "solution": [
-        "d2d4"
-      ],
-      "depth": 1,
-      "distractors": 24,
       "rating": 1100,
       "puzzleType": "Standard mate in 1",
       "source": "engine-generated"
@@ -21980,19 +19642,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "teleportChess_2",
-      "variant": "teleportChess",
-      "fen": "r1bq1k2/1pp2p2/2rpPR2/p2n4/2P3pB/8/PB1K2PP/RNQ1c1N1 w - - 1 1711",
-      "solution": [
-        "f6h8"
-      ],
-      "depth": 1,
-      "distractors": 528,
-      "rating": 1200,
-      "puzzleType": "Teleport mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "teleportChess_3",
       "variant": "teleportChess",
       "fen": "2b1k3/1r6/1pppP1R1/N2n1p2/6pP/P1B3P1/5r1N/2K5 b - - 0 3684",
@@ -22019,14 +19668,14 @@
       "source": "engine-generated"
     },
     {
-      "id": "teleportChess_5",
+      "id": "teleportChess_7",
       "variant": "teleportChess",
-      "fen": "r1bq4/1pp1k3/3pP2R/p2n1p2/2r3p1/P1N2N2/1B2K1PP/c7 w - - 0 2255",
+      "fen": "1Q4R1/1b2k3/N3B3/1p1pp3/p3Pp1R/2b2P2/4K1N1/8 w - - 6 2856",
       "solution": [
         "e2f7"
       ],
       "depth": 1,
-      "distractors": 408,
+      "distractors": 470,
       "rating": 1200,
       "puzzleType": "Teleport mate in 1",
       "source": "engine-generated"
@@ -22040,19 +19689,6 @@
       ],
       "depth": 1,
       "distractors": 478,
-      "rating": 1200,
-      "puzzleType": "Teleport mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "teleportChess_7",
-      "variant": "teleportChess",
-      "fen": "1Q4R1/1b2k3/N3B3/1p1pp3/p3Pp1R/2b2P2/4K1N1/8 w - - 6 2856",
-      "solution": [
-        "e2f7"
-      ],
-      "depth": 1,
-      "distractors": 470,
       "rating": 1200,
       "puzzleType": "Teleport mate in 1",
       "source": "engine-generated"
@@ -22105,19 +19741,6 @@
       ],
       "depth": 1,
       "distractors": 544,
-      "rating": 1200,
-      "puzzleType": "Teleport mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "teleportChess_12",
-      "variant": "teleportChess",
-      "fen": "1k5r/1p1n1Q1p/pr3p2/P6n/2K1P2P/R4P1q/2bP4/2BR4 b - - 0 3288",
-      "solution": [
-        "h3c5"
-      ],
-      "depth": 1,
-      "distractors": 514,
       "rating": 1200,
       "puzzleType": "Teleport mate in 1",
       "source": "engine-generated"
@@ -22179,11 +19802,11 @@
       }
     },
     {
-      "id": "threeCheck_2",
+      "id": "threeCheck_3",
       "variant": "threeCheck",
-      "fen": "r2qkbnr/p1p1pppp/1p4n1/3p1b1Q/4P2P/2P4N/PP1P1PP1/RNB1KBR1 w Qkq - 7 508",
+      "fen": "r1bqkbnr/p1p1pppp/1p6/3p3Q/4P2n/N1P4N/PP1PKPP1/R1B2BR1 w kq - 0 681",
       "solution": [
-        "f1b5"
+        "h5f7"
       ],
       "depth": 1,
       "distractors": 34,
@@ -22196,11 +19819,11 @@
       }
     },
     {
-      "id": "threeCheck_3",
+      "id": "threeCheck_2",
       "variant": "threeCheck",
-      "fen": "r1bqkbnr/p1p1pppp/1p6/3p3Q/4P2n/N1P4N/PP1PKPP1/R1B2BR1 w kq - 0 681",
+      "fen": "r2qkbnr/p1p1pppp/1p4n1/3p1b1Q/4P2P/2P4N/PP1P1PP1/RNB1KBR1 w Qkq - 7 508",
       "solution": [
-        "h5f7"
+        "f1b5"
       ],
       "depth": 1,
       "distractors": 34,
@@ -22264,23 +19887,6 @@
       }
     },
     {
-      "id": "threeCheck_7",
-      "variant": "threeCheck",
-      "fen": "rn1q1br1/2ppk2p/4bpp1/pp2P3/P3P1n1/RP1B3P/2PP2Q1/1NB1K1NR w - - 6 1354",
-      "solution": [
-        "e5f6"
-      ],
-      "depth": 1,
-      "distractors": 28,
-      "rating": 1100,
-      "puzzleType": "Third check in 1",
-      "source": "engine-generated",
-      "checkCount": {
-        "w": 1,
-        "b": 2
-      }
-    },
-    {
       "id": "threeCheck_8",
       "variant": "threeCheck",
       "fen": "rnb1kb1r/1p1p1p2/p3pn1B/2p3pp/Pq1PP1Q1/2P5/1P1N1PPP/R3KBNR w KQkq - 3 618",
@@ -22289,57 +19895,6 @@
       ],
       "depth": 1,
       "distractors": 45,
-      "rating": 1200,
-      "puzzleType": "Third check in 1",
-      "source": "engine-generated",
-      "checkCount": {
-        "w": 1,
-        "b": 2
-      }
-    },
-    {
-      "id": "threeCheck_9",
-      "variant": "threeCheck",
-      "fen": "rnb1k2r/1p1p1pb1/p3pn1B/2p3pp/Pq1PP1Q1/2P4N/1P1N1PPP/R3KB1R w KQkq - 5 727",
-      "solution": [
-        "g4e6"
-      ],
-      "depth": 1,
-      "distractors": 42,
-      "rating": 1200,
-      "puzzleType": "Third check in 1",
-      "source": "engine-generated",
-      "checkCount": {
-        "w": 1,
-        "b": 2
-      }
-    },
-    {
-      "id": "threeCheck_10",
-      "variant": "threeCheck",
-      "fen": "rnb1k2r/1p1p1pB1/p3pn2/1qp3pp/P2PP1Q1/2P4N/1P1N1PPP/R3KB1R w KQkq - 1 830",
-      "solution": [
-        "g4e6"
-      ],
-      "depth": 1,
-      "distractors": 43,
-      "rating": 1200,
-      "puzzleType": "Third check in 1",
-      "source": "engine-generated",
-      "checkCount": {
-        "w": 1,
-        "b": 2
-      }
-    },
-    {
-      "id": "threeCheck_11",
-      "variant": "threeCheck",
-      "fen": "rnb1k1nr/1p1p1pB1/p3p3/1Pp3pp/3PP1Q1/2P4N/1P1N1PPP/R3KB1R w KQkq - 1 903",
-      "solution": [
-        "g4e6"
-      ],
-      "depth": 1,
-      "distractors": 47,
       "rating": 1200,
       "puzzleType": "Third check in 1",
       "source": "engine-generated",
@@ -22451,19 +20006,6 @@
       ],
       "depth": 1,
       "distractors": 59,
-      "rating": 1200,
-      "puzzleType": "Toroidal Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "toroidalChess_4",
-      "variant": "toroidalChess",
-      "fen": "N1b4r/rpqk4/3b1Bnp/p2P1p2/P1p1Q1PR/pP1P4/4P1B1/R3K3 w - - 3 3034",
-      "solution": [
-        "e4e6"
-      ],
-      "depth": 1,
-      "distractors": 51,
       "rating": 1200,
       "puzzleType": "Toroidal Chess mate in 1",
       "source": "engine-generated"
@@ -22664,19 +20206,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "torpedo_5",
-      "variant": "torpedo",
-      "fen": "2k5/2P5/7B/8/3R3r/ppp1n1K1/2b1p1P1/8 b - - 6 4276",
-      "solution": [
-        "e2e1a"
-      ],
-      "depth": 1,
-      "distractors": 35,
-      "rating": 1200,
-      "puzzleType": "Torpedo mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "torpedo_6",
       "variant": "torpedo",
       "fen": "4kb1r/prp1qp1p/6p1/3p3N/Pp2nKb1/2N4P/RPnPP3/2BQ1B1R b k - 1 1526",
@@ -22781,32 +20310,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "torpedo_14",
-      "variant": "torpedo",
-      "fen": "2bqkbn1/3np1Q1/7p/1p6/pP1p2P1/1r6/PBP1PNKP/R6R w - - 2 1158",
-      "solution": [
-        "g7g6"
-      ],
-      "depth": 1,
-      "distractors": 45,
-      "rating": 1200,
-      "puzzleType": "Torpedo mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "torpedo_15",
-      "variant": "torpedo",
-      "fen": "2bqkbn1/3np1Q1/1p5p/8/pP1p2P1/B1r4N/P1P1P1KP/R6R w - - 0 1034",
-      "solution": [
-        "g7g6"
-      ],
-      "depth": 1,
-      "distractors": 38,
-      "rating": 1200,
-      "puzzleType": "Torpedo mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "upsideDown_1",
       "variant": "upsideDown",
       "fen": "3Kn3/3PB2P/2N5/2pP2Pr/pP1b4/r4Q2/8/5Bk1 w - - 0 2813",
@@ -22859,19 +20362,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "upsideDown_5",
-      "variant": "upsideDown",
-      "fen": "3K4/3NB2P/p3P3/2pP2P1/1r2r3/2P4B/1Q6/6k1 w - - 0 3730",
-      "solution": [
-        "b2g2"
-      ],
-      "depth": 1,
-      "distractors": 37,
-      "rating": 1200,
-      "puzzleType": "Upside-Down mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "upsideDown_6",
       "variant": "upsideDown",
       "fen": "2R1K1R1/Pq6/1P1BP2n/7P/p4p2/6p1/2r2N2/2b1k2r b - - 1 3369",
@@ -22901,19 +20391,6 @@
       "id": "upsideDown_8",
       "variant": "upsideDown",
       "fen": "R2K2N1/P3NP2/1P1P2PR/1BP1P2p/p3p3/1bb2n2/r1pp1pQp/4kr2 w q - 0 1393",
-      "solution": [
-        "g2f1"
-      ],
-      "depth": 1,
-      "distractors": 41,
-      "rating": 1200,
-      "puzzleType": "Upside-Down mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "upsideDown_9",
-      "variant": "upsideDown",
-      "fen": "R2K2N1/P1P1NP2/1P1P2PR/1B2P2p/4p3/pbb2n2/r1pp1pQp/4kr2 w q - 2 1336",
       "solution": [
         "g2f1"
       ],
@@ -23028,32 +20505,6 @@
       "source": "engine-generated"
     },
     {
-      "id": "weakChess_3",
-      "variant": "weakChess",
-      "fen": "rQ5r/1b3kb1/3Q4/8/1KR5/8/8/6R1 w - - 3 4851",
-      "solution": [
-        "c4c7"
-      ],
-      "depth": 1,
-      "distractors": 25,
-      "rating": 1100,
-      "puzzleType": "Weak! Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "weakChess_4",
-      "variant": "weakChess",
-      "fen": "rQ5r/5kb1/3Q4/8/1KR5/8/8/2R4b w - - 1 4768",
-      "solution": [
-        "c4c7"
-      ],
-      "depth": 1,
-      "distractors": 20,
-      "rating": 1000,
-      "puzzleType": "Weak! Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
       "id": "weakChess_5",
       "variant": "weakChess",
       "fen": "8/K7/3k4/3q4/8/8/8/7a b - - 21 5936",
@@ -23153,19 +20604,6 @@
       ],
       "depth": 1,
       "distractors": 15,
-      "rating": 1000,
-      "puzzleType": "Weak! Chess mate in 1",
-      "source": "engine-generated"
-    },
-    {
-      "id": "weakChess_13",
-      "variant": "weakChess",
-      "fen": "rnbq1knr/P1P5/3P1P2/8/1p6/8/7p/RNBK1BbR w - - 0 1892",
-      "solution": [
-        "c7d8c"
-      ],
-      "depth": 1,
-      "distractors": 20,
       "rating": 1000,
       "puzzleType": "Weak! Chess mate in 1",
       "source": "engine-generated"
@@ -23804,19 +21242,6 @@
       "depth": 2,
       "distractors": 14,
       "rating": 1220,
-      "puzzleType": "Force your capture",
-      "source": "engine-generated"
-    },
-    {
-      "id": "omnicide_8",
-      "variant": "omnicide",
-      "fen": "6q1/8/8/8/8/8/8/7B b - - 88 1699",
-      "solution": [
-        "g8g2"
-      ],
-      "depth": 2,
-      "distractors": 21,
-      "rating": 1400,
       "puzzleType": "Force your capture",
       "source": "engine-generated"
     },
