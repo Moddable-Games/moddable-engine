@@ -49,6 +49,42 @@ const playManifest = readJSON('play/playability-manifest.json')
 const playableVariants = playManifest.filter(v => v.playable)
 const playableFamilies = [...new Set(playableVariants.map(v => v.family))]
 
+const familyCounts = {}
+playableVariants.forEach(v => { familyCounts[v.family] = (familyCounts[v.family] || 0) + 1 })
+
+const readmeText = fs.readFileSync(resolve('README.md'), 'utf-8')
+const testCountMatch = readmeText.match(/(\d[\d,]*)\s+tests\s+across\s+(\d+)\s+suites/)
+const testCount = testCountMatch ? parseInt(testCountMatch[1].replace(/,/g, ''), 10) : 0
+const testSuites = testCountMatch ? parseInt(testCountMatch[2], 10) : 0
+
+const FAMILY_TOPOLOGY = {
+  'moddable-chess': 'grid', draughts: 'grid', go: 'grid', reversi: 'grid',
+  shogi: 'grid', xiangqi: 'grid', halma: 'grid', 'stern-halma': 'grid',
+  tafl: 'grid', lattaque: 'grid', 'dou-shou-qi': 'grid', surakarta: 'grid',
+  'dungeon-chess': 'grid', fanorona: 'grid', asalto: 'grid',
+  hex: 'hex', agon: 'hex', nukes: 'hex',
+  backgammon: 'track', pachisi: 'track', chaupar: 'track', nyout: 'track',
+  'royal-ur': 'track', 'landlords-game': 'track', econopoly: 'track',
+  mancala: 'pit',
+  morris: 'graph',
+  'standard-52': 'tableau', 'flower-48': 'tableau', mahjong: 'tableau',
+  'double-six-dominoes': 'tableau', 'bavarian-32': 'tableau',
+  'standard-dice': 'tableau',
+}
+
+const boardSvgFamilies = fs.readdirSync(resolve('boards/svgs'))
+  .filter(f => f.endsWith('.svg'))
+  .map(f => f.replace(/--.*/, ''))
+
+const topoCounts = {}
+boardSvgFamilies.forEach(family => {
+  const topo = FAMILY_TOPOLOGY[family] || 'other'
+  topoCounts[topo] = (topoCounts[topo] || 0) + 1
+})
+
+const TOPOLOGY_TYPES = ['grid', 'hex', 'track', 'pit', 'graph', 'tableau']
+const uniqueTopologies = TOPOLOGY_TYPES.filter(t => topoCounts[t] > 0).length
+
 const stats = {
   pieces: pieceCount,
   boards: boardSvgCount,
@@ -59,6 +95,11 @@ const stats = {
   playableVariants: playableVariants.length,
   playableFamilies: playableFamilies.length,
   families: playableFamilies.sort(),
+  familyCounts,
+  topoCounts,
+  uniqueTopologies,
+  testCount,
+  testSuites,
 }
 
 console.log('Counts from data:')
@@ -67,6 +108,8 @@ console.log(`  Boards: ${stats.boards}`)
 console.log(`  Tiles: ${stats.tiles}`)
 console.log(`  Puzzles: ${stats.puzzles} (${stats.puzzleStandard} standard + ${stats.puzzleVariant} variant)`)
 console.log(`  Playable: ${stats.playableVariants} variants across ${stats.playableFamilies} families`)
+console.log(`  Tests: ${stats.testCount} across ${stats.testSuites} suites`)
+console.log(`  Topologies: ${JSON.stringify(stats.topoCounts)}`)
 
 // --- Generate files ---
 
@@ -212,6 +255,9 @@ if (puzzleParsed.meta.count !== puzzleTotal) {
 }
 
 // 7. Patch HTML stat values
+const frontmatterOnlyCount = stats.playableVariants - 1
+const frontmatterPct = Math.floor((frontmatterOnlyCount / stats.playableVariants) * 100)
+
 const htmlPatches = [
   {
     file: 'index.html',
@@ -220,6 +266,34 @@ const htmlPatches = [
       [/(\d+,?\d*) terrain and game tiles/g, `${stats.tiles} terrain and game tiles`],
       [/(\d+) hex terrain sets/g, `${stats.tiles} hex terrain sets`],
       [/(\d+) packages/g, '14 packages'],
+      // Stats section: test count
+      [/(<span class="stat-value">)[\d,]+\+?(<\/span>\s*<span class="stat-label">Tests passing<\/span>)/g, `$1${stats.testCount.toLocaleString()}$2`],
+      // Hero lede: variant counts
+      [/across (\d+) variants/g, `across ${stats.playableVariants} variants`],
+      [/playing chess, go, draughts, shogi, xiangqi, and reversi across \d+ variants/g, `playing chess, go, draughts, shogi, xiangqi, and reversi across ${stats.playableVariants} variants`],
+      [/(\d+) carry zero JavaScript/g, `${frontmatterOnlyCount} carry zero JavaScript`],
+      // Stats section
+      [/(<span class="stat-value">)\d+(<\/span>\s*<span class="stat-label">Variants<\/span>)/g, `$1${stats.playableVariants}$2`],
+      [/(<span class="stat-value">)\d+(<\/span>\s*<span class="stat-label">Playable families<\/span>)/g, `$1${stats.playableFamilies}$2`],
+      [/(<span class="stat-value">)\d+%(<\/span>\s*<span class="stat-label">Frontmatter-only<\/span>)/g, `$1${frontmatterPct}%$2`],
+      [/(<span class="stat-value">)\d+(<\/span>\s*<span class="stat-label">Topologies<\/span>)/g, `$1${stats.uniqueTopologies}$2`],
+      // Section heading: playable families
+      [/(\d+) Playable Families/g, `${stats.playableFamilies} Playable Families`],
+      [/(\d+) Topology Types/g, `${stats.uniqueTopologies} Topology Types`],
+      // Family chips
+      [/(Chess <span class="family-count">)\d+(<\/span>)/g, `$1${stats.familyCounts.chess || 0}$2`],
+      [/(Draughts <span class="family-count">)\d+(<\/span>)/g, `$1${stats.familyCounts.draughts || 0}$2`],
+      [/(Go <span class="family-count">)\d+(<\/span>)/g, `$1${stats.familyCounts.go || 0}$2`],
+      [/(Shogi <span class="family-count">)\d+(<\/span>)/g, `$1${stats.familyCounts.shogi || 0}$2`],
+      [/(Xiangqi <span class="family-count">)\d+(<\/span>)/g, `$1${stats.familyCounts.xiangqi || 0}$2`],
+      [/(Reversi <span class="family-count">)\d+(<\/span>)/g, `$1${stats.familyCounts.reversi || 0}$2`],
+      // Topology cards
+      [/(<h4 class="topo-name">Grid<\/h4>[\s\S]*?<span class="topo-count">)\d+ variants(<\/span>)/g, `$1${stats.topoCounts.grid || 0} variants$2`],
+      [/(<h4 class="topo-name">Hex<\/h4>[\s\S]*?<span class="topo-count">)\d+ variants(<\/span>)/g, `$1${stats.topoCounts.hex || 0} variants$2`],
+      [/(<h4 class="topo-name">Track<\/h4>[\s\S]*?<span class="topo-count">)\d+ variants(<\/span>)/g, `$1${stats.topoCounts.track || 0} variants$2`],
+      [/(<h4 class="topo-name">Pit<\/h4>[\s\S]*?<span class="topo-count">)\d+ variants(<\/span>)/g, `$1${stats.topoCounts.pit || 0} variants$2`],
+      [/(<h4 class="topo-name">Graph<\/h4>[\s\S]*?<span class="topo-count">)\d+ variants(<\/span>)/g, `$1${stats.topoCounts.graph || 0} variants$2`],
+      [/(<h4 class="topo-name">Tableau<\/h4>[\s\S]*?<span class="topo-count">)\d+ variants(<\/span>)/g, `$1${stats.topoCounts.tableau || 0} variants$2`],
     ],
   },
   {
@@ -241,6 +315,21 @@ const htmlPatches = [
       [/(\d+) hex tile sets/g, `${stats.tiles} hex tile sets`],
       [/(\d+,?\d*) tactical puzzles/g, `${stats.puzzles.toLocaleString()} tactical puzzles`],
       [/(\d+) SVG sets/g, `${stats.pieces} SVG sets`],
+    ],
+  },
+  {
+    file: 'docs/pieces.html',
+    replacements: [
+      [/(\d+) piece sets/g, `${stats.pieces} piece sets`],
+      [/(\d+) sets, recolorable/g, `${stats.pieces} sets, recolorable`],
+    ],
+  },
+  {
+    file: 'docs/index.html',
+    replacements: [
+      [/<strong>\d+ game variants<\/strong>/g, `<strong>${stats.boards} game variants</strong>`],
+      [/<strong>\d+ families<\/strong>/g, `<strong>${stats.boardFamilies} families</strong>`],
+      [/<strong>\d+ topology types<\/strong>/g, `<strong>${stats.uniqueTopologies} topology types</strong>`],
     ],
   },
 ]
