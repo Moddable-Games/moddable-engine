@@ -171,11 +171,6 @@ const _game = _params.get('game');
 const _isEmbed = _params.has('embed');
 const _hexGames = ['nukes','twilight','colony','talisman','mongo','endless'];
 const _isHexEmbed = _isEmbed && _game && _hexGames.includes(_game);
-if (_isEmbed) {
-  document.querySelector('.site-header').style.display = 'none';
-  document.querySelector('.site-footer').style.display = 'none';
-  document.body.style.overflow = 'hidden';
-}
 if (_isHexEmbed) {
   import('../js/play.js?v=1.0.14');
 } else {
