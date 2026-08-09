@@ -1,6 +1,6 @@
 # Moddable Engine
 
-> Universal board game engine with piece sets (115), board layouts (333), hex tile galleries (7), and chess puzzles (1,557). Topology-driven architecture renders any game from a configuration.
+> Universal board game engine with piece sets (115), board layouts (333), hex tile galleries (7), and chess puzzles (1,876). Topology-driven architecture renders any game from a configuration.
 
 This site hosts game engine assets and tools. Agents can consume galleries and puzzle data via the static JSON API.
 
@@ -12,7 +12,7 @@ All structured data is available at predictable URLs under `/api/`:
 - Piece gallery (115 sets): https://engine.moddable.games/api/pieces/index.json
 - Board gallery (333 layouts): https://engine.moddable.games/api/boards/index.json
 - Tile gallery (7 sets): https://engine.moddable.games/api/tiles/index.json
-- Chess puzzles (1,557): https://engine.moddable.games/api/puzzles/index.json
+- Chess puzzles (1,876): https://engine.moddable.games/api/puzzles/index.json
 
 ## MCP Tools
 
@@ -27,7 +27,7 @@ Interactive tools (puzzle generation, board rendering, piece lookup) are availab
 - **Piece sets** — 115 SVG piece collections across chess, shogi, xiangqi, Go, draughts, backgammon, and more
 - **Board layouts** — 333 rendered SVG diagrams spanning 42 game families and all supported topologies
 - **Tile sets** — 7 hex tile galleries for strategy map games
-- **Chess puzzles** — 1,557 tactical puzzles (606 standard + 951 variant) with FEN, solutions, and ratings
+- **Chess puzzles** — 1,876 tactical puzzles (1,118 standard + 758 variant) with FEN, solutions, and ratings
 
 ## Architecture
 
