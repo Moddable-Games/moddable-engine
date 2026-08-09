@@ -171,6 +171,15 @@ const _game = _params.get('game');
 const _isEmbed = _params.has('embed');
 const _hexGames = ['nukes','twilight','colony','talisman','mongo','endless'];
 const _isHexEmbed = _isEmbed && _game && _hexGames.includes(_game);
+if (_isEmbed) {
+  document.body.classList.add('embed-mode');
+  const _bg = _params.get('bg');
+  if (_bg) {
+    const bgColor = _bg.startsWith('#') ? _bg : '#' + _bg;
+    document.body.style.background = bgColor;
+    document.documentElement.style.background = bgColor;
+  }
+}
 if (_isHexEmbed) {
   import('../js/play.js?v=1.0.14');
 } else {

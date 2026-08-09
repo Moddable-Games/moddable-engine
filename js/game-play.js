@@ -1038,9 +1038,9 @@ export async function initGamePlay(container, defaults = {}) {
   const handEl = document.createElement('div')
   handEl.className = 'game-play-hand'
 
-  container.appendChild(leftSidebar)
+  if (!params.embed) container.appendChild(leftSidebar)
   container.appendChild(boardArea)
-  container.appendChild(rightSidebar)
+  if (!params.embed) container.appendChild(rightSidebar)
 
   const familySelect = buildSelect(leftSidebar, 'Game', PLAYABLE_FAMILIES.map(f => ({ value: f, label: FAMILY_LABELS[f] })), family)
   const variantSelect = buildGroupedSelect(leftSidebar, 'Variant', variantsForFamily(family), variant)
@@ -1267,12 +1267,20 @@ export async function initGamePlay(container, defaults = {}) {
 
   async function restart(changes) {
     config = { ...config, ...changes }
-    updateURL()
+    if (!params.embed) updateURL()
     session = createPlaySession(config)
     await session.start()
-    updateRules()
-    populatePieceSetSelect(config.variant, session.setup)
-    renderActions()
+    if (!params.embed) {
+      updateRules()
+      populatePieceSetSelect(config.variant, session.setup)
+      renderActions()
+    }
+    if (params.embed && window.parent !== window) {
+      requestAnimationFrame(() => {
+        const h = boardArea.offsetHeight || document.documentElement.scrollHeight
+        window.parent.postMessage({ type: 'game:resize', height: h, family: config.family, variant: config.variant }, '*')
+      })
+    }
   }
 
   familySelect.addEventListener('change', () => {
