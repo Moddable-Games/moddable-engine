@@ -12,7 +12,7 @@ Every game in the Moddable Games collection — from standard chess to Endless S
 
 Rules are implemented as plugin hooks — move filters, win conditions, turn logic, post-move effects. Each family currently defines its own. Lifting these into a shared, composable rule layer is the next architectural step (#88).
 
-The play surface (interaction, embed protocol, variant registry, SDK) is family-agnostic and lives in `packages/play`. All six playable families share the same kit: embed, play page, simulator, and headless SDK. 3045 tests across 132 suites, all passing.
+The play surface (interaction, embed protocol, variant registry, SDK) is family-agnostic and lives in `packages/play`. All six playable families share the same kit: embed, play page, simulator, and headless SDK. 3092 tests across 134 suites, all passing.
 
 Read [`SPEC.md`](./SPEC.md) before contributing anything.
 
