@@ -76,6 +76,7 @@ const outputs = []
 const boardFamilies = [...new Set(
   readJSON('api/boards/index.json').boards.map(b => (b.id || '').split('--')[0])
 )].filter(Boolean).length
+stats.boardFamilies = boardFamilies
 
 const statsJson = {
   generated: new Date().toISOString().slice(0, 10),
@@ -98,7 +99,7 @@ existingIndex.endpoints = existingIndex.endpoints.map(ep => {
     ep.description = `Piece gallery — ${stats.pieces} SVG sets across chess, shogi, xiangqi, Go, draughts, backgammon`
   } else if (ep.path.includes('boards')) {
     ep.count = stats.boards
-    ep.description = `Board gallery — ${stats.boards} rendered SVG diagrams spanning 42 game families`
+    ep.description = `Board gallery — ${stats.boards} rendered SVG diagrams spanning ${stats.boardFamilies} game families`
   } else if (ep.path.includes('tiles')) {
     ep.count = stats.tiles
     ep.description = `Tile gallery — ${stats.tiles} hex tile sets for strategy maps`
@@ -143,7 +144,7 @@ Interactive tools (puzzle generation, board rendering, piece lookup) are availab
 ## Content Types
 
 - **Piece sets** — ${stats.pieces} SVG piece collections across chess, shogi, xiangqi, Go, draughts, backgammon, and more
-- **Board layouts** — ${stats.boards} rendered SVG diagrams spanning 42 game families and all supported topologies
+- **Board layouts** — ${stats.boards} rendered SVG diagrams spanning ${stats.boardFamilies} game families and all supported topologies
 - **Tile sets** — ${stats.tiles} hex tile galleries for strategy map games
 - **Chess puzzles** — ${stats.puzzles.toLocaleString()} tactical puzzles (${stats.puzzleStandard.toLocaleString()} standard + ${stats.puzzleVariant} variant) with FEN, solutions, and ratings
 
@@ -208,6 +209,55 @@ if (puzzleParsed.meta.count !== puzzleTotal) {
   puzzleParsed.meta.variants = variantCount
   puzzleParsed.meta.lastUpdated = new Date().toISOString().slice(0, 10)
   outputs.push({ path: 'api/puzzles/index.json', content: JSON.stringify(puzzleParsed, null, 2) + '\n' })
+}
+
+// 7. Patch HTML stat values
+const htmlPatches = [
+  {
+    file: 'index.html',
+    replacements: [
+      [/(\d+) piece sets/g, `${stats.pieces} piece sets`],
+      [/(\d+,?\d*) terrain and game tiles/g, `${stats.tiles} terrain and game tiles`],
+      [/(\d+) hex terrain sets/g, `${stats.tiles} hex terrain sets`],
+      [/(\d+) packages/g, '14 packages'],
+    ],
+  },
+  {
+    file: 'pieces/index.html',
+    replacements: [
+      [/(\d+) piece sets/g, `${stats.pieces} piece sets`],
+    ],
+  },
+  {
+    file: 'tiles/index.html',
+    replacements: [
+      [/across \d+ sets/g, `across ${stats.tiles} sets`],
+    ],
+  },
+  {
+    file: 'api/index.html',
+    replacements: [
+      [/(\d+) rendered SVG diagrams spanning \d+ game families/g, `${stats.boards} rendered SVG diagrams spanning ${stats.boardFamilies} game families`],
+      [/(\d+) hex tile sets/g, `${stats.tiles} hex tile sets`],
+      [/(\d+,?\d*) tactical puzzles/g, `${stats.puzzles.toLocaleString()} tactical puzzles`],
+      [/(\d+) SVG sets/g, `${stats.pieces} SVG sets`],
+    ],
+  },
+]
+
+for (const { file, replacements } of htmlPatches) {
+  const fullPath = resolve(file)
+  if (!fs.existsSync(fullPath)) continue
+  let html = fs.readFileSync(fullPath, 'utf-8')
+  let changed = false
+  for (const [pattern, replacement] of replacements) {
+    const before = html
+    html = html.replace(pattern, replacement)
+    if (html !== before) changed = true
+  }
+  if (changed) {
+    outputs.push({ path: file, content: html })
+  }
 }
 
 // --- Write or check ---
