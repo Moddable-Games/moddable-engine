@@ -14,8 +14,8 @@ function historyIndex(move) {
 const DIFFICULTIES = {
   beginner: { timeMs: 200, maxDepth: 2, topN: 5, spread: 0.5 },
   easy: { timeMs: 400, maxDepth: 3, topN: 4, spread: 1.0 },
-  medium: { timeMs: 800, maxDepth: 5, topN: 3, spread: 2.0 },
-  hard: { timeMs: 1500, maxDepth: 5, topN: 1, spread: 0 },
+  medium: { timeMs: 800, maxDepth: 5, topN: 3, spread: 1.0 },
+  hard: { timeMs: 1500, maxDepth: 7, topN: 2, spread: 0 },
   expert: { timeMs: 3000, maxDepth: 50, topN: 1, spread: 0 },
 }
 
