@@ -456,9 +456,9 @@ export function createPlaySession(options = {}) {
     if (currentPieceSet !== 'auto') {
       rendered.pieces = { ...rendered.pieces, set: currentPieceSet }
     }
-    const variantCfg = getVariantConfig(family, variant) || {}
-    if (variantCfg.render?.fenMap) {
-      rendered.pieces = { ...rendered.pieces, fenMap: variantCfg.render.fenMap }
+    const fenMap = resolvedBoard.plugins?.[family]?.render?.fenMap
+    if (fenMap) {
+      rendered.pieces = { ...rendered.pieces, fenMap }
     }
     const boardTheme = BOARD_THEMES[currentTheme] || BOARD_THEMES.classic
     rendered.surface = {
@@ -1387,14 +1387,13 @@ function buildGroupedSelect(parent, label, variants, selected) {
 function capitalize(s) { return s ? s[0].toUpperCase() + s.slice(1) : '' }
 
 function getVariantPieceKeys(family, variantKey, fallbackSetup, resolved) {
-  const vCfg = getVariantConfig(family, variantKey) || {}
   const pluginBlock = resolved?.plugins?.[family] || {}
-  const fen = vCfg.setup || vCfg.fen || pluginBlock.setup || fallbackSetup
+  const fen = pluginBlock.setup || resolved?.setup || fallbackSetup
   if (typeof fen !== 'string') {
     const keys = new Set(['wK', 'wP', 'bK', 'bP'])
-    const placementPieces = vCfg.placementPieces || pluginBlock.placementPieces
+    const placementPieces = pluginBlock.placementPieces
     if (placementPieces) {
-      const vocab = vCfg.vocabulary || pluginBlock.vocabulary || {}
+      const vocab = pluginBlock.vocabulary || resolved?.vocabulary || {}
       for (const side of placementPieces) {
         for (const type of side) {
           const entry = vocab[type]
