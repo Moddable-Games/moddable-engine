@@ -49,9 +49,17 @@ export function getEffectAppearance(type) {
   return effectRegistry.get(type) || null
 }
 
-registerEffect('immune', { stroke: 'rgba(100,200,255,0.7)', fill: 'rgba(100,200,255,0.1)' })
-registerEffect('petrified', { stroke: 'rgba(128,128,128,0.8)', fill: 'rgba(128,128,128,0.2)' })
-registerEffect('poison', { stroke: 'rgba(100,255,100,0.7)', fill: 'rgba(100,255,100,0.1)' })
+export function registerEffects(map) {
+  for (const [type, appearance] of Object.entries(map)) {
+    effectRegistry.set(type, appearance)
+  }
+}
+
+registerEffects({
+  immune: { stroke: 'rgba(100,200,255,0.7)', fill: 'rgba(100,200,255,0.1)' },
+  petrified: { stroke: 'rgba(128,128,128,0.8)', fill: 'rgba(128,128,128,0.2)' },
+  poison: { stroke: 'rgba(100,255,100,0.7)', fill: 'rgba(100,255,100,0.1)' },
+})
 
 export function paintEffect(overlay, bbox, effect) {
   if (!bbox) return

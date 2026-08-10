@@ -18,21 +18,38 @@ export const ANIM_THEME = {
   easing: { slide: 'cubic-out', arc: 'ease-in-out', bounce: 'bounce', warp: 'fade' },
 }
 
-export const PIECE_STYLES = {
-  auto: { label: 'Auto', light: null, dark: null },
-  gold: { label: 'White & Gold', light: { fill: '#fff', stroke: '#000', detail: '#fff' }, dark: { fill: '#b58863', stroke: '#5c3a1e', detail: '#f5e6d0' } },
-  charcoal: { label: 'Cream & Charcoal', light: { fill: '#f5f0e8', stroke: '#333', detail: '#f5f0e8' }, dark: { fill: '#3a3a3a', stroke: '#1a1a1a', detail: '#ccc' } },
-  burgundy: { label: 'White & Burgundy', light: { fill: '#fff', stroke: '#000', detail: '#fff' }, dark: { fill: '#6b1a2a', stroke: '#3d0f18', detail: '#e8b4bf' } },
-  navy: { label: 'White & Navy', light: { fill: '#fff', stroke: '#000', detail: '#fff' }, dark: { fill: '#1a3a5c', stroke: '#0d1f33', detail: '#a8c4e0' } },
+const _pieceStyles = new Map([
+  ['auto', { label: 'Auto', light: null, dark: null }],
+  ['gold', { label: 'White & Gold', light: { fill: '#fff', stroke: '#000', detail: '#fff' }, dark: { fill: '#b58863', stroke: '#5c3a1e', detail: '#f5e6d0' } }],
+  ['charcoal', { label: 'Cream & Charcoal', light: { fill: '#f5f0e8', stroke: '#333', detail: '#f5f0e8' }, dark: { fill: '#3a3a3a', stroke: '#1a1a1a', detail: '#ccc' } }],
+  ['burgundy', { label: 'White & Burgundy', light: { fill: '#fff', stroke: '#000', detail: '#fff' }, dark: { fill: '#6b1a2a', stroke: '#3d0f18', detail: '#e8b4bf' } }],
+  ['navy', { label: 'White & Navy', light: { fill: '#fff', stroke: '#000', detail: '#fff' }, dark: { fill: '#1a3a5c', stroke: '#0d1f33', detail: '#a8c4e0' } }],
+])
+
+export const PIECE_STYLES = Object.fromEntries(_pieceStyles)
+
+export function registerPieceStyle(key, config) {
+  _pieceStyles.set(key, config)
+  PIECE_STYLES[key] = config
 }
 
-export const CAPTURE_BURST_THEME = {
+export function getPieceStyle(key) {
+  return _pieceStyles.get(key) || _pieceStyles.get('auto')
+}
+
+const _captureBurstTheme = {
   particles: 8,
   duration: 400,
   radius: 3,
   spread: 0.6,
   colors: ['#ff6', '#f93'],
   easing: 'ease-out',
+}
+
+export const CAPTURE_BURST_THEME = _captureBurstTheme
+
+export function setCaptureBurstTheme(overrides) {
+  Object.assign(_captureBurstTheme, overrides)
 }
 
 export const RULES_BASE = typeof location !== 'undefined' && location.hostname === 'engine.moddable.games'
