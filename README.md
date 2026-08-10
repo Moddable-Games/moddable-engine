@@ -118,6 +118,13 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Changelog
 
+#### 2026-08-10
+- Issue triage: closed 17 issues (47, 48, 51, 54, 56, 60, 64, 66, 72, 73, 74, 76, 77, 80, 94, 96, 104)
+- build-discovery.mjs: patches all homepage stats from data (test count, topology cards, family chips, hero lede, docs coverage)
+- Fixed: absorption chess typeForAbilities returned queen for all compound types; now correctly maps archbishop/chancellor/amazon
+- Fixed: game-play.js fenMap and getVariantPieceKeys read from resolved frontmatter instead of JS registry
+- Compound piece definitions (archbishop, chancellor, amazon) added to absorption.md frontmatter in moddable-rules
+
 #### 2026-08-06
 - CI pipeline fully green for the first time (PR #92 merged): unit-tests (3021), playability-standard, Playwright e2e (50 tests)
 - Fixed: opening books inert since conformance migration (PR #97). Parser now strips quote chars from YAML keys; variantOpeningBook reads from definition object (browser-safe), not resolveFromDisk (Node-only)
