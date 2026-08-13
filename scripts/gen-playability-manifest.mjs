@@ -25,8 +25,11 @@ import '../packages/plugins/xiangqi/index.js'
 import '../packages/plugins/shogi/index.js'
 import '../packages/plugins/reversi/index.js'
 
+import { readdirSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { createGameForFamily } from '../packages/play/src/play.js'
-import { listVariants, getVariantConfig } from '../packages/play/src/variant-registry.js'
+import { listVariants, getVariantConfig, getVariantKeys } from '../packages/play/src/variant-registry.js'
+import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUTPUT = process.env.MANIFEST_OUT || resolve(__dirname, '..', 'play', 'playability-manifest.json')
@@ -109,31 +112,58 @@ const manifest = []
 let totalVariants = 0
 let totalPlayable = 0
 
+const RULES_ROOT = process.env.MODDABLE_RULES_DIR || join(process.cwd(), '..', 'moddable-rules', 'games')
+
 for (const family of FAMILIES) {
-  const variants = listVariants(family)
+  const seen = new Set()
+  const allVariants = []
+
+  // Registry variants
+  const registryVariants = listVariants(family)
+  for (const v of registryVariants) {
+    seen.add(v.key)
+    if (v.slug) seen.add(v.slug)
+    allVariants.push({ key: v.key, slug: v.slug, label: v.label, group: v.group })
+  }
+
+  // Frontmatter variants with playable: true not already in registry
+  try {
+    const dir = join(RULES_ROOT, family, 'content', 'variants')
+    const files = readdirSync(dir).filter(f => f.endsWith('.md'))
+    for (const file of files) {
+      const slug = file.replace('.md', '')
+      const text = readFileSync(join(dir, file), 'utf8')
+      const { meta } = parseFrontmatter(text)
+      const key = meta.key || slug
+      if (seen.has(key) || seen.has(slug)) continue
+      if (meta.playable !== true) continue
+      seen.add(key)
+      seen.add(slug)
+      allVariants.push({ key, slug, label: meta.title || humanize(slug), group: meta.group || 'Other' })
+    }
+  } catch { /* no rules dir */ }
+
   let familyPlayable = 0
+  process.stdout.write(`${family}: ${allVariants.length} variants... `)
 
-  process.stdout.write(`${family}: ${variants.length} variants... `)
-
-  for (const v of variants) {
-    const key = v.key
-    const playable = runGame(family, key)
+  for (const v of allVariants) {
+    const playable = runGame(family, v.slug || v.key)
     if (playable) familyPlayable++
 
     const entry = {
       family,
-      variant: key,
-      label: v.label === key ? humanize(key) : v.label,
+      variant: v.slug || v.key,
+      key: v.key,
+      label: v.label === v.key ? humanize(v.key) : v.label,
       group: v.group,
       playable,
     }
-    if (v.slug && v.slug !== key) entry.slug = v.slug
     manifest.push(entry)
   }
 
-  totalVariants += variants.length
+  totalVariants += allVariants.length
   totalPlayable += familyPlayable
-  console.log(`${familyPlayable}/${variants.length} playable`)
+  console.log(`${familyPlayable}/${allVariants.length} playable`)
 }
 
 // Sort by family then variant key
