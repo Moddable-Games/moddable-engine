@@ -109,6 +109,8 @@ describeWithRules('late binding: frontmatter data + registry functions', () => {
       const pluginConfig = { setup: fm.engine.setup }
       if (extra.castling === false) pluginConfig.castling = false
       if (extra.stalemateMeaning) pluginConfig.stalemateMeaning = extra.stalemateMeaning
+      if (fm.engine.vocabulary) pluginConfig.vocabulary = fm.engine.vocabulary
+      if (fm.engine.plugins?.chess?.pieces) pluginConfig.pieces = fm.engine.plugins.chess.pieces
 
       const def = {
         title: fm.title,
