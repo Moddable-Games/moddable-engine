@@ -148,13 +148,6 @@
   },
   {
     "family": "chess",
-    "variant": "chigorin",
-    "label": "Chigorin",
-    "group": "Other",
-    "playable": true
-  },
-  {
-    "family": "chess",
     "variant": "circular-chess",
     "label": "Circular Chess",
     "group": "Other",
@@ -372,14 +365,6 @@
     "label": "Knightmate",
     "group": "Other",
     "playable": true
-  },
-  {
-    "family": "chess",
-    "variant": "leganChess",
-    "label": "Legan Chess",
-    "group": "Other",
-    "playable": true,
-    "slug": "legan-chess"
   },
   {
     "family": "chess",
