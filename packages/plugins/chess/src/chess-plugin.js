@@ -120,13 +120,13 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   let topology = null
   let pawnConfig = null
 
-  function derivePawnConfig(topo) {
+  function derivePawnConfig(topo, board) {
     if (config.pawnConfig) return normalizePawnConfig(config.pawnConfig)
     if (config.hexPawnConfig && topo && topo.getAllCells) {
       return deriveHexPawnConfig(topo, config.hexPawnConfig)
     }
     if (topo && topo.rows !== undefined && topo.cols !== undefined) {
-      return deriveGridPawnConfig(topo)
+      return deriveGridPawnConfig(topo, board)
     }
     return null
   }
@@ -165,7 +165,29 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return { forwardDir, startCells, promotionCells, captureDirections, doubleStep }
   }
 
-  function deriveGridPawnConfig(topo) {
+  function findPawnStartRows(board, cols) {
+    if (!board || !Array.isArray(board)) return null
+    const pawnType = config.pawnType || 'pawn'
+    const rowCounts = { 0: new Map(), 1: new Map() }
+    for (let idx = 0; idx < board.length; idx++) {
+      const cell = board[idx]
+      if (!cell || cell.type !== pawnType) continue
+      const row = Math.floor(idx / cols)
+      const counts = rowCounts[cell.owner]
+      counts.set(row, (counts.get(row) || 0) + 1)
+    }
+    const result = {}
+    for (const player of [0, 1]) {
+      let bestRow = -1, bestCount = 0
+      for (const [row, count] of rowCounts[player]) {
+        if (count > bestCount) { bestRow = row; bestCount = count }
+      }
+      if (bestRow >= 0) result[player] = bestRow
+    }
+    return (result[0] !== undefined && result[1] !== undefined) ? result : null
+  }
+
+  function deriveGridPawnConfig(topo, board) {
     const { rows, cols } = topo
     const advDir = config.advancement || { 0: -1, 1: 1 }
     const forwardDir = {}
@@ -173,11 +195,13 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const promotionCells = { 0: new Set(), 1: new Set() }
     const captureDirections = {}
 
+    const derivedRows = config.pawnStartRow || findPawnStartRows(board, cols)
+
     for (const player of [0, 1]) {
       const dir = typeof advDir === 'function' ? advDir(player) : advDir[player]
       forwardDir[player] = [dir, 0]
       const defaultStart = dir === -1 ? rows - 2 : 1
-      const startRow = config.pawnStartRow ? config.pawnStartRow[player] : defaultStart
+      const startRow = derivedRows ? derivedRows[player] : defaultStart
       const defaultPromo = dir === -1 ? 0 : rows - 1
       const promoRow = config.promotionRow ? config.promotionRow[player] : defaultPromo
       for (let c = 0; c < cols; c++) {
@@ -223,7 +247,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       board = parseFENtoArray(setupInput)
     }
 
-    pawnConfig = derivePawnConfig(topology)
+    pawnConfig = derivePawnConfig(topology, board)
 
     const state = {
       board,
@@ -528,9 +552,10 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
           moves.push({ from, to: forward })
         }
 
+        const playerDoubleStep2 = typeof doubleStep === 'object' ? doubleStep[playerIdx] : doubleStep
         const canDoubleStep = config.torpedo
-          ? doubleStep
-          : doubleStep && startCells[playerIdx].has(from)
+          ? playerDoubleStep2
+          : playerDoubleStep2 && startCells[playerIdx].has(from)
         if (canDoubleStep) {
           const doubleForward = topology.step(forward, fwd)
           if (doubleForward !== null && getCell(slice.board, doubleForward) === null) {
