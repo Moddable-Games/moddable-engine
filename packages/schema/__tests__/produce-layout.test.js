@@ -364,5 +364,57 @@ describe('produceLayout', () => {
       expect(result.config.cellFill(0, 0)).toBe('#ffffff')
       expect(result.config.cellFill(0, 1)).toBe('#b58863')
     })
+
+    test('xiangqi river texts emitted from decorations (ops path)', () => {
+      const engine = {
+        topology: { type: 'grid', rows: 10, cols: 9, layout: 'intersections' },
+        surface: { colors: { stroke: '#4a3520' } },
+        render: {
+          cellSize: 36,
+          ops: [
+            { op: 'grid-lines', color: '#4a3520', width: 2, split: { topRow: 4, bottomRow: 5 } },
+          ],
+          decorations: [
+            { type: 'gap', rows: [4, 5] },
+            { type: 'texts', items: [
+              { text: '楚 河', position: 'river-left' },
+              { text: '漢 界', position: 'river-right' },
+            ] },
+          ],
+        },
+      }
+      const result = produceLayout(engine)
+      const textsOp = result.config.ops.find(o => o.op === 'texts')
+      expect(textsOp).toBeDefined()
+      expect(textsOp.items).toHaveLength(2)
+      expect(textsOp.items[0].text).toBe('楚 河')
+      expect(textsOp.items[1].text).toBe('漢 界')
+      expect(textsOp.items[0].attrs['text-anchor']).toBe('middle')
+      expect(textsOp.items[0].attrs['font-family']).toBe('serif')
+      expect(textsOp.items[0].attrs.x).toBeLessThan(textsOp.items[1].attrs.x)
+    })
+
+    test('xiangqi river texts emitted from decorations (non-ops path)', () => {
+      const engine = {
+        topology: { type: 'grid', rows: 10, cols: 9, layout: 'intersections' },
+        surface: { colors: { stroke: '#4a3520' } },
+        render: {
+          cellSize: 36,
+          cellColor: 'uniform',
+          decorations: [
+            { type: 'gap', rows: [4, 5] },
+            { type: 'texts', items: [
+              { text: '楚 河', position: 'river-left' },
+              { text: '漢 界', position: 'river-right' },
+            ] },
+          ],
+        },
+      }
+      const result = produceLayout(engine)
+      expect(result.config.texts).toHaveLength(2)
+      expect(result.config.texts[0].text).toBe('楚 河')
+      expect(result.config.texts[1].text).toBe('漢 界')
+      expect(result.config.texts[0].attrs.x).toBeLessThan(result.config.texts[1].attrs.x)
+    })
   })
 })

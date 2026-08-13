@@ -77,4 +77,68 @@ describe('player-system', () => {
     ps.advance(store)
     expect(ps.getCurrentIndex(store)).toBe(1)
   })
+
+  describe('elimination', () => {
+    let ps4, s4
+
+    beforeEach(() => {
+      ps4 = createPlayerSystem({ players: ['a', 'b', 'c', 'd'] })
+      s4 = createStore({ [ps4.sliceName]: ps4.initState() })
+    })
+
+    test('getActiveCount returns total when none eliminated', () => {
+      expect(ps4.getActiveCount(s4)).toBe(4)
+    })
+
+    test('eliminate reduces active count', () => {
+      ps4.eliminate(1, s4)
+      expect(ps4.getActiveCount(s4)).toBe(3)
+    })
+
+    test('isEliminated reports correctly', () => {
+      expect(ps4.isEliminated(1, s4)).toBe(false)
+      ps4.eliminate(1, s4)
+      expect(ps4.isEliminated(1, s4)).toBe(true)
+    })
+
+    test('double eliminate is idempotent', () => {
+      ps4.eliminate(1, s4)
+      ps4.eliminate(1, s4)
+      expect(ps4.getActiveCount(s4)).toBe(3)
+    })
+
+    test('advance skips eliminated seat', () => {
+      ps4.eliminate(1, s4)
+      ps4.advance(s4)
+      expect(ps4.current(s4)).toBe('c')
+    })
+
+    test('advance skips multiple eliminated seats', () => {
+      ps4.eliminate(1, s4)
+      ps4.eliminate(2, s4)
+      ps4.advance(s4)
+      expect(ps4.current(s4)).toBe('d')
+    })
+
+    test('advance wraps around skipping eliminated', () => {
+      ps4.eliminate(3, s4)
+      ps4.forceTurn('c', s4)
+      ps4.advance(s4)
+      expect(ps4.current(s4)).toBe('a')
+    })
+
+    test('pass skips eliminated seat', () => {
+      ps4.eliminate(1, s4)
+      ps4.pass(s4)
+      expect(ps4.current(s4)).toBe('c')
+      expect(ps4.getPassCount(s4)).toBe(1)
+    })
+
+    test('three-player elimination leaves last active', () => {
+      ps4.eliminate(0, s4)
+      ps4.eliminate(2, s4)
+      ps4.eliminate(3, s4)
+      expect(ps4.getActiveCount(s4)).toBe(1)
+    })
+  })
 })

@@ -1056,6 +1056,11 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       parts.push(' ')
       parts.push(slice.enPassantTarget !== null ? String(slice.enPassantTarget) : '-')
     }
+    if (config.drops || config.randomSetup) {
+      parts.push(' +')
+      if (config.drops) parts.push('d')
+      if (config.randomSetup) parts.push('r')
+    }
     return parts.join('')
   }
 

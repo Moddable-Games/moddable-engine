@@ -221,4 +221,40 @@ describe('plugin-chess', () => {
       expect(state.board[1]).toBeNull()
     })
   })
+
+  describe('positionKey with flags', () => {
+    function getPlugin(game) {
+      return game.registry.getPlugins().find(p => p.sliceName === 'chess')
+    }
+
+    it('standard game has no flag suffix', () => {
+      const game = createChessGame()
+      const key = getPlugin(game).positionKey(game.getState('chess'), 0)
+      expect(key).not.toContain('+')
+    })
+
+    it('drops flag adds suffix', () => {
+      const game = createChessGame({ drops: true })
+      const key = getPlugin(game).positionKey(game.getState('chess'), 0)
+      expect(key).toContain(' +d')
+    })
+
+    it('randomSetup flag adds suffix', () => {
+      const game = createChessGame({ randomSetup: true })
+      const key = getPlugin(game).positionKey(game.getState('chess'), 0)
+      expect(key).toContain(' +r')
+    })
+
+    it('both flags produce distinct key from either alone', () => {
+      const gameBase = createChessGame()
+      const gameDrops = createChessGame({ drops: true })
+      const gameBoth = createChessGame({ drops: true, randomSetup: true })
+      const keyBase = getPlugin(gameBase).positionKey(gameBase.getState('chess'), 0)
+      const keyDrops = getPlugin(gameDrops).positionKey(gameDrops.getState('chess'), 0)
+      const keyBoth = getPlugin(gameBoth).positionKey(gameBoth.getState('chess'), 0)
+      expect(keyBase).not.toBe(keyDrops)
+      expect(keyDrops).not.toBe(keyBoth)
+      expect(keyBase).not.toBe(keyBoth)
+    })
+  })
 })

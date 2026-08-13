@@ -52,3 +52,12 @@ export {
   overlayLayer,
   marksForState,
 } from './src/board-view.js'
+
+export {
+  parseVariantKey,
+  serializeVariantKey,
+  parseUrlFlags,
+  deriveCompatibleFlags,
+  applyFlags,
+  flagPositionKeySuffix,
+} from './src/variant-flags.js'

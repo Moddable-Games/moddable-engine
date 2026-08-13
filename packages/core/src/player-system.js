@@ -3,7 +3,7 @@ export function createPlayerSystem(config) {
   const sliceName = '__players'
 
   function initState() {
-    return { currentIndex: 0, passCount: 0, turnActions: 0 }
+    return { currentIndex: 0, passCount: 0, turnActions: 0, eliminated: [] }
   }
 
   function current(store) {
@@ -15,11 +15,23 @@ export function createPlayerSystem(config) {
     return store.get(sliceName).currentIndex
   }
 
+  function nextActiveIndex(fromIndex, eliminated) {
+    const len = players.length
+    let idx = (fromIndex + 1) % len
+    let checked = 0
+    while (eliminated.includes(idx) && checked < len) {
+      idx = (idx + 1) % len
+      checked++
+    }
+    return idx
+  }
+
   function advance(store) {
     const s = store.get(sliceName)
+    const next = nextActiveIndex(s.currentIndex, s.eliminated)
     store.set(sliceName, {
       ...s,
-      currentIndex: (s.currentIndex + 1) % players.length,
+      currentIndex: next,
       passCount: 0,
       turnActions: 0,
     })
@@ -27,11 +39,11 @@ export function createPlayerSystem(config) {
 
   function pass(store) {
     const s = store.get(sliceName)
-    const newPassCount = s.passCount + 1
+    const next = nextActiveIndex(s.currentIndex, s.eliminated)
     store.set(sliceName, {
       ...s,
-      currentIndex: (s.currentIndex + 1) % players.length,
-      passCount: newPassCount,
+      currentIndex: next,
+      passCount: s.passCount + 1,
       turnActions: 0,
     })
   }
@@ -59,6 +71,25 @@ export function createPlayerSystem(config) {
     return players.length
   }
 
+  function getActiveCount(store) {
+    const s = store.get(sliceName)
+    return players.length - s.eliminated.length
+  }
+
+  function isEliminated(playerIndex, store) {
+    const s = store.get(sliceName)
+    return s.eliminated.includes(playerIndex)
+  }
+
+  function eliminate(playerIndex, store) {
+    const s = store.get(sliceName)
+    if (s.eliminated.includes(playerIndex)) return
+    store.set(sliceName, {
+      ...s,
+      eliminated: [...s.eliminated, playerIndex],
+    })
+  }
+
   function incrementActions(store) {
     const s = store.get(sliceName)
     store.set(sliceName, { ...s, turnActions: s.turnActions + 1 })
@@ -80,6 +111,9 @@ export function createPlayerSystem(config) {
     isCurrentPlayer,
     getAll,
     getPlayerCount,
+    getActiveCount,
+    isEliminated,
+    eliminate,
     incrementActions,
     getTurnActions,
   }

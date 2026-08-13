@@ -65,7 +65,7 @@ function produceGridLayout(topo, colors, render) {
     diagonals: produceDiagonals(render.decorations, colors),
     paths: producePaths(render.decorations, topo, cellSize),
     markers: produceMarkers(render.decorations, topo),
-    texts: [],
+    texts: produceTexts(render.decorations, topo, cellSize, colors, inset, isIntersection ? (cols - 1) * cellSize : cols * cellSize),
     labels: showLabels ? { color: colors.stroke || '#555', fontSize: 10 } : {},
   }
 
@@ -110,6 +110,8 @@ function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabel
       const markerFill = render.decorations.find(d => d.type === 'markers')?.fill
       ops.push({ op: 'markers', items: markers, radius: 3, itemFill: (markerFill && colors[markerFill]) || colors.stroke || '#333' })
     }
+    const textItems = produceTexts(render.decorations, topo, cellSize, colors, gx, gridW)
+    if (textItems.length) ops.push({ op: 'texts', items: textItems })
   }
 
   const goStyle = idStyle === 'go'
@@ -2037,17 +2039,46 @@ function produceMarkers(decorations, topo) {
   return result
 }
 
+function produceTexts(decorations, topo, cellSize, colors, gx, gridW) {
+  if (!decorations || !Array.isArray(decorations)) return []
+  const textDecs = decorations.filter(d => d.type === 'texts')
+  if (!textDecs.length) return []
+
+  const gapDec = decorations.find(d => d.type === 'gap')
+  const gapRows = gapDec ? gapDec.rows : null
+
+  const items = []
+  for (const dec of textDecs) {
+    if (!dec.items) continue
+    for (const item of dec.items) {
+      if (item.position && gapRows) {
+        const rt = gapRows[0], rb = gapRows[1]
+        const rty1 = rt * cellSize, rty2 = rb * cellSize
+        const rmid = (rty1 + rty2) / 2
+        const fs = Math.min(cellSize * 0.45, 14)
+        const fill = (item.fill && colors[item.fill]) || colors.stroke || '#4a3520'
+        const xFrac = item.position === 'river-left' ? 0.25 : 0.75
+        items.push({
+          attrs: { x: gx + gridW * xFrac, y: rmid + fs * 0.35, 'text-anchor': 'middle', 'font-size': fs, 'font-family': 'serif', 'pointer-events': 'none', fill },
+          text: item.text,
+        })
+      } else if (item.attrs) {
+        items.push({ attrs: { ...item.attrs, fill: (colors[item.attrs?.fill] || item.attrs?.fill) }, text: item.text })
+      }
+    }
+  }
+  return items
+}
+
 function producePaths(decorations, topo, cellSize) {
   if (!decorations || !Array.isArray(decorations)) return []
   const result = []
 
   for (const dec of decorations) {
     if (dec.type === 'gap') {
-      // River gap — visual only, handled by grid lines skipRows
       continue
     }
     if (dec.type === 'arcs') {
-      // Surakarta arcs — generated from ring count + corner offset
       result.push(...generateArcPaths(topo, dec, cellSize))
     }
   }
