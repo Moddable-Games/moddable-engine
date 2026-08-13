@@ -256,6 +256,7 @@ function resolveMeta(family, variant) {
       engine: { players, plugins: { [family]: pluginConfig } },
     }
     if (topo.type) def.engine.topology = { ...topo }
+    if (resolved.render) def.engine.render = resolved.render
     return def
   }
 

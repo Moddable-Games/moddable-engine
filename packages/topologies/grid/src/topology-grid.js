@@ -12,7 +12,9 @@ export const schema = {
 }
 
 export function createGridTopology(config) {
-  const { rows, cols, wrap = false } = config
+  const { rows, cols, wrap = false, voids: voidList } = config
+
+  const _voids = voidList ? new Set(voidList.map(v => Array.isArray(v) ? v[0] * cols + v[1] : v)) : null
 
   function toIndex(r, c) {
     return r * cols + c
@@ -33,15 +35,20 @@ export function createGridTopology(config) {
     ]
   }
 
+  function isVoid(index) {
+    return _voids !== null && _voids.has(index)
+  }
+
   function isValid(coord) {
     if (typeof coord === 'number') {
-      return coord >= 0 && coord < rows * cols
+      if (coord < 0 || coord >= rows * cols) return false
+      return !isVoid(coord)
     }
     const [r, c] = coord
-    if (wrapR && wrapC) return true
-    if (wrapR) return c >= 0 && c < cols
-    if (wrapC) return r >= 0 && r < rows
-    return r >= 0 && r < rows && c >= 0 && c < cols
+    if (wrapR && wrapC) return !isVoid(toIndex(r, c))
+    if (wrapR) return c >= 0 && c < cols && !isVoid(toIndex(r, c))
+    if (wrapC) return r >= 0 && r < rows && !isVoid(toIndex(r, c))
+    return r >= 0 && r < rows && c >= 0 && c < cols && !isVoid(toIndex(r, c))
   }
 
   function neighbours(coord) {
@@ -51,7 +58,7 @@ export function createGridTopology(config) {
     for (const [dr, dc] of dirs) {
       let nr = r + dr, nc = c + dc
       if (wrap) [nr, nc] = wrapCoords(nr, nc)
-      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && !isVoid(toIndex(nr, nc))) {
         result.push(toIndex(nr, nc))
       }
     }
@@ -65,7 +72,7 @@ export function createGridTopology(config) {
     for (const [dr, dc] of dirs) {
       let nr = r + dr, nc = c + dc
       if (wrap) [nr, nc] = wrapCoords(nr, nc)
-      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && !isVoid(toIndex(nr, nc))) {
         result.push(toIndex(nr, nc))
       }
     }
@@ -105,7 +112,9 @@ export function createGridTopology(config) {
     while (steps < limit) {
       if (wrap) [nr, nc] = wrapCoords(nr, nc)
       if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) break
-      result.push(toIndex(nr, nc))
+      const idx = toIndex(nr, nc)
+      if (isVoid(idx)) break
+      result.push(idx)
       nr += dr
       nc += dc
       steps++
@@ -114,10 +123,10 @@ export function createGridTopology(config) {
   }
 
   function onBoard(r, c) {
-    if (wrapR && wrapC) return true
-    if (wrapR) return c >= 0 && c < cols
-    if (wrapC) return r >= 0 && r < rows
-    return r >= 0 && r < rows && c >= 0 && c < cols
+    if (wrapR && wrapC) return !isVoid(toIndex(r, c))
+    if (wrapR) return c >= 0 && c < cols && !isVoid(toIndex(r, c))
+    if (wrapC) return r >= 0 && r < rows && !isVoid(toIndex(r, c))
+    return r >= 0 && r < rows && c >= 0 && c < cols && !isVoid(toIndex(r, c))
   }
 
   function rays(from, directions, maxSteps) {
@@ -417,12 +426,14 @@ export function createGridTopology(config) {
 
   function getAllCells() {
     const result = []
-    for (let i = 0; i < rows * cols; i++) result.push(i)
+    for (let i = 0; i < rows * cols; i++) {
+      if (!isVoid(i)) result.push(i)
+    }
     return result
   }
 
   function getCellCount() {
-    return rows * cols
+    return _voids ? rows * cols - _voids.size : rows * cols
   }
 
   function step(from, direction) {
