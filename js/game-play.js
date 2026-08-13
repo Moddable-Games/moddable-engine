@@ -259,7 +259,8 @@ export function createPlaySession(options = {}) {
 
     const frontmatterDef = buildDefinitionFromResolved(family, variant, resolvedBoard, variantCfg)
     const variantKey = flags.length ? serializeVariantKey(variant, flags) : variant
-    game = createGameForFamily(family, { variant: variantKey, definition: frontmatterDef })
+    const rngSeed = flags.includes('random') ? Math.floor(Math.random() * 1000000) : 42
+    game = createGameForFamily(family, { variant: variantKey, definition: frontmatterDef, rngSeed })
     const topo = resolvedBoard.topology
     if (topo.type === 'grid' && topo.rows && topo.cols) {
       cells = createCellAddressing({
