@@ -210,6 +210,7 @@ export function createPlaySession(options = {}) {
     theme = 'classic',
     seat = '0',
     pieceSet = 'auto',
+    flags = [],
     embed = null,
     onStatus = null,
     onCapture = null,
@@ -257,7 +258,7 @@ export function createPlaySession(options = {}) {
     resolvedBoard = await resolveBoard(family, variantCfg, variant, slug)
 
     const frontmatterDef = buildDefinitionFromResolved(family, variant, resolvedBoard, variantCfg)
-    const variantKey = activeFlags.length ? serializeVariantKey(variant, activeFlags) : variant
+    const variantKey = flags.length ? serializeVariantKey(variant, flags) : variant
     game = createGameForFamily(family, { variant: variantKey, definition: frontmatterDef })
     const topo = resolvedBoard.topology
     if (topo.type === 'grid' && topo.rows && topo.cols) {
@@ -1185,6 +1186,7 @@ export async function initGamePlay(container, defaults = {}) {
   let config = {
     family,
     variant,
+    flags: activeFlags,
     container: boardArea,
     handContainer: handEl,
     capturedContainer: capturedEl,
@@ -1298,7 +1300,7 @@ export async function initGamePlay(container, defaults = {}) {
   }
 
   async function restart(changes) {
-    config = { ...config, ...changes }
+    config = { ...config, ...changes, flags: activeFlags }
     if (!params.embed) updateURL()
     session = createPlaySession(config)
     await session.start()
