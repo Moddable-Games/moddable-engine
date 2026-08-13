@@ -432,11 +432,17 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     if (undo.checkCount !== undefined) state.checkCount = undo.checkCount
   }
 
+  let _cachedPositions = null
   function allPositions() {
-    if (topology && topology.getAllCells) return topology.getAllCells()
+    if (_cachedPositions) return _cachedPositions
+    if (topology && topology.getAllCells) {
+      _cachedPositions = topology.getAllCells()
+      return _cachedPositions
+    }
     const size = topology ? topology.rows * topology.cols : 64
     const result = []
     for (let i = 0; i < size; i++) result.push(i)
+    _cachedPositions = result
     return result
   }
 
