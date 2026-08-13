@@ -1,8 +1,27 @@
+import { readFileSync, readdirSync } from 'fs'
+import { join } from 'path'
 import '../index.js'
 import { listVariants, getVariantConfig } from '../../../play/src/variant-registry.js'
+import { resolveFromDisk, STRUCTURAL_KEYS, setRulesReader } from '../../../play/src/play.js'
 import { pluginConfigFromVariant } from '../../../play/src/variant-definition.js'
 
-const ALL_VARIANTS = listVariants('chess').map(v => v.key)
+const RULES_ROOT = process.env.MODDABLE_RULES_DIR || join(process.cwd(), '..', 'moddable-rules', 'games')
+setRulesReader(
+  (family, slug) => {
+    const path = slug === 'rulebook'
+      ? join(RULES_ROOT, family, 'content', 'rulebook.md')
+      : join(RULES_ROOT, family, 'content', 'variants', `${slug}.md`)
+    return readFileSync(path, 'utf8')
+  },
+  (family) => {
+    const dir = join(RULES_ROOT, family, 'content', 'variants')
+    try { return readdirSync(dir).filter(f => f.endsWith('.md')).map(f => f.replace(/\.md$/, '')) }
+    catch { return [] }
+  }
+)
+
+import { getVariantKeys } from '../../../play/src/variant-registry.js'
+const ALL_VARIANTS = getVariantKeys('chess').filter(k => getVariantConfig('chess', k) !== null)
 
 // Keys that createChessPlugin actually reads from variantConfig.
 // Derived by reading chess-plugin.js: every config.X access.
@@ -13,9 +32,8 @@ const ACCEPTED_KEYS = new Set([
   'openingBook', 'torpedo', 'doubleStep', 'advancement', 'pawnConfig',
   'checkThreshold', 'afterMove', 'turnLogic', 'onTurnEnd', 'pawnStartRow', 'moveApply',
   'drops', 'visibility', 'placementPieces', 'actions', 'initState',
+  'hexPawnConfig', 'pawnMoveDirections', 'pawnCaptureDirections', 'promotionRow',
 ])
-// checkThreshold is read via ctx.config in winCondition, which the
-// plugin passes. It is genuinely consumed, not an allowance.
 
 // Keys consumed by the play layer (variant-definition.js strips these
 // before passing to the plugin, so they never reach createChessPlugin)
@@ -36,4 +54,31 @@ describe('chess config validation (Tier 1: unknown keys)', () => {
 
     expect(unknown).toEqual([])
   })
+})
+
+describe('chess config validation (Tier 1: frontmatter variants)', () => {
+  const variantsDir = join(RULES_ROOT, 'chess', 'content', 'variants')
+  let allSlugs = []
+  try {
+    allSlugs = readdirSync(variantsDir)
+      .filter(f => f.endsWith('.md'))
+      .map(f => f.replace('.md', ''))
+  } catch { /* no rules dir in CI without checkout */ }
+
+  if (allSlugs.length === 0) {
+    it.skip('no frontmatter variants found (missing moddable-rules checkout)', () => {})
+  } else {
+    it.each(allSlugs)('%s: resolved plugin config has no unknown keys', (slug) => {
+      const resolved = resolveFromDisk('chess', slug)
+      if (!resolved) return
+      const pluginConfig = resolved.plugins?.chess || {}
+      const allKeys = Object.keys(pluginConfig)
+
+      const unknown = allKeys.filter(k =>
+        !ACCEPTED_KEYS.has(k) && !PLAY_LAYER_KEYS.has(k)
+      )
+
+      expect(unknown).toEqual([])
+    })
+  }
 })
