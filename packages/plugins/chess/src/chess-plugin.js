@@ -883,9 +883,14 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       }
     }
 
+    const hasBlockers = topology && topology.isBlocker
+    const movesFiltered = hasBlockers
+      ? allMoves.filter(m => m.to === undefined || !topology.isBlocker(m.to))
+      : allMoves
+
     let legal = config.noCheck
-      ? allMoves
-      : filterLegalMoves(allMoves, slice, playerIdx)
+      ? movesFiltered
+      : filterLegalMoves(movesFiltered, slice, playerIdx)
 
     if (config.moveFilter) {
       legal = config.moveFilter(legal, slice, {

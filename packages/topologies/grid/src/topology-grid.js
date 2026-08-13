@@ -12,9 +12,10 @@ export const schema = {
 }
 
 export function createGridTopology(config) {
-  const { rows, cols, wrap = false, voids: voidList } = config
+  const { rows, cols, wrap = false, voids: voidList, blockers: blockerList } = config
 
   const _voids = voidList ? new Set(voidList.map(v => Array.isArray(v) ? v[0] * cols + v[1] : v)) : null
+  const _blockers = blockerList ? new Set(blockerList.map(v => Array.isArray(v) ? v[0] * cols + v[1] : v)) : null
 
   function toIndex(r, c) {
     return r * cols + c
@@ -37,6 +38,10 @@ export function createGridTopology(config) {
 
   function isVoid(index) {
     return _voids !== null && _voids.has(index)
+  }
+
+  function isBlocker(index) {
+    return _blockers !== null && _blockers.has(index)
   }
 
   function isValid(coord) {
@@ -479,6 +484,7 @@ export function createGridTopology(config) {
     step,
     serializePosition,
     parsePosition,
+    isBlocker,
   }
 }
 
