@@ -41,6 +41,31 @@
   font-size: 13px;
 }
 
+.game-play-flags {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.game-play-flags .control-label {
+  width: 100%;
+}
+
+.flag-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text, #f0ede8);
+  cursor: pointer;
+}
+
+.flag-toggle input[type="checkbox"] {
+  accent-color: var(--accent, #5b8af0);
+}
+
 .game-play-actions {
   display: flex;
   gap: 8px;

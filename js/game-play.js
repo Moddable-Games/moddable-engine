@@ -1,6 +1,7 @@
 import { createGameForFamily, STRUCTURAL_KEYS } from '../packages/play/src/play.js'
 import { createGameController } from '../packages/play/src/game-controller.js'
 import { listVariants, getVariantConfig } from '../packages/play/src/variant-registry.js'
+import { parseUrlFlags, deriveCompatibleFlags, serializeVariantKey } from '../packages/play/src/variant-flags.js'
 import { createAI } from '../packages/play/src/sdk.js'
 import { interactionModelFor, FAMILY_INTERACTION } from '../packages/play/src/interaction.js'
 import { createEmbedBridge, parseEmbedParams, normaliseOutcome } from '../packages/play/src/embed.js'
@@ -256,7 +257,8 @@ export function createPlaySession(options = {}) {
     resolvedBoard = await resolveBoard(family, variantCfg, variant, slug)
 
     const frontmatterDef = buildDefinitionFromResolved(family, variant, resolvedBoard, variantCfg)
-    game = createGameForFamily(family, { variant, definition: frontmatterDef })
+    const variantKey = activeFlags.length ? serializeVariantKey(variant, activeFlags) : variant
+    game = createGameForFamily(family, { variant: variantKey, definition: frontmatterDef })
     const topo = resolvedBoard.topology
     if (topo.type === 'grid' && topo.rows && topo.cols) {
       cells = createCellAddressing({
@@ -1018,6 +1020,7 @@ export async function initGamePlay(container, defaults = {}) {
   }
 
   let variant = pickVariant(family, params.variant)
+  let activeFlags = parseUrlFlags(params.flags || new URLSearchParams(location.search).get('flags') || '')
 
   const leftSidebar = document.createElement('aside')
   leftSidebar.className = 'game-play-sidebar game-play-sidebar--left'
@@ -1037,6 +1040,40 @@ export async function initGamePlay(container, defaults = {}) {
 
   const familySelect = buildSelect(leftSidebar, 'Game', PLAYABLE_FAMILIES.map(f => ({ value: f, label: FAMILY_LABELS[f] })), family)
   const variantSelect = buildGroupedSelect(leftSidebar, 'Variant', variantsForFamily(family), variant)
+
+  const flagsContainer = document.createElement('div')
+  flagsContainer.className = 'game-play-flags'
+  leftSidebar.appendChild(flagsContainer)
+
+  function buildFlagToggles() {
+    flagsContainer.innerHTML = ''
+    const definition = { engine: { topology: { type: 'grid', rows: 8, cols: 8 }, setup: { position: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' }, plugins: { chess: {} } } }
+    const compatible = family === 'chess' ? deriveCompatibleFlags(definition) : []
+    if (!compatible.length) return
+    const label = document.createElement('label')
+    label.className = 'control-label'
+    label.textContent = 'Flags'
+    flagsContainer.appendChild(label)
+    for (const flag of compatible) {
+      const wrap = document.createElement('label')
+      wrap.className = 'flag-toggle'
+      const cb = document.createElement('input')
+      cb.type = 'checkbox'
+      cb.checked = activeFlags.includes(flag)
+      cb.addEventListener('change', () => {
+        if (cb.checked) { if (!activeFlags.includes(flag)) activeFlags.push(flag) }
+        else { activeFlags = activeFlags.filter(f => f !== flag) }
+        activeFlags.sort()
+        updateURL()
+        restart({})
+      })
+      wrap.appendChild(cb)
+      wrap.appendChild(document.createTextNode(' ' + flag[0].toUpperCase() + flag.slice(1)))
+      flagsContainer.appendChild(wrap)
+    }
+  }
+  buildFlagToggles()
+
   const opponentSelect = buildSelect(leftSidebar, 'Opponent', [
     { value: 'ai', label: 'vs AI' },
     { value: 'human', label: 'Human vs Human' },
@@ -1215,6 +1252,8 @@ export async function initGamePlay(container, defaults = {}) {
     params.set('family', config.family)
     if (config.variant) params.set('variant', config.variant)
     else params.delete('variant')
+    if (activeFlags.length) params.set('flags', activeFlags.join(','))
+    else params.delete('flags')
     if (config.opponent === 'human') params.set('opponent', 'human')
     else params.delete('opponent')
     if (config.difficulty && config.difficulty !== 'medium') params.set('difficulty', config.difficulty)
@@ -1293,7 +1332,7 @@ export async function initGamePlay(container, defaults = {}) {
     variantSelect.value = newVariant
     restart({ family, variant: newVariant, seat: seatSelect.value })
   })
-  variantSelect.addEventListener('change', () => restart({ variant: variantSelect.value }))
+  variantSelect.addEventListener('change', () => { activeFlags = []; buildFlagToggles(); restart({ variant: variantSelect.value }) })
   opponentSelect.addEventListener('change', () => restart({ opponent: opponentSelect.value }))
   difficultySelect.addEventListener('change', () => restart({ difficulty: difficultySelect.value }))
   seatSelect.addEventListener('change', () => restart({ seat: seatSelect.value }))
