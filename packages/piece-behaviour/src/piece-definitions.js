@@ -118,6 +118,64 @@ export function divergent(movePrimitive, capturePrimitive) {
   }
 }
 
+export function hopper(dirs, opts = {}) {
+  const { captureSlide = false } = opts
+  return {
+    type: 'hopper',
+    dirs,
+    captureSlide,
+    genMoves(topology, from, board) {
+      const rays = topology.rays(from, dirs)
+      const moves = []
+      for (const ray of rays) {
+        let hurdleFound = false
+        for (let i = 0; i < ray.length; i++) {
+          const pos = ray[i]
+          const occupant = board[pos]
+          if (!hurdleFound) {
+            if (occupant) { hurdleFound = true }
+            continue
+          }
+          if (captureSlide) {
+            if (occupant) {
+              if (occupant.enemy) moves.push({ from, to: pos, capture: true })
+              break
+            }
+          } else {
+            if (occupant) {
+              if (occupant.enemy) moves.push({ from, to: pos, capture: true })
+            } else {
+              moves.push({ from, to: pos })
+            }
+            break
+          }
+        }
+      }
+      return moves
+    },
+    attacks(topology, from, target, board) {
+      const rays = topology.rays(from, dirs)
+      for (const ray of rays) {
+        let hurdleFound = false
+        for (let i = 0; i < ray.length; i++) {
+          const pos = ray[i]
+          if (!hurdleFound) {
+            if (board[pos]) { hurdleFound = true }
+            continue
+          }
+          if (pos === target) return true
+          if (captureSlide) {
+            if (board[pos]) break
+          } else {
+            break
+          }
+        }
+      }
+      return false
+    },
+  }
+}
+
 export function fromConfig(config, resolve) {
   if (config.divergent) {
     return divergent(
@@ -135,6 +193,7 @@ function buildPrimitive(spec, resolve) {
   if (typeof spec === 'string' && resolve) return resolve(spec)
   if (spec.type === 'leaper') return leaper(spec.offsets || spec.dirs)
   if (spec.type === 'rider') return rider(spec.dirs, { maxSteps: spec.maxSteps })
+  if (spec.type === 'hopper') return hopper(spec.dirs, { captureSlide: spec.captureSlide })
   if (spec.type === 'compose' && Array.isArray(spec.parts)) {
     const parts = spec.parts.map(p => typeof p === 'string' && resolve ? resolve(p) : buildPrimitive(p, resolve)).filter(Boolean)
     return compose(...parts)
