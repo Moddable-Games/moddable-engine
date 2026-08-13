@@ -33,7 +33,18 @@ export function registerVariants(family, variants) {
 }
 
 export function getVariantConfig(family, key) {
-  return resolve(registryFor(family), key)
+  const registry = registryFor(family)
+  const direct = resolve(registry, key)
+  if (direct) return direct
+  const canonicalKey = getKeyForSlug(family, key)
+  if (canonicalKey && canonicalKey !== key) return resolve(registry, canonicalKey)
+  return null
+}
+
+export function getKeyForSlug(family, slug) {
+  if (registryFor(family).has(slug)) return slug
+  const meta = readMeta(family, slug)
+  return meta?.key || slug
 }
 
 export function getVariantKeys(family) {
