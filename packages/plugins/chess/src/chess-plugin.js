@@ -661,8 +661,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const primitive = buildPieceForPlayer(piece.type, piece.owner)
     if (!primitive) return false
 
-    const viewBoard = buildViewBoard(board, piece.owner)
-    return primitive.attacks(topology, from, target, viewBoard)
+    return primitive.attacks(topology, from, target, board)
   }
 
   function pawnAttacks(from, target, owner) {
