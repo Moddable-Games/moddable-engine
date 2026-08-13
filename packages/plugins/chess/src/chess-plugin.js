@@ -259,19 +259,23 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       const totalRows = topology ? topology.rows : 8
       const cols = topology ? topology.cols : 8
       if (ranks.length >= totalRows) {
-        const pawnType = (config.pawnType || 'pawn')[0].toLowerCase()
-        let bestIdx = -1, bestNonPawn = 0
-        for (let i = Math.floor(totalRows / 2); i < totalRows; i++) {
-          const chars = ranks[i].replace(/\d+/g, '').toLowerCase().split('')
-          const nonPawn = chars.filter(ch => ch !== pawnType).length
-          if (nonPawn > bestNonPawn) { bestNonPawn = nonPawn; bestIdx = i }
+        const pawnChar = (config.pawnType || 'pawn')[0].toLowerCase()
+        const pieceRanks = []
+        for (let i = 0; i < totalRows; i++) {
+          const raw = ranks[i].replace(/\d+/g, '')
+          const chars = raw.toLowerCase().split('')
+          const nonPawn = chars.filter(ch => ch !== pawnChar).length
+          if (nonPawn >= Math.floor(cols * 0.6)) {
+            const isUpper = raw === raw.toUpperCase()
+            pieceRanks.push({ idx: i, isUpper })
+          }
         }
-        if (bestIdx >= 0) {
-          const pieces = ranks[bestIdx].replace(/\d+/g, '').toLowerCase().split('')
-          const mirrorIdx = totalRows - 1 - bestIdx
-          const rank = randomBackRank(rng, { width: cols, pieces, castling: !!config.castling })
-          ranks[bestIdx] = rank.toUpperCase()
-          ranks[mirrorIdx] = rank
+        if (pieceRanks.length >= 1) {
+          const pieces = ranks[pieceRanks[0].idx].replace(/\d+/g, '').toLowerCase().split('')
+          const shuffled = randomBackRank(rng, { width: cols, pieces, castling: !!config.castling })
+          for (const pr of pieceRanks) {
+            ranks[pr.idx] = pr.isUpper ? shuffled.toUpperCase() : shuffled
+          }
           rawSetup = ranks.join('/')
         }
       }
