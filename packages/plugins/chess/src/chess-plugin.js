@@ -466,7 +466,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   }
 
 
-  function generateMovesForPiece(from, slice, playerIdx) {
+  function generateMovesForPiece(from, slice, playerIdx, viewBoard) {
     const piece = getCell(slice.board, from)
     if (!piece) return []
     const pConfig = pieceConfigs[piece.type]
@@ -479,7 +479,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const primitive = buildPieceForPlayer(piece.type, playerIdx)
     if (!primitive) return []
 
-    const viewBoard = buildViewBoard(slice.board, playerIdx)
+    if (!viewBoard) viewBoard = buildViewBoard(slice.board, playerIdx)
     return primitive.genMoves(topology, from, viewBoard)
   }
 
@@ -862,11 +862,12 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   function getLegalMoves(slice, full) {
     const playerIdx = full.__players.currentIndex
     const allMoves = []
+    const viewBoard = buildViewBoard(slice.board, playerIdx)
 
     for (const pos of allPositions()) {
       const piece = getCell(slice.board, pos)
       if (!piece || piece.owner !== playerIdx) continue
-      const moves = generateMovesForPiece(pos, slice, playerIdx)
+      const moves = generateMovesForPiece(pos, slice, playerIdx, viewBoard)
       allMoves.push(...moves)
 
       if (piece.type === (config.royalType || 'king')) {
