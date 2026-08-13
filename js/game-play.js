@@ -1075,8 +1075,6 @@ export async function initGamePlay(container, defaults = {}) {
       flagsContainer.appendChild(wrap)
     }
   }
-  buildFlagToggles()
-
   const opponentSelect = buildSelect(leftSidebar, 'Opponent', [
     { value: 'ai', label: 'vs AI' },
     { value: 'human', label: 'Human vs Human' },
