@@ -188,11 +188,12 @@ function loadDataOnlyVariant(slug, extraConfig) {
   if (!fs.existsSync(varPath)) return null
   const fm = parseFrontmatter(fs.readFileSync(varPath, 'utf8')).meta || {}
   if (!fm.engine) return null
+  const pluginConfig = { setup: fm.engine.setup, ...extraConfig }
+  if (fm.engine.vocabulary) pluginConfig.vocabulary = fm.engine.vocabulary
+  if (fm.engine.plugins?.chess?.pieces) pluginConfig.pieces = fm.engine.plugins.chess.pieces
+  const engineDef = { players: fm.engine.players || ['white', 'black'], topology: fm.engine.topology, plugins: { chess: pluginConfig } }
   return createGameForFamily('chess', {
-    definition: {
-      title: fm.title, slug, parent: 'chess',
-      engine: { players: fm.engine.players || ['white', 'black'], topology: fm.engine.topology, plugins: { chess: { setup: fm.engine.setup, ...extraConfig } } },
-    },
+    definition: { title: fm.title, slug, parent: 'chess', engine: engineDef },
   })
 }
 
