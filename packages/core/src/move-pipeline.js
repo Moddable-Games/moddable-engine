@@ -42,7 +42,15 @@ export function createPipeline(registry, store, history, playerSystem, eventBus)
       if (typeof plugin.checkWin === 'function') {
         const result = plugin.checkWin(store.get(plugin.sliceName), store.getAll())
         if (result !== null && result !== undefined) {
-          winner = result
+          if (typeof result === 'object' && 'eliminate' in result) {
+            playerSystem.eliminate(result.eliminate, store)
+            if (playerSystem.getActiveCount(store) === 1) {
+              const players = playerSystem.getAll()
+              winner = players.findIndex((_, i) => !playerSystem.isEliminated(i, store))
+            }
+          } else {
+            winner = result
+          }
           break
         }
       }

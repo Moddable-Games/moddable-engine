@@ -195,14 +195,88 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
     return true
   }
 
+  function canAttackTarget(board, from, target, piece, playerIndex) {
+    const def = PIECE_DEFS[piece.type]
+    if (!def) return false
+    const [fr, fc] = rowCol(from)
+    const [tr, tc] = rowCol(target)
+
+    switch (def.movement) {
+      case 'step': {
+        for (const [dr, dc] of def.dirs) {
+          if (fr + dr === tr && fc + dc === tc) {
+            if (def.constraint === 'palace' && !inPalace(tr, tc, playerIndex)) return false
+            return true
+          }
+        }
+        return false
+      }
+      case 'blocked-leap': {
+        for (const [dr, dc] of def.dirs) {
+          if (fr + dr !== tr || fc + dc !== tc) continue
+          if (def.constraint === 'own-side' && config.hasRiver && acrossRiver(tr, playerIndex)) return false
+          const blockR = fr + Math.round(dr * def.blockAt)
+          const blockC = fc + Math.round(dc * def.blockAt)
+          if (board[cellIndex(blockR, blockC)] !== null) return false
+          return true
+        }
+        return false
+      }
+      case 'blocked-knight': {
+        for (const [dr, dc] of def.dirs) {
+          if (fr + dr !== tr || fc + dc !== tc) continue
+          const legBlock = Math.abs(dr) > Math.abs(dc)
+            ? cellIndex(fr + (dr > 0 ? 1 : -1), fc)
+            : cellIndex(fr, fc + (dc > 0 ? 1 : -1))
+          if (board[legBlock] !== null) return false
+          return true
+        }
+        return false
+      }
+      case 'slide': {
+        const dr = Math.sign(tr - fr), dc = Math.sign(tc - fc)
+        if (dr === 0 && dc === 0) return false
+        if (dr !== 0 && dc !== 0 && Math.abs(tr - fr) !== Math.abs(tc - fc)) return false
+        if (dr === 0 && fr !== tr) return false
+        if (dc === 0 && fc !== tc) return false
+        const validDir = def.dirs.some(([ddr, ddc]) => Math.sign(ddr) === dr && Math.sign(ddc) === dc)
+        if (!validDir) return false
+        const dist = Math.max(Math.abs(tr - fr), Math.abs(tc - fc))
+        for (let d = 1; d < dist; d++) {
+          if (board[cellIndex(fr + dr * d, fc + dc * d)] !== null) return false
+        }
+        return true
+      }
+      case 'cannon': {
+        const dr = Math.sign(tr - fr), dc = Math.sign(tc - fc)
+        if (dr === 0 && dc === 0) return false
+        if (dr !== 0 && dc !== 0) return false
+        const dist = Math.max(Math.abs(tr - fr), Math.abs(tc - fc))
+        let screens = 0
+        for (let d = 1; d < dist; d++) {
+          if (board[cellIndex(fr + dr * d, fc + dc * d)] !== null) screens++
+        }
+        return screens === 1
+      }
+      case 'soldier': {
+        const advancement = config.advancement
+          ? config.advancement[playerIndex]
+          : (playerIndex === 0 ? -1 : 1)
+        if (tr === fr + advancement && tc === fc) return true
+        if (acrossRiver(fr, playerIndex) && tr === fr && Math.abs(tc - fc) === 1) return true
+        return false
+      }
+    }
+    return false
+  }
+
   function isInCheck(board, playerIndex) {
     const genPos = findGeneral(board, playerIndex)
     if (genPos === -1) return true
     const opponent = 1 - playerIndex
     for (let i = 0; i < board.length; i++) {
       if (!board[i] || board[i].owner !== opponent) continue
-      const attacks = generatePieceMoves(board, i, board[i], opponent)
-      if (attacks.some(m => m.to === genPos)) return true
+      if (canAttackTarget(board, i, genPos, board[i], opponent)) return true
     }
     if (violatesFlyingGeneral(board)) return true
     return false

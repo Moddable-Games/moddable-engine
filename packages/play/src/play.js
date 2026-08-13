@@ -2,6 +2,7 @@ import { createGameFromDefinition } from '../../game/src/create-game.js'
 import { produce } from '../../schema/src/produce.js'
 import { getVariantConfig, hasVariant, getSlugForKey, setVariantSources as _setVariantSources } from './variant-registry.js'
 import { definitionFromVariant } from './variant-definition.js'
+import { parseVariantKey, applyFlags } from './variant-flags.js'
 import { parseFrontmatter } from '../../schema/src/parse-frontmatter.js'
 import { resolve as cascadeResolve } from '../../schema/src/cascade-resolver.js'
 import { resolveSurface } from '../../schema/src/surfaces.js'
@@ -78,9 +79,11 @@ export function createGameForFamily(family, opts = {}) {
     throw new Error(`Unknown game family: "${family}". Available: ${Object.keys(PLUGIN_FACTORIES).join(', ')}`)
   }
 
-  const definition = userDefinition
+  const { base, flags } = variant ? parseVariantKey(variant) : { base: variant, flags: [] }
+  let definition = userDefinition
     ? (userDefinition.topology !== undefined ? userDefinition : produce(userDefinition))
-    : produce(resolveMeta(family, variant))
+    : produce(resolveMeta(family, base || variant))
+  if (flags.length) definition = applyFlags(definition, flags)
 
   const gameOpts = {
     topologies: TOPOLOGIES,

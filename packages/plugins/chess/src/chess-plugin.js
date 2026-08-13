@@ -1,4 +1,5 @@
 import { rider, leaper, compose, divergent, fromConfig, OFFSETS } from '../../../piece-behaviour/index.js'
+import { randomBackRank } from './variants/chess960.js'
 
 function normalizePawnConfig(pc) {
   if (!pc) return pc
@@ -233,7 +234,15 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       pieceConfigs.knight = { ...pieceConfigs.knight, offsets: 'hex-knight' }
     }
     const rng = request('core.rng')
-    const rawSetup = pluginConfig.setup || config.setup
+    let rawSetup = pluginConfig.setup || config.setup
+    if (config.randomSetup && rng) {
+      const width = topology ? topology.cols : 8
+      const rank = randomBackRank(rng, { width, castling: !!config.castling })
+      const pawns = 'p'.repeat(width)
+      const emptyRank = String(width)
+      const innerRanks = Array(Math.max(0, (topology ? topology.rows : 8) - 4)).fill(emptyRank).join('/')
+      rawSetup = `${rank}/${pawns}/${innerRanks}/${pawns.toUpperCase()}/${rank.toUpperCase()}`
+    }
     const setupInput = typeof rawSetup === 'function' ? rawSetup(rng) : rawSetup
 
     let board
@@ -984,13 +993,26 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
   function checkWin(slice, full) {
     const playerIdx = full.__players.currentIndex
-    const opponent = 1 - playerIdx
+    const eliminated = full.__players.eliminated || []
+    const isMultiplayer = config.playerCount > 2
 
     if (config.winCondition) {
       const result = config.winCondition(slice, { currentPlayer: playerIdx, config })
       if (result !== null && result !== undefined) return result
     }
 
+    if (isMultiplayer) {
+      const royalType = config.royalType || 'king'
+      for (let opp = 0; opp < config.playerCount; opp++) {
+        if (opp === playerIdx) continue
+        if (eliminated.includes(opp)) continue
+        const hasRoyal = slice.board.some(cell => cell && cell.type === royalType && cell.owner === opp)
+        if (!hasRoyal) return { eliminate: opp }
+      }
+      return null
+    }
+
+    const opponent = 1 - playerIdx
     const oppFull = { ...full, __players: { ...full.__players, currentIndex: opponent } }
     const oppMoves = getLegalMoves(slice, oppFull)
 

@@ -96,24 +96,25 @@ export function applyFlags(definition, flags) {
   return result
 }
 
+function mergeChessFlag(definition, patch) {
+  if (definition.engine && definition.engine.plugins) {
+    const engine = { ...definition.engine }
+    const plugins = { ...engine.plugins }
+    plugins.chess = { ...(plugins.chess || {}), ...patch }
+    engine.plugins = plugins
+    return { ...definition, engine }
+  }
+  const plugins = { ...(definition.plugins || {}) }
+  plugins.chess = { ...(plugins.chess || {}), ...patch }
+  return { ...definition, plugins }
+}
+
 function applyRandom(definition) {
-  const engine = { ...definition.engine }
-  const plugins = { ...engine.plugins }
-  const chessConfig = { ...(plugins.chess || {}) }
-  chessConfig.randomSetup = true
-  plugins.chess = chessConfig
-  engine.plugins = plugins
-  return { ...definition, engine }
+  return mergeChessFlag(definition, { randomSetup: true })
 }
 
 function applyDrops(definition) {
-  const engine = { ...definition.engine }
-  const plugins = { ...engine.plugins }
-  const chessConfig = { ...(plugins.chess || {}) }
-  chessConfig.drops = true
-  plugins.chess = chessConfig
-  engine.plugins = plugins
-  return { ...definition, engine }
+  return mergeChessFlag(definition, { drops: true })
 }
 
 export function flagPositionKeySuffix(flags) {

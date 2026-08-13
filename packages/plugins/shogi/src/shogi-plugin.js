@@ -205,14 +205,67 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     return -1
   }
 
+  function canAttack(board, from, target, piece, playerIndex) {
+    const [fr, fc] = rowCol(from)
+    const [tr, tc] = rowCol(target)
+    const type = piece.type
+    const moveDef = PIECE_MOVES[type]
+
+    if (moveDef === 'slide_orthogonal' || moveDef === 'slide_orthogonal_plus_diag_step') {
+      if (fr === tr || fc === tc) {
+        const dr = Math.sign(tr - fr), dc = Math.sign(tc - fc)
+        const dist = Math.max(Math.abs(tr - fr), Math.abs(tc - fc))
+        for (let d = 1; d < dist; d++) {
+          if (board[cellIndex(fr + dr * d, fc + dc * d)] !== null) return false
+        }
+        return true
+      }
+      if (moveDef === 'slide_orthogonal_plus_diag_step') {
+        if (Math.abs(tr - fr) === 1 && Math.abs(tc - fc) === 1) return true
+      }
+      return false
+    }
+    if (moveDef === 'slide_diagonal' || moveDef === 'slide_diagonal_plus_orth_step') {
+      if (Math.abs(tr - fr) === Math.abs(tc - fc) && tr !== fr) {
+        const dr = Math.sign(tr - fr), dc = Math.sign(tc - fc)
+        const dist = Math.abs(tr - fr)
+        for (let d = 1; d < dist; d++) {
+          if (board[cellIndex(fr + dr * d, fc + dc * d)] !== null) return false
+        }
+        return true
+      }
+      if (moveDef === 'slide_diagonal_plus_orth_step') {
+        if ((Math.abs(tr - fr) <= 1 && Math.abs(tc - fc) <= 1) && (tr !== fr || tc !== fc) && !(Math.abs(tr - fr) === 1 && Math.abs(tc - fc) === 1)) return true
+      }
+      return false
+    }
+    if (moveDef === 'slide_forward') {
+      const dr = config.advancement ? config.advancement[playerIndex] : (playerIndex === 0 ? -1 : 1)
+      if (tc !== fc) return false
+      if (Math.sign(tr - fr) !== dr) return false
+      const dist = Math.abs(tr - fr)
+      for (let d = 1; d < dist; d++) {
+        if (board[cellIndex(fr + dr * d, fc)] !== null) return false
+      }
+      return true
+    }
+    if (Array.isArray(moveDef)) {
+      const dirs = flipDirs(moveDef, playerIndex)
+      for (const [dr, dc] of dirs) {
+        if (fr + dr === tr && fc + dc === tc) return true
+      }
+      return false
+    }
+    return false
+  }
+
   function isInCheck(board, playerIndex) {
     const kingPos = findKing(board, playerIndex)
     if (kingPos === -1) return true
     const opponent = 1 - playerIndex
     for (let i = 0; i < board.length; i++) {
       if (!board[i] || board[i].owner !== opponent) continue
-      const attacks = generatePieceMoves(board, i, board[i], opponent)
-      if (attacks.some(m => m.to === kingPos)) return true
+      if (canAttack(board, i, kingPos, board[i], opponent)) return true
     }
     return false
   }
