@@ -1,0 +1,210 @@
+{
+  "chess": {
+    "default": {
+      "title": "Standard Chess",
+      "slug": "standard",
+      "parent": "chess",
+      "engine": {
+        "topology": {
+          "type": "grid",
+          "rows": 8,
+          "cols": 8
+        },
+        "players": [
+          "white",
+          "black"
+        ],
+        "plugins": {
+          "chess": {
+            "openingBook": {
+              "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -": [
+                "e2e4",
+                "d2d4",
+                "g1f3",
+                "c2c4"
+              ],
+              "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3": [
+                "e7e5",
+                "c7c5",
+                "e7e6",
+                "c7c6"
+              ],
+              "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6": [
+                "g1f3",
+                "f1c4",
+                "b1c3"
+              ],
+              "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq -": [
+                "b8c6",
+                "g8f6",
+                "d7d6"
+              ],
+              "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6": [
+                "g1f3",
+                "b1c3",
+                "c2c3",
+                "d2d4"
+              ],
+              "rnbqkbnr/pppp1ppp/4p3/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq -": [
+                "d2d4",
+                "g1f3",
+                "b1c3"
+              ],
+              "rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR w KQkq d6": [
+                "c2c4",
+                "g1f3",
+                "b1c3"
+              ],
+              "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3": [
+                "d7d5",
+                "g8f6",
+                "e7e6",
+                "f7f5"
+              ],
+              "rnbqkbnr/pppppppp/8/8/8/5N2/PPPPPPPP/RNBQKB1R b KQkq -": [
+                "d7d5",
+                "g8f6",
+                "c7c5"
+              ]
+            },
+            "setup": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+          }
+        }
+      }
+    }
+  },
+  "go": {
+    "default": {
+      "title": "Standard Go (19×19)",
+      "slug": "standard",
+      "parent": "go",
+      "engine": {
+        "topology": {
+          "type": "grid",
+          "rows": 19,
+          "cols": 19,
+          "layout": "intersections"
+        },
+        "players": [
+          "black",
+          "white"
+        ],
+        "plugins": {
+          "go": {
+            "komi": 6.5,
+            "scoring": "territory",
+            "superko": true,
+            "suicideAllowed": false
+          }
+        }
+      }
+    }
+  },
+  "draughts": {
+    "default": {
+      "title": "English Draughts",
+      "slug": "english",
+      "parent": "draughts",
+      "engine": {
+        "topology": {
+          "type": "grid",
+          "rows": 8,
+          "cols": 8
+        },
+        "players": [
+          "white",
+          "black"
+        ],
+        "plugins": {
+          "draughts": {
+            "piecesPerPlayer": 12,
+            "directions": "diagonal",
+            "manCapture": "forward",
+            "manMove": "forward",
+            "forcedCapture": true,
+            "maximalCapture": false,
+            "flyingKings": false,
+            "setup": "1b1b1b1b/b1b1b1b1/1b1b1b1b/8/8/w1w1w1w1/1w1w1w1w/w1w1w1w1"
+          }
+        }
+      }
+    }
+  },
+  "shogi": {
+    "default": {
+      "title": "Standard Shogi",
+      "slug": "standard",
+      "parent": "shogi",
+      "engine": {
+        "topology": {
+          "type": "grid",
+          "rows": 9,
+          "cols": 9
+        },
+        "players": [
+          "sente",
+          "gote"
+        ],
+        "plugins": {
+          "shogi": {
+            "promotionZone": 3,
+            "setup": "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL"
+          }
+        }
+      }
+    }
+  },
+  "xiangqi": {
+    "default": {
+      "title": "Standard Xiangqi",
+      "slug": "standard",
+      "parent": "xiangqi",
+      "engine": {
+        "topology": {
+          "type": "grid",
+          "rows": 10,
+          "cols": 9
+        },
+        "players": [
+          "red",
+          "black"
+        ],
+        "plugins": {
+          "xiangqi": {
+            "hasRiver": true,
+            "flyingGeneralRule": true,
+            "cannonJumpToMove": false,
+            "setup": "rheakaehr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RHEAKAEHR"
+          }
+        }
+      }
+    }
+  },
+  "reversi": {
+    "default": {
+      "title": "Standard Reversi",
+      "slug": "standard",
+      "parent": "reversi",
+      "engine": {
+        "topology": {
+          "type": "grid",
+          "rows": 8,
+          "cols": 8
+        },
+        "players": [
+          "black",
+          "white"
+        ],
+        "plugins": {
+          "reversi": {
+            "directions": "all",
+            "mustFlip": true,
+            "winBy": "most",
+            "passWhenNoMoves": true,
+            "setup": "8/8/8/3bw3/3wb3/8/8/8"
+          }
+        }
+      }
+    }
+  }
+}

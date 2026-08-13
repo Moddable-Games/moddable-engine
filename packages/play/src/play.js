@@ -18,6 +18,7 @@ import { createShogiPlugin } from '../../plugins/shogi/src/shogi-plugin.js'
 import { createXiangqiPlugin } from '../../plugins/xiangqi/src/xiangqi-plugin.js'
 import { createChessPlugin } from '../../plugins/chess/src/chess-plugin.js'
 import { createStandard52Deck } from '../../component-deck/src/standard-52.js'
+import GENERATED_DEFAULTS from '../../../play/family-defaults.json' with { type: 'json' }
 
 const TOPOLOGIES = {
   grid: (config) => createGridTopology(config),
@@ -276,77 +277,4 @@ function getDefaultMeta(family, variant) {
   return defaults.default
 }
 
-const DEFAULT_DEFINITIONS = {
-  go: {
-    default: {
-      title: 'Go 19x19',
-      slug: 'standard',
-      parent: 'go',
-      engine: {
-        topology: { type: 'grid', rows: 19, cols: 19 },
-        players: ['black', 'white'],
-        plugins: { go: { size: 361 } },
-      },
-    },
-  },
-  chess: {
-    default: {
-      title: 'Standard Chess',
-      slug: 'standard',
-      parent: 'chess',
-      engine: {
-        topology: { type: 'grid', rows: 8, cols: 8 },
-        players: ['white', 'black'],
-        plugins: { chess: { setup: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' } },
-      },
-    },
-  },
-  draughts: {
-    default: {
-      title: 'English Draughts',
-      slug: 'english',
-      parent: 'draughts',
-      engine: {
-        topology: { type: 'grid', rows: 8, cols: 8 },
-        players: ['white', 'black'],
-        plugins: { draughts: {} },
-      },
-    },
-  },
-  shogi: {
-    default: {
-      title: 'Minishogi',
-      slug: 'minishogi',
-      parent: 'shogi',
-      engine: {
-        topology: { type: 'grid', rows: 5, cols: 5 },
-        players: ['sente', 'gote'],
-        plugins: { shogi: { rows: 5, cols: 5, promotionZone: 1, setup: 'rbsgk/4p/5/P4/KGSBR' } },
-      },
-    },
-  },
-  xiangqi: {
-    default: {
-      title: 'Standard Xiangqi',
-      slug: 'standard',
-      parent: 'xiangqi',
-      engine: {
-        topology: { type: 'grid', rows: 10, cols: 9 },
-        players: ['red', 'black'],
-        plugins: { xiangqi: { setup: 'rheakaehr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RHEAKAEHR' } },
-      },
-    },
-  },
-  reversi: {
-    default: {
-      title: 'Standard Reversi',
-      slug: 'standard',
-      parent: 'reversi',
-      engine: {
-        topology: { type: 'grid', rows: 8, cols: 8 },
-        players: ['black', 'white'],
-        plugins: { reversi: { setup: '8/8/8/3bw3/3wb3/8/8/8' } },
-      },
-    },
-  },
-}
+const DEFAULT_DEFINITIONS = GENERATED_DEFAULTS

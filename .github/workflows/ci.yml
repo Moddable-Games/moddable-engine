@@ -54,6 +54,13 @@ jobs:
           MODDABLE_RULES_DIR: ${{ github.workspace }}/moddable-rules/games
       - name: Verify manifest is up to date
         run: git diff --exit-code play/playability-manifest.json || (echo "Manifest is stale — run scripts/gen-playability-manifest.mjs" && exit 1)
+      - name: Regenerate family defaults
+        run: node scripts/gen-family-defaults.mjs
+        env:
+          NODE_OPTIONS: '--experimental-vm-modules'
+          MODDABLE_RULES_DIR: ${{ github.workspace }}/moddable-rules/games
+      - name: Verify family defaults are up to date
+        run: git diff --exit-code play/family-defaults.json || (echo "Family defaults are stale — run scripts/gen-family-defaults.mjs" && exit 1)
       - name: Verify discovery surfaces are up to date
         run: node scripts/build-discovery.mjs --check
 
