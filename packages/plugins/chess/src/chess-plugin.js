@@ -191,7 +191,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       }
       if (bestRow >= 0) result[player] = bestRow
     }
-    return (result[0] !== undefined && result[1] !== undefined) ? result : null
+    return Object.keys(result).length > 0 ? result : null
   }
 
   function deriveGridPawnConfig(topo, board) {
@@ -207,17 +207,27 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const derivedRows = config.pawnStartRow || findPawnStartRows(board, cols)
 
     for (let player = 0; player < playerCount; player++) {
-      const dir = typeof advDir === 'function' ? advDir(player) : (advDir[player] || -1)
-      forwardDir[player] = [dir, 0]
-      const defaultStart = dir === -1 ? rows - 2 : 1
+      const raw = typeof advDir === 'function' ? advDir(player) : advDir[player]
+      const vec = Array.isArray(raw) ? raw : [raw || -1, 0]
+      forwardDir[player] = vec
+      const dr = vec[0], dc = vec[1]
+      const isVertical = dr !== 0 && dc === 0
+      const defaultStart = isVertical ? (dr === -1 ? rows - 2 : 1) : (dc === -1 ? cols - 2 : 1)
       const startRow = derivedRows ? derivedRows[player] : defaultStart
-      const defaultPromo = dir === -1 ? 0 : rows - 1
+      const defaultPromo = isVertical ? (dr === -1 ? 0 : rows - 1) : (dc === -1 ? 0 : cols - 1)
       const promoRow = config.promotionRow ? config.promotionRow[player] : defaultPromo
-      for (let c = 0; c < cols; c++) {
-        startCells[player].add(topo.toIndex(startRow, c))
-        promotionCells[player].add(topo.toIndex(promoRow, c))
+      if (isVertical) {
+        for (let c = 0; c < cols; c++) startCells[player].add(topo.toIndex(startRow, c))
+        for (let c = 0; c < cols; c++) promotionCells[player].add(topo.toIndex(promoRow, c))
+      } else {
+        for (let r = 0; r < rows; r++) startCells[player].add(topo.toIndex(r, startRow))
+        for (let r = 0; r < rows; r++) promotionCells[player].add(topo.toIndex(r, promoRow))
       }
-      captureDirections[player] = [[dir, -1], [dir, 1]]
+      if (isVertical) {
+        captureDirections[player] = [[dr, -1], [dr, 1]]
+      } else {
+        captureDirections[player] = [[-1, dc], [1, dc]]
+      }
     }
     let doubleStep
     if (typeof config.doubleStep === 'object') {

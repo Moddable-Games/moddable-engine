@@ -33,6 +33,7 @@ const ACCEPTED_KEYS = new Set([
   'checkThreshold', 'afterMove', 'turnLogic', 'onTurnEnd', 'pawnStartRow', 'moveApply',
   'drops', 'visibility', 'placementPieces', 'actions', 'initState',
   'hexPawnConfig', 'pawnMoveDirections', 'pawnCaptureDirections', 'promotionRow',
+  'playerCount', 'randomSetup',
 ])
 
 // Keys consumed by the play layer (variant-definition.js strips these
