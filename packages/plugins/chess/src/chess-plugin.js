@@ -49,6 +49,8 @@ function resolvePromotionChoices(raw) {
 }
 
 export function createChessPlugin(variantConfig = {}, context = {}) {
+  const defPlayers = context.definition?.players
+  const derivedPlayerCount = defPlayers ? (defPlayers.names || defPlayers).length : 2
   const config = {
     setup: variantConfig.setup || DEFAULT_SETUP,
     promotionChoices: resolvePromotionChoices(variantConfig.promotionChoices),
@@ -57,6 +59,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     royalType: variantConfig.royalType || 'king',
     pawnType: variantConfig.pawnType || 'pawn',
     rookType: variantConfig.rookType || 'rook',
+    playerCount: derivedPlayerCount,
     ...variantConfig,
   }
 
@@ -169,16 +172,19 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   function findPawnStartRows(board, cols) {
     if (!board || !Array.isArray(board)) return null
     const pawnType = config.pawnType || 'pawn'
-    const rowCounts = { 0: new Map(), 1: new Map() }
+    const playerCount = config.playerCount || 2
+    const rowCounts = {}
+    for (let p = 0; p < playerCount; p++) rowCounts[p] = new Map()
     for (let idx = 0; idx < board.length; idx++) {
       const cell = board[idx]
       if (!cell || cell.type !== pawnType) continue
       const row = Math.floor(idx / cols)
       const counts = rowCounts[cell.owner]
+      if (!counts) continue
       counts.set(row, (counts.get(row) || 0) + 1)
     }
     const result = {}
-    for (const player of [0, 1]) {
+    for (let player = 0; player < playerCount; player++) {
       let bestRow = -1, bestCount = 0
       for (const [row, count] of rowCounts[player]) {
         if (count > bestCount) { bestRow = row; bestCount = count }
@@ -190,16 +196,18 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
   function deriveGridPawnConfig(topo, board) {
     const { rows, cols } = topo
+    const playerCount = config.playerCount || 2
     const advDir = config.advancement || { 0: -1, 1: 1 }
     const forwardDir = {}
-    const startCells = { 0: new Set(), 1: new Set() }
-    const promotionCells = { 0: new Set(), 1: new Set() }
+    const startCells = {}
+    const promotionCells = {}
     const captureDirections = {}
+    for (let p = 0; p < playerCount; p++) { startCells[p] = new Set(); promotionCells[p] = new Set() }
 
     const derivedRows = config.pawnStartRow || findPawnStartRows(board, cols)
 
-    for (const player of [0, 1]) {
-      const dir = typeof advDir === 'function' ? advDir(player) : advDir[player]
+    for (let player = 0; player < playerCount; player++) {
+      const dir = typeof advDir === 'function' ? advDir(player) : (advDir[player] || -1)
       forwardDir[player] = [dir, 0]
       const defaultStart = dir === -1 ? rows - 2 : 1
       const startRow = derivedRows ? derivedRows[player] : defaultStart
@@ -216,7 +224,8 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       doubleStep = config.doubleStep
     } else {
       const val = config.doubleStep !== false
-      doubleStep = { 0: val, 1: val }
+      doubleStep = {}
+      for (let p = 0; p < playerCount; p++) doubleStep[p] = val
     }
     const result = { forwardDir, startCells, promotionCells, captureDirections, doubleStep }
     if (config.pawnMoveDirections) result.moveDirections = config.pawnMoveDirections
@@ -408,15 +417,15 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
         }
       }
       if (undo.toPiece && undo.toPiece.type === rookType && topology) {
-        const opponent = 1 - playerIdx
+        const rookOwner = undo.toPiece.owner
         const cols = topology.cols
         const advDir = config.advancement || { 0: -1, 1: 1 }
-        const advancement = typeof advDir === 'function' ? advDir(opponent) : advDir[opponent]
+        const advancement = typeof advDir === 'function' ? advDir(rookOwner) : advDir[rookOwner]
         const backRank = advancement === -1 ? (topology.rows - 1) * cols : 0
-        if (move.to === backRank + cols - 1 && cr[opponent]?.king) {
-          state.castlingRights = { ...(state.castlingRights || cr), [opponent]: { ...(state.castlingRights || cr)[opponent], king: false } }
-        } else if (move.to === backRank && cr[opponent]?.queen) {
-          state.castlingRights = { ...(state.castlingRights || cr), [opponent]: { ...(state.castlingRights || cr)[opponent], queen: false } }
+        if (move.to === backRank + cols - 1 && cr[rookOwner]?.king) {
+          state.castlingRights = { ...(state.castlingRights || cr), [rookOwner]: { ...(state.castlingRights || cr)[rookOwner], king: false } }
+        } else if (move.to === backRank && cr[rookOwner]?.queen) {
+          state.castlingRights = { ...(state.castlingRights || cr), [rookOwner]: { ...(state.castlingRights || cr)[rookOwner], queen: false } }
         }
       }
     }
@@ -675,10 +684,9 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   }
 
   function isSquareAttacked(board, target, defendingPlayer) {
-    const attacker = 1 - defendingPlayer
     for (const pos of allPositions()) {
       const piece = getCell(board, pos)
-      if (!piece || piece.owner !== attacker) continue
+      if (!piece || piece.owner === defendingPlayer) continue
       if (pieceAttacks(pos, target, piece, board)) return true
     }
     return false

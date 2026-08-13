@@ -379,17 +379,31 @@ export function createGridTopology(config) {
     const symbolMap = buildSymbolMap(vocabulary)
     const cells = new Array(rows * cols).fill(null)
     const rowStrings = notation.split('/')
+    const isCommaSeparated = rowStrings.some(r => r.includes(','))
+
     for (let r = 0; r < rowStrings.length && r < rows; r++) {
       let c = 0
-      for (const ch of rowStrings[r]) {
-        if (ch >= '0' && ch <= '9') {
-          c += parseInt(ch, 10)
-        } else {
-          const piece = symbolMap.fromSymbol(ch)
-          if (piece && c < cols) {
-            cells[toIndex(r, c)] = piece
+      if (isCommaSeparated) {
+        const tokens = rowStrings[r].split(',')
+        for (const token of tokens) {
+          const trimmed = token.trim()
+          if (!trimmed) continue
+          if (/^\d+$/.test(trimmed)) { c += parseInt(trimmed, 10) }
+          else {
+            const piece = symbolMap.fromSymbol(trimmed)
+            if (piece && c < cols) cells[toIndex(r, c)] = piece
+            c++
           }
-          c++
+        }
+      } else {
+        for (const ch of rowStrings[r]) {
+          if (ch >= '0' && ch <= '9') {
+            c += parseInt(ch, 10)
+          } else {
+            const piece = symbolMap.fromSymbol(ch)
+            if (piece && c < cols) cells[toIndex(r, c)] = piece
+            c++
+          }
         }
       }
     }
@@ -417,6 +431,9 @@ export function createGridTopology(config) {
       }
     }
 
+    const FEN4_PREFIXES = { r: 0, y: 1, g: 2, b: 3 }
+    const FEN4_TYPES = { R: 'rook', N: 'knight', B: 'bishop', Q: 'queen', K: 'king', P: 'pawn', E: 'elephant', H: 'horse', L: 'lance', S: 'silver', G: 'gold' }
+
     return {
       toSymbol(cell) {
         if (typeof cell === 'string') return cell
@@ -424,7 +441,15 @@ export function createGridTopology(config) {
         return toSym.get(key) || '?'
       },
       fromSymbol(ch) {
-        return fromSym.get(ch) || null
+        const direct = fromSym.get(ch)
+        if (direct) return direct
+        if (ch.length >= 2 && ch[0] in FEN4_PREFIXES) {
+          const owner = FEN4_PREFIXES[ch[0]]
+          const typeChar = ch.slice(1)
+          const type = FEN4_TYPES[typeChar] || typeChar.toLowerCase()
+          return { type, owner }
+        }
+        return null
       },
     }
   }
