@@ -1049,8 +1049,9 @@ export async function initGamePlay(container, defaults = {}) {
 
   function buildFlagToggles() {
     flagsContainer.innerHTML = ''
-    const definition = { engine: { topology: { type: 'grid', rows: 8, cols: 8 }, setup: { position: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' }, plugins: { chess: {} } } }
-    const compatible = family === 'chess' ? deriveCompatibleFlags(definition) : []
+    const compatible = session?.resolved
+      ? deriveCompatibleFlags({ topology: session.resolved.topology, plugins: session.resolved.plugins, setup: session.resolved.setup })
+      : (family === 'chess' ? ['random', 'drops'] : [])
     if (!compatible.length) return
     const label = document.createElement('label')
     label.className = 'control-label'
@@ -1306,6 +1307,7 @@ export async function initGamePlay(container, defaults = {}) {
     session = createPlaySession(config)
     await session.start()
     if (!params.embed) {
+      buildFlagToggles()
       updateRules()
       populatePieceSetSelect(config.variant, session.setup)
       renderActions()

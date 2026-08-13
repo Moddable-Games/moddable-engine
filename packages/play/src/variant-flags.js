@@ -19,71 +19,56 @@ export function parseUrlFlags(flagString) {
 }
 
 export function deriveCompatibleFlags(definition) {
-  if (!definition || !definition.engine) return []
+  if (!definition) return []
+  const engine = definition.engine || definition
   const flags = []
-  if (canRandomise(definition)) flags.push('random')
-  if (canDrop(definition)) flags.push('drops')
+  if (canRandomise(engine)) flags.push('random')
+  if (canDrop(engine)) flags.push('drops')
   return flags
 }
 
-function canRandomise(definition) {
-  const engine = definition.engine
-  if (!engine.topology || engine.topology.type !== 'grid') return false
-  if (!engine.setup || !engine.setup.position) return false
-
-  const position = engine.setup.position
-  const cols = engine.topology.cols || 8
-  const rows = engine.topology.rows || 8
-
-  const board = parsePositionToBoard(position, rows, cols)
-  if (!board) return false
-
-  const lastRank = board[rows - 1]
-  if (!lastRank) return false
-  const filledCount = lastRank.filter(c => c !== null).length
-  if (filledCount < Math.floor(cols * 0.75)) return false
-
-  const firstRank = board[0]
-  if (!firstRank) return false
-  const firstFilled = firstRank.filter(c => c !== null).length
-  if (firstFilled < Math.floor(cols * 0.75)) return false
-
-  return true
+function getSetupString(engine) {
+  if (engine.setup && typeof engine.setup === 'string') return engine.setup
+  if (engine.setup && engine.setup.position) return engine.setup.position
+  const chess = engine.plugins?.chess
+  if (chess && typeof chess.setup === 'string') return chess.setup
+  return null
 }
 
-function canDrop(definition) {
-  const engine = definition.engine
-  if (!engine.topology || engine.topology.type !== 'grid') return false
-  if (!engine.plugins) return false
+function canRandomise(engine) {
+  const topoType = engine.topology?.type || (engine.plugins?.chess ? 'grid' : null)
+  if (topoType !== 'grid') return false
 
-  const chessConfig = engine.plugins.chess
+  const setup = getSetupString(engine)
+  if (!setup) return false
+  if (setup.includes(',')) return false
+
+  const cols = engine.topology?.cols || 8
+  const rows = engine.topology?.rows || 8
+  const ranks = setup.split('/')
+  if (ranks.length < rows) return false
+
+  const pawnChar = 'p'
+  let hasPieceRank = false
+  for (let i = Math.floor(rows / 2); i < rows; i++) {
+    const chars = ranks[i].replace(/\d+/g, '').toLowerCase().split('')
+    const nonPawn = chars.filter(ch => ch !== pawnChar).length
+    if (nonPawn >= Math.floor(cols * 0.6)) { hasPieceRank = true; break }
+  }
+  return hasPieceRank
+}
+
+function canDrop(engine) {
+  const topoType = engine.topology?.type || (engine.plugins?.chess ? 'grid' : null)
+  if (topoType !== 'grid') return false
+
+  const chessConfig = engine.plugins?.chess
   if (!chessConfig) return false
 
   if (chessConfig.winCondition === 'antichess' || chessConfig.winCondition === 'giveaway') return false
   if (chessConfig.drops) return false
 
   return true
-}
-
-function parsePositionToBoard(position, rows, cols) {
-  if (typeof position !== 'string') return null
-  const ranks = position.split('/')
-  if (ranks.length < rows) return null
-
-  const board = []
-  for (const rank of ranks.slice(0, rows)) {
-    const row = []
-    for (const ch of rank) {
-      if (ch >= '1' && ch <= '9') {
-        for (let i = 0; i < parseInt(ch); i++) row.push(null)
-      } else {
-        row.push(ch)
-      }
-    }
-    while (row.length < cols) row.push(null)
-    board.push(row)
-  }
-  return board
 }
 
 export function applyFlags(definition, flags) {
