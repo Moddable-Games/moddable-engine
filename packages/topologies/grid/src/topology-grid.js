@@ -400,7 +400,8 @@ export function createGridTopology(config) {
           if (/^\d+$/.test(trimmed)) { c += parseInt(trimmed, 10) }
           else {
             const piece = symbolMap.fromSymbol(trimmed)
-            if (piece && c < cols) cells[toIndex(r, c)] = piece
+            if (!piece) throw new Error(`Unmapped FEN symbol "${trimmed}" at row ${r}, col ${c}. Declare it in vocabulary.`)
+            if (c < cols) cells[toIndex(r, c)] = piece
             c++
           }
         }
@@ -410,7 +411,8 @@ export function createGridTopology(config) {
             c += parseInt(ch, 10)
           } else {
             const piece = symbolMap.fromSymbol(ch)
-            if (piece && c < cols) cells[toIndex(r, c)] = piece
+            if (!piece) throw new Error(`Unmapped FEN symbol "${ch}" at row ${r}, col ${c}. Declare it in vocabulary.`)
+            if (c < cols) cells[toIndex(r, c)] = piece
             c++
           }
         }
