@@ -393,6 +393,14 @@
   },
   {
     "family": "chess",
+    "variant": "four-handed-chess",
+    "key": "four-handed-chess",
+    "label": "Four-Handed Chess (Chaturaji)",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
     "variant": "giveaway",
     "key": "giveaway",
     "label": "Giveaway",
@@ -548,6 +556,14 @@
     "variant": "los-alamos",
     "key": "los-alamos",
     "label": "Los Alamos",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "los-alamos-vierschach",
+    "key": "los-alamos-vierschach",
+    "label": "Los Alamos Vierschach",
     "group": "Other",
     "playable": true
   },
@@ -1036,6 +1052,14 @@
     "variant": "upside-down",
     "key": "upside-down",
     "label": "Upside-Down",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "vierschach",
+    "key": "vierschach",
+    "label": "Vierschach",
     "group": "Other",
     "playable": true
   },
