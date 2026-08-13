@@ -53,7 +53,7 @@
     "key": "archchess",
     "label": "Archchess",
     "group": "Other",
-    "playable": true
+    "playable": false
   },
   {
     "family": "chess",
@@ -156,14 +156,6 @@
     "variant": "carrera",
     "key": "carrera",
     "label": "Carrera's Chess",
-    "group": "Other",
-    "playable": true
-  },
-  {
-    "family": "chess",
-    "variant": "centennial-chess",
-    "key": "centennial-chess",
-    "label": "Centennial Chess",
     "group": "Other",
     "playable": true
   },
@@ -425,14 +417,6 @@
   },
   {
     "family": "chess",
-    "variant": "grande-acedrex",
-    "key": "grande-acedrex",
-    "label": "Grande Acedrex",
-    "group": "Other",
-    "playable": true
-  },
-  {
-    "family": "chess",
     "variant": "grasshopper",
     "key": "grasshopper",
     "label": "Standard Grasshopper Chess",
@@ -453,7 +437,7 @@
     "key": "gustav-iii-chess",
     "label": "Gustav III's Chess",
     "group": "Other",
-    "playable": true
+    "playable": false
   },
   {
     "family": "chess",
@@ -701,7 +685,7 @@
     "key": "omega-chess",
     "label": "Omega Chess",
     "group": "Other",
-    "playable": true
+    "playable": false
   },
   {
     "family": "chess",
@@ -1044,14 +1028,6 @@
     "variant": "turkish-great-chess-iv",
     "key": "turkish-great-chess-iv",
     "label": "Turkish Great Chess IV",
-    "group": "Other",
-    "playable": true
-  },
-  {
-    "family": "chess",
-    "variant": "ultima",
-    "key": "ultima",
-    "label": "Ultima (Baroque Chess)",
     "group": "Other",
     "playable": true
   },
