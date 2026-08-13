@@ -107,6 +107,16 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return primitive
   }
 
+  function buildPieceForPlayer(name, playerIdx) {
+    const pConfig = pieceConfigs[name]
+    if (!pConfig || !pConfig.directional || playerIdx === 0) return buildPiece(name)
+    const key = `${name}__p1`
+    if (builtPieces.has(key)) return builtPieces.get(key)
+    const flipped = fromConfig({ ...pConfig, offsets: pConfig.offsets.map(([dr, dc]) => [-dr, dc]) })
+    builtPieces.set(key, flipped)
+    return flipped
+  }
+
   let topology = null
   let pawnConfig = null
 
@@ -460,12 +470,8 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       return generatePawnMoves(from, slice, playerIdx)
     }
 
-    let primitive = buildPiece(piece.type)
+    const primitive = buildPieceForPlayer(piece.type, playerIdx)
     if (!primitive) return []
-
-    if (pConfig.directional && playerIdx === 1) {
-      primitive = fromConfig({ ...pConfig, offsets: pConfig.offsets.map(([dr, dc]) => [-dr, dc]) })
-    }
 
     const viewBoard = buildViewBoard(slice.board, playerIdx)
     return primitive.genMoves(topology, from, viewBoard)
@@ -646,12 +652,8 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       return pawnAttacks(from, target, piece.owner)
     }
 
-    let primitive = buildPiece(piece.type)
+    const primitive = buildPieceForPlayer(piece.type, piece.owner)
     if (!primitive) return false
-
-    if (pConfig.directional && piece.owner === 1) {
-      primitive = fromConfig({ ...pConfig, offsets: pConfig.offsets.map(([dr, dc]) => [-dr, dc]) })
-    }
 
     const viewBoard = buildViewBoard(board, piece.owner)
     return primitive.attacks(topology, from, target, viewBoard)
