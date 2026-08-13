@@ -321,6 +321,14 @@
   },
   {
     "family": "chess",
+    "variant": "dragon-chess",
+    "key": "dragon-chess",
+    "label": "Dragon Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
     "variant": "duck-chess",
     "key": "duckChess",
     "label": "Duck Chess",

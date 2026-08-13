@@ -1,8 +1,6 @@
 export const dragonChess = {
   key: 'dragon-chess',
 
-  drops: true,
-
   initState(state) {
     state.hands = [['dragon', 'dragon'], ['dragon', 'dragon']]
   },

@@ -742,7 +742,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   function applyMove(move, slice, full) {
     const playerIdx = full.__players.currentIndex
     const board = cloneBoard(slice.board)
-    const hands = config.drops ? [slice.hands[0].slice(), slice.hands[1].slice()] : null
+    const hands = slice.hands ? [slice.hands[0].slice(), slice.hands[1].slice()] : null
 
     if (move.action && actions[move.action]) {
       const actionDef = actions[move.action]
