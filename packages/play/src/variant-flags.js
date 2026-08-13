@@ -62,9 +62,7 @@ function canDrop(engine) {
   const topoType = engine.topology?.type || (engine.plugins?.chess ? 'grid' : null)
   if (topoType !== 'grid') return false
 
-  const chessConfig = engine.plugins?.chess
-  if (!chessConfig) return false
-
+  const chessConfig = engine.plugins?.chess || engine
   if (chessConfig.winCondition === 'antichess' || chessConfig.winCondition === 'giveaway') return false
   if (chessConfig.drops) return false
 
