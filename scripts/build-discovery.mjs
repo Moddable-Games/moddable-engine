@@ -131,6 +131,7 @@ const statsJson = {
   puzzlesByType: { standard: stats.puzzleStandard, variants: stats.puzzleVariant },
   playableVariants: stats.playableVariants,
   playableFamilies: stats.playableFamilies,
+  playableByFamily: stats.familyCounts,
 }
 outputs.push({ path: 'api/stats.json', content: JSON.stringify(statsJson, null, 2) + '\n' })
 
