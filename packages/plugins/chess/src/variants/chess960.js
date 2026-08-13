@@ -1,5 +1,3 @@
-import { createRng } from '../../../../core/src/rng.js'
-
 export function randomBackRank(rng, opts = {}) {
   const width = opts.width || 8
   const castling = opts.castling !== false
@@ -63,7 +61,6 @@ function extractPieceList(width) {
 export const chess960 = {
   key: 'chess960',
   setup(rng) {
-    if (!rng) rng = createRng(960)
     const rank = randomBackRank(rng)
     return rank + '/pppppppp/8/8/8/8/PPPPPPPP/' + rank.toUpperCase()
   },

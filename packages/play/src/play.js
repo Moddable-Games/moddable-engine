@@ -72,7 +72,7 @@ export function hasFamily(family) {
 }
 
 export function createGameForFamily(family, opts = {}) {
-  const { variant, definition: userDefinition, rngSeed = 42 } = opts
+  const { variant, definition: userDefinition, rngSeed } = opts
 
   const factory = PLUGIN_FACTORIES[family]
   if (!factory) {
@@ -85,11 +85,13 @@ export function createGameForFamily(family, opts = {}) {
     : produce(resolveMeta(family, base || variant))
   if (flags.length) definition = applyFlags(definition, flags)
 
+  const effectiveSeed = rngSeed !== undefined ? rngSeed : Date.now() ^ (Math.random() * 0x7fffffff | 0)
+
   const gameOpts = {
     topologies: TOPOLOGIES,
     pluginFactories: { [family]: factory },
     components: COMPONENT_FACTORIES,
-    rngSeed,
+    rngSeed: effectiveSeed,
   }
 
   const game = createGameFromDefinition(definition, gameOpts)
