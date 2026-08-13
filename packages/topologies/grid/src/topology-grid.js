@@ -25,15 +25,22 @@ export function createGridTopology(config) {
     return [Math.floor(index / cols), index % cols]
   }
 
-  const wrapR = wrap === true || wrap === 'torus' || wrap === 'ranks'
-  const wrapC = wrap === true || wrap === 'torus' || wrap === 'files'
+  const wrapR = wrap === true || wrap === 'torus' || wrap === 'ranks' || wrap === 'klein-bottle' || wrap === 'spherical'
+  const wrapC = wrap === true || wrap === 'torus' || wrap === 'files' || wrap === 'cylinder' || wrap === 'mobius' || wrap === 'klein-bottle' || wrap === 'spherical'
 
   function wrapCoords(r, c) {
     if (!wrap) return [r, c]
-    return [
-      wrapR ? ((r % rows) + rows) % rows : r,
-      wrapC ? ((c % cols) + cols) % cols : c,
-    ]
+    let wr = r, wc = c
+    if (wrapC && (wc < 0 || wc >= cols)) {
+      wc = ((wc % cols) + cols) % cols
+      if (wrap === 'mobius' || wrap === 'klein-bottle') wr = rows - 1 - wr
+    }
+    if (wrapR && (wr < 0 || wr >= rows)) {
+      wr = ((wr % rows) + rows) % rows
+      if (wrap === 'klein-bottle') wc = cols - 1 - wc
+      if (wrap === 'spherical') wc = (wc + Math.floor(cols / 2)) % cols
+    }
+    return [wr, wc]
   }
 
   function isVoid(index) {
@@ -110,6 +117,7 @@ export function createGridTopology(config) {
 
   function ray(from, dr, dc, maxSteps) {
     const [r, c] = typeof from === 'number' ? toRC(from) : from
+    const origin = toIndex(r, c)
     const result = []
     const limit = maxSteps || Math.max(rows, cols)
     let nr = r + dr, nc = c + dc
@@ -118,6 +126,7 @@ export function createGridTopology(config) {
       if (wrap) [nr, nc] = wrapCoords(nr, nc)
       if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) break
       const idx = toIndex(nr, nc)
+      if (idx === origin) break
       if (isVoid(idx)) break
       result.push(idx)
       nr += dr

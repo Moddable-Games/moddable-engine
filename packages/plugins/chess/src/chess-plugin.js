@@ -254,13 +254,20 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     }
     const rng = request('core.rng')
     let rawSetup = pluginConfig.setup || config.setup
-    if (config.randomSetup && rng) {
-      const width = topology ? topology.cols : 8
-      const rank = randomBackRank(rng, { width, castling: !!config.castling })
-      const pawns = 'p'.repeat(width)
-      const emptyRank = String(width)
-      const innerRanks = Array(Math.max(0, (topology ? topology.rows : 8) - 4)).fill(emptyRank).join('/')
-      rawSetup = `${rank}/${pawns}/${innerRanks}/${pawns.toUpperCase()}/${rank.toUpperCase()}`
+    if (config.randomSetup && rng && typeof rawSetup === 'string') {
+      const ranks = rawSetup.split('/')
+      const rows = topology ? topology.rows : 8
+      const cols = topology ? topology.cols : 8
+      if (ranks.length >= rows) {
+        const lastRank = ranks[rows - 1]
+        const pieces = lastRank.replace(/\d+/g, '').toLowerCase().split('')
+        if (pieces.length >= Math.floor(cols * 0.75)) {
+          const rank = randomBackRank(rng, { width: cols, pieces, castling: !!config.castling })
+          ranks[rows - 1] = rank.toUpperCase()
+          ranks[0] = rank
+          rawSetup = ranks.join('/')
+        }
+      }
     }
     const setupInput = typeof rawSetup === 'function' ? rawSetup(rng) : rawSetup
 
