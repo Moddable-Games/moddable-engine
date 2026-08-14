@@ -633,6 +633,14 @@
   },
   {
     "family": "chess",
+    "variant": "metamachy",
+    "key": "metamachy",
+    "label": "Metamachy",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
     "variant": "mini-hexchess",
     "key": "mini-hexchess",
     "label": "Mini Hexchess",

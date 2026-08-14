@@ -14,7 +14,7 @@ import { execSync } from 'child_process'
 const MANIFEST_PATH = join(process.cwd(), 'play', 'playability-manifest.json')
 
 const EXPECTED_PLAYABLE = {
-  chess: 134,
+  chess: 135,
   draughts: 13,
   go: 9,
   shogi: 5,
