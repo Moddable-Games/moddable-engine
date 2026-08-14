@@ -121,9 +121,13 @@ function render() {
 
   const svg = renderFromEngine(resolved, opts)
   if (svg) {
+    // .canvas-svg is display:none until it has the active class, so the board
+    // was being rendered into a hidden container.
+    container.classList.add('active')
     container.innerHTML = svg
     bindCellClick()
   } else {
+    container.classList.add('active')
     container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted)">Cannot render this configuration</div>'
   }
 }
