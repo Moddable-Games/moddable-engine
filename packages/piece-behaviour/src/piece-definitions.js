@@ -52,12 +52,51 @@ export function rider(dirs, opts = {}) {
   }
 }
 
-export function leaper(offsets) {
+// The square that blocks a lame leaper for a given offset.
+//   'half'       the midpoint, for even offsets. The Xiangqi Elephant (2,2) is
+//                blocked at (1,1).
+//   'orthogonal' one unit step along the longer axis. The Xiangqi Horse (2,1)
+//                is blocked at (1,0).
+function lameBlockOffset(mode, dr, dc) {
+  if (mode === 'half') {
+    if (dr % 2 !== 0 || dc % 2 !== 0) return null
+    return [dr / 2, dc / 2]
+  }
+  if (Math.abs(dr) > Math.abs(dc)) return [Math.sign(dr), 0]
+  if (Math.abs(dc) > Math.abs(dr)) return [0, Math.sign(dc)]
+  return null
+}
+
+export function leaper(offsets, opts = {}) {
+  const { lame = null } = opts
+
+  // A lame leaper is blocked by an occupied square on the way, so it must be
+  // resolved offset by offset rather than through a single leapTargets call.
+  function lameTargets(topology, from, board) {
+    const resolved = resolveLeapOffsets(offsets)
+    if (!Array.isArray(resolved)) return topology.leapTargets(from, resolved)
+    const out = []
+    for (const [dr, dc] of resolved) {
+      const target = topology.leapTargets(from, [[dr, dc]])[0]
+      if (target === undefined) continue
+      const blockOffset = lameBlockOffset(lame, dr, dc)
+      if (blockOffset) {
+        const blocker = topology.leapTargets(from, [blockOffset])[0]
+        if (blocker !== undefined && board[blocker]) continue
+      }
+      out.push(target)
+    }
+    return out
+  }
+
   return {
     type: 'leaper',
     offsets,
+    lame,
     genMoves(topology, from, board) {
-      const targets = topology.leapTargets(from, resolveLeapOffsets(offsets))
+      const targets = lame
+        ? lameTargets(topology, from, board)
+        : topology.leapTargets(from, resolveLeapOffsets(offsets))
       const moves = []
       for (const pos of targets) {
         const occupant = board[pos]
@@ -70,8 +109,10 @@ export function leaper(offsets) {
       }
       return moves
     },
-    attacks(topology, from, target) {
-      const targets = topology.leapTargets(from, resolveLeapOffsets(offsets))
+    attacks(topology, from, target, board) {
+      const targets = lame
+        ? lameTargets(topology, from, board || [])
+        : topology.leapTargets(from, resolveLeapOffsets(offsets))
       return targets.includes(target)
     },
   }
@@ -283,7 +324,7 @@ export function fromConfig(config, resolve) {
 
 function buildPrimitive(spec, resolve) {
   if (typeof spec === 'string' && resolve) return resolve(spec)
-  if (spec.type === 'leaper') return leaper(spec.offsets || spec.dirs)
+  if (spec.type === 'leaper') return leaper(spec.offsets || spec.dirs, { lame: spec.lame })
   if (spec.type === 'rider') return rider(spec.dirs, { maxSteps: spec.maxSteps, minSteps: spec.minSteps })
   if (spec.type === 'hopper') return hopper(spec.dirs, { captureSlide: spec.captureSlide, moveSlide: spec.moveSlide })
   if (spec.type === 'locust') return locust(resolveLeapOffsets(spec.dirs || spec.offsets))
