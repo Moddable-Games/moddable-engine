@@ -52,19 +52,20 @@ if (rulesAvailable) {
 }
 
 const manifest = JSON.parse(readFileSync(join(process.cwd(), 'play', 'playability-manifest.json'), 'utf8'))
-const variants = manifest.filter(e => e.playable && e.family === 'chess').map(e => e.variant)
+const chessVariants = manifest.filter(e => e.playable && e.family === 'chess').map(e => e.variant)
+const shogiVariants = manifest.filter(e => e.playable && e.family === 'shogi').map(e => e.variant)
 
 function boardOf(game) {
   const slice = game.getState().slice || {}
   return Array.isArray(slice.board) ? slice.board : []
 }
 
-function inertTypes(slug) {
+function inertTypes(slug, family = 'chess') {
   const present = new Set()
   const moved = new Set()
 
   for (let seed = 0; seed < SEEDS; seed++) {
-    const game = createGameForFamily('chess', { variant: slug, rngSeed: 2000 + seed })
+    const game = createGameForFamily(family, { variant: slug, rngSeed: 2000 + seed })
     for (const cell of boardOf(game)) {
       if (cell && cell.type) present.add(cell.type)
     }
@@ -87,13 +88,28 @@ function inertTypes(slug) {
 
 const describeOrSkip = rulesAvailable ? describe : describe.skip
 
-describeOrSkip('piece mobility across every playable chess variant', () => {
-  test(`all ${variants.length} variants move every piece type they start with`, () => {
+describeOrSkip('piece mobility across every playable variant', () => {
+  test(`all ${chessVariants.length} chess variants move every piece type they start with`, () => {
     const offenders = []
-    for (const slug of variants) {
+    for (const slug of chessVariants) {
       let inert
       try {
-        inert = inertTypes(slug)
+        inert = inertTypes(slug, 'chess')
+      } catch (e) {
+        offenders.push(`${slug} (${e.message.slice(0, 60)})`)
+        continue
+      }
+      if (inert.length) offenders.push(`${slug} (never moves: ${inert.join(', ')})`)
+    }
+    expect(offenders).toEqual([])
+  }, 600000)
+
+  test(`all ${shogiVariants.length} shogi variants move every piece type they start with`, () => {
+    const offenders = []
+    for (const slug of shogiVariants) {
+      let inert
+      try {
+        inert = inertTypes(slug, 'shogi')
       } catch (e) {
         offenders.push(`${slug} (${e.message.slice(0, 60)})`)
         continue

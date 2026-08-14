@@ -1,3 +1,5 @@
+import { fromConfig } from '../../../piece-behaviour/src/piece-definitions.js'
+
 export function createShogiPlugin(variantConfig = {}, context = {}) {
   const defaults = {
     rows: 9,
@@ -42,35 +44,108 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     return row >= config.rows - config.promotionZone
   }
 
-  function flipDirs(dirs, playerIndex) {
-    const adv = config.advancement ? config.advancement[playerIndex] : (playerIndex === 0 ? -1 : 1)
-    if (adv === -1) return dirs
-    return dirs.map(([dr, dc]) => [-dr, dc])
-  }
-
+  // Piece-behaviour schema definitions for each standard shogi piece type.
+  // Directional pieces (all except king) are built per-player with flipped offsets.
   const DEFAULT_PIECE_MOVES = {
-    king: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]],
-    rook: 'slide_orthogonal',
-    bishop: 'slide_diagonal',
-    gold: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, 0]],
-    silver: [[-1, -1], [-1, 0], [-1, 1], [1, -1], [1, 1]],
-    knight: [[-2, -1], [-2, 1]],
-    lance: 'slide_forward',
-    pawn: [[-1, 0]],
-    promoted_rook: 'slide_orthogonal_plus_diag_step',
-    promoted_bishop: 'slide_diagonal_plus_orth_step',
-    promoted_silver: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, 0]],
-    promoted_knight: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, 0]],
-    promoted_lance: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, 0]],
-    promoted_pawn: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, 0]],
+    king: { type: 'rider', dirs: 'all', maxSteps: 1 },
+    rook: { type: 'rider', dirs: 'orthogonal' },
+    bishop: { type: 'rider', dirs: 'diagonal' },
+    gold: { type: 'leaper', offsets: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, 0]], directional: true },
+    silver: { type: 'leaper', offsets: [[-1, -1], [-1, 0], [-1, 1], [1, -1], [1, 1]], directional: true },
+    knight: { type: 'leaper', offsets: [[-2, -1], [-2, 1]], directional: true },
+    lance: { type: 'rider', dirs: [[-1, 0]], directional: true },
+    pawn: { type: 'leaper', offsets: [[-1, 0]], directional: true },
+    promoted_rook: { type: 'compose', parts: [{ type: 'rider', dirs: 'orthogonal' }, { type: 'rider', dirs: 'diagonal', maxSteps: 1 }] },
+    promoted_bishop: { type: 'compose', parts: [{ type: 'rider', dirs: 'diagonal' }, { type: 'rider', dirs: 'orthogonal', maxSteps: 1 }] },
+    promoted_silver: { type: 'leaper', offsets: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, 0]], directional: true },
+    promoted_knight: { type: 'leaper', offsets: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, 0]], directional: true },
+    promoted_lance: { type: 'leaper', offsets: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, 0]], directional: true },
+    promoted_pawn: { type: 'leaper', offsets: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, 0]], directional: true },
   }
 
   const PIECE_MOVES = config.pieceMoves || DEFAULT_PIECE_MOVES
 
+  // Cache of built primitives keyed by "type__playerIndex"
+  const builtPieces = new Map()
+
+  function flipSpec(spec) {
+    if (!spec || typeof spec !== 'object') return spec
+    const out = { ...spec }
+    if (Array.isArray(out.offsets)) out.offsets = out.offsets.map(([dr, dc]) => [-dr, dc])
+    if (Array.isArray(out.dirs)) out.dirs = out.dirs.map(([dr, dc]) => [-dr, dc])
+    if (out.type === 'compose' && Array.isArray(out.parts)) out.parts = out.parts.map(p => flipSpec(p))
+    return out
+  }
+
+  function buildPieceForPlayer(type, playerIndex) {
+    const key = `${type}__${playerIndex}`
+    if (builtPieces.has(key)) return builtPieces.get(key)
+    const pConfig = PIECE_MOVES[type]
+    if (!pConfig) return null
+    // For directional pieces, flip for player 1
+    const adv = config.advancement ? config.advancement[playerIndex] : (playerIndex === 0 ? -1 : 1)
+    const needsFlip = pConfig.directional && adv !== -1
+    const spec = needsFlip ? flipSpec(pConfig) : pConfig
+    const primitive = fromConfig(spec)
+    builtPieces.set(key, primitive)
+    return primitive
+  }
+
+  // Minimal topology providing rays() and leapTargets() when no external
+  // topology is available (tests create the plugin without one).
+  function buildInternalTopology() {
+    return {
+      rays(from, directions, maxSteps) {
+        const resolved = typeof directions === 'string' ? resolveDirections(directions) : directions
+        return resolved.map(([dr, dc]) => {
+          const ray = []
+          const [r, c] = rowCol(from)
+          const limit = maxSteps || Math.max(config.rows, config.cols)
+          for (let i = 1; i <= limit; i++) {
+            const nr = r + dr * i, nc = c + dc * i
+            if (!inBounds(nr, nc)) break
+            ray.push(cellIndex(nr, nc))
+          }
+          return ray
+        })
+      },
+      leapTargets(from, offsets) {
+        const resolved = typeof offsets === 'string' ? resolveDirections(offsets) : offsets
+        const [r, c] = rowCol(from)
+        const targets = []
+        for (const [dr, dc] of resolved) {
+          const nr = r + dr, nc = c + dc
+          if (inBounds(nr, nc)) targets.push(cellIndex(nr, nc))
+        }
+        return targets
+      },
+    }
+  }
+
+  const DIRECTIONS = {
+    orthogonal: [[-1, 0], [1, 0], [0, -1], [0, 1]],
+    diagonal: [[-1, -1], [-1, 1], [1, -1], [1, 1]],
+    all: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]],
+  }
+
+  function resolveDirections(name) {
+    return DIRECTIONS[name] || []
+  }
+
+  // Creates a board view with .friendly/.enemy properties for piece-behaviour primitives
+  function buildViewBoard(board, playerIndex) {
+    return board.map(cell => {
+      if (cell === null) return null
+      return { friendly: cell.owner === playerIndex, enemy: cell.owner !== playerIndex, ...cell }
+    })
+  }
+
   function getPromotedType(type) {
     if (type.startsWith('promoted_')) return null
-    if (type === 'king' || type === 'gold') return null
-    return `promoted_${type}`
+    if (type === royalType || type === 'gold') return null
+    const promoted = `promoted_${type}`
+    if (!PIECE_MOVES[promoted]) return null
+    return promoted
   }
 
   function getDemotedType(type) {
@@ -79,87 +154,12 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
   }
 
   function generatePieceMoves(board, pos, piece, playerIndex) {
-    const [r, c] = rowCol(pos)
-    const moves = []
-    const type = piece.type
-    const moveDef = PIECE_MOVES[type]
-
-    if (moveDef === 'slide_orthogonal' || moveDef === 'slide_orthogonal_plus_diag_step') {
-      for (const [dr, dc] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
-        for (let dist = 1; dist < config.rows; dist++) {
-          const nr = r + dr * dist
-          const nc = c + dc * dist
-          if (!inBounds(nr, nc)) break
-          const idx = cellIndex(nr, nc)
-          if (board[idx] !== null) {
-            if (board[idx].owner !== playerIndex) moves.push({ from: pos, to: idx })
-            break
-          }
-          moves.push({ from: pos, to: idx })
-        }
-      }
-      if (moveDef === 'slide_orthogonal_plus_diag_step') {
-        for (const [dr, dc] of [[-1, -1], [-1, 1], [1, -1], [1, 1]]) {
-          const nr = r + dr
-          const nc = c + dc
-          if (!inBounds(nr, nc)) continue
-          const idx = cellIndex(nr, nc)
-          if (board[idx] === null || board[idx].owner !== playerIndex) {
-            moves.push({ from: pos, to: idx })
-          }
-        }
-      }
-    } else if (moveDef === 'slide_diagonal' || moveDef === 'slide_diagonal_plus_orth_step') {
-      for (const [dr, dc] of [[-1, -1], [-1, 1], [1, -1], [1, 1]]) {
-        for (let dist = 1; dist < config.rows; dist++) {
-          const nr = r + dr * dist
-          const nc = c + dc * dist
-          if (!inBounds(nr, nc)) break
-          const idx = cellIndex(nr, nc)
-          if (board[idx] !== null) {
-            if (board[idx].owner !== playerIndex) moves.push({ from: pos, to: idx })
-            break
-          }
-          moves.push({ from: pos, to: idx })
-        }
-      }
-      if (moveDef === 'slide_diagonal_plus_orth_step') {
-        for (const [dr, dc] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
-          const nr = r + dr
-          const nc = c + dc
-          if (!inBounds(nr, nc)) continue
-          const idx = cellIndex(nr, nc)
-          if (board[idx] === null || board[idx].owner !== playerIndex) {
-            moves.push({ from: pos, to: idx })
-          }
-        }
-      }
-    } else if (moveDef === 'slide_forward') {
-      const dr = config.advancement ? config.advancement[playerIndex] : (playerIndex === 0 ? -1 : 1)
-      for (let dist = 1; dist < config.rows; dist++) {
-        const nr = r + dr * dist
-        if (!inBounds(nr, c)) break
-        const idx = cellIndex(nr, c)
-        if (board[idx] !== null) {
-          if (board[idx].owner !== playerIndex) moves.push({ from: pos, to: idx })
-          break
-        }
-        moves.push({ from: pos, to: idx })
-      }
-    } else if (Array.isArray(moveDef)) {
-      const dirs = flipDirs(moveDef, playerIndex)
-      for (const [dr, dc] of dirs) {
-        const nr = r + dr
-        const nc = c + dc
-        if (!inBounds(nr, nc)) continue
-        const idx = cellIndex(nr, nc)
-        if (board[idx] === null || board[idx].owner !== playerIndex) {
-          moves.push({ from: pos, to: idx })
-        }
-      }
-    }
-
-    return moves
+    const primitive = buildPieceForPlayer(piece.type, playerIndex)
+    if (!primitive) return []
+    const topo = topology || buildInternalTopology()
+    const viewBoard = buildViewBoard(board, playerIndex)
+    const rawMoves = primitive.genMoves(topo, pos, viewBoard)
+    return rawMoves.map(m => ({ from: m.from, to: m.to }))
   }
 
   function generateDropMoves(board, hand, playerIndex) {
@@ -198,65 +198,21 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     return moves
   }
 
+  const royalType = config.royalType || 'king'
+
   function findKing(board, playerIndex) {
     for (let i = 0; i < board.length; i++) {
-      if (board[i] && board[i].owner === playerIndex && board[i].type === 'king') return i
+      if (board[i] && board[i].owner === playerIndex && board[i].type === royalType) return i
     }
     return -1
   }
 
   function canAttack(board, from, target, piece, playerIndex) {
-    const [fr, fc] = rowCol(from)
-    const [tr, tc] = rowCol(target)
-    const type = piece.type
-    const moveDef = PIECE_MOVES[type]
-
-    if (moveDef === 'slide_orthogonal' || moveDef === 'slide_orthogonal_plus_diag_step') {
-      if (fr === tr || fc === tc) {
-        const dr = Math.sign(tr - fr), dc = Math.sign(tc - fc)
-        const dist = Math.max(Math.abs(tr - fr), Math.abs(tc - fc))
-        for (let d = 1; d < dist; d++) {
-          if (board[cellIndex(fr + dr * d, fc + dc * d)] !== null) return false
-        }
-        return true
-      }
-      if (moveDef === 'slide_orthogonal_plus_diag_step') {
-        if (Math.abs(tr - fr) === 1 && Math.abs(tc - fc) === 1) return true
-      }
-      return false
-    }
-    if (moveDef === 'slide_diagonal' || moveDef === 'slide_diagonal_plus_orth_step') {
-      if (Math.abs(tr - fr) === Math.abs(tc - fc) && tr !== fr) {
-        const dr = Math.sign(tr - fr), dc = Math.sign(tc - fc)
-        const dist = Math.abs(tr - fr)
-        for (let d = 1; d < dist; d++) {
-          if (board[cellIndex(fr + dr * d, fc + dc * d)] !== null) return false
-        }
-        return true
-      }
-      if (moveDef === 'slide_diagonal_plus_orth_step') {
-        if ((Math.abs(tr - fr) <= 1 && Math.abs(tc - fc) <= 1) && (tr !== fr || tc !== fc) && !(Math.abs(tr - fr) === 1 && Math.abs(tc - fc) === 1)) return true
-      }
-      return false
-    }
-    if (moveDef === 'slide_forward') {
-      const dr = config.advancement ? config.advancement[playerIndex] : (playerIndex === 0 ? -1 : 1)
-      if (tc !== fc) return false
-      if (Math.sign(tr - fr) !== dr) return false
-      const dist = Math.abs(tr - fr)
-      for (let d = 1; d < dist; d++) {
-        if (board[cellIndex(fr + dr * d, fc)] !== null) return false
-      }
-      return true
-    }
-    if (Array.isArray(moveDef)) {
-      const dirs = flipDirs(moveDef, playerIndex)
-      for (const [dr, dc] of dirs) {
-        if (fr + dr === tr && fc + dc === tc) return true
-      }
-      return false
-    }
-    return false
+    const primitive = buildPieceForPlayer(piece.type, playerIndex)
+    if (!primitive) return false
+    const topo = topology || buildInternalTopology()
+    // attacks() needs the board to check for blocking pieces on sliding paths
+    return primitive.attacks(topo, from, target, board)
   }
 
   function isInCheck(board, playerIndex) {
@@ -285,6 +241,23 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
       }
       const setup = pluginConfig.setup || config.setup || null
       const board = setup ? parseSetup(setup) : buildDefaultBoard()
+
+      // Validate: every board cell type must have a movement definition
+      for (let i = 0; i < board.length; i++) {
+        if (board[i] && !PIECE_MOVES[board[i].type]) {
+          throw new Error(`Unmapped piece type "${board[i].type}" at cell ${i}. Declare its movement in pieceMoves or remove it from setup.`)
+        }
+      }
+
+      // Validate: vocabulary entries with player ownership must have piece definitions
+      for (const [type, def] of Object.entries(VOCABULARY)) {
+        const owners = def.symbols ? Object.keys(def.symbols) : []
+        const hasPlayerOwner = owners.some(o => o === '0' || o === '1')
+        if (hasPlayerOwner && !PIECE_MOVES[type]) {
+          throw new Error(`Vocabulary declares "${type}" but no matching entry in pieceMoves. Declare its movement or remove it from vocabulary.`)
+        }
+      }
+
       const hands = config.initialHands
         ? [config.initialHands[0] || [], config.initialHands[1] || []]
         : [[], []]
@@ -322,7 +295,7 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
 
       if (captured) {
         const demoted = getDemotedType(captured.type)
-        if (demoted !== 'king') {
+        if (demoted !== royalType) {
           hands[playerIndex].push(demoted)
         }
       }
