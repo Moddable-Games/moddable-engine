@@ -153,6 +153,13 @@
     <div class="canvas-viewport" id="board-viewport">
       <div class="canvas-svg" id="board-svg"></div>
     </div>
+    <div class="setup-bar">
+      <label class="setup-bar__label" for="setup-input">Setup</label>
+      <input class="setup-bar__input" id="setup-input" type="text" spellcheck="false"
+             placeholder="place pieces, or paste a setup string here" />
+      <button class="info-btn" id="setup-copy-btn">Copy</button>
+      <button class="info-btn" id="try-play-btn">Try in Play</button>
+    </div>
     <div class="hex-info-bar" id="hex-info-bar">
       <span class="info-text" id="info-text">Configure board and click cells to place pieces</span>
       <span class="info-actions">

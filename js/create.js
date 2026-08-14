@@ -6,6 +6,28 @@ let galleryIndex = null
 let placement = {}
 let activePiece = null
 let pieceHistory = []
+let lastGrid = null
+
+// Placement is keyed "row,col". Resizing the board used to leave every piece on
+// its old row and column while the board grew or shrank around it, silently
+// discarding anything that fell outside. Reanchor from the bottom-left instead,
+// which is where a setup is conventionally read from, and report any piece that
+// genuinely cannot fit.
+function reanchorPlacement(oldRows, oldCols, rows, cols) {
+  if (!oldRows || !oldCols) return 0
+  if (oldRows === rows && oldCols === cols) return 0
+  const next = {}
+  let dropped = 0
+  for (const [key, piece] of Object.entries(placement)) {
+    const [r, c] = key.split(',').map(Number)
+    const fromBottom = oldRows - 1 - r
+    const nr = rows - 1 - fromBottom
+    if (nr < 0 || nr >= rows || c >= cols) { dropped++; continue }
+    next[`${nr},${c}`] = piece
+  }
+  placement = next
+  return dropped
+}
 
 async function loadGallery() {
   try { galleryIndex = await fetch('../pieces/gallery-index.json').then(r => r.json()) }
@@ -126,12 +148,53 @@ function bindCellClick() {
   })
 }
 
+function syncSetupInput() {
+  const input = document.getElementById('setup-input')
+  if (!input) return
+  if (document.activeElement === input) return
+  input.classList.remove('is-invalid')
+  input.value = Object.keys(placement).length ? buildFen() : ''
+}
+
+// Accept a pasted setup string for grid boards. Anything the board cannot hold
+// is rejected outright rather than partially applied, so the box never shows a
+// string the board is not actually displaying.
+function applySetupInput(text) {
+  const input = document.getElementById('setup-input')
+  const rows = parseInt(document.getElementById('grid-rows').value) || 8
+  const cols = parseInt(document.getElementById('grid-cols').value) || 8
+  const next = {}
+  const rowStrings = String(text).trim().split('/')
+  if (getTopoType() !== 'grid' || rowStrings.length !== rows) {
+    input.classList.add('is-invalid')
+    return false
+  }
+  for (let r = 0; r < rows; r++) {
+    let c = 0
+    const run = rowStrings[r].match(/\d+|[^\d]/g) || []
+    for (const token of run) {
+      if (/^\d+$/.test(token)) { c += parseInt(token, 10); continue }
+      if (c >= cols) { input.classList.add('is-invalid'); return false }
+      next[`${r},${c}`] = token
+      c++
+    }
+    if (c !== cols) { input.classList.add('is-invalid'); return false }
+  }
+  pieceHistory.push({ replaceAll: { ...placement } })
+  placement = next
+  input.classList.remove('is-invalid')
+  render()
+  updateInfoText()
+  return true
+}
+
 function updateInfoText() {
   const count = Object.keys(placement).length
   const text = count > 0
     ? `${count} piece${count !== 1 ? 's' : ''} placed` + (activePiece ? ` · Placing: ${activePiece}` : '')
     : 'Configure board and click cells to place pieces'
   document.getElementById('info-text').textContent = text
+  syncSetupInput()
 }
 
 function populatePieceSets() {
@@ -313,28 +376,69 @@ function showTopoOpts() {
 function undo() {
   const last = pieceHistory.pop()
   if (!last) return
-  if (last.prev) placement[last.sq] = last.prev
-  else delete placement[last.sq]
+  if (last.replaceAll) {
+    placement = last.replaceAll
+  } else if (last.prev) {
+    placement[last.sq] = last.prev
+  } else {
+    delete placement[last.sq]
+  }
   render()
   updateInfoText()
+}
+
+// The page already builds a config in the shape createGameForFamily accepts as
+// opts.definition, so handing it to the play page needs a transport, not engine
+// work.
+function tryInPlay() {
+  const resolved = buildResolved()
+  try {
+    sessionStorage.setItem('moddable:createDraft', JSON.stringify({
+      definition: { title: 'Custom', slug: 'custom', engine: resolved },
+      createdFrom: 'create',
+    }))
+  } catch { /* storage unavailable: the play page falls back to standard */ }
+  window.location.href = '../play/?family=chess&variant=custom&draft=1'
 }
 
 async function init() {
   await loadGallery()
   populatePieceSets()
   showTopoOpts()
+  lastGrid = {
+    rows: parseInt(document.getElementById('grid-rows')?.value) || 8,
+    cols: parseInt(document.getElementById('grid-cols')?.value) || 8,
+  }
   render()
+  updateInfoText()
 
   document.getElementById('topo-type').addEventListener('change', () => {
     placement = {}; pieceHistory = []
     showTopoOpts(); render(); updateInfoText()
   })
 
-  const rerenderInputs = ['grid-rows', 'grid-cols', 'hex-radius', 'graph-structure',
-    'graph-rings', 'track-positions', 'pit-cols', 'surface-select', 'cellcolor-select', 'labels-select']
+  const rerenderInputs = ['hex-radius', 'graph-structure', 'graph-rings',
+    'track-positions', 'pit-cols', 'surface-select', 'cellcolor-select', 'labels-select']
   for (const id of rerenderInputs) {
     const el = document.getElementById(id)
     if (el) el.addEventListener('change', render)
+  }
+
+  for (const id of ['grid-rows', 'grid-cols']) {
+    const el = document.getElementById(id)
+    if (!el) continue
+    el.addEventListener('change', () => {
+      const rows = parseInt(document.getElementById('grid-rows').value) || 8
+      const cols = parseInt(document.getElementById('grid-cols').value) || 8
+      const dropped = lastGrid ? reanchorPlacement(lastGrid.rows, lastGrid.cols, rows, cols) : 0
+      lastGrid = { rows, cols }
+      render()
+      updateInfoText()
+      if (dropped) {
+        document.getElementById('info-text').textContent =
+          `${dropped} piece${dropped !== 1 ? 's' : ''} did not fit the new board and ${dropped !== 1 ? 'were' : 'was'} removed`
+      }
+    })
   }
 
   document.getElementById('pieceset-select').addEventListener('change', () => {
@@ -343,6 +447,21 @@ async function init() {
   document.getElementById('export-yaml-btn').addEventListener('click', exportYaml)
   document.getElementById('export-svg-btn').addEventListener('click', exportSvg)
   document.getElementById('bar-undo-btn').addEventListener('click', undo)
+
+  const setupInput = document.getElementById('setup-input')
+  if (setupInput) {
+    setupInput.addEventListener('change', () => applySetupInput(setupInput.value))
+    setupInput.addEventListener('blur', () => syncSetupInput())
+  }
+  const copyBtn = document.getElementById('setup-copy-btn')
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      const value = Object.keys(placement).length ? buildFen() : ''
+      if (value && navigator.clipboard) navigator.clipboard.writeText(value)
+    })
+  }
+  const tryBtn = document.getElementById('try-play-btn')
+  if (tryBtn) tryBtn.addEventListener('click', tryInPlay)
   document.getElementById('clear-pieces-btn').addEventListener('click', () => {
     placement = {}; pieceHistory = []; render(); updateInfoText()
   })

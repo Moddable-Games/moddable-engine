@@ -749,3 +749,40 @@
 .chargen-prev:disabled, .chargen-next:disabled { opacity: 0.3; cursor: default; }
 .chargen-page-info { font-size: 12px; color: #888; }
 
+
+.setup-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+}
+
+.setup-bar__label {
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.setup-bar__input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 6px 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  background: var(--bg-page);
+  color: var(--text-primary);
+}
+
+.setup-bar__input:focus {
+  outline: none;
+  border-color: var(--cosmic-glow);
+}
+
+.setup-bar__input.is-invalid {
+  border-color: #c0392b;
+}
