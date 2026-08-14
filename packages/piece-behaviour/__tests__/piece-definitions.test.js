@@ -1,4 +1,4 @@
-import { rider, leaper, compose, divergent, fromConfig, OFFSETS } from '../index.js'
+import { rider, leaper, compose, divergent, hopper, locust, bent, fromConfig, OFFSETS } from '../index.js'
 import { createGridTopology } from '../../topologies/grid/index.js'
 
 const topology = createGridTopology({ rows: 8, cols: 8 })
@@ -218,6 +218,83 @@ describe('piece-definitions', () => {
     it('resolveLeapOffsets passes unknown strings through to topology', () => {
       const piece = fromConfig({ type: 'leaper', offsets: 'hexKnight' })
       expect(piece.type).toBe('leaper')
+    })
+  })
+
+  describe('locust (draughts capture)', () => {
+    it('captures by jumping over an adjacent enemy', () => {
+      const piece = locust(OFFSETS.king)
+      const board = makeBoard({ 27: enemy })
+      const moves = piece.genMoves(topology, 36, board)
+      expect(moves.length).toBeGreaterThan(0)
+      const jump = moves.find(m => m.captured === 27)
+      expect(jump).toBeDefined()
+      expect(jump.to).toBe(18)
+      expect(jump.capture).toBe(true)
+    })
+
+    it('cannot jump over friendly pieces', () => {
+      const piece = locust(OFFSETS.king)
+      const board = makeBoard({ 27: friendly })
+      const moves = piece.genMoves(topology, 36, board)
+      expect(moves.length).toBe(0)
+    })
+
+    it('cannot land on an occupied square', () => {
+      const piece = locust(OFFSETS.king)
+      const board = makeBoard({ 27: enemy, 18: friendly })
+      const moves = piece.genMoves(topology, 36, board)
+      const blocked = moves.find(m => m.captured === 27)
+      expect(blocked).toBeUndefined()
+    })
+
+    it('attacks the piece jumped over, not the landing square', () => {
+      const piece = locust(OFFSETS.king)
+      const board = makeBoard({ 27: enemy })
+      expect(piece.attacks(topology, 36, 27, board)).toBe(true)
+      expect(piece.attacks(topology, 36, 18, board)).toBe(false)
+    })
+
+    it('works via fromConfig with named dirs', () => {
+      const piece = fromConfig({ type: 'locust', dirs: 'king' })
+      expect(piece.type).toBe('locust')
+      const board = makeBoard({ 27: enemy })
+      const moves = piece.genMoves(topology, 36, board)
+      expect(moves.some(m => m.captured === 27)).toBe(true)
+    })
+  })
+
+  describe('bent (diagonal step then orthogonal slide)', () => {
+    it('generates correct moves for an eagle on d1 (index 59)', () => {
+      const piece = bent({ first: 'diagonal', firstSteps: 1 })
+      const board = makeBoard({})
+      const moves = piece.genMoves(topology, 59, board)
+      const targets = moves.map(m => m.to).sort((a, b) => a - b)
+      expect(moves.length).toBe(19)
+    })
+
+    it('knee square blocks the continuation', () => {
+      const piece = bent({ first: 'diagonal', firstSteps: 1 })
+      const board = makeBoard({ 50: friendly })
+      const moves = piece.genMoves(topology, 59, board)
+      const pastKnee = moves.filter(m => m.to < 50 && m.to % 8 <= 2)
+      expect(pastKnee.length).toBe(0)
+    })
+
+    it('captures enemy on knee square', () => {
+      const piece = bent({ first: 'diagonal', firstSteps: 1 })
+      const board = makeBoard({ 50: enemy })
+      const moves = piece.genMoves(topology, 59, board)
+      const capture = moves.find(m => m.to === 50 && m.capture)
+      expect(capture).toBeDefined()
+    })
+
+    it('works via fromConfig', () => {
+      const piece = fromConfig({ type: 'bent', first: 'diagonal', firstSteps: 1 })
+      expect(piece.type).toBe('bent')
+      const board = makeBoard({})
+      const moves = piece.genMoves(topology, 59, board)
+      expect(moves.length).toBe(19)
     })
   })
 })
