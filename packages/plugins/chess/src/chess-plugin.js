@@ -480,11 +480,13 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     }
 
     state.enPassantTarget = null
+    state.enPassantPawn = null
     if (piece && piece.type === (config.pawnType || 'pawn') && config.enPassant) {
       const diff = Math.abs(move.to - move.from)
       const cols = topology ? topology.cols : 8
       if (diff === cols * 2) {
         state.enPassantTarget = (move.from + move.to) / 2
+        state.enPassantPawn = move.to
       }
     }
 
@@ -649,8 +651,16 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       }
 
       if (config.enPassant && target === slice.enPassantTarget) {
-        const capturedPawn = topology.step(target, forwardDir[1 - playerIdx])
-        moves.push({ from, to: target, capture: true, enPassant: true, captured: capturedPawn })
+        // The victim is the pawn that made the double step. It is recorded when
+        // the opportunity is created; deriving it from an opponent index only
+        // works for two players and crashes for seats 2 and 3.
+        const fallbackDir = forwardDir[1 - playerIdx]
+        const capturedPawn = slice.enPassantPawn != null
+          ? slice.enPassantPawn
+          : (fallbackDir ? topology.step(target, fallbackDir) : null)
+        if (capturedPawn != null) {
+          moves.push({ from, to: target, capture: true, enPassant: true, captured: capturedPawn })
+        }
       }
     }
 
@@ -856,6 +866,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const piece = getCell(board, move.from)
     let castlingRights = slice.castlingRights ? deepCopyCastling(slice.castlingRights) : null
     let enPassantTarget = null
+    let enPassantPawn = null
     let halfmoveClock = slice.halfmoveClock + 1
 
     if (getCell(board, move.to) !== null || piece.type === (config.pawnType || 'pawn')) {
@@ -899,6 +910,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       const twoStep = oneStep !== null ? topology.step(oneStep, fwd) : null
       if (twoStep === move.to) {
         enPassantTarget = oneStep
+        enPassantPawn = move.to
       }
     }
 
@@ -921,7 +933,10 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
     const newSlice = { board, halfmoveClock, fullmoveNumber }
     if (castlingRights !== null) newSlice.castlingRights = castlingRights
-    if (config.enPassant) newSlice.enPassantTarget = enPassantTarget
+    if (config.enPassant) {
+      newSlice.enPassantTarget = enPassantTarget
+      newSlice.enPassantPawn = enPassantPawn
+    }
     if (hands) newSlice.hands = hands
     for (const k of Object.keys(slice)) {
       if (k.startsWith('_') && !(k in newSlice)) newSlice[k] = slice[k]
