@@ -44,7 +44,7 @@
   </div>
 </header>
 
-<div class="boards-app">
+<div class="boards-app create-layout">
   <aside class="boards-sidebar">
     <div class="sidebar-panel active">
 
@@ -125,6 +125,39 @@
         </select>
       </div>
 
+      <div class="control-group" style="margin-top:16px">
+        <label class="control-label">Export</label>
+        <div class="control-row">
+          <button class="btn btn-outline" id="export-yaml-btn">YAML</button>
+          <button class="btn btn-outline" id="export-svg-btn">SVG</button>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <main class="boards-canvas">
+    <div class="canvas-viewport" id="board-viewport">
+      <div class="canvas-svg" id="board-svg"></div>
+    </div>
+    <div class="setup-bar">
+      <label class="setup-bar__label" for="setup-input">Setup</label>
+      <input class="setup-bar__input" id="setup-input" type="text" spellcheck="false"
+             placeholder="place pieces, or paste a setup string here" />
+      <button class="info-btn" id="setup-copy-btn">Copy</button>
+      <button class="info-btn" id="try-play-btn">Try in Play</button>
+    </div>
+    <div class="hex-info-bar" id="hex-info-bar">
+      <span class="info-text" id="info-text">Configure board and click cells to place pieces</span>
+      <span class="info-actions">
+        <button class="info-btn" id="bar-undo-btn">Undo</button>
+      </span>
+    </div>
+  </main>
+
+  <aside class="boards-sidebar boards-sidebar--right">
+    <div class="sidebar-panel active">
+
       <div class="control-group">
         <label class="control-label">Piece Set</label>
         <select id="pieceset-select">
@@ -138,7 +171,7 @@
         <button class="btn btn-outline" id="clear-pieces-btn" style="margin-top:8px;font-size:11px">Clear all pieces</button>
       </div>
 
-      <div class="control-group" id="piece-define-group" style="margin-top:16px">
+      <div class="control-group" id="piece-define-group">
         <label class="control-label">Define Piece</label>
         <div class="piece-define-form" id="piece-define-form">
           <div class="control-row" style="gap:4px">
@@ -177,35 +210,8 @@
         <div id="custom-pieces-list" style="margin-top:6px"></div>
       </div>
 
-      <div class="control-group" style="margin-top:16px">
-        <label class="control-label">Export</label>
-        <div class="control-row">
-          <button class="btn btn-outline" id="export-yaml-btn">YAML</button>
-          <button class="btn btn-outline" id="export-svg-btn">SVG</button>
-        </div>
-      </div>
-
     </div>
   </aside>
-
-  <main class="boards-canvas">
-    <div class="canvas-viewport" id="board-viewport">
-      <div class="canvas-svg" id="board-svg"></div>
-    </div>
-    <div class="setup-bar">
-      <label class="setup-bar__label" for="setup-input">Setup</label>
-      <input class="setup-bar__input" id="setup-input" type="text" spellcheck="false"
-             placeholder="place pieces, or paste a setup string here" />
-      <button class="info-btn" id="setup-copy-btn">Copy</button>
-      <button class="info-btn" id="try-play-btn">Try in Play</button>
-    </div>
-    <div class="hex-info-bar" id="hex-info-bar">
-      <span class="info-text" id="info-text">Configure board and click cells to place pieces</span>
-      <span class="info-actions">
-        <button class="info-btn" id="bar-undo-btn">Undo</button>
-      </span>
-    </div>
-  </main>
 </div>
 
 <footer class="site-footer">
