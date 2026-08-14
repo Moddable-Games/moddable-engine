@@ -28,9 +28,6 @@ const KNOWN_INERT = {
   // "You MUST move the weakest piece type that has a legal move." A Rook only
   // moves once nothing weaker can, which a bounded random playout rarely reaches.
   weak: ['rook'],
-  // 12x12 board, lance starts on row 11 with 3 rows of own pieces ahead.
-  // 60-ply random playout rarely clears the file.
-  'chu-shogi': ['lance'],
 }
 
 let rulesAvailable = true
@@ -70,10 +67,12 @@ function inertTypes(slug, family = 'chess') {
 
   for (let seed = 0; seed < SEEDS; seed++) {
     const game = createGameForFamily(family, { variant: slug, rngSeed: 2000 + seed })
-    for (const cell of boardOf(game)) {
+    const board0 = boardOf(game)
+    for (const cell of board0) {
       if (cell && cell.type) present.add(cell.type)
     }
-    for (let ply = 0; ply < PLIES; ply++) {
+    const plies = board0.length > 100 ? PLIES * 3 : PLIES
+    for (let ply = 0; ply < plies; ply++) {
       const board = boardOf(game)
       let moves
       try { moves = game.getLegalMoves() } catch { break }
@@ -137,4 +136,20 @@ describeOrSkip('piece mobility across every playable variant', () => {
     }
     expect(offenders).toEqual([])
   }, 600000)
+
+  test('chu-shogi lance moves on a cleared file', () => {
+    const game = createGameForFamily('shogi', { variant: 'chu-shogi', rngSeed: 99 })
+    const state = game.getState()
+    const slice = Object.values(state).find(s => s && s.board)
+    const board = slice.board.slice()
+    const cols = 12
+    board[11 * cols + 0] = { type: 'lance', owner: 0 }
+    for (let r = 0; r < 11; r++) board[r * cols + 0] = null
+    board[0 * cols + 6] = { type: 'king', owner: 1 }
+    const testSlice = { ...slice, board }
+    const full = { __players: { currentIndex: 0 } }
+    const moves = game.raw.registry.getPlugins()[0].getLegalMoves(testSlice, full)
+    const lanceMoves = moves.filter(m => board[m.from]?.type === 'lance')
+    expect(lanceMoves.length).toBeGreaterThan(0)
+  })
 })
