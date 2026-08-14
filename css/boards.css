@@ -884,3 +884,11 @@
   color: var(--text-muted);
   padding: 4px 0;
 }
+
+.piece-ghost {
+  transition: opacity 0.1s;
+}
+
+.hover-move-dot {
+  transition: opacity 0.15s;
+}

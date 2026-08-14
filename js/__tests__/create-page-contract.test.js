@@ -66,6 +66,20 @@ describe('create page: placing a piece writes the piece it was asked for', () =>
     expect(drawn).toContain('wK')
     expect(drawn).toHaveLength(2)
   })
+
+  test('same piece type for each side produces distinct image references', () => {
+    const resolved = build({ type: 'grid', rows: 8, cols: 8 }, {})
+    resolved.setup = '6K1/8/8/8/5kk1/8/5kk1/8'
+    resolved.pieces = { set: 'chessnut' }
+    const images = attachPieceImages(resolved, gallery)
+    const svg = renderFromEngine(resolved, { pieceImages: images.images || {} })
+    const hrefs = [...svg.matchAll(/href="([^"]+)"/g)].map(m => m[1])
+    const wKing = hrefs.filter(h => h.includes('wK.svg'))
+    const bKing = hrefs.filter(h => h.includes('bK.svg'))
+    expect(wKing.length).toBe(1)
+    expect(bKing.length).toBe(4)
+    expect(wKing[0]).not.toBe(bKing[0])
+  })
 })
 
 describe('create page: the setup string round-trips', () => {

@@ -6,10 +6,34 @@ import { fromConfig } from '../packages/piece-behaviour/src/piece-definitions.js
 let galleryIndex = null
 let placement = {}
 let activePiece = null
+let activePieceSrc = null
 let pieceHistory = []
 let lastGrid = null
 let customPieces = []
 let movePreviewCells = []
+
+const STANDARD_PIECE_SPECS = {
+  K: { type: 'rider', dirs: 'all', maxSteps: 1 },
+  k: { type: 'rider', dirs: 'all', maxSteps: 1 },
+  Q: { type: 'rider', dirs: 'all' },
+  q: { type: 'rider', dirs: 'all' },
+  R: { type: 'rider', dirs: 'orthogonal' },
+  r: { type: 'rider', dirs: 'orthogonal' },
+  B: { type: 'rider', dirs: 'diagonal' },
+  b: { type: 'rider', dirs: 'diagonal' },
+  N: { type: 'leaper', offsets: 'knight' },
+  n: { type: 'leaper', offsets: 'knight' },
+  P: { type: 'leaper', offsets: [[-1, 0]], directional: true },
+  p: { type: 'leaper', offsets: [[1, 0]], directional: true },
+}
+
+function getSpecForFenChar(fenChar) {
+  if (STANDARD_PIECE_SPECS[fenChar]) return STANDARD_PIECE_SPECS[fenChar]
+  for (const cp of customPieces) {
+    if (cp.symbolW === fenChar || cp.symbolB === fenChar) return cp.spec
+  }
+  return null
+}
 
 // Placement is keyed "row,col". Resizing the board used to leave every piece on
 // its old row and column while the board grew or shrank around it, silently
@@ -146,15 +170,95 @@ function render() {
   }
 }
 
+function clearHoverHighlights() {
+  const container = document.getElementById('board-svg')
+  container.querySelectorAll('.piece-ghost, .hover-move-dot').forEach(el => el.remove())
+}
+
+function showHoverMoves(key) {
+  if (getTopoType() !== 'grid') return
+  const fenChar = placement[key]
+  if (!fenChar) return
+  const spec = getSpecForFenChar(fenChar)
+  if (!spec) return
+  const rows = parseInt(document.getElementById('grid-rows').value) || 8
+  const cols = parseInt(document.getElementById('grid-cols').value) || 8
+  const [r, c] = key.split(',').map(Number)
+  const center = r * cols + c
+  let primitive
+  try { primitive = fromConfig(spec) } catch { return }
+
+  const board = new Array(rows * cols).fill(null)
+  for (const [k, v] of Object.entries(placement)) {
+    const [pr, pc] = k.split(',').map(Number)
+    const idx = pr * cols + pc
+    const isUpper = v === v.toUpperCase()
+    board[idx] = { friendly: isUpper === (fenChar === fenChar.toUpperCase()), enemy: isUpper !== (fenChar === fenChar.toUpperCase()) }
+  }
+
+  const topo = {
+    rays(from, directions, maxSteps) {
+      const DIRS = { orthogonal: [[-1,0],[1,0],[0,-1],[0,1]], diagonal: [[-1,-1],[-1,1],[1,-1],[1,1]], all: [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]] }
+      const resolved = typeof directions === 'string' ? (DIRS[directions] || []) : directions
+      return resolved.map(([dr, dc]) => {
+        const ray = []
+        const limit = maxSteps || Math.max(rows, cols)
+        for (let i = 1; i <= limit; i++) {
+          const nr = Math.floor(from / cols) + dr * i, nc = from % cols + dc * i
+          if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) break
+          ray.push(nr * cols + nc)
+        }
+        return ray
+      })
+    },
+    leapTargets(from, offsets) {
+      const NAMED = { knight: [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]], elephant: [[-2,-2],[-2,2],[2,-2],[2,2]], camel: [[-3,-1],[-3,1],[-1,-3],[-1,3],[1,-3],[1,3],[3,-1],[3,1]], king: [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]] }
+      const resolved = typeof offsets === 'string' ? (NAMED[offsets] || []) : offsets
+      const fr = Math.floor(from / cols), fc = from % cols
+      return resolved.filter(([dr, dc]) => { const nr = fr+dr, nc = fc+dc; return nr >= 0 && nr < rows && nc >= 0 && nc < cols }).map(([dr, dc]) => (fr+dr)*cols+(fc+dc))
+    },
+  }
+
+  const moves = primitive.genMoves(topo, center, board)
+  const container = document.getElementById('board-svg')
+  const svgEl = container.querySelector('svg')
+  if (!svgEl) return
+
+  for (const m of moves) {
+    const mr = Math.floor(m.to / cols), mc = m.to % cols
+    const algebraic = String.fromCharCode(97 + mc) + (rows - mr)
+    const cellEl = container.querySelector(`[data-sq="${algebraic}"]`)
+    if (!cellEl || !cellEl.getBBox) continue
+    const rect = cellEl.getBBox()
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+    dot.setAttribute('cx', rect.x + rect.width / 2)
+    dot.setAttribute('cy', rect.y + rect.height / 2)
+    dot.setAttribute('r', Math.min(rect.width, rect.height) * 0.15)
+    dot.setAttribute('fill', m.capture ? 'rgba(244, 67, 54, 0.5)' : 'rgba(76, 175, 80, 0.5)')
+    dot.setAttribute('class', 'hover-move-dot')
+    dot.setAttribute('pointer-events', 'none')
+    svgEl.appendChild(dot)
+  }
+}
+
 function bindCellClick() {
   const container = document.getElementById('board-svg')
   container.querySelectorAll('.board-cell').forEach(cell => {
-    cell.style.cursor = activePiece ? 'crosshair' : 'default'
+    const sq = cell.dataset.sq
+    if (!sq) return
+    const key = sqToPlacementKey(sq)
+    const isOccupied = !!placement[key]
+
+    if (activePiece === '__erase') {
+      cell.style.cursor = isOccupied ? 'pointer' : 'default'
+    } else if (activePiece) {
+      cell.style.cursor = 'copy'
+    } else {
+      cell.style.cursor = 'default'
+    }
+
     cell.addEventListener('click', () => {
       if (!activePiece) return
-      const sq = cell.dataset.sq
-      if (!sq) return
-      const key = sqToPlacementKey(sq)
       pieceHistory.push({ sq: key, prev: placement[key] || null })
       if (activePiece === '__erase' || placement[key] === activePiece) {
         delete placement[key]
@@ -163,6 +267,33 @@ function bindCellClick() {
       }
       render()
       updateInfoText()
+    })
+
+    cell.addEventListener('mouseenter', () => {
+      clearHoverHighlights()
+      if (activePiece && activePiece !== '__erase' && activePieceSrc) {
+        const rect = cell.getBBox ? cell.getBBox() : null
+        if (rect) {
+          const svgEl = container.querySelector('svg')
+          const ghost = document.createElementNS('http://www.w3.org/2000/svg', 'image')
+          ghost.setAttribute('href', activePieceSrc)
+          ghost.setAttribute('x', rect.x + rect.width * 0.1)
+          ghost.setAttribute('y', rect.y + rect.height * 0.1)
+          ghost.setAttribute('width', rect.width * 0.8)
+          ghost.setAttribute('height', rect.height * 0.8)
+          ghost.setAttribute('opacity', '0.4')
+          ghost.setAttribute('pointer-events', 'none')
+          ghost.setAttribute('class', 'piece-ghost')
+          svgEl.appendChild(ghost)
+        }
+      }
+      if (!activePiece && isOccupied) {
+        showHoverMoves(key)
+      }
+    })
+
+    cell.addEventListener('mouseleave', () => {
+      clearHoverHighlights()
     })
   })
 }
@@ -209,10 +340,20 @@ function applySetupInput(text) {
 
 function updateInfoText() {
   const count = Object.keys(placement).length
-  const text = count > 0
-    ? `${count} piece${count !== 1 ? 's' : ''} placed` + (activePiece ? ` · Placing: ${activePiece}` : '')
-    : 'Configure board and click cells to place pieces'
-  document.getElementById('info-text').textContent = text
+  const el = document.getElementById('info-text')
+  if (activePiece && activePiece !== '__erase') {
+    const imgTag = activePieceSrc
+      ? `<img src="${activePieceSrc}" width="18" height="18" style="vertical-align:middle;margin:0 4px">`
+      : ''
+    el.innerHTML = (count > 0 ? `${count} piece${count !== 1 ? 's' : ''} placed · ` : '') +
+      `Placing: ${imgTag}<span style="font-weight:600">${activePiece}</span>`
+  } else if (activePiece === '__erase') {
+    el.textContent = (count > 0 ? `${count} piece${count !== 1 ? 's' : ''} placed · ` : '') + 'Eraser active'
+  } else {
+    el.textContent = count > 0
+      ? `${count} piece${count !== 1 ? 's' : ''} placed`
+      : 'Configure board and click cells to place pieces'
+  }
   syncSetupInput()
 }
 
@@ -301,6 +442,7 @@ function buildPiecePicker() {
       }
       btn.addEventListener('click', () => {
         activePiece = activePiece === e.fenChar ? null : e.fenChar
+        activePieceSrc = activePiece ? (e.src || null) : null
         buildPiecePicker()
         updateInfoText()
         bindCellClick()
@@ -341,6 +483,7 @@ function buildPiecePicker() {
   eraser.textContent = 'Erase'
   eraser.addEventListener('click', () => {
     activePiece = activePiece === '__erase' ? null : '__erase'
+    activePieceSrc = null
     buildPiecePicker()
     updateInfoText()
     bindCellClick()
