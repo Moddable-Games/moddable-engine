@@ -8,11 +8,11 @@ Every game in the Moddable Games collection — from standard chess to Endless S
 
 ## Status
 
-**Six families playable today** — chess (100 variants), draughts (13), go (9), shogi (5), xiangqi (3), reversi (3). 133 registered variants total, 132 of which carry zero declarative JavaScript: games are defined entirely in frontmatter. A further seven plugins exist for mancala, backgammon, morris, hex, halma, big 2, and race games, with playable variants to follow.
+**Six families playable today** — chess (135 variants), shogi (13), draughts (13), go (10), xiangqi (3), reversi (3). 177 playable variants total. A further seven plugins exist for mancala, backgammon, morris, hex, halma, big 2, and race games, with playable variants to follow.
 
-Rules are implemented as plugin hooks — move filters, win conditions, turn logic, post-move effects. Each family currently defines its own. Lifting these into a shared, composable rule layer is the next architectural step (#88).
+Rules are implemented as plugin hooks — move filters, win conditions, turn logic, post-move effects. Chess has all eight extension points; shogi gained three this session (moveFilter, afterMove, winCondition); go has moveFilter and winCondition. Lifting these into a shared, composable rule layer is the next architectural step (#88).
 
-The play surface (interaction, embed protocol, variant registry, SDK) is family-agnostic and lives in `packages/play`. All six playable families share the same kit: embed, play page, simulator, and headless SDK. 3092 tests across 134 suites, all passing.
+The play surface (interaction, embed protocol, variant registry, SDK) is family-agnostic and lives in `packages/play`. All six playable families share the same kit: embed, play page, simulator, and headless SDK.
 
 Read [`SPEC.md`](./SPEC.md) before contributing anything.
 
@@ -20,9 +20,9 @@ Read [`SPEC.md`](./SPEC.md) before contributing anything.
 
 ## The proof
 
-Draughts has 13 playable variants (English, International, Turkish, Russian, Canadian, Brazilian, Italian, Spanish, Czech, German, Ghanaian, Pool, Spantsiretti). There is no variant code directory. Each variant is a set of declarative keys in a `.md` file. The same is true for shogi (5 variants) and xiangqi (3 variants).
+Draughts has 13 playable variants (English, International, Turkish, Russian, Canadian, Brazilian, Italian, Spanish, Czech, German, Ghanaian, Pool, Spantsiretti). There is no variant code directory. Each variant is a set of declarative keys in a `.md` file. The same is true for shogi (13 variants including chu-shogi with 21 piece types) and xiangqi (3 variants).
 
-Chess has 100 variants. 99 have no data in their JS registry entry. The one exception (Breakthrough) carries board dimensions because it uses a non-standard grid.
+Chess has 135 variants. All share piece definitions through `fromConfig` in `piece-behaviour`. Shogi and xiangqi were refactored this session to consume the same primitives, eliminating hand-rolled movement code.
 
 ---
 
@@ -51,11 +51,11 @@ moddable-engine/
     component-dice/      ← standard dice (roll, doubles, movesFromRoll, expression parser, odds)
     hex-generators/      ← hex map generation (Catan, Twilight, Colony, etc.)
     rpg/                 ← RPG entity search, oracle rolls, card data, manifest loader
-    plugin-chess/        ← 100 variants (topology-agnostic, hook-composed)
+    plugin-chess/        ← 135 variants (topology-agnostic, hook-composed)
     plugin-draughts/     ← 13 variants (all frontmatter-only, no variant code)
-    plugin-go/           ← 9 variants (capture-go, gomoku, stoical have JS hooks)
-    plugin-shogi/        ← 5 variants (all frontmatter-only, no variant code)
-    plugin-xiangqi/      ← 3 variants (all frontmatter-only, no variant code)
+    plugin-go/           ← 10 variants (capture-go, gomoku, renju, stoical have JS hooks)
+    plugin-shogi/        ← 13 variants (fromConfig-driven, rule hooks for hasami/custodian)
+    plugin-xiangqi/      ← 3 variants (fromConfig-driven, no variant code)
     plugin-reversi/      ← 3 variants (flanking capture, anti-reversi)
     plugin-mancala/      ← plugin only
     plugin-backgammon/   ← plugin only
@@ -117,6 +117,19 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ---
 
 ## Changelog
+
+#### 2026-08-14
+- Shogi 6 to 13: sho, yari, tori, cannon, hasami, chu (12x12, 21 types), four-player declared playable
+- Go 9 to 10: renju with forbidden-move filter (double-three, double-four, overline)
+- piece-behaviour: lame leapers (orthogonal/half blocking), hopper moveSlide option
+- Shogi plugin refactored to consume fromConfig; gains rule hooks (moveFilter, afterMove, winCondition), custodian capture, royal-less variants
+- Xiangqi plugin refactored to consume fromConfig; unmapped-symbol throws added
+- Chess en passant crash fixed for 4-player (seats 2/3); multiplayer opponent guards
+- Create page: WYSIWYG board editor with piece definition, live move preview, Try in Play, two-sidebar layout, hover feedback, 15 contract tests
+- Synochess: lame leapers declared correctly (approximation notes retired)
+- Issues closed: #59 (N-player framework), #110 (Create page Phase 1)
+- Issue opened: #115 (Create page Phase 2)
+- Total: 177 playable variants across 6 families
 
 #### 2026-08-10
 - Issue triage: closed 17 issues (47, 48, 51, 54, 56, 60, 64, 66, 72, 73, 74, 76, 77, 80, 94, 96, 104)
