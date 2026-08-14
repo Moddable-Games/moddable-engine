@@ -90,7 +90,7 @@ function buildResolved() {
   } else if (type === 'hex') {
     topology.radius = parseInt(document.getElementById('hex-radius').value) || 5
     topology.shape = 'hexagonal'
-    render.cellColor = 'three-colour'
+    render.cellColor = 'tricolor'
     render.frame = 'hexagonal'
   } else if (type === 'graph') {
     topology.structure = document.getElementById('graph-structure').value
