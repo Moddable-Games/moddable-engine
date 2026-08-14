@@ -39,6 +39,17 @@ async function loadGallery() {
 
 function getTopoType() { return document.getElementById('topo-type').value }
 
+function sqToPlacementKey(sq) {
+  const type = getTopoType()
+  if (type === 'grid') {
+    const rows = parseInt(document.getElementById('grid-rows').value) || 8
+    const col = sq.charCodeAt(0) - 97
+    const row = rows - parseInt(sq.slice(1))
+    return `${row},${col}`
+  }
+  return sq
+}
+
 function buildResolved() {
   const type = getTopoType()
   const surfaceRef = document.getElementById('surface-select').value
@@ -143,11 +154,12 @@ function bindCellClick() {
       if (!activePiece) return
       const sq = cell.dataset.sq
       if (!sq) return
-      pieceHistory.push({ sq, prev: placement[sq] || null })
-      if (activePiece === '__erase' || placement[sq] === activePiece) {
-        delete placement[sq]
+      const key = sqToPlacementKey(sq)
+      pieceHistory.push({ sq: key, prev: placement[key] || null })
+      if (activePiece === '__erase' || placement[key] === activePiece) {
+        delete placement[key]
       } else {
-        placement[sq] = activePiece
+        placement[key] = activePiece
       }
       render()
       updateInfoText()
