@@ -169,12 +169,20 @@ function buildOpsCellMap(zones, rows, cols, defaultFill) {
       }
     }
   }
+  if (zones.map) {
+    const lines = zones.map.trim().split('\n')
+    for (let r = 0; r < lines.length && r < rows; r++) {
+      for (let c = 0; c < lines[r].length && c < cols; c++) {
+        if (lines[r][c] !== '.') map[r][c] = lines[r][c]
+      }
+    }
+  }
   return map
 }
 
 const AUTO_STAR_POINTS = {
   9:  [[2,2],[2,6],[4,4],[6,2],[6,6]],
-  13: [[3,3],[3,9],[6,6],[9,3],[9,9]],
+  13: [[3,3],[3,6],[3,9],[6,3],[6,6],[6,9],[9,3],[9,6],[9,9]],
   19: [[3,3],[3,9],[3,15],[9,3],[9,9],[9,15],[15,3],[15,9],[15,15]],
 }
 
