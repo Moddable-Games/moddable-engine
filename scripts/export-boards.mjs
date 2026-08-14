@@ -266,12 +266,8 @@ function embedPieceImages(svg, setDef) {
       const ownerName = FEN4_OWNERS[prefix]
       if (ownerName && owners[ownerName]) {
         const fill = owners[ownerName].fill
-        inner = inner.replace(/fill:#fff\b/gi, `fill:${fill}`)
-        inner = inner.replace(/fill:\s*#ffffff\b/gi, `fill:${fill}`)
-        inner = inner.replace(/fill="white"/gi, `fill="${fill}"`)
-        inner = inner.replace(/fill="#fff"/gi, `fill="${fill}"`)
-        inner = inner.replace(/fill="#ffffff"/gi, `fill="${fill}"`)
-        inner = inner.replace(/fill="#f5deb3"/gi, `fill="${fill}"`)
+        const matchColor = setDef.recolourMatch || '#fff'
+        inner = inner.replaceAll(matchColor, fill)
       }
     }
 

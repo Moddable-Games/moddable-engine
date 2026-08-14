@@ -20,6 +20,7 @@ const SNAP_DIR = resolve(ENGINE_ROOT, 'snapshots')
 const SVG_DIR = resolve(ENGINE_ROOT, 'boards', 'svgs')
 
 import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
+import { FEN4_OWNERS } from '../packages/render/src/recolour.js'
 
 mkdirSync(SVG_DIR, { recursive: true })
 
@@ -99,7 +100,6 @@ function stripSvgBloat(svgContent) {
 function embedPieceImages(svg, setDef) {
   const imagePattern = /<image\s+href="([^"]+)"\s+x="([^"]+)"\s+y="([^"]+)"\s+width="([^"]+)"\s+height="([^"]+)"[^/>]*\/>/g
   const owners = setDef?.owners || null
-  const FEN4_OWNERS = { r: 'red', b: 'blue', y: 'yellow', g: 'green' }
   const hrefToSymbol = new Map()
 
   let match

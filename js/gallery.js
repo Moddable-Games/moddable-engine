@@ -1,4 +1,5 @@
 import { createSurfaceDOM, getSurfaceRatios } from '../packages/render/src/piece-surface.js'
+import { FEN4_OWNERS } from '../packages/render/src/recolour.js'
 
 const base = document.querySelector('meta[name="base-path"]')?.content || ''
 const GALLERY_INDEX_PATH = `${base}/pieces/gallery-index.json`
@@ -221,8 +222,7 @@ const recolourCache = {}
 
 function getOwnerFromKey(key, owners) {
   const prefix = key[0]
-  const map = { r: 'red', b: 'blue', y: 'yellow', g: 'green', w: 'white' }
-  return owners[map[prefix]] || null
+  return owners[FEN4_OWNERS[prefix]] || null
 }
 
 function createPieceCell(set, entry, opts) {
