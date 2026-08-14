@@ -53,7 +53,7 @@
     "key": "archchess",
     "label": "Archchess",
     "group": "Other",
-    "playable": false
+    "playable": true
   },
   {
     "family": "chess",
@@ -228,6 +228,14 @@
     "variant": "codrus",
     "key": "codrus",
     "label": "Codrus",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "congo",
+    "key": "congo",
+    "label": "Congo",
     "group": "Other",
     "playable": true
   },
@@ -437,7 +445,7 @@
     "key": "gustav-iii-chess",
     "label": "Gustav III's Chess",
     "group": "Other",
-    "playable": false
+    "playable": true
   },
   {
     "family": "chess",
@@ -557,7 +565,7 @@
     "key": "los-alamos-vierschach",
     "label": "Los Alamos Vierschach",
     "group": "Other",
-    "playable": false
+    "playable": true
   },
   {
     "family": "chess",
@@ -685,7 +693,7 @@
     "key": "omega-chess",
     "label": "Omega Chess",
     "group": "Other",
-    "playable": false
+    "playable": true
   },
   {
     "family": "chess",
@@ -881,6 +889,14 @@
   },
   {
     "family": "chess",
+    "variant": "shinobi",
+    "key": "shinobi",
+    "label": "Shinobi Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
     "variant": "shinobiplus",
     "key": "shinobiplus",
     "label": "Shinobi+",
@@ -940,6 +956,14 @@
     "variant": "suicide-chess",
     "key": "suicideChess",
     "label": "Suicide Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "synochess",
+    "key": "synochess",
+    "label": "Synochess",
     "group": "Other",
     "playable": true
   },
