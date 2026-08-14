@@ -21,7 +21,7 @@ const RENDER_FN = { grid: renderGridLayout, graph: renderGraphLayout, pit: rende
 
 // --- Piece image resolution ---
 
-const FEN_TO_PIECE_ID = {
+export const FEN_TO_PIECE_ID = {
   K: 'wK', Q: 'wQ', R: 'wR', B: 'wB', N: 'wN', P: 'wP',
   k: 'bK', q: 'bQ', r: 'bR', b: 'bB', n: 'bN', p: 'bP',
   A: 'wA', a: 'bA', C: 'wC', c: 'bC', D: 'wD', d: 'bD',
@@ -39,6 +39,16 @@ function resolvePieceEntry(pieceId, entry, setId, baseSetId) {
     return baseSetId ? `../pieces/sets/${dir}/${entry}#${pieceId}` : `../pieces/sets/${dir}/${entry}`
   }
   if (entry && entry.source && entry.file) return `../pieces/sets/${entry.source}/${entry.file}`
+  return null
+}
+
+// Inverse of FEN_TO_PIECE_ID: a piece id such as wK or bQ back to the single
+// FEN character that represents it. The create page needs this because a piece
+// gallery is keyed by piece id while a setup string is keyed by FEN character.
+export function pieceIdToFenChar(pieceId) {
+  for (const [fenChar, id] of Object.entries(FEN_TO_PIECE_ID)) {
+    if (id === pieceId) return fenChar
+  }
   return null
 }
 

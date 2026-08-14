@@ -1,4 +1,4 @@
-import { renderFromEngine, attachPieceImages } from '../packages/render/src/render-engine.js'
+import { renderFromEngine, attachPieceImages, pieceIdToFenChar } from '../packages/render/src/render-engine.js'
 import { resolveSurface } from '../packages/schema/src/surfaces.js'
 import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolver.js'
 
@@ -115,7 +115,7 @@ function bindCellClick() {
       const sq = cell.dataset.sq
       if (!sq) return
       pieceHistory.push({ sq, prev: placement[sq] || null })
-      if (placement[sq] === activePiece) {
+      if (activePiece === '__erase' || placement[sq] === activePiece) {
         delete placement[sq]
       } else {
         placement[sq] = activePiece
@@ -152,6 +152,26 @@ function populatePieceSets() {
   }
 }
 
+// A gallery set is keyed by piece id (wK, bQ). A setup string is keyed by FEN
+// character (K, q). Placing the piece id directly produced spurious pieces and
+// column shifts: "bQ7" parsed as a black bishop followed by a white queen.
+function paletteEntries(setDef) {
+  const out = []
+  for (const [pieceId, entry] of Object.entries(setDef.pieces || {})) {
+    const fenChar = pieceIdToFenChar(pieceId)
+    if (!fenChar) continue
+    const file = typeof entry === 'string' ? entry : entry?.file
+    const dir = (typeof entry === 'object' && entry?.source) || setDef.baseSet || setDef.id
+    out.push({
+      pieceId,
+      fenChar,
+      src: file ? `../pieces/sets/${dir}/${file}` : null,
+      side: fenChar === fenChar.toUpperCase() ? 'first' : 'second',
+    })
+  }
+  return out
+}
+
 function buildPiecePicker() {
   const setId = document.getElementById('pieceset-select').value
   const palette = document.getElementById('piece-palette')
@@ -163,21 +183,57 @@ function buildPiecePicker() {
   if (!setDef || !setDef.pieces) { picker.innerHTML = ''; return }
 
   picker.innerHTML = ''
-  const pieces = Object.entries(setDef.pieces)
-  for (const [fenChar, filename] of pieces) {
-    const btn = document.createElement('button')
-    btn.className = 'piece-btn' + (activePiece === fenChar ? ' active' : '')
-    btn.title = fenChar
-    btn.textContent = fenChar
-    btn.addEventListener('click', () => {
-      activePiece = activePiece === fenChar ? null : fenChar
-      buildPiecePicker()
-      updateInfoText()
-      bindCellClick()
-    })
-    picker.appendChild(btn)
+  const entries = paletteEntries(setDef)
+
+  for (const side of ['first', 'second']) {
+    const group = entries.filter(e => e.side === side)
+    if (!group.length) continue
+    const heading = document.createElement('div')
+    heading.className = 'piece-group-label'
+    heading.textContent = side === 'first' ? 'First player' : 'Second player'
+    picker.appendChild(heading)
+
+    const row = document.createElement('div')
+    row.className = 'piece-group'
+    for (const e of group) {
+      const btn = document.createElement('button')
+      btn.className = 'piece-btn' + (activePiece === e.fenChar ? ' active' : '')
+      btn.title = `${e.pieceId} (${e.fenChar})`
+      if (e.src) {
+        const img = document.createElement('img')
+        img.src = e.src
+        img.alt = e.pieceId
+        img.width = 36
+        img.height = 36
+        btn.appendChild(img)
+      } else {
+        btn.textContent = e.fenChar
+      }
+      btn.addEventListener('click', () => {
+        activePiece = activePiece === e.fenChar ? null : e.fenChar
+        buildPiecePicker()
+        updateInfoText()
+        bindCellClick()
+      })
+      row.appendChild(btn)
+    }
+    picker.appendChild(row)
   }
-  document.getElementById('active-piece-label').textContent = activePiece ? `(${activePiece})` : ''
+
+  const eraser = document.createElement('button')
+  eraser.className = 'piece-btn piece-btn--eraser' + (activePiece === '__erase' ? ' active' : '')
+  eraser.title = 'Eraser: click a cell to clear it'
+  eraser.textContent = 'Erase'
+  eraser.addEventListener('click', () => {
+    activePiece = activePiece === '__erase' ? null : '__erase'
+    buildPiecePicker()
+    updateInfoText()
+    bindCellClick()
+  })
+  picker.appendChild(eraser)
+
+  const label = activePiece === '__erase' ? '(eraser)' : activePiece ? `(${activePiece})` : ''
+  document.getElementById('active-piece-label').textContent = label
 }
 
 function exportYaml() {
