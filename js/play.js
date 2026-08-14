@@ -2,6 +2,7 @@ import { renderFromEngine, attachPieceImages, fenToPosition } from '../packages/
 import { getGameConfig, getAllGames, HexSvg, createSeededRng } from '../packages/hex-generators/index.js'
 import { renderRpgProvider } from './rpg-provider.js'
 import { renderChargenProvider } from './rpg-chargen.js'
+import { loadRecolouredPieces } from './play-shared.js'
 
 let galleryIndex = null
 async function loadGalleryIndex(basePath = '../pieces/') {
@@ -88,45 +89,6 @@ async function loadVariant({ familyPath, variantPath, basePath }) {
 
 
 const FEN4_OWNERS = { r: 'red', b: 'blue', y: 'yellow', g: 'green' }
-
-
-const recolourCache = {}
-
-async function loadRecolouredPieces(config, gallery) {
-  const setDef = gallery?.find(s => s.id === (config.pieceSet4 || 'mce-4player'))
-  if (!setDef || !setDef.owners || !setDef.baseSet) return
-
-  const basePath = `../pieces/sets/${setDef.baseSet}/`
-  const images = {}
-  const owners = setDef.owners
-  const matchColor = setDef.recolourMatch || '#fff'
-
-  const fetches = []
-  for (const [pieceId, filename] of Object.entries(setDef.pieces || {})) {
-    const ownerPrefix = pieceId[0]
-    const ownerName = FEN4_OWNERS[ownerPrefix]
-    const ownerColors = owners[ownerName]
-    if (!ownerColors) continue
-
-    const cacheKey = `${setDef.baseSet}/${filename}:${ownerColors.fill}`
-    if (recolourCache[cacheKey]) {
-      images[pieceId] = recolourCache[cacheKey]
-      continue
-    }
-
-    fetches.push(
-      fetch(basePath + filename).then(r => r.text()).then(svg => {
-        const tinted = svg.replaceAll(matchColor, ownerColors.fill)
-        const dataUri = 'data:image/svg+xml,' + encodeURIComponent(tinted)
-        recolourCache[cacheKey] = dataUri
-        images[pieceId] = dataUri
-      }).catch(() => {})
-    )
-  }
-
-  await Promise.all(fetches)
-  config.pieceImages = images
-}
 
 
 // ─── APP STATE ──────────────────────────────────────────────────────────────
@@ -479,11 +441,8 @@ async function render() {
 
     const target = document.getElementById('board-svg')
     if (resolved.players && resolved.players.length > 2 && resolved.pieces?.set) {
-      const recolourConfig = { pieceSet4: resolved.pieces.set }
-      await loadRecolouredPieces(recolourConfig, galleryIndex)
-      if (recolourConfig.pieceImages) {
-        resolved._recolouredPieceImages = recolourConfig.pieceImages
-      }
+      const coloured = await loadRecolouredPieces(resolved.pieces.set, galleryIndex)
+      if (coloured) resolved._recolouredPieceImages = coloured
     }
     const opts = await renderFromResolved(resolved, target)
     target.classList.add('active')

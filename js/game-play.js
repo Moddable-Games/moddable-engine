@@ -17,7 +17,7 @@ import '../packages/plugins/draughts/index.js'
 import '../packages/plugins/xiangqi/index.js'
 import '../packages/plugins/shogi/index.js'
 
-import { BOARD_THEMES, RULES_BASE, ANIM_THEME, CAPTURE_BURST_THEME, PIECE_STYLES, loadGalleryIndex, getGalleryIndex, loadVariantManifest, getManifestVariants, loadPlayabilityManifest, getPlayableVariants, getAllManifestVariants, PLAYABLE_FAMILIES, FAMILY_LABELS } from './play-shared.js'
+import { BOARD_THEMES, RULES_BASE, ANIM_THEME, CAPTURE_BURST_THEME, PIECE_STYLES, loadGalleryIndex, getGalleryIndex, loadVariantManifest, getManifestVariants, loadPlayabilityManifest, getPlayableVariants, getAllManifestVariants, PLAYABLE_FAMILIES, FAMILY_LABELS, loadRecolouredPieces } from './play-shared.js'
 import { createCellAddressing, createDirectAddressing } from './play-cells.js'
 import { paintHighlight, paintIndicator, paintFog, paintEffect, createOverlay } from './play-overlays.js'
 import { bindBoardInteraction } from './play-interaction.js'
@@ -229,6 +229,7 @@ export function createPlaySession(options = {}) {
   let currentAnimSpeed = options.animSpeed || ANIM_THEME.defaultSpeed
   let currentPieceStyle = options.pieceStyle || 'auto'
   let resolvedBoard = null
+  let recolouredImages = null
   let cells = null
   let moveHistory = []
   let boardSnapshot = null
@@ -262,6 +263,11 @@ export function createPlaySession(options = {}) {
     const rngSeed = Math.floor(Math.random() * 1000000)
     game = createGameForFamily(family, { variant: variantKey, definition: frontmatterDef, rngSeed })
     captured = Object.fromEntries(playerNames().map((_, i) => [i, []]))
+    recolouredImages = null
+    if (playerNames().length > 2 && resolvedBoard.pieces?.set) {
+      const gallery = getGalleryIndex() || []
+      recolouredImages = await loadRecolouredPieces(resolvedBoard.pieces.set, gallery)
+    }
     const topo = resolvedBoard.topology
     if (topo.type === 'grid' && topo.rows && topo.cols) {
       cells = createCellAddressing({
@@ -472,7 +478,7 @@ export function createPlaySession(options = {}) {
     }
     const gallery = getGalleryIndex() || []
     const pieceResult = attachPieceImages(rendered, gallery)
-    const pieceImages = pieceResult.images || {}
+    const pieceImages = recolouredImages ? { ...pieceResult.images, ...recolouredImages } : (pieceResult.images || {})
     const svg = renderFromEngine(rendered, {
       pieceImages,
       pieceSurfaceMap: pieceResult.surfaceMap || {},
@@ -910,7 +916,7 @@ export function createPlaySession(options = {}) {
   }
 
   function boardToSetup(slice, topo) {
-    return serialiseBoard(slice, topo, (pluginFor() || {}).vocabulary || {})
+    return serialiseBoard(slice, topo, (pluginFor() || {}).vocabulary || {}, { players: playerNames() })
   }
 
   function moveToNotation(move) {

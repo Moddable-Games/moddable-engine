@@ -37,7 +37,7 @@ export function cellToSymbol(cell, vocabulary = {}) {
   return null
 }
 
-export function boardToSetup(slice, topo = {}, vocabulary = {}) {
+export function boardToSetup(slice, topo = {}, vocabulary = {}, opts = {}) {
   const board = slice.board || []
   if (!Array.isArray(board)) {
     const entries = []
@@ -50,6 +50,11 @@ export function boardToSetup(slice, topo = {}, vocabulary = {}) {
   }
   const cols = topo.cols || Math.round(Math.sqrt(board.length))
   const rows = topo.rows || Math.round(board.length / cols)
+  const players = opts.players || []
+
+  if (players.length > 2) {
+    return boardToFen4(board, rows, cols, vocabulary, players)
+  }
 
   const fenRows = []
   for (let r = 0; r < rows; r++) {
@@ -63,6 +68,26 @@ export function boardToSetup(slice, topo = {}, vocabulary = {}) {
     }
     if (empty > 0) row += empty
     fenRows.push(row)
+  }
+  return fenRows.join('/')
+}
+
+function boardToFen4(board, rows, cols, vocabulary, players) {
+  const fenRows = []
+  for (let r = 0; r < rows; r++) {
+    const tokens = []
+    let empty = 0
+    for (let c = 0; c < cols; c++) {
+      const cell = board[r * cols + c]
+      if (!cell) { empty++; continue }
+      if (empty > 0) { tokens.push(String(empty)); empty = 0 }
+      const prefix = players[cell.owner]?.[0]?.toLowerCase() || 'w'
+      const entry = vocabulary[cell.type]
+      const letter = entry?.symbols?.['0'] || cell.type[0].toUpperCase()
+      tokens.push(prefix + letter)
+    }
+    if (empty > 0) tokens.push(String(empty))
+    fenRows.push(tokens.join(','))
   }
   return fenRows.join('/')
 }
