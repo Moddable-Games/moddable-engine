@@ -17,7 +17,7 @@ const EXPECTED_PLAYABLE = {
   chess: 135,
   draughts: 13,
   go: 10,
-  shogi: 12,
+  shogi: 13,
   xiangqi: 3,
   reversi: 3,
 }

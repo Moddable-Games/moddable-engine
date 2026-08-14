@@ -1313,6 +1313,14 @@
   },
   {
     "family": "shogi",
+    "variant": "four-player-shogi",
+    "key": "four-player-shogi",
+    "label": "Four Player Shogi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "shogi",
     "variant": "gorogoro-plus",
     "key": "gorogoro-plus",
     "label": "Gorogoro+",
