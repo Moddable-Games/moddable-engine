@@ -111,12 +111,22 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return primitive
   }
 
+  function flipSpec(spec) {
+    if (!spec || typeof spec !== 'object') return spec
+    const out = { ...spec }
+    if (Array.isArray(out.offsets)) out.offsets = out.offsets.map(([dr, dc]) => [-dr, dc])
+    if (Array.isArray(out.dirs)) out.dirs = out.dirs.map(([dr, dc]) => [-dr, dc])
+    if (out.divergent) out.divergent = { move: flipSpec(out.divergent.move), capture: flipSpec(out.divergent.capture) }
+    if (out.type === 'compose' && Array.isArray(out.parts)) out.parts = out.parts.map(p => flipSpec(p))
+    return out
+  }
+
   function buildPieceForPlayer(name, playerIdx) {
     const pConfig = pieceConfigs[name]
     if (!pConfig || !pConfig.directional || playerIdx === 0) return buildPiece(name)
     const key = `${name}__p1`
     if (builtPieces.has(key)) return builtPieces.get(key)
-    const flipped = fromConfig({ ...pConfig, offsets: pConfig.offsets.map(([dr, dc]) => [-dr, dc]) })
+    const flipped = fromConfig(flipSpec(pConfig))
     builtPieces.set(key, flipped)
     return flipped
   }
