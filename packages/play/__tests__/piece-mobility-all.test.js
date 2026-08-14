@@ -28,10 +28,6 @@ const KNOWN_INERT = {
   // "You MUST move the weakest piece type that has a legal move." A Rook only
   // moves once nothing weaker can, which a bounded random playout rarely reaches.
   weak: ['rook'],
-  // taliah and zurafa are mapped in `vocabulary` but have no entry in `pieces`,
-  // so they are built as null and cannot move. Both are Tier C on engine#114:
-  // their movement must be read from the rulebook, not guessed.
-  tamerlane: ['taliah', 'zurafa'],
 }
 
 let rulesAvailable = true

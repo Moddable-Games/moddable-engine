@@ -78,6 +78,17 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     }
   }
 
+  for (const [type, def] of Object.entries(vocabulary)) {
+    if (type in DEFAULT_VOCABULARY) continue
+    if (!pieceConfigs[type]) {
+      const owners = def.symbols ? Object.keys(def.symbols) : []
+      const hasPlayerOwner = owners.some(o => o === '0' || o === '1')
+      if (hasPlayerOwner) {
+        throw new Error(`Vocabulary declares "${type}" but no matching entry in pieces. Declare its movement or remove it from vocabulary.`)
+      }
+    }
+  }
+
   function getPromotionChoices(playerIdx) {
     const pc = config.promotionChoices
     if (Array.isArray(pc)) return pc
