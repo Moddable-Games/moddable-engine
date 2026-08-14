@@ -252,13 +252,31 @@ export function createPlaySession(options = {}) {
     boardSnapshot = null
     captureHistory = []
 
-    const variantCfg = getVariantConfig(family, variant) || {}
-    const playable = getPlayableVariants(family)
-    const variantEntry = playable.find(e => e.variant === variant)
-    const slug = variantEntry?.slug || variant
-    resolvedBoard = await resolveBoard(family, variantCfg, variant, slug)
+    const isDraft = new URLSearchParams(location.search).has('draft')
+    let draftDef = null
+    if (isDraft) {
+      try {
+        const raw = sessionStorage.getItem('moddable:createDraft')
+        if (raw) {
+          const parsed = JSON.parse(raw)
+          if (parsed?.definition?.engine) draftDef = parsed.definition
+        }
+      } catch { /* malformed: fall through to normal path */ }
+    }
 
-    const frontmatterDef = buildDefinitionFromResolved(family, variant, resolvedBoard, variantCfg)
+    let frontmatterDef
+    if (draftDef) {
+      resolvedBoard = draftDef.engine
+      frontmatterDef = draftDef
+    } else {
+      const variantCfg = getVariantConfig(family, variant) || {}
+      const playable = getPlayableVariants(family)
+      const variantEntry = playable.find(e => e.variant === variant)
+      const slug = variantEntry?.slug || variant
+      resolvedBoard = await resolveBoard(family, variantCfg, variant, slug)
+      frontmatterDef = buildDefinitionFromResolved(family, variant, resolvedBoard, variantCfg)
+    }
+
     const variantKey = flags.length ? serializeVariantKey(variant, flags) : variant
     const rngSeed = Math.floor(Math.random() * 1000000)
     game = createGameForFamily(family, { variant: variantKey, definition: frontmatterDef, rngSeed })
