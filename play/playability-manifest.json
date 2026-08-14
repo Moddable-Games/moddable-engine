@@ -161,6 +161,14 @@
   },
   {
     "family": "chess",
+    "variant": "chak",
+    "key": "chak",
+    "label": "Chak",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
     "variant": "chancellor-chess",
     "key": "chancellor-chess",
     "label": "Chancellor Chess",
@@ -204,6 +212,14 @@
     "variant": "circular-chess",
     "key": "circular-chess",
     "label": "Circular Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "citadel-chess",
+    "key": "citadel-chess",
+    "label": "Citadel Chess",
     "group": "Other",
     "playable": true
   },
@@ -541,7 +557,7 @@
     "key": "los-alamos-vierschach",
     "label": "Los Alamos Vierschach",
     "group": "Other",
-    "playable": true
+    "playable": false
   },
   {
     "family": "chess",
@@ -676,6 +692,14 @@
     "variant": "omnicide",
     "key": "omnicide",
     "label": "Omnicide",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "variant": "orda-chess",
+    "key": "orda-chess",
+    "label": "Orda Chess",
     "group": "Other",
     "playable": true
   },
