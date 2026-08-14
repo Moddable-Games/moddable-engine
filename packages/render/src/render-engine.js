@@ -15,6 +15,7 @@ import { renderHexLayout } from '../../topologies/hex/src/topology-hex.js'
 import { renderTableauLayout } from '../../topologies/tableau/src/render-tableau.js'
 import { elementsToFragment, elementToSvg } from './serialize-layout.js'
 import { renderSurfaceSVG } from './piece-surface.js'
+import { FEN4_OWNERS, fen4GetOwner } from './recolour.js'
 
 const RENDER_FN = { grid: renderGridLayout, graph: renderGraphLayout, pit: renderPitLayout, track: renderTrackLayout, hex: renderHexLayout, tableau: renderTableauLayout }
 
@@ -523,11 +524,6 @@ function parseFen4(fen4, rows, cols) {
   return position
 }
 
-const FEN4_OWNERS = { r: 'red', b: 'blue', y: 'yellow', g: 'green' }
-function fen4GetOwner(pieceType) {
-  if (pieceType.length >= 2) return FEN4_OWNERS[pieceType[0]] || 'white'
-  return pieceType === pieceType.toUpperCase() ? 'white' : 'black'
-}
 
 function parseSfenToPosition(fen, rows, cols) {
   const position = {}

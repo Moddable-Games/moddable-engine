@@ -2,7 +2,7 @@ import { renderFromEngine, attachPieceImages, fenToPosition } from '../packages/
 import { getGameConfig, getAllGames, HexSvg, createSeededRng } from '../packages/hex-generators/index.js'
 import { renderRpgProvider } from './rpg-provider.js'
 import { renderChargenProvider } from './rpg-chargen.js'
-import { loadRecolouredPieces } from './play-shared.js'
+import { loadRecolouredPieces, FEN4_OWNERS } from './play-shared.js'
 
 let galleryIndex = null
 async function loadGalleryIndex(basePath = '../pieces/') {
@@ -88,7 +88,6 @@ async function loadVariant({ familyPath, variantPath, basePath }) {
 
 
 
-const FEN4_OWNERS = { r: 'red', b: 'blue', y: 'yellow', g: 'green' }
 
 
 // ─── APP STATE ──────────────────────────────────────────────────────────────

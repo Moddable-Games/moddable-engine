@@ -36,6 +36,7 @@ import { resolveSurface } from '../packages/schema/src/surfaces.js'
 import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolver.js'
 import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
 import { renderFromEngine, attachPieceImages } from '../packages/render/src/render-engine.js'
+import { FEN4_OWNERS } from '../packages/render/src/recolour.js'
 
 const gallery = JSON.parse(readFileSync(resolve(ENGINE_ROOT, 'pieces/gallery-index.json'), 'utf8'))
 
@@ -209,7 +210,6 @@ function stripSvgBloat(svgContent) {
 function embedPieceImages(svg, setDef) {
   const imagePattern = /<image\s+href="([^"]+)"\s+x="([^"]+)"\s+y="([^"]+)"\s+width="([^"]+)"\s+height="([^"]+)"[^/>]*\/>/g
   const owners = setDef?.owners || null
-  const FEN4_OWNERS = { r: 'red', b: 'blue', y: 'yellow', g: 'green' }
   const hrefToSymbol = new Map()
 
   let match
