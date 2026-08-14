@@ -497,7 +497,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     }
     state.fullmoveNumber = playerIdx === 1 ? undo.fullmoveNumber + 1 : undo.fullmoveNumber
 
-    if (config.checkThreshold && state.checkCount) {
+    if (config.checkThreshold && state.checkCount && (config.playerCount || 2) <= 2) {
       undo.checkCount = state.checkCount
       const opponent = 1 - playerIdx
       if (isInCheck(state.board, opponent)) {
@@ -960,7 +960,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     })
     if (effects.length > 0 || slice.effects) newSlice.effects = effects
 
-    if (config.turnLogic) {
+    if (config.turnLogic && (config.playerCount || 2) <= 2) {
       const opponent = 1 - playerIdx
       const inCheck = isInCheck(board, opponent)
       const movesThisTurn = (slice.movesThisTurn || 0) + 1
@@ -1032,7 +1032,12 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
         givesCheck: (move) => {
           const testBoard = cloneBoard(slice.board)
           applyMoveToBoard(testBoard, move)
-          return isInCheck(testBoard, 1 - playerIdx)
+          const pc = config.playerCount || 2
+          for (let opp = 0; opp < pc; opp++) {
+            if (opp === playerIdx) continue
+            if (isInCheck(testBoard, opp)) return true
+          }
+          return false
         },
       })
     }
