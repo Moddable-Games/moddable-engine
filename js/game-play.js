@@ -954,6 +954,7 @@ export function createPlaySession(options = {}) {
     get setup() { return resolvedBoard?.setup || null },
     get variantMeta() { return resolvedBoard?._variantMeta || null },
     get resolved() { return resolvedBoard },
+    get playerNames() { return playerNames() },
     start,
     draw,
     summarise,
@@ -1001,13 +1002,26 @@ export async function initGamePlay(container, defaults = {}) {
     reversi: ['Black', 'White'],
   }
 
-  function seatOptionsForFamily(f) {
+  function titleCase(name) {
+    return String(name).charAt(0).toUpperCase() + String(name).slice(1)
+  }
+
+  // Seat labels come from the variant's own `players` list when it has one,
+  // so a four-army variant offers four seats with its own colour names. The
+  // per-family table is only a fallback for the two-player case, where the
+  // conventional label ("Sente", "Gote") differs from the engine's own
+  // ("white", "black").
+  function seatOptionsForFamily(f, declaredNames) {
+    if (Array.isArray(declaredNames) && declaredNames.length > 2) {
+      return declaredNames.map((name, i) => ({ value: String(i), label: titleCase(name) }))
+    }
     const names = FAMILY_PLAYER_NAMES[f] || ['Player 1', 'Player 2']
     return names.map((name, i) => ({ value: String(i), label: name }))
   }
 
-  function rebuildSeatSelect(f) {
-    const opts = seatOptionsForFamily(f)
+  function rebuildSeatSelect(f, declaredNames) {
+    const opts = seatOptionsForFamily(f, declaredNames)
+    const previous = seatSelect.value
     seatSelect.innerHTML = ''
     for (const opt of opts) {
       const o = document.createElement('option')
@@ -1015,6 +1029,8 @@ export async function initGamePlay(container, defaults = {}) {
       o.textContent = opt.label
       seatSelect.appendChild(o)
     }
+    // keep the current seat if it still exists, otherwise fall back to seat 0
+    seatSelect.value = opts.some(o => o.value === previous) ? previous : '0'
   }
 
   function variantsForFamily(f) {
@@ -1315,6 +1331,7 @@ export async function initGamePlay(container, defaults = {}) {
     session = createPlaySession(config)
     await session.start()
     if (!params.embed) {
+      rebuildSeatSelect(config.family, session.playerNames)
       buildFlagToggles()
       updateRules()
       populatePieceSetSelect(config.variant, session.setup)
