@@ -102,7 +102,7 @@ function parseList(lines, start, end, baseIndent) {
     const itemContent = trimmed.slice(2)
     const itemColonIdx = itemContent.indexOf(':')
 
-    if (itemColonIdx === -1 || itemContent.startsWith('[')) {
+    if (itemColonIdx === -1 || itemContent.startsWith('[') || (itemContent.startsWith('{') && itemContent.endsWith('}'))) {
       items.push(parseValue(itemContent))
       i++
     } else {

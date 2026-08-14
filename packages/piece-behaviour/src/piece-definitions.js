@@ -198,5 +198,6 @@ function buildPrimitive(spec, resolve) {
     const parts = spec.parts.map(p => typeof p === 'string' && resolve ? resolve(p) : buildPrimitive(p, resolve)).filter(Boolean)
     return compose(...parts)
   }
-  return spec
+  const keys = spec && typeof spec === 'object' ? Object.keys(spec).join(', ') : String(spec)
+  throw new Error(`Unrecognised piece spec: type="${spec?.type}" keys=[${keys}]. Check frontmatter parse output.`)
 }
