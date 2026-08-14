@@ -128,13 +128,29 @@ export const BUILTIN_SURFACES = {
   },
 }
 
+function deriveCrossTopoDefaults(colors) {
+  if (!colors) return colors
+  const c = { ...colors }
+  if (!c.point) c.point = c['cell-light'] || '#ddd'
+  if (!c.edge) c.edge = c.stroke || c['cell-dark'] || '#666'
+  if (!c.pit) c.pit = c['cell-light'] || '#ddd'
+  if (!c['pit-stroke']) c['pit-stroke'] = c.stroke || c['cell-dark'] || '#666'
+  if (!c.seed) c.seed = c['cell-dark'] || '#888'
+  if (!c['seed-stroke']) c['seed-stroke'] = c.stroke || '#555'
+  if (!c.track) c.track = c['cell-light'] || '#ddd'
+  if (!c['track-stroke']) c['track-stroke'] = c.stroke || c['cell-dark'] || '#666'
+  return c
+}
+
 export function resolveSurface(ref) {
   if (!ref) return {}
 
   if (typeof ref === 'string') {
     const surface = BUILTIN_SURFACES[ref]
     if (!surface) return {}
-    return { ...surface }
+    const result = { ...surface }
+    result.colors = deriveCrossTopoDefaults(result.colors)
+    return result
   }
 
   if (ref.base) {
@@ -149,6 +165,7 @@ export function resolveSurface(ref) {
         result[key] = overrides[key]
       }
     }
+    result.colors = deriveCrossTopoDefaults(result.colors)
     return result
   }
 

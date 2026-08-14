@@ -567,7 +567,16 @@ function undo() {
 // The page already builds a config in the shape createGameForFamily accepts as
 // opts.definition, so handing it to the play page needs a transport, not engine
 // work.
+function updateTryInPlayState() {
+  const btn = document.getElementById('try-play-btn')
+  if (!btn) return
+  const isGrid = getTopoType() === 'grid'
+  btn.disabled = !isGrid
+  btn.title = isGrid ? '' : 'Only grid boards can be played (engine#62)'
+}
+
 function tryInPlay() {
+  if (getTopoType() !== 'grid') return
   const resolved = buildResolved()
   if (customPieces.length) {
     const vocabulary = {}
@@ -602,10 +611,11 @@ async function init() {
   }
   render()
   updateInfoText()
+  updateTryInPlayState()
 
   document.getElementById('topo-type').addEventListener('change', () => {
     placement = {}; pieceHistory = []
-    showTopoOpts(); render(); updateInfoText()
+    showTopoOpts(); render(); updateInfoText(); updateTryInPlayState()
   })
 
   const rerenderInputs = ['hex-radius', 'graph-structure', 'graph-rings',
