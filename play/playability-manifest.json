@@ -1281,6 +1281,14 @@
   },
   {
     "family": "shogi",
+    "variant": "dobutsu",
+    "key": "dobutsu",
+    "label": "Dobutsu Shogi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "shogi",
     "variant": "gorogoro-plus",
     "key": "gorogoro-plus",
     "label": "Gorogoro+",
