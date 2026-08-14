@@ -236,7 +236,7 @@ export function createPlaySession(options = {}) {
   const fogViewSide = parseInt(seat, 10) || 0
 
   function playerNames() {
-    return game.raw.definition.players.names || []
+    return game?.raw?.definition?.players?.names || []
   }
 
   function pluginFor() {
@@ -247,7 +247,7 @@ export function createPlaySession(options = {}) {
     scoring = null
     deadStones = []
     moveHistory = []
-    captured = Object.fromEntries(playerNames().map((_, i) => [i, []]))
+    captured = {}
     boardSnapshot = null
     captureHistory = []
 
@@ -259,8 +259,9 @@ export function createPlaySession(options = {}) {
 
     const frontmatterDef = buildDefinitionFromResolved(family, variant, resolvedBoard, variantCfg)
     const variantKey = flags.length ? serializeVariantKey(variant, flags) : variant
-    const rngSeed = flags.includes('random') ? Math.floor(Math.random() * 1000000) : 42
+    const rngSeed = Math.floor(Math.random() * 1000000)
     game = createGameForFamily(family, { variant: variantKey, definition: frontmatterDef, rngSeed })
+    captured = Object.fromEntries(playerNames().map((_, i) => [i, []]))
     const topo = resolvedBoard.topology
     if (topo.type === 'grid' && topo.rows && topo.cols) {
       cells = createCellAddressing({
