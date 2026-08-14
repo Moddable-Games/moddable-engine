@@ -143,10 +143,7 @@ function buildFen() {
     }
     return fenRows.join('/')
   }
-  if (type === 'hex') {
-    return Object.entries(placement).map(([k, v]) => `${k}:${v}`).join(',')
-  }
-  return JSON.stringify(placement)
+  return Object.entries(placement).map(([k, v]) => `${k}:${v}`).join(',')
 }
 
 function render() {
@@ -273,6 +270,15 @@ function bindCellClick() {
       updateInfoText()
     })
 
+    cell.addEventListener('contextmenu', (e) => {
+      e.preventDefault()
+      if (!placement[key]) return
+      pieceHistory.push({ sq: key, prev: placement[key] })
+      delete placement[key]
+      render()
+      updateInfoText()
+    })
+
     cell.addEventListener('mouseenter', () => {
       clearHoverHighlights()
       if (activePiece && activePiece !== '__erase' && activePieceSrc) {
@@ -315,11 +321,30 @@ function syncSetupInput() {
 // string the board is not actually displaying.
 function applySetupInput(text) {
   const input = document.getElementById('setup-input')
+  const type = getTopoType()
+
+  if (type !== 'grid') {
+    const trimmed = String(text).trim()
+    if (!trimmed || !trimmed.includes(':')) { input.classList.add('is-invalid'); return false }
+    const next = {}
+    for (const pair of trimmed.split(',')) {
+      const [key, piece] = pair.split(':')
+      if (!key || !piece || piece.length !== 1) { input.classList.add('is-invalid'); return false }
+      next[key.trim()] = piece.trim()
+    }
+    pieceHistory.push({ replaceAll: { ...placement } })
+    placement = next
+    input.classList.remove('is-invalid')
+    render()
+    updateInfoText()
+    return true
+  }
+
   const rows = parseInt(document.getElementById('grid-rows').value) || 8
   const cols = parseInt(document.getElementById('grid-cols').value) || 8
   const next = {}
   const rowStrings = String(text).trim().split('/')
-  if (getTopoType() !== 'grid' || rowStrings.length !== rows) {
+  if (rowStrings.length !== rows) {
     input.classList.add('is-invalid')
     return false
   }
@@ -821,6 +846,7 @@ async function init() {
   document.getElementById('export-yaml-btn').addEventListener('click', exportYaml)
   document.getElementById('export-svg-btn').addEventListener('click', exportSvg)
   document.getElementById('bar-undo-btn').addEventListener('click', undo)
+  document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo() } })
 
   const defPreviewBtn = document.getElementById('def-preview-btn')
   if (defPreviewBtn) defPreviewBtn.addEventListener('click', previewMoves)
