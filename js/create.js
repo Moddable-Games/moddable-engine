@@ -1,12 +1,15 @@
 import { renderFromEngine, attachPieceImages, pieceIdToFenChar } from '../packages/render/src/render-engine.js'
 import { resolveSurface } from '../packages/schema/src/surfaces.js'
 import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolver.js'
+import { fromConfig } from '../packages/piece-behaviour/src/piece-definitions.js'
 
 let galleryIndex = null
 let placement = {}
 let activePiece = null
 let pieceHistory = []
 let lastGrid = null
+let customPieces = []
+let movePreviewCells = []
 
 // Placement is keyed "row,col". Resizing the board used to leave every piece on
 // its old row and column while the board grew or shrank around it, silently
@@ -287,6 +290,31 @@ function buildPiecePicker() {
     picker.appendChild(row)
   }
 
+  if (customPieces.length) {
+    const heading = document.createElement('div')
+    heading.className = 'piece-group-label'
+    heading.textContent = 'Custom'
+    picker.appendChild(heading)
+    const row = document.createElement('div')
+    row.className = 'piece-group'
+    for (const cp of customPieces) {
+      for (const [sym, label] of [[cp.symbolW, cp.name + ' (W)'], [cp.symbolB, cp.name + ' (b)']]) {
+        const btn = document.createElement('button')
+        btn.className = 'piece-btn' + (activePiece === sym ? ' active' : '')
+        btn.title = label
+        btn.textContent = sym
+        btn.addEventListener('click', () => {
+          activePiece = activePiece === sym ? null : sym
+          buildPiecePicker()
+          updateInfoText()
+          bindCellClick()
+        })
+        row.appendChild(btn)
+      }
+    }
+    picker.appendChild(row)
+  }
+
   const eraser = document.createElement('button')
   eraser.className = 'piece-btn piece-btn--eraser' + (activePiece === '__erase' ? ' active' : '')
   eraser.title = 'Eraser: click a cell to clear it'
@@ -301,6 +329,151 @@ function buildPiecePicker() {
 
   const label = activePiece === '__erase' ? '(eraser)' : activePiece ? `(${activePiece})` : ''
   document.getElementById('active-piece-label').textContent = label
+}
+
+function buildPieceSpec() {
+  const shape = document.getElementById('def-shape').value
+  const dirs = document.getElementById('def-dirs').value
+  const maxSteps = parseInt(document.getElementById('def-maxsteps').value) || undefined
+  const directional = document.getElementById('def-directional').checked
+  const lame = document.getElementById('def-lame').checked
+
+  const spec = { type: shape }
+  if (shape === 'rider') {
+    spec.dirs = dirs
+    if (maxSteps) spec.maxSteps = maxSteps
+  } else if (shape === 'leaper') {
+    spec.offsets = dirs
+    if (lame) spec.lame = (dirs === 'elephant') ? 'half' : 'orthogonal'
+  } else if (shape === 'hopper') {
+    spec.dirs = dirs
+    spec.captureSlide = true
+  }
+  if (directional) spec.directional = true
+  return spec
+}
+
+function previewMoves() {
+  const type = getTopoType()
+  if (type !== 'grid') return
+  const rows = parseInt(document.getElementById('grid-rows').value) || 8
+  const cols = parseInt(document.getElementById('grid-cols').value) || 8
+  const spec = buildPieceSpec()
+  let primitive
+  try { primitive = fromConfig(spec) } catch { return }
+
+  const center = Math.floor(rows / 2) * cols + Math.floor(cols / 2)
+  const board = new Array(rows * cols).fill(null)
+  board[center] = { friendly: true, owner: 0, type: 'preview' }
+
+  const topo = {
+    rays(from, directions, maxSteps) {
+      const DIRS = {
+        orthogonal: [[-1, 0], [1, 0], [0, -1], [0, 1]],
+        diagonal: [[-1, -1], [-1, 1], [1, -1], [1, 1]],
+        all: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]],
+      }
+      const resolved = typeof directions === 'string' ? (DIRS[directions] || []) : directions
+      return resolved.map(([dr, dc]) => {
+        const ray = []
+        const r = Math.floor(from / cols), c = from % cols
+        const limit = maxSteps || Math.max(rows, cols)
+        for (let i = 1; i <= limit; i++) {
+          const nr = r + dr * i, nc = c + dc * i
+          if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) break
+          ray.push(nr * cols + nc)
+        }
+        return ray
+      })
+    },
+    leapTargets(from, offsets) {
+      const NAMED = {
+        knight: [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]],
+        elephant: [[-2,-2],[-2,2],[2,-2],[2,2]],
+        camel: [[-3,-1],[-3,1],[-1,-3],[-1,3],[1,-3],[1,3],[3,-1],[3,1]],
+        king: [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]],
+      }
+      const resolved = typeof offsets === 'string' ? (NAMED[offsets] || []) : offsets
+      const r = Math.floor(from / cols), c = from % cols
+      const out = []
+      for (const [dr, dc] of resolved) {
+        const nr = r + dr, nc = c + dc
+        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) out.push(nr * cols + nc)
+      }
+      return out
+    },
+  }
+
+  const moves = primitive.genMoves(topo, center, board)
+  movePreviewCells = moves.map(m => m.to)
+
+  const container = document.getElementById('board-svg')
+  const svgEl = container.querySelector('svg')
+  if (!svgEl) return
+
+  container.querySelectorAll('.move-preview-dot').forEach(el => el.remove())
+
+  for (const cellIdx of movePreviewCells) {
+    const r = Math.floor(cellIdx / cols), c = cellIdx % cols
+    const cell = container.querySelector(`[data-sq="${r},${c}"]`)
+    if (!cell) continue
+    const rect = cell.getBBox ? cell.getBBox() : null
+    if (!rect) continue
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+    dot.setAttribute('cx', rect.x + rect.width / 2)
+    dot.setAttribute('cy', rect.y + rect.height / 2)
+    dot.setAttribute('r', Math.min(rect.width, rect.height) * 0.2)
+    dot.setAttribute('fill', 'rgba(76, 175, 80, 0.6)')
+    dot.setAttribute('class', 'move-preview-dot')
+    dot.setAttribute('pointer-events', 'none')
+    svgEl.appendChild(dot)
+  }
+
+  const centerR = Math.floor(rows / 2), centerC = Math.floor(cols / 2)
+  const centerCell = container.querySelector(`[data-sq="${centerR},${centerC}"]`)
+  if (centerCell) {
+    const rect = centerCell.getBBox ? centerCell.getBBox() : null
+    if (rect) {
+      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+      dot.setAttribute('cx', rect.x + rect.width / 2)
+      dot.setAttribute('cy', rect.y + rect.height / 2)
+      dot.setAttribute('r', Math.min(rect.width, rect.height) * 0.25)
+      dot.setAttribute('fill', 'rgba(33, 150, 243, 0.6)')
+      dot.setAttribute('class', 'move-preview-dot')
+      dot.setAttribute('pointer-events', 'none')
+      svgEl.appendChild(dot)
+    }
+  }
+}
+
+function addCustomPiece() {
+  const name = document.getElementById('def-name').value.trim()
+  const symbolW = document.getElementById('def-symbol-w').value.trim()
+  const symbolB = document.getElementById('def-symbol-b').value.trim()
+  if (!name || !symbolW || !symbolB) return
+
+  const spec = buildPieceSpec()
+  customPieces.push({ name, symbolW, symbolB, spec })
+  renderCustomPiecesList()
+  buildPiecePicker()
+}
+
+function renderCustomPiecesList() {
+  const list = document.getElementById('custom-pieces-list')
+  if (!list) return
+  list.innerHTML = ''
+  for (let i = 0; i < customPieces.length; i++) {
+    const p = customPieces[i]
+    const row = document.createElement('div')
+    row.style.cssText = 'display:flex;align-items:center;gap:4px;font-size:11px;padding:2px 0'
+    row.innerHTML = `<span style="flex:1">${p.name} (${p.symbolW}/${p.symbolB})</span>`
+    const del = document.createElement('button')
+    del.textContent = 'x'
+    del.style.cssText = 'font-size:10px;padding:1px 4px;cursor:pointer;border:1px solid var(--border-subtle);background:none;color:var(--text-muted);border-radius:3px'
+    del.addEventListener('click', () => { customPieces.splice(i, 1); renderCustomPiecesList(); buildPiecePicker() })
+    row.appendChild(del)
+    list.appendChild(row)
+  }
 }
 
 function exportYaml() {
@@ -396,6 +569,20 @@ function undo() {
 // work.
 function tryInPlay() {
   const resolved = buildResolved()
+  if (customPieces.length) {
+    const vocabulary = {}
+    const pieces = {}
+    for (const cp of customPieces) {
+      vocabulary[cp.name] = { symbols: { 0: cp.symbolW, 1: cp.symbolB } }
+      pieces[cp.name] = cp.spec
+    }
+    if (!resolved.vocabulary) resolved.vocabulary = {}
+    if (!resolved.plugins) resolved.plugins = { chess: {} }
+    if (!resolved.plugins.chess) resolved.plugins.chess = {}
+    Object.assign(resolved.vocabulary, vocabulary)
+    if (!resolved.plugins.chess.pieces) resolved.plugins.chess.pieces = {}
+    Object.assign(resolved.plugins.chess.pieces, pieces)
+  }
   try {
     sessionStorage.setItem('moddable:createDraft', JSON.stringify({
       definition: { title: 'Custom', slug: 'custom', engine: resolved },
@@ -451,6 +638,11 @@ async function init() {
   document.getElementById('export-yaml-btn').addEventListener('click', exportYaml)
   document.getElementById('export-svg-btn').addEventListener('click', exportSvg)
   document.getElementById('bar-undo-btn').addEventListener('click', undo)
+
+  const defPreviewBtn = document.getElementById('def-preview-btn')
+  if (defPreviewBtn) defPreviewBtn.addEventListener('click', previewMoves)
+  const defAddBtn = document.getElementById('def-add-btn')
+  if (defAddBtn) defAddBtn.addEventListener('click', addCustomPiece)
 
   const setupInput = document.getElementById('setup-input')
   if (setupInput) {
