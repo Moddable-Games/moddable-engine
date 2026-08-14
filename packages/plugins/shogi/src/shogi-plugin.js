@@ -216,6 +216,49 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
 
   const royalType = config.royalType || 'king'
 
+  function isRoyalless() {
+    return config.royalType === null || config.royalType === 'none'
+  }
+
+  // Custodian capture: after a move, any enemy piece flanked on two opposite
+  // sides along a rank or file is removed. The mover must close the trap, so
+  // moving between two enemies is safe, and a player never loses their own
+  // piece on their own turn.
+  function applyCustodianCapture(board, to, playerIndex) {
+    const [r, c] = rowCol(to)
+    const removed = []
+    for (const [dr, dc] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+      const vr = r + dr, vc = c + dc
+      const fr = r + dr * 2, fc = c + dc * 2
+      if (!inBounds(vr, vc) || !inBounds(fr, fc)) continue
+      const victim = board[cellIndex(vr, vc)]
+      const anchor = board[cellIndex(fr, fc)]
+      if (!victim || victim.owner === playerIndex) continue
+      if (!anchor || anchor.owner !== playerIndex) continue
+      removed.push(cellIndex(vr, vc))
+    }
+    // Corner capture: a piece in a corner falls when both of its neighbours
+    // along the edge are enemies.
+    const corners = [
+      [0, 0, [[0, 1], [1, 0]]],
+      [0, config.cols - 1, [[0, -1], [1, 0]]],
+      [config.rows - 1, 0, [[0, 1], [-1, 0]]],
+      [config.rows - 1, config.cols - 1, [[0, -1], [-1, 0]]],
+    ]
+    for (const [cr, cc, neighbours] of corners) {
+      const idx = cellIndex(cr, cc)
+      const occupant = board[idx]
+      if (!occupant || occupant.owner === playerIndex) continue
+      const trapped = neighbours.every(([dr, dc]) => {
+        const n = board[cellIndex(cr + dr, cc + dc)]
+        return n && n.owner === playerIndex
+      })
+      if (trapped) removed.push(idx)
+    }
+    for (const idx of removed) board[idx] = null
+    return removed.length
+  }
+
   function findKing(board, playerIndex) {
     for (let i = 0; i < board.length; i++) {
       if (board[i] && board[i].owner === playerIndex && board[i].type === royalType) return i
@@ -301,7 +344,15 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
         board[move.to] = { type: move.type, owner: playerIndex }
         const idx = hands[playerIndex].indexOf(move.type)
         if (idx !== -1) hands[playerIndex].splice(idx, 1)
-        return { ...slice, board, hands }
+        let droppedSlice = { ...slice, board, hands }
+        if (config.afterMove) {
+          const result = config.afterMove({
+            move, board, hands, piece: board[move.to], captured: null, playerIndex,
+            topology, slice: droppedSlice, cellIndex, rowCol, rows: config.rows, cols: config.cols,
+          })
+          if (result) droppedSlice = { ...droppedSlice, ...result }
+        }
+        return droppedSlice
       }
 
       const piece = board[move.from]
@@ -324,7 +375,19 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
 
       board[move.to] = { type: newType, owner: playerIndex }
 
-      return { ...slice, board, hands }
+      if (config.captureRule === 'custodian') {
+        applyCustodianCapture(board, move.to, playerIndex)
+      }
+
+      let newSlice = { ...slice, board, hands }
+      if (config.afterMove) {
+        const result = config.afterMove({
+          move, board, hands, piece, captured, playerIndex,
+          topology, slice: newSlice, cellIndex, rowCol, rows: config.rows, cols: config.cols,
+        })
+        if (result) newSlice = { ...newSlice, ...result }
+      }
+      return newSlice
     },
 
     getLegalMoves(slice, full) {
@@ -363,7 +426,15 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
         allMoves.push(...drops)
       }
 
-      return allMoves.filter(m => {
+      const generated = config.moveFilter
+        ? config.moveFilter(allMoves, slice, { currentPlayer: playerIndex, config })
+        : allMoves
+
+      // With no royal piece there is no check to legalise against, so the
+      // generated list is already the legal list.
+      if (isRoyalless()) return generated
+
+      return generated.filter(m => {
         const testBoard = slice.board.map(c => c ? { ...c } : null)
         if (m.action === 'drop') {
           testBoard[m.to] = { type: m.type, owner: playerIndex }
@@ -391,6 +462,25 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     checkWin(slice, full) {
       const playerIndex = full.__players.currentIndex
       const opponent = 1 - playerIndex
+
+      if (config.winCondition === 'reduced-to-one') {
+        const counts = [0, 0]
+        for (const cell of slice.board) if (cell) counts[cell.owner]++
+        if (counts[opponent] <= 1) return playerIndex
+        if (counts[playerIndex] <= 1) return opponent
+        return null
+      }
+
+      if (typeof config.winCondition === 'function') {
+        const result = config.winCondition(slice, {
+          currentPlayer: playerIndex, config, rows: config.rows, cols: config.cols,
+        })
+        if (result !== null && result !== undefined) return result
+      }
+
+      // A variant with no royal piece, such as hasami shogi, decides its own
+      // outcome through winCondition and has no king to lose.
+      if (isRoyalless()) return null
 
       if (findKing(slice.board, opponent) === -1) return playerIndex
 
