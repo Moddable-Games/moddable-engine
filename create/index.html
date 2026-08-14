@@ -174,40 +174,38 @@
       <div class="control-group" id="piece-define-group">
         <label class="control-label">Define Piece</label>
         <div class="piece-define-form" id="piece-define-form">
-          <div class="control-row" style="gap:4px">
-            <input type="text" id="def-name" placeholder="Name" style="flex:2;font-size:12px;padding:4px 6px">
-            <input type="text" id="def-symbol-w" placeholder="W" maxlength="1" style="width:32px;text-align:center;font-size:12px;padding:4px">
-            <input type="text" id="def-symbol-b" placeholder="b" maxlength="1" style="width:32px;text-align:center;font-size:12px;padding:4px">
+          <div class="def-row">
+            <input type="text" id="def-name" class="def-input def-input--name" placeholder="Name">
+            <input type="text" id="def-symbol-w" class="def-input def-input--symbol" placeholder="W" maxlength="1">
+            <input type="text" id="def-symbol-b" class="def-input def-input--symbol" placeholder="b" maxlength="1">
           </div>
-          <select id="def-shape" style="font-size:12px;padding:4px 6px;margin-top:4px">
+          <select id="def-shape" class="def-select">
             <option value="rider">Rider (slides)</option>
             <option value="leaper">Leaper (jumps)</option>
             <option value="hopper">Hopper (cannon)</option>
           </select>
-          <div id="def-shape-opts" style="margin-top:4px">
-            <select id="def-dirs" style="font-size:12px;padding:4px 6px">
-              <option value="orthogonal">Orthogonal</option>
-              <option value="diagonal">Diagonal</option>
-              <option value="all">All (queen)</option>
-              <option value="knight">Knight offsets</option>
-              <option value="elephant">Elephant offsets</option>
-              <option value="camel">Camel offsets</option>
-            </select>
-            <div class="control-row" style="gap:4px;margin-top:4px">
-              <label style="font-size:11px;color:var(--text-muted)">Max steps</label>
-              <input type="number" id="def-maxsteps" value="" min="1" max="20" placeholder="unlimited" style="width:60px;font-size:12px;padding:4px">
-            </div>
-            <div class="control-row" style="gap:4px;margin-top:4px">
-              <label style="font-size:11px;white-space:nowrap"><input type="checkbox" id="def-directional"> Directional</label>
-              <label style="font-size:11px;white-space:nowrap"><input type="checkbox" id="def-lame"> Lame</label>
-            </div>
+          <select id="def-dirs" class="def-select">
+            <option value="orthogonal">Orthogonal</option>
+            <option value="diagonal">Diagonal</option>
+            <option value="all">All (queen)</option>
+            <option value="knight">Knight offsets</option>
+            <option value="elephant">Elephant offsets</option>
+            <option value="camel">Camel offsets</option>
+          </select>
+          <div class="def-row">
+            <label class="def-label">Max steps</label>
+            <input type="number" id="def-maxsteps" class="def-input def-input--short" value="" min="1" max="20" placeholder="unlimited">
           </div>
-          <div class="control-row" style="gap:4px;margin-top:6px">
-            <button class="btn btn-outline" id="def-preview-btn" style="font-size:11px;flex:1">Preview</button>
-            <button class="btn btn-outline" id="def-add-btn" style="font-size:11px;flex:1">Add</button>
+          <div class="def-row def-row--checks">
+            <label class="def-check"><input type="checkbox" id="def-directional"> Directional</label>
+            <label class="def-check"><input type="checkbox" id="def-lame"> Lame</label>
+          </div>
+          <div class="def-row">
+            <button class="btn btn-outline def-btn" id="def-preview-btn">Preview</button>
+            <button class="btn btn-outline def-btn" id="def-add-btn">Add</button>
           </div>
         </div>
-        <div id="custom-pieces-list" style="margin-top:6px"></div>
+        <div id="custom-pieces-list"></div>
       </div>
 
     </div>

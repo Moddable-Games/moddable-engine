@@ -794,3 +794,86 @@
 .setup-bar__input.is-invalid {
   border-color: #c0392b;
 }
+
+.piece-define-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.def-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.def-row--checks {
+  gap: 16px;
+  padding: 4px 0;
+}
+
+.def-input {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 6px 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  background: var(--bg-page);
+  color: var(--text-primary);
+}
+
+.def-input--name {
+  flex: 1;
+  min-width: 0;
+}
+
+.def-input--symbol {
+  width: 36px;
+  text-align: center;
+}
+
+.def-input--short {
+  width: 72px;
+}
+
+.def-select {
+  font-size: 13px;
+  padding: 6px 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  background: var(--bg-page);
+  color: var(--text-primary);
+}
+
+.def-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.def-check {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.def-check input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+}
+
+.def-btn {
+  flex: 1;
+  font-size: 12px;
+}
+
+#custom-pieces-list {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
