@@ -82,6 +82,99 @@ function pairCaptures(coord, board, opponentColour, slice) {
   return captured
 }
 
+function linePattern(board, pos, colour, dr, dc, cols, rows) {
+  const r0 = Math.floor(pos / cols), c0 = pos % cols
+  const cells = [pos]
+  for (const sign of [1, -1]) {
+    let r = r0 + dr * sign, c = c0 + dc * sign
+    while (r >= 0 && r < rows && c >= 0 && c < cols && board[r * cols + c] === colour) {
+      cells.push(r * cols + c)
+      r += dr * sign
+      c += dc * sign
+    }
+  }
+  return cells.length
+}
+
+function countOpenEnds(board, pos, colour, dr, dc, cols, rows) {
+  const r0 = Math.floor(pos / cols), c0 = pos % cols
+  let open = 0
+  for (const sign of [1, -1]) {
+    let r = r0, c = c0
+    while (true) {
+      r += dr * sign
+      c += dc * sign
+      if (r < 0 || r >= rows || c < 0 || c >= cols) break
+      if (board[r * cols + c] !== colour) {
+        if (board[r * cols + c] === null) open++
+        break
+      }
+    }
+  }
+  return open
+}
+
+function isRenjuForbidden(board, pos, colour, cols, rows) {
+  const DIRS = [[0, 1], [1, 0], [1, 1], [1, -1]]
+  for (const [dr, dc] of DIRS) {
+    if (linePattern(board, pos, colour, dr, dc, cols, rows) >= 6) return true
+  }
+  let fours = 0, openThrees = 0
+  for (const [dr, dc] of DIRS) {
+    const len = linePattern(board, pos, colour, dr, dc, cols, rows)
+    const openEnds = countOpenEnds(board, pos, colour, dr, dc, cols, rows)
+    if (len === 4 && openEnds >= 1) fours++
+    if (len === 3 && openEnds === 2) openThrees++
+  }
+  if (fours >= 2) return true
+  if (openThrees >= 2) return true
+  return false
+}
+
+export const renju = {
+  key: 'renju',
+
+  hooks: {
+    moveFilter(moves, slice, full) {
+      const playerIdx = full && full.__players ? full.__players.currentIndex : 0
+      if (playerIdx !== 0) return moves.filter(m => m.action !== 'pass')
+      const cols = slice.cols || Math.round(Math.sqrt(slice.board.length))
+      const rows = slice.rows || Math.round(slice.board.length / cols)
+      return moves.filter(m => {
+        if (m.action === 'pass') return false
+        const testBoard = [...slice.board]
+        testBoard[m.coord] = 'black'
+        if (linePattern(testBoard, m.coord, 'black', 0, 1, cols, rows) === 5 ||
+            linePattern(testBoard, m.coord, 'black', 1, 0, cols, rows) === 5 ||
+            linePattern(testBoard, m.coord, 'black', 1, 1, cols, rows) === 5 ||
+            linePattern(testBoard, m.coord, 'black', 1, -1, cols, rows) === 5) return true
+        return !isRenjuForbidden(testBoard, m.coord, 'black', cols, rows)
+      })
+    },
+    captureEffect() {
+      return []
+    },
+  },
+
+  winCondition(slice) {
+    const cols = slice.cols || Math.round(Math.sqrt(slice.board.length))
+    const rows = slice.rows || Math.round(slice.board.length / cols)
+    const last = slice.lastPlaced
+    if (last === null || last === undefined) return null
+    const colour = slice.board[last]
+    if (!colour) return null
+    const run = longestRun(slice.board, last, colour, cols, rows)
+    if (colour === 'black') {
+      if (run === 5) return 0
+      if (run >= 6) return 1
+    } else {
+      if (run >= 5) return 1
+    }
+    if (slice.board.every(cell => cell !== null)) return 'draw'
+    return null
+  },
+}
+
 export const ninukiRenju = {
   key: 'ninuki-renju',
 

@@ -1233,6 +1233,14 @@
   },
   {
     "family": "go",
+    "variant": "renju",
+    "key": "renju",
+    "label": "Renju",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "go",
     "variant": "standard",
     "key": "standard",
     "label": "Standard Go (19×19)",
