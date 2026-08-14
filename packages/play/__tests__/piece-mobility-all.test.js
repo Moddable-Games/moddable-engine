@@ -28,6 +28,9 @@ const KNOWN_INERT = {
   // "You MUST move the weakest piece type that has a legal move." A Rook only
   // moves once nothing weaker can, which a bounded random playout rarely reaches.
   weak: ['rook'],
+  // 12x12 board, lance starts on row 11 with 3 rows of own pieces ahead.
+  // 60-ply random playout rarely clears the file.
+  'chu-shogi': ['lance'],
 }
 
 let rulesAvailable = true

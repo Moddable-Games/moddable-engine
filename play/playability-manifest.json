@@ -1297,6 +1297,14 @@
   },
   {
     "family": "shogi",
+    "variant": "chu-shogi",
+    "key": "chu-shogi",
+    "label": "Chu Shogi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "shogi",
     "variant": "dobutsu",
     "key": "dobutsu",
     "label": "Dobutsu Shogi",
