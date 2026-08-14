@@ -969,6 +969,14 @@
   },
   {
     "family": "chess",
+    "variant": "tamerlane",
+    "key": "tamerlane",
+    "label": "Tamerlane Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
     "variant": "teleport-chess",
     "key": "teleportChess",
     "label": "Teleportation Chess",

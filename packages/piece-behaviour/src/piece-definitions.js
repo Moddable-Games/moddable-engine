@@ -16,22 +16,24 @@ function resolveLeapOffsets(input) {
 }
 
 export function rider(dirs, opts = {}) {
-  const { maxSteps } = opts
+  const { maxSteps, minSteps = 1 } = opts
   return {
     type: 'rider',
     dirs,
     maxSteps,
+    minSteps,
     genMoves(topology, from, board) {
       const rays = topology.rays(from, dirs, maxSteps)
       const moves = []
       for (const ray of rays) {
-        for (const pos of ray) {
+        for (let i = 0; i < ray.length; i++) {
+          const pos = ray[i]
           const occupant = board[pos]
           if (occupant) {
-            if (occupant.enemy) moves.push({ from, to: pos, capture: true })
+            if (occupant.enemy && i + 1 >= minSteps) moves.push({ from, to: pos, capture: true })
             break
           }
-          moves.push({ from, to: pos })
+          if (i + 1 >= minSteps) moves.push({ from, to: pos })
         }
       }
       return moves
@@ -39,8 +41,9 @@ export function rider(dirs, opts = {}) {
     attacks(topology, from, target, board) {
       const rays = topology.rays(from, dirs, maxSteps)
       for (const ray of rays) {
-        for (const pos of ray) {
-          if (pos === target) return true
+        for (let i = 0; i < ray.length; i++) {
+          const pos = ray[i]
+          if (pos === target) return i + 1 >= minSteps
           if (board[pos]) break
         }
       }
@@ -122,7 +125,7 @@ export function divergent(movePrimitive, capturePrimitive) {
 // slide "outward" along the component directions of that first leg.
 // This is the Aanca / Gryphon / Eagle family (metamachy Eagle, grande-acedrex Griffion).
 export function bent(opts = {}) {
-  const { first = 'diagonal', firstSteps = 1 } = opts
+  const { first = 'diagonal', firstSteps = 1, minSecondLeg = 0 } = opts
   const firstDirs = typeof first === 'string' ? (OFFSETS[first] || OFFSETS.bishop) : first
 
   function legs(topology, from, board) {
@@ -145,24 +148,28 @@ export function bent(opts = {}) {
     type: 'bent',
     first,
     firstSteps,
+    minSecondLeg,
     genMoves(topology, from, board) {
       const moves = []
       for (const { kneePos, blocked, continues } of legs(topology, from, board)) {
         const at = board[kneePos]
         if (at) {
-          if (at.enemy) moves.push({ from, to: kneePos, capture: true })
+          // the knee is occupied: it blocks the whole ray. It is a capture
+          // target only when the second leg has no minimum.
+          if (at.enemy && minSecondLeg === 0) moves.push({ from, to: kneePos, capture: true })
           continue
         }
-        moves.push({ from, to: kneePos })
+        if (minSecondLeg === 0) moves.push({ from, to: kneePos })
         if (blocked) continue
         for (const ray of topology.rays(kneePos, continues)) {
-          for (const pos of ray) {
+          for (let i = 0; i < ray.length; i++) {
+            const pos = ray[i]
             const occ = board[pos]
             if (occ) {
-              if (occ.enemy) moves.push({ from, to: pos, capture: true })
+              if (occ.enemy && i + 1 >= minSecondLeg) moves.push({ from, to: pos, capture: true })
               break
             }
-            moves.push({ from, to: pos })
+            if (i + 1 >= minSecondLeg) moves.push({ from, to: pos })
           }
         }
       }
@@ -275,10 +282,10 @@ export function fromConfig(config, resolve) {
 function buildPrimitive(spec, resolve) {
   if (typeof spec === 'string' && resolve) return resolve(spec)
   if (spec.type === 'leaper') return leaper(spec.offsets || spec.dirs)
-  if (spec.type === 'rider') return rider(spec.dirs, { maxSteps: spec.maxSteps })
+  if (spec.type === 'rider') return rider(spec.dirs, { maxSteps: spec.maxSteps, minSteps: spec.minSteps })
   if (spec.type === 'hopper') return hopper(spec.dirs, { captureSlide: spec.captureSlide })
   if (spec.type === 'locust') return locust(resolveLeapOffsets(spec.dirs || spec.offsets))
-  if (spec.type === 'bent') return bent({ first: spec.first, firstSteps: spec.firstSteps })
+  if (spec.type === 'bent') return bent({ first: spec.first, firstSteps: spec.firstSteps, minSecondLeg: spec.minSecondLeg })
   if (spec.type === 'compose' && Array.isArray(spec.parts)) {
     const parts = spec.parts.map(p => typeof p === 'string' && resolve ? resolve(p) : buildPrimitive(p, resolve)).filter(Boolean)
     return compose(...parts)
