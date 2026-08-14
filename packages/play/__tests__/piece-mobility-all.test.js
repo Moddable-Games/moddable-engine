@@ -54,6 +54,7 @@ if (rulesAvailable) {
 const manifest = JSON.parse(readFileSync(join(process.cwd(), 'play', 'playability-manifest.json'), 'utf8'))
 const chessVariants = manifest.filter(e => e.playable && e.family === 'chess').map(e => e.variant)
 const shogiVariants = manifest.filter(e => e.playable && e.family === 'shogi').map(e => e.variant)
+const xiangqiVariants = manifest.filter(e => e.playable && e.family === 'xiangqi').map(e => e.variant)
 
 function boardOf(game) {
   const slice = game.getState().slice || {}
@@ -110,6 +111,21 @@ describeOrSkip('piece mobility across every playable variant', () => {
       let inert
       try {
         inert = inertTypes(slug, 'shogi')
+      } catch (e) {
+        offenders.push(`${slug} (${e.message.slice(0, 60)})`)
+        continue
+      }
+      if (inert.length) offenders.push(`${slug} (never moves: ${inert.join(', ')})`)
+    }
+    expect(offenders).toEqual([])
+  }, 600000)
+
+  test(`all ${xiangqiVariants.length} xiangqi variants move every piece type they start with`, () => {
+    const offenders = []
+    for (const slug of xiangqiVariants) {
+      let inert
+      try {
+        inert = inertTypes(slug, 'xiangqi')
       } catch (e) {
         offenders.push(`${slug} (${e.message.slice(0, 60)})`)
         continue

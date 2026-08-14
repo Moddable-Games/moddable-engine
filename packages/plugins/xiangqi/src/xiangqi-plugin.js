@@ -1,3 +1,5 @@
+import { fromConfig } from '../../../piece-behaviour/src/piece-definitions.js'
+
 export function createXiangqiPlugin(variantConfig = {}, context = {}) {
   const defaults = {
     rows: 10,
@@ -30,6 +32,22 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
 
   const VOCABULARY = config.vocabulary || DEFAULT_VOCABULARY
 
+  const DEFAULT_PIECE_MOVES = {
+    general: { type: 'rider', dirs: 'orthogonal', maxSteps: 1, constraint: 'palace' },
+    advisor: { type: 'rider', dirs: 'diagonal', maxSteps: 1, constraint: 'palace' },
+    elephant: { type: 'leaper', offsets: 'elephant', lame: 'half', constraint: 'own-side' },
+    horse: { type: 'leaper', offsets: 'knight', lame: 'orthogonal' },
+    chariot: { type: 'rider', dirs: 'orthogonal' },
+    cannon: config.cannonJumpToMove
+      ? { type: 'hopper', dirs: 'orthogonal', moveSlide: true }
+      : { divergent: { move: { type: 'rider', dirs: 'orthogonal' }, capture: { type: 'hopper', dirs: 'orthogonal', captureSlide: true } } },
+    soldier: null,
+  }
+
+  const PIECE_MOVES = config.pieceMoves
+    ? { ...DEFAULT_PIECE_MOVES, ...config.pieceMoves }
+    : DEFAULT_PIECE_MOVES
+
   function cellIndex(row, col) {
     return row * config.cols + col
   }
@@ -53,126 +71,117 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
     return r >= riverRow
   }
 
-  const ORTHOGONAL = [[0, 1], [0, -1], [1, 0], [-1, 0]]
-  const DIAGONAL = [[-1, -1], [-1, 1], [1, -1], [1, 1]]
-  const KNIGHT_OFFSETS = [[-2, -1], [-2, 1], [2, -1], [2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2]]
-  const ELEPHANT_OFFSETS = [[-2, -2], [-2, 2], [2, -2], [2, 2]]
+  const builtPieces = new Map()
 
-  const PIECE_DEFS = config.pieces || {
-    general: { movement: 'step', dirs: ORTHOGONAL, constraint: 'palace' },
-    advisor: { movement: 'step', dirs: DIAGONAL, constraint: 'palace' },
-    elephant: { movement: 'blocked-leap', dirs: ELEPHANT_OFFSETS, constraint: 'own-side', blockAt: 0.5 },
-    horse: { movement: 'blocked-knight', dirs: KNIGHT_OFFSETS },
-    chariot: { movement: 'slide', dirs: ORTHOGONAL },
-    cannon: { movement: 'cannon', dirs: ORTHOGONAL },
-    soldier: { movement: 'soldier' },
+  function buildPieceForType(type) {
+    if (builtPieces.has(type)) return builtPieces.get(type)
+    const spec = PIECE_MOVES[type]
+    if (!spec) { builtPieces.set(type, null); return null }
+    const { constraint, ...pureSpec } = spec
+    const primitive = fromConfig(pureSpec)
+    builtPieces.set(type, primitive)
+    return primitive
   }
 
-  function generatePieceMoves(board, pos, piece, playerIndex) {
-    const def = PIECE_DEFS[piece.type]
-    if (!def) return []
+  function getConstraint(type) {
+    const spec = PIECE_MOVES[type]
+    return spec ? spec.constraint || null : null
+  }
+
+  function buildViewBoard(board, playerIndex) {
+    return board.map(cell => {
+      if (cell === null) return null
+      return { friendly: cell.owner === playerIndex, enemy: cell.owner !== playerIndex, ...cell }
+    })
+  }
+
+  function buildInternalTopology() {
+    return {
+      rays(from, directions, maxSteps) {
+        const DIRS = {
+          orthogonal: [[-1, 0], [1, 0], [0, -1], [0, 1]],
+          diagonal: [[-1, -1], [-1, 1], [1, -1], [1, 1]],
+          all: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]],
+        }
+        const resolved = typeof directions === 'string' ? (DIRS[directions] || []) : directions
+        return resolved.map(([dr, dc]) => {
+          const ray = []
+          const [r, c] = rowCol(from)
+          const limit = maxSteps || Math.max(config.rows, config.cols)
+          for (let i = 1; i <= limit; i++) {
+            const nr = r + dr * i, nc = c + dc * i
+            if (!inBounds(nr, nc)) break
+            ray.push(cellIndex(nr, nc))
+          }
+          return ray
+        })
+      },
+      leapTargets(from, offsets) {
+        const [r, c] = rowCol(from)
+        const targets = []
+        for (const [dr, dc] of offsets) {
+          const nr = r + dr, nc = c + dc
+          if (inBounds(nr, nc)) targets.push(cellIndex(nr, nc))
+        }
+        return targets
+      },
+    }
+  }
+
+  function generateSoldierMoves(board, pos, playerIndex) {
     const [r, c] = rowCol(pos)
     const moves = []
     const advancement = config.advancement
       ? config.advancement[playerIndex]
       : (playerIndex === 0 ? -1 : 1)
-
-    switch (def.movement) {
-      case 'step': {
-        for (const [dr, dc] of def.dirs) {
-          const nr = r + dr, nc = c + dc
-          if (!inBounds(nr, nc)) continue
-          if (def.constraint === 'palace' && !inPalace(nr, nc, playerIndex)) continue
-          const idx = cellIndex(nr, nc)
-          if (board[idx] === null || board[idx].owner !== playerIndex) moves.push({ from: pos, to: idx })
-        }
-        break
-      }
-      case 'blocked-leap': {
-        for (const [dr, dc] of def.dirs) {
-          const nr = r + dr, nc = c + dc
-          if (!inBounds(nr, nc)) continue
-          if (def.constraint === 'own-side' && config.hasRiver && acrossRiver(nr, playerIndex)) continue
-          const blockR = r + Math.round(dr * def.blockAt)
-          const blockC = c + Math.round(dc * def.blockAt)
-          if (board[cellIndex(blockR, blockC)] !== null) continue
-          const idx = cellIndex(nr, nc)
-          if (board[idx] === null || board[idx].owner !== playerIndex) moves.push({ from: pos, to: idx })
-        }
-        break
-      }
-      case 'blocked-knight': {
-        for (const [dr, dc] of def.dirs) {
-          const nr = r + dr, nc = c + dc
-          if (!inBounds(nr, nc)) continue
-          const legBlock = Math.abs(dr) > Math.abs(dc)
-            ? cellIndex(r + (dr > 0 ? 1 : -1), c)
-            : cellIndex(r, c + (dc > 0 ? 1 : -1))
-          if (board[legBlock] !== null) continue
-          const idx = cellIndex(nr, nc)
-          if (board[idx] === null || board[idx].owner !== playerIndex) moves.push({ from: pos, to: idx })
-        }
-        break
-      }
-      case 'slide': {
-        for (const [dr, dc] of def.dirs) {
-          for (let dist = 1; dist < Math.max(config.rows, config.cols); dist++) {
-            const nr = r + dr * dist, nc = c + dc * dist
-            if (!inBounds(nr, nc)) break
-            const idx = cellIndex(nr, nc)
-            if (board[idx] !== null) {
-              if (board[idx].owner !== playerIndex) moves.push({ from: pos, to: idx })
-              break
-            }
-            moves.push({ from: pos, to: idx })
-          }
-        }
-        break
-      }
-      case 'cannon': {
-        for (const [dr, dc] of def.dirs) {
-          let foundScreen = false
-          for (let dist = 1; dist < Math.max(config.rows, config.cols); dist++) {
-            const nr = r + dr * dist, nc = c + dc * dist
-            if (!inBounds(nr, nc)) break
-            const idx = cellIndex(nr, nc)
-            if (!foundScreen) {
-              if (board[idx] !== null) { foundScreen = true }
-              else if (!config.cannonJumpToMove) moves.push({ from: pos, to: idx })
-            } else {
-              if (board[idx] !== null) {
-                if (board[idx].owner !== playerIndex) moves.push({ from: pos, to: idx })
-                break
-              }
-              if (config.cannonJumpToMove) moves.push({ from: pos, to: idx })
-            }
-          }
-        }
-        break
-      }
-      case 'soldier': {
-        const nr = r + advancement
-        if (inBounds(nr, c)) {
-          const idx = cellIndex(nr, c)
-          if (board[idx] === null || board[idx].owner !== playerIndex) moves.push({ from: pos, to: idx })
-        }
-        if (acrossRiver(r, playerIndex)) {
-          for (const dc of [-1, 1]) {
-            if (!inBounds(r, c + dc)) continue
-            const idx = cellIndex(r, c + dc)
-            if (board[idx] === null || board[idx].owner !== playerIndex) moves.push({ from: pos, to: idx })
-          }
-        }
-        break
+    const nr = r + advancement
+    if (inBounds(nr, c)) {
+      const idx = cellIndex(nr, c)
+      if (board[idx] === null || board[idx].owner !== playerIndex) moves.push({ from: pos, to: idx })
+    }
+    if (acrossRiver(r, playerIndex)) {
+      for (const dc of [-1, 1]) {
+        if (!inBounds(r, c + dc)) continue
+        const idx = cellIndex(r, c + dc)
+        if (board[idx] === null || board[idx].owner !== playerIndex) moves.push({ from: pos, to: idx })
       }
     }
-
     return moves
   }
 
+  function generatePieceMoves(board, pos, piece, playerIndex) {
+    if (piece.type === 'soldier' && !PIECE_MOVES[piece.type]) {
+      return generateSoldierMoves(board, pos, playerIndex)
+    }
+
+    const primitive = buildPieceForType(piece.type)
+    if (!primitive) {
+      if (piece.type === 'soldier') return generateSoldierMoves(board, pos, playerIndex)
+      return []
+    }
+
+    const topo = topology || buildInternalTopology()
+    const viewBoard = buildViewBoard(board, playerIndex)
+    const rawMoves = primitive.genMoves(topo, pos, viewBoard)
+
+    const constraint = getConstraint(piece.type)
+    if (!constraint) return rawMoves.map(m => ({ from: m.from, to: m.to }))
+
+    return rawMoves
+      .filter(m => {
+        const [tr, tc] = rowCol(m.to)
+        if (constraint === 'palace') return inPalace(tr, tc, playerIndex)
+        if (constraint === 'own-side' && config.hasRiver) return !acrossRiver(tr, playerIndex)
+        return true
+      })
+      .map(m => ({ from: m.from, to: m.to }))
+  }
+
+  const royalType = config.royalType || 'general'
+
   function findGeneral(board, playerIndex) {
     for (let i = 0; i < board.length; i++) {
-      if (board[i] && board[i].owner === playerIndex && board[i].type === 'general') return i
+      if (board[i] && board[i].owner === playerIndex && board[i].type === royalType) return i
     }
     return -1
   }
@@ -195,79 +204,28 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
     return true
   }
 
-  function canAttackTarget(board, from, target, piece, playerIndex) {
-    const def = PIECE_DEFS[piece.type]
-    if (!def) return false
-    const [fr, fc] = rowCol(from)
-    const [tr, tc] = rowCol(target)
-
-    switch (def.movement) {
-      case 'step': {
-        for (const [dr, dc] of def.dirs) {
-          if (fr + dr === tr && fc + dc === tc) {
-            if (def.constraint === 'palace' && !inPalace(tr, tc, playerIndex)) return false
-            return true
-          }
-        }
-        return false
-      }
-      case 'blocked-leap': {
-        for (const [dr, dc] of def.dirs) {
-          if (fr + dr !== tr || fc + dc !== tc) continue
-          if (def.constraint === 'own-side' && config.hasRiver && acrossRiver(tr, playerIndex)) return false
-          const blockR = fr + Math.round(dr * def.blockAt)
-          const blockC = fc + Math.round(dc * def.blockAt)
-          if (board[cellIndex(blockR, blockC)] !== null) return false
-          return true
-        }
-        return false
-      }
-      case 'blocked-knight': {
-        for (const [dr, dc] of def.dirs) {
-          if (fr + dr !== tr || fc + dc !== tc) continue
-          const legBlock = Math.abs(dr) > Math.abs(dc)
-            ? cellIndex(fr + (dr > 0 ? 1 : -1), fc)
-            : cellIndex(fr, fc + (dc > 0 ? 1 : -1))
-          if (board[legBlock] !== null) return false
-          return true
-        }
-        return false
-      }
-      case 'slide': {
-        const dr = Math.sign(tr - fr), dc = Math.sign(tc - fc)
-        if (dr === 0 && dc === 0) return false
-        if (dr !== 0 && dc !== 0 && Math.abs(tr - fr) !== Math.abs(tc - fc)) return false
-        if (dr === 0 && fr !== tr) return false
-        if (dc === 0 && fc !== tc) return false
-        const validDir = def.dirs.some(([ddr, ddc]) => Math.sign(ddr) === dr && Math.sign(ddc) === dc)
-        if (!validDir) return false
-        const dist = Math.max(Math.abs(tr - fr), Math.abs(tc - fc))
-        for (let d = 1; d < dist; d++) {
-          if (board[cellIndex(fr + dr * d, fc + dc * d)] !== null) return false
-        }
-        return true
-      }
-      case 'cannon': {
-        const dr = Math.sign(tr - fr), dc = Math.sign(tc - fc)
-        if (dr === 0 && dc === 0) return false
-        if (dr !== 0 && dc !== 0) return false
-        const dist = Math.max(Math.abs(tr - fr), Math.abs(tc - fc))
-        let screens = 0
-        for (let d = 1; d < dist; d++) {
-          if (board[cellIndex(fr + dr * d, fc + dc * d)] !== null) screens++
-        }
-        return screens === 1
-      }
-      case 'soldier': {
-        const advancement = config.advancement
-          ? config.advancement[playerIndex]
-          : (playerIndex === 0 ? -1 : 1)
-        if (tr === fr + advancement && tc === fc) return true
-        if (acrossRiver(fr, playerIndex) && tr === fr && Math.abs(tc - fc) === 1) return true
-        return false
-      }
+  function canAttack(board, from, target, piece, playerIndex) {
+    if (piece.type === 'soldier' && !PIECE_MOVES[piece.type]) {
+      return generateSoldierMoves(board, from, playerIndex).some(m => m.to === target)
     }
-    return false
+
+    const primitive = buildPieceForType(piece.type)
+    if (!primitive) {
+      if (piece.type === 'soldier') {
+        return generateSoldierMoves(board, from, playerIndex).some(m => m.to === target)
+      }
+      return false
+    }
+
+    const constraint = getConstraint(piece.type)
+    if (constraint) {
+      const [tr, tc] = rowCol(target)
+      if (constraint === 'palace' && !inPalace(tr, tc, playerIndex)) return false
+      if (constraint === 'own-side' && config.hasRiver && acrossRiver(tr, playerIndex)) return false
+    }
+
+    const topo = topology || buildInternalTopology()
+    return primitive.attacks(topo, from, target, board)
   }
 
   function isInCheck(board, playerIndex) {
@@ -276,14 +234,12 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
     const opponent = 1 - playerIndex
     for (let i = 0; i < board.length; i++) {
       if (!board[i] || board[i].owner !== opponent) continue
-      if (canAttackTarget(board, i, genPos, board[i], opponent)) return true
+      if (canAttack(board, i, genPos, board[i], opponent)) return true
     }
     if (violatesFlyingGeneral(board)) return true
     return false
   }
 
-  // The starting position comes from the variant's frontmatter in
-  // moddable-rules, the same string the published board diagram is drawn from.
   function boardFromSetup(setup) {
     const empty = () => new Array(config.rows * config.cols).fill(null)
     if (!setup) return empty()
@@ -294,7 +250,7 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
 
   return {
     sliceName: 'xiangqi',
-    pieceTypes: ['general', 'advisor', 'elephant', 'horse', 'chariot', 'cannon', 'soldier'],
+    pieceTypes: Object.keys(VOCABULARY),
     vocabulary: VOCABULARY,
     config,
     rules: ['constraint.region', 'capture.screen-jump', 'constraint.facing', 'check', 'checkmate'],
@@ -306,7 +262,23 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
         if (topology.cols) config.cols = topology.cols
       }
       const setup = pluginConfig.setup || config.setup || null
-      return { board: boardFromSetup(setup), _cols: config.cols }
+      const board = boardFromSetup(setup)
+
+      for (let i = 0; i < board.length; i++) {
+        if (board[i] && board[i].type !== 'soldier' && !PIECE_MOVES[board[i].type]) {
+          throw new Error(`Unmapped piece type "${board[i].type}" at cell ${i}. Declare its movement in pieceMoves or remove it from setup.`)
+        }
+      }
+
+      for (const [type, def] of Object.entries(VOCABULARY)) {
+        const owners = def.symbols ? Object.keys(def.symbols) : []
+        const hasPlayerOwner = owners.some(o => o === '0' || o === '1')
+        if (hasPlayerOwner && type !== 'soldier' && !PIECE_MOVES[type]) {
+          throw new Error(`Vocabulary declares "${type}" but no matching entry in pieceMoves. Declare its movement or remove it from vocabulary.`)
+        }
+      }
+
+      return { board, _cols: config.cols }
     },
 
     validateMove(move, slice, full) {
