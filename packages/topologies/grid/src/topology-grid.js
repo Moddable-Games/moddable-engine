@@ -160,7 +160,8 @@ export function createGridTopology(config) {
     return targets
   }
 
-  function jumpPairs(from, directions) {
+  function jumpPairs(from, directionInput) {
+    const directions = typeof directionInput === 'string' ? getDirections(directionInput) : directionInput
     const [r, c] = toRC(from)
     const pairs = []
     for (const [dr, dc] of directions) {

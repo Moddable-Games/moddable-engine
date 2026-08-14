@@ -387,7 +387,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       setCell(board, move.from, null)
       setCell(board, move.rookTo, getCell(board, move.rookFrom))
       setCell(board, move.rookFrom, null)
-    } else if (move.enPassant) {
+    } else if (move.captured !== undefined && move.captured !== null) {
       setCell(board, move.to, getCell(board, move.from))
       setCell(board, move.from, null)
       setCell(board, move.captured, null)
@@ -416,7 +416,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       state.board[move.from] = null
       state.board[move.rookTo] = state.board[move.rookFrom]
       state.board[move.rookFrom] = null
-    } else if (move.enPassant) {
+    } else if (move.captured !== undefined && move.captured !== null) {
       undo.capturedPiece = state.board[move.captured]
       undo.capturedPos = move.captured
       state.board[move.to] = state.board[move.from]
@@ -502,7 +502,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       state.board[move.rookFrom] = undo.rookFromPiece
       state.board[move.rookTo] = undo.rookToPiece
     }
-    if (move.enPassant) {
+    if (undo.capturedPos !== undefined && undo.capturedPos !== null) {
       state.board[undo.capturedPos] = undo.capturedPiece
     }
     state.castlingRights = undo.castlingRights
@@ -852,7 +852,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     }
 
     if (hands) {
-      const captured = move.enPassant ? getCell(slice.board, move.captured) : getCell(slice.board, move.to)
+      const captured = move.captured != null ? getCell(slice.board, move.captured) : getCell(slice.board, move.to)
       if (captured && captured.owner !== playerIdx && captured.type !== (config.royalType || 'king')) {
         const handType = captured.wasPromoted ? (config.pawnType || 'pawn') : captured.type
         hands[playerIdx].push(handType)
@@ -869,7 +869,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       if (castlingRights) {
         castlingRights[playerIdx] = { king: false, queen: false }
       }
-    } else if (move.enPassant) {
+    } else if (move.captured !== undefined && move.captured !== null) {
       setCell(board, move.to, getCell(board, move.from))
       setCell(board, move.from, null)
       setCell(board, move.captured, null)
@@ -919,7 +919,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
     let effects = slice.effects ? slice.effects.map(e => ({ ...e })) : []
     if (config.afterMove) {
-      const captured = move.enPassant ? slice.board[move.captured] : slice.board[move.to]
+      const captured = move.captured != null ? slice.board[move.captured] : slice.board[move.to]
       const ctx = { playerIdx, move, captured, board, effects, topology, slice: newSlice, piece }
       ctx.addEffect = (effect) => effects.push(effect)
       ctx.hasEffect = (sq, type) => effects.some(e => e.sq === sq && e.type === type)
@@ -1028,7 +1028,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
         board[move.from] = null
         board[move.rookTo] = board[move.rookFrom]
         board[move.rookFrom] = null
-      } else if (move.enPassant) {
+      } else if (move.captured !== undefined && move.captured !== null) {
         capturedPiece = board[move.captured]
         capturedPos = move.captured
         board[move.to] = board[move.from]
@@ -1048,7 +1048,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
         board[move.rookFrom] = rookFrom
         board[move.rookTo] = rookTo
       }
-      if (move.enPassant) {
+      if (capturedPos !== undefined && capturedPos !== null) {
         board[capturedPos] = capturedPiece
       }
       return !inCheck

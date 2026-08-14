@@ -118,6 +118,89 @@ export function divergent(movePrimitive, capturePrimitive) {
   }
 }
 
+// A bent rider: one or more steps along a first direction, then an unlimited
+// slide "outward" along the component directions of that first leg.
+// This is the Aanca / Gryphon / Eagle family (metamachy Eagle, grande-acedrex Griffion).
+export function bent(opts = {}) {
+  const { first = 'diagonal', firstSteps = 1 } = opts
+  const firstDirs = typeof first === 'string' ? (OFFSETS[first] || OFFSETS.bishop) : first
+
+  function legs(topology, from, board) {
+    const out = []
+    for (const [dr, dc] of firstDirs) {
+      const knee = topology.rays(from, [[dr, dc]], firstSteps)[0]
+      if (!knee || knee.length < firstSteps) continue
+      const kneePos = knee[firstSteps - 1]
+      // the knee square itself is a legal destination, and blocks if occupied
+      const blocked = !!board[kneePos]
+      const continues = []
+      if (dr !== 0) continues.push([dr, 0])
+      if (dc !== 0) continues.push([0, dc])
+      out.push({ kneePos, blocked, continues })
+    }
+    return out
+  }
+
+  return {
+    type: 'bent',
+    first,
+    firstSteps,
+    genMoves(topology, from, board) {
+      const moves = []
+      for (const { kneePos, blocked, continues } of legs(topology, from, board)) {
+        const at = board[kneePos]
+        if (at) {
+          if (at.enemy) moves.push({ from, to: kneePos, capture: true })
+          continue
+        }
+        moves.push({ from, to: kneePos })
+        if (blocked) continue
+        for (const ray of topology.rays(kneePos, continues)) {
+          for (const pos of ray) {
+            const occ = board[pos]
+            if (occ) {
+              if (occ.enemy) moves.push({ from, to: pos, capture: true })
+              break
+            }
+            moves.push({ from, to: pos })
+          }
+        }
+      }
+      return moves
+    },
+    attacks(topology, from, target, board) {
+      return this.genMoves(topology, from, board).some(m => m.to === target)
+    },
+  }
+}
+
+export function locust(dirs) {
+  return {
+    type: 'locust',
+    dirs,
+    genMoves(topology, from, board) {
+      if (!topology.jumpPairs) return []
+      const moves = []
+      for (const { over, landing } of topology.jumpPairs(from, dirs)) {
+        const occupant = board[over]
+        if (!occupant || !occupant.enemy) continue
+        if (board[landing]) continue
+        moves.push({ from, to: landing, capture: true, captured: over })
+      }
+      return moves
+    },
+    attacks(topology, from, target, board) {
+      if (!topology.jumpPairs) return false
+      for (const { over, landing } of topology.jumpPairs(from, dirs)) {
+        if (over !== target) continue
+        if (board[landing]) continue
+        return true
+      }
+      return false
+    },
+  }
+}
+
 export function hopper(dirs, opts = {}) {
   const { captureSlide = false } = opts
   return {
@@ -194,6 +277,8 @@ function buildPrimitive(spec, resolve) {
   if (spec.type === 'leaper') return leaper(spec.offsets || spec.dirs)
   if (spec.type === 'rider') return rider(spec.dirs, { maxSteps: spec.maxSteps })
   if (spec.type === 'hopper') return hopper(spec.dirs, { captureSlide: spec.captureSlide })
+  if (spec.type === 'locust') return locust(resolveLeapOffsets(spec.dirs || spec.offsets))
+  if (spec.type === 'bent') return bent({ first: spec.first, firstSteps: spec.firstSteps })
   if (spec.type === 'compose' && Array.isArray(spec.parts)) {
     const parts = spec.parts.map(p => typeof p === 'string' && resolve ? resolve(p) : buildPrimitive(p, resolve)).filter(Boolean)
     return compose(...parts)
