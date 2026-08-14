@@ -63,7 +63,9 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     promoted_pawn: { type: 'leaper', offsets: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, 0]], directional: true },
   }
 
-  const PIECE_MOVES = config.pieceMoves || DEFAULT_PIECE_MOVES
+  const PIECE_MOVES = config.pieceMoves
+    ? { ...DEFAULT_PIECE_MOVES, ...config.pieceMoves }
+    : DEFAULT_PIECE_MOVES
 
   // Cache of built primitives keyed by "type__playerIndex"
   const builtPieces = new Map()
@@ -71,8 +73,8 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
   function flipSpec(spec) {
     if (!spec || typeof spec !== 'object') return spec
     const out = { ...spec }
-    if (Array.isArray(out.offsets)) out.offsets = out.offsets.map(([dr, dc]) => [-dr, dc])
-    if (Array.isArray(out.dirs)) out.dirs = out.dirs.map(([dr, dc]) => [-dr, dc])
+    if (Array.isArray(out.offsets)) out.offsets = out.offsets.map(([dr, dc]) => [-dr, -dc])
+    if (Array.isArray(out.dirs)) out.dirs = out.dirs.map(([dr, dc]) => [-dr, -dc])
     if (out.type === 'compose' && Array.isArray(out.parts)) out.parts = out.parts.map(p => flipSpec(p))
     return out
   }
@@ -140,7 +142,15 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     })
   }
 
+  const promotionMap = config.promotionMap || null
+  const demotionMap = promotionMap
+    ? Object.fromEntries(Object.entries(promotionMap).map(([k, v]) => [v, k]))
+    : null
+
   function getPromotedType(type) {
+    if (promotionMap) {
+      return promotionMap[type] || null
+    }
     if (type.startsWith('promoted_')) return null
     if (type === royalType || type === 'gold') return null
     const promoted = `promoted_${type}`
@@ -149,6 +159,7 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
   }
 
   function getDemotedType(type) {
+    if (demotionMap && demotionMap[type]) return demotionMap[type]
     if (type.startsWith('promoted_')) return type.slice(9)
     return type
   }
@@ -170,23 +181,28 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
       for (let i = 0; i < board.length; i++) {
         if (board[i] !== null) continue
 
-        if (config.dropPawnFileLimit && type === 'pawn') {
+        const nifuType = config.nifuType || 'pawn'
+        const nifuLimit = config.nifuLimit || 1
+        if (config.dropPawnFileLimit && type === nifuType) {
           const [, col] = rowCol(i)
-          const hasPawnInFile = board.some((cell, idx) => {
-            if (!cell || cell.owner !== playerIndex || cell.type !== 'pawn') return false
+          let count = 0
+          for (let idx = 0; idx < board.length; idx++) {
+            const cell = board[idx]
+            if (!cell || cell.owner !== playerIndex || cell.type !== nifuType) continue
             const [, cellCol] = rowCol(idx)
-            return cellCol === col
-          })
-          if (hasPawnInFile) continue
+            if (cellCol === col) count++
+          }
+          if (count >= nifuLimit) continue
         }
 
         const [row] = rowCol(i)
-        const fwd = playerIndex === 0 ? -1 : 1
-        if (type === 'pawn' || type === 'lance') {
+        const noLastRank = config.noDropLastRank || ['pawn', 'lance']
+        const noSecondRank = config.noDropSecondRank || ['knight']
+        if (noLastRank.includes(type)) {
           if (playerIndex === 0 && row === 0) continue
           if (playerIndex === 1 && row === config.rows - 1) continue
         }
-        if (type === 'knight') {
+        if (noSecondRank.includes(type)) {
           if (playerIndex === 0 && row <= 1) continue
           if (playerIndex === 1 && row >= config.rows - 2) continue
         }

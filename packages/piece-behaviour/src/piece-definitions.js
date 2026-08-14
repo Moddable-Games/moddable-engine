@@ -209,11 +209,12 @@ export function locust(dirs) {
 }
 
 export function hopper(dirs, opts = {}) {
-  const { captureSlide = false } = opts
+  const { captureSlide = false, moveSlide = false } = opts
   return {
     type: 'hopper',
     dirs,
     captureSlide,
+    moveSlide,
     genMoves(topology, from, board) {
       const rays = topology.rays(from, dirs)
       const moves = []
@@ -226,11 +227,12 @@ export function hopper(dirs, opts = {}) {
             if (occupant) { hurdleFound = true }
             continue
           }
-          if (captureSlide) {
+          if (captureSlide || moveSlide) {
             if (occupant) {
               if (occupant.enemy) moves.push({ from, to: pos, capture: true })
               break
             }
+            if (moveSlide) moves.push({ from, to: pos })
           } else {
             if (occupant) {
               if (occupant.enemy) moves.push({ from, to: pos, capture: true })
@@ -254,7 +256,7 @@ export function hopper(dirs, opts = {}) {
             continue
           }
           if (pos === target) return true
-          if (captureSlide) {
+          if (captureSlide || moveSlide) {
             if (board[pos]) break
           } else {
             break
@@ -283,7 +285,7 @@ function buildPrimitive(spec, resolve) {
   if (typeof spec === 'string' && resolve) return resolve(spec)
   if (spec.type === 'leaper') return leaper(spec.offsets || spec.dirs)
   if (spec.type === 'rider') return rider(spec.dirs, { maxSteps: spec.maxSteps, minSteps: spec.minSteps })
-  if (spec.type === 'hopper') return hopper(spec.dirs, { captureSlide: spec.captureSlide })
+  if (spec.type === 'hopper') return hopper(spec.dirs, { captureSlide: spec.captureSlide, moveSlide: spec.moveSlide })
   if (spec.type === 'locust') return locust(resolveLeapOffsets(spec.dirs || spec.offsets))
   if (spec.type === 'bent') return bent({ first: spec.first, firstSteps: spec.firstSteps, minSecondLeg: spec.minSecondLeg })
   if (spec.type === 'compose' && Array.isArray(spec.parts)) {

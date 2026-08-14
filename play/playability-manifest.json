@@ -1281,6 +1281,14 @@
   },
   {
     "family": "shogi",
+    "variant": "cannon-shogi",
+    "key": "cannon-shogi",
+    "label": "Cannon Shogi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "shogi",
     "variant": "dobutsu",
     "key": "dobutsu",
     "label": "Dobutsu Shogi",
@@ -1321,9 +1329,33 @@
   },
   {
     "family": "shogi",
+    "variant": "sho-shogi",
+    "key": "sho-shogi",
+    "label": "Sho Shogi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "shogi",
     "variant": "standard",
     "key": "standard",
     "label": "Standard Shogi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "shogi",
+    "variant": "tori-shogi",
+    "key": "tori-shogi",
+    "label": "Tori Shogi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "shogi",
+    "variant": "yari-shogi",
+    "key": "yari-shogi",
+    "label": "Yari Shogi",
     "group": "Other",
     "playable": true
   },
