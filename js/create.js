@@ -246,8 +246,16 @@ function buildPiecePicker() {
   const setId = document.getElementById('pieceset-select').value
   const palette = document.getElementById('piece-palette')
   const picker = document.getElementById('piece-picker')
-  if (!setId) { palette.style.display = 'none'; activePiece = null; return }
   palette.style.display = ''
+  if (!setId) {
+    // The palette used to hide itself entirely when no set was chosen, and Piece
+    // Set defaults to None, so there was no visible way to place a piece and
+    // nothing saying why.
+    activePiece = null
+    picker.innerHTML = '<div class="piece-hint">Choose a piece set above to start placing pieces.</div>'
+    document.getElementById('active-piece-label').textContent = ''
+    return
+  }
 
   const setDef = galleryIndex?.find(s => s.id === setId)
   if (!setDef || !setDef.pieces) { picker.innerHTML = ''; return }

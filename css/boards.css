@@ -877,3 +877,10 @@
   flex-direction: column;
   gap: 4px;
 }
+
+.piece-hint {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+  padding: 4px 0;
+}
