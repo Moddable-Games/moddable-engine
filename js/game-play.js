@@ -223,7 +223,7 @@ export function createPlaySession(options = {}) {
   let deadStones = []
   let currentTheme = theme
   let currentPieceSet = pieceSet
-  let captured = { 0: [], 1: [] }
+  let captured = {}
   let flipped = false
   let currentAnimStyle = options.animStyle || ANIM_THEME.defaultStyle
   let currentAnimSpeed = options.animSpeed || ANIM_THEME.defaultSpeed
@@ -247,7 +247,7 @@ export function createPlaySession(options = {}) {
     scoring = null
     deadStones = []
     moveHistory = []
-    captured = { 0: [], 1: [] }
+    captured = Object.fromEntries(playerNames().map((_, i) => [i, []]))
     boardSnapshot = null
     captureHistory = []
 
@@ -362,7 +362,7 @@ export function createPlaySession(options = {}) {
         while (moveHistory.length > undoCount) moveHistory.pop()
         while (captureHistory.length > undoCount) captureHistory.pop()
         // Rebuild captured state from remaining history
-        captured = { 0: [], 1: [] }
+        captured = Object.fromEntries(playerNames().map((_, i) => [i, []]))
         for (const entry of captureHistory) {
           for (const piece of entry.pieces) {
             const capturer = piece._capturer !== undefined ? piece._capturer : entry.side
@@ -569,7 +569,7 @@ export function createPlaySession(options = {}) {
       const pieces = Object.entries(counted).map(([type, count]) => {
         const entry = vocab[type]
         const symbol = entry?.symbols?.[idx]
-        const pieceId = symbol ? (idx === 0 ? 'w' : 'b') + symbol.toUpperCase() : null
+        const pieceId = symbol ? ownerPrefix(names, idx) + symbol.toUpperCase() : null
         const image = pieceImages[pieceId]
           || pieceImages[symbol]
           || (symbol && pieceImages[symbol.toUpperCase()])
@@ -592,6 +592,7 @@ export function createPlaySession(options = {}) {
   function detectCaptures(move, player, prevBoard) {
     const names = playerNames()
     const playerIdx = names.indexOf(player)
+    if (!captured[playerIdx]) captured[playerIdx] = []
     const entry = { side: playerIdx, pieces: [] }
 
     if (move.enPassant && move.captured !== undefined) {
@@ -604,11 +605,8 @@ export function createPlaySession(options = {}) {
       for (const pos of move.captures) {
         const piece = prevBoard[pos]
         if (piece) {
-          const capturer = typeof piece.owner === 'number'
-            ? (piece.owner === 0 ? 1 : 0)
-            : playerIdx
-          entry.pieces.push({ ...piece, _capturer: capturer })
-          captured[capturer].push(piece)
+          entry.pieces.push({ ...piece, _capturer: playerIdx })
+          captured[playerIdx].push(piece)
         }
       }
     } else if (move.to !== undefined) {
@@ -636,10 +634,10 @@ export function createPlaySession(options = {}) {
     const pieceResult = attachPieceImages(rendered, gallery)
     const pieceImages = pieceResult.images || {}
 
-    const hasPieces = captured[0].length > 0 || captured[1].length > 0
+    const hasPieces = names.some((_, i) => captured[i] && captured[i].length > 0)
     if (!hasPieces) return
 
-    for (let side = 0; side < 2; side++) {
+    for (let side = 0; side < names.length; side++) {
       const pieces = captured[side]
       if (pieces.length === 0) continue
 
@@ -654,7 +652,7 @@ export function createPlaySession(options = {}) {
       const counted = {}
       for (const piece of pieces) {
         const entry = vocab[piece.type]
-        const opOwner = typeof piece.owner === 'number' ? piece.owner : (side === 0 ? 1 : 0)
+        const opOwner = typeof piece.owner === 'number' ? piece.owner : side
         const symbol = entry?.symbols?.[opOwner]
         const key = symbol || piece.type
         if (!counted[key]) counted[key] = { symbol, owner: opOwner, type: piece.type, count: 0 }
@@ -666,7 +664,7 @@ export function createPlaySession(options = {}) {
         el.className = 'captured-piece'
 
         const pieceId = info.symbol
-          ? (info.owner === 0 ? 'w' : 'b') + info.symbol.toUpperCase()
+          ? ownerPrefix(names, info.owner) + info.symbol.toUpperCase()
           : null
         const imgSrc = pieceImages[pieceId] || pieceImages[info.symbol] || null
 
@@ -715,6 +713,7 @@ export function createPlaySession(options = {}) {
 
   function animateMove(move, duration, done) {
     if (!container || !cells || duration <= 0) { done(); return }
+    if (move.from === undefined || move.from === null) { done(); return }
     const fromPos = cells.centre(move.from, container)
     const toPos = cells.centre(move.to, container)
     if (!fromPos || !toPos) { done(); return }
@@ -919,6 +918,10 @@ export function createPlaySession(options = {}) {
       const topo = resolvedBoard?.topology
       const legal = boardSnapshot?._legalMoves || null
       return moveToSAN(move, board, topo, legal)
+    }
+    if (move.action && move.from === undefined) {
+      const target = move.to !== undefined ? (cells.toId(move.to) || String(move.to)) : ''
+      return target ? `${move.action}@${target}` : move.action
     }
     if (move.action) return move.action
     if (move.coord !== undefined) {
@@ -1420,6 +1423,12 @@ function buildGroupedSelect(parent, label, variants, selected) {
 }
 
 function capitalize(s) { return s ? s[0].toUpperCase() + s.slice(1) : '' }
+
+function ownerPrefix(names, idx) {
+  const name = names[idx]
+  if (!name) return idx === 0 ? 'w' : 'b'
+  return name[0].toLowerCase()
+}
 
 function getVariantPieceKeys(family, variantKey, fallbackSetup, resolved) {
   const pluginBlock = resolved?.plugins?.[family] || {}
