@@ -161,14 +161,6 @@
   },
   {
     "family": "chess",
-    "variant": "chak",
-    "key": "chak",
-    "label": "Chak",
-    "group": "Other",
-    "playable": true
-  },
-  {
-    "family": "chess",
     "variant": "chancellor-chess",
     "key": "chancellor-chess",
     "label": "Chancellor Chess",
@@ -217,25 +209,9 @@
   },
   {
     "family": "chess",
-    "variant": "citadel-chess",
-    "key": "citadel-chess",
-    "label": "Citadel Chess",
-    "group": "Other",
-    "playable": true
-  },
-  {
-    "family": "chess",
     "variant": "codrus",
     "key": "codrus",
     "label": "Codrus",
-    "group": "Other",
-    "playable": true
-  },
-  {
-    "family": "chess",
-    "variant": "congo",
-    "key": "congo",
-    "label": "Congo",
     "group": "Other",
     "playable": true
   },
@@ -633,14 +609,6 @@
   },
   {
     "family": "chess",
-    "variant": "metamachy",
-    "key": "metamachy",
-    "label": "Metamachy",
-    "group": "Other",
-    "playable": true
-  },
-  {
-    "family": "chess",
     "variant": "mini-hexchess",
     "key": "mini-hexchess",
     "label": "Mini Hexchess",
@@ -708,14 +676,6 @@
     "variant": "omnicide",
     "key": "omnicide",
     "label": "Omnicide",
-    "group": "Other",
-    "playable": true
-  },
-  {
-    "family": "chess",
-    "variant": "orda-chess",
-    "key": "orda-chess",
-    "label": "Orda Chess",
     "group": "Other",
     "playable": true
   },
@@ -897,14 +857,6 @@
   },
   {
     "family": "chess",
-    "variant": "shinobi",
-    "key": "shinobi",
-    "label": "Shinobi Chess",
-    "group": "Other",
-    "playable": true
-  },
-  {
-    "family": "chess",
     "variant": "shinobiplus",
     "key": "shinobiplus",
     "label": "Shinobi+",
@@ -964,14 +916,6 @@
     "variant": "suicide-chess",
     "key": "suicideChess",
     "label": "Suicide Chess",
-    "group": "Other",
-    "playable": true
-  },
-  {
-    "family": "chess",
-    "variant": "synochess",
-    "key": "synochess",
-    "label": "Synochess",
     "group": "Other",
     "playable": true
   },
@@ -1076,14 +1020,6 @@
     "variant": "wildebeest",
     "key": "wildebeest",
     "label": "Standard Wildebeest Chess",
-    "group": "Other",
-    "playable": true
-  },
-  {
-    "family": "chess",
-    "variant": "xiang-fu",
-    "key": "xiang-fu",
-    "label": "Xiang Fu",
     "group": "Other",
     "playable": true
   },
