@@ -89,12 +89,16 @@ function buildResolved() {
     render.cellColor = document.getElementById('cellcolor-select').value
   } else if (type === 'hex') {
     topology.radius = parseInt(document.getElementById('hex-radius').value) || 5
+    topology.shape = 'hexagonal'
+    render.cellColor = 'three-colour'
+    render.frame = 'hexagonal'
   } else if (type === 'graph') {
     topology.structure = document.getElementById('graph-structure').value
     topology.params = { rings: parseInt(document.getElementById('graph-rings').value) || 3 }
   } else if (type === 'track') {
     topology.positions = parseInt(document.getElementById('track-positions').value) || 24
     render.trackStyle = 'triangular-points'
+    render.cellColor = 'backgammon'
   } else if (type === 'pit') {
     topology.cols = parseInt(document.getElementById('pit-cols').value) || 6
   }
@@ -778,6 +782,12 @@ async function init() {
 
   document.getElementById('topo-type').addEventListener('change', () => {
     placement = {}; pieceHistory = []
+    const type = getTopoType()
+    const surfaceSelect = document.getElementById('surface-select')
+    if (type === 'pit') surfaceSelect.value = 'earth'
+    else if (type === 'graph') surfaceSelect.value = 'parchment'
+    else if (type === 'hex') surfaceSelect.value = 'wood-classic'
+    else if (type === 'track') surfaceSelect.value = 'wood-classic'
     showTopoOpts(); render(); updateInfoText(); updateTryInPlayState()
   })
 

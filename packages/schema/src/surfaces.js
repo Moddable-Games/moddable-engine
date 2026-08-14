@@ -139,6 +139,13 @@ function deriveCrossTopoDefaults(colors) {
   if (!c['seed-stroke']) c['seed-stroke'] = c.stroke || '#555'
   if (!c.track) c.track = c['cell-light'] || '#ddd'
   if (!c['track-stroke']) c['track-stroke'] = c.stroke || c['cell-dark'] || '#666'
+  if (!c.line) c.line = c.stroke || c['cell-dark'] || '#333'
+  if (!c.outline) c.outline = c.stroke || '#333'
+  if (!c.frame) c.frame = c['cell-dark'] || '#8b5a2b'
+  if (!c.felt) c.felt = c.background || '#2a5a2a'
+  if (!c['point-a']) c['point-a'] = c['cell-light'] || '#d9c5a0'
+  if (!c['point-b']) c['point-b'] = c['cell-dark'] || '#8b5a2b'
+  if (!c['board-outer']) c['board-outer'] = c.frame || c['cell-dark'] || '#5a3a1a'
   return c
 }
 
