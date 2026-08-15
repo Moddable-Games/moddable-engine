@@ -389,7 +389,7 @@ export function createGridTopology(config) {
   function parsePosition(notation, vocabulary) {
     const symbolMap = buildSymbolMap(vocabulary)
     const cells = new Array(rows * cols).fill(null)
-    const rowStrings = notation.split('/')
+    const rowStrings = notation.split(' ')[0].split('/')
     const isCommaSeparated = rowStrings.some(r => r.includes(','))
 
     for (let r = 0; r < rowStrings.length && r < rows; r++) {

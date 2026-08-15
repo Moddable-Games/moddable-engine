@@ -351,7 +351,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const cols = topology ? topology.cols : 8
     const rows = topology ? topology.rows : 8
     const board = new Array(rows * cols).fill(null)
-    const rowStrings = fen.split('/')
+    const rowStrings = fen.split(' ')[0].split('/')
     const symbolLookup = buildReverseVocab()
     let idx = 0
     for (const row of rowStrings) {
