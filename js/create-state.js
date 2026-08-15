@@ -9,6 +9,7 @@
 import { resolveSurface } from '../packages/schema/src/surfaces.js'
 import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolver.js'
 import { toPluginConfig, defaultRuleValues } from './create-rules.js'
+import { defaultPlayers, toPlayerConfig, playersFromResolved } from './create-players.js'
 
 export const STATE_VERSION = 1
 
@@ -23,6 +24,7 @@ export function defaultState(family = 'chess') {
     pieceVocabulary: null,
     placement: {},
     customPieces: [],
+    players: defaultPlayers(family),
     rules: defaultRuleValues(family),
   }
 }
@@ -176,6 +178,10 @@ export function buildResolvedFromState(state) {
   const family = state.family || 'chess'
   const pluginConfig = toPluginConfig(family, state.rules || {})
 
+  const { players, config: playerConfig } = toPlayerConfig(family, state.players)
+  variantEngine.players = players
+  Object.assign(pluginConfig, playerConfig)
+
   if (Array.isArray(state.customPieces) && state.customPieces.length) {
     const vocabulary = {}
     const pieces = {}
@@ -245,6 +251,8 @@ export function stateFromResolved(resolved, family, opts = {}) {
   const setup = typeof resolved.setup === 'string' ? resolved.setup : ''
   const parsed = setup ? parseSetup(setup, { type: state.topology.type, rows: state.topology.rows, cols: state.topology.cols }) : {}
   state.placement = parsed || {}
+
+  state.players = playersFromResolved(resolved, family)
 
   const pluginBlock = resolved.plugins?.[family] || {}
   const rules = defaultRuleValues(family)

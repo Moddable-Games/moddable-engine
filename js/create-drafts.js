@@ -151,6 +151,20 @@ export function relativeTime(ts, now = Date.now()) {
   return `${days}d ago`
 }
 
-export function hasContent(state) {
-  return !!state && Object.keys(state.placement || {}).length > 0
+// Whether a working draft is worth restoring. Placed pieces are the obvious
+// case, but a board with four named seats, custom rules and no pieces yet is
+// also work someone would be annoyed to lose, and was being discarded because
+// the only test was the piece count. `defaultFor` is passed in rather than
+// imported so this module keeps no dependencies.
+export function hasContent(state, defaultFor) {
+  if (!state) return false
+  if (Object.keys(state.placement || {}).length > 0) return true
+  if ((state.customPieces || []).length > 0) return true
+  if (typeof defaultFor !== 'function') return false
+  const base = defaultFor(state.family || 'chess')
+  const shape = s => JSON.stringify({
+    family: s.family, title: s.title, pieceSet: s.pieceSet,
+    topology: s.topology, players: s.players, rules: s.rules,
+  })
+  return shape(state) !== shape(base)
 }

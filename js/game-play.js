@@ -1230,13 +1230,24 @@ export async function initGamePlay(container, defaults = {}) {
   // looked empty on the way back.
   function updateDraftLink() {
     draftLinkEl.innerHTML = ''
-    if (!config.draftId) return
-    const record = getDraft(config.draftId)
     const link = document.createElement('a')
     link.className = 'btn btn-outline'
-    link.href = '../create/?draft=' + encodeURIComponent(config.draftId)
     link.textContent = 'Edit in Create'
-    link.title = record ? `Reopen "${record.name}" in the board editor` : 'Reopen this draft in the board editor'
+
+    if (config.draftId) {
+      const record = getDraft(config.draftId)
+      link.href = '../create/?draft=' + encodeURIComponent(config.draftId)
+      link.title = record ? `Reopen "${record.name}" in the board editor` : 'Reopen this draft in the board editor'
+    } else {
+      // Play back to create for a variant that is not a draft. It opens as a
+      // starting point, not as a claim to be that variant, which is why the
+      // create page says so when it loads one.
+      if (session?.resolved?.topology?.type !== 'grid') return
+      const playable = getPlayableVariants(config.family)
+      const slug = playable.find(e => e.variant === config.variant)?.slug || config.variant
+      link.href = `../create/?family=${encodeURIComponent(config.family)}&variant=${encodeURIComponent(slug)}`
+      link.title = 'Open this variant in the board editor as a starting point'
+    }
     draftLinkEl.appendChild(link)
   }
 

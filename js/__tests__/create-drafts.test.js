@@ -24,6 +24,7 @@ globalThis.localStorage = {
 const drafts = await import('../create-drafts.js')
 const { defaultState, buildResolvedFromState, stateFromResolved, buildSetup, parseSetup } = await import('../create-state.js')
 const { FAMILY_RULES, toPluginConfig, defaultRuleValues } = await import('../create-rules.js')
+const { defaultPlayers, toPlayerConfig } = await import('../create-players.js')
 
 beforeEach(() => backing.clear())
 
@@ -179,8 +180,8 @@ describe('the emitted plugin config says only what the user changed', () => {
   })
 
   test('changed values are emitted with their real types', () => {
-    const values = { ...defaultRuleValues('chess'), castling: false, playerCount: 4 }
-    expect(toPluginConfig('chess', values)).toEqual({ castling: false, playerCount: 4 })
+    const values = { ...defaultRuleValues('chess'), castling: false, torpedo: true }
+    expect(toPluginConfig('chess', values)).toEqual({ castling: false, torpedo: true })
   })
 
   test('a royal-less chess board also turns check detection off', () => {
@@ -217,5 +218,87 @@ describe('the draft is configuration, not a URL flag', () => {
   test('updateURL clears the draft parameter when the session has no draft', () => {
     const update = source.slice(source.indexOf('function updateURL()'))
     expect(update).toContain("params.delete('draft')")
+  })
+})
+
+describe('players and sides', () => {
+  test('two players facing up and down emit nothing, because that is the default everywhere', () => {
+    const { players, config } = toPlayerConfig('chess', defaultPlayers('chess'))
+    expect(players).toEqual(['white', 'black'])
+    expect(config).toEqual({})
+  })
+
+  test('names reach engine.players', () => {
+    const state = defaultState('chess')
+    state.players = { count: 2, names: ['Attackers', 'Defenders'], advancement: { 0: 'up', 1: 'down' } }
+    expect(buildResolvedFromState(state).players).toEqual(['Attackers', 'Defenders'])
+  })
+
+  test('a four-seat shogi board emits a direction vector per seat', () => {
+    // The exact configuration four-player-shogi shipped without, which made red
+    // advance into its own army and green advance backwards.
+    const { players, config } = toPlayerConfig('shogi', {
+      count: 4,
+      names: ['red', 'yellow', 'green', 'blue'],
+      advancement: { 0: 'right', 1: 'down', 2: 'up', 3: 'left' },
+    })
+    expect(players).toEqual(['red', 'yellow', 'green', 'blue'])
+    expect(config.playerCount).toBe(4)
+    expect(config.advancement).toEqual({ 0: [0, 1], 1: [1, 0], 2: [-1, 0], 3: [0, -1] })
+  })
+
+  test('chess gets a scalar, because that is what its plugin reads', () => {
+    const { config } = toPlayerConfig('chess', {
+      count: 4, names: ['a', 'b', 'c', 'd'],
+      advancement: { 0: 'up', 1: 'down', 2: 'up', 3: 'down' },
+    })
+    expect(config.advancement).toEqual({ 0: -1, 1: 1, 2: -1, 3: 1 })
+  })
+
+  test('families whose plugin does not read advancement are offered no direction', () => {
+    const { config } = toPlayerConfig('go', defaultPlayers('go'))
+    expect(config.advancement).toBeUndefined()
+  })
+
+  test('players survive the round-trip', () => {
+    const state = defaultState('shogi')
+    state.players = { count: 4, names: ['red', 'yellow', 'green', 'blue'], advancement: { 0: 'right', 1: 'down', 2: 'up', 3: 'left' } }
+    const back = stateFromResolved(buildResolvedFromState(state), 'shogi')
+    expect(back.players.count).toBe(4)
+    expect(back.players.names).toEqual(['red', 'yellow', 'green', 'blue'])
+    expect(back.players.advancement).toEqual({ 0: 'right', 1: 'down', 2: 'up', 3: 'left' })
+  })
+
+  test('advancement is emitted for every seat once there are more than two', () => {
+    // Leaving a seat out is what the two-player default answers for, and the
+    // answer is wrong for any seat that is not at the top or the bottom.
+    const { config } = toPlayerConfig('shogi', { count: 3, names: ['a', 'b', 'c'], advancement: { 0: 'up', 1: 'down' } })
+    expect(Object.keys(config.advancement)).toEqual(['0', '1', '2'])
+  })
+})
+
+describe('rules content is never served from a stale cache', () => {
+  // A corrected variant could be committed, pulled and served while the page
+  // kept playing yesterday's copy, because every engine asset carries a `?v=`
+  // string and no moddable-rules fetch carried anything. A `?v=` would not fix
+  // it either: the engine's version does not change when a rules file does.
+  const frontmatter = readFileSync(join(process.cwd(), 'js', 'variant-frontmatter.js'), 'utf8')
+  const shared = readFileSync(join(process.cwd(), 'js', 'play-shared.js'), 'utf8')
+
+  test('every rules fetch forces revalidation', () => {
+    const calls = frontmatter.match(/fetch\([^)]*\)/g) || []
+    expect(calls.length).toBeGreaterThan(0)
+    for (const call of calls) expect(call).toContain('RULES_FETCH')
+  })
+
+  test('the diagrams manifest does too', () => {
+    const call = shared.match(/fetch\(RULES_BASE[^)]*\)/)?.[0] || ''
+    expect(call).toContain("cache: 'no-cache'")
+  })
+
+  test('engine-served assets still carry a version string', () => {
+    // The other half of the contract: those are busted by version, not revalidated.
+    expect(shared).toMatch(/gallery-index\.json\?v=/)
+    expect(shared).toMatch(/playability-manifest\.json\?v=/)
   })
 })

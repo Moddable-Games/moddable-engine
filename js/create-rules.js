@@ -29,7 +29,6 @@ export const FAMILY_RULES = {
     { key: 'doubleStep', label: 'Pawn double step', type: 'bool', default: true },
     { key: 'torpedo', label: 'Torpedo pawns (double step anywhere)', type: 'bool', default: false },
     { key: 'drops', label: 'Drops from hand (crazyhouse)', type: 'bool', default: false },
-    { key: 'playerCount', label: 'Players', type: 'number', default: 2, min: 2, max: 4 },
   ],
   shogi: [
     { key: 'royalType', label: 'Royal piece', type: 'select', default: 'king',

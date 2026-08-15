@@ -60,7 +60,7 @@ let _galleryIndex = null
 export async function loadGalleryIndex() {
   if (_galleryIndex) return _galleryIndex
   try {
-    const resp = await fetch('../pieces/gallery-index.json?v=1.0.15')
+    const resp = await fetch('../pieces/gallery-index.json?v=1.0.16')
     if (!resp.ok) throw new Error(`gallery-index.json: ${resp.status}`)
     _galleryIndex = await resp.json()
   } catch (e) {
@@ -75,7 +75,9 @@ export function getGalleryIndex() { return _galleryIndex }
 let _variantManifest = null
 export async function loadVariantManifest() {
   if (_variantManifest) return _variantManifest
-  try { _variantManifest = await fetch(RULES_BASE + 'diagrams-manifest.json').then(r => r.json()) }
+  // Same reason as the rules markdown in js/variant-frontmatter.js: this comes
+  // from moddable-rules and carries no version string of its own.
+  try { _variantManifest = await fetch(RULES_BASE + 'diagrams-manifest.json', { cache: 'no-cache' }).then(r => r.json()) }
   catch { _variantManifest = [] }
   return _variantManifest
 }
@@ -100,7 +102,7 @@ let _playabilityManifest = null
 export async function loadPlayabilityManifest() {
   if (_playabilityManifest) return _playabilityManifest
   try {
-    const resp = await fetch('../play/playability-manifest.json?v=1.0.15')
+    const resp = await fetch('../play/playability-manifest.json?v=1.0.16')
     if (!resp.ok) throw new Error(resp.status)
     _playabilityManifest = await resp.json()
   } catch {

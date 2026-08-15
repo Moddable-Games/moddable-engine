@@ -4,6 +4,7 @@ import { resolveVariantBoard } from './variant-frontmatter.js'
 import { defaultState, buildResolvedFromState, buildSetup, parseSetup, stateFromResolved, isGrid } from './create-state.js'
 import { FAMILY_RULES, defaultRuleValues, buildRulesPanel, toPluginConfig } from './create-rules.js'
 import { movesForSpec, boardFromPlacement, paintDots } from './create-preview.js'
+import { defaultPlayers, buildPlayersPanel, resizePlayers, MAX_PLAYERS } from './create-players.js'
 import { exportSvgFile, exportPngFile } from './svg-export.js'
 import * as drafts from './create-drafts.js'
 
@@ -168,12 +169,14 @@ function loadDraft(id) {
 function applyState(next) {
   state = { ...defaultState(next.family || 'chess'), ...structuredClone(next) }
   state.rules = { ...defaultRuleValues(state.family), ...(next.rules || {}) }
+  state.players = next.players ? structuredClone(next.players) : defaultPlayers(state.family)
   pieceHistory = []
   activePiece = null
   activePieceSrc = null
   writeStateIntoControls()
   showTopoOpts()
   buildPiecePicker()
+  renderPlayers()
   renderRules()
   renderCustomPiecesList()
   render()
@@ -397,6 +400,13 @@ function updateInfoText() {
 function populatePieceSets() {
   const select = $('pieceset-select')
   if (!galleryIndex || !galleryIndex.length) return
+  // 45 of the 115 gallery sets produce no palette, because `pieceIdToFenChar`
+  // knows one naming convention and the gallery uses five: wK/bQ, but also
+  // `dragon`/`wolf` (emoji), `black_stone` (wikimedia go), `0FU` (kanji shogi)
+  // and bare digits (oware). Hiding them would remove real sets — a go board
+  // could no longer use the wikimedia go stones — so they stay listed and the
+  // palette says why it is empty instead of showing a lone eraser. Reading all
+  // five conventions is the unified piece editor in engine#118.
   const families = [...new Set(galleryIndex.map(s => s.family))].sort()
   for (const fam of families) {
     const group = document.createElement('optgroup')
@@ -404,7 +414,7 @@ function populatePieceSets() {
     for (const s of galleryIndex.filter(s => s.family === fam)) {
       const opt = document.createElement('option')
       opt.value = s.id
-      opt.textContent = s.name || s.id
+      opt.textContent = (s.name || s.id) + (paletteEntries(s).length ? '' : ' (not placeable yet)')
       group.appendChild(opt)
     }
     select.appendChild(group)
@@ -452,6 +462,12 @@ function buildPiecePicker() {
 
   picker.innerHTML = ''
   const entries = paletteEntries(setDef)
+  if (!entries.length) {
+    picker.innerHTML = '<div class="piece-hint">This set names its pieces in a way the editor cannot yet map to board symbols, so there is nothing to place from it. Pick another set, or define a piece by hand below. Tracked in engine#118.</div>'
+    $('active-piece-label').textContent = ''
+    activePiece = null
+    return
+  }
 
   for (const side of ['first', 'second']) {
     const group = entries.filter(e => e.side === side)
@@ -588,6 +604,24 @@ function renderCustomPiecesList() {
 
 // --- rules ---
 
+function renderPlayers() {
+  const panel = $('players-panel')
+  if (!panel) return
+  buildPlayersPanel(panel, state.family, state.players, (field, value, index) => {
+    if (field === 'count') {
+      const max = MAX_PLAYERS[state.family] || 2
+      state.players = resizePlayers(state.players, Math.min(value, max), state.family)
+      renderPlayers()
+    } else if (field === 'name') {
+      state.players.names[index] = value
+    } else if (field === 'direction') {
+      state.players.advancement[index] = value
+    }
+    render()
+    updateInfoText()
+  })
+}
+
 function renderRules() {
   const panel = $('rules-panel')
   if (!panel) return
@@ -691,9 +725,12 @@ function exportYaml() {
     }
   }
 
-  const pluginConfig = toPluginConfig(state.family, state.rules)
-  if (state.customPieces.length) {
-    pluginConfig.pieces = Object.fromEntries(state.customPieces.map(cp => [cp.name, cp.spec]))
+  // Read the plugin block off the resolved engine rather than rebuilding it, so
+  // the exported file cannot disagree with the board being played. Players were
+  // missing from the export for exactly that reason: two paths, one updated.
+  const pluginConfig = resolved.plugins?.[state.family] || {}
+  if (Array.isArray(resolved.players) && resolved.players.length) {
+    lines.push(`  players: [${resolved.players.join(', ')}]`)
   }
   if (Object.keys(pluginConfig).length) {
     lines.push('  plugins:')
@@ -784,9 +821,17 @@ async function init() {
   let restored = false
   if (requested) {
     restored = loadDraft(requested)
+  } else if (params.get('variant')) {
+    // The other direction of the round-trip: a variant played on the play page
+    // opens here as a starting point. Same path as the template picker.
+    $('template-family').value = params.get('family') || 'chess'
+    populateTemplateVariants()
+    $('template-variant').value = params.get('variant')
+    await loadTemplate()
+    restored = true
   } else {
     const working = drafts.getWorkingDraft()
-    if (working && drafts.hasContent(working.state)) {
+    if (working && drafts.hasContent(working.state, defaultState)) {
       applyState(working.state)
       restored = true
       setStatus('Restored your last board. Use Start new to clear it.')
@@ -796,6 +841,7 @@ async function init() {
     writeStateIntoControls()
     showTopoOpts()
     buildPiecePicker()
+    renderPlayers()
     renderRules()
     render()
     updateInfoText()
@@ -807,6 +853,8 @@ async function init() {
   $('family-select').addEventListener('change', () => {
     state.family = val('family-select')
     state.rules = defaultRuleValues(state.family)
+    state.players = defaultPlayers(state.family)
+    renderPlayers()
     renderRules()
     onControlChange()
   })
