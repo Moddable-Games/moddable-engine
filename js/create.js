@@ -1,58 +1,224 @@
 import { renderFromEngine, attachPieceImages, pieceIdToFenChar } from '../packages/render/src/render-engine.js'
-import { resolveSurface } from '../packages/schema/src/surfaces.js'
-import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolver.js'
-import { fromConfig } from '../packages/piece-behaviour/src/piece-definitions.js'
+import { PLAYABLE_FAMILIES, FAMILY_LABELS, loadPlayabilityManifest, getPlayableVariants } from './play-shared.js'
+import { resolveVariantBoard } from './variant-frontmatter.js'
+import { defaultState, buildResolvedFromState, buildSetup, parseSetup, stateFromResolved, isGrid } from './create-state.js'
+import { FAMILY_RULES, defaultRuleValues, buildRulesPanel, toPluginConfig } from './create-rules.js'
+import { movesForSpec, boardFromPlacement, paintDots } from './create-preview.js'
+import { exportSvgFile, exportPngFile } from './svg-export.js'
+import * as drafts from './create-drafts.js'
 
 let galleryIndex = null
-let placement = {}
+let state = defaultState('chess')
 let activePiece = null
 let activePieceSrc = null
 let pieceHistory = []
 let lastGrid = null
-let customPieces = []
-let movePreviewCells = []
+let currentDraftId = null
+let autosaveTimer = null
+let restoring = false
 
 const STANDARD_PIECE_SPECS = {
   K: { type: 'rider', dirs: 'all', maxSteps: 1 },
-  k: { type: 'rider', dirs: 'all', maxSteps: 1 },
   Q: { type: 'rider', dirs: 'all' },
-  q: { type: 'rider', dirs: 'all' },
   R: { type: 'rider', dirs: 'orthogonal' },
-  r: { type: 'rider', dirs: 'orthogonal' },
   B: { type: 'rider', dirs: 'diagonal' },
-  b: { type: 'rider', dirs: 'diagonal' },
   N: { type: 'leaper', offsets: 'knight' },
-  n: { type: 'leaper', offsets: 'knight' },
   P: { type: 'leaper', offsets: [[-1, 0]], directional: true },
   p: { type: 'leaper', offsets: [[1, 0]], directional: true },
 }
 
 function getSpecForFenChar(fenChar) {
-  if (STANDARD_PIECE_SPECS[fenChar]) return STANDARD_PIECE_SPECS[fenChar]
-  for (const cp of customPieces) {
+  const upper = fenChar.toUpperCase()
+  if (fenChar === 'p') return STANDARD_PIECE_SPECS.p
+  if (STANDARD_PIECE_SPECS[upper]) return STANDARD_PIECE_SPECS[upper]
+  for (const cp of state.customPieces) {
     if (cp.symbolW === fenChar || cp.symbolB === fenChar) return cp.spec
   }
   return null
 }
 
-// Placement is keyed "row,col". Resizing the board used to leave every piece on
-// its old row and column while the board grew or shrank around it, silently
-// discarding anything that fell outside. Reanchor from the bottom-left instead,
-// which is where a setup is conventionally read from, and report any piece that
-// genuinely cannot fit.
+const $ = id => document.getElementById(id)
+const val = id => $(id)?.value
+const num = (id, fallback) => parseInt($(id)?.value, 10) || fallback
+
+// --- state <-> DOM ---
+
+function readControlsIntoState() {
+  state.family = val('family-select') || 'chess'
+  state.topology.type = val('topo-type') || 'grid'
+  state.topology.rows = num('grid-rows', 8)
+  state.topology.cols = num('grid-cols', 8)
+  state.topology.layout = val('grid-layout') || 'cells'
+  state.topology.radius = num('hex-radius', 5)
+  state.topology.structure = val('graph-structure') || 'concentric-rings'
+  state.topology.rings = num('graph-rings', 3)
+  state.topology.positions = num('track-positions', 24)
+  state.topology.pitCols = num('pit-cols', 6)
+  state.render.surface = val('surface-select') || 'wood-classic'
+  state.render.cellColor = val('cellcolor-select') || 'checkered'
+  state.render.labels = val('labels-select') !== 'false'
+  state.render.starPoints = !!$('star-points')?.checked
+  state.pieceSet = val('pieceset-select') || ''
+}
+
+function writeStateIntoControls() {
+  restoring = true
+  $('family-select').value = state.family
+  $('topo-type').value = state.topology.type
+  $('grid-rows').value = state.topology.rows
+  $('grid-cols').value = state.topology.cols
+  $('grid-layout').value = state.topology.layout || 'cells'
+  $('hex-radius').value = state.topology.radius
+  $('graph-structure').value = state.topology.structure
+  $('graph-rings').value = state.topology.rings
+  $('track-positions').value = state.topology.positions
+  $('pit-cols').value = state.topology.pitCols
+  $('surface-select').value = state.render.surface
+  $('cellcolor-select').value = state.render.cellColor
+  $('labels-select').value = state.render.labels ? 'true' : 'false'
+  $('star-points').checked = !!state.render.starPoints
+  if ([...$('pieceset-select').options].some(o => o.value === state.pieceSet)) {
+    $('pieceset-select').value = state.pieceSet
+  }
+  lastGrid = { rows: state.topology.rows, cols: state.topology.cols }
+  restoring = false
+}
+
+// --- drafts ---
+
+function scheduleAutosave() {
+  if (restoring) return
+  clearTimeout(autosaveTimer)
+  autosaveTimer = setTimeout(() => {
+    drafts.saveWorking(structuredClone(state))
+    if (currentDraftId) drafts.saveDraft(structuredClone(state), { id: currentDraftId })
+  }, 400)
+}
+
+function renderDraftsPanel() {
+  const list = $('drafts-list')
+  if (!list) return
+  list.innerHTML = ''
+  const records = drafts.listDrafts()
+  if (!records.length) {
+    const empty = document.createElement('div')
+    empty.className = 'piece-hint'
+    empty.textContent = 'No saved boards yet. Your work in progress is kept automatically; press Save to name it.'
+    list.appendChild(empty)
+    return
+  }
+  for (const record of records) {
+    const row = document.createElement('div')
+    row.className = 'draft-row' + (record.id === currentDraftId ? ' draft-row--active' : '')
+
+    const main = document.createElement('button')
+    main.className = 'draft-open'
+    main.innerHTML = `<span class="draft-name">${escapeHtml(record.name)}</span>` +
+      `<span class="draft-meta">${escapeHtml(drafts.describeDraft(record))} · ${drafts.relativeTime(record.updatedAt)}</span>`
+    main.addEventListener('click', () => loadDraft(record.id))
+    row.appendChild(main)
+
+    const rename = document.createElement('button')
+    rename.className = 'draft-action'
+    rename.textContent = 'Rename'
+    rename.addEventListener('click', () => {
+      const name = prompt('Name this board', record.name)
+      if (name && name.trim()) { drafts.renameDraft(record.id, name.trim()); renderDraftsPanel(); syncDraftName() }
+    })
+    row.appendChild(rename)
+
+    const del = document.createElement('button')
+    del.className = 'draft-action draft-action--danger'
+    del.textContent = 'Delete'
+    del.addEventListener('click', () => {
+      drafts.deleteDraft(record.id)
+      if (currentDraftId === record.id) currentDraftId = null
+      renderDraftsPanel()
+      syncDraftName()
+    })
+    row.appendChild(del)
+
+    list.appendChild(row)
+  }
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
+}
+
+function syncDraftName() {
+  const input = $('draft-name')
+  if (!input) return
+  const record = currentDraftId ? drafts.getDraft(currentDraftId) : null
+  input.value = record ? record.name : ''
+  input.placeholder = record ? '' : 'Unsaved board'
+}
+
+function loadDraft(id) {
+  const record = drafts.getDraft(id)
+  if (!record?.state) return false
+  applyState(record.state)
+  currentDraftId = id === drafts.WORKING_ID ? null : id
+  renderDraftsPanel()
+  syncDraftName()
+  setStatus(`Restored ${record.name}`)
+  return true
+}
+
+function applyState(next) {
+  state = { ...defaultState(next.family || 'chess'), ...structuredClone(next) }
+  state.rules = { ...defaultRuleValues(state.family), ...(next.rules || {}) }
+  pieceHistory = []
+  activePiece = null
+  activePieceSrc = null
+  writeStateIntoControls()
+  showTopoOpts()
+  buildPiecePicker()
+  renderRules()
+  renderCustomPiecesList()
+  render()
+  updateInfoText()
+  updateTryInPlayState()
+}
+
+function saveNamed() {
+  const suggested = $('draft-name')?.value?.trim() || drafts.defaultName(state)
+  const record = drafts.saveDraft(structuredClone(state), { id: currentDraftId || undefined, name: suggested })
+  if (!record) { setStatus('Could not save: browser storage is full or disabled'); return }
+  currentDraftId = record.id
+  renderDraftsPanel()
+  syncDraftName()
+  setStatus(`Saved "${record.name}"`)
+}
+
+function setStatus(text) {
+  const el = $('create-status')
+  if (el) el.textContent = text || ''
+}
+
+// --- board rendering ---
+
+function sqToPlacementKey(sq) {
+  if (!isGrid(state)) return sq
+  if (/^\d+,\d+$/.test(sq)) return sq
+  const col = sq.charCodeAt(0) - 97
+  const row = state.topology.rows - parseInt(sq.slice(1), 10)
+  return `${row},${col}`
+}
+
 function reanchorPlacement(oldRows, oldCols, rows, cols) {
   if (!oldRows || !oldCols) return 0
   if (oldRows === rows && oldCols === cols) return 0
   const next = {}
   let dropped = 0
-  for (const [key, piece] of Object.entries(placement)) {
+  for (const [key, piece] of Object.entries(state.placement)) {
     const [r, c] = key.split(',').map(Number)
     const fromBottom = oldRows - 1 - r
     const nr = rows - 1 - fromBottom
     if (nr < 0 || nr >= rows || c >= cols) { dropped++; continue }
     next[`${nr},${c}`] = piece
   }
-  placement = next
+  state.placement = next
   return dropped
 }
 
@@ -61,96 +227,11 @@ async function loadGallery() {
   catch { galleryIndex = [] }
 }
 
-function getTopoType() { return document.getElementById('topo-type').value }
-
-function sqToPlacementKey(sq) {
-  const type = getTopoType()
-  if (type === 'grid') {
-    const rows = parseInt(document.getElementById('grid-rows').value) || 8
-    const col = sq.charCodeAt(0) - 97
-    const row = rows - parseInt(sq.slice(1))
-    return `${row},${col}`
-  }
-  return sq
-}
-
-function buildResolved() {
-  const type = getTopoType()
-  const surfaceRef = document.getElementById('surface-select').value
-  const surface = resolveSurface(surfaceRef)
-  const labels = document.getElementById('labels-select').value === 'true'
-
-  const topology = { type }
-  const render = { labels }
-
-  if (type === 'grid') {
-    topology.rows = parseInt(document.getElementById('grid-rows').value) || 8
-    topology.cols = parseInt(document.getElementById('grid-cols').value) || 8
-    render.cellColor = document.getElementById('cellcolor-select').value
-  } else if (type === 'hex') {
-    topology.radius = parseInt(document.getElementById('hex-radius').value) || 5
-    topology.shape = 'hexagonal'
-    render.cellColor = 'tricolor'
-    render.frame = 'hexagonal'
-  } else if (type === 'graph') {
-    topology.structure = document.getElementById('graph-structure').value
-    topology.params = { rings: parseInt(document.getElementById('graph-rings').value) || 3 }
-  } else if (type === 'track') {
-    topology.positions = parseInt(document.getElementById('track-positions').value) || 24
-    render.trackStyle = 'triangular-points'
-    render.cellColor = 'backgammon'
-  } else if (type === 'pit') {
-    topology.cols = parseInt(document.getElementById('pit-cols').value) || 6
-  }
-
-  const pieceSetId = document.getElementById('pieceset-select').value
-  const pieces = pieceSetId ? { set: pieceSetId } : undefined
-  const setup = Object.keys(placement).length > 0 ? buildFen() : undefined
-
-  const variantEngine = { topology, surface: surfaceRef, render }
-  if (setup) variantEngine.setup = setup
-  if (pieces) variantEngine.pieces = pieces
-
-  const { resolved } = cascadeResolve({
-    surface,
-    family: { engine: {}, meta: { label: '' } },
-    variant: { engine: variantEngine, meta: { label: 'Custom Variant' } },
-  })
-
-  return resolved
-}
-
-function buildFen() {
-  const type = getTopoType()
-  if (type === 'grid') {
-    const rows = parseInt(document.getElementById('grid-rows').value) || 8
-    const cols = parseInt(document.getElementById('grid-cols').value) || 8
-    const fenRows = []
-    for (let r = 0; r < rows; r++) {
-      let row = ''
-      let empty = 0
-      for (let c = 0; c < cols; c++) {
-        const key = `${r},${c}`
-        if (placement[key]) {
-          if (empty > 0) { row += empty; empty = 0 }
-          row += placement[key]
-        } else {
-          empty++
-        }
-      }
-      if (empty > 0) row += empty
-      fenRows.push(row)
-    }
-    return fenRows.join('/')
-  }
-  return Object.entries(placement).map(([k, v]) => `${k}:${v}`).join(',')
-}
-
 function render() {
-  const resolved = buildResolved()
-  const container = document.getElementById('board-svg')
+  const resolved = buildResolvedFromState(state)
+  const container = $('board-svg')
 
-  let opts = {}
+  const opts = {}
   if (resolved.pieces?.set && galleryIndex) {
     const result = attachPieceImages(resolved, galleryIndex)
     opts.pieceImages = result.images || {}
@@ -159,208 +240,136 @@ function render() {
   }
 
   const svg = renderFromEngine(resolved, opts)
+  container.classList.add('active')
   if (svg) {
-    // .canvas-svg is display:none until it has the active class, so the board
-    // was being rendered into a hidden container.
-    container.classList.add('active')
     container.innerHTML = svg
-    bindCellClick()
+    updateCursors()
   } else {
-    container.classList.add('active')
-    container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted)">Cannot render this configuration</div>'
+    container.innerHTML = '<div class="canvas-error">Cannot render this configuration</div>'
   }
+  scheduleAutosave()
 }
 
 function clearHoverHighlights() {
-  const container = document.getElementById('board-svg')
-  container.querySelectorAll('.piece-ghost, .hover-move-dot').forEach(el => el.remove())
+  $('board-svg').querySelectorAll('.piece-ghost, .hover-move-dot').forEach(el => el.remove())
 }
 
 function showHoverMoves(key) {
-  if (getTopoType() !== 'grid') return
-  const fenChar = placement[key]
+  if (!isGrid(state)) return
+  const fenChar = state.placement[key]
   if (!fenChar) return
   const spec = getSpecForFenChar(fenChar)
   if (!spec) return
-  const rows = parseInt(document.getElementById('grid-rows').value) || 8
-  const cols = parseInt(document.getElementById('grid-cols').value) || 8
+  const { rows, cols } = state.topology
   const [r, c] = key.split(',').map(Number)
-  const center = r * cols + c
-  let primitive
-  try { primitive = fromConfig(spec) } catch { return }
-
-  const board = new Array(rows * cols).fill(null)
-  for (const [k, v] of Object.entries(placement)) {
-    const [pr, pc] = k.split(',').map(Number)
-    const idx = pr * cols + pc
-    const isUpper = v === v.toUpperCase()
-    board[idx] = { friendly: isUpper === (fenChar === fenChar.toUpperCase()), enemy: isUpper !== (fenChar === fenChar.toUpperCase()) }
-  }
-
-  const topo = {
-    rays(from, directions, maxSteps) {
-      const DIRS = { orthogonal: [[-1,0],[1,0],[0,-1],[0,1]], diagonal: [[-1,-1],[-1,1],[1,-1],[1,1]], all: [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]] }
-      const resolved = typeof directions === 'string' ? (DIRS[directions] || []) : directions
-      return resolved.map(([dr, dc]) => {
-        const ray = []
-        const limit = maxSteps || Math.max(rows, cols)
-        for (let i = 1; i <= limit; i++) {
-          const nr = Math.floor(from / cols) + dr * i, nc = from % cols + dc * i
-          if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) break
-          ray.push(nr * cols + nc)
-        }
-        return ray
-      })
-    },
-    leapTargets(from, offsets) {
-      const NAMED = { knight: [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]], elephant: [[-2,-2],[-2,2],[2,-2],[2,2]], camel: [[-3,-1],[-3,1],[-1,-3],[-1,3],[1,-3],[1,3],[3,-1],[3,1]], king: [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]] }
-      const resolved = typeof offsets === 'string' ? (NAMED[offsets] || []) : offsets
-      const fr = Math.floor(from / cols), fc = from % cols
-      return resolved.filter(([dr, dc]) => { const nr = fr+dr, nc = fc+dc; return nr >= 0 && nr < rows && nc >= 0 && nc < cols }).map(([dr, dc]) => (fr+dr)*cols+(fc+dc))
-    },
-  }
-
-  const moves = primitive.genMoves(topo, center, board)
-  const container = document.getElementById('board-svg')
-  const svgEl = container.querySelector('svg')
-  if (!svgEl) return
-
-  for (const m of moves) {
-    const mr = Math.floor(m.to / cols), mc = m.to % cols
-    const algebraic = String.fromCharCode(97 + mc) + (rows - mr)
-    const cellEl = container.querySelector(`[data-sq="${algebraic}"]`)
-    if (!cellEl || !cellEl.getBBox) continue
-    const rect = cellEl.getBBox()
-    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-    dot.setAttribute('cx', rect.x + rect.width / 2)
-    dot.setAttribute('cy', rect.y + rect.height / 2)
-    dot.setAttribute('r', Math.min(rect.width, rect.height) * 0.15)
-    dot.setAttribute('fill', m.capture ? 'rgba(244, 67, 54, 0.5)' : 'rgba(76, 175, 80, 0.5)')
-    dot.setAttribute('class', 'hover-move-dot')
-    dot.setAttribute('pointer-events', 'none')
-    svgEl.appendChild(dot)
-  }
-}
-
-function bindCellClick() {
-  const container = document.getElementById('board-svg')
-  container.querySelectorAll('.board-cell').forEach(cell => {
-    const sq = cell.dataset.sq
-    if (!sq) return
-    const key = sqToPlacementKey(sq)
-    const isOccupied = !!placement[key]
-
-    if (activePiece === '__erase') {
-      cell.style.cursor = isOccupied ? 'pointer' : 'default'
-    } else if (activePiece) {
-      cell.style.cursor = 'copy'
-    } else {
-      cell.style.cursor = 'default'
-    }
-
-    cell.addEventListener('click', () => {
-      if (!activePiece) return
-      pieceHistory.push({ sq: key, prev: placement[key] || null })
-      if (activePiece === '__erase' || placement[key] === activePiece) {
-        delete placement[key]
-      } else {
-        placement[key] = activePiece
-      }
-      render()
-      updateInfoText()
-    })
-
-    cell.addEventListener('contextmenu', (e) => {
-      e.preventDefault()
-      if (!placement[key]) return
-      pieceHistory.push({ sq: key, prev: placement[key] })
-      delete placement[key]
-      render()
-      updateInfoText()
-    })
-
-    cell.addEventListener('mouseenter', () => {
-      clearHoverHighlights()
-      if (activePiece && activePiece !== '__erase' && activePieceSrc) {
-        const rect = cell.getBBox ? cell.getBBox() : null
-        if (rect) {
-          const svgEl = container.querySelector('svg')
-          const ghost = document.createElementNS('http://www.w3.org/2000/svg', 'image')
-          ghost.setAttribute('href', activePieceSrc)
-          ghost.setAttribute('x', rect.x + rect.width * 0.1)
-          ghost.setAttribute('y', rect.y + rect.height * 0.1)
-          ghost.setAttribute('width', rect.width * 0.8)
-          ghost.setAttribute('height', rect.height * 0.8)
-          ghost.setAttribute('opacity', '0.4')
-          ghost.setAttribute('pointer-events', 'none')
-          ghost.setAttribute('class', 'piece-ghost')
-          svgEl.appendChild(ghost)
-        }
-      }
-      if (!activePiece && isOccupied) {
-        showHoverMoves(key)
-      }
-    })
-
-    cell.addEventListener('mouseleave', () => {
-      clearHoverHighlights()
-    })
+  const moverIsUpper = fenChar === fenChar.toUpperCase()
+  const board = boardFromPlacement(state.placement, rows, cols, moverIsUpper)
+  const moves = movesForSpec(spec, { rows, cols, from: r * cols + c, board })
+  if (!moves) return
+  paintDots($('board-svg'), moves, {
+    rows, cols,
+    className: 'hover-move-dot',
+    fill: m => (m.capture ? 'rgba(244, 67, 54, 0.5)' : 'rgba(76, 175, 80, 0.5)'),
   })
 }
 
-function syncSetupInput() {
-  const input = document.getElementById('setup-input')
-  if (!input) return
-  if (document.activeElement === input) return
-  input.classList.remove('is-invalid')
-  input.value = Object.keys(placement).length ? buildFen() : ''
-}
+// One delegated listener set on the container, bound once at init.
+//
+// The previous version attached listeners per cell and re-attached them every
+// time a palette button was pressed, without the cells having been re-rendered
+// in between. The cell then carried two identical handlers, and a click ran
+// both: the first placed the piece, the second saw the piece already there and
+// removed it again. The visible symptom was that the first click after picking
+// a piece silently did nothing, every single time.
+function bindBoard() {
+  const container = $('board-svg')
 
-// Accept a pasted setup string for grid boards. Anything the board cannot hold
-// is rejected outright rather than partially applied, so the box never shows a
-// string the board is not actually displaying.
-function applySetupInput(text) {
-  const input = document.getElementById('setup-input')
-  const type = getTopoType()
+  const keyFor = target => {
+    const cell = target.closest ? target.closest('.board-cell') : null
+    const sq = cell?.dataset?.sq
+    return sq ? { cell, key: sqToPlacementKey(sq) } : null
+  }
 
-  if (type !== 'grid') {
-    const trimmed = String(text).trim()
-    if (!trimmed || !trimmed.includes(':')) { input.classList.add('is-invalid'); return false }
-    const next = {}
-    for (const pair of trimmed.split(',')) {
-      const [key, piece] = pair.split(':')
-      if (!key || !piece || piece.length !== 1) { input.classList.add('is-invalid'); return false }
-      next[key.trim()] = piece.trim()
-    }
-    pieceHistory.push({ replaceAll: { ...placement } })
-    placement = next
-    input.classList.remove('is-invalid')
+  container.addEventListener('click', (e) => {
+    const hit = keyFor(e.target)
+    if (!hit || !activePiece) return
+    pieceHistory.push({ sq: hit.key, prev: state.placement[hit.key] || null })
+    if (activePiece === '__erase' || state.placement[hit.key] === activePiece) delete state.placement[hit.key]
+    else state.placement[hit.key] = activePiece
     render()
     updateInfoText()
-    return true
-  }
+  })
 
-  const rows = parseInt(document.getElementById('grid-rows').value) || 8
-  const cols = parseInt(document.getElementById('grid-cols').value) || 8
-  const next = {}
-  const rowStrings = String(text).trim().split('/')
-  if (rowStrings.length !== rows) {
-    input.classList.add('is-invalid')
-    return false
-  }
-  for (let r = 0; r < rows; r++) {
-    let c = 0
-    const run = rowStrings[r].match(/\d+|[^\d]/g) || []
-    for (const token of run) {
-      if (/^\d+$/.test(token)) { c += parseInt(token, 10); continue }
-      if (c >= cols) { input.classList.add('is-invalid'); return false }
-      next[`${r},${c}`] = token
-      c++
+  container.addEventListener('contextmenu', (e) => {
+    const hit = keyFor(e.target)
+    if (!hit) return
+    e.preventDefault()
+    if (!state.placement[hit.key]) return
+    pieceHistory.push({ sq: hit.key, prev: state.placement[hit.key] })
+    delete state.placement[hit.key]
+    render()
+    updateInfoText()
+  })
+
+  container.addEventListener('mouseover', (e) => {
+    const hit = keyFor(e.target)
+    if (!hit) return
+    clearHoverHighlights()
+    if (activePiece && activePiece !== '__erase' && activePieceSrc && hit.cell.getBBox) {
+      const rect = hit.cell.getBBox()
+      const svgEl = container.querySelector('svg')
+      if (!svgEl) return
+      const ghost = document.createElementNS('http://www.w3.org/2000/svg', 'image')
+      ghost.setAttribute('href', activePieceSrc)
+      ghost.setAttribute('x', rect.x + rect.width * 0.1)
+      ghost.setAttribute('y', rect.y + rect.height * 0.1)
+      ghost.setAttribute('width', rect.width * 0.8)
+      ghost.setAttribute('height', rect.height * 0.8)
+      ghost.setAttribute('opacity', '0.4')
+      ghost.setAttribute('pointer-events', 'none')
+      ghost.setAttribute('class', 'piece-ghost')
+      svgEl.appendChild(ghost)
     }
-    if (c !== cols) { input.classList.add('is-invalid'); return false }
-  }
-  pieceHistory.push({ replaceAll: { ...placement } })
-  placement = next
+    if (!activePiece && state.placement[hit.key]) showHoverMoves(hit.key)
+  })
+
+  container.addEventListener('mouseout', (e) => {
+    if (keyFor(e.target)) clearHoverHighlights()
+  })
+}
+
+// Cursors are the only per-cell state left, and they are re-applied after each
+// render rather than carried on a listener.
+function updateCursors() {
+  const container = $('board-svg')
+  container.querySelectorAll('.board-cell').forEach(cell => {
+    const sq = cell.dataset.sq
+    if (!sq) return
+    if (activePiece === '__erase') cell.style.cursor = state.placement[sqToPlacementKey(sq)] ? 'pointer' : 'default'
+    else if (activePiece) cell.style.cursor = 'copy'
+    else cell.style.cursor = 'default'
+  })
+}
+
+// --- setup bar ---
+
+function syncSetupInput() {
+  const input = $('setup-input')
+  if (!input || document.activeElement === input) return
+  input.classList.remove('is-invalid')
+  input.value = Object.keys(state.placement).length ? buildSetup(state) : ''
+}
+
+function applySetupInput(text) {
+  const input = $('setup-input')
+  const next = parseSetup(text, {
+    type: state.topology.type,
+    rows: state.topology.rows,
+    cols: state.topology.cols,
+  })
+  if (next === null) { input.classList.add('is-invalid'); return false }
+  pieceHistory.push({ replaceAll: { ...state.placement } })
+  state.placement = next
   input.classList.remove('is-invalid')
   render()
   updateInfoText()
@@ -368,33 +377,31 @@ function applySetupInput(text) {
 }
 
 function updateInfoText() {
-  const count = Object.keys(placement).length
-  const el = document.getElementById('info-text')
+  const count = Object.keys(state.placement).length
+  const el = $('info-text')
+  const prefix = count > 0 ? `${count} piece${count !== 1 ? 's' : ''} placed · ` : ''
   if (activePiece && activePiece !== '__erase') {
-    const imgTag = activePieceSrc
-      ? `<img src="${activePieceSrc}" width="18" height="18" style="vertical-align:middle;margin:0 4px">`
-      : ''
-    el.innerHTML = (count > 0 ? `${count} piece${count !== 1 ? 's' : ''} placed · ` : '') +
-      `Placing: ${imgTag}<span style="font-weight:600">${activePiece}</span>`
+    const imgTag = activePieceSrc ? `<img class="info-piece" src="${activePieceSrc}" width="18" height="18">` : ''
+    el.innerHTML = prefix + `Placing: ${imgTag}<span class="info-strong">${escapeHtml(activePiece)}</span>`
   } else if (activePiece === '__erase') {
-    el.textContent = (count > 0 ? `${count} piece${count !== 1 ? 's' : ''} placed · ` : '') + 'Eraser active'
+    el.textContent = prefix + 'Eraser active'
   } else {
-    el.textContent = count > 0
-      ? `${count} piece${count !== 1 ? 's' : ''} placed`
-      : 'Configure board and click cells to place pieces'
+    el.textContent = count > 0 ? `${count} piece${count !== 1 ? 's' : ''} placed` : 'Configure board and click cells to place pieces'
   }
   syncSetupInput()
+  scheduleAutosave()
 }
 
+// --- piece palette ---
+
 function populatePieceSets() {
-  const select = document.getElementById('pieceset-select')
+  const select = $('pieceset-select')
   if (!galleryIndex || !galleryIndex.length) return
   const families = [...new Set(galleryIndex.map(s => s.family))].sort()
   for (const fam of families) {
-    const sets = galleryIndex.filter(s => s.family === fam)
     const group = document.createElement('optgroup')
     group.label = fam.replace(/-/g, ' ')
-    for (const s of sets) {
+    for (const s of galleryIndex.filter(s => s.family === fam)) {
       const opt = document.createElement('option')
       opt.value = s.id
       opt.textContent = s.name || s.id
@@ -404,9 +411,6 @@ function populatePieceSets() {
   }
 }
 
-// A gallery set is keyed by piece id (wK, bQ). A setup string is keyed by FEN
-// character (K, q). Placing the piece id directly produced spurious pieces and
-// column shifts: "bQ7" parsed as a black bishop followed by a white queen.
 function paletteEntries(setDef) {
   const out = []
   for (const [pieceId, entry] of Object.entries(setDef.pieces || {})) {
@@ -424,18 +428,22 @@ function paletteEntries(setDef) {
   return out
 }
 
+function selectPiece(sym, src) {
+  activePiece = activePiece === sym ? null : sym
+  activePieceSrc = activePiece ? (src || null) : null
+  buildPiecePicker()
+  updateInfoText()
+  updateCursors()
+}
+
 function buildPiecePicker() {
-  const setId = document.getElementById('pieceset-select').value
-  const palette = document.getElementById('piece-palette')
-  const picker = document.getElementById('piece-picker')
-  palette.style.display = ''
+  const setId = state.pieceSet
+  const picker = $('piece-picker')
+  $('piece-palette').style.display = ''
   if (!setId) {
-    // The palette used to hide itself entirely when no set was chosen, and Piece
-    // Set defaults to None, so there was no visible way to place a piece and
-    // nothing saying why.
     activePiece = null
     picker.innerHTML = '<div class="piece-hint">Choose a piece set above to start placing pieces.</div>'
-    document.getElementById('active-piece-label').textContent = ''
+    $('active-piece-label').textContent = ''
     return
   }
 
@@ -469,37 +477,26 @@ function buildPiecePicker() {
       } else {
         btn.textContent = e.fenChar
       }
-      btn.addEventListener('click', () => {
-        activePiece = activePiece === e.fenChar ? null : e.fenChar
-        activePieceSrc = activePiece ? (e.src || null) : null
-        buildPiecePicker()
-        updateInfoText()
-        bindCellClick()
-      })
+      btn.addEventListener('click', () => selectPiece(e.fenChar, e.src))
       row.appendChild(btn)
     }
     picker.appendChild(row)
   }
 
-  if (customPieces.length) {
+  if (state.customPieces.length) {
     const heading = document.createElement('div')
     heading.className = 'piece-group-label'
     heading.textContent = 'Custom'
     picker.appendChild(heading)
     const row = document.createElement('div')
     row.className = 'piece-group'
-    for (const cp of customPieces) {
+    for (const cp of state.customPieces) {
       for (const [sym, label] of [[cp.symbolW, cp.name + ' (W)'], [cp.symbolB, cp.name + ' (b)']]) {
         const btn = document.createElement('button')
         btn.className = 'piece-btn' + (activePiece === sym ? ' active' : '')
         btn.title = label
         btn.textContent = sym
-        btn.addEventListener('click', () => {
-          activePiece = activePiece === sym ? null : sym
-          buildPiecePicker()
-          updateInfoText()
-          bindCellClick()
-        })
+        btn.addEventListener('click', () => selectPiece(sym, null))
         row.appendChild(btn)
       }
     }
@@ -510,25 +507,21 @@ function buildPiecePicker() {
   eraser.className = 'piece-btn piece-btn--eraser' + (activePiece === '__erase' ? ' active' : '')
   eraser.title = 'Eraser: click a cell to clear it'
   eraser.textContent = 'Erase'
-  eraser.addEventListener('click', () => {
-    activePiece = activePiece === '__erase' ? null : '__erase'
-    activePieceSrc = null
-    buildPiecePicker()
-    updateInfoText()
-    bindCellClick()
-  })
+  eraser.addEventListener('click', () => selectPiece('__erase', null))
   picker.appendChild(eraser)
 
-  const label = activePiece === '__erase' ? '(eraser)' : activePiece ? `(${activePiece})` : ''
-  document.getElementById('active-piece-label').textContent = label
+  $('active-piece-label').textContent =
+    activePiece === '__erase' ? '(eraser)' : activePiece ? `(${activePiece})` : ''
 }
 
+// --- piece definer ---
+
 function buildPieceSpec() {
-  const shape = document.getElementById('def-shape').value
-  const dirs = document.getElementById('def-dirs').value
-  const maxSteps = parseInt(document.getElementById('def-maxsteps').value) || undefined
-  const directional = document.getElementById('def-directional').checked
-  const lame = document.getElementById('def-lame').checked
+  const shape = val('def-shape')
+  const dirs = val('def-dirs')
+  const maxSteps = parseInt(val('def-maxsteps'), 10) || undefined
+  const directional = $('def-directional').checked
+  const lame = $('def-lame').checked
 
   const spec = { type: shape }
   if (shape === 'rider') {
@@ -546,329 +539,374 @@ function buildPieceSpec() {
 }
 
 function previewMoves() {
-  const type = getTopoType()
-  if (type !== 'grid') return
-  const rows = parseInt(document.getElementById('grid-rows').value) || 8
-  const cols = parseInt(document.getElementById('grid-cols').value) || 8
-  const spec = buildPieceSpec()
-  let primitive
-  try { primitive = fromConfig(spec) } catch { return }
-
-  const center = Math.floor(rows / 2) * cols + Math.floor(cols / 2)
+  if (!isGrid(state)) { setStatus('Move preview is grid only (engine#62)'); return }
+  const { rows, cols } = state.topology
+  const from = Math.floor(rows / 2) * cols + Math.floor(cols / 2)
   const board = new Array(rows * cols).fill(null)
-  board[center] = { friendly: true, owner: 0, type: 'preview' }
-
-  const topo = {
-    rays(from, directions, maxSteps) {
-      const DIRS = {
-        orthogonal: [[-1, 0], [1, 0], [0, -1], [0, 1]],
-        diagonal: [[-1, -1], [-1, 1], [1, -1], [1, 1]],
-        all: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]],
-      }
-      const resolved = typeof directions === 'string' ? (DIRS[directions] || []) : directions
-      return resolved.map(([dr, dc]) => {
-        const ray = []
-        const r = Math.floor(from / cols), c = from % cols
-        const limit = maxSteps || Math.max(rows, cols)
-        for (let i = 1; i <= limit; i++) {
-          const nr = r + dr * i, nc = c + dc * i
-          if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) break
-          ray.push(nr * cols + nc)
-        }
-        return ray
-      })
-    },
-    leapTargets(from, offsets) {
-      const NAMED = {
-        knight: [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]],
-        elephant: [[-2,-2],[-2,2],[2,-2],[2,2]],
-        camel: [[-3,-1],[-3,1],[-1,-3],[-1,3],[1,-3],[1,3],[3,-1],[3,1]],
-        king: [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]],
-      }
-      const resolved = typeof offsets === 'string' ? (NAMED[offsets] || []) : offsets
-      const r = Math.floor(from / cols), c = from % cols
-      const out = []
-      for (const [dr, dc] of resolved) {
-        const nr = r + dr, nc = c + dc
-        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) out.push(nr * cols + nc)
-      }
-      return out
-    },
-  }
-
-  const moves = primitive.genMoves(topo, center, board)
-  movePreviewCells = moves.map(m => m.to)
-
-  const container = document.getElementById('board-svg')
-  const svgEl = container.querySelector('svg')
-  if (!svgEl) return
-
+  board[from] = { friendly: true, owner: 0, type: 'preview' }
+  const moves = movesForSpec(buildPieceSpec(), { rows, cols, from, board })
+  const container = $('board-svg')
   container.querySelectorAll('.move-preview-dot').forEach(el => el.remove())
-
-  for (const cellIdx of movePreviewCells) {
-    const r = Math.floor(cellIdx / cols), c = cellIdx % cols
-    const cell = container.querySelector(`[data-sq="${r},${c}"]`)
-    if (!cell) continue
-    const rect = cell.getBBox ? cell.getBBox() : null
-    if (!rect) continue
-    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-    dot.setAttribute('cx', rect.x + rect.width / 2)
-    dot.setAttribute('cy', rect.y + rect.height / 2)
-    dot.setAttribute('r', Math.min(rect.width, rect.height) * 0.2)
-    dot.setAttribute('fill', 'rgba(76, 175, 80, 0.6)')
-    dot.setAttribute('class', 'move-preview-dot')
-    dot.setAttribute('pointer-events', 'none')
-    svgEl.appendChild(dot)
-  }
-
-  const centerR = Math.floor(rows / 2), centerC = Math.floor(cols / 2)
-  const centerCell = container.querySelector(`[data-sq="${centerR},${centerC}"]`)
-  if (centerCell) {
-    const rect = centerCell.getBBox ? centerCell.getBBox() : null
-    if (rect) {
-      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-      dot.setAttribute('cx', rect.x + rect.width / 2)
-      dot.setAttribute('cy', rect.y + rect.height / 2)
-      dot.setAttribute('r', Math.min(rect.width, rect.height) * 0.25)
-      dot.setAttribute('fill', 'rgba(33, 150, 243, 0.6)')
-      dot.setAttribute('class', 'move-preview-dot')
-      dot.setAttribute('pointer-events', 'none')
-      svgEl.appendChild(dot)
-    }
-  }
+  if (!moves) { setStatus('That shape does not build'); return }
+  paintDots(container, moves, { rows, cols, className: 'move-preview-dot', fill: 'rgba(76, 175, 80, 0.6)', radiusFactor: 0.2 })
+  paintDots(container, [from], { rows, cols, className: 'move-preview-dot', fill: 'rgba(33, 150, 243, 0.6)', radiusFactor: 0.25 })
+  setStatus(`${moves.length} reachable cell${moves.length === 1 ? '' : 's'}`)
 }
 
 function addCustomPiece() {
-  const name = document.getElementById('def-name').value.trim()
-  const symbolW = document.getElementById('def-symbol-w').value.trim()
-  const symbolB = document.getElementById('def-symbol-b').value.trim()
-  if (!name || !symbolW || !symbolB) return
-
-  const spec = buildPieceSpec()
-  customPieces.push({ name, symbolW, symbolB, spec })
+  const name = val('def-name').trim()
+  const symbolW = val('def-symbol-w').trim()
+  const symbolB = val('def-symbol-b').trim()
+  if (!name || !symbolW || !symbolB) { setStatus('A custom piece needs a name and both symbols'); return }
+  state.customPieces.push({ name, symbolW, symbolB, spec: buildPieceSpec() })
   renderCustomPiecesList()
   buildPiecePicker()
+  scheduleAutosave()
 }
 
 function renderCustomPiecesList() {
-  const list = document.getElementById('custom-pieces-list')
+  const list = $('custom-pieces-list')
   if (!list) return
   list.innerHTML = ''
-  for (let i = 0; i < customPieces.length; i++) {
-    const p = customPieces[i]
+  state.customPieces.forEach((p, i) => {
     const row = document.createElement('div')
-    row.style.cssText = 'display:flex;align-items:center;gap:4px;font-size:11px;padding:2px 0'
-    row.innerHTML = `<span style="flex:1">${p.name} (${p.symbolW}/${p.symbolB})</span>`
+    row.className = 'custom-piece-row'
+    row.innerHTML = `<span class="custom-piece-name">${escapeHtml(p.name)} (${escapeHtml(p.symbolW)}/${escapeHtml(p.symbolB)})</span>`
     const del = document.createElement('button')
+    del.className = 'draft-action draft-action--danger'
     del.textContent = 'x'
-    del.style.cssText = 'font-size:10px;padding:1px 4px;cursor:pointer;border:1px solid var(--border-subtle);background:none;color:var(--text-muted);border-radius:3px'
-    del.addEventListener('click', () => { customPieces.splice(i, 1); renderCustomPiecesList(); buildPiecePicker() })
+    del.addEventListener('click', () => {
+      state.customPieces.splice(i, 1)
+      renderCustomPiecesList()
+      buildPiecePicker()
+      scheduleAutosave()
+    })
     row.appendChild(del)
     list.appendChild(row)
+  })
+}
+
+// --- rules ---
+
+function renderRules() {
+  const panel = $('rules-panel')
+  if (!panel) return
+  const heading = $('rules-heading')
+  if (heading) heading.textContent = `${FAMILY_LABELS[state.family] || state.family} rules`
+  buildRulesPanel(panel, state.family, state.rules, (key, value) => {
+    state.rules[key] = value
+    render()
+    updateInfoText()
+  })
+}
+
+// --- templates ---
+
+function populateTemplateFamilies() {
+  const sel = $('template-family')
+  if (!sel) return
+  for (const f of PLAYABLE_FAMILIES) {
+    const o = document.createElement('option')
+    o.value = f
+    o.textContent = FAMILY_LABELS[f] || f
+    sel.appendChild(o)
+  }
+  sel.value = 'chess'
+  populateTemplateVariants()
+}
+
+function populateTemplateVariants() {
+  const sel = $('template-variant')
+  if (!sel) return
+  sel.innerHTML = ''
+  const entries = getPlayableVariants(val('template-family') || 'chess')
+  for (const e of entries) {
+    const o = document.createElement('option')
+    o.value = e.slug || e.variant
+    o.textContent = e.label || e.variant
+    sel.appendChild(o)
+  }
+  if (!entries.length) {
+    const o = document.createElement('option')
+    o.value = ''
+    o.textContent = 'No playable variants'
+    sel.appendChild(o)
   }
 }
+
+async function loadTemplate() {
+  const templateFamily = val('template-family') || 'chess'
+  const slug = val('template-variant')
+  if (!slug) return
+  const btn = $('template-load-btn')
+  btn.disabled = true
+  setStatus(`Loading ${slug}…`)
+  try {
+    const resolved = await resolveVariantBoard(templateFamily, {}, slug, slug)
+    const next = stateFromResolved(resolved, templateFamily, { title: resolved.meta?.label || slug })
+    applyState(next)
+    currentDraftId = null
+    syncDraftName()
+    setStatus(`Loaded ${next.title} as a starting point. Save it to keep your changes separate.`)
+  } catch (e) {
+    setStatus(`Could not load ${slug}: ${e.message}`)
+  } finally {
+    btn.disabled = false
+  }
+}
+
+// --- export ---
 
 function exportYaml() {
-  const type = getTopoType()
-  const surface = document.getElementById('surface-select').value
-  const labels = document.getElementById('labels-select').value === 'true'
-  const pieceSet = document.getElementById('pieceset-select').value
-
-  let lines = ['---', 'title: Custom Variant', 'engine:']
+  const resolved = buildResolvedFromState(state)
+  const lines = ['---', `title: ${state.title || 'Custom Variant'}`, 'engine:']
   lines.push('  topology:')
-  lines.push(`    type: ${type}`)
-
-  if (type === 'grid') {
-    lines.push(`    rows: ${document.getElementById('grid-rows').value}`)
-    lines.push(`    cols: ${document.getElementById('grid-cols').value}`)
-  } else if (type === 'hex') {
-    lines.push(`    radius: ${document.getElementById('hex-radius').value}`)
-  } else if (type === 'graph') {
-    lines.push(`    structure: ${document.getElementById('graph-structure').value}`)
-    lines.push(`    params:`)
-    lines.push(`      rings: ${document.getElementById('graph-rings').value}`)
-  } else if (type === 'track') {
-    lines.push(`    positions: ${document.getElementById('track-positions').value}`)
-  } else if (type === 'pit') {
-    lines.push(`    cols: ${document.getElementById('pit-cols').value}`)
+  for (const [k, v] of Object.entries(resolved.topology || {})) {
+    if (k === 'params') {
+      lines.push('    params:')
+      for (const [pk, pv] of Object.entries(v)) lines.push(`      ${pk}: ${pv}`)
+    } else {
+      lines.push(`    ${k}: ${v}`)
+    }
   }
-
-  lines.push(`  surface: ${surface}`)
+  lines.push(`  surface: ${state.render.surface}`)
   lines.push('  render:')
-  if (type === 'grid') {
-    lines.push(`    cellColor: ${document.getElementById('cellcolor-select').value}`)
+  const render = resolved.render || {}
+  for (const [k, v] of Object.entries(render)) {
+    if (k === 'decorations') {
+      lines.push('    decorations:')
+      for (const d of v) lines.push(`      - ${Object.entries(d).map(([dk, dv]) => `${dk}: ${dv}`).join(', ')}`)
+    } else if (typeof v !== 'object') {
+      lines.push(`    ${k}: ${v}`)
+    }
   }
-  if (labels) lines.push('    labels: true')
+  if (state.pieceSet) lines.push(`  pieces:\n    set: ${state.pieceSet}`)
+  if (Object.keys(state.placement).length) lines.push(`  setup: "${buildSetup(state)}"`)
 
-  if (pieceSet) lines.push(`  pieces:\n    set: ${pieceSet}`)
-
-  const fen = buildFen()
-  if (fen && Object.keys(placement).length > 0) {
-    lines.push(`  setup: "${fen}"`)
+  if (state.customPieces.length) {
+    lines.push('  vocabulary:')
+    for (const cp of state.customPieces) {
+      lines.push(`    ${cp.name}:`)
+      lines.push(`      symbols: { 0: ${cp.symbolW}, 1: ${cp.symbolB} }`)
+    }
   }
 
+  const pluginConfig = toPluginConfig(state.family, state.rules)
+  if (state.customPieces.length) {
+    pluginConfig.pieces = Object.fromEntries(state.customPieces.map(cp => [cp.name, cp.spec]))
+  }
+  if (Object.keys(pluginConfig).length) {
+    lines.push('  plugins:')
+    lines.push(`    ${state.family}:`)
+    for (const [k, v] of Object.entries(pluginConfig)) {
+      if (v && typeof v === 'object') lines.push(`      ${k}: ${JSON.stringify(v)}`)
+      else lines.push(`      ${k}: ${v}`)
+    }
+  }
   lines.push('---')
 
-  const yaml = lines.join('\n')
-  const blob = new Blob([yaml], { type: 'text/yaml' })
+  const blob = new Blob([lines.join('\n')], { type: 'text/yaml' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = 'variant.md'
+  a.download = `${slugify(state.title)}.md`
   a.click()
   URL.revokeObjectURL(url)
 }
 
-function exportSvg() {
-  const container = document.getElementById('board-svg')
-  const svg = container.querySelector('svg')
-  if (!svg) return
-  const blob = new Blob([svg.outerHTML], { type: 'image/svg+xml' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'board.svg'
-  a.click()
-  URL.revokeObjectURL(url)
+function slugify(s) {
+  return String(s || 'custom-variant').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'custom-variant'
 }
+
+// --- topology visibility ---
 
 function showTopoOpts() {
-  const type = getTopoType()
-  document.getElementById('grid-opts').style.display = type === 'grid' ? '' : 'none'
-  document.getElementById('hex-opts').style.display = type === 'hex' ? '' : 'none'
-  document.getElementById('graph-opts').style.display = type === 'graph' ? '' : 'none'
-  document.getElementById('track-opts').style.display = type === 'track' ? '' : 'none'
-  document.getElementById('pit-opts').style.display = type === 'pit' ? '' : 'none'
-  document.getElementById('cellcolor-group').style.display = type === 'grid' ? '' : 'none'
+  const type = state.topology.type
+  $('grid-opts').style.display = type === 'grid' ? '' : 'none'
+  $('hex-opts').style.display = type === 'hex' ? '' : 'none'
+  $('graph-opts').style.display = type === 'graph' ? '' : 'none'
+  $('track-opts').style.display = type === 'track' ? '' : 'none'
+  $('pit-opts').style.display = type === 'pit' ? '' : 'none'
+  const intersections = type === 'grid' && state.topology.layout === 'intersections'
+  $('cellcolor-group').style.display = type === 'grid' && !intersections ? '' : 'none'
+  $('starpoints-group').style.display = intersections ? '' : 'none'
 }
 
 function undo() {
   const last = pieceHistory.pop()
   if (!last) return
-  if (last.replaceAll) {
-    placement = last.replaceAll
-  } else if (last.prev) {
-    placement[last.sq] = last.prev
-  } else {
-    delete placement[last.sq]
-  }
+  if (last.replaceAll) state.placement = last.replaceAll
+  else if (last.prev) state.placement[last.sq] = last.prev
+  else delete state.placement[last.sq]
   render()
   updateInfoText()
 }
 
-// The page already builds a config in the shape createGameForFamily accepts as
-// opts.definition, so handing it to the play page needs a transport, not engine
-// work.
 function updateTryInPlayState() {
-  const btn = document.getElementById('try-play-btn')
+  const btn = $('try-play-btn')
   if (!btn) return
-  const isGrid = getTopoType() === 'grid'
-  btn.disabled = !isGrid
-  btn.title = isGrid ? '' : 'Only grid boards can be played (engine#62)'
+  const grid = isGrid(state)
+  btn.disabled = !grid
+  btn.title = grid ? '' : 'Only grid boards can be played (engine#62)'
 }
 
 function tryInPlay() {
-  if (getTopoType() !== 'grid') return
-  const resolved = buildResolved()
-  if (customPieces.length) {
-    const vocabulary = {}
-    const pieces = {}
-    for (const cp of customPieces) {
-      vocabulary[cp.name] = { symbols: { 0: cp.symbolW, 1: cp.symbolB } }
-      pieces[cp.name] = cp.spec
-    }
-    if (!resolved.vocabulary) resolved.vocabulary = {}
-    if (!resolved.plugins) resolved.plugins = { chess: {} }
-    if (!resolved.plugins.chess) resolved.plugins.chess = {}
-    Object.assign(resolved.vocabulary, vocabulary)
-    if (!resolved.plugins.chess.pieces) resolved.plugins.chess.pieces = {}
-    Object.assign(resolved.plugins.chess.pieces, pieces)
-  }
-  try {
-    sessionStorage.setItem('moddable:createDraft', JSON.stringify({
-      definition: { title: 'Custom', slug: 'custom', engine: resolved },
-      createdFrom: 'create',
-    }))
-  } catch { /* storage unavailable: the play page falls back to standard */ }
-  window.location.href = '../play/?family=chess&variant=custom&draft=1'
+  if (!isGrid(state)) return
+  clearTimeout(autosaveTimer)
+  const snapshot = structuredClone(state)
+  const name = $('draft-name')?.value?.trim() || drafts.defaultName(snapshot)
+  const record = currentDraftId
+    ? drafts.saveDraft(snapshot, { id: currentDraftId, name })
+    : drafts.saveWorking(snapshot)
+  const id = record ? record.id : drafts.WORKING_ID
+  const params = new URLSearchParams({ family: state.family, variant: 'draft', draft: id })
+  window.location.href = '../play/?' + params.toString()
 }
 
-async function init() {
-  await loadGallery()
-  populatePieceSets()
+// --- init ---
+
+function onControlChange() {
+  readControlsIntoState()
   showTopoOpts()
-  lastGrid = {
-    rows: parseInt(document.getElementById('grid-rows')?.value) || 8,
-    cols: parseInt(document.getElementById('grid-cols')?.value) || 8,
-  }
   render()
   updateInfoText()
   updateTryInPlayState()
+}
 
-  document.getElementById('topo-type').addEventListener('change', () => {
-    placement = {}; pieceHistory = []
-    const type = getTopoType()
-    const surfaceSelect = document.getElementById('surface-select')
-    if (type === 'pit') surfaceSelect.value = 'earth'
-    else if (type === 'graph') surfaceSelect.value = 'parchment'
-    else if (type === 'hex') surfaceSelect.value = 'wood-classic'
-    else if (type === 'track') surfaceSelect.value = 'wood-classic'
-    showTopoOpts(); render(); updateInfoText(); updateTryInPlayState()
+async function init() {
+  await Promise.all([loadGallery(), loadPlayabilityManifest()])
+  bindBoard()
+  populatePieceSets()
+  populateTemplateFamilies()
+
+  const params = new URLSearchParams(location.search)
+  const requested = drafts.resolveDraftId(params.get('draft'))
+  let restored = false
+  if (requested) {
+    restored = loadDraft(requested)
+  } else {
+    const working = drafts.getWorkingDraft()
+    if (working && drafts.hasContent(working.state)) {
+      applyState(working.state)
+      restored = true
+      setStatus('Restored your last board. Use Start new to clear it.')
+    }
+  }
+  if (!restored) {
+    writeStateIntoControls()
+    showTopoOpts()
+    buildPiecePicker()
+    renderRules()
+    render()
+    updateInfoText()
+    updateTryInPlayState()
+  }
+  renderDraftsPanel()
+  syncDraftName()
+
+  $('family-select').addEventListener('change', () => {
+    state.family = val('family-select')
+    state.rules = defaultRuleValues(state.family)
+    renderRules()
+    onControlChange()
   })
 
-  const rerenderInputs = ['hex-radius', 'graph-structure', 'graph-rings',
-    'track-positions', 'pit-cols', 'surface-select', 'cellcolor-select', 'labels-select']
-  for (const id of rerenderInputs) {
-    const el = document.getElementById(id)
-    if (el) el.addEventListener('change', render)
+  $('topo-type').addEventListener('change', () => {
+    state.placement = {}
+    pieceHistory = []
+    state.render.inherited = null
+    state.render.surfaceColors = null
+    state.pieceVocabulary = null
+    const type = val('topo-type')
+    const surfaceSelect = $('surface-select')
+    if (type === 'pit') surfaceSelect.value = 'earth'
+    else if (type === 'graph') surfaceSelect.value = 'parchment'
+    else if (type === 'hex' || type === 'track') surfaceSelect.value = 'wood-classic'
+    onControlChange()
+  })
+
+  for (const id of ['grid-layout', 'star-points', 'hex-radius', 'graph-structure', 'graph-rings',
+    'track-positions', 'pit-cols', 'surface-select', 'cellcolor-select', 'labels-select']) {
+    $(id)?.addEventListener('change', onControlChange)
   }
 
   for (const id of ['grid-rows', 'grid-cols']) {
-    const el = document.getElementById(id)
-    if (!el) continue
-    el.addEventListener('change', () => {
-      const rows = parseInt(document.getElementById('grid-rows').value) || 8
-      const cols = parseInt(document.getElementById('grid-cols').value) || 8
+    $(id)?.addEventListener('change', () => {
+      const rows = num('grid-rows', 8)
+      const cols = num('grid-cols', 8)
       const dropped = lastGrid ? reanchorPlacement(lastGrid.rows, lastGrid.cols, rows, cols) : 0
       lastGrid = { rows, cols }
-      render()
-      updateInfoText()
-      if (dropped) {
-        document.getElementById('info-text').textContent =
-          `${dropped} piece${dropped !== 1 ? 's' : ''} did not fit the new board and ${dropped !== 1 ? 'were' : 'was'} removed`
-      }
+      onControlChange()
+      if (dropped) setStatus(`${dropped} piece${dropped !== 1 ? 's' : ''} did not fit the new board and ${dropped !== 1 ? 'were' : 'was'} removed`)
     })
   }
 
-  document.getElementById('pieceset-select').addEventListener('change', () => {
-    buildPiecePicker(); render()
+  $('pieceset-select').addEventListener('change', () => {
+    state.pieceSet = val('pieceset-select')
+    buildPiecePicker()
+    render()
   })
-  document.getElementById('export-yaml-btn').addEventListener('click', exportYaml)
-  document.getElementById('export-svg-btn').addEventListener('click', exportSvg)
-  document.getElementById('bar-undo-btn').addEventListener('click', undo)
-  document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo() } })
 
-  const defPreviewBtn = document.getElementById('def-preview-btn')
-  if (defPreviewBtn) defPreviewBtn.addEventListener('click', previewMoves)
-  const defAddBtn = document.getElementById('def-add-btn')
-  if (defAddBtn) defAddBtn.addEventListener('click', addCustomPiece)
-
-  const setupInput = document.getElementById('setup-input')
-  if (setupInput) {
-    setupInput.addEventListener('change', () => applySetupInput(setupInput.value))
-    setupInput.addEventListener('blur', () => syncSetupInput())
-  }
-  const copyBtn = document.getElementById('setup-copy-btn')
-  if (copyBtn) {
-    copyBtn.addEventListener('click', () => {
-      const value = Object.keys(placement).length ? buildFen() : ''
-      if (value && navigator.clipboard) navigator.clipboard.writeText(value)
+  // Choosing a surface or a cell style is an explicit override, so the loaded
+  // variant's own drawing program stops applying at that point.
+  for (const id of ['surface-select', 'cellcolor-select', 'grid-layout']) {
+    $(id)?.addEventListener('change', () => {
+      state.render.inherited = null
+      state.render.surfaceColors = null
+      onControlChange()
     })
   }
-  const tryBtn = document.getElementById('try-play-btn')
-  if (tryBtn) tryBtn.addEventListener('click', tryInPlay)
-  document.getElementById('clear-pieces-btn').addEventListener('click', () => {
-    placement = {}; pieceHistory = []; render(); updateInfoText()
+
+  $('template-family').addEventListener('change', populateTemplateVariants)
+  $('template-load-btn').addEventListener('click', loadTemplate)
+
+  $('draft-save-btn').addEventListener('click', saveNamed)
+  $('draft-new-btn').addEventListener('click', () => {
+    applyState(defaultState(state.family))
+    currentDraftId = null
+    drafts.saveWorking(structuredClone(state))
+    renderDraftsPanel()
+    syncDraftName()
+    setStatus('Started a new board')
+  })
+
+  $('export-yaml-btn').addEventListener('click', exportYaml)
+  $('export-svg-btn').addEventListener('click', async () => {
+    const ok = await exportSvgFile($('board-svg').querySelector('svg'), `${slugify(state.title)}.svg`)
+    setStatus(ok ? 'SVG exported with pieces embedded' : 'Nothing to export')
+  })
+  $('export-png-btn').addEventListener('click', async () => {
+    const ok = await exportPngFile($('board-svg').querySelector('svg'), `${slugify(state.title)}.png`)
+    setStatus(ok ? 'PNG exported' : 'Nothing to export')
+  })
+
+  $('bar-undo-btn').addEventListener('click', undo)
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo() }
+  })
+
+  $('def-preview-btn')?.addEventListener('click', previewMoves)
+  $('def-add-btn')?.addEventListener('click', addCustomPiece)
+
+  const setupInput = $('setup-input')
+  setupInput?.addEventListener('change', () => applySetupInput(setupInput.value))
+  setupInput?.addEventListener('blur', syncSetupInput)
+
+  $('setup-copy-btn')?.addEventListener('click', () => {
+    const value = Object.keys(state.placement).length ? buildSetup(state) : ''
+    if (value && navigator.clipboard) navigator.clipboard.writeText(value)
+  })
+
+  $('try-play-btn')?.addEventListener('click', tryInPlay)
+  $('clear-pieces-btn').addEventListener('click', () => {
+    state.placement = {}
+    pieceHistory = []
+    render()
+    updateInfoText()
+  })
+
+  $('draft-name')?.addEventListener('change', () => {
+    if (currentDraftId) { drafts.renameDraft(currentDraftId, $('draft-name').value.trim()); renderDraftsPanel() }
   })
 }
 

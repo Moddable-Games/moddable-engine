@@ -7,7 +7,7 @@
 <meta name="description" content="Build your own game variant. Select topology, configure the board, place pieces, and export playable frontmatter.">
 <meta property="og:title" content="Create — Moddable Engine">
 <meta property="og:description" content="Build your own game variant. Select topology, configure the board, place pieces, and export playable frontmatter.">
-<meta property="og:image" content="https://engine.moddable.games/og/create.png?v=1.0.14">
+<meta property="og:image" content="https://engine.moddable.games/og/create.png?v=1.0.15">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:url" content="https://engine.moddable.games/create/">
@@ -16,11 +16,11 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Create — Moddable Engine">
 <meta name="twitter:description" content="Build your own game variant. Select topology, configure the board, place pieces, and export playable frontmatter.">
-<meta name="twitter:image" content="https://engine.moddable.games/og/create.png?v=1.0.14">
+<meta name="twitter:image" content="https://engine.moddable.games/og/create.png?v=1.0.15">
 <meta name="theme-color" content="#0a0d2a">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-<link rel="stylesheet" href="../css/home.css?v=1.0.14">
-<link rel="stylesheet" href="../css/boards.css?v=1.0.14">
+<link rel="stylesheet" href="../css/home.css?v=1.0.15">
+<link rel="stylesheet" href="../css/boards.css?v=1.0.15">
 </head>
 <body>
 
@@ -48,6 +48,27 @@
   <aside class="boards-sidebar">
     <div class="sidebar-panel active">
 
+      <div class="control-group create-drafts">
+        <label class="control-label">Your boards</label>
+        <div class="control-row">
+          <input type="text" id="draft-name" class="def-input" placeholder="Unsaved board">
+          <button class="btn btn-outline" id="draft-save-btn">Save</button>
+        </div>
+        <button class="btn btn-outline" id="draft-new-btn" style="margin-top:6px;font-size:11px">Start new</button>
+        <div class="drafts-list" id="drafts-list"></div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">Start from</label>
+        <div class="control-row">
+          <select id="template-family"></select>
+        </div>
+        <div class="control-row" style="margin-top:6px">
+          <select id="template-variant"></select>
+        </div>
+        <button class="btn btn-outline" id="template-load-btn" style="margin-top:6px;font-size:11px">Load as template</button>
+      </div>
+
       <div class="control-group">
         <label class="control-label">Topology</label>
         <select id="topo-type">
@@ -65,6 +86,11 @@
           <input type="number" id="grid-rows" value="8" min="2" max="36">
           <input type="number" id="grid-cols" value="8" min="2" max="36">
         </div>
+        <label class="control-label" style="margin-top:8px">Grid style</label>
+        <select id="grid-layout">
+          <option value="cells">Cells &mdash; chess, draughts, shogi</option>
+          <option value="intersections">Intersections &mdash; go, xiangqi</option>
+        </select>
       </div>
 
       <div class="control-group" id="hex-opts" style="display:none">
@@ -117,6 +143,10 @@
         </select>
       </div>
 
+      <div class="control-group" id="starpoints-group" style="display:none">
+        <label class="def-check"><input type="checkbox" id="star-points"> Star points (go)</label>
+      </div>
+
       <div class="control-group">
         <label class="control-label">Labels</label>
         <select id="labels-select">
@@ -130,6 +160,7 @@
         <div class="control-row">
           <button class="btn btn-outline" id="export-yaml-btn">YAML</button>
           <button class="btn btn-outline" id="export-svg-btn">SVG</button>
+          <button class="btn btn-outline" id="export-png-btn">PNG</button>
         </div>
       </div>
 
@@ -149,6 +180,7 @@
     </div>
     <div class="hex-info-bar" id="hex-info-bar">
       <span class="info-text" id="info-text">Configure board and click cells to place pieces</span>
+      <span class="info-status" id="create-status"></span>
       <span class="info-actions">
         <button class="info-btn" id="bar-undo-btn">Undo</button>
       </span>
@@ -157,6 +189,18 @@
 
   <aside class="boards-sidebar boards-sidebar--right">
     <div class="sidebar-panel active">
+
+      <div class="control-group">
+        <label class="control-label">Family</label>
+        <select id="family-select">
+          <option value="chess">Chess</option>
+          <option value="shogi">Shogi</option>
+          <option value="go">Go</option>
+          <option value="draughts">Draughts</option>
+          <option value="xiangqi">Xiangqi</option>
+          <option value="reversi">Reversi</option>
+        </select>
+      </div>
 
       <div class="control-group">
         <label class="control-label">Piece Set</label>
@@ -169,6 +213,11 @@
         <label class="control-label">Place Piece <span id="active-piece-label"></span></label>
         <div class="piece-picker" id="piece-picker"></div>
         <button class="btn btn-outline" id="clear-pieces-btn" style="margin-top:8px;font-size:11px">Clear all pieces</button>
+      </div>
+
+      <div class="control-group" id="rules-group">
+        <label class="control-label" id="rules-heading">Chess rules</label>
+        <div class="rules-panel" id="rules-panel"></div>
       </div>
 
       <div class="control-group" id="piece-define-group">
@@ -239,11 +288,11 @@
     </div>
     <div class="footer-bottom">
       <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
-      <span class="footer-version">v1.0.14</span>
+      <span class="footer-version">v1.0.15</span>
     </div>
   </div>
 </footer>
 
-<script type="module" src="../js/create.js?v=1.0.14"></script>
+<script type="module" src="../js/create.js?v=1.0.15"></script>
 </body>
 </html>

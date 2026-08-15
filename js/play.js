@@ -3,6 +3,7 @@ import { getGameConfig, getAllGames, HexSvg, createSeededRng } from '../packages
 import { renderRpgProvider } from './rpg-provider.js'
 import { renderChargenProvider } from './rpg-chargen.js'
 import { loadRecolouredPieces, FEN4_OWNERS } from './play-shared.js'
+import { exportSvgFile, exportPngFile } from './svg-export.js'
 
 let galleryIndex = null
 async function loadGalleryIndex(basePath = '../pieces/') {
@@ -229,89 +230,11 @@ function bindControls() {
 }
 
 function exportSvg() {
-  const container = document.getElementById('board-svg')
-  const svg = container.querySelector('svg')
-  if (!svg) return
-  const svgString = new XMLSerializer().serializeToString(svg)
-  const blob = new Blob([svgString], { type: 'image/svg+xml' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `${state.game}-${state.variant}.svg`
-  a.click()
-  URL.revokeObjectURL(url)
+  exportSvgFile(document.getElementById('board-svg').querySelector('svg'), `${state.game}-${state.variant}.svg`)
 }
 
-async function exportPng() {
-  const container = document.getElementById('board-svg')
-  const svg = container.querySelector('svg')
-  if (!svg) return
-
-  // Get actual dimensions from viewBox (most reliable source)
-  const vb = svg.getAttribute('viewBox')
-  let svgW, svgH
-  if (vb) {
-    const parts = vb.split(/[\s,]+/).map(Number)
-    svgW = parts[2]
-    svgH = parts[3]
-  } else {
-    svgW = parseInt(svg.getAttribute('width')) || svg.getBoundingClientRect().width || 400
-    svgH = parseInt(svg.getAttribute('height')) || svg.getBoundingClientRect().height || 400
-  }
-
-  const scale = 2
-  const width = svgW * scale
-  const height = svgH * scale
-
-  // Clone and ensure explicit width/height so Image renders at full size
-  const clone = svg.cloneNode(true)
-  clone.setAttribute('width', svgW)
-  clone.setAttribute('height', svgH)
-  clone.removeAttribute('style')
-  await inlineExternalImages(clone)
-
-  const svgString = new XMLSerializer().serializeToString(clone)
-
-  const canvas = document.createElement('canvas')
-  canvas.width = width
-  canvas.height = height
-  const ctx = canvas.getContext('2d')
-
-  const img = new Image()
-  img.onload = () => {
-    ctx.drawImage(img, 0, 0, width, height)
-    canvas.toBlob(blob => {
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `${state.game}-${state.variant}.png`
-      a.click()
-      URL.revokeObjectURL(url)
-    }, 'image/png')
-  }
-  const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
-  img.src = URL.createObjectURL(blob)
-}
-
-async function inlineExternalImages(svgEl) {
-  const images = svgEl.querySelectorAll('image[href]')
-  const promises = [...images].map(async img => {
-    const href = img.getAttribute('href')
-    if (!href || href.startsWith('data:')) return
-    try {
-      const resp = await fetch(href)
-      const blob = await resp.blob()
-      const dataUrl = await new Promise(resolve => {
-        const reader = new FileReader()
-        reader.onload = () => resolve(reader.result)
-        reader.readAsDataURL(blob)
-      })
-      img.setAttribute('href', dataUrl)
-    } catch (e) {
-      // Leave as-is if fetch fails
-    }
-  })
-  await Promise.all(promises)
+function exportPng() {
+  exportPngFile(document.getElementById('board-svg').querySelector('svg'), `${state.game}-${state.variant}.png`)
 }
 
 function applyHandicapStones(fen, positions, rows, cols) {

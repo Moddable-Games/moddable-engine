@@ -6,9 +6,6 @@ import { createAI } from '../packages/play/src/sdk.js'
 import { interactionModelFor, FAMILY_INTERACTION } from '../packages/play/src/interaction.js'
 import { createEmbedBridge, parseEmbedParams, normaliseOutcome } from '../packages/play/src/embed.js'
 import { renderFromEngine, attachPieceImages } from '../packages/render/src/render-engine.js'
-import { resolveSurface } from '../packages/schema/src/surfaces.js'
-import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolver.js'
-import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
 import { boardToSetup as serialiseBoard } from '../packages/play/src/serialise.js'
 
 import '../packages/plugins/chess/index.js'
@@ -17,15 +14,21 @@ import '../packages/plugins/draughts/index.js'
 import '../packages/plugins/xiangqi/index.js'
 import '../packages/plugins/shogi/index.js'
 
-import { BOARD_THEMES, RULES_BASE, ANIM_THEME, CAPTURE_BURST_THEME, PIECE_STYLES, loadGalleryIndex, getGalleryIndex, loadVariantManifest, getManifestVariants, loadPlayabilityManifest, getPlayableVariants, getAllManifestVariants, PLAYABLE_FAMILIES, FAMILY_LABELS, loadRecolouredPieces } from './play-shared.js'
+import { BOARD_THEMES, ANIM_THEME, CAPTURE_BURST_THEME, PIECE_STYLES, loadGalleryIndex, getGalleryIndex, loadVariantManifest, getManifestVariants, loadPlayabilityManifest, getPlayableVariants, getAllManifestVariants, PLAYABLE_FAMILIES, FAMILY_LABELS, loadRecolouredPieces } from './play-shared.js'
 import { createCellAddressing, createDirectAddressing } from './play-cells.js'
 import { paintHighlight, paintIndicator, paintFog, paintEffect, createOverlay } from './play-overlays.js'
 import { bindBoardInteraction } from './play-interaction.js'
 import { renderHandPanel } from './play-hand.js'
 import { renderRulesPanel } from './play-rules.js'
 import { moveToSAN } from '../packages/plugins/chess/src/san.js'
+import { getDraft, resolveDraftId, listDrafts, WORKING_ID } from './create-drafts.js'
+import { buildResolvedFromState } from './create-state.js'
+import { resolveVariantBoard } from './variant-frontmatter.js'
 
 const DIFFICULTIES = ['beginner', 'easy', 'medium', 'hard', 'expert']
+
+// Variant keys that address a create-page draft rather than a rules file.
+const DRAFT_PREFIX = 'draft:'
 
 const FAMILY_AI_OPTIONS = {
   chess: [
@@ -143,61 +146,6 @@ function buildDefinitionFromResolved(family, variant, resolved, registryCfg) {
   return def
 }
 
-async function resolveBoard(family, variantConfig, variantKey, slugOverride) {
-  const basePath = RULES_BASE + 'games/'
-  const variantSlug = slugOverride || variantConfig.slug || variantKey || 'standard'
-  const familyPath = family + '/content/rulebook.md'
-  const variantPath = family + '/content/variants/' + variantSlug + '.md'
-
-  const [familyMd, variantMd] = await Promise.all([
-    fetch(basePath + familyPath).then(r => r.text()),
-    fetch(basePath + variantPath).then(r => r.ok ? r.text() : '').then(md => {
-      if (!md && variantSlug !== 'standard') {
-        console.error(`[resolveBoard] No rulebook found for ${family}/${variantSlug} — check that ${variantSlug}.md exists`)
-      }
-      return md
-    }),
-  ])
-
-  const familyFm = parseFrontmatter(familyMd).meta || {}
-  const variantFm = variantMd ? (parseFrontmatter(variantMd).meta || {}) : {}
-  const surfaceRef = variantFm.engine?.surface || familyFm.engine?.surface
-  const surface = resolveSurface(surfaceRef)
-  const { resolved } = cascadeResolve({
-    surface,
-    family: { engine: familyFm.engine || {}, meta: { label: familyFm.title || '' } },
-    variant: { engine: variantFm.engine || {}, meta: { label: variantFm.title || variantConfig.label || '' } },
-  })
-
-  const pluginBlock = resolved.plugins?.[family]
-  if (pluginBlock?.extends) {
-    const parentSlug = pluginBlock.extends
-    const parentPath = family + '/content/variants/' + parentSlug + '.md'
-    const parentMd = await fetch(basePath + parentPath).then(r => r.ok ? r.text() : '')
-    if (parentMd) {
-      const parentFm = parseFrontmatter(parentMd).meta || {}
-      const parentSurface = resolveSurface(parentFm.engine?.surface || familyFm.engine?.surface)
-      const { resolved: parentResolved } = cascadeResolve({
-        surface: parentSurface,
-        family: { engine: familyFm.engine || {}, meta: { label: familyFm.title || '' } },
-        variant: { engine: parentFm.engine || {}, meta: { label: parentFm.title || '' } },
-      })
-      const parentPlugin = parentResolved.plugins?.[family] || {}
-      const merged = { ...parentPlugin, ...pluginBlock }
-      delete merged.extends
-      resolved.plugins[family] = merged
-    }
-  }
-
-  resolved._variantMeta = {
-    board: variantFm.board || familyFm.board || '',
-    win: variantFm.win || familyFm.win || '',
-    special: variantFm.special || '',
-    title: variantFm.title || '',
-  }
-  return resolved
-}
-
 export function createPlaySession(options = {}) {
   const {
     family,
@@ -212,6 +160,7 @@ export function createPlaySession(options = {}) {
     pieceSet = 'auto',
     flags = [],
     embed = null,
+    draftId = null,
     onStatus = null,
     onCapture = null,
   } = options
@@ -252,28 +201,24 @@ export function createPlaySession(options = {}) {
     boardSnapshot = null
     captureHistory = []
 
-    const isDraft = new URLSearchParams(location.search).has('draft')
-    let draftDef = null
-    if (isDraft) {
-      try {
-        const raw = sessionStorage.getItem('moddable:createDraft')
-        if (raw) {
-          const parsed = JSON.parse(raw)
-          if (parsed?.definition?.engine) draftDef = parsed.definition
-        }
-      } catch { /* malformed: fall through to normal path */ }
-    }
+    // The draft is part of the session's configuration, not of the page URL.
+    // It used to be read from location.search here, while updateURL() rebuilt
+    // the query string from location.search and so carried `draft` forward
+    // forever: picking a different variant reloaded the draft and ignored the
+    // choice. Reading it from options means restart({ variant }) drops it,
+    // because the caller did not pass it.
+    const draftState = draftId ? getDraft(draftId)?.state : null
 
     let frontmatterDef
-    if (draftDef) {
-      resolvedBoard = draftDef.engine
+    if (draftState) {
+      resolvedBoard = buildResolvedFromState(draftState)
       frontmatterDef = buildDefinitionFromResolved(family, variant, resolvedBoard, {})
     } else {
       const variantCfg = getVariantConfig(family, variant) || {}
       const playable = getPlayableVariants(family)
       const variantEntry = playable.find(e => e.variant === variant)
       const slug = variantEntry?.slug || variant
-      resolvedBoard = await resolveBoard(family, variantCfg, variant, slug)
+      resolvedBoard = await resolveVariantBoard(family, variantCfg, variant, slug)
       frontmatterDef = buildDefinitionFromResolved(family, variant, resolvedBoard, variantCfg)
     }
 
@@ -1051,11 +996,32 @@ export async function initGamePlay(container, defaults = {}) {
     seatSelect.value = opts.some(o => o.value === previous) ? previous : '0'
   }
 
+  // A draft is a variant of its family like any other, so it belongs in the
+  // variant list rather than in a URL flag that survives every other choice.
+  // Listing it here is what makes switching away from it, and back to it,
+  // ordinary behaviour instead of a special case.
+  function draftEntriesFor(f) {
+    const records = [...listDrafts()]
+    const working = getDraft(WORKING_ID)
+    if (working) records.unshift(working)
+    return records
+      .filter(r => (r.state?.family || 'chess') === f && (r.state?.topology?.type || 'grid') === 'grid')
+      .map(r => ({
+        key: DRAFT_PREFIX + r.id,
+        slug: DRAFT_PREFIX + r.id,
+        label: r.id === WORKING_ID ? 'Working board (unsaved)' : r.name,
+        group: 'Your drafts',
+        draftId: r.id,
+        playable: true,
+      }))
+  }
+
   function variantsForFamily(f) {
     const playable = getPlayableVariants(f)
-    if (playable.length > 0) return playable.map(e => ({ key: e.variant, slug: e.slug || e.variant, label: e.label, group: e.group, playable: true }))
-    const registry = listVariants(f)
-    return registry.map(v => ({ key: v.key, slug: v.slug || v.key, label: v.label, group: v.group, playable: true }))
+    const base = playable.length > 0
+      ? playable.map(e => ({ key: e.variant, slug: e.slug || e.variant, label: e.label, group: e.group, playable: true }))
+      : listVariants(f).map(v => ({ key: v.key, slug: v.slug || v.key, label: v.label, group: v.group, playable: true }))
+    return [...draftEntriesFor(f), ...base]
   }
 
   function pickVariant(f, requested) {
@@ -1065,8 +1031,14 @@ export async function initGamePlay(container, defaults = {}) {
     return std ? std.key : (vs[0] && vs[0].key)
   }
 
-  let variant = pickVariant(family, params.variant)
-  let activeFlags = parseUrlFlags(params.flags || new URLSearchParams(location.search).get('flags') || '')
+  const urlParams = new URLSearchParams(location.search)
+  const initialDraftId = resolveDraftId(urlParams.get('draft'))
+  let variant = initialDraftId ? DRAFT_PREFIX + initialDraftId : pickVariant(family, params.variant)
+  if (initialDraftId) {
+    const record = getDraft(initialDraftId)
+    if (record?.state?.family) family = record.state.family
+  }
+  let activeFlags = parseUrlFlags(params.flags || urlParams.get('flags') || '')
 
   const leftSidebar = document.createElement('aside')
   leftSidebar.className = 'game-play-sidebar game-play-sidebar--left'
@@ -1203,6 +1175,10 @@ export async function initGamePlay(container, defaults = {}) {
   exportEl.appendChild(fenBtn)
   rightSidebar.appendChild(exportEl)
 
+  const draftLinkEl = document.createElement('div')
+  draftLinkEl.className = 'game-play-draft-link'
+  rightSidebar.appendChild(draftLinkEl)
+
   const rulesEl = document.createElement('div')
   rulesEl.className = 'game-play-rules'
   rightSidebar.appendChild(rulesEl)
@@ -1230,6 +1206,7 @@ export async function initGamePlay(container, defaults = {}) {
   let config = {
     family,
     variant,
+    draftId: initialDraftId,
     flags: activeFlags,
     container: boardArea,
     handContainer: handEl,
@@ -1246,6 +1223,21 @@ export async function initGamePlay(container, defaults = {}) {
   function updateRules() {
     const meta = session?.variantMeta
     renderRulesPanel(rulesEl, meta || {})
+  }
+
+  // The other half of the round-trip. Without it a draft could be played but
+  // only reopened for editing by typing a URL, which is why the create page
+  // looked empty on the way back.
+  function updateDraftLink() {
+    draftLinkEl.innerHTML = ''
+    if (!config.draftId) return
+    const record = getDraft(config.draftId)
+    const link = document.createElement('a')
+    link.className = 'btn btn-outline'
+    link.href = '../create/?draft=' + encodeURIComponent(config.draftId)
+    link.textContent = 'Edit in Create'
+    link.title = record ? `Reopen "${record.name}" in the board editor` : 'Reopen this draft in the board editor'
+    draftLinkEl.appendChild(link)
   }
 
   function updateStatus(info) {
@@ -1298,6 +1290,8 @@ export async function initGamePlay(container, defaults = {}) {
     params.set('family', config.family)
     if (config.variant) params.set('variant', config.variant)
     else params.delete('variant')
+    if (config.draftId) params.set('draft', config.draftId)
+    else params.delete('draft')
     if (activeFlags.length) params.set('flags', activeFlags.join(','))
     else params.delete('flags')
     if (config.opponent === 'human') params.set('opponent', 'human')
@@ -1349,11 +1343,14 @@ export async function initGamePlay(container, defaults = {}) {
     session = createPlaySession(config)
     await session.start()
     if (!params.embed) {
+      rebuildVariantSelect(config.family)
+      variantSelect.value = config.variant
       rebuildSeatSelect(config.family, session.playerNames)
       buildFlagToggles()
       updateRules()
       populatePieceSetSelect(config.variant, session.setup)
       renderActions()
+      updateDraftLink()
     }
     if (params.embed && window.parent !== window) {
       requestAnimationFrame(() => {
@@ -1378,9 +1375,16 @@ export async function initGamePlay(container, defaults = {}) {
     }
     const newVariant = pickVariant(family, null)
     variantSelect.value = newVariant
-    restart({ family, variant: newVariant, seat: seatSelect.value })
+    const draftId = newVariant.startsWith(DRAFT_PREFIX) ? newVariant.slice(DRAFT_PREFIX.length) : null
+    restart({ family, variant: newVariant, draftId, seat: seatSelect.value })
   })
-  variantSelect.addEventListener('change', () => { activeFlags = []; buildFlagToggles(); restart({ variant: variantSelect.value }) })
+  variantSelect.addEventListener('change', () => {
+    activeFlags = []
+    buildFlagToggles()
+    const value = variantSelect.value
+    const draftId = value.startsWith(DRAFT_PREFIX) ? value.slice(DRAFT_PREFIX.length) : null
+    restart({ variant: value, draftId })
+  })
   opponentSelect.addEventListener('change', () => restart({ opponent: opponentSelect.value }))
   difficultySelect.addEventListener('change', () => restart({ difficulty: difficultySelect.value }))
   seatSelect.addEventListener('change', () => restart({ seat: seatSelect.value }))

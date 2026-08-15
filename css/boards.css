@@ -892,3 +892,128 @@
 .hover-move-dot {
   transition: opacity 0.15s;
 }
+
+/* Create page: drafts, templates, rules */
+
+.drafts-list {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.draft-row {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+
+.draft-row--active {
+  border-color: var(--accent, #6fb5ff);
+}
+
+.draft-open {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+}
+
+.draft-name {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.draft-meta {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.draft-action {
+  font-size: 10px;
+  padding: 1px 5px;
+  cursor: pointer;
+  border: 1px solid var(--border-subtle);
+  background: none;
+  color: var(--text-muted);
+  border-radius: 3px;
+  align-self: center;
+}
+
+.draft-action--danger:hover {
+  color: #f44;
+  border-color: #f44;
+}
+
+.rules-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.rule-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.rule-hint {
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.custom-piece-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  padding: 2px 0;
+}
+
+.custom-piece-name { flex: 1; }
+
+.info-status {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-left: 12px;
+  flex: 1;
+}
+
+.info-piece {
+  vertical-align: middle;
+  margin: 0 4px;
+}
+
+.info-strong { font-weight: 600; }
+
+.canvas-error {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.game-play-draft-link {
+  margin-top: 8px;
+}
+
+.game-play-draft-link .btn {
+  width: 100%;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+}
