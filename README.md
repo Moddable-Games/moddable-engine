@@ -108,7 +108,6 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Related repos
 
-- [`moddable-chess`](https://github.com/Moddable-Games/moddable-chess) — migrating to plugin-grid-square
 - [`moddable-hexmaps`](https://github.com/Moddable-Games/moddable-hexmaps) — migrating to plugin-grid-hex
 - [`moddable-rules`](https://github.com/Moddable-Games/moddable-rules) — migrating build system to plugin-rules
 - [`dungeon-chess`](https://github.com/Moddable-Games/dungeon-chess) — north star proof of concept

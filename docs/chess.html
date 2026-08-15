@@ -306,14 +306,19 @@ game.applyMove(moves[0])</code></pre>
   </table>
 
   <h2 id="puzzles">Puzzle API</h2>
-  <p>1,557 puzzles available as static JSON at <code>/api/puzzles/index.json</code>.</p>
+  <p>1,876 puzzles available as static JSON at <code>/api/puzzles/index.json</code>.</p>
   <pre><code>// Fetch puzzle data
 const res = await fetch('https://engine.moddable.games/api/puzzles/index.json')
 const data = await res.json()
 
-// data.standard = [{ id, fen, solution, rating, themes }]
-// data.variants = [{ id, variant, fen, solution, rating }]
-// data.meta = { count: 1876, standard: 1118, variants: 758 }</code></pre>
+// data.standard = [{ id, fen, position, turn, variantSlug, solution, rating, themes, setupMove? }]
+// data.variants = [{ id, variant, variantSlug, fen, position, turn, solution, rating, setupMove? }]
+// data.meta = { count: 1876, standard: 1118, variants: 758, schemaVersion: 2 }
+//
+// position: the FEN the solver faces (after setupMove is applied through the engine).
+// fen: provenance — the source position before the opponent's move.
+// setupMove: if present, the move that was applied to fen to produce position.
+// variantSlug: kebab-case key matching play/playability-manifest.json.</code></pre>
 
 </div>
 </div>
