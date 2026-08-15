@@ -60,7 +60,7 @@ let _galleryIndex = null
 export async function loadGalleryIndex() {
   if (_galleryIndex) return _galleryIndex
   try {
-    const resp = await fetch('../pieces/gallery-index.json?v=1.0.16')
+    const resp = await fetch('../pieces/gallery-index.json?v=1.0.17')
     if (!resp.ok) throw new Error(`gallery-index.json: ${resp.status}`)
     _galleryIndex = await resp.json()
   } catch (e) {
@@ -102,7 +102,7 @@ let _playabilityManifest = null
 export async function loadPlayabilityManifest() {
   if (_playabilityManifest) return _playabilityManifest
   try {
-    const resp = await fetch('../play/playability-manifest.json?v=1.0.16')
+    const resp = await fetch('../play/playability-manifest.json?v=1.0.17')
     if (!resp.ok) throw new Error(resp.status)
     _playabilityManifest = await resp.json()
   } catch {

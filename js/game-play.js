@@ -711,6 +711,24 @@ export function createPlaySession(options = {}) {
     }
     if (!pieceEl) { done(); return }
 
+    // A variant that declares pieceRotations renders each piece as
+    //   <g transform="rotate(a cx cy)"><image x y .../></g>
+    // so a transform set on the <image> is applied in the rotated frame, not in
+    // board space. On four-player shogi that sent red's pieces ninety degrees
+    // off for the length of the animation before the re-render snapped them to
+    // the right square: "moves the wrong way, then corrects itself".
+    //
+    // Animate the group instead, keeping its rotation as a suffix. Transforms
+    // apply outermost first, so `translate(...) rotate(...)` rotates the piece
+    // about its own centre and then moves it in the parent's coordinates.
+    const parent = pieceEl.parentElement
+    const baseTransform = parent && parent.tagName.toLowerCase() === 'g'
+      && /rotate\(/.test(parent.getAttribute('transform') || '')
+      ? parent.getAttribute('transform')
+      : null
+    const animEl = baseTransform ? parent : pieceEl
+    const setTransform = t => animEl.setAttribute('transform', baseTransform ? `${t} ${baseTransform}` : t)
+
     const dx = toPos.x - fromPos.x
     const dy = toPos.y - fromPos.y
     const style = currentAnimStyle || ANIM_THEME.defaultStyle
@@ -726,7 +744,7 @@ export function createPlaySession(options = {}) {
           requestAnimationFrame(warpFrame)
         } else if (elapsed < fadeOut + 50) {
           pieceEl.setAttribute('opacity', '0')
-          pieceEl.setAttribute('transform', `translate(${dx}, ${dy})`)
+          setTransform(`translate(${dx}, ${dy})`)
           requestAnimationFrame(warpFrame)
         } else if (elapsed < fadeOut + 50 + fadeIn) {
           const tp = (elapsed - fadeOut - 50) / fadeIn
@@ -750,7 +768,7 @@ export function createPlaySession(options = {}) {
         const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
         const cx = dx * ease
         const cy = dy * ease + lift * Math.sin(ease * Math.PI)
-        pieceEl.setAttribute('transform', `translate(${cx}, ${cy})`)
+        setTransform(`translate(${cx}, ${cy})`)
         if (t < 1) requestAnimationFrame(arcFrame)
         else done()
       }
@@ -773,7 +791,7 @@ export function createPlaySession(options = {}) {
     function frame(now) {
       const t = Math.min((now - start) / duration, 1)
       const p = easeFn(t)
-      pieceEl.setAttribute('transform', `translate(${dx * p}, ${dy * p})`)
+      setTransform(`translate(${dx * p}, ${dy * p})`)
       if (t < 1) requestAnimationFrame(frame)
       else done()
     }

@@ -302,3 +302,29 @@ describe('rules content is never served from a stale cache', () => {
     expect(shared).toMatch(/playability-manifest\.json\?v=/)
   })
 })
+
+describe('animation respects piece rotation', () => {
+  // A variant declaring pieceRotations renders each piece as
+  //   <g transform="rotate(a cx cy)"><image .../></g>
+  // so a transform set on the <image> is applied in the rotated frame. On
+  // four-player shogi that sent red's pieces ninety degrees off for the length
+  // of the animation, before the re-render snapped them to the right square.
+  const source = readFileSync(join(process.cwd(), 'js', 'game-play.js'), 'utf8')
+  const body = source.slice(source.indexOf('function animateMove('), source.indexOf('function captureBurst('))
+
+  test('the animation never writes a transform straight onto the image', () => {
+    expect(body).not.toMatch(/pieceEl\.setAttribute\('transform'/)
+  })
+
+  test('it animates the rotation group and keeps the rotation', () => {
+    expect(body).toContain('baseTransform')
+    expect(body).toMatch(/\$\{t\} \$\{baseTransform\}/)
+  })
+
+  test('every animation style goes through the one helper', () => {
+    const writes = body.match(/setAttribute\('transform'/g) || []
+    // exactly one: inside setTransform
+    expect(writes).toHaveLength(1)
+    expect((body.match(/setTransform\(/g) || []).length).toBe(3) // warp, arc, and the slide/bounce frame
+  })
+})
