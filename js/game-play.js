@@ -267,7 +267,7 @@ export function createPlaySession(options = {}) {
     let frontmatterDef
     if (draftDef) {
       resolvedBoard = draftDef.engine
-      frontmatterDef = draftDef
+      frontmatterDef = buildDefinitionFromResolved(family, variant, resolvedBoard, {})
     } else {
       const variantCfg = getVariantConfig(family, variant) || {}
       const playable = getPlayableVariants(family)
