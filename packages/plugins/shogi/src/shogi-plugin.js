@@ -1,12 +1,16 @@
 import { fromConfig } from '../../../piece-behaviour/src/piece-definitions.js'
 
 export function createShogiPlugin(variantConfig = {}, context = {}) {
+  const defPlayers = context.definition?.players
+  const derivedPlayerCount = defPlayers ? (defPlayers.names || defPlayers).length : 2
+
   const defaults = {
     rows: 9,
     cols: 9,
     promotionZone: 3,
     dropPawnFileLimit: true,
     dropCheckmateLimit: true,
+    playerCount: derivedPlayerCount,
   }
 
   const config = { ...defaults, ...variantConfig }
@@ -40,7 +44,8 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
   }
 
   function isInPromotionZone(row, playerIndex) {
-    if (playerIndex === 0) return row < config.promotionZone
+    const adv = config.advancement ? config.advancement[playerIndex] : (playerIndex === 0 ? -1 : 1)
+    if (adv === -1) return row < config.promotionZone
     return row >= config.rows - config.promotionZone
   }
 
@@ -196,15 +201,16 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
         }
 
         const [row] = rowCol(i)
+        const adv = config.advancement ? config.advancement[playerIndex] : (playerIndex === 0 ? -1 : 1)
+        const lastRank = adv === -1 ? 0 : config.rows - 1
+        const secondRank = adv === -1 ? 1 : config.rows - 2
         const noLastRank = config.noDropLastRank || ['pawn', 'lance']
         const noSecondRank = config.noDropSecondRank || ['knight']
         if (noLastRank.includes(type)) {
-          if (playerIndex === 0 && row === 0) continue
-          if (playerIndex === 1 && row === config.rows - 1) continue
+          if (row === lastRank) continue
         }
         if (noSecondRank.includes(type)) {
-          if (playerIndex === 0 && row <= 1) continue
-          if (playerIndex === 1 && row >= config.rows - 2) continue
+          if (adv === -1 ? row <= secondRank : row >= secondRank) continue
         }
 
         moves.push({ action: 'drop', type, to: i })
@@ -277,10 +283,9 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
   function isInCheck(board, playerIndex) {
     const kingPos = findKing(board, playerIndex)
     if (kingPos === -1) return true
-    const opponent = 1 - playerIndex
     for (let i = 0; i < board.length; i++) {
-      if (!board[i] || board[i].owner !== opponent) continue
-      if (canAttack(board, i, kingPos, board[i], opponent)) return true
+      if (!board[i] || board[i].owner === playerIndex) continue
+      if (canAttack(board, i, kingPos, board[i], board[i].owner)) return true
     }
     return false
   }
@@ -317,9 +322,9 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
         }
       }
 
-      const hands = config.initialHands
-        ? [config.initialHands[0] || [], config.initialHands[1] || []]
-        : [[], []]
+      const hands = Array.from({ length: config.playerCount }, (_, i) =>
+        config.initialHands?.[i]?.slice() || []
+      )
       return {
         board,
         hands,
@@ -338,7 +343,7 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     applyMove(move, slice, full) {
       const playerIndex = full.__players.currentIndex
       const board = slice.board.map(c => c ? { ...c } : null)
-      const hands = [slice.hands[0].slice(), slice.hands[1].slice()]
+      const hands = slice.hands.map(h => h.slice())
 
       if (move.action === 'drop') {
         board[move.to] = { type: move.type, owner: playerIndex }
@@ -407,11 +412,12 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
 
           if (canPromote && promotedType) {
             allMoves.push({ ...m, promote: true })
-            const fwd = playerIndex === 0 ? -1 : 1
-            const mustPromote = (piece.type === 'pawn' || piece.type === 'lance') &&
-              ((playerIndex === 0 && toRow === 0) || (playerIndex === 1 && toRow === config.rows - 1))
+            const adv = config.advancement ? config.advancement[playerIndex] : (playerIndex === 0 ? -1 : 1)
+            const lastRank = adv === -1 ? 0 : config.rows - 1
+            const secondRank = adv === -1 ? 1 : config.rows - 2
+            const mustPromote = (piece.type === 'pawn' || piece.type === 'lance') && toRow === lastRank
             const mustPromoteKnight = piece.type === 'knight' &&
-              ((playerIndex === 0 && toRow <= 1) || (playerIndex === 1 && toRow >= config.rows - 2))
+              (adv === -1 ? toRow <= secondRank : toRow >= secondRank)
             if (!mustPromote && !mustPromoteKnight) {
               allMoves.push(m)
             }
@@ -446,7 +452,7 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
           }
         }
         if (isInCheck(testBoard, playerIndex)) return false
-        if (config.dropCheckmateLimit && m.action === 'drop' && m.type === 'pawn') {
+        if (config.dropCheckmateLimit && config.playerCount <= 2 && m.action === 'drop' && m.type === 'pawn') {
           const opponent = 1 - playerIndex
           if (isInCheck(testBoard, opponent)) {
             const testSlice = { ...slice, board: testBoard }
@@ -461,11 +467,20 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
 
     checkWin(slice, full) {
       const playerIndex = full.__players.currentIndex
-      const opponent = 1 - playerIndex
+      const eliminated = full.__players.eliminated || []
+      const isMultiplayer = config.playerCount > 2
 
       if (config.winCondition === 'reduced-to-one') {
-        const counts = [0, 0]
+        const counts = Array.from({ length: config.playerCount }, () => 0)
         for (const cell of slice.board) if (cell) counts[cell.owner]++
+        if (isMultiplayer) {
+          for (let opp = 0; opp < config.playerCount; opp++) {
+            if (opp === playerIndex || eliminated.includes(opp)) continue
+            if (counts[opp] <= 1) return { eliminate: opp }
+          }
+          return null
+        }
+        const opponent = 1 - playerIndex
         if (counts[opponent] <= 1) return playerIndex
         if (counts[playerIndex] <= 1) return opponent
         return null
@@ -478,10 +493,17 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
         if (result !== null && result !== undefined) return result
       }
 
-      // A variant with no royal piece, such as hasami shogi, decides its own
-      // outcome through winCondition and has no king to lose.
       if (isRoyalless()) return null
 
+      if (isMultiplayer) {
+        for (let opp = 0; opp < config.playerCount; opp++) {
+          if (opp === playerIndex || eliminated.includes(opp)) continue
+          if (findKing(slice.board, opp) === -1) return { eliminate: opp }
+        }
+        return null
+      }
+
+      const opponent = 1 - playerIndex
       if (findKing(slice.board, opponent) === -1) return playerIndex
 
       if (isInCheck(slice.board, opponent)) {
