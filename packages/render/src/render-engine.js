@@ -7,6 +7,7 @@
  */
 
 import { produceLayout } from '../../schema/src/produce-layout.js'
+import { parseRankRuns } from '../../core/src/fen-runs.js'
 import { renderGridLayout } from '../../topologies/grid/src/topology-grid.js'
 import { renderGraphLayout } from '../../topologies/graph/src/topology-graph.js'
 import { renderPitLayout } from '../../topologies/pit/src/topology-pit.js'
@@ -464,27 +465,15 @@ export function fenToPosition(fen, rows, cols, alphabet) {
   const ranks = positionPart.split('/')
   const position = {}
   for (let r = 0; r < ranks.length; r++) {
-    let c = 0, i = 0
-    const rank = ranks[r]
-    while (i < rank.length) {
-      const ch = rank[i]
-      if (ch >= '1' && ch <= '9') {
-        const next = rank[i + 1]
-        if (next >= '0' && next <= '9') { c += parseInt(ch + next); i += 2 }
-        else { c += parseInt(ch); i++ }
-      } else if (ch === '[') {
-        const close = rank.indexOf(']', i)
-        if (close === -1) { i++; continue }
-        const code = rank.slice(i + 1, close)
-        const file = alphabet ? alphabet[c] : String.fromCharCode(97 + c)
-        const rankNum = rows - r
-        position[`${file}${rankNum}`] = code
-        c++; i = close + 1
+    let c = 0
+    for (const run of parseRankRuns(ranks[r])) {
+      if (run.skip !== undefined) {
+        c += run.skip
       } else {
         const file = alphabet ? alphabet[c] : String.fromCharCode(97 + c)
         const rankNum = rows - r
-        position[`${file}${rankNum}`] = ch
-        c++; i++
+        position[`${file}${rankNum}`] = run.symbol
+        c++
       }
     }
   }
@@ -495,25 +484,19 @@ function parseVocabularyFen(fen, rows, cols, vocabulary, alphabet) {
   const position = {}
   const ranks = fen.split('/')
   for (let r = 0; r < ranks.length && r < rows; r++) {
-    let c = 0, i = 0
-    const rank = ranks[r]
-    while (i < rank.length && c < cols) {
-      const ch = rank[i]
-      if (ch >= '1' && ch <= '9') {
-        const next = rank[i + 1]
-        if (next >= '0' && next <= '9') { c += parseInt(ch + next); i += 2 }
-        else { c += parseInt(ch); i++ }
+    let c = 0
+    for (const run of parseRankRuns(ranks[r])) {
+      if (c >= cols) break
+      if (run.skip !== undefined) { c += run.skip; continue }
+      const file = alphabet ? alphabet[c] : String.fromCharCode(97 + c)
+      const rankNum = rows - r
+      const vocabEntry = vocabulary[run.symbol]
+      if (vocabEntry) {
+        position[`${file}${rankNum}`] = typeof vocabEntry === 'string' ? vocabEntry : { ...vocabEntry }
       } else {
-        const file = alphabet ? alphabet[c] : String.fromCharCode(97 + c)
-        const rankNum = rows - r
-        const vocabEntry = vocabulary[ch]
-        if (vocabEntry) {
-          position[`${file}${rankNum}`] = typeof vocabEntry === 'string' ? vocabEntry : { ...vocabEntry }
-        } else {
-          position[`${file}${rankNum}`] = ch
-        }
-        c++; i++
+        position[`${file}${rankNum}`] = run.symbol
       }
+      c++
     }
   }
   return position

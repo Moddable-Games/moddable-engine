@@ -1,3 +1,4 @@
+import { parseRankRuns } from '../../../core/src/fen-runs.js'
 export const schema = {
   type: 'hex',
   required: [],
@@ -388,11 +389,11 @@ export function createHexTopology(config) {
       const rowStrings = notation.split('/')
       for (let r = 0; r < rowStrings.length && r < size; r++) {
         let q = 0
-        for (const ch of rowStrings[r]) {
-          if (ch >= '0' && ch <= '9') {
-            q += parseInt(ch, 10)
+        for (const run of parseRankRuns(rowStrings[r])) {
+          if (run.skip !== undefined) {
+            q += run.skip
           } else {
-            const piece = symbolMap.fromSymbol(ch)
+            const piece = symbolMap.fromSymbol(run.symbol)
             if (piece) cellStates[key(q, r)] = piece
             q++
           }
@@ -401,11 +402,11 @@ export function createHexTopology(config) {
     } else {
       const allKeys = getAllCells().sort()
       let idx = 0
-      for (const ch of notation) {
-        if (ch >= '0' && ch <= '9') {
-          idx += parseInt(ch, 10)
+      for (const run of parseRankRuns(notation)) {
+        if (run.skip !== undefined) {
+          idx += run.skip
         } else {
-          const piece = symbolMap.fromSymbol(ch)
+          const piece = symbolMap.fromSymbol(run.symbol)
           if (piece && idx < allKeys.length) {
             cellStates[allKeys[idx]] = piece
           }

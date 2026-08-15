@@ -1,3 +1,4 @@
+import { parseRankRuns } from '../../../core/src/fen-runs.js'
 export const schema = {
   type: 'grid',
   required: ['rows', 'cols'],
@@ -407,12 +408,12 @@ export function createGridTopology(config) {
           }
         }
       } else {
-        for (const ch of rowStrings[r]) {
-          if (ch >= '0' && ch <= '9') {
-            c += parseInt(ch, 10)
+        for (const run of parseRankRuns(rowStrings[r])) {
+          if (run.skip !== undefined) {
+            c += run.skip
           } else {
-            const piece = symbolMap.fromSymbol(ch)
-            if (!piece) throw new Error(`Unmapped FEN symbol "${ch}" at row ${r}, col ${c}. Declare it in vocabulary.`)
+            const piece = symbolMap.fromSymbol(run.symbol)
+            if (!piece) throw new Error(`Unmapped FEN symbol "${run.symbol}" at row ${r}, col ${c}. Declare it in vocabulary.`)
             if (c < cols) cells[toIndex(r, c)] = piece
             c++
           }

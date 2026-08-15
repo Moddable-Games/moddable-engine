@@ -1,5 +1,6 @@
 import { rider, leaper, compose, divergent, fromConfig, OFFSETS } from '../../../piece-behaviour/index.js'
 import { randomBackRank } from './variants/chess960.js'
+import { parseRankRuns } from '../../../core/src/fen-runs.js'
 
 function normalizePawnConfig(pc) {
   if (!pc) return pc
@@ -354,13 +355,10 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const symbolLookup = buildReverseVocab()
     let idx = 0
     for (const row of rowStrings) {
-      for (const ch of row) {
-        if (ch >= '1' && ch <= '9') {
-          idx += parseInt(ch, 10)
-        } else {
-          board[idx] = symbolLookup(ch)
-          idx++
-        }
+      for (const run of parseRankRuns(row)) {
+        if (run.skip !== undefined) { idx += run.skip; continue }
+        board[idx] = symbolLookup(run.symbol)
+        idx++
       }
     }
     return board
