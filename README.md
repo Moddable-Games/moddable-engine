@@ -138,6 +138,19 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 - Fixed: game-play.js fenMap and getVariantPieceKeys read from resolved frontmatter instead of JS registry
 - Compound piece definitions (archbishop, chancellor, amazon) added to absorption.md frontmatter in moddable-rules
 
+#### 2026-08-15
+- Create page Phase 2: named drafts (localStorage), per-family rules panel, intersection grids, template loading, SVG/PNG export with inlined pieces, "Players & sides" with per-player advancement directions
+- Fixed: four-player-shogi now fully playable (shogi plugin was two-player throughout: hands, checkWin, isInCheck, promotion, drops all generalised for N players)
+- Shogi plugin: per-player directional rotation via advancement vectors (red/blue advance laterally on cross-boards)
+- Fixed: move animation on rotated pieces (animate the rotation group, not the child image)
+- Fixed: FEN parser disagreement on boards wider than 9 files (unified multi-digit empty-count parsing across all four readers)
+- Fixed: rules content caching (no-cache revalidation on all moddable-rules fetches)
+- Fixed: create page "Try in Play" crash (engine.pieces.map not a function)
+- AI evaluator: fixed oppHand crash for >2 player games
+- "Edit in Create" link on play page for any grid variant
+- Honest piece-set list (marks 45 sets whose naming convention the editor cannot yet map)
+- Version 1.0.18
+
 #### 2026-08-06
 - CI pipeline fully green for the first time (PR #92 merged): unit-tests (3021), playability-standard, Playwright e2e (50 tests)
 - Fixed: opening books inert since conformance migration (PR #97). Parser now strips quote chars from YAML keys; variantOpeningBook reads from definition object (browser-safe), not resolveFromDisk (Node-only)
