@@ -43,10 +43,13 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     return r >= 0 && r < config.rows && c >= 0 && c < config.cols
   }
 
-  function isInPromotionZone(row, playerIndex) {
-    const adv = config.advancement ? config.advancement[playerIndex] : (playerIndex === 0 ? -1 : 1)
-    if (adv === -1) return row < config.promotionZone
-    return row >= config.rows - config.promotionZone
+  function isInPromotionZone(row, col, playerIndex) {
+    const advVec = advancementFor(playerIndex)
+    if (advVec[0] === -1) return row < config.promotionZone
+    if (advVec[0] === 1) return row >= config.rows - config.promotionZone
+    if (advVec[1] === 1) return col >= config.cols - config.promotionZone
+    if (advVec[1] === -1) return col < config.promotionZone
+    return false
   }
 
   // Piece-behaviour schema definitions for each standard shogi piece type.
@@ -75,13 +78,26 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
   // Cache of built primitives keyed by "type__playerIndex"
   const builtPieces = new Map()
 
-  function flipSpec(spec) {
+  function rotateOffset([dr, dc], advVec) {
+    if (advVec[0] === -1 && advVec[1] === 0) return [dr, dc]
+    if (advVec[0] === 1 && advVec[1] === 0) return [-dr, -dc]
+    if (advVec[0] === 0 && advVec[1] === 1) return [dc, -dr]
+    if (advVec[0] === 0 && advVec[1] === -1) return [-dc, dr]
+    return [dr, dc]
+  }
+
+  function rotateSpec(spec, advVec) {
     if (!spec || typeof spec !== 'object') return spec
     const out = { ...spec }
-    if (Array.isArray(out.offsets)) out.offsets = out.offsets.map(([dr, dc]) => [-dr, -dc])
-    if (Array.isArray(out.dirs)) out.dirs = out.dirs.map(([dr, dc]) => [-dr, -dc])
-    if (out.type === 'compose' && Array.isArray(out.parts)) out.parts = out.parts.map(p => flipSpec(p))
+    if (Array.isArray(out.offsets)) out.offsets = out.offsets.map(o => rotateOffset(o, advVec))
+    if (Array.isArray(out.dirs)) out.dirs = out.dirs.map(o => rotateOffset(o, advVec))
+    if (out.type === 'compose' && Array.isArray(out.parts)) out.parts = out.parts.map(p => rotateSpec(p, advVec))
     return out
+  }
+
+  function advancementFor(playerIndex) {
+    const raw = config.advancement ? config.advancement[playerIndex] : (playerIndex === 0 ? -1 : 1)
+    return Array.isArray(raw) ? raw : [raw || -1, 0]
   }
 
   function buildPieceForPlayer(type, playerIndex) {
@@ -89,10 +105,9 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     if (builtPieces.has(key)) return builtPieces.get(key)
     const pConfig = PIECE_MOVES[type]
     if (!pConfig) return null
-    // For directional pieces, flip for player 1
-    const adv = config.advancement ? config.advancement[playerIndex] : (playerIndex === 0 ? -1 : 1)
-    const needsFlip = pConfig.directional && adv !== -1
-    const spec = needsFlip ? flipSpec(pConfig) : pConfig
+    const advVec = advancementFor(playerIndex)
+    const needsRotate = pConfig.directional && !(advVec[0] === -1 && advVec[1] === 0)
+    const spec = needsRotate ? rotateSpec(pConfig, advVec) : pConfig
     const primitive = fromConfig(spec)
     builtPieces.set(key, primitive)
     return primitive
@@ -200,17 +215,21 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
           if (count >= nifuLimit) continue
         }
 
-        const [row] = rowCol(i)
-        const adv = config.advancement ? config.advancement[playerIndex] : (playerIndex === 0 ? -1 : 1)
-        const lastRank = adv === -1 ? 0 : config.rows - 1
-        const secondRank = adv === -1 ? 1 : config.rows - 2
+        const [row, col] = rowCol(i)
+        const advVec = advancementFor(playerIndex)
+        const isVertical = advVec[0] !== 0
+        const coordVal = isVertical ? row : col
+        const maxCoord = isVertical ? config.rows - 1 : config.cols - 1
+        const advancing = isVertical ? advVec[0] : advVec[1]
+        const lastRank = advancing === -1 ? 0 : maxCoord
+        const secondRank = advancing === -1 ? 1 : maxCoord - 1
         const noLastRank = config.noDropLastRank || ['pawn', 'lance']
         const noSecondRank = config.noDropSecondRank || ['knight']
         if (noLastRank.includes(type)) {
-          if (row === lastRank) continue
+          if (coordVal === lastRank) continue
         }
         if (noSecondRank.includes(type)) {
-          if (adv === -1 ? row <= secondRank : row >= secondRank) continue
+          if (advancing === -1 ? coordVal <= secondRank : coordVal >= secondRank) continue
         }
 
         moves.push({ action: 'drop', type, to: i })
@@ -405,19 +424,21 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
         const pieceMoves = generatePieceMoves(slice.board, i, piece, playerIndex)
 
         for (const m of pieceMoves) {
-          const [fromRow] = rowCol(m.from)
-          const [toRow] = rowCol(m.to)
-          const canPromote = isInPromotionZone(toRow, playerIndex) || isInPromotionZone(fromRow, playerIndex)
+          const [fromRow, fromCol] = rowCol(m.from)
+          const [toRow, toCol] = rowCol(m.to)
+          const canPromote = isInPromotionZone(toRow, toCol, playerIndex) || isInPromotionZone(fromRow, fromCol, playerIndex)
           const promotedType = getPromotedType(piece.type)
 
           if (canPromote && promotedType) {
             allMoves.push({ ...m, promote: true })
-            const adv = config.advancement ? config.advancement[playerIndex] : (playerIndex === 0 ? -1 : 1)
-            const lastRank = adv === -1 ? 0 : config.rows - 1
-            const secondRank = adv === -1 ? 1 : config.rows - 2
-            const mustPromote = (piece.type === 'pawn' || piece.type === 'lance') && toRow === lastRank
+            const advVec = advancementFor(playerIndex)
+            const isVertical = advVec[0] !== 0
+            const lastRank = isVertical ? (advVec[0] === -1 ? 0 : config.rows - 1) : (advVec[1] === -1 ? 0 : config.cols - 1)
+            const secondRank = isVertical ? (advVec[0] === -1 ? 1 : config.rows - 2) : (advVec[1] === -1 ? 1 : config.cols - 2)
+            const coordVal = isVertical ? toRow : toCol
+            const mustPromote = (piece.type === 'pawn' || piece.type === 'lance') && coordVal === lastRank
             const mustPromoteKnight = piece.type === 'knight' &&
-              (adv === -1 ? toRow <= secondRank : toRow >= secondRank)
+              (advVec[0] === -1 || advVec[1] === -1 ? coordVal <= secondRank : coordVal >= secondRank)
             if (!mustPromote && !mustPromoteKnight) {
               allMoves.push(m)
             }

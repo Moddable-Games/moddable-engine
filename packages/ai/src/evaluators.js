@@ -234,10 +234,14 @@ export function shogiEvaluate(state, playerIndex) {
     else score -= value
   }
 
-  const myHand = state.hands ? state.hands[playerIndex] : []
-  const oppHand = state.hands ? state.hands[1 - playerIndex] : []
+  const myHand = state.hands?.[playerIndex] || []
   for (const type of myHand) score += Math.round((values[type] || 100) * 0.8)
-  for (const type of oppHand) score -= Math.round((values[type] || 100) * 0.8)
+  if (state.hands) {
+    for (let i = 0; i < state.hands.length; i++) {
+      if (i === playerIndex) continue
+      for (const type of state.hands[i] || []) score -= Math.round((values[type] || 100) * 0.8)
+    }
+  }
 
   return score
 }
