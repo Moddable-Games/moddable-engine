@@ -35,7 +35,9 @@
     "lint": "eslint packages/*/src/**/*.js",
     "variant-report": "node --experimental-vm-modules scripts/variant-report.mjs",
     "build:discovery": "node scripts/build-discovery.mjs",
-    "check:discovery": "node scripts/build-discovery.mjs --check"
+    "check:discovery": "node scripts/build-discovery.mjs --check",
+    "build:puzzles": "node scripts/normalise-puzzles.mjs",
+    "check:puzzles": "node scripts/normalise-puzzles.mjs --check"
   },
   "engines": {
     "node": ">=18.0.0"
