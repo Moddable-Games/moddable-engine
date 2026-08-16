@@ -137,6 +137,9 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 - Fixed: game-play.js fenMap and getVariantPieceKeys read from resolved frontmatter instead of JS registry
 - Compound piece definitions (archbishop, chancellor, amazon) added to absorption.md frontmatter in moddable-rules
 
+#### 2026-08-16
+- Fixed: play page board invisible on iOS Safari (SVG collapsed to 0 height without explicit width attribute; embeds worked because their CSS set width:100%)
+
 #### 2026-08-15
 - Create page Phase 2: named drafts (localStorage), per-family rules panel, intersection grids, template loading, SVG/PNG export with inlined pieces, "Players & sides" with per-player advancement directions
 - Fixed: four-player-shogi now fully playable (shogi plugin was two-player throughout: hands, checkWin, isInCheck, promotion, drops all generalised for N players)
