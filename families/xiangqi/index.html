@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en" data-family="xiangqi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xiangqi — Moddable Engine</title>
+<meta name="description" content="Xiangqi (Chinese Chess) variants from one engine. Standard, MiniXiangqi, and Janggi. River, palace, cannon screen-jump, and flying general from declarative config.">
+<meta property="og:title" content="Xiangqi — Moddable Engine">
+<meta property="og:description" content="Xiangqi (Chinese Chess) variants from one engine. Standard, MiniXiangqi, and Janggi. River, palace, cannon screen-jump, and flying general from declarative config.">
+<meta property="og:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta property="og:url" content="https://engine.moddable.games/families/xiangqi/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Xiangqi — Moddable Engine">
+<meta name="twitter:description" content="Xiangqi (Chinese Chess) variants from one engine. Standard, MiniXiangqi, and Janggi. River, palace, cannon screen-jump, and flying general from declarative config.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="stylesheet" href="../../css/families.css?v=1.0.20">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../../play/" class="nav-link">Play</a>
+      <a href="../../create/" class="nav-link">Create</a>
+      <a href="../../boards/" class="nav-link">Boards</a>
+      <a href="../../pieces/" class="nav-link">Pieces</a>
+      <a href="../../tiles/" class="nav-link">Tiles</a>
+      <a href="../../docs/" class="nav-link">Docs</a>
+      <a href="../../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<section class="family-hero">
+  <div class="family-hero-inner">
+    <span class="hero-symbol">&#x8ECA;</span>
+    <h1>Xiangqi</h1>
+    <p class="hero-lede"><span data-stat="variants">3</span> variants of Chinese Chess. The river divides the board, the palace constrains the general, and the cannon leaps over screens to capture. All expressed as plugin parameters on the same grid topology.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-value" data-stat="variants">3</span>
+        <span class="hero-meta-label">Variants</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">1</span>
+        <span class="hero-meta-label">Plugin</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">&#x2713;</span>
+        <span class="hero-meta-label">Frontmatter-only</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="showcase">
+  <div class="showcase-intro">
+    <h2>Ancient Rules, Modern Engine</h2>
+    <p>Xiangqi's unique mechanics (river crossing, palace confinement, cannon screen-jump, flying general) are all declarative parameters. No hardcoded board knowledge.</p>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Standard Xiangqi <a href="https://rules.moddable.games/dist/xiangqi/variants/standard/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">The full 9x10 game with river, palace, and all classic piece types. The cannon captures by jumping exactly one piece (the screen). The flying general rule prevents generals from facing on an open file.</p>
+      <pre><code>engine:
+  topology:
+    type: grid
+    rows: 10
+    cols: 9
+  players: [red, black]
+  setup: "rheakaehr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RHEAKAEHR"
+  plugins:
+    xiangqi:
+      hasRiver: true
+      flyingGeneralRule: true
+      cannonJumpToMove: false</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=xiangqi&variant=standard" loading="lazy" title="Standard Xiangqi"></iframe>
+      <p class="board-caption">Standard Xiangqi (9x10) — river, palace, cannon, flying general</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>MiniXiangqi <a href="https://rules.moddable.games/dist/xiangqi/variants/minixiangqi/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">A condensed 7x7 variant that preserves the essential xiangqi mechanics on a smaller board. Faster games, same tactical depth from the cannon and river interactions.</p>
+      <pre><code>engine:
+  topology:
+    type: grid
+    rows: 7
+    cols: 7
+  players: [red, black]
+  setup: "rckaecr/7/p1p1p1p/7/P1P1P1P/7/RCKAECR"
+  plugins:
+    xiangqi:
+      hasRiver: true
+      flyingGeneralRule: true
+      cannonJumpToMove: false</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=xiangqi&variant=minixiangqi" loading="lazy" title="MiniXiangqi"></iframe>
+      <p class="board-caption">MiniXiangqi (7x7) — compact board, same mechanics</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Xiangqi 42 <a href="https://rules.moddable.games/dist/xiangqi/variants/xiangqi-42/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">A streamlined variant on a smaller board that focuses purely on tactical piece interaction. Reduced piece count creates immediate contact and sharp play from move one.</p>
+      <pre><code>engine:
+  topology:
+    type: grid
+    rows: 7
+    cols: 6
+  players: [red, black]
+  setup: "ekaeke/1c2c1/p1pp1p/P1PP1P/1C2C1/EKAEKE"
+  plugins:
+    xiangqi:
+      hasRiver: true
+      flyingGeneralRule: true
+      cannonJumpToMove: false</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=xiangqi&variant=xiangqi-42" loading="lazy" title="Xiangqi 42"></iframe>
+      <p class="board-caption">Xiangqi 42 (6x7) — tactical focus, immediate contact</p>
+    </div>
+  </div>
+</section>
+
+<section class="family-cta">
+  <h2>Play All <span data-stat="variants">3</span> Variants</h2>
+  <p>Every xiangqi variant is playable with AI opponents at multiple difficulty levels.</p>
+  <div class="cta-actions">
+    <a href="../../play/?family=xiangqi" class="btn btn--primary">Play Xiangqi</a>
+    <a href="../../boards/?family=xiangqi" class="btn btn--ghost">Browse Boards</a>
+    <a href="../../docs/xiangqi.html" class="btn btn--ghost">SDK Docs</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../../play/">Play</a>
+        <a href="../../boards/">Boards</a>
+        <a href="../../pieces/">Pieces</a>
+        <a href="../../tiles/">Tiles</a>
+        <a href="../../docs/">Docs</a>
+        <a href="../../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Families</h4>
+        <a href="../chess/">Chess</a>
+        <a href="../draughts/">Draughts</a>
+        <a href="../go/">Go</a>
+        <a href="../shogi/">Shogi</a>
+        <a href="../xiangqi/">Xiangqi</a>
+        <a href="../reversi/">Reversi</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.20</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../../js/families.js?v=1.0.20"></script>
+</body>
+</html>

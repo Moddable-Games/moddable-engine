@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en" data-topology="hex">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hex Topology — Moddable Engine</title>
+<meta name="description" content="Axial hex coordinate system for hexagonal and rhombus-shaped boards. Chess on hexagons, connection games, and hex maps from one topology package.">
+<meta property="og:title" content="Hex Topology — Moddable Engine">
+<meta property="og:description" content="Axial hex coordinate system for hexagonal and rhombus-shaped boards. Chess on hexagons, connection games, and hex maps from one topology package.">
+<meta property="og:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta property="og:url" content="https://engine.moddable.games/topologies/hex/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Hex Topology — Moddable Engine">
+<meta name="twitter:description" content="Axial hex coordinate system for hexagonal and rhombus-shaped boards. Chess on hexagons, connection games, and hex maps from one topology package.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="stylesheet" href="../../css/families.css?v=1.0.20">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../../play/" class="nav-link">Play</a>
+      <a href="../../create/" class="nav-link">Create</a>
+      <a href="../../boards/" class="nav-link">Boards</a>
+      <a href="../../pieces/" class="nav-link">Pieces</a>
+      <a href="../../tiles/" class="nav-link">Tiles</a>
+      <a href="../../docs/" class="nav-link">Docs</a>
+      <a href="../../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<section class="family-hero">
+  <div class="family-hero-inner">
+    <span class="hero-symbol">&#x2B22;</span>
+    <h1>Hex</h1>
+    <p class="hero-lede">Axial coordinate system for hexagonal geometry. Two board shapes (hexagonal, rhombus), six directional adjacency, and tricolor cell patterns. Chess pieces, connection games, and strategy maps on the same topology.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-value" data-stat="variants">13</span>
+        <span class="hero-meta-label">Variants</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">2</span>
+        <span class="hero-meta-label">Shapes</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">6</span>
+        <span class="hero-meta-label">Directions</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="showcase">
+  <div class="showcase-intro">
+    <h2>Different Shape, Same Contract</h2>
+    <p>The hex topology provides axial coordinates, adjacency, and distance. Board shape (hexagonal or rhombus) is a parameter. Piece behaviour adapts automatically to hex geometry.</p>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Glinski's Hexagonal Chess <a href="https://rules.moddable.games/dist/chess/variants/glinski/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">Chess on a 91-cell hexagonal board. The chess plugin receives hex directions from the topology and adapts piece movement automatically. Three bishops per side (one per cell colour in tricolor).</p>
+      <pre><code>engine:
+  topology:
+    type: hex
+    radius: 5
+    shape: hexagonal
+    orientation: flat
+  players: [white, black]
+  render:
+    cellSize: 22
+    cellColor: tricolor
+    frame: true
+  plugins:
+    chess:
+      pieces:
+        queen:
+          type: rider
+          dirs: all
+        bishop:
+          type: rider
+          dirs: diagonal
+        knight:
+          type: leaper
+          offsets: hex-knight</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=chess&variant=glinski" loading="lazy" title="Glinski's Hexagonal Chess"></iframe>
+      <p class="board-caption">Glinski Chess (hexagonal shape, radius 5) — 91 cells, tricolor</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Hex — Connection Game <a href="https://rules.moddable.games/dist/hex/variants/standard/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">The classic connection game on a rhombus-shaped board. Two players aim to connect opposite edges. Same topology package, different shape parameter. The win condition is a topological property: path connectivity.</p>
+      <pre><code>engine:
+  topology:
+    type: hex
+    shape: rhombus
+    rows: 11
+    cols: 11
+  render:
+    cellSize: 20
+  players: [black, white]
+  setup: ""</code></pre>
+    </div>
+    <div class="showcase-board">
+      <img src="../../boards/svgs/hex--standard.svg" alt="Hex connection game board" loading="lazy">
+      <p class="board-caption">Hex (rhombus shape, 11x11) — connect your edges to win</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Y Game <a href="https://rules.moddable.games/dist/hex/variants/y-game/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">A triangular connection game where the goal is to connect all three edges simultaneously. Same hex topology with a triangular board shape derived from the rhombus. Demonstrates the topology's geometric flexibility.</p>
+      <pre><code>engine:
+  topology:
+    type: hex
+    shape: hexagonal
+    radius: 5
+  render:
+    cellSize: 18
+  players: [black, white]
+  setup: ""</code></pre>
+    </div>
+    <div class="showcase-board">
+      <img src="../../boards/svgs/hex--y-game.svg" alt="Y game board" loading="lazy">
+      <p class="board-caption">Y Game (triangular hex) — connect all three edges</p>
+    </div>
+  </div>
+</section>
+
+<section class="family-cta">
+  <h2>Browse All Hex Variants</h2>
+  <p>Hexagonal boards across chess, connection games, and strategy maps.</p>
+  <div class="cta-actions">
+    <a href="../../play/?family=chess&variant=glinski" class="btn btn--primary">Play Hex Chess</a>
+    <a href="../../boards/?topology=hex" class="btn btn--ghost">Browse Boards</a>
+    <a href="../../docs/" class="btn btn--ghost">Docs</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../../play/">Play</a>
+        <a href="../../boards/">Boards</a>
+        <a href="../../pieces/">Pieces</a>
+        <a href="../../tiles/">Tiles</a>
+        <a href="../../docs/">Docs</a>
+        <a href="../../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Topologies</h4>
+        <a href="../grid/">Grid</a>
+        <a href="../hex/">Hex</a>
+        <a href="../track/">Track</a>
+        <a href="../pit/">Pit</a>
+        <a href="../graph/">Graph</a>
+        <a href="../tableau/">Tableau</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.20</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../../js/families.js?v=1.0.20"></script>
+</body>
+</html>

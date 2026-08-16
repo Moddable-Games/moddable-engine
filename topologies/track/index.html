@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en" data-topology="track">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Track Topology — Moddable Engine</title>
+<meta name="description" content="Linear and circuit path topology for race games. Backgammon points, pachisi tracks, and property circuits from one coordinate system.">
+<meta property="og:title" content="Track Topology — Moddable Engine">
+<meta property="og:description" content="Linear and circuit path topology for race games. Backgammon points, pachisi tracks, and property circuits from one coordinate system.">
+<meta property="og:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta property="og:url" content="https://engine.moddable.games/topologies/track/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Track Topology — Moddable Engine">
+<meta name="twitter:description" content="Linear and circuit path topology for race games. Backgammon points, pachisi tracks, and property circuits from one coordinate system.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="stylesheet" href="../../css/families.css?v=1.0.20">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../../play/" class="nav-link">Play</a>
+      <a href="../../create/" class="nav-link">Create</a>
+      <a href="../../boards/" class="nav-link">Boards</a>
+      <a href="../../pieces/" class="nav-link">Pieces</a>
+      <a href="../../tiles/" class="nav-link">Tiles</a>
+      <a href="../../docs/" class="nav-link">Docs</a>
+      <a href="../../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<section class="family-hero">
+  <div class="family-hero-inner">
+    <span class="hero-symbol">&#x2192;</span>
+    <h1>Track</h1>
+    <p class="hero-lede">Linear and circuit paths. Positions numbered sequentially, pieces advance by dice or count. Backgammon points, pachisi arms, property loops. Movement is always forward along the path.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-value" data-stat="variants">20</span>
+        <span class="hero-meta-label">Variants</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">3</span>
+        <span class="hero-meta-label">Families</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">2</span>
+        <span class="hero-meta-label">Path types</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="showcase">
+  <div class="showcase-intro">
+    <h2>Paths, Not Grids</h2>
+    <p>Track topology reduces the board to a sequence of positions. Pieces move forward by count. Branching, circuits, and stacking are parameters. The topology handles addressing; game rules handle interaction.</p>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Backgammon <a href="https://rules.moddable.games/dist/backgammon/variants/standard/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">24 numbered points in a linear track. Pieces stack on positions and move by dice roll. The topology provides position addressing and distance calculation; the plugin handles bearing off, hitting, and the bar.</p>
+      <pre><code>engine:
+  topology:
+    type: track
+    positions: 24
+  players: [white, black]
+  setup: "0:2W,5:5B,7:3B,11:5W,12:5B,16:3W,18:5W,23:2B"</code></pre>
+    </div>
+    <div class="showcase-board">
+      <img src="../../boards/svgs/backgammon--standard.svg" alt="Backgammon board" loading="lazy">
+      <p class="board-caption">Backgammon (24-point track) — stacking, dice movement</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Pachisi <a href="https://rules.moddable.games/dist/pachisi/variants/standard/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">A cross-shaped circuit track with multiple arms and home rows. Four players race pieces around the circuit, capturing by landing. Same topology type as backgammon, different position count and path structure.</p>
+      <pre><code>engine:
+  topology:
+    type: track
+    positions: 68
+    circuit: true
+    arms: 4
+    homeRows: true
+  players: [red, yellow, green, blue]
+  setup: "home:4R,home:4Y,home:4G,home:4B"</code></pre>
+    </div>
+    <div class="showcase-board">
+      <img src="../../boards/svgs/pachisi--standard.svg" alt="Pachisi board" loading="lazy">
+      <p class="board-caption">Pachisi (68-position circuit) — four-player race with arms</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>The Landlord's Game (1904) <a href="https://rules.moddable.games/dist/landlords-game/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">A 40-position property circuit. The ancestor of Monopoly. Positions have properties (rent, price) loaded from external JSON. Same track topology, extended with content data.</p>
+      <pre><code>engine:
+  topology:
+    type: track
+    positions: 40
+  players: [player1, player2]
+  setup: ""
+  render:
+    overflow: visible
+  content:
+    source: landlords-game-boards.json
+    board: 1904-patent</code></pre>
+    </div>
+    <div class="showcase-board">
+      <img src="../../boards/svgs/landlords-game--1904-original.svg" alt="Landlord's Game 1904 board" loading="lazy">
+      <p class="board-caption">Landlord's Game 1904 (40-position circuit) — property track with content data</p>
+    </div>
+  </div>
+</section>
+
+<section class="family-cta">
+  <h2>Browse All Track Variants</h2>
+  <p>Race games, property circuits, and point-based boards.</p>
+  <div class="cta-actions">
+    <a href="../../boards/?topology=track" class="btn btn--primary">Browse Boards</a>
+    <a href="../../docs/" class="btn btn--ghost">Docs</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../../play/">Play</a>
+        <a href="../../boards/">Boards</a>
+        <a href="../../pieces/">Pieces</a>
+        <a href="../../tiles/">Tiles</a>
+        <a href="../../docs/">Docs</a>
+        <a href="../../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Topologies</h4>
+        <a href="../grid/">Grid</a>
+        <a href="../hex/">Hex</a>
+        <a href="../track/">Track</a>
+        <a href="../pit/">Pit</a>
+        <a href="../graph/">Graph</a>
+        <a href="../tableau/">Tableau</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.20</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../../js/families.js?v=1.0.20"></script>
+</body>
+</html>

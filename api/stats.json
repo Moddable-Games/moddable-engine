@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-15",
+  "generated": "2026-08-16",
   "pieces": 115,
   "boards": 333,
   "boardFamilies": 33,
@@ -15,6 +15,22 @@
     "chess": 135,
     "draughts": 13,
     "go": 10,
+    "reversi": 3,
+    "shogi": 13,
+    "xiangqi": 3
+  },
+  "variantPluginsByFamily": {
+    "chess": 53,
+    "draughts": 0,
+    "go": 3,
+    "reversi": 0,
+    "shogi": 0,
+    "xiangqi": 0
+  },
+  "frontmatterOnlyByFamily": {
+    "chess": 82,
+    "draughts": 13,
+    "go": 7,
     "reversi": 3,
     "shogi": 13,
     "xiangqi": 3

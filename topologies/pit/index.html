@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en" data-topology="pit">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pit Topology — Moddable Engine</title>
+<meta name="description" content="Mancala sow-path topology. Pits, stores, and directional sowing for Kalah, Oware, Bao, and all count-and-capture games.">
+<meta property="og:title" content="Pit Topology — Moddable Engine">
+<meta property="og:description" content="Mancala sow-path topology. Pits, stores, and directional sowing for Kalah, Oware, Bao, and all count-and-capture games.">
+<meta property="og:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta property="og:url" content="https://engine.moddable.games/topologies/pit/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Pit Topology — Moddable Engine">
+<meta name="twitter:description" content="Mancala sow-path topology. Pits, stores, and directional sowing for Kalah, Oware, Bao, and all count-and-capture games.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="stylesheet" href="../../css/families.css?v=1.0.20">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../../play/" class="nav-link">Play</a>
+      <a href="../../create/" class="nav-link">Create</a>
+      <a href="../../boards/" class="nav-link">Boards</a>
+      <a href="../../pieces/" class="nav-link">Pieces</a>
+      <a href="../../tiles/" class="nav-link">Tiles</a>
+      <a href="../../docs/" class="nav-link">Docs</a>
+      <a href="../../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<section class="family-hero">
+  <div class="family-hero-inner">
+    <span class="hero-symbol">&#x26AB;</span>
+    <h1>Pit</h1>
+    <p class="hero-lede">Mancala sow-path layouts. Two rows of pits with optional stores, seeds distributed counter-clockwise. The topology defines the path; the plugin defines capture, extra turns, and scoring.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-value" data-stat="variants">8</span>
+        <span class="hero-meta-label">Variants</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">1</span>
+        <span class="hero-meta-label">Family</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">&#x2713;</span>
+        <span class="hero-meta-label">Kalah-correct</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="showcase">
+  <div class="showcase-intro">
+    <h2>Count and Capture</h2>
+    <p>The pit topology provides a sowing path: pick up all seeds from a pit, drop one in each subsequent pit. What happens on the last seed (capture, extra turn, relay) is the plugin's concern. The topology just knows the path.</p>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Kalah <a href="https://rules.moddable.games/dist/mancala/variants/kalah/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">The most common Western mancala. Six pits per side with stores. Capture by landing in an empty pit on your side. Extra turn when the last seed lands in your store. The topology provides the Kalah-correct sowing path (skip opponent's store).</p>
+      <pre><code>engine:
+  topology:
+    type: pit
+  players: [south, north]
+  setup: "4,4,4,4,4,4;0;4,4,4,4,4,4;0"</code></pre>
+    </div>
+    <div class="showcase-board">
+      <img src="../../boards/svgs/mancala--kalah.svg" alt="Kalah board" loading="lazy">
+      <p class="board-caption">Kalah (6 pits per side + stores) — Kalah-correct sow path</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Oware <a href="https://rules.moddable.games/dist/mancala/variants/oware/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">West African mancala with no stores. Capture by making the opponent's pit contain exactly 2 or 3 seeds. Seeds cycle continuously around the board. Same topology, different column count and no stores parameter.</p>
+      <pre><code>engine:
+  topology:
+    type: pit
+    cols: 6
+    stores: false
+  players: [south, north]
+  render:
+    cellSize: 24
+  setup: "4,4,4,4,4,4;0;4,4,4,4,4,4;0"</code></pre>
+    </div>
+    <div class="showcase-board">
+      <img src="../../boards/svgs/mancala--oware.svg" alt="Oware board" loading="lazy">
+      <p class="board-caption">Oware (6 pits, no stores) — capture at 2 or 3 seeds</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Congkak <a href="https://rules.moddable.games/dist/mancala/variants/congkak/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">Southeast Asian mancala with 7 pits per side and stores. Relay sowing: if the last seed lands in an occupied pit, pick up and continue. The topology scales to any pit count; relay logic lives in the plugin.</p>
+      <pre><code>engine:
+  topology:
+    type: pit
+    cols: 7
+  players: [south, north]
+  setup: "7,7,7,7,7,7,7;0;7,7,7,7,7,7,7;0"</code></pre>
+    </div>
+    <div class="showcase-board">
+      <img src="../../boards/svgs/mancala--congkak.svg" alt="Congkak board" loading="lazy">
+      <p class="board-caption">Congkak (7 pits per side) — relay sowing, more seeds</p>
+    </div>
+  </div>
+</section>
+
+<section class="family-cta">
+  <h2>Browse All Pit Variants</h2>
+  <p>Mancala games from around the world, all on the same topology.</p>
+  <div class="cta-actions">
+    <a href="../../boards/?topology=pit" class="btn btn--primary">Browse Boards</a>
+    <a href="../../docs/" class="btn btn--ghost">Docs</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../../play/">Play</a>
+        <a href="../../boards/">Boards</a>
+        <a href="../../pieces/">Pieces</a>
+        <a href="../../tiles/">Tiles</a>
+        <a href="../../docs/">Docs</a>
+        <a href="../../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Topologies</h4>
+        <a href="../grid/">Grid</a>
+        <a href="../hex/">Hex</a>
+        <a href="../track/">Track</a>
+        <a href="../pit/">Pit</a>
+        <a href="../graph/">Graph</a>
+        <a href="../tableau/">Tableau</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.20</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../../js/families.js?v=1.0.20"></script>
+</body>
+</html>

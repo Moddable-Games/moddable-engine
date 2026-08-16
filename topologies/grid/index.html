@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en" data-topology="grid">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grid Topology — Moddable Engine</title>
+<meta name="description" content="Rectangular grid topology powering chess, draughts, go, shogi, xiangqi, and reversi. Tiles, intersections, river zones, and palace constraints from one coordinate system.">
+<meta property="og:title" content="Grid Topology — Moddable Engine">
+<meta property="og:description" content="Rectangular grid topology powering chess, draughts, go, shogi, xiangqi, and reversi. Tiles, intersections, river zones, and palace constraints from one coordinate system.">
+<meta property="og:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta property="og:url" content="https://engine.moddable.games/topologies/grid/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Grid Topology — Moddable Engine">
+<meta name="twitter:description" content="Rectangular grid topology powering chess, draughts, go, shogi, xiangqi, and reversi. Tiles, intersections, river zones, and palace constraints from one coordinate system.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="stylesheet" href="../../css/families.css?v=1.0.20">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../../play/" class="nav-link">Play</a>
+      <a href="../../create/" class="nav-link">Create</a>
+      <a href="../../boards/" class="nav-link">Boards</a>
+      <a href="../../pieces/" class="nav-link">Pieces</a>
+      <a href="../../tiles/" class="nav-link">Tiles</a>
+      <a href="../../docs/" class="nav-link">Docs</a>
+      <a href="../../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<section class="family-hero">
+  <div class="family-hero-inner">
+    <span class="hero-symbol">&#x25A6;</span>
+    <h1>Grid</h1>
+    <p class="hero-lede">The rectangular coordinate system. Rows and columns addressing cells as tiles (chess, draughts), intersections (go), or zones (xiangqi river, shogi promotion). One topology, multiple layout modes.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-value" data-stat="variants">245</span>
+        <span class="hero-meta-label">Variants</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">6</span>
+        <span class="hero-meta-label">Families</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">3</span>
+        <span class="hero-meta-label">Layout modes</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="showcase">
+  <div class="showcase-intro">
+    <h2>One Coordinate System, Many Games</h2>
+    <p>The grid topology provides rows, columns, and cell addressing. Layout mode determines whether pieces sit on cells (tiles), intersections (points), or zones. The game never knows which mode it uses.</p>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Chess — Tiles Layout <a href="https://rules.moddable.games/dist/chess/variants/standard/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">Standard rectangular grid with pieces occupying cells. The checkered pattern is a board theme concern, not a topology concern. The grid just provides coordinates and adjacency.</p>
+      <pre><code>engine:
+  topology:
+    type: grid
+    rows: 8
+    cols: 8
+  players: [white, black]
+  setup: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+  plugins:
+    chess:
+      castling: true
+      enPassant: true
+      doubleStep: true</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=chess&variant=standard" loading="lazy" title="Chess — Grid Tiles"></iframe>
+      <p class="board-caption">Chess (8x8 grid, tiles layout) — pieces occupy cells</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Go — Intersections Layout <a href="https://rules.moddable.games/dist/go/variants/standard/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">Same grid topology, different layout mode. Stones sit on intersections rather than inside cells. The topology provides the same coordinate system; only the rendering changes.</p>
+      <pre><code>engine:
+  topology:
+    type: grid
+    rows: 19
+    cols: 19
+    layout: intersections
+  players: [black, white]
+  setup: ""
+  plugins:
+    go:
+      komi: 6.5
+      scoring: "territory"
+      superko: true
+      suicideAllowed: false</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=go&variant=standard" loading="lazy" title="Go — Grid Intersections"></iframe>
+      <p class="board-caption">Go (19x19 grid, intersections layout) — stones on crossings</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Xiangqi — Zones and River <a href="https://rules.moddable.games/dist/xiangqi/variants/standard/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">Grid with semantic zones: a river dividing the board, a palace constraining the general. Same coordinate system as chess, but the plugin declares zone rules that restrict movement based on position.</p>
+      <pre><code>engine:
+  topology:
+    type: grid
+    rows: 10
+    cols: 9
+  players: [red, black]
+  setup: "rheakaehr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RHEAKAEHR"
+  plugins:
+    xiangqi:
+      hasRiver: true
+      flyingGeneralRule: true
+      cannonJumpToMove: false</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=xiangqi&variant=standard" loading="lazy" title="Xiangqi — Grid with Zones"></iframe>
+      <p class="board-caption">Xiangqi (9x10 grid) — river and palace zones on the same coordinate system</p>
+    </div>
+  </div>
+</section>
+
+<section class="family-cta">
+  <h2>Browse All Grid Variants</h2>
+  <p>Every grid-based game is available in the board studio and play surface.</p>
+  <div class="cta-actions">
+    <a href="../../play/" class="btn btn--primary">Play</a>
+    <a href="../../boards/?topology=grid" class="btn btn--ghost">Browse Boards</a>
+    <a href="../../docs/" class="btn btn--ghost">Docs</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../../play/">Play</a>
+        <a href="../../boards/">Boards</a>
+        <a href="../../pieces/">Pieces</a>
+        <a href="../../tiles/">Tiles</a>
+        <a href="../../docs/">Docs</a>
+        <a href="../../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Topologies</h4>
+        <a href="../grid/">Grid</a>
+        <a href="../hex/">Hex</a>
+        <a href="../track/">Track</a>
+        <a href="../pit/">Pit</a>
+        <a href="../graph/">Graph</a>
+        <a href="../tableau/">Tableau</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.20</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../../js/families.js?v=1.0.20"></script>
+</body>
+</html>

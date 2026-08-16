@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en" data-family="draughts">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Draughts — Moddable Engine</title>
+<meta name="description" content="Draughts variants from one engine. English, International, Turkish, and more. Flying kings, chain jumps, and maximal capture as declarative parameters.">
+<meta property="og:title" content="Draughts — Moddable Engine">
+<meta property="og:description" content="Draughts variants from one engine. English, International, Turkish, and more. Flying kings, chain jumps, and maximal capture as declarative parameters.">
+<meta property="og:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta property="og:url" content="https://engine.moddable.games/families/draughts/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Draughts — Moddable Engine">
+<meta name="twitter:description" content="13 draughts variants from one engine. English, International, Turkish, and more, all defined in declarative frontmatter.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="stylesheet" href="../../css/families.css?v=1.0.20">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../../play/" class="nav-link">Play</a>
+      <a href="../../create/" class="nav-link">Create</a>
+      <a href="../../boards/" class="nav-link">Boards</a>
+      <a href="../../pieces/" class="nav-link">Pieces</a>
+      <a href="../../tiles/" class="nav-link">Tiles</a>
+      <a href="../../docs/" class="nav-link">Docs</a>
+      <a href="../../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<section class="family-hero">
+  <div class="family-hero-inner">
+    <span class="hero-symbol">&#x26C0;</span>
+    <h1>Draughts</h1>
+    <p class="hero-lede"><span data-stat="variants">13</span> variants spanning the global family of checkers games. From English 8x8 to International 10x10 to Turkish orthogonal movement. Each variant is a set of parameters: flying kings, forced capture, chain jumps. The engine handles the rest.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-value" data-stat="variants">13</span>
+        <span class="hero-meta-label">Variants</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">1</span>
+        <span class="hero-meta-label">Plugin</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">&#x2713;</span>
+        <span class="hero-meta-label">Frontmatter-only</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="showcase">
+  <div class="showcase-intro">
+    <h2>Same Plugin, Different Rules</h2>
+    <p>Every draughts variant is the same plugin with different parameters. Flying kings, maximal capture, backward capture: all toggleable flags.</p>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>English Draughts <a href="https://rules.moddable.games/dist/draughts/variants/english/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">The classic 8x8 game. Forward-only movement, no flying kings, free choice between captures. The simplest parameter set: every option defaults to its most restrictive value.</p>
+      <pre><code>engine:
+  topology:
+    type: grid
+    rows: 8
+    cols: 8
+  players: [white, black]
+  setup: "1b1b1b1b/b1b1b1b1/1b1b1b1b/8/8/w1w1w1w1/1w1w1w1w/w1w1w1w1"
+  plugins:
+    draughts:
+      piecesPerPlayer: 12
+      directions: "diagonal"
+      manCapture: "forward"
+      manMove: "forward"
+      forcedCapture: true
+      maximalCapture: false
+      flyingKings: false</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=draughts&variant=english" loading="lazy" title="English Draughts"></iframe>
+      <p class="board-caption">English Draughts (8x8) — classic checkers</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>International Draughts <a href="https://rules.moddable.games/dist/draughts/variants/international/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">The tournament standard. 10x10 board, 20 pieces per side, flying kings, mandatory longest chain, backward capture for men. Same plugin as English, different parameters.</p>
+      <pre><code>engine:
+  topology:
+    type: grid
+    rows: 10
+    cols: 10
+  players: [white, black]
+  setup: "1b1b1b1b1b/b1b1b1b1b1/1b1b1b1b1b/b1b1b1b1b1/10/10/1w1w1w1w1w/w1w1w1w1w1/1w1w1w1w1w/w1w1w1w1w1"
+  plugins:
+    draughts:
+      piecesPerPlayer: 20
+      directions: "diagonal"
+      manCapture: "all"
+      manMove: "forward"
+      captureBackward: true
+      forcedCapture: true
+      maximalCapture: true
+      flyingKings: true
+      removeImmediately: false</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=draughts&variant=international" loading="lazy" title="International Draughts"></iframe>
+      <p class="board-caption">International Draughts (10x10) — flying kings, maximal capture</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Turkish Draughts <a href="https://rules.moddable.games/dist/draughts/variants/turkish-draughts/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">Orthogonal movement instead of diagonal. A fundamentally different geometry on the same grid topology. The directions parameter switches from "diagonal" to "orthogonal" and the entire movement system adapts.</p>
+      <pre><code>engine:
+  topology:
+    type: grid
+    rows: 8
+    cols: 8
+  players: [white, black]
+  setup: "8/bbbbbbbb/bbbbbbbb/8/8/wwwwwwww/wwwwwwww/8"
+  plugins:
+    draughts:
+      piecesPerPlayer: 16
+      directions: "orthogonal"
+      manCapture: "forward"
+      manMove: "forward"
+      captureBackward: false
+      forcedCapture: true
+      maximalCapture: true
+      flyingKings: true</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=draughts&variant=turkish-draughts" loading="lazy" title="Turkish Draughts"></iframe>
+      <p class="board-caption">Turkish Draughts (8x8) — orthogonal movement, all squares used</p>
+    </div>
+  </div>
+</section>
+
+<section class="family-cta">
+  <h2>Play All <span data-stat="variants">13</span> Variants</h2>
+  <p>Every draughts variant is playable with AI opponents at multiple difficulty levels.</p>
+  <div class="cta-actions">
+    <a href="../../play/?family=draughts" class="btn btn--primary">Play Draughts</a>
+    <a href="../../boards/?family=draughts" class="btn btn--ghost">Browse Boards</a>
+    <a href="../../docs/draughts.html" class="btn btn--ghost">SDK Docs</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../../play/">Play</a>
+        <a href="../../boards/">Boards</a>
+        <a href="../../pieces/">Pieces</a>
+        <a href="../../tiles/">Tiles</a>
+        <a href="../../docs/">Docs</a>
+        <a href="../../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Families</h4>
+        <a href="../chess/">Chess</a>
+        <a href="../draughts/">Draughts</a>
+        <a href="../go/">Go</a>
+        <a href="../shogi/">Shogi</a>
+        <a href="../xiangqi/">Xiangqi</a>
+        <a href="../reversi/">Reversi</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.20</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../../js/families.js?v=1.0.20"></script>
+</body>
+</html>

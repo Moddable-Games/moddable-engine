@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en" data-family="chess">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chess — Moddable Engine</title>
+<meta name="description" content="Chess variants from one engine. Standard, hexagonal, 4-player, and fairy chess, all defined in declarative frontmatter. Games are configuration files, not code.">
+<meta property="og:title" content="Chess — Moddable Engine">
+<meta property="og:description" content="Chess variants from one engine. Standard, hexagonal, 4-player, and fairy chess, all defined in declarative frontmatter. Games are configuration files, not code.">
+<meta property="og:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta property="og:url" content="https://engine.moddable.games/families/chess/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Chess — Moddable Engine">
+<meta name="twitter:description" content="135 chess variants from one engine. Standard, hexagonal, 4-player, and fairy chess, all defined in declarative frontmatter.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="stylesheet" href="../../css/families.css?v=1.0.20">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../../play/" class="nav-link">Play</a>
+      <a href="../../create/" class="nav-link">Create</a>
+      <a href="../../boards/" class="nav-link">Boards</a>
+      <a href="../../pieces/" class="nav-link">Pieces</a>
+      <a href="../../tiles/" class="nav-link">Tiles</a>
+      <a href="../../docs/" class="nav-link">Docs</a>
+      <a href="../../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<section class="family-hero">
+  <div class="family-hero-inner">
+    <span class="hero-symbol">&#x265A;</span>
+    <h1>Chess</h1>
+    <p class="hero-lede"><span data-stat="variants">135</span> variants from a single declarative engine. Standard 8x8, hexagonal boards, 4-player battles, fairy pieces, and everything in between. Each variant is a configuration file. The engine does the rest.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-value" data-stat="variants">135</span>
+        <span class="hero-meta-label">Variants</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value" data-stat="variant-plugins">53</span>
+        <span class="hero-meta-label">Variant Plugins</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value" data-stat="frontmatter-only">82</span>
+        <span class="hero-meta-label">Frontmatter-only</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="showcase">
+  <div class="showcase-intro">
+    <h2>One Engine, Many Boards</h2>
+    <p>Every variant below is defined entirely in frontmatter. The same engine, the same renderer, the same AI. Only the configuration changes.</p>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Capablanca Chess <a href="https://rules.moddable.games/dist/chess/variants/capablanca/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">A 10x8 board with two fairy pieces: the Archbishop (bishop + knight) and Chancellor (rook + knight). Wider board, deeper tactics. The engine composes piece behaviour from primitives, no special-case code.</p>
+      <pre><code>engine:
+  topology:
+    type: grid
+    rows: 8
+    cols: 10
+  players: [white, black]
+  setup: "rnabqkbcnr/pppppppppp/10/10/10/10/PPPPPPPPPP/RNABQKBCNR"
+  promotionChoices: [queen, rook, bishop, knight, archbishop, chancellor]
+  plugins:
+    chess:
+      pieces:
+        archbishop:
+          type: compose
+          parts: [bishop, knight]
+        chancellor:
+          type: compose
+          parts: [rook, knight]</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=chess&variant=capablanca" loading="lazy" title="Capablanca Chess"></iframe>
+      <p class="board-caption">Capablanca Chess (10x8) — playable with AI opponent</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Glinski's Hexagonal Chess <a href="https://rules.moddable.games/dist/chess/variants/glinski/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">Chess on a 91-cell hexagonal board. The topology changes from grid to hex, piece movement adapts automatically. Three bishops per side, one per cell colour. Same plugin, different geometry.</p>
+      <pre><code>engine:
+  topology:
+    type: hex
+    radius: 5
+    shape: hexagonal
+    orientation: flat
+  players: [white, black]
+  setup: "-1,-1:p,-1,-4:q,-1,2:P,-1,5:Q,..."
+  plugins:
+    chess:
+      pieces:
+        king:
+          type: rider
+          dirs: all
+          maxSteps: 1
+        queen:
+          type: rider
+          dirs: all
+        rook:
+          type: rider
+          dirs: orthogonal
+        bishop:
+          type: rider
+          dirs: diagonal
+        knight:
+          type: leaper
+          offsets: hex-knight
+        pawn:
+          type: pawn
+          advance: orthogonal</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=chess&variant=glinski" loading="lazy" title="Glinski's Hexagonal Chess"></iframe>
+      <p class="board-caption">Glinski's Hexagonal Chess (91 cells) — hex topology, same rules engine</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Four-Handed Chess <a href="https://rules.moddable.games/dist/chess/variants/four-handed-chess/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">Four players on a 14x14 board with corner voids. Each army advances in a different direction. The engine handles N-player rotation, per-player advancement vectors, and asymmetric captures without any chess-specific multiplayer code.</p>
+      <pre><code>engine:
+  topology:
+    type: grid
+    rows: 14
+    cols: 14
+    voids: [[0,0],[0,1],[0,2],...]
+  players: [red, yellow, green, blue]
+  plugins:
+    chess:
+      playerCount: 4
+      advancement:
+        0: [-1, 0]
+        1: [1, 0]
+        2: [0, -1]
+        3: [0, 1]
+      doubleStep: false
+      castling: false
+      enPassant: false
+      noCheck: true
+  pieces:
+    set: mce-4player
+  setup: "3,yR,yN,yB,yK,yQ,yB,yN,yR,3/..."</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=chess&variant=four-handed-chess" loading="lazy" title="Four-Handed Chess"></iframe>
+      <p class="board-caption">Four-Handed Chess (14x14, 4 players) — N-player rotation, directional pawns</p>
+    </div>
+  </div>
+</section>
+
+<section class="family-cta">
+  <h2>Play All <span data-stat="variants">135</span> Variants</h2>
+  <p>Every variant is playable right now with AI opponents at multiple difficulty levels.</p>
+  <div class="cta-actions">
+    <a href="../../play/?family=chess" class="btn btn--primary">Play Chess</a>
+    <a href="../../boards/?family=chess" class="btn btn--ghost">Browse Boards</a>
+    <a href="../../docs/chess.html" class="btn btn--ghost">SDK Docs</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../../play/">Play</a>
+        <a href="../../boards/">Boards</a>
+        <a href="../../pieces/">Pieces</a>
+        <a href="../../tiles/">Tiles</a>
+        <a href="../../docs/">Docs</a>
+        <a href="../../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Families</h4>
+        <a href="../chess/">Chess</a>
+        <a href="../draughts/">Draughts</a>
+        <a href="../go/">Go</a>
+        <a href="../shogi/">Shogi</a>
+        <a href="../xiangqi/">Xiangqi</a>
+        <a href="../reversi/">Reversi</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.20</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../../js/families.js?v=1.0.20"></script>
+</body>
+</html>

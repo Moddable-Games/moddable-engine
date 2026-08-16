@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en" data-family="go">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Go — Moddable Engine</title>
+<meta name="description" content="Go variants from one engine. Standard 19x19, 9x9, Capture Go, and more. Each variant is a configuration file with topology, komi, and scoring rules.">
+<meta property="og:title" content="Go — Moddable Engine">
+<meta property="og:description" content="Go variants from one engine. Standard 19x19, 9x9, Capture Go, and more. Each variant is a configuration file with topology, komi, and scoring rules.">
+<meta property="og:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta property="og:url" content="https://engine.moddable.games/families/go/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Go — Moddable Engine">
+<meta name="twitter:description" content="Go variants from one engine. Standard 19x19, 9x9, Capture Go, and more. Each variant is a configuration file with topology, komi, and scoring rules.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="stylesheet" href="../../css/families.css?v=1.0.20">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../../play/" class="nav-link">Play</a>
+      <a href="../../create/" class="nav-link">Create</a>
+      <a href="../../boards/" class="nav-link">Boards</a>
+      <a href="../../pieces/" class="nav-link">Pieces</a>
+      <a href="../../tiles/" class="nav-link">Tiles</a>
+      <a href="../../docs/" class="nav-link">Docs</a>
+      <a href="../../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<section class="family-hero">
+  <div class="family-hero-inner">
+    <span class="hero-symbol">&#x25CB;</span>
+    <h1>Go</h1>
+    <p class="hero-lede"><span data-stat="variants">10</span> variants of the oldest strategy game still played. From the full 19x19 tournament game to the quick 9x9, to Capture Go for beginners. Same plugin, different board sizes and win conditions.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-value" data-stat="variants">10</span>
+        <span class="hero-meta-label">Variants</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value" data-stat="variant-plugins">3</span>
+        <span class="hero-meta-label">Variant Plugins</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value" data-stat="frontmatter-only">7</span>
+        <span class="hero-meta-label">Frontmatter-only</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="showcase">
+  <div class="showcase-intro">
+    <h2>Scale the Board, Keep the Rules</h2>
+    <p>Go's elegance comes from simple rules on different scales. The engine captures this: same plugin, parameterised by board size, komi, and scoring method.</p>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Standard Go (19x19) <a href="https://rules.moddable.games/dist/go/variants/standard/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">The full tournament game. 361 intersections, komi 6.5, territory scoring, superko. The intersection layout mode renders stones at grid crossings rather than inside cells.</p>
+      <pre><code>engine:
+  topology:
+    type: grid
+    rows: 19
+    cols: 19
+    layout: intersections
+  players: [black, white]
+  setup: ""
+  plugins:
+    go:
+      komi: 6.5
+      scoring: "territory"
+      superko: true
+      suicideAllowed: false
+  handicaps:
+    range: [2, 3, 4, 5, 6, 7, 8, 9]
+    positions:
+      - "15,3"
+      - "3,15"
+      - "15,15"</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=go&variant=standard" loading="lazy" title="Standard Go 19x19"></iframe>
+      <p class="board-caption">Standard Go (19x19) — full tournament game with handicap support</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>9x9 Go <a href="https://rules.moddable.games/dist/go/variants/9x9/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">Quick tactical games in 15 minutes. Same rules, smaller board, adjusted komi. The topology shrinks from 19 to 9, handicap positions shift. Everything else stays identical.</p>
+      <pre><code>engine:
+  topology:
+    type: grid
+    rows: 9
+    cols: 9
+    layout: intersections
+  players: [black, white]
+  setup: ""
+  plugins:
+    go:
+      extends: "standard"
+      komi: 5.5
+  handicaps:
+    range: [2, 3, 4, 5]
+    positions:
+      - "6,2"
+      - "2,6"
+      - "6,6"
+      - "2,2"
+      - "4,4"</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=go&variant=9x9" loading="lazy" title="9x9 Go"></iframe>
+      <p class="board-caption">9x9 Go — fast tactical games, same rules engine</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Capture Go <a href="https://rules.moddable.games/dist/go/variants/capture-go/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">First capture wins. No territory scoring, no passing, no komi. The universal teaching variant that introduces the capture mechanic in isolation. One parameter change transforms the win condition.</p>
+      <pre><code>engine:
+  topology:
+    type: grid
+    rows: 9
+    cols: 9
+    layout: intersections
+  players: [black, white]
+  setup: ""
+  plugins:
+    go:
+      komi: 0
+      scoring: "capture"
+      captureTarget: 1
+      allowPass: false
+      superko: false</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=go&variant=capture-go" loading="lazy" title="Capture Go"></iframe>
+      <p class="board-caption">Capture Go — first capture wins, the perfect teaching variant</p>
+    </div>
+  </div>
+</section>
+
+<section class="family-cta">
+  <h2>Play All <span data-stat="variants">10</span> Variants</h2>
+  <p>Every Go variant is playable with AI opponents at multiple difficulty levels.</p>
+  <div class="cta-actions">
+    <a href="../../play/?family=go" class="btn btn--primary">Play Go</a>
+    <a href="../../boards/?family=go" class="btn btn--ghost">Browse Boards</a>
+    <a href="../../docs/go.html" class="btn btn--ghost">SDK Docs</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../../play/">Play</a>
+        <a href="../../boards/">Boards</a>
+        <a href="../../pieces/">Pieces</a>
+        <a href="../../tiles/">Tiles</a>
+        <a href="../../docs/">Docs</a>
+        <a href="../../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Families</h4>
+        <a href="../chess/">Chess</a>
+        <a href="../draughts/">Draughts</a>
+        <a href="../go/">Go</a>
+        <a href="../shogi/">Shogi</a>
+        <a href="../xiangqi/">Xiangqi</a>
+        <a href="../reversi/">Reversi</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.20</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../../js/families.js?v=1.0.20"></script>
+</body>
+</html>

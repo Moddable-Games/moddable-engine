@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en" data-topology="graph">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Graph Topology — Moddable Engine</title>
+<meta name="description" content="Arbitrary node-edge topology for Morris, Alquerque, and custom boards. Any structure expressible as nodes connected by edges.">
+<meta property="og:title" content="Graph Topology — Moddable Engine">
+<meta property="og:description" content="Arbitrary node-edge topology for Morris, Alquerque, and custom boards. Any structure expressible as nodes connected by edges.">
+<meta property="og:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta property="og:url" content="https://engine.moddable.games/topologies/graph/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Graph Topology — Moddable Engine">
+<meta name="twitter:description" content="Arbitrary node-edge topology for Morris, Alquerque, and custom boards. Any structure expressible as nodes connected by edges.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="stylesheet" href="../../css/families.css?v=1.0.20">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../../play/" class="nav-link">Play</a>
+      <a href="../../create/" class="nav-link">Create</a>
+      <a href="../../boards/" class="nav-link">Boards</a>
+      <a href="../../pieces/" class="nav-link">Pieces</a>
+      <a href="../../tiles/" class="nav-link">Tiles</a>
+      <a href="../../docs/" class="nav-link">Docs</a>
+      <a href="../../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<section class="family-hero">
+  <div class="family-hero-inner">
+    <span class="hero-symbol">&#x25C9;</span>
+    <h1>Graph</h1>
+    <p class="hero-lede">Arbitrary node-edge structures. Concentric rings (Morris), grids with diagonals (Alquerque), or any custom topology expressible as nodes connected by edges. No grid assumptions, no axis constraints.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-value" data-stat="variants">7</span>
+        <span class="hero-meta-label">Variants</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">2</span>
+        <span class="hero-meta-label">Families</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">&#x221E;</span>
+        <span class="hero-meta-label">Structures</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="showcase">
+  <div class="showcase-intro">
+    <h2>Nodes and Edges</h2>
+    <p>Graph topology is the escape hatch for boards that don't fit grids, hexes, or tracks. Define nodes, connect them with edges. The topology provides adjacency; game rules handle movement and capture.</p>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Nine Men's Morris <a href="https://rules.moddable.games/dist/morris/variants/nine-mens-morris/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">Three concentric squares connected by midpoints. 24 nodes, 32 edges. The "concentric-rings" structure generator creates the classic Morris board from parameters. Mill detection is a plugin concern, not a topology concern.</p>
+      <pre><code>engine:
+  topology:
+    type: graph
+    structure: concentric-rings
+    params:
+      rings: 3
+      midpoints: true
+  players: [white, black]
+  setup: ""</code></pre>
+    </div>
+    <div class="showcase-board">
+      <img src="../../boards/svgs/morris--nine-mens-morris.svg" alt="Nine Men's Morris board" loading="lazy">
+      <p class="board-caption">Nine Men's Morris (3 rings + midpoints) — 24 nodes, 32 edges</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Six Men's Morris <a href="https://rules.moddable.games/dist/morris/variants/six-mens-morris/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">Two concentric squares, no midpoints. Fewer nodes mean faster, more tactical games. Same structure generator, different ring count and midpoint parameter. The mill-forming logic works identically.</p>
+      <pre><code>engine:
+  topology:
+    type: graph
+    structure: concentric-rings
+    params:
+      rings: 2
+      midpoints: false
+  players: [white, black]
+  setup: ""</code></pre>
+    </div>
+    <div class="showcase-board">
+      <img src="../../boards/svgs/morris--six-mens-morris.svg" alt="Six Men's Morris board" loading="lazy">
+      <p class="board-caption">Six Men's Morris (2 rings, no midpoints) — compact variant</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Twelve Men's Morris <a href="https://rules.moddable.games/dist/morris/variants/twelve-mens-morris/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">Three concentric squares with midpoints AND diagonal connections. More edges mean more possible mills and more complex movement. The structure generator adds diagonals as a parameter.</p>
+      <pre><code>engine:
+  topology:
+    type: graph
+    structure: concentric-rings
+    params:
+      rings: 3
+      midpoints: true
+      diagonals: true
+  players: [white, black]
+  setup: ""</code></pre>
+    </div>
+    <div class="showcase-board">
+      <img src="../../boards/svgs/morris--twelve-mens-morris.svg" alt="Twelve Men's Morris board" loading="lazy">
+      <p class="board-caption">Twelve Men's Morris (3 rings + midpoints + diagonals) — maximum connections</p>
+    </div>
+  </div>
+</section>
+
+<section class="family-cta">
+  <h2>Browse All Graph Variants</h2>
+  <p>Morris games, Alquerque, and custom node-edge boards.</p>
+  <div class="cta-actions">
+    <a href="../../boards/?topology=graph" class="btn btn--primary">Browse Boards</a>
+    <a href="../../docs/" class="btn btn--ghost">Docs</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../../play/">Play</a>
+        <a href="../../boards/">Boards</a>
+        <a href="../../pieces/">Pieces</a>
+        <a href="../../tiles/">Tiles</a>
+        <a href="../../docs/">Docs</a>
+        <a href="../../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Topologies</h4>
+        <a href="../grid/">Grid</a>
+        <a href="../hex/">Hex</a>
+        <a href="../track/">Track</a>
+        <a href="../pit/">Pit</a>
+        <a href="../graph/">Graph</a>
+        <a href="../tableau/">Tableau</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.20</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../../js/families.js?v=1.0.20"></script>
+</body>
+</html>

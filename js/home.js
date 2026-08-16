@@ -10,4 +10,17 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('dev-panel-' + tab.dataset.tab).classList.add('active')
     })
   })
+
+  fetch('https://tools.moddable.games/api/stats?project=rules')
+    .then(r => r.ok ? r.json() : null)
+    .then(data => {
+      if (!data) return
+      const fill = (attr, val) => {
+        if (val == null) return
+        document.querySelectorAll(`[data-stat="${attr}"]`).forEach(el => { el.textContent = val })
+      }
+      fill('rules-games', data.games_count || data.totalGames)
+      fill('rules-variants', data.rules_variants || data.totalVariants)
+    })
+    .catch(() => {})
 })

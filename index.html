@@ -153,23 +153,20 @@
     <h2 class="section-heading">6 Playable Families</h2>
     <p class="section-sub">Each family has a full play surface: variant registry, embed protocol, interaction model, headless SDK.</p>
     <div class="family-grid">
-      <div class="family-chip"><span class="family-symbol">&#x265A;</span> Chess <span class="family-count">135</span></div>
-      <div class="family-chip"><span class="family-symbol">&#x26C0;</span> Draughts <span class="family-count">13</span></div>
-      <div class="family-chip"><span class="family-symbol">&#x25CB;</span> Go <span class="family-count">10</span></div>
-      <div class="family-chip"><span class="family-symbol">&#x5C06;</span> Shogi <span class="family-count">13</span></div>
-      <div class="family-chip"><span class="family-symbol">&#x8ECA;</span> Xiangqi <span class="family-count">3</span></div>
-      <div class="family-chip"><span class="family-symbol">&#x25CF;</span> Reversi <span class="family-count">3</span></div>
+      <a href="families/chess/" class="family-chip"><span class="family-symbol">&#x265A;</span> Chess <span class="family-count">135</span></a>
+      <a href="families/draughts/" class="family-chip"><span class="family-symbol">&#x26C0;</span> Draughts <span class="family-count">13</span></a>
+      <a href="families/go/" class="family-chip"><span class="family-symbol">&#x25CB;</span> Go <span class="family-count">10</span></a>
+      <a href="families/shogi/" class="family-chip"><span class="family-symbol">&#x5C06;</span> Shogi <span class="family-count">13</span></a>
+      <a href="families/xiangqi/" class="family-chip"><span class="family-symbol">&#x8ECA;</span> Xiangqi <span class="family-count">3</span></a>
+      <a href="families/reversi/" class="family-chip"><span class="family-symbol">&#x25CF;</span> Reversi <span class="family-count">3</span></a>
     </div>
-    <h3 class="section-sub" style="margin-top: 2rem;">Plugins in progress</h3>
-    <p class="section-sub">Engine logic complete, playable variants to follow.</p>
+    <h3 class="section-sub section-sub--spaced"><span data-stat="rules-games">46</span> Games in the Rules Catalogue</h3>
+    <p class="section-sub">The <a href="https://rules.moddable.games" class="text-link" target="_blank" rel="noopener">rules library</a> documents the full system: <span data-stat="rules-variants">296</span> variants across classic board games, card systems, RPGs, and more.</p>
     <div class="family-grid">
-      <div class="family-chip family-chip--pending"><span class="family-symbol">&#x26AB;</span> Mancala</div>
-      <div class="family-chip family-chip--pending"><span class="family-symbol">&#x2680;</span> Backgammon</div>
-      <div class="family-chip family-chip--pending"><span class="family-symbol">&#x25A0;</span> Morris</div>
-      <div class="family-chip family-chip--pending"><span class="family-symbol">&#x2B22;</span> Hex</div>
-      <div class="family-chip family-chip--pending"><span class="family-symbol">&#x25B2;</span> Halma</div>
-      <div class="family-chip family-chip--pending"><span class="family-symbol">&#x2660;</span> Big 2</div>
-      <div class="family-chip family-chip--pending"><span class="family-symbol">&#x2316;</span> Race</div>
+      <div class="family-chip family-chip--pending"><span class="family-symbol">&#x265F;</span> 19 Classic Board Games</div>
+      <div class="family-chip family-chip--pending"><span class="family-symbol">&#x2660;</span> 6 Component Systems</div>
+      <div class="family-chip family-chip--pending"><span class="family-symbol">&#x2694;</span> 10 Tabletop RPGs</div>
+      <div class="family-chip family-chip--pending"><span class="family-symbol">&#x2B22;</span> 11 Mods &amp; Standalone</div>
     </div>
   </div>
 </section>
@@ -179,42 +176,42 @@
     <h2 class="section-heading">6 Topology Types</h2>
     <p class="section-sub">The universal adapter layer. Every package above topologies defines a contract. Topologies implement it. Higher packages never know which topology they consume.</p>
     <div class="topo-grid">
-      <div class="topo-card">
+      <a href="topologies/grid/" class="topo-card">
         <div class="topo-visual topo-visual--grid"></div>
         <h4 class="topo-name">Grid</h4>
         <p class="topo-desc">Rectangular boards. Chess, draughts, reversi, halma, shogi, xiangqi.</p>
         <span class="topo-count">245 variants</span>
-      </div>
-      <div class="topo-card">
+      </a>
+      <a href="topologies/hex/" class="topo-card">
         <div class="topo-visual topo-visual--hex"></div>
         <h4 class="topo-name">Hex</h4>
         <p class="topo-desc">Axial coordinates. Hexagonal and rhombus shapes. Hex, Glinski chess.</p>
         <span class="topo-count">13 variants</span>
-      </div>
-      <div class="topo-card">
+      </a>
+      <a href="topologies/track/" class="topo-card">
         <div class="topo-visual topo-visual--track"></div>
         <h4 class="topo-name">Track</h4>
         <p class="topo-desc">Linear and circuit paths. Pachisi, chaupar, backgammon, landlords.</p>
         <span class="topo-count">20 variants</span>
-      </div>
-      <div class="topo-card">
+      </a>
+      <a href="topologies/pit/" class="topo-card">
         <div class="topo-visual topo-visual--pit"></div>
         <h4 class="topo-name">Pit</h4>
         <p class="topo-desc">Mancala sow layouts. Kalah-correct paths with stores.</p>
         <span class="topo-count">8 variants</span>
-      </div>
-      <div class="topo-card">
+      </a>
+      <a href="topologies/graph/" class="topo-card">
         <div class="topo-visual topo-visual--graph"></div>
         <h4 class="topo-name">Graph</h4>
         <p class="topo-desc">Arbitrary node-edge structures. Morris, alquerque, custom boards.</p>
         <span class="topo-count">7 variants</span>
-      </div>
-      <div class="topo-card">
+      </a>
+      <a href="topologies/tableau/" class="topo-card">
         <div class="topo-visual topo-visual--tableau"></div>
         <h4 class="topo-name">Tableau</h4>
         <p class="topo-desc">Card table layouts. Radial, tableau, wall, linear arrangements for deck games.</p>
         <span class="topo-count">40 variants</span>
-      </div>
+      </a>
     </div>
   </div>
 </section>

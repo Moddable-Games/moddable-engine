@@ -202,6 +202,14 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 - Headless character sheet SVG generation via export-chargen.mjs
 - Closed issues #16 (cross-repo sync) and #33 (RPG manifest v2)
 
+#### 2026-08-16
+- Added 6 topology landing pages (/topologies/grid, hex, track, pit, graph, tableau) with showcase examples and embedded play surfaces
+- Added 6 family landing pages (/families/chess, draughts, go, shogi, xiangqi, reversi) with variant showcases and dynamic stats
+- Homepage topology cards and family chips now link to their landing pages
+- Each showcase example links to the corresponding rules page on rules.moddable.games
+- Discovery pipeline generates sitemap entries and per-family variant/frontmatter-only stats
+- Shared families.css and families.js for consistent layout across all landing pages
+
 #### 2026-08-09
 - Added build-discovery.mjs: generates api/stats.json, api/index.json, mcp.json, llms.txt, sitemap.xml from data
 - CI gate enforces discovery surface freshness (--check mode)

@@ -52,6 +52,29 @@ const playableFamilies = [...new Set(playableVariants.map(v => v.family))]
 const familyCounts = {}
 playableVariants.forEach(v => { familyCounts[v.family] = (familyCounts[v.family] || 0) + 1 })
 
+// Count variant plugins per family (files in packages/plugins/{family}/src/variants/)
+const variantPluginCounts = {}
+for (const family of playableFamilies) {
+  const variantsDir = resolve(`packages/plugins/${family}/src/variants`)
+  if (fs.existsSync(variantsDir)) {
+    const indexFile = path.join(variantsDir, 'index.js')
+    if (fs.existsSync(indexFile)) {
+      const indexContent = fs.readFileSync(indexFile, 'utf-8')
+      variantPluginCounts[family] = (indexContent.match(/^export /gm) || []).length
+    } else {
+      variantPluginCounts[family] = fs.readdirSync(variantsDir).filter(f => f.endsWith('.js') && f !== 'index.js').length
+    }
+  } else {
+    variantPluginCounts[family] = 0
+  }
+}
+
+const frontmatterOnlyCounts = {}
+for (const family of playableFamilies) {
+  frontmatterOnlyCounts[family] = (familyCounts[family] || 0) - (variantPluginCounts[family] || 0)
+}
+
+
 const readmeText = fs.readFileSync(resolve('README.md'), 'utf-8')
 const testCountMatch = readmeText.match(/(\d[\d,]*)\s+tests\s+across\s+(\d+)\s+suites/)
 const testCount = testCountMatch ? parseInt(testCountMatch[1].replace(/,/g, ''), 10) : 0
@@ -132,6 +155,8 @@ const statsJson = {
   playableVariants: stats.playableVariants,
   playableFamilies: stats.playableFamilies,
   playableByFamily: stats.familyCounts,
+  variantPluginsByFamily: variantPluginCounts,
+  frontmatterOnlyByFamily: frontmatterOnlyCounts,
 }
 outputs.push({ path: 'api/stats.json', content: JSON.stringify(statsJson, null, 2) + '\n' })
 
@@ -226,12 +251,23 @@ const docPages = fs.readdirSync(resolve('docs'))
   .filter(f => f.endsWith('.html'))
   .map(f => ({ path: `/docs/${f}`, priority: '0.7' }))
 
-const familyPages = playableFamilies.map(f => ({
+const familyPlayPages = playableFamilies.map(f => ({
   path: `/play/?game=${f}`,
   priority: '0.8',
 }))
 
-const allPages = [...staticPages, ...docPages, ...familyPages]
+const familyLandingPages = playableFamilies.map(f => ({
+  path: `/families/${f}/`,
+  priority: '0.9',
+}))
+
+const topologyNames = ['grid', 'hex', 'track', 'pit', 'graph', 'tableau']
+const topologyLandingPages = topologyNames.map(t => ({
+  path: `/topologies/${t}/`,
+  priority: '0.8',
+}))
+
+const allPages = [...staticPages, ...familyLandingPages, ...topologyLandingPages, ...docPages, ...familyPlayPages]
 
 const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -333,6 +369,22 @@ const htmlPatches = [
       [/<strong>\d+ topology types<\/strong>/g, `<strong>${stats.uniqueTopologies} topology types</strong>`],
     ],
   },
+  // Family pages: patch all dynamic stats
+  ...playableFamilies.map(family => {
+    const vp = variantPluginCounts[family] || 0
+    const fo = frontmatterOnlyCounts[family] || 0
+    const replacements = [
+      [/(data-stat="variants">)\d+(<\/span>)/g, `$1${stats.familyCounts[family] || 0}$2`],
+      [/(data-stat="variants">)\d+(<)/g, `$1${stats.familyCounts[family] || 0}$2`],
+    ]
+    if (vp > 0) {
+      replacements.push(
+        [/(data-stat="variant-plugins">)\d+(<\/span>)/g, `$1${vp}$2`],
+        [/(data-stat="frontmatter-only">)\d+(<\/span>)/g, `$1${fo}$2`],
+      )
+    }
+    return { file: `families/${family}/index.html`, replacements }
+  }),
 ]
 
 for (const { file, replacements } of htmlPatches) {

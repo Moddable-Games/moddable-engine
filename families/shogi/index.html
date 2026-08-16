@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en" data-family="shogi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shogi — Moddable Engine</title>
+<meta name="description" content="Shogi variants from one engine. Standard, Dobutsu, Chu Shogi, Four-Player, and more. Drop mechanics, flip promotion, and N-player rotation from declarative config.">
+<meta property="og:title" content="Shogi — Moddable Engine">
+<meta property="og:description" content="Shogi variants from one engine. Standard, Dobutsu, Chu Shogi, Four-Player, and more. Drop mechanics, flip promotion, and N-player rotation from declarative config.">
+<meta property="og:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta property="og:url" content="https://engine.moddable.games/families/shogi/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Shogi — Moddable Engine">
+<meta name="twitter:description" content="Shogi variants from one engine. Standard, Dobutsu, Chu Shogi, Four-Player, and more. Drop mechanics, flip promotion, and N-player rotation from declarative config.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="stylesheet" href="../../css/families.css?v=1.0.20">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../../play/" class="nav-link">Play</a>
+      <a href="../../create/" class="nav-link">Create</a>
+      <a href="../../boards/" class="nav-link">Boards</a>
+      <a href="../../pieces/" class="nav-link">Pieces</a>
+      <a href="../../tiles/" class="nav-link">Tiles</a>
+      <a href="../../docs/" class="nav-link">Docs</a>
+      <a href="../../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<section class="family-hero">
+  <div class="family-hero-inner">
+    <span class="hero-symbol">&#x5C06;</span>
+    <h1>Shogi</h1>
+    <p class="hero-lede"><span data-stat="variants">13</span> variants from 3x4 teaching games to 12x12 historical boards. Drop mechanics, flip promotion, and N-player rotation all emerge from parameterised configuration. No variant-specific code.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-value" data-stat="variants">13</span>
+        <span class="hero-meta-label">Variants</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">1</span>
+        <span class="hero-meta-label">Plugin</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">&#x2713;</span>
+        <span class="hero-meta-label">Frontmatter-only</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="showcase">
+  <div class="showcase-intro">
+    <h2>From Tiny to Epic</h2>
+    <p>The shogi plugin handles everything from a 3x4 children's game to a 12x12 medieval battle. Board size, piece count, promotion rules, and drop mechanics are all parameters.</p>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Standard Shogi (9x9) <a href="https://rules.moddable.games/dist/shogi/variants/standard/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">The classic Japanese chess. Captured pieces can be dropped back as your own. Pieces promote by flipping when entering the opponent's zone. The plugin handles both mechanics declaratively.</p>
+      <pre><code>engine:
+  topology:
+    type: grid
+    rows: 9
+    cols: 9
+  players: [sente, gote]
+  setup: "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL"
+  plugins:
+    shogi:
+      promotionZone: 3
+      dropAllowed: true
+      royalType: king
+      pawnDropMate: false
+      twoOnFile: false</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=shogi&variant=standard" loading="lazy" title="Standard Shogi"></iframe>
+      <p class="board-caption">Standard Shogi (9x9) — drops, promotion, full piece set</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Dobutsu Shogi (3x4) <a href="https://rules.moddable.games/dist/shogi/variants/dobutsu/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">Animal-themed introduction to shogi on the smallest possible board. Designed for children by professional player Madoka Kitao. A solved game. The same plugin scales down to 12 cells with a custom vocabulary.</p>
+      <pre><code>engine:
+  topology:
+    type: grid
+    rows: 4
+    cols: 3
+  players: [sente, gote]
+  setup: "gle/1c1/1C1/ELG"
+  vocabulary:
+    lion:
+      symbols: { 0: L, 1: l }
+    giraffe:
+      symbols: { 0: G, 1: g }
+    elephant:
+      symbols: { 0: E, 1: e }
+    chick:
+      symbols: { 0: C, 1: c }
+  plugins:
+    shogi:
+      promotionZone: 1
+      royalType: lion</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=shogi&variant=dobutsu" loading="lazy" title="Dobutsu Shogi"></iframe>
+      <p class="board-caption">Dobutsu Shogi (3x4) — animal pieces, same engine</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Four-Player Shogi <a href="https://rules.moddable.games/dist/shogi/variants/four-player-shogi/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">Four armies on a single board with per-player directional rotation. The plugin generalises advancement vectors for N players. Same drop and promotion mechanics, multiplied across four sides.</p>
+      <pre><code>engine:
+  topology:
+    type: grid
+    rows: 9
+    cols: 9
+  players: [south, east, north, west]
+  plugins:
+    shogi:
+      playerCount: 4
+      advancement:
+        0: [-1, 0]
+        1: [0, 1]
+        2: [1, 0]
+        3: [0, -1]
+      promotionZone: 3
+      dropAllowed: true
+      royalType: king
+  pieces:
+    set: mce-shogi-4p</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=shogi&variant=four-player-shogi" loading="lazy" title="Four-Player Shogi"></iframe>
+      <p class="board-caption">Four-Player Shogi — N-player rotation, directional promotion</p>
+    </div>
+  </div>
+</section>
+
+<section class="family-cta">
+  <h2>Play All <span data-stat="variants">13</span> Variants</h2>
+  <p>Every shogi variant is playable with AI opponents at multiple difficulty levels.</p>
+  <div class="cta-actions">
+    <a href="../../play/?family=shogi" class="btn btn--primary">Play Shogi</a>
+    <a href="../../boards/?family=shogi" class="btn btn--ghost">Browse Boards</a>
+    <a href="../../docs/shogi.html" class="btn btn--ghost">SDK Docs</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../../play/">Play</a>
+        <a href="../../boards/">Boards</a>
+        <a href="../../pieces/">Pieces</a>
+        <a href="../../tiles/">Tiles</a>
+        <a href="../../docs/">Docs</a>
+        <a href="../../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Families</h4>
+        <a href="../chess/">Chess</a>
+        <a href="../draughts/">Draughts</a>
+        <a href="../go/">Go</a>
+        <a href="../shogi/">Shogi</a>
+        <a href="../xiangqi/">Xiangqi</a>
+        <a href="../reversi/">Reversi</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.20</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../../js/families.js?v=1.0.20"></script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en" data-family="reversi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reversi — Moddable Engine</title>
+<meta name="description" content="Reversi variants from one engine. Standard Othello, Anti-Reversi, and 6x6. Flanking capture, pass rules, and win conditions as declarative parameters.">
+<meta property="og:title" content="Reversi — Moddable Engine">
+<meta property="og:description" content="Reversi variants from one engine. Standard Othello, Anti-Reversi, and 6x6. Flanking capture, pass rules, and win conditions as declarative parameters.">
+<meta property="og:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta property="og:url" content="https://engine.moddable.games/families/reversi/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Reversi — Moddable Engine">
+<meta name="twitter:description" content="Reversi variants from one engine. Standard Othello, Anti-Reversi, and 6x6. Flanking capture, pass rules, and win conditions as declarative parameters.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.20">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="stylesheet" href="../../css/families.css?v=1.0.20">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../../play/" class="nav-link">Play</a>
+      <a href="../../create/" class="nav-link">Create</a>
+      <a href="../../boards/" class="nav-link">Boards</a>
+      <a href="../../pieces/" class="nav-link">Pieces</a>
+      <a href="../../tiles/" class="nav-link">Tiles</a>
+      <a href="../../docs/" class="nav-link">Docs</a>
+      <a href="../../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<section class="family-hero">
+  <div class="family-hero-inner">
+    <span class="hero-symbol">&#x25CF;</span>
+    <h1>Reversi</h1>
+    <p class="hero-lede"><span data-stat="variants">3</span> variants of the flanking capture game. Standard Othello, Anti-Reversi (fewest discs wins), and the compact 6x6. One plugin parameter inverts the win condition entirely.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-value" data-stat="variants">3</span>
+        <span class="hero-meta-label">Variants</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">1</span>
+        <span class="hero-meta-label">Plugin</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">&#x2713;</span>
+        <span class="hero-meta-label">Frontmatter-only</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="showcase">
+  <div class="showcase-intro">
+    <h2>Invert the Win, Keep the Engine</h2>
+    <p>Reversi demonstrates the power of parametric rules. Change one value and the entire strategy inverts. The engine handles both without branching.</p>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Standard Reversi <a href="https://rules.moddable.games/dist/reversi/variants/standard/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">The classic 8x8 game played in international competition since 1977. Place discs to outflank and flip your opponent's pieces. Most discs wins when no moves remain.</p>
+      <pre><code>engine:
+  topology:
+    type: grid
+    rows: 8
+    cols: 8
+  players: [black, white]
+  setup: "8/8/8/3bw3/3wb3/8/8/8"
+  plugins:
+    reversi:
+      directions: "all"
+      mustFlip: true
+      winBy: "most"
+      passWhenNoMoves: true</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=reversi&variant=standard" loading="lazy" title="Standard Reversi"></iframe>
+      <p class="board-caption">Standard Reversi (8x8) — most discs wins</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Anti-Reversi <a href="https://rules.moddable.games/dist/reversi/variants/anti-reversi/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">The misere variant. Win condition inverted: fewest discs wins. One parameter change (winBy: "fewest") transforms the entire strategic landscape. Corner control becomes a liability.</p>
+      <pre><code>engine:
+  topology:
+    type: grid
+    rows: 8
+    cols: 8
+  players: [black, white]
+  setup: "8/8/8/3bw3/3wb3/8/8/8"
+  plugins:
+    reversi:
+      directions: "all"
+      mustFlip: true
+      winBy: "fewest"
+      passWhenNoMoves: true</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=reversi&variant=anti-reversi" loading="lazy" title="Anti-Reversi"></iframe>
+      <p class="board-caption">Anti-Reversi (8x8) — fewest discs wins, inverted strategy</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>6x6 Reversi <a href="https://rules.moddable.games/dist/reversi/variants/six-by-six/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">A compact variant for faster games. Fewer cells mean every move is critical from the start. Same rules, tighter board, more immediate tactical consequences.</p>
+      <pre><code>engine:
+  topology:
+    type: grid
+    rows: 6
+    cols: 6
+  players: [black, white]
+  setup: "6/6/2bw2/2wb2/6/6"
+  plugins:
+    reversi:
+      directions: "all"
+      mustFlip: true
+      winBy: "most"
+      passWhenNoMoves: true</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=reversi&variant=six-by-six" loading="lazy" title="6x6 Reversi"></iframe>
+      <p class="board-caption">6x6 Reversi — compact board, immediate tactics</p>
+    </div>
+  </div>
+</section>
+
+<section class="family-cta">
+  <h2>Play All <span data-stat="variants">3</span> Variants</h2>
+  <p>Every reversi variant is playable with AI opponents at multiple difficulty levels.</p>
+  <div class="cta-actions">
+    <a href="../../play/?family=reversi" class="btn btn--primary">Play Reversi</a>
+    <a href="../../boards/?family=reversi" class="btn btn--ghost">Browse Boards</a>
+    <a href="../../docs/reversi.html" class="btn btn--ghost">SDK Docs</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../../play/">Play</a>
+        <a href="../../boards/">Boards</a>
+        <a href="../../pieces/">Pieces</a>
+        <a href="../../tiles/">Tiles</a>
+        <a href="../../docs/">Docs</a>
+        <a href="../../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Families</h4>
+        <a href="../chess/">Chess</a>
+        <a href="../draughts/">Draughts</a>
+        <a href="../go/">Go</a>
+        <a href="../shogi/">Shogi</a>
+        <a href="../xiangqi/">Xiangqi</a>
+        <a href="../reversi/">Reversi</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.20</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../../js/families.js?v=1.0.20"></script>
+</body>
+</html>
