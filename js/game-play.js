@@ -454,7 +454,7 @@ export function createPlaySession(options = {}) {
 
     const svgEl = container.querySelector('svg')
     if (svgEl) {
-      svgEl.removeAttribute('width')
+      svgEl.setAttribute('width', '100%')
       svgEl.removeAttribute('height')
 
       const style = PIECE_STYLES[currentPieceStyle]
