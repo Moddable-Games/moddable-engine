@@ -79,6 +79,19 @@ if (inlineRecolour.length > 0) {
   errors.push(`Inline recolour replaceAll found (use recolourSvgText): ${inlineRecolour.map(f => f.replace(ROOT + '/', '')).join(', ')}`)
 }
 
+// 6. Frontmatter resolver must not be duplicated — resolveFromFetch (browser) and resolveFromDisk (Node) are canonical
+// Scripts that render boards use cascadeResolve for visual output only (no extends needed); that's allowed.
+const resolverDups = sourceFiles.filter(f => {
+  if (f.includes('__tests__') || f.includes('check-duplication') || f.includes('compare-resolvers')) return false
+  if (f.includes('resolve-frontmatter.js') || f.includes('packages/play/src/play.js')) return false
+  if (f.includes('scripts/export-boards') || f.includes('scripts/snapshot-boards') || f.includes('scripts/build-board-index')) return false
+  const content = readFileSync(f, 'utf8')
+  return content.includes('cascadeResolve(') && content.includes('parseFrontmatter(') && content.includes('familyFm')
+})
+if (resolverDups.length > 0) {
+  errors.push(`Frontmatter resolver duplicated (use resolveFromFetch or resolveFromDisk): ${resolverDups.map(f => f.replace(ROOT + '/', '')).join(', ')}`)
+}
+
 if (errors.length > 0) {
   console.error('Duplication guard FAILED:')
   for (const e of errors) console.error('  - ' + e)

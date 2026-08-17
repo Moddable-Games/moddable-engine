@@ -49,9 +49,7 @@ async function renderFromResolved(resolved, container) {
     } : null,
   }
 }
-import { resolveSurface } from '../packages/schema/src/surfaces.js'
-import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolver.js'
-import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
+import { resolveFromFetch } from '../packages/play/src/resolve-frontmatter.js'
 
 async function loadContent(resolved, basePath) {
   const content = resolved.content
@@ -66,20 +64,12 @@ async function loadContent(resolved, basePath) {
 }
 
 async function loadVariant({ familyPath, variantPath, basePath }) {
-  const [familyMd, variantMd] = await Promise.all([
-    fetch(basePath + familyPath).then(r => r.text()),
-    fetch(basePath + variantPath).then(r => r.text()),
-  ])
-  const familyFm = parseFrontmatter(familyMd).meta || {}
-  const variantFm = parseFrontmatter(variantMd).meta || {}
-  const surfaceRef = variantFm.engine?.surface || familyFm.engine?.surface
-  const surface = resolveSurface(surfaceRef)
-  const { resolved, errors } = cascadeResolve({
-    surface,
-    family: { engine: familyFm.engine || {}, meta: { label: familyFm.title || '' } },
-    variant: { engine: variantFm.engine || {}, meta: { label: variantFm.title || variantFm.slug || '' } },
-  })
-  if (errors.length > 0) return { resolved, errors }
+  const family = familyPath.split('/')[0]
+  const slug = variantPath.match(/variants\/([^.]+)\.md$/)?.[1]
+    || variantPath.match(/games\/([^/]+)\/standard\.md$/)?.[1]
+    || 'standard'
+  const resolved = await resolveFromFetch(family, slug, basePath)
+  if (!resolved) return { resolved: {}, errors: ['Failed to resolve variant'] }
   const contentBasePath = basePath + variantPath.replace(/\/[^/]+$/, '/')
   const final = await loadContent(resolved, contentBasePath)
   return { resolved: final, errors: [] }
