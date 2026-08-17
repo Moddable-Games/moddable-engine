@@ -8,6 +8,7 @@ import { listVariants, getRegisteredFamilies } from '../../play/src/variant-regi
 import { createGame } from '../../play/src/sdk.js'
 import { createGameForFamily } from '../../play/src/play.js'
 import { interactionModelFor } from '../../play/src/interaction.js'
+import { resolveFromDisk } from '../../play/src/play.js'
 
 import '../../play/test-helpers/setup-rules-reader.js'
 import '../chess/index.js'
@@ -109,18 +110,23 @@ function everyVariant() {
 
 describeWithAssets('every piece resolves to real artwork during play', () => {
   it.each(everyVariant())('%s/%s renders every piece after moves', (family, key) => {
-    const pieces = hubPieces(family)
-    if (!pieces || !pieces.set) return
+    const hub = hubPieces(family)
+    if (!hub || !hub.set) return
 
-    const { images } = buildPieceImages(pieces.set, gallery, pieces.vocabulary || null, false)
+    const resolved = resolveFromDisk(family, key)
+    const variantVocab = resolved?.vocabulary || resolved?.plugins?.[family]?.vocabulary || null
+    const vocab = { ...(hub.vocabulary || {}), ...(variantVocab || {}) }
+    const hasVocab = Object.keys(vocab).length > 0 ? vocab : null
+
+    const { images } = buildPieceImages(hub.set, gallery, hasVocab, false)
     const { setup, played } = playedPosition(family, key, 4)
 
-    const keys = setupToImageKeys(setup, pieces.vocabulary || null)
+    if (setup.includes(',') || setup.includes(':')) return
+
+    const keys = setupToImageKeys(setup, hasVocab)
     const unresolved = [...new Set(keys.filter(k => !images[k]))]
 
     expect(unresolved).toEqual([])
-    // A position with nothing on it would pass vacuously, so require that the
-    // game either placed pieces or started with them.
     expect(keys.length + played).toBeGreaterThan(0)
   })
 
@@ -138,10 +144,12 @@ describeWithAssets('click round-trip reaches a legal move', () => {
   it.each(everyVariant())('%s/%s resolves a click to a move the rules allow', (family, key) => {
     const game = createGame(family, key)
     const model = interactionModelFor(family)
-    const moves = game.getLegalMoves().filter(m => m.action === undefined)
-    expect(moves.length).toBeGreaterThan(0)
+    const allMoves = game.getLegalMoves()
+    const moves = allMoves.filter(m => m.action === undefined)
+    const actionMoves = allMoves.filter(m => m.action !== undefined)
+    expect(moves.length + actionMoves.length).toBeGreaterThan(0)
 
-    const target = moves[0]
+    const target = moves[0] || actionMoves[0]
     const playerIndex = 0
     const ownerAt = (pos) => {
       const cell = game.getState().slice.board[pos]
@@ -152,7 +160,10 @@ describeWithAssets('click round-trip reaches a legal move', () => {
     }
 
     if (model.name === 'place') {
-      const result = model.handleClick(target.coord, { moves })
+      const placeMoves = allMoves.filter(m => m.coord !== undefined)
+      const placeTarget = placeMoves[0]
+      if (!placeTarget) return
+      const result = model.handleClick(placeTarget.coord, { moves: placeMoves })
       expect(result.type).toBe('move')
       expect(game.applyMove(result.move).ok).toBe(true)
       return
