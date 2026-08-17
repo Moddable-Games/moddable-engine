@@ -22,6 +22,8 @@ export function defaultState(family = 'chess') {
     render: { surface: 'wood-classic', cellColor: 'checkered', labels: true, starPoints: false, inherited: null, surfaceColors: null },
     pieceSet: '',
     pieceVocabulary: null,
+    inheritedVocabulary: null,
+    inheritedPieces: null,
     placement: {},
     customPieces: [],
     players: defaultPlayers(family),
@@ -128,6 +130,7 @@ function topologyFromState(state) {
 // are carried opaquely and cleared when the topology type changes, because a
 // grid's drawing program means nothing on a pit board.
 const INHERITED_RENDER_KEYS = ['ops', 'cellSize', 'inset', 'insetFactor', 'idStyle', 'decorations', 'zones', 'frame', 'trackStyle', 'gap']
+const INHERITED_PIECE_KEYS = ['pieces', 'pieceMoves']
 
 function renderFromState(state) {
   const t = state.topology || {}
@@ -182,16 +185,16 @@ export function buildResolvedFromState(state) {
   variantEngine.players = players
   Object.assign(pluginConfig, playerConfig)
 
-  if (Array.isArray(state.customPieces) && state.customPieces.length) {
-    const vocabulary = {}
-    const pieces = {}
-    for (const cp of state.customPieces) {
-      vocabulary[cp.name] = { symbols: { 0: cp.symbolW, 1: cp.symbolB } }
-      pieces[cp.name] = cp.spec
-    }
-    variantEngine.vocabulary = vocabulary
-    pluginConfig.pieces = pieces
+  const vocabulary = { ...(state.inheritedVocabulary || {}) }
+  for (const key of INHERITED_PIECE_KEYS) {
+    const carried = state.inheritedPieces?.[key]
+    if (carried && Object.keys(carried).length) pluginConfig[key] = { ...carried }
   }
+  for (const cp of (Array.isArray(state.customPieces) ? state.customPieces : [])) {
+    vocabulary[cp.name] = { symbols: { 0: cp.symbolW, 1: cp.symbolB } }
+    pluginConfig.pieces = { ...pluginConfig.pieces, [cp.name]: cp.spec }
+  }
+  if (Object.keys(vocabulary).length) variantEngine.vocabulary = vocabulary
 
   if (Object.keys(pluginConfig).length) {
     variantEngine.plugins = { [family]: pluginConfig }
@@ -261,5 +264,20 @@ export function stateFromResolved(resolved, family, opts = {}) {
   }
   state.rules = rules
 
+  const inheritedVocabulary = plainEntries({ ...(resolved.vocabulary || {}), ...(pluginBlock.vocabulary || {}) })
+  state.inheritedVocabulary = Object.keys(inheritedVocabulary).length ? inheritedVocabulary : null
+  const inheritedPieces = {}
+  for (const key of INHERITED_PIECE_KEYS) {
+    const carried = plainEntries(pluginBlock[key] || {})
+    if (Object.keys(carried).length) inheritedPieces[key] = carried
+  }
+  state.inheritedPieces = Object.keys(inheritedPieces).length ? inheritedPieces : null
+
   return state
+}
+
+function plainEntries(obj) {
+  const out = {}
+  for (const [k, v] of Object.entries(obj)) if (v && typeof v === 'object') out[k] = v
+  return out
 }

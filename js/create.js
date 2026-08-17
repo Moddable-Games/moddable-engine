@@ -35,6 +35,11 @@ function getSpecForFenChar(fenChar) {
   for (const cp of state.customPieces) {
     if (cp.symbolW === fenChar || cp.symbolB === fenChar) return cp.spec
   }
+  for (const [type, def] of Object.entries(state.inheritedVocabulary || {})) {
+    if (!Object.values(def?.symbols || {}).includes(fenChar)) continue
+    const carried = state.inheritedPieces || {}
+    return carried.pieces?.[type] || carried.pieceMoves?.[type] || null
+  }
   return null
 }
 
@@ -865,6 +870,8 @@ async function init() {
     state.render.inherited = null
     state.render.surfaceColors = null
     state.pieceVocabulary = null
+    state.inheritedVocabulary = null
+    state.inheritedPieces = null
     const type = val('topo-type')
     const surfaceSelect = $('surface-select')
     if (type === 'pit') surfaceSelect.value = 'earth'
