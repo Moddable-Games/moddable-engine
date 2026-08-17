@@ -1,5 +1,13 @@
 const KNOWN_FLAGS = ['drops', 'random']
 
+const FLAG_SUPPORT = {
+  chess: new Set(['drops', 'random']),
+}
+
+export function familySupportsFlag(family, flag) {
+  return !!FLAG_SUPPORT[family]?.has(flag)
+}
+
 export function parseVariantKey(key) {
   if (!key || !key.includes('+')) return { base: key || '', flags: [] }
   const parts = key.split('+')
@@ -18,12 +26,15 @@ export function parseUrlFlags(flagString) {
   return flagString.split(',').map(f => f.trim().toLowerCase()).filter(f => KNOWN_FLAGS.includes(f)).sort()
 }
 
-export function deriveCompatibleFlags(definition) {
+export function deriveCompatibleFlags(definition, family) {
   if (!definition) return []
   const engine = definition.engine || definition
+  const fam = family || engine.family || (engine.plugins ? Object.keys(engine.plugins)[0] : null)
+  const supported = FLAG_SUPPORT[fam]
+  if (!supported) return []
   const flags = []
-  if (canRandomise(engine)) flags.push('random')
-  if (canDrop(engine)) flags.push('drops')
+  if (supported.has('random') && canRandomise(engine)) flags.push('random')
+  if (supported.has('drops') && canDrop(engine)) flags.push('drops')
   return flags
 }
 
@@ -62,9 +73,10 @@ function canDrop(engine) {
   const topoType = engine.topology?.type || (engine.plugins?.chess ? 'grid' : null)
   if (topoType !== 'grid') return false
 
-  const chessConfig = engine.plugins?.chess || engine
-  if (chessConfig.winCondition === 'antichess' || chessConfig.winCondition === 'giveaway') return false
-  if (chessConfig.drops) return false
+  const chessConfig = engine.plugins?.chess || {}
+  const winCondition = chessConfig.winCondition ?? engine.winCondition
+  if (winCondition === 'antichess' || winCondition === 'giveaway') return false
+  if (chessConfig.drops || engine.drops) return false
 
   return true
 }

@@ -1,7 +1,7 @@
 import { createGameForFamily, STRUCTURAL_KEYS } from '../packages/play/src/play.js'
 import { createGameController } from '../packages/play/src/game-controller.js'
 import { listVariants, getVariantConfig } from '../packages/play/src/variant-registry.js'
-import { parseUrlFlags, deriveCompatibleFlags, serializeVariantKey } from '../packages/play/src/variant-flags.js'
+import { parseUrlFlags, deriveCompatibleFlags, familySupportsFlag, serializeVariantKey } from '../packages/play/src/variant-flags.js'
 import { createAI } from '../packages/play/src/sdk.js'
 import { interactionModelFor, FAMILY_INTERACTION } from '../packages/play/src/interaction.js'
 import { createEmbedBridge, parseEmbedParams, normaliseOutcome } from '../packages/play/src/embed.js'
@@ -1084,7 +1084,7 @@ export async function initGamePlay(container, defaults = {}) {
   function buildFlagToggles() {
     flagsContainer.innerHTML = ''
     const compatible = session?.resolved
-      ? deriveCompatibleFlags({ topology: session.resolved.topology, plugins: session.resolved.plugins, setup: session.resolved.setup })
+      ? deriveCompatibleFlags(session.resolved, family)
       : (family === 'chess' ? ['random', 'drops'] : [])
     if (!compatible.length) return
     const label = document.createElement('label')
@@ -1391,6 +1391,7 @@ export async function initGamePlay(container, defaults = {}) {
 
   familySelect.addEventListener('change', () => {
     family = familySelect.value
+    activeFlags = []
     rebuildVariantSelect(family)
     rebuildSeatSelect(family)
     const opts = difficultyOptionsFor(family)

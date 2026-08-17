@@ -290,7 +290,7 @@ export function createGameController(game, opts = {}) {
 
     if (onMove) onMove(move, player)
 
-    if (result.winner) {
+    if (result.winner !== null && result.winner !== undefined) {
       gameOver = true
       chainAnchor = null
       if (onGameEnd) onGameEnd(result.winner)
@@ -415,7 +415,7 @@ export function createGameController(game, opts = {}) {
 
     if (onMove) onMove(move, player)
 
-    if (result.winner) {
+    if (result.winner !== null && result.winner !== undefined) {
       gameOver = true
       aiThinking = false
       if (onGameEnd) onGameEnd(result.winner)

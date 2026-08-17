@@ -2,7 +2,7 @@ import { createGameFromDefinition } from '../../game/src/create-game.js'
 import { produce } from '../../schema/src/produce.js'
 import { getVariantConfig, hasVariant, getSlugForKey, setVariantSources as _setVariantSources } from './variant-registry.js'
 import { definitionFromVariant } from './variant-definition.js'
-import { parseVariantKey, applyFlags } from './variant-flags.js'
+import { parseVariantKey, applyFlags, familySupportsFlag } from './variant-flags.js'
 import { parseFrontmatter } from '../../schema/src/parse-frontmatter.js'
 import { resolve as cascadeResolve } from '../../schema/src/cascade-resolver.js'
 import { resolveSurface } from '../../schema/src/surfaces.js'
@@ -83,7 +83,8 @@ export function createGameForFamily(family, opts = {}) {
   let definition = userDefinition
     ? (userDefinition.topology !== undefined ? userDefinition : produce(userDefinition))
     : produce(resolveMeta(family, base || variant))
-  if (flags.length) definition = applyFlags(definition, flags)
+  const usableFlags = flags.filter(f => familySupportsFlag(family, f))
+  if (usableFlags.length) definition = applyFlags(definition, usableFlags)
 
   const effectiveSeed = rngSeed !== undefined ? rngSeed : Date.now() ^ (Math.random() * 0x7fffffff | 0)
 

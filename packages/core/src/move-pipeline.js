@@ -57,14 +57,14 @@ export function createPipeline(registry, store, history, playerSystem, eventBus)
     }
 
     // 6. Advance turn — only if no plugin signalled continueTurn and no winner
-    if (!winner && !continueTurn) {
+    if (winner === null && !continueTurn) {
       playerSystem.advance(store)
     }
 
     // 7. Emit
     eventBus.emit('move.applied', { move, state: store.getAll(), winner, continueTurn })
 
-    if (winner) {
+    if (winner !== null) {
       eventBus.emit('game.ended', { winner })
     }
 

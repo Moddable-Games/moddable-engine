@@ -58,6 +58,7 @@ export {
   serializeVariantKey,
   parseUrlFlags,
   deriveCompatibleFlags,
+  familySupportsFlag,
   applyFlags,
   flagPositionKeySuffix,
 } from './src/variant-flags.js'
