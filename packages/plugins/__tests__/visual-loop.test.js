@@ -146,9 +146,15 @@ describeWithAssets('every piece resolves to real artwork during play', () => {
 
     const fenOverrides = pieces.fenMap || pieces.vocabulary || null
     const { images } = buildPieceImages(pieces.set, gallery, fenOverrides, false)
-    const { setup, played } = playedPosition(family, key, 4)
 
-    const keys = setupToImageKeys(setup, null)
+    const varFile = path.join(RULES_DIR, family, 'content/variants', `${key}.md`)
+    const varMeta = fs.existsSync(varFile) ? (parseFrontmatter(fs.readFileSync(varFile, 'utf8')).meta || {}) : {}
+    const declaredSetup = varMeta.engine?.setup || ''
+    const isFen4 = declaredSetup.includes(',') && /[ryg][A-Z]/.test(declaredSetup)
+
+    const { setup, played } = playedPosition(family, key, 4)
+    const checkSetup = isFen4 ? declaredSetup : setup
+    const keys = setupToImageKeys(checkSetup, null)
     const unresolved = [...new Set(keys.filter(k => !images[k]))]
 
     expect(unresolved).toEqual([])
