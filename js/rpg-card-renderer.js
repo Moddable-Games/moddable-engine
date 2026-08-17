@@ -1,3 +1,5 @@
+import { getField } from '../packages/rpg/src/card-data.js'
+
 const TRANSFORMS = {
   levelSlug(value) {
     return value === 0 ? 'cantrips' : `level-${value}`
@@ -19,21 +21,6 @@ const TRANSFORMS = {
   lowercase(value) {
     return String(value).toLowerCase()
   },
-}
-
-function getField(obj, path) {
-  if (!path) return undefined
-  const arrayMatch = path.match(/^(.+?)\[(\d+)\](.*)$/)
-  if (arrayMatch) {
-    const [, pre, idx, post] = arrayMatch
-    const arr = pre.split('.').reduce((o, k) => o && o[k], obj)
-    if (!Array.isArray(arr)) return undefined
-    const val = arr[parseInt(idx)]
-    if (!post) return val
-    const rest = post.startsWith('.') ? post.slice(1) : post
-    return rest ? getField(val, rest) : val
-  }
-  return path.split('.').reduce((o, k) => o && o[k], obj)
 }
 
 function interpolate(template, item) {

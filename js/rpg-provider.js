@@ -1,7 +1,7 @@
 import { loadRpgManifest } from './rpg-manifest-loader.js'
 import { renderCard } from './rpg-card-renderer.js'
 import { resolveLink } from './rpg-link-resolver.js'
-
+import { getField } from '../packages/rpg/src/card-data.js'
 import { RULES_BASE } from './play-shared.js'
 
 function deriveColors(hex) {
@@ -172,7 +172,7 @@ function getAllResults() {
         const searchFields = cat.searchFields || ['name']
         const matched = data.filter(item =>
           searchFields.some(field => {
-            const val = getNestedField(item, field)
+            const val = getField(item, field)
             return val && String(val).toLowerCase().includes(query)
           })
         )
@@ -225,7 +225,7 @@ function renderResults() {
       row.innerHTML = `<span class="rpg-result-range">${range}</span><span class="rpg-result-name">${displayText}</span><span class="rpg-result-cat" style="color:${color.accent}">${cat.label}</span>`
     } else {
       const displayText = resolveDisplay(item, cat.displayField || 'name') || item.index || ''
-      const tag = cat.tag ? getNestedField(item, cat.tag.field) : null
+      const tag = cat.tag ? getField(item, cat.tag.field) : null
       const tagHtml = tag != null ? `<span class="rpg-result-tag" style="background:${color.bg};color:${color.accent}">${cat.tag.prefix || ''}${tag}</span>` : ''
       row.innerHTML = `<span class="rpg-result-name">${displayText}</span>${tagHtml}<span class="rpg-result-cat" style="color:${color.accent}">${cat.label}</span>`
     }
@@ -295,14 +295,11 @@ function renderTable() {
   }
 }
 
-function getNestedField(obj, path) {
-  return path.split('.').reduce((o, k) => o && o[k], obj)
-}
 
 function resolveDisplay(item, displayField) {
   if (!displayField) return item.name || item.result || ''
   if (displayField.includes('{')) {
-    return displayField.replace(/\{([^}]+)\}/g, (_, key) => getNestedField(item, key) || '')
+    return displayField.replace(/\{([^}]+)\}/g, (_, key) => getField(item, key) || '')
   }
-  return getNestedField(item, displayField) || ''
+  return getField(item, displayField) || ''
 }
