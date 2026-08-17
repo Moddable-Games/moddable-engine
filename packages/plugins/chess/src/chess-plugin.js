@@ -1,6 +1,5 @@
 import { rider, leaper, compose, divergent, fromConfig, OFFSETS } from '../../../piece-behaviour/index.js'
 import { randomBackRank } from './variants/chess960.js'
-import { parseRankRuns } from '../../../core/src/fen-runs.js'
 
 function normalizePawnConfig(pc) {
   if (!pc) return pc
@@ -309,10 +308,8 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       board = setupInput
     } else if (typeof setupInput === 'object') {
       board = setupInput
-    } else if (topology && topology.parsePosition) {
-      board = topology.parsePosition(setupInput, vocabulary)
     } else {
-      board = parseFENtoArray(setupInput)
+      board = topology.parsePosition(setupInput, vocabulary)
     }
 
     pawnConfig = derivePawnConfig(topology, board)
@@ -347,32 +344,6 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return state
   }
 
-  function parseFENtoArray(fen) {
-    const cols = topology ? topology.cols : 8
-    const rows = topology ? topology.rows : 8
-    const board = new Array(rows * cols).fill(null)
-    const rowStrings = fen.split(' ')[0].split('/')
-    const symbolLookup = buildReverseVocab()
-    let idx = 0
-    for (const row of rowStrings) {
-      for (const run of parseRankRuns(row)) {
-        if (run.skip !== undefined) { idx += run.skip; continue }
-        board[idx] = symbolLookup(run.symbol)
-        idx++
-      }
-    }
-    return board
-  }
-
-  function buildReverseVocab() {
-    const map = new Map()
-    for (const [type, def] of Object.entries(vocabulary)) {
-      for (const [owner, symbol] of Object.entries(def.symbols)) {
-        map.set(symbol, { type, owner: parseInt(owner) })
-      }
-    }
-    return (ch) => map.get(ch) || null
-  }
 
   function getCell(board, pos) {
     if (Array.isArray(board)) return board[pos]
@@ -626,7 +597,13 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
         if (canDoubleStep) {
           const doubleForward = topology.step(forward, fwd)
           if (doubleForward !== null && getCell(slice.board, doubleForward) === null) {
-            moves.push({ from, to: doubleForward })
+            if (promotionCells[playerIdx].has(doubleForward)) {
+              for (const promo of getPromotionChoices(playerIdx)) {
+                moves.push({ from, to: doubleForward, promotion: promo })
+              }
+            } else {
+              moves.push({ from, to: doubleForward })
+            }
           }
         }
       }

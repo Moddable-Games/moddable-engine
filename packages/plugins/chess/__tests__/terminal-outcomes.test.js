@@ -5,28 +5,12 @@ import { createGameForFamily } from '../../../play/src/play.js'
 
 function setupGame(variant, fen, playerJustMoved = 0) {
   const game = createGame('chess', variant)
-  const board = parseFEN(fen, game.getState().slice.board.length)
+  const topo = game.topology
+  const vocab = game.raw.registry.getPlugins().find(p => p.sliceName === 'chess')?.vocabulary || {}
+  const board = topo.parsePosition(fen, vocab)
   const slice = { ...game.getState().slice, board }
   game.loadState({ slice, players: { currentIndex: playerJustMoved } })
   return game
-}
-
-function parseFEN(fen, size) {
-  const cols = Math.round(Math.sqrt(size)) === 8 ? 8 : Math.round(Math.sqrt(size))
-  const board = new Array(size).fill(null)
-  const PIECES = { K: 'king', Q: 'queen', R: 'rook', B: 'bishop', N: 'knight', P: 'pawn' }
-  const rows = fen.split('/').length <= 8 ? fen.split('/') : fen.split('/')
-  let idx = 0
-  for (const row of fen.split('/')) {
-    for (const ch of row) {
-      if (ch >= '1' && ch <= '9') { idx += parseInt(ch); continue }
-      const type = PIECES[ch.toUpperCase()]
-      const owner = ch === ch.toUpperCase() ? 0 : 1
-      if (type) board[idx] = { type, owner }
-      idx++
-    }
-  }
-  return board
 }
 
 // --- Stalemate differential ---
