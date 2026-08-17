@@ -160,6 +160,7 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 - Rewrote visual-loop and start-position-canon tests to respect per-variant piece set overrides (was hardcoding hub set)
 - Added `validatePieceVocabulary()` to render-engine — throws on vocabulary/set mismatches at resolve time
 - #130 tranche A: fixed produceHexLegacy 0x0 viewBox, added cx/cy to track point polygons, deleted 529 lines of dead parameterised renderers, lifted backgammon constants to render.*
+- Fixed FEN4 regression: boardToSetup now receives players arg so 4-player positions serialise with owner prefixes; 532/533 visual-loop tests pass (djambi only failure)
 
 #### 2026-08-06
 - CI pipeline fully green for the first time (PR #92 merged): unit-tests (3021), playability-standard, Playwright e2e (50 tests)
