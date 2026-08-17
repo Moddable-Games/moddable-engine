@@ -1,3 +1,4 @@
+// Browser consumers: js/boards.js (via schema loader), js/play.js, packages/render/src/render-engine.js
 /**
  * Produce layout config from resolved frontmatter.
  *

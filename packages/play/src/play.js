@@ -1,3 +1,4 @@
+// Browser consumers: js/game-play.js, js/play.js, js/create.js
 import { createGameFromDefinition } from '../../game/src/create-game.js'
 import { produce } from '../../schema/src/produce.js'
 import { getVariantConfig, hasVariant, getSlugForKey, setVariantSources as _setVariantSources } from './variant-registry.js'

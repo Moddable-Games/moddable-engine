@@ -1,3 +1,4 @@
+// Browser consumers: js/game-play.js, js/play.js, js/gallery.js, scripts/export-boards.mjs, scripts/build-board-index.mjs
 export const FEN4_OWNERS = { r: 'red', b: 'blue', y: 'yellow', g: 'green', w: 'white' }
 
 const recolourCache = {}

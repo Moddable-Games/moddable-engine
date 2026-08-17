@@ -1,3 +1,4 @@
+// Browser consumers: js/game-play.js, js/play.js, js/boards.js, scripts/export-boards.mjs
 /**
  * renderFromEngine — renders SVG directly from a resolved cascade object.
  *
