@@ -11,6 +11,7 @@
 // the definer copy did not list `all` in the same order. One table now.
 
 import { fromConfig } from '../packages/piece-behaviour/src/piece-definitions.js'
+import { algebraicId } from '../packages/topologies/grid/src/topology-grid.js'
 
 const DIRS = {
   orthogonal: [[-1, 0], [1, 0], [0, -1], [0, 1]],
@@ -79,7 +80,7 @@ export function boardFromPlacement(placement, rows, cols, moverIsUpper) {
 }
 
 function cellSelector(container, r, c, rows, idStyle) {
-  const algebraic = String.fromCharCode(97 + c) + (rows - r)
+  const algebraic = algebraicId(r, c, rows)
   return container.querySelector(`[data-sq="${idStyle === 'rc' ? `${r},${c}` : algebraic}"]`)
     || container.querySelector(`[data-sq="${r},${c}"]`)
     || container.querySelector(`[data-sq="${algebraic}"]`)

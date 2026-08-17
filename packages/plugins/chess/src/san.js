@@ -1,3 +1,5 @@
+import { indexToAlgebraic } from '../../../topologies/grid/src/topology-grid.js'
+
 const PIECE_SYMBOLS = { king: 'K', queen: 'Q', rook: 'R', bishop: 'B', knight: 'N' }
 
 export function moveToSAN(move, board, topology, legalMoves) {
@@ -49,11 +51,6 @@ export function moveToSAN(move, board, topology, legalMoves) {
   return symbol + disambig + pawnFile + captureStr + to + promo
 }
 
-function indexToAlgebraic(idx, rows, cols) {
-  const r = Math.floor(idx / cols)
-  const c = idx % cols
-  return String.fromCharCode(97 + c) + (rows - r)
-}
 
 function fallbackNotation(move) {
   if (move.action) return move.action

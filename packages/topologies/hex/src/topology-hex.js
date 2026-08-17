@@ -1,4 +1,5 @@
 import { parseRankRuns } from '../../../core/src/fen-runs.js'
+import { HexMath } from '../../../hex-generators/src/hex-math.js'
 export const schema = {
   type: 'hex',
   required: [],
@@ -169,10 +170,7 @@ export function createHexTopology(config) {
 
   function toPixel(coord, size) {
     const { q, r } = typeof coord === 'string' ? parse(coord) : coord
-    if (orientation === 'flat') {
-      return { x: size * (3 / 2 * q), y: size * (Math.sqrt(3) / 2 * q + Math.sqrt(3) * r) }
-    }
-    return { x: size * (Math.sqrt(3) * q + Math.sqrt(3) / 2 * r), y: size * (3 / 2 * r) }
+    return orientation === 'flat' ? HexMath.axialToPixelFlat(q, r, size) : HexMath.axialToPixelPointy(q, r, size)
   }
 
   function getCorners(center, size) {
@@ -478,10 +476,7 @@ export function createHexTopology(config) {
     const orient = config.orientation || orientation
 
     function toPixelLocal(q, r) {
-      if (orient === 'flat') {
-        return { x: cellSize * (3 / 2 * q), y: cellSize * (Math.sqrt(3) / 2 * q + Math.sqrt(3) * r) }
-      }
-      return { x: cellSize * (Math.sqrt(3) * q + Math.sqrt(3) / 2 * r), y: cellSize * (3 / 2 * r) }
+      return orient === 'flat' ? HexMath.axialToPixelFlat(q, r, cellSize) : HexMath.axialToPixelPointy(q, r, cellSize)
     }
 
     function getCornersLocal(cx, cy, sz) {
@@ -494,14 +489,7 @@ export function createHexTopology(config) {
       return corners
     }
 
-    function isLightHex(hex) {
-      const c = hex.replace('#', '')
-      const full = c.length === 3 ? c[0]+c[0]+c[1]+c[1]+c[2]+c[2] : c
-      const r = parseInt(full.substring(0, 2), 16)
-      const g = parseInt(full.substring(2, 4), 16)
-      const b = parseInt(full.substring(4, 6), 16)
-      return (r * 299 + g * 587 + b * 114) / 1000 > 180
-    }
+    const isLightHex = HexMath.isLightColor
 
     // Compute bounding box
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity

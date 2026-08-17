@@ -2,16 +2,10 @@ import { renderFromEngine, attachPieceImages, fenToPosition } from '../packages/
 import { getGameConfig, getAllGames, HexSvg, createSeededRng } from '../packages/hex-generators/index.js'
 import { renderRpgProvider } from './rpg-provider.js'
 import { renderChargenProvider } from './rpg-chargen.js'
-import { loadRecolouredPieces, FEN4_OWNERS } from './play-shared.js'
+import { loadRecolouredPieces, FEN4_OWNERS, RULES_BASE, loadGalleryIndex, getGalleryIndex } from './play-shared.js'
 import { exportSvgFile, exportPngFile } from './svg-export.js'
 
 let galleryIndex = null
-async function loadGalleryIndex(basePath = '../pieces/') {
-  if (galleryIndex) return galleryIndex
-  try { galleryIndex = await fetch(basePath + 'gallery-index.json').then(r => r.json()) }
-  catch { galleryIndex = [] }
-  return galleryIndex
-}
 
 async function renderFromResolved(resolved, container) {
   const topo = resolved.topology || {}
@@ -111,12 +105,9 @@ function pushState() {
 let gamesIndex = {}
 let manifestIndex = {}
 
-const RULES_BASE = location.hostname === 'engine.moddable.games'
-  ? 'https://rules.moddable.games/'
-  : '../../moddable-rules/'
 
 async function init() {
-  galleryIndex = await fetch('../pieces/gallery-index.json').then(r => r.json()).catch(e => { console.error('Gallery load failed:', e); return null })
+  galleryIndex = await loadGalleryIndex()
   const manifest = await fetch(RULES_BASE + 'diagrams-manifest.json').then(r => r.json()).catch(e => { console.error('Manifest load failed:', e); return [] })
   const entries = Array.isArray(manifest) ? manifest : Object.entries(manifest).map(([k, v]) => ({ family: k.split('/')[0], variant: k.split('/')[1], ...v }))
   for (const entry of entries) {

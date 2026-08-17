@@ -1,3 +1,5 @@
+import { algebraicToIndex } from '../../topologies/grid/src/topology-grid.js'
+
 const TT_EXACT = 0
 const TT_LOWER = 1
 const TT_UPPER = 2
@@ -51,12 +53,10 @@ export function createMinimax(simulator, opts = {}) {
     const entries = openingBook[key]
     if (!entries || entries.length === 0) return null
     const notation = entries[Math.floor(Math.random() * entries.length)]
-    const fromCol = notation.charCodeAt(0) - 97
-    const fromRow = 8 - parseInt(notation[1])
-    const toCol = notation.charCodeAt(2) - 97
-    const toRow = 8 - parseInt(notation[3])
-    const from = fromRow * 8 + fromCol
-    const to = toRow * 8 + toCol
+    const cols = simulator.cols || 8
+    const rows = simulator.rows || 8
+    const from = algebraicToIndex(notation.slice(0, 2), rows, cols)
+    const to = algebraicToIndex(notation.slice(2, 4), rows, cols)
     const promo = notation.length > 4 ? notation[4] : null
     for (const m of moves) {
       if (m.from === from && m.to === to) {

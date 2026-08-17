@@ -139,23 +139,9 @@ function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabel
   return { type: 'grid', rows, cols, config }
 }
 
-function buildCrossMapOps(rows, cols, castles) {
-  const grid = Array.from({ length: rows }, () => Array(cols).fill(null))
-  const midR = Math.floor(rows / 2)
-  const midC = Math.floor(cols / 2)
-  const armWidth = 3
-  const half = Math.floor(armWidth / 2)
-  for (let r = 0; r < midR - half; r++) for (let c = midC - half; c <= midC + half; c++) grid[r][c] = 'floor'
-  for (let r = midR + half + 1; r < rows; r++) for (let c = midC - half; c <= midC + half; c++) grid[r][c] = 'floor'
-  for (let c = 0; c < midC - half; c++) for (let r = midR - half; r <= midR + half; r++) grid[r][c] = 'floor'
-  for (let c = midC + half + 1; c < cols; c++) for (let r = midR - half; r <= midR + half; r++) grid[r][c] = 'floor'
-  for (let r = midR - half; r <= midR + half; r++) for (let c = midC - half; c <= midC + half; c++) grid[r][c] = 'home'
-  for (const [r, c] of castles) if (r >= 0 && r < rows && c >= 0 && c < cols) grid[r][c] = 'castle'
-  return grid
-}
 
 function buildOpsCellMap(zones, rows, cols, defaultFill) {
-  if (zones && zones.generator === 'cross') return buildOpsCrossMap(rows, cols, zones.castles || [])
+  if (zones && zones.generator === 'cross') return buildCrossMap(rows, cols, zones.castles || [])
   const map = Array.from({ length: rows }, () => Array(cols).fill(defaultFill))
   if (!zones) return map
   if (zones.voids) {
@@ -182,19 +168,6 @@ function buildOpsCellMap(zones, rows, cols, defaultFill) {
   return map
 }
 
-function buildOpsCrossMap(rows, cols, castles) {
-  const grid = Array.from({ length: rows }, () => Array(cols).fill(null))
-  const midR = Math.floor(rows / 2), midC = Math.floor(cols / 2), half = 1
-  for (let r = 0; r < midR - half; r++) for (let c = midC - half; c <= midC + half; c++) grid[r][c] = 'floor'
-  for (let r = midR + half + 1; r < rows; r++) for (let c = midC - half; c <= midC + half; c++) grid[r][c] = 'floor'
-  for (let c = 0; c < midC - half; c++) for (let r = midR - half; r <= midR + half; r++) grid[r][c] = 'floor'
-  for (let c = midC + half + 1; c < cols; c++) for (let r = midR - half; r <= midR + half; r++) grid[r][c] = 'floor'
-  for (let r = midR - half; r <= midR + half; r++) for (let c = midC - half; c <= midC + half; c++) grid[r][c] = 'home'
-  for (const [r, c] of castles) {
-    if (r >= 0 && r < rows && c >= 0 && c < cols) grid[r][c] = 'castle'
-  }
-  return grid
-}
 
 const AUTO_STAR_POINTS = {
   9:  [[2,2],[2,6],[4,4],[6,2],[6,6]],
@@ -392,7 +365,7 @@ function translateOp(decl, ctx) {
       if (decl.pattern === 'cross') {
         const light = colors[decl.light] || decl.light
         const dark = colors[decl.dark] || decl.dark
-        const map = buildCrossMapOps(rows, cols, decl.castles || [])
+        const map = buildCrossMap(rows, cols, decl.castles || [])
         const typeColors = {}
         const typeStrokes = {}
         if (decl.typeColors) for (const [t, v] of Object.entries(decl.typeColors)) typeColors[t] = colors[v] || v
@@ -552,12 +525,15 @@ function produceHexDirect(topo, colors, render) {
 
 const HEX_EDGE_NEIGHBOURS = [[1, 0], [0, 1], [-1, 1], [-1, 0], [0, -1], [1, -1]]
 
+import { HexMath } from '../../hex-generators/src/hex-math.js'
+import { buildCrossMap } from '../../render/src/cross-map.js'
+
 function axialToPixelPointy(q, r, size) {
-  return { x: size * (Math.sqrt(3) * q + Math.sqrt(3) / 2 * r), y: size * (3 / 2 * r) }
+  return HexMath.axialToPixelPointy(q, r, size)
 }
 
 function axialToPixelFlat(q, r, size) {
-  return { x: size * (3 / 2 * q), y: size * (Math.sqrt(3) / 2 * q + Math.sqrt(3) * r) }
+  return HexMath.axialToPixelFlat(q, r, size)
 }
 
 function hexCorners(cx, cy, size, flat) {

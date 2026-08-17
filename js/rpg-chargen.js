@@ -2,9 +2,7 @@ import { createRng } from '../packages/core/src/rng.js'
 import { rollDiceExpression } from '../packages/component-dice/src/dice-expression.js'
 import { loadRpgManifest } from './rpg-manifest-loader.js'
 
-const RULES_BASE = location.hostname === 'engine.moddable.games'
-  ? 'https://rules.moddable.games/'
-  : '/MODDABLE/moddable-rules/'
+import { RULES_BASE } from './play-shared.js'
 
 // ─── PAGE DIMENSIONS (A4 portrait, unitless coords mapped to mm) ───────────
 const PAGE_W = 210

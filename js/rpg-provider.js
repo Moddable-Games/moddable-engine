@@ -2,7 +2,7 @@ import { loadRpgManifest } from './rpg-manifest-loader.js'
 import { renderCard } from './rpg-card-renderer.js'
 import { resolveLink } from './rpg-link-resolver.js'
 
-const RULES_BASE = 'https://rules.moddable.games'
+import { RULES_BASE } from './play-shared.js'
 
 function deriveColors(hex) {
   return {

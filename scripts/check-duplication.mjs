@@ -92,6 +92,47 @@ if (resolverDups.length > 0) {
   errors.push(`Frontmatter resolver duplicated (use resolveFromFetch or resolveFromDisk): ${resolverDups.map(f => f.replace(ROOT + '/', '')).join(', ')}`)
 }
 
+// 7. axialToPixel must not be re-implemented (use HexMath from packages/hex-generators/src/hex-math.js)
+const axialDups = sourceFiles.filter(f => {
+  if (f.includes('__tests__') || f.includes('check-duplication') || f.includes('hex-math.js')) return false
+  const content = readFileSync(f, 'utf8')
+  return (content.includes('Math.sqrt(3) * q') || content.includes('Math.sqrt(3)/2 * q') || content.includes('Math.sqrt(3) / 2 * q'))
+    && content.includes('3 / 2 * q') || content.includes('3/2 * q')
+})
+if (axialDups.length > 0) {
+  errors.push(`Inline axialToPixel found (use HexMath): ${axialDups.map(f => f.replace(ROOT + '/', '')).join(', ')}`)
+}
+
+// 8. RULES_BASE must be defined only in js/play-shared.js
+const rulesBaseDups = sourceFiles.filter(f => {
+  if (f.includes('__tests__') || f.includes('check-duplication') || f.includes('play-shared.js')) return false
+  const content = readFileSync(f, 'utf8')
+  return /(?:const|let|var)\s+RULES_BASE\s*=/.test(content)
+})
+if (rulesBaseDups.length > 0) {
+  errors.push(`RULES_BASE defined outside play-shared.js: ${rulesBaseDups.map(f => f.replace(ROOT + '/', '')).join(', ')}`)
+}
+
+// 9. buildCrossMap must live in packages/render/src/cross-map.js only
+const crossMapDups = sourceFiles.filter(f => {
+  if (f.includes('__tests__') || f.includes('check-duplication') || f.includes('cross-map.js')) return false
+  const content = readFileSync(f, 'utf8')
+  return content.includes('function buildCrossMap') || content.includes('function buildOpsCrossMap') || content.includes('function buildCrossMapOps')
+})
+if (crossMapDups.length > 0) {
+  errors.push(`buildCrossMap defined outside cross-map.js: ${crossMapDups.map(f => f.replace(ROOT + '/', '')).join(', ')}`)
+}
+
+// 10. indexToAlgebraic must be defined only in packages/topologies/grid/src/topology-grid.js
+const algDups = sourceFiles.filter(f => {
+  if (f.includes('__tests__') || f.includes('check-duplication') || f.includes('topology-grid.js')) return false
+  const content = readFileSync(f, 'utf8')
+  return /function indexToAlgebraic/.test(content)
+})
+if (algDups.length > 0) {
+  errors.push(`indexToAlgebraic defined outside topology-grid.js: ${algDups.map(f => f.replace(ROOT + '/', '')).join(', ')}`)
+}
+
 if (errors.length > 0) {
   console.error('Duplication guard FAILED:')
   for (const e of errors) console.error('  - ' + e)

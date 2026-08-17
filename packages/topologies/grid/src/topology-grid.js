@@ -540,6 +540,12 @@ export function algebraicToIndex(alg, rows, cols) {
   return r * cols + c
 }
 
+export function indexToAlgebraic(idx, rows, cols) {
+  const r = Math.floor(idx / cols)
+  const c = idx % cols
+  return algebraicId(r, c, rows)
+}
+
 export function goId(r, c, rows) {
   return GO_ALPHABET[c] + (rows - r)
 }
