@@ -52,21 +52,43 @@ function hubPieces(family) {
 
 // Mirrors how the render pipeline turns a setup string into piece identifiers:
 // through the vocabulary the rules declare, falling back to the raw symbol.
+// Handles slash-delimited FEN, comma-separated FEN4, and colon-delimited coords.
 function setupToImageKeys(setup, vocabulary) {
+  if (!setup) return []
+  const ranks = setup.split(' ')[0].split('/')
+  const isCommaSeparated = ranks.some(r => r.includes(','))
+  const isCoordFormat = ranks.some(r => r.includes(':'))
   const keys = []
-  for (const rank of setup.split('/')) {
-    for (let i = 0; i < rank.length; i++) {
-      const ch = rank[i]
-      if (ch >= '0' && ch <= '9') {
-        if (rank[i + 1] >= '0' && rank[i + 1] <= '9') i++
-        continue
+
+  if (isCoordFormat) {
+    for (const pair of setup.split(',')) {
+      const [, piece] = pair.split(':')
+      if (piece) keys.push(vocabulary && vocabulary[piece] ? vocabulary[piece] : piece)
+    }
+    return keys
+  }
+
+  for (const rank of ranks) {
+    if (isCommaSeparated) {
+      for (const token of rank.split(',')) {
+        const trimmed = token.trim()
+        if (!trimmed || /^\d+$/.test(trimmed)) continue
+        keys.push(trimmed)
       }
-      if (ch === '+') {
-        keys.push('+' + rank[i + 1])
-        i++
-        continue
+    } else {
+      for (let i = 0; i < rank.length; i++) {
+        const ch = rank[i]
+        if (ch >= '0' && ch <= '9') {
+          if (rank[i + 1] >= '0' && rank[i + 1] <= '9') i++
+          continue
+        }
+        if (ch === '+') {
+          keys.push('+' + rank[i + 1])
+          i++
+          continue
+        }
+        keys.push(vocabulary && vocabulary[ch] ? vocabulary[ch] : ch)
       }
-      keys.push(vocabulary && vocabulary[ch] ? vocabulary[ch] : ch)
     }
   }
   return keys
@@ -120,8 +142,6 @@ describeWithAssets('every piece resolves to real artwork during play', () => {
 
     const { images } = buildPieceImages(hub.set, gallery, hasVocab, false)
     const { setup, played } = playedPosition(family, key, 4)
-
-    if (setup.includes(',') || setup.includes(':')) return
 
     const keys = setupToImageKeys(setup, hasVocab)
     const unresolved = [...new Set(keys.filter(k => !images[k]))]
