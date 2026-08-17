@@ -154,6 +154,7 @@ function buildCrossMapOps(rows, cols, castles) {
 }
 
 function buildOpsCellMap(zones, rows, cols, defaultFill) {
+  if (zones && zones.generator === 'cross') return buildOpsCrossMap(rows, cols, zones.castles || [])
   const map = Array.from({ length: rows }, () => Array(cols).fill(defaultFill))
   if (!zones) return map
   if (zones.voids) {
@@ -178,6 +179,20 @@ function buildOpsCellMap(zones, rows, cols, defaultFill) {
     }
   }
   return map
+}
+
+function buildOpsCrossMap(rows, cols, castles) {
+  const grid = Array.from({ length: rows }, () => Array(cols).fill(null))
+  const midR = Math.floor(rows / 2), midC = Math.floor(cols / 2), half = 1
+  for (let r = 0; r < midR - half; r++) for (let c = midC - half; c <= midC + half; c++) grid[r][c] = 'floor'
+  for (let r = midR + half + 1; r < rows; r++) for (let c = midC - half; c <= midC + half; c++) grid[r][c] = 'floor'
+  for (let c = 0; c < midC - half; c++) for (let r = midR - half; r <= midR + half; r++) grid[r][c] = 'floor'
+  for (let c = midC + half + 1; c < cols; c++) for (let r = midR - half; r <= midR + half; r++) grid[r][c] = 'floor'
+  for (let r = midR - half; r <= midR + half; r++) for (let c = midC - half; c <= midC + half; c++) grid[r][c] = 'home'
+  for (const [r, c] of castles) {
+    if (r >= 0 && r < rows && c >= 0 && c < cols) grid[r][c] = 'castle'
+  }
+  return grid
 }
 
 const AUTO_STAR_POINTS = {
@@ -2040,7 +2055,7 @@ function produceMarkers(decorations, topo) {
     } else if (dec.auto === 'star-points') {
       const rows = topo.rows || 19
       const cols = topo.cols || 19
-      result.push(...computeStarPoints(rows, cols).map(p => ({ r: p[0], c: p[1], radius: dec.size || 3 })))
+      result.push(...(AUTO_STAR_POINTS[rows] || []).filter(() => rows === cols).map(p => ({ r: p[0], c: p[1], radius: dec.size || 3 })))
     }
   }
 
@@ -2106,15 +2121,6 @@ function producePaths(decorations, topo, cellSize) {
   }
 
   return result
-}
-
-function computeStarPoints(rows, cols) {
-  if (rows !== cols) return []
-  const n = rows
-  if (n === 9) return [[2,2],[2,6],[4,4],[6,2],[6,6]]
-  if (n === 13) return [[3,3],[3,6],[3,9],[6,3],[6,6],[6,9],[9,3],[9,6],[9,9]]
-  if (n === 19) return [[3,3],[3,9],[3,15],[9,3],[9,9],[9,15],[15,3],[15,9],[15,15]]
-  return []
 }
 
 function generateArcPaths(topo, dec, cellSize) {
