@@ -269,7 +269,10 @@ export function renderFromEngine(resolved, opts = {}) {
     const displayPosition = opts.flipped
       ? flipPosition(position, topo.rows || 8, topo.cols || 8, idStyle === 'go' ? GO_ALPHA : null)
       : position
-    const effectiveRotations = opts.flipped ? flipRotations(resolved.pieceRotations) : resolved.pieceRotations
+    let effectiveRotations = opts.flipped ? flipRotations(resolved.pieceRotations) : resolved.pieceRotations
+    if (opts.flipped && !effectiveRotations && resolved.pieces?.directional) {
+      effectiveRotations = Object.fromEntries((resolved.players || ['white', 'black']).map(p => [p, 180]))
+    }
     parts.push(`<g pointer-events="none">${renderPiecesFromCells(displayPosition, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: effectiveRotations, getOwner, pieceDefs: opts.pieceDefs, colors })}</g>`)
   } else if (position && Object.keys(position).length > 0) {
     parts.push(`<g pointer-events="none"></g>`)
@@ -307,9 +310,15 @@ function flipRotations(rotations) {
   if (!rotations) return null
   const flipped = {}
   for (const [owner, deg] of Object.entries(rotations)) {
-    flipped[owner] = deg ? 0 : 180
+    flipped[owner] = ((deg || 0) + 180) % 360
   }
   return flipped
+}
+
+function fallbackOwner(type) {
+  if (/^[wb]\+?[A-Z]/.test(type)) return type[0] === 'w' ? 'white' : 'black'
+  const head = type.replace(/^\+/, '')[0] || type[0]
+  return head === head.toUpperCase() && head !== head.toLowerCase() ? 'white' : 'black'
 }
 
 // --- Position parsing ---
@@ -380,15 +389,11 @@ function renderPiecesFromCells(position, cells, tileSize, opts) {
       const surfaceMap = opts.pieceSurfaceMap || {}
       const hasSurface = opts.pieceBorders || surfaceMap[imageKey]
       const rotations = opts.pieceRotations
-      const ownerForRot = opts.getOwner
-        ? opts.getOwner(piece.type)
-        : (piece.type === piece.type.toUpperCase() && piece.type !== piece.type.toLowerCase() ? 'white' : 'black')
+      const ownerForRot = opts.getOwner ? opts.getOwner(piece.type) : fallbackOwner(piece.type)
       const rot = rotations ? (rotations[ownerForRot] || 0) : 0
       if (hasSurface) {
-        const isUpper = piece.type === piece.type.toUpperCase()
-        const owner = opts.getOwner ? opts.getOwner(piece.type) : (isUpper ? 'white' : 'black')
-        const surface = opts.pieceSurface?.owners?.[owner]
-        const ownerColors = surface || { fill: opts.pieceBorders?.[owner] || '#888', stroke: 'rgba(0,0,0,0.3)' }
+        const surface = opts.pieceSurface?.owners?.[ownerForRot]
+        const ownerColors = surface || { fill: opts.pieceBorders?.[ownerForRot] || '#888', stroke: 'rgba(0,0,0,0.3)' }
         parts.push(renderSurfaceSVG('disc', pos.x, pos.y, tileSize, ownerColors, pieceImages[imageKey]))
       } else if (rot) {
         parts.push(`<g transform="rotate(${rot} ${pos.x} ${pos.y})"><image href="${pieceImages[imageKey]}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" pointer-events="none"/></g>`)

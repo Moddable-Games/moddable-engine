@@ -722,11 +722,12 @@ function exportYaml() {
   if (state.pieceSet) lines.push(`  pieces:\n    set: ${state.pieceSet}`)
   if (Object.keys(state.placement).length) lines.push(`  setup: "${buildSetup(state)}"`)
 
-  if (state.customPieces.length) {
+  const vocabulary = resolved.vocabulary || {}
+  if (Object.keys(vocabulary).length) {
     lines.push('  vocabulary:')
-    for (const cp of state.customPieces) {
-      lines.push(`    ${cp.name}:`)
-      lines.push(`      symbols: { 0: ${cp.symbolW}, 1: ${cp.symbolB} }`)
+    for (const [name, def] of Object.entries(vocabulary)) {
+      lines.push(`    ${name}:`)
+      lines.push(`      symbols: ${JSON.stringify(def.symbols || {})}`)
     }
   }
 
