@@ -173,7 +173,7 @@ export function createPlaySession(options = {}) {
   let currentTheme = theme
   let currentPieceSet = pieceSet
   let captured = {}
-  let flipped = false
+  let flipped = !!options.flipped
   let currentAnimStyle = options.animStyle || ANIM_THEME.defaultStyle
   let currentAnimSpeed = options.animSpeed || ANIM_THEME.defaultSpeed
   let currentPieceStyle = options.pieceStyle || 'auto'
@@ -1274,6 +1274,7 @@ export async function initGamePlay(container, defaults = {}) {
     seat: seatSelect.value,
     theme: themeSelect.value,
     embed: params.embed ? bridge : null,
+    flipped: !!params.flipped,
     onStatus: updateStatus,
   }
 
