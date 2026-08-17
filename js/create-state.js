@@ -106,10 +106,8 @@ function topologyFromState(state) {
   if (type === 'grid') {
     topology.rows = t.rows || 8
     topology.cols = t.cols || 8
-    // `intersections` is what makes a grid a go or xiangqi board rather than a
-    // chessboard. The renderer has supported it all along; the create page
-    // never offered it, so every grid it produced was a cell grid.
     if (t.layout === 'intersections') topology.layout = 'intersections'
+    if (Array.isArray(t.voids) && t.voids.length) topology.voids = t.voids
   } else if (type === 'hex') {
     topology.radius = t.radius || 5
     topology.shape = 'hexagonal'
@@ -225,6 +223,7 @@ export function stateFromResolved(resolved, family, opts = {}) {
   if (topo.cols) state.topology.cols = topo.type === 'pit' ? state.topology.cols : topo.cols
   if (topo.type === 'pit' && topo.cols) state.topology.pitCols = topo.cols
   state.topology.layout = topo.layout === 'intersections' || topo.layout === 'cross' ? 'intersections' : 'cells'
+  if (Array.isArray(topo.voids) && topo.voids.length) state.topology.voids = topo.voids
   if (topo.radius) state.topology.radius = topo.radius
   if (topo.structure) state.topology.structure = topo.structure
   if (topo.params?.rings) state.topology.rings = topo.params.rings
