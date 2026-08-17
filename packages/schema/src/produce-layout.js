@@ -705,12 +705,13 @@ function produceTrackLayout(topo, colors, render) {
 // Runtime pass-through: render._parsedSetup {dark[], light[]}, _pieceImages.
 
 function backgammonOps(colors, render) {
-  const frameW = 16
-  const barW = 24
-  const pointW = 32
-  const panelW = pointW * 6
-  const boardW = frameW * 2 + panelW * 2 + barW
-  const boardH = 320
+  const frameW = render.frameW || 16
+  const barW = render.barW || 24
+  const pointW = render.pointW || 32
+  const pointsPerSide = render.pointsPerSide || 6
+  const panelW = pointW * pointsPerSide
+  const boardW = render.boardW || (frameW * 2 + panelW * 2 + barW)
+  const boardH = render.boardH || 320
   const panelH = boardH - frameW * 2
   const pointH = Math.round(panelH * 0.417)
 
@@ -725,18 +726,19 @@ function backgammonOps(colors, render) {
   const bottomBase = boardH - frameW
   const topBase = frameW
 
+  const totalPoints = pointsPerSide * 4
   const pointX = (i) => {
-    const quadrant = Math.floor(i / 6)
-    const posInQuad = i % 6
+    const quadrant = Math.floor(i / pointsPerSide)
+    const posInQuad = i % pointsPerSide
     const isBottom = quadrant === 0 || quadrant === 1
     const isRight = quadrant === 0 || quadrant === 3
     const panelX = isRight ? frameW + panelW + barW : frameW
     return isBottom ? panelX + panelW - (posInQuad + 1) * pointW : panelX + posInQuad * pointW
   }
 
-  for (let i = 0; i < 24; i++) {
-    const quadrant = Math.floor(i / 6)
-    const posInQuad = i % 6
+  for (let i = 0; i < totalPoints; i++) {
+    const quadrant = Math.floor(i / pointsPerSide)
+    const posInQuad = i % pointsPerSide
     const isBottom = quadrant === 0 || quadrant === 1
     const ptColor = ((posInQuad % 2 === 0) === isBottom) ? colors['point-a'] : colors['point-b']
     const lx = pointX(i)
@@ -756,12 +758,12 @@ function backgammonOps(colors, render) {
     const darkImg = pieceImages.bM || pieceImages.b || null
     const lightImg = pieceImages.wM || pieceImages.w || null
 
-    for (let i = 0; i < 24; i++) {
+    for (let i = 0; i < totalPoints; i++) {
       const dark = setup.dark ? (setup.dark[i] || 0) : 0
       const light = setup.light ? (setup.light[i] || 0) : 0
       if (!dark && !light) continue
 
-      const quadrant = Math.floor(i / 6)
+      const quadrant = Math.floor(i / pointsPerSide)
       const isBottom = quadrant === 0 || quadrant === 1
       const cx = pointX(i) + pointW / 2
 

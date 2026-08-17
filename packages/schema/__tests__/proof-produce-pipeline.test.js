@@ -9,7 +9,7 @@ import { produce } from '../src/produce.js'
 import { createGridTopology } from '../../topologies/grid/src/topology-grid.js'
 import { createHexTopology } from '../../topologies/hex/src/topology-hex.js'
 import { renderHexLayout } from '../../topologies/hex/src/topology-hex.js'
-import { createPitTopology } from '../../topologies/pit/src/topology-pit.js'
+import { createPitTopology, renderPitLayout } from '../../topologies/pit/src/topology-pit.js'
 import { createGraphTopology } from '../../topologies/graph/src/topology-graph.js'
 import { serializeLayout } from '../../render/src/serialize-layout.js'
 
@@ -127,8 +127,7 @@ describe('proof: produce → renderLayout → SVG', () => {
     const def = produce(meta)
     expect(def.layout.type).toBe('pit')
 
-    const pit = createPitTopology({ pitsPerSide: 6, hasStores: true })
-    const layout = pit.renderLayout(def.layout.config)
+    const layout = renderPitLayout(def.layout.config)
 
     expect(layout.width).toBeGreaterThan(0)
     expect(layout.cells.length).toBeGreaterThan(0)
