@@ -65,7 +65,7 @@ function produceGridLayout(topo, colors, render) {
     diagonals: produceDiagonals(render.decorations, colors),
     paths: producePaths(render.decorations, topo, cellSize),
     markers: produceMarkers(render.decorations, topo),
-    texts: produceTexts(render.decorations, topo, cellSize, colors, inset, isIntersection ? (cols - 1) * cellSize : cols * cellSize),
+    texts: produceTexts(render.decorations, topo, cellSize, colors, inset, isIntersection ? (cols - 1) * cellSize : cols * cellSize, inset, render),
     labels: showLabels ? { color: colors.stroke || '#555', fontSize: 10 } : {},
   }
 
@@ -110,7 +110,7 @@ function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabel
       const markerFill = render.decorations.find(d => d.type === 'markers')?.fill
       ops.push({ op: 'markers', items: markers, radius: 3, itemFill: (markerFill && colors[markerFill]) || colors.stroke || '#333' })
     }
-    const textItems = produceTexts(render.decorations, topo, cellSize, colors, gx, gridW)
+    const textItems = produceTexts(render.decorations, topo, cellSize, colors, gx, gridW, gy, render)
     if (textItems.length) ops.push({ op: 'texts', items: textItems })
   }
 
@@ -2047,22 +2047,36 @@ function produceMarkers(decorations, topo) {
   return result
 }
 
-function produceTexts(decorations, topo, cellSize, colors, gx, gridW) {
+function resolveGapBand(decorations, render, topo) {
+  const rows = topo?.rows || 0
+  const split = (render?.ops || []).find(o => o.op === 'grid-lines' && o.split)?.split
+  const gapDec = (decorations || []).find(d => d.type === 'gap')
+
+  let band = null
+  if (split && split.topRow != null && split.bottomRow != null) band = [split.topRow, split.bottomRow]
+  else if (gapDec && !render?.ops) band = Array.isArray(gapDec.rows) ? gapDec.rows : [Math.ceil(rows / 2) - 1, Math.ceil(rows / 2)]
+  if (!band) return null
+
+  const [rt, rb] = band
+  if (!Number.isFinite(rt) || rb !== rt + 1 || rt < 1 || rb > rows - 2) return null
+  return [rt, rb]
+}
+
+function produceTexts(decorations, topo, cellSize, colors, gx, gridW, gy, render) {
   if (!decorations || !Array.isArray(decorations)) return []
   const textDecs = decorations.filter(d => d.type === 'texts')
   if (!textDecs.length) return []
 
-  const gapDec = decorations.find(d => d.type === 'gap')
-  const gapRows = gapDec ? gapDec.rows : null
+  const band = resolveGapBand(decorations, render, topo)
+  const isIntersection = topo?.layout === 'intersections' || topo?.layout === 'cross'
 
   const items = []
   for (const dec of textDecs) {
     if (!dec.items) continue
     for (const item of dec.items) {
-      if (item.position && gapRows) {
-        const rt = gapRows[0], rb = gapRows[1]
-        const rty1 = rt * cellSize, rty2 = rb * cellSize
-        const rmid = (rty1 + rty2) / 2
+      if (item.position && band) {
+        const [rt, rb] = band
+        const rmid = (gy || 0) + ((rt + rb) / 2 + (isIntersection ? 0 : 0.5)) * cellSize
         const fs = Math.min(cellSize * 0.45, 14)
         const fill = (item.fill && colors[item.fill]) || colors.stroke || '#4a3520'
         const xFrac = item.position === 'river-left' ? 0.25 : 0.75
