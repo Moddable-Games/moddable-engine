@@ -25,6 +25,7 @@ export function registerVariant(family, key, config) {
 }
 
 export function registerVariants(family, variants) {
+  registryFor(family)
   const entries = Array.isArray(variants) ? variants : Object.values(variants)
   for (const variant of entries) {
     if (!variant || !variant.key) continue

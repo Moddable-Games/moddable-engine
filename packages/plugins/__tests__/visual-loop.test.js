@@ -9,11 +9,13 @@ import { createGame } from '../../play/src/sdk.js'
 import { createGameForFamily } from '../../play/src/play.js'
 import { interactionModelFor } from '../../play/src/interaction.js'
 
+import '../../play/test-helpers/setup-rules-reader.js'
 import '../chess/index.js'
 import '../go/index.js'
 import '../draughts/index.js'
 import '../xiangqi/index.js'
 import '../shogi/index.js'
+import '../reversi/index.js'
 
 // The Go and draughts batch shipped with pieces that were invisible during play
 // while the game logic ran correctly underneath. Every unit test passed, because
