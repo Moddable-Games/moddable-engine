@@ -101,6 +101,24 @@ export function attachPieceImages(resolved, gallery) {
   return buildPieceImages(resolved.pieces.set, gallery, fenOverrides, skipFenMap)
 }
 
+export function validatePieceVocabulary(resolved, gallery) {
+  if (!resolved.pieces?.set || !gallery) return []
+  const setDef = gallery.find(s => s.id === resolved.pieces.set)
+  if (!setDef) return [`set '${resolved.pieces.set}' not found in gallery`]
+  const fenMap = resolved.pieces.fenMap || resolved.pieces.vocabulary || {}
+  const available = new Set(Object.keys(setDef.pieces || {}))
+  const vocabulary = resolved.vocabulary || resolved.plugins?.[Object.keys(resolved.plugins || {})[0]]?.vocabulary || {}
+  const missing = []
+  for (const [type, def] of Object.entries(vocabulary)) {
+    for (const [owner, symbol] of Object.entries(def.symbols || {})) {
+      const mapped = fenMap[symbol]
+      const id = mapped || (symbol === symbol.toUpperCase() ? 'w' : 'b') + symbol.toUpperCase()
+      if (!available.has(id)) missing.push({ type, owner, symbol, resolvedId: id })
+    }
+  }
+  return missing
+}
+
 // --- Main render function ---
 
 export function renderFromEngine(resolved, opts = {}) {

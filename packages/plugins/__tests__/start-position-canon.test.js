@@ -136,35 +136,42 @@ describeWithRules('piece symbols resolve to real artwork', () => {
     ? JSON.parse(fs.readFileSync(galleryPath, 'utf8'))
     : null
 
-  const families = getRegisteredFamilies()
-
-  it.each(families)('%s: every symbol its plugin can emit has an image', (family) => {
-    if (!gallery) return
+  function variantPieces(family, key) {
     const hubFile = path.join(RULES_DIR, family, 'content/rulebook.md')
-    if (!fs.existsSync(hubFile)) return
-    const meta = parseFrontmatter(fs.readFileSync(hubFile, 'utf8')).meta || {}
-    const setId = meta.engine?.pieces?.set
-    if (!setId) return
+    if (!fs.existsSync(hubFile)) return null
+    const hubMeta = parseFrontmatter(fs.readFileSync(hubFile, 'utf8')).meta || {}
+    const hubPieces = hubMeta.engine?.pieces || {}
 
-    const setDef = gallery.find(s => s.id === setId)
-    expect(setDef).toBeDefined()
+    const varFile = path.join(RULES_DIR, family, 'content/variants', `${key}.md`)
+    if (!fs.existsSync(varFile)) return hubPieces
+    const varMeta = parseFrontmatter(fs.readFileSync(varFile, 'utf8')).meta || {}
+    const varPieces = varMeta.engine?.pieces || {}
+    return { ...hubPieces, ...varPieces }
+  }
 
-    const vocabulary = meta.engine?.pieces?.vocabulary || null
+  const variants = everyRegisteredVariant()
+
+  it.each(variants)('%s/%s: every symbol its plugin can emit has an image', (family, key) => {
+    if (!gallery) return
+    const pieces = variantPieces(family, key)
+    if (!pieces || !pieces.set) return
+
+    const setDef = gallery.find(s => s.id === pieces.set)
+    if (!setDef) return
+
+    const fenMap = pieces.fenMap || pieces.vocabulary || {}
     const available = new Set(Object.keys(setDef.pieces || {}))
 
-    const game = createGame(family, listVariants(family)[0].key)
+    const game = createGame(family, key)
     const plugin = game.raw.registry.getPlugins().find(p => p.sliceName === family)
 
     const unresolved = []
     for (const [type, def] of Object.entries(plugin.vocabulary || {})) {
       for (const [owner, symbol] of Object.entries(def.symbols || {})) {
-        // A symbol resolves either through the vocabulary the rules declare, or
-        // by the default convention of colour prefix plus upper-cased letter.
-        const viaVocab = vocabulary ? vocabulary[symbol] : null
+        const viaFenMap = fenMap[symbol]
         const viaDefault = (symbol === symbol.toUpperCase() ? 'w' : 'b') + symbol.toUpperCase()
-        const id = viaVocab || viaDefault
-        const resolvedId = typeof id === 'string' ? id : id?.type
-        if (!available.has(resolvedId)) unresolved.push(`${type}(${owner}) '${symbol}' -> ${resolvedId}`)
+        const id = viaFenMap || viaDefault
+        if (!available.has(id)) unresolved.push(`${type}(${owner}) '${symbol}' -> ${id}`)
       }
     }
     expect(unresolved).toEqual([])

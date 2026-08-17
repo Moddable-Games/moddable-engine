@@ -8,7 +8,6 @@ import { listVariants, getRegisteredFamilies } from '../../play/src/variant-regi
 import { createGame } from '../../play/src/sdk.js'
 import { createGameForFamily } from '../../play/src/play.js'
 import { interactionModelFor } from '../../play/src/interaction.js'
-import { resolveFromDisk } from '../../play/src/play.js'
 
 import '../../play/test-helpers/setup-rules-reader.js'
 import '../chess/index.js'
@@ -48,6 +47,16 @@ function hubPieces(family) {
   if (!fs.existsSync(hubFile)) return null
   const meta = parseFrontmatter(fs.readFileSync(hubFile, 'utf8')).meta || {}
   return meta.engine?.pieces || null
+}
+
+function variantPieces(family, key) {
+  const hub = hubPieces(family)
+  const varFile = path.join(RULES_DIR, family, 'content/variants', `${key}.md`)
+  if (!fs.existsSync(varFile)) return hub
+  const meta = parseFrontmatter(fs.readFileSync(varFile, 'utf8')).meta || {}
+  const vp = meta.engine?.pieces
+  if (!vp) return hub
+  return { ...hub, ...vp }
 }
 
 // Mirrors how the render pipeline turns a setup string into piece identifiers:
@@ -132,18 +141,14 @@ function everyVariant() {
 
 describeWithAssets('every piece resolves to real artwork during play', () => {
   it.each(everyVariant())('%s/%s renders every piece after moves', (family, key) => {
-    const hub = hubPieces(family)
-    if (!hub || !hub.set) return
+    const pieces = variantPieces(family, key)
+    if (!pieces || !pieces.set) return
 
-    const resolved = resolveFromDisk(family, key)
-    const variantVocab = resolved?.vocabulary || resolved?.plugins?.[family]?.vocabulary || null
-    const vocab = { ...(hub.vocabulary || {}), ...(variantVocab || {}) }
-    const hasVocab = Object.keys(vocab).length > 0 ? vocab : null
-
-    const { images } = buildPieceImages(hub.set, gallery, hasVocab, false)
+    const fenOverrides = pieces.fenMap || pieces.vocabulary || null
+    const { images } = buildPieceImages(pieces.set, gallery, fenOverrides, false)
     const { setup, played } = playedPosition(family, key, 4)
 
-    const keys = setupToImageKeys(setup, hasVocab)
+    const keys = setupToImageKeys(setup, null)
     const unresolved = [...new Set(keys.filter(k => !images[k]))]
 
     expect(unresolved).toEqual([])
