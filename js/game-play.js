@@ -427,6 +427,14 @@ export function createPlaySession(options = {}) {
     if (fenMap) {
       rendered.pieces = { ...rendered.pieces, fenMap }
     }
+    if (resolvedBoard.render?.uniformPieces && rendered.pieces?.vocabulary) {
+      const entries = Object.entries(rendered.pieces.vocabulary)
+      const [, first] = entries[0]
+      rendered.pieces = {
+        ...rendered.pieces,
+        vocabulary: Object.fromEntries(entries.map(([k]) => [k, first])),
+      }
+    }
     const boardTheme = BOARD_THEMES[currentTheme] || BOARD_THEMES.classic
     rendered.surface = {
       ...(rendered.surface || {}),
