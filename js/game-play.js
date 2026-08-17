@@ -5,6 +5,7 @@ import { parseUrlFlags, deriveCompatibleFlags, familySupportsFlag, serializeVari
 import { createAI } from '../packages/play/src/sdk.js'
 import { interactionModelFor, FAMILY_INTERACTION } from '../packages/play/src/interaction.js'
 import { createEmbedBridge, parseEmbedParams, normaliseOutcome } from '../packages/play/src/embed.js'
+import { defaultSeatFor } from '../packages/play/src/default-seat.js'
 import { renderFromEngine, attachPieceImages } from '../packages/render/src/render-engine.js'
 import { boardToSetup as serialiseBoard } from '../packages/play/src/serialise.js'
 
@@ -915,25 +916,6 @@ export function createPlaySession(options = {}) {
     return 0
   }
 
-  function defaultSeatFor(board, cols, playerCount, declared) {
-    if (declared != null) return typeof declared === 'number' ? declared : 0
-    if (!board || !board.length || !cols || playerCount <= 2) return 0
-    const sum = new Array(playerCount).fill(0)
-    const n = new Array(playerCount).fill(0)
-    for (let i = 0; i < board.length; i++) {
-      const o = board[i] && typeof board[i].owner === 'number' ? board[i].owner : -1
-      if (o < 0 || o >= playerCount) continue
-      sum[o] += Math.floor(i / cols)
-      n[o]++
-    }
-    let best = 0, bestMean = -Infinity
-    for (let i = 0; i < playerCount; i++) {
-      if (!n[i]) continue
-      const mean = sum[i] / n[i]
-      if (mean > bestMean + 1e-9) { bestMean = mean; best = i }
-    }
-    return best
-  }
 
   function boardToSetup(slice, topo) {
     return serialiseBoard(slice, topo, (pluginFor() || {}).vocabulary || {}, { players: playerNames() })
