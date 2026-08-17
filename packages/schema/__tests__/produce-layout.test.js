@@ -103,7 +103,7 @@ describe('produceLayout', () => {
   })
 
   describe('hex topology', () => {
-    test('standard hex — rhombus 11x11', () => {
+    test('standard hex — rhombus 11x11 produces ops', () => {
       const engine = {
         topology: { type: 'hex', shape: 'rhombus', rows: 11, cols: 11, orientation: 'pointy' },
         surface: 'slate',
@@ -111,15 +111,14 @@ describe('produceLayout', () => {
       }
       const result = produceLayout(engine)
       expect(result.type).toBe('hex')
-      expect(result.shape).toBe('rhombus')
-      expect(result.params).toEqual({ rows: 11, cols: 11 })
-      expect(result.config.cellSize).toBe(20)
-      expect(result.config.orientation).toBe('pointy')
-      expect(result.config.frame).not.toBeNull()
-      expect(result.config.background).toBeNull()
+      expect(Array.isArray(result.config.ops)).toBe(true)
+      expect(result.config.width).toBeGreaterThan(0)
+      expect(result.config.height).toBeGreaterThan(0)
+      const cells = result.config.ops.filter(o => o.attrs?.['data-sq'])
+      expect(cells.length).toBe(121)
     })
 
-    test('hexagonal shape with tricolor', () => {
+    test('hexagonal shape with tricolor produces coloured cells', () => {
       const engine = {
         topology: { type: 'hex', shape: 'hexagonal', radius: 5, orientation: 'flat' },
         surface: 'wood-classic',
@@ -127,38 +126,34 @@ describe('produceLayout', () => {
       }
       const result = produceLayout(engine)
       expect(result.type).toBe('hex')
-      expect(result.shape).toBe('hexagonal')
-      expect(result.params).toEqual({ radius: 5 })
-      expect(result.config.cellFill).toBeInstanceOf(Function)
-      // tricolor: (q-r) % 3 determines colour
-      expect(result.config.cellFill(0, 0)).toBe('#f0d9b5') // light
-      expect(result.config.cellFill(1, 0)).toBe('#d4a76a') // mid
-      expect(result.config.cellFill(2, 0)).toBe('#b58863') // dark
+      const cells = result.config.ops.filter(o => o.attrs?.['data-sq'])
+      expect(cells.length).toBe(91)
+      const fills = new Set(cells.map(c => c.attrs.fill))
+      expect(fills.size).toBe(3)
     })
 
-    test('bicolor (ring-based)', () => {
+    test('bicolor (ring-based) produces alternating fills', () => {
       const engine = {
         topology: { type: 'hex', shape: 'hexagonal', radius: 5 },
         surface: 'slate',
-        render: { cellSize: 22, cellColor: 'bicolor' },
+        render: { cellSize: 22, cellColor: 'rings' },
       }
       const result = produceLayout(engine)
-      const fn = result.config.cellFill
-      expect(fn(0, 0)).toBe('#c0c0c0') // ring 0 → dark
-      expect(fn(1, 0)).toBe('#e8e8e8') // ring 1 → light
-      expect(fn(2, 0)).toBe('#c0c0c0') // ring 2 → dark
+      const cells = result.config.ops.filter(o => o.attrs?.['data-sq'])
+      const fills = new Set(cells.map(c => c.attrs.fill))
+      expect(fills.size).toBe(2)
     })
 
-    test('no frame = background rect', () => {
+    test('no explicit frame but shape present = frame derived from shape', () => {
       const engine = {
         topology: { type: 'hex', shape: 'hexagonal', radius: 5 },
         surface: 'wood-classic',
         render: { cellSize: 22 },
       }
       const result = produceLayout(engine)
-      expect(result.config.frame).toBeNull()
-      expect(result.config.background).not.toBeNull()
-      expect(result.config.background.fill).toBe('#2c2c2c')
+      expect(result.config.ops.length).toBeGreaterThan(0)
+      expect(result.config.width).toBeGreaterThan(0)
+      expect(result.config.height).toBeGreaterThan(0)
     })
 
     test('centre marker', () => {
@@ -168,21 +163,22 @@ describe('produceLayout', () => {
         render: { cellSize: 22, centreMarker: '★' },
       }
       const result = produceLayout(engine)
-      expect(result.config.centreMarker).not.toBeNull()
-      expect(result.config.centreMarker.text).toBe('★')
-      expect(result.config.centreMarker.q).toBe(0)
-      expect(result.config.centreMarker.r).toBe(0)
+      const texts = result.config.ops.filter(o => o.tag === 'text')
+      expect(texts.length).toBeGreaterThan(0)
+      expect(texts[0].text).toBe('★')
     })
 
-    test('triangular shape', () => {
+    test('triangular shape produces cells', () => {
       const engine = {
         topology: { type: 'hex', shape: 'triangular', sideLength: 12 },
         surface: 'slate',
         render: { cellSize: 18 },
       }
       const result = produceLayout(engine)
-      expect(result.shape).toBe('triangular')
-      expect(result.params).toEqual({ sideLength: 12 })
+      expect(result.type).toBe('hex')
+      expect(Array.isArray(result.config.ops)).toBe(true)
+      const cells = result.config.ops.filter(o => o.attrs?.['data-sq'])
+      expect(cells.length).toBeGreaterThan(0)
     })
   })
 

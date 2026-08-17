@@ -677,41 +677,17 @@ function hexBoardOps(colors, render) {
 }
 
 function produceHexLegacy(topo, colors, render) {
-  const cellSize = render.cellSize || 20
-  const orientation = render.orientation || topo.orientation || 'pointy'
-  const scale = 0.95
-  const cellFill = buildHexCellFill(render.cellColor, colors)
-
-  const hasFrame = render.frame && render.frame !== 'none'
-  const background = hasFrame ? null : { fill: colors.background || '#f5f5f5', rx: 6 }
-  const frame = hasFrame ? {
-    stroke: colors.stroke || '#6b4226',
-    strokeWidth: 14,
-    linecap: 'round',
-    linejoin: 'round',
-    scale: 1.05,
-  } : null
-
-  const centreMarker = render.centreMarker
-    ? { q: 0, r: 0, text: render.centreMarker, fontSize: cellSize * 0.8, fill: colors['cell-light'] || '#fff' }
-    : null
-
-  const layout = {
-    cellSize,
-    orientation,
-    scale,
-    background,
-    frame,
-    cellFill,
-    cellStroke: { color: colors.stroke || 'rgba(0,0,0,0.2)', width: 1 },
-    cellImage: null,
-    cellLabel: null,
-    labelStyle: {},
-    overlays: [],
-    centreMarker,
-  }
-
-  return { type: 'hex', shape: topo.shape, params: hexParams(topo), config: layout }
+  const derived = { ...render }
+  if (topo.radius != null) derived._hexRadius = topo.radius
+  else if (topo.rows && topo.cols) { derived._hexRows = topo.rows; derived._hexCols = topo.cols }
+  else if (topo.grid) derived._hexes = topo.grid.map(c => Array.isArray(c) ? { q: c[0], r: c[1] } : c)
+  else derived._hexRadius = 5
+  if (topo.orientation === 'flat') derived._flat = true
+  if (render.frame || topo.shape) derived._frame = render.frame || topo.shape
+  if (render.cellColor === 'tricolor') derived._colorFn = tricolorFn
+  else if (render.cellColor === 'rings') derived._colorFn = ringColorFn
+  if (render.centreMarker) derived._centreMarker = render.centreMarker
+  return hexBoardOps(colors, derived)
 }
 
 function produceTrackLayout(topo, colors, render) {
@@ -766,9 +742,9 @@ function backgammonOps(colors, render) {
     const lx = pointX(i)
     const x1 = lx, x2 = lx + pointW, tipX = lx + pointW / 2
     if (isBottom) {
-      el('polygon', { points: `${x1},${bottomBase} ${x2},${bottomBase} ${tipX},${bottomBase - pointH}`, fill: ptColor, class: 'board-cell', 'data-sq': `point-${i + 1}` })
+      el('polygon', { points: `${x1},${bottomBase} ${x2},${bottomBase} ${tipX},${bottomBase - pointH}`, fill: ptColor, class: 'board-cell', 'data-sq': `point-${i + 1}`, cx: tipX, cy: bottomBase - pointH / 2 })
     } else {
-      el('polygon', { points: `${x1},${topBase} ${x2},${topBase} ${tipX},${topBase + pointH}`, fill: ptColor, class: 'board-cell', 'data-sq': `point-${i + 1}` })
+      el('polygon', { points: `${x1},${topBase} ${x2},${topBase} ${tipX},${topBase + pointH}`, fill: ptColor, class: 'board-cell', 'data-sq': `point-${i + 1}`, cx: tipX, cy: topBase + pointH / 2 })
     }
   }
 
