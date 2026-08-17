@@ -3516,7 +3516,7 @@
     "license": "CC-BY-SA-3.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
     "recolorable": true,
-    "playable": false,
+    "playable": true,
     "pieces": {
       "Dobutsu_Chess_Bishop": "Dobutsu_Chess_Bishop.svg",
       "Dobutsu_Chess_King": "Dobutsu_Chess_King.svg",

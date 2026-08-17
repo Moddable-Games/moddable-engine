@@ -102,9 +102,9 @@ export function attachPieceImages(resolved, gallery) {
 }
 
 export function validatePieceVocabulary(resolved, gallery) {
-  if (!resolved.pieces?.set || !gallery) return []
+  if (!resolved.pieces?.set || !gallery) return
   const setDef = gallery.find(s => s.id === resolved.pieces.set)
-  if (!setDef) return [`set '${resolved.pieces.set}' not found in gallery`]
+  if (!setDef) throw new Error(`Piece set '${resolved.pieces.set}' not found in gallery`)
   const fenMap = resolved.pieces.fenMap || resolved.pieces.vocabulary || {}
   const available = new Set(Object.keys(setDef.pieces || {}))
   const vocabulary = resolved.vocabulary || resolved.plugins?.[Object.keys(resolved.plugins || {})[0]]?.vocabulary || {}
@@ -113,10 +113,12 @@ export function validatePieceVocabulary(resolved, gallery) {
     for (const [owner, symbol] of Object.entries(def.symbols || {})) {
       const mapped = fenMap[symbol]
       const id = mapped || (symbol === symbol.toUpperCase() ? 'w' : 'b') + symbol.toUpperCase()
-      if (!available.has(id)) missing.push({ type, owner, symbol, resolvedId: id })
+      if (!available.has(id)) missing.push(`${type}(${owner}) '${symbol}' → ${id}`)
     }
   }
-  return missing
+  if (missing.length) {
+    throw new Error(`Piece set '${resolved.pieces.set}' cannot draw ${missing.length} vocabulary symbol(s): ${missing.join(', ')}`)
+  }
 }
 
 // --- Main render function ---
