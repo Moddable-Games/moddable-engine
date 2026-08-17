@@ -49,7 +49,7 @@ async function renderFromResolved(resolved, container) {
     } : null,
   }
 }
-import { resolveFromFetch } from '../packages/play/src/resolve-frontmatter.js'
+import { resolveVariantAsync } from '../packages/play/src/resolve-frontmatter.js'
 
 async function loadContent(resolved, basePath) {
   const content = resolved.content
@@ -68,7 +68,7 @@ async function loadVariant({ familyPath, variantPath, basePath }) {
   const slug = variantPath.match(/variants\/([^.]+)\.md$/)?.[1]
     || variantPath.match(/games\/([^/]+)\/standard\.md$/)?.[1]
     || 'standard'
-  const resolved = await resolveFromFetch(family, slug, basePath)
+  const resolved = await resolveVariantAsync(family, slug, basePath)
   if (!resolved) return { resolved: {}, errors: ['Failed to resolve variant'] }
   const contentBasePath = basePath + variantPath.replace(/\/[^/]+$/, '/')
   const final = await loadContent(resolved, contentBasePath)

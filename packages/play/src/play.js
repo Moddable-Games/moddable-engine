@@ -4,9 +4,7 @@ import { produce } from '../../schema/src/produce.js'
 import { getVariantConfig, hasVariant, getSlugForKey, setVariantSources as _setVariantSources } from './variant-registry.js'
 import { definitionFromVariant } from './variant-definition.js'
 import { parseVariantKey, applyFlags, familySupportsFlag } from './variant-flags.js'
-import { parseFrontmatter } from '../../schema/src/parse-frontmatter.js'
-import { resolve as cascadeResolve } from '../../schema/src/cascade-resolver.js'
-import { resolveSurface } from '../../schema/src/surfaces.js'
+import { resolveVariantSync } from './resolve-frontmatter.js'
 import { createGridTopology } from '../../topologies/grid/src/topology-grid.js'
 import { createHexTopology } from '../../topologies/hex/src/topology-hex.js'
 import { createTrackTopology } from '../../topologies/track/src/topology-track.js'
@@ -174,37 +172,8 @@ export const STRUCTURAL_KEYS = new Set(['topology', 'players', 'meta', 'surface'
 
 export function resolveFromDisk(family, variant) {
   if (!_readFile) return null
-
   const slug = getSlugForKey(family, variant)
-  let familyMd, variantMd
-  try { familyMd = _readFile(family, 'rulebook') } catch { return null }
-  try { variantMd = _readFile(family, slug) } catch { variantMd = '' }
-
-  if (!variantMd && variant && variant !== 'standard') return null
-
-  const familyFm = parseFrontmatter(familyMd).meta || {}
-  const variantFm = variantMd ? (parseFrontmatter(variantMd).meta || {}) : {}
-  const surfaceRef = variantFm.engine?.surface || familyFm.engine?.surface
-  const surface = resolveSurface(surfaceRef)
-  const { resolved } = cascadeResolve({
-    surface,
-    family: { engine: familyFm.engine || {}, meta: { label: familyFm.title || '' } },
-    variant: { engine: variantFm.engine || {}, meta: { label: variantFm.title || '' } },
-  })
-
-  const pluginBlock = resolved.plugins?.[family]
-  if (pluginBlock?.extends) {
-    const parentResolved = resolveFromDisk(family, pluginBlock.extends)
-    if (parentResolved) {
-      const parentPlugin = parentResolved.plugins?.[family] || {}
-      const merged = { ...parentPlugin, ...pluginBlock }
-      delete merged.extends
-      if (!resolved.plugins) resolved.plugins = {}
-      resolved.plugins[family] = merged
-    }
-  }
-
-  return resolved
+  return resolveVariantSync(family, slug, _readFile)
 }
 
 function resolveMeta(family, variant) {

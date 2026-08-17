@@ -1,7 +1,7 @@
 // Resolve a variant's frontmatter from moddable-rules into an engine block.
-// Thin wrapper over packages/play/src/resolve-frontmatter.js for browser use.
+// Thin wrapper over packages/play/src/resolve-frontmatter.js adding _variantMeta.
 
-import { resolveFromFetch } from '../packages/play/src/resolve-frontmatter.js'
+import { resolveVariantAsync } from '../packages/play/src/resolve-frontmatter.js'
 import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
 import { RULES_BASE } from './play-shared.js'
 
@@ -12,7 +12,7 @@ export async function resolveVariantBoard(family, variantConfig, variantKey, slu
   const variantSlug = slugOverride || cfg.slug || variantKey || 'standard'
   const basePath = RULES_BASE + 'games/'
 
-  const resolved = await resolveFromFetch(family, variantSlug, basePath)
+  const resolved = await resolveVariantAsync(family, variantSlug, basePath)
 
   const variantPath = basePath + family + '/content/variants/' + variantSlug + '.md'
   const familyPath = basePath + family + '/content/rulebook.md'
