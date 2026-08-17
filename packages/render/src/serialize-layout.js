@@ -5,7 +5,7 @@
  * SVG document. Pieces are added on top if provided.
  */
 
-const DISC_RATIO = { disc: 0.92, image: 0.60 }
+import { renderSurfaceSVG } from './piece-surface.js'
 
 export function serializeLayout(layout, opts = {}) {
   const { title, pieces, pieceImages, pieceSurface, pieceSurfaceMap, pieceRotations } = opts
@@ -45,13 +45,10 @@ export function serializeLayout(layout, opts = {}) {
       if (surface && surface.type === 'disc') {
         const owner = piece.owner || (imgKey[0] === 'w' || imgKey[0] === imgKey[0].toUpperCase() ? 'white' : 'black')
         const ownerColors = surface.owners?.[owner] || { fill: '#ccc', stroke: '#888' }
-        const discR = size * DISC_RATIO.disc / 2
-        const imgSize = size * DISC_RATIO.image
-        parts.push(`<circle cx="${cell.x}" cy="${cell.y}" r="${discR}" fill="${ownerColors.fill}" stroke="${ownerColors.stroke}" stroke-width="2"/>`)
         if (rot) {
-          parts.push(`<g transform="rotate(${rot} ${cell.x} ${cell.y})"><image href="${imgPath}" x="${cell.x - imgSize / 2}" y="${cell.y - imgSize / 2}" width="${imgSize}" height="${imgSize}"/></g>`)
+          parts.push(`<g transform="rotate(${rot} ${cell.x} ${cell.y})">${renderSurfaceSVG('disc', cell.x, cell.y, size, ownerColors, imgPath)}</g>`)
         } else {
-          parts.push(`<image href="${imgPath}" x="${cell.x - imgSize / 2}" y="${cell.y - imgSize / 2}" width="${imgSize}" height="${imgSize}"/>`)
+          parts.push(renderSurfaceSVG('disc', cell.x, cell.y, size, ownerColors, imgPath))
         }
       } else if (rot) {
         parts.push(`<g transform="rotate(${rot} ${cell.x} ${cell.y})"><image href="${imgPath}" x="${cell.x - size / 2}" y="${cell.y - size / 2}" width="${size}" height="${size}"/></g>`)
