@@ -2,7 +2,7 @@ import { createSurfaceDOM, getSurfaceRatios } from '../packages/render/src/piece
 import { FEN4_OWNERS, recolourSvgText } from '../packages/render/src/recolour.js'
 
 const base = document.querySelector('meta[name="base-path"]')?.content || ''
-const GALLERY_INDEX_PATH = `${base}/pieces/gallery-index.json`
+const GALLERY_INDEX_PATH = `${base}/pieces/gallery-index.json?v=1.0.20`
 const SETS_BASE = `${base}/pieces/sets`
 
 let SETS = []

@@ -153,6 +153,10 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 - Honest piece-set list (marks 45 sets whose naming convention the editor cannot yet map)
 - Version 1.0.18
 
+#### 2026-08-17
+- Consolidation sprint (#128): collapsed 3 resolver copies into resolveFromFetch, unified recolour into recolourSvgText, routed RPG getField through packages/rpg/src/card-data.js, eliminated bare returns in visual-loop, fixed FEN4/coord setups
+- Fixed gallery-index.json cache-busting: all 3 loaders (play-shared, gallery, create) now use versioned fetch URLs
+
 #### 2026-08-06
 - CI pipeline fully green for the first time (PR #92 merged): unit-tests (3021), playability-standard, Playwright e2e (50 tests)
 - Fixed: opening books inert since conformance migration (PR #97). Parser now strips quote chars from YAML keys; variantOpeningBook reads from definition object (browser-safe), not resolveFromDisk (Node-only)
