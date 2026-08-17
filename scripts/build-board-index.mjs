@@ -20,7 +20,7 @@ const SNAP_DIR = resolve(ENGINE_ROOT, 'snapshots')
 const SVG_DIR = resolve(ENGINE_ROOT, 'boards', 'svgs')
 
 import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
-import { FEN4_OWNERS } from '../packages/render/src/recolour.js'
+import { FEN4_OWNERS, recolourSvgText } from '../packages/render/src/recolour.js'
 
 mkdirSync(SVG_DIR, { recursive: true })
 
@@ -154,9 +154,7 @@ function embedPieceImages(svg, setDef) {
       const prefix = fragment[0]
       const ownerName = FEN4_OWNERS[prefix]
       if (ownerName && owners[ownerName]) {
-        const fill = owners[ownerName].fill
-        const matchColor = setDef.recolourMatch || '#fff'
-        inner = inner.replaceAll(matchColor, fill)
+        inner = recolourSvgText(inner, setDef.recolourMatch || '#fff', owners[ownerName].fill)
       }
     }
 

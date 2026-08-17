@@ -1,5 +1,5 @@
 import { createSurfaceDOM, getSurfaceRatios } from '../packages/render/src/piece-surface.js'
-import { FEN4_OWNERS } from '../packages/render/src/recolour.js'
+import { FEN4_OWNERS, recolourSvgText } from '../packages/render/src/recolour.js'
 
 const base = document.querySelector('meta[name="base-path"]')?.content || ''
 const GALLERY_INDEX_PATH = `${base}/pieces/gallery-index.json`
@@ -259,7 +259,7 @@ function createPieceCell(set, entry, opts) {
         fetch(`${SETS_BASE}/${sourceSetId}/${file}`)
           .then(r => r.text())
           .then(svg => {
-            const tinted = svg.replaceAll(matchColor, ownerColors.fill)
+            const tinted = recolourSvgText(svg, matchColor, ownerColors.fill)
             const dataUri = 'data:image/svg+xml,' + encodeURIComponent(tinted)
             recolourCache[cacheKey] = dataUri
             img.src = dataUri

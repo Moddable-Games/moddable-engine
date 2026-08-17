@@ -36,7 +36,7 @@ import { resolveSurface } from '../packages/schema/src/surfaces.js'
 import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolver.js'
 import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
 import { renderFromEngine, attachPieceImages } from '../packages/render/src/render-engine.js'
-import { FEN4_OWNERS } from '../packages/render/src/recolour.js'
+import { FEN4_OWNERS, recolourSvgText } from '../packages/render/src/recolour.js'
 
 const gallery = JSON.parse(readFileSync(resolve(ENGINE_ROOT, 'pieces/gallery-index.json'), 'utf8'))
 
@@ -260,14 +260,11 @@ function embedPieceImages(svg, setDef) {
     let inner = content.replace(/<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '').trim()
     inner = stripSvgBloat(inner)
 
-    // Apply owner recolouring for virtual sets (4-player chess etc.)
     if (owners && fragment) {
       const prefix = fragment[0]
       const ownerName = FEN4_OWNERS[prefix]
       if (ownerName && owners[ownerName]) {
-        const fill = owners[ownerName].fill
-        const matchColor = setDef.recolourMatch || '#fff'
-        inner = inner.replaceAll(matchColor, fill)
+        inner = recolourSvgText(inner, setDef.recolourMatch || '#fff', owners[ownerName].fill)
       }
     }
 

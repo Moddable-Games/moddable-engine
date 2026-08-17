@@ -69,6 +69,16 @@ if (starPointDups.length > 0) {
   errors.push(`computeStarPoints found (use AUTO_STAR_POINTS): ${starPointDups.map(f => f.replace(ROOT + '/', '')).join(', ')}`)
 }
 
+// 5. Inline recolour (replaceAll(matchColor, ...)) must use recolourSvgText from packages/render/src/recolour.js
+const inlineRecolour = sourceFiles.filter(f => {
+  if (f.includes('__tests__') || f.includes('check-duplication') || f.includes('recolour.js')) return false
+  const content = readFileSync(f, 'utf8')
+  return content.includes('.replaceAll(matchColor') || content.includes('.replaceAll(recolourMatch')
+})
+if (inlineRecolour.length > 0) {
+  errors.push(`Inline recolour replaceAll found (use recolourSvgText): ${inlineRecolour.map(f => f.replace(ROOT + '/', '')).join(', ')}`)
+}
+
 if (errors.length > 0) {
   console.error('Duplication guard FAILED:')
   for (const e of errors) console.error('  - ' + e)

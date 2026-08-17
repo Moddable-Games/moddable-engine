@@ -1,6 +1,10 @@
 // Browser consumers: js/game-play.js, js/play.js, js/gallery.js, scripts/export-boards.mjs, scripts/build-board-index.mjs
 export const FEN4_OWNERS = { r: 'red', b: 'blue', y: 'yellow', g: 'green', w: 'white' }
 
+export function recolourSvgText(svgText, matchColor, fillColor) {
+  return svgText.replaceAll(matchColor, fillColor)
+}
+
 const recolourCache = {}
 
 export async function recolourPieceSet(pieceSetId, gallery, fetchFn = fetch) {
@@ -27,7 +31,7 @@ export async function recolourPieceSet(pieceSetId, gallery, fetchFn = fetch) {
 
     fetches.push(
       fetchFn(basePath + filename).then(r => r.text()).then(svg => {
-        const tinted = svg.replaceAll(matchColor, ownerColors.fill)
+        const tinted = recolourSvgText(svg, matchColor, ownerColors.fill)
         const dataUri = 'data:image/svg+xml,' + encodeURIComponent(tinted)
         recolourCache[cacheKey] = dataUri
         images[pieceId] = dataUri
