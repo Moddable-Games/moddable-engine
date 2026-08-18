@@ -5359,7 +5359,7 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
     "recolorable": true,
     "playable": false,
-    "recolourMatch": "#fff",
+    "recolourMatch": "#739bff",
     "pieces": {
       "C": "Djambi_chief.svg",
       "A": "Djambi_assassin.svg",
@@ -5376,6 +5376,7 @@
     "family": "djambi",
     "virtual": true,
     "recolorable": true,
+    "recolourMatch": "#739bff",
     "baseSet": "wikimedia-djambi",
     "license": "CC-BY-SA-3.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
