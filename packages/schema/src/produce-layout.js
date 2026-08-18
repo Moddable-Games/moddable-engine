@@ -693,7 +693,7 @@ function produceHexLegacy(topo, colors, render) {
 function produceTrackLayout(topo, colors, render) {
   const style = render.trackStyle || 'dots'
   if (style === 'triangular-points') return backgammonOps(colors, render)
-  if (style === 'perimeter') return landlordsOps(render)
+  if (style === 'perimeter') return landlordsOps(colors, render)
   return { type: 'track', config: { style, ops: [], width: 0, height: 0 } }
 }
 
@@ -882,7 +882,7 @@ function landlordsSpaceRect(side, idx, count, cornerSize, boardW, boardH) {
   return { x: 0, y: 0, w: cellW, h: cellH }
 }
 
-function landlordsOps(render) {
+function landlordsOps(colors, render) {
   const variant = render._board || '1904-patent'
   const boardData = render._boardData || null
   const board = boardData ? boardData.boards[variant] : null
@@ -897,7 +897,8 @@ function landlordsOps(render) {
     return { type: 'track', config: { style: 'perimeter', ops: els, width: 400, height: 60 } }
   }
 
-  const theme = LANDLORDS_THEMES[variant] || LANDLORDS_THEMES['1904-patent']
+  // Use colors from frontmatter, falling back to LANDLORDS_THEMES for backwards compatibility
+  const theme = (colors && Object.keys(colors).length > 5) ? colors : (LANDLORDS_THEMES[variant] || LANDLORDS_THEMES['1904-patent'])
   const totalSpaces = board.totalSpaces
   const corners = 4
   const perSide = (totalSpaces - corners) / 4
