@@ -310,7 +310,7 @@ function translateOp(decl, ctx) {
         ]
       }
       if (children === 'arcs') {
-        children = surakartaArcElements(gx, gy, cellSize, rows, cols, colors)
+        children = surakartaArcElements(gx, gy, cellSize, rows, cols, colors, decl.rings || 2)
       }
       const attrs = { ...(decl.attrs || {}) }
       if (decl.fill) attrs.fill = colors[decl.fill] || decl.fill
@@ -473,21 +473,22 @@ function translateOp(decl, ctx) {
   }
 }
 
-function surakartaArcElements(gx, gy, tileSize, rows, cols, colors) {
-  const innerR = tileSize
-  const outerR = tileSize * 2
+function surakartaArcElements(gx, gy, tileSize, rows, cols, colors, rings = 2) {
   const ix = (i) => gx + i * tileSize
   const iy = (i) => gy + i * tileSize
-  return [
-    { tag: 'path', attrs: { d: `M ${ix(1)},${iy(0)} A ${innerR},${innerR} 0 1,0 ${ix(0)},${iy(1)}`, stroke: colors['inner-arc'] || '#6b4a30' } },
-    { tag: 'path', attrs: { d: `M ${ix(cols - 2)},${iy(0)} A ${innerR},${innerR} 0 1,1 ${ix(cols - 1)},${iy(1)}`, stroke: colors['inner-arc'] || '#6b4a30' } },
-    { tag: 'path', attrs: { d: `M ${ix(0)},${iy(rows - 2)} A ${innerR},${innerR} 0 1,0 ${ix(1)},${iy(rows - 1)}`, stroke: colors['inner-arc'] || '#6b4a30' } },
-    { tag: 'path', attrs: { d: `M ${ix(cols - 1)},${iy(rows - 2)} A ${innerR},${innerR} 0 1,1 ${ix(cols - 2)},${iy(rows - 1)}`, stroke: colors['inner-arc'] || '#6b4a30' } },
-    { tag: 'path', attrs: { d: `M ${ix(2)},${iy(0)} A ${outerR},${outerR} 0 1,0 ${ix(0)},${iy(2)}`, stroke: colors['outer-arc'] || '#6b4a30' } },
-    { tag: 'path', attrs: { d: `M ${ix(cols - 3)},${iy(0)} A ${outerR},${outerR} 0 1,1 ${ix(cols - 1)},${iy(2)}`, stroke: colors['outer-arc'] || '#6b4a30' } },
-    { tag: 'path', attrs: { d: `M ${ix(0)},${iy(rows - 3)} A ${outerR},${outerR} 0 1,0 ${ix(2)},${iy(rows - 1)}`, stroke: colors['outer-arc'] || '#6b4a30' } },
-    { tag: 'path', attrs: { d: `M ${ix(cols - 1)},${iy(rows - 3)} A ${outerR},${outerR} 0 1,1 ${ix(cols - 3)},${iy(rows - 1)}`, stroke: colors['outer-arc'] || '#6b4a30' } },
-  ]
+  const result = []
+  for (let ring = 1; ring <= rings; ring++) {
+    const radius = tileSize * ring
+    const colorKey = ring === 1 ? 'inner-arc' : ring === 2 ? 'outer-arc' : `arc-${ring}`
+    const stroke = colors[colorKey] || '#6b4a30'
+    result.push(
+      { tag: 'path', attrs: { d: `M ${ix(ring)},${iy(0)} A ${radius},${radius} 0 1,0 ${ix(0)},${iy(ring)}`, stroke } },
+      { tag: 'path', attrs: { d: `M ${ix(cols - 1 - ring)},${iy(0)} A ${radius},${radius} 0 1,1 ${ix(cols - 1)},${iy(ring)}`, stroke } },
+      { tag: 'path', attrs: { d: `M ${ix(0)},${iy(rows - 1 - ring)} A ${radius},${radius} 0 1,0 ${ix(ring)},${iy(rows - 1)}`, stroke } },
+      { tag: 'path', attrs: { d: `M ${ix(cols - 1)},${iy(rows - 1 - ring)} A ${radius},${radius} 0 1,1 ${ix(cols - 1 - ring)},${iy(rows - 1)}`, stroke } }
+    )
+  }
+  return result
 }
 
 
