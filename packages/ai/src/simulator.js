@@ -82,7 +82,7 @@ export function createSimulator(plugin, opts = {}) {
     const board = state.board
     if (!board || !Array.isArray(board)) return 0
     const size = board.length
-    const cols = state._cols || (size === 64 ? 8 : size === 81 ? 9 : size === 90 ? 9 : Math.round(Math.sqrt(size)))
+    const cols = state._cols || state.cols || Math.round(Math.sqrt(size))
     const rows = size / cols
     let myMobility = 0
     let oppMobility = 0
