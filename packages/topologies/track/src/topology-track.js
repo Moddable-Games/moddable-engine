@@ -340,21 +340,15 @@ export function createTrackTopology(config) {
       }
     }
 
-    const specials = cellStates.bar || cellStates.home || null
-    if (cellStates.bar) {
-      for (const piece of (Array.isArray(cellStates.bar) ? cellStates.bar : [cellStates.bar])) {
+    for (const key of Object.keys(cellStates)) {
+      if (posMap.has(key)) continue
+      const cell = cellStates[key]
+      if (cell === null || cell === undefined) continue
+      for (const piece of (Array.isArray(cell) ? cell : [cell])) {
         const sym = symbolMap.toSymbol(piece)
-        const existing = parts.find(p => p.idx === 'bar' && p.symbol === sym)
+        const existing = parts.find(p => p.idx === key && p.symbol === sym)
         if (existing) existing.count++
-        else parts.push({ idx: 'bar', symbol: sym, count: 1 })
-      }
-    }
-    if (cellStates.home) {
-      for (const piece of (Array.isArray(cellStates.home) ? cellStates.home : [cellStates.home])) {
-        const sym = symbolMap.toSymbol(piece)
-        const existing = parts.find(p => p.idx === 'home' && p.symbol === sym)
-        if (existing) existing.count++
-        else parts.push({ idx: 'home', symbol: sym, count: 1 })
+        else parts.push({ idx: key, symbol: sym, count: 1 })
       }
     }
 
@@ -375,7 +369,7 @@ export function createTrackTopology(config) {
       const piece = symbolMap.fromSymbol(symbol)
       if (!piece) continue
 
-      const key = (posKey === 'bar' || posKey === 'home') ? posKey : parseInt(posKey, 10)
+      const key = /^\d+$/.test(posKey) ? parseInt(posKey, 10) : posKey
 
       if (typeof key === 'number') {
         const name = getName(key)
