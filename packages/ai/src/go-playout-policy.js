@@ -185,8 +185,9 @@ export function createGoPlayoutPolicy() {
     const board = state.board
     const size = board.length
     const cols = state.cols || Math.round(Math.sqrt(size))
-    const ownColour = playerIndex === 0 ? 'black' : 'white'
-    const oppColour = playerIndex === 0 ? 'white' : 'black'
+    const colours = state.playerColours || ['black', 'white']
+    const ownColour = colours[playerIndex]
+    const oppColour = colours[1 - playerIndex]
 
     const stones = stoneCount(board)
     const fillRatio = stones / size

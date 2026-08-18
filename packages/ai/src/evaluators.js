@@ -151,8 +151,9 @@ export function draughtsEvaluate(state, playerIndex) {
 
 export function goEvaluate(state, playerIndex) {
   if (!state.board) return 0
-  const myColour = playerIndex === 0 ? 'black' : 'white'
-  const oppColour = playerIndex === 0 ? 'white' : 'black'
+  const colours = state.playerColours || ['black', 'white']
+  const myColour = colours[playerIndex]
+  const oppColour = colours[1 - playerIndex]
 
   let myStones = 0
   let oppStones = 0

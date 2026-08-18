@@ -68,6 +68,7 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
       lastPlaced: null,
       lastCaptureBy: null,
       deadStones: [],
+      playerColours,
     }
   }
 
