@@ -11,7 +11,7 @@ import { createMinimax, DIFFICULTIES } from '../../ai/src/minimax.js'
 import { createMCTS, MCTS_DIFFICULTIES } from '../../ai/src/mcts.js'
 import { getEvaluator } from '../../ai/src/evaluators.js'
 import { createGoPlayoutPolicy, createGoExpansionPolicy } from '../../ai/src/go-playout-policy.js'
-import { interactionModelFor, FAMILY_INTERACTION } from './interaction.js'
+import { interactionModelFor } from './interaction.js'
 import { definitionFromVariant } from './variant-definition.js'
 import { usesMctsDefault } from './mcts-registry.js'
 
@@ -65,7 +65,11 @@ export function getGameStatus(family, variant, state, opts = {}) {
 export function createAI(family, variant, opts = {}) {
   const difficulty = opts.difficulty || 'medium'
   const searchMethod = opts.search || variantSearchMethod(family, variant, opts.definition)
-  const useMcts = searchMethod === 'mcts' || (!searchMethod && usesMctsDefault(family))
+  const pluginDeclaresMcts = usesMctsDefault(family)
+  if (!searchMethod && pluginDeclaresMcts) {
+    console.warn(`[sdk] Family "${family}" uses MCTS but frontmatter does not declare search: mcts.`)
+  }
+  const useMcts = searchMethod === 'mcts' || (!searchMethod && pluginDeclaresMcts)
 
   const simulator = createSimulatorForFamily(family, opts.state || null, {
     variant,
@@ -119,10 +123,11 @@ export function renderSvg(family, variant, state, opts = {}) {
 }
 
 export function getInteractionModel(family) {
+  const model = interactionModelFor(family)
   return {
     family,
-    model: FAMILY_INTERACTION[family] || 'move',
-    needsSelection: interactionModelFor(family).needsSelection,
+    model: model.name || 'move',
+    needsSelection: model.needsSelection,
   }
 }
 

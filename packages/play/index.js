@@ -25,7 +25,6 @@ export {
   listInteractionModels,
   interactionModelFor,
   availableActions,
-  FAMILY_INTERACTION,
 } from './src/interaction.js'
 
 export {

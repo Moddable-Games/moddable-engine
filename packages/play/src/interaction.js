@@ -132,12 +132,13 @@ registerInteractionModel('place', placeModel)
 registerInteractionModel('chain', chainModel)
 registerInteractionModel('drop', dropModel)
 
-// Fallback for families that haven't declared their interaction model (empty now that plugins can declare their own)
-export const FAMILY_INTERACTION = {}
-
 export function interactionModelFor(family, override) {
   if (override) return getInteractionModel(override)
-  return getInteractionModel(familyInteractions.get(family) || 'move')
+  const declared = familyInteractions.get(family)
+  if (!declared) {
+    console.warn(`[interaction] Family "${family}" has no interactionModel declared. Defaulting to 'move'.`)
+  }
+  return getInteractionModel(declared || 'move')
 }
 
 export function availableActions(moves) {

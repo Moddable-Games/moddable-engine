@@ -3,7 +3,7 @@ import { createGameController } from '../packages/play/src/game-controller.js'
 import { listVariants, getVariantConfig } from '../packages/play/src/variant-registry.js'
 import { parseUrlFlags, deriveCompatibleFlags, familySupportsFlag, serializeVariantKey } from '../packages/play/src/variant-flags.js'
 import { createAI } from '../packages/play/src/sdk.js'
-import { interactionModelFor, FAMILY_INTERACTION } from '../packages/play/src/interaction.js'
+import { interactionModelFor } from '../packages/play/src/interaction.js'
 import { createEmbedBridge, parseEmbedParams, normaliseOutcome } from '../packages/play/src/embed.js'
 import { defaultSeatFor } from '../packages/play/src/default-seat.js'
 import { renderFromEngine, attachPieceImages } from '../packages/render/src/render-engine.js'
@@ -1567,4 +1567,4 @@ function getVariantPieceKeys(family, variantKey, fallbackSetup, resolved) {
   return keys
 }
 
-export { BOARD_THEMES, DIFFICULTIES, FAMILY_INTERACTION, getVariantConfig }
+export { BOARD_THEMES, DIFFICULTIES, getVariantConfig }
