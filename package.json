@@ -31,12 +31,26 @@
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "build": "npm run build --workspaces",
-    "lint": "eslint packages/*/src/**/*.js",
     "variant-report": "node --experimental-vm-modules scripts/variant-report.mjs",
     "build:discovery": "node scripts/build-discovery.mjs",
     "check:discovery": "node scripts/build-discovery.mjs --check",
     "build:puzzles": "node scripts/normalise-puzzles.mjs",
-    "check:puzzles": "node scripts/normalise-puzzles.mjs --check"
+    "check:puzzles": "node scripts/normalise-puzzles.mjs --check",
+    "gen:manifest": "MODDABLE_RULES_DIR=../moddable-rules/games node scripts/gen-playability-manifest.mjs",
+    "gen:family-defaults": "MODDABLE_RULES_DIR=../moddable-rules/games node scripts/gen-family-defaults.mjs",
+    "gen:puzzles": "MODDABLE_RULES_DIR=../moddable-rules/games node scripts/generate-puzzles.mjs",
+    "boards:export": "node scripts/export-boards.mjs --export",
+    "boards:snapshot": "node scripts/snapshot-boards.mjs --capture",
+    "boards:diff": "node scripts/snapshot-boards.mjs --diff",
+    "boards:index": "node scripts/build-board-index.mjs",
+    "boards:compare": "node scripts/compare-engine.mjs",
+    "check:duplication": "node scripts/check-duplication.mjs",
+    "check:purity": "node scripts/check-purity.mjs",
+    "check:all": "npm run check:duplication && npm run check:purity && npm run check:discovery && npm run check:puzzles",
+    "audit:frontmatter": "MODDABLE_RULES_DIR=../moddable-rules/games node scripts/audit-frontmatter-gap.mjs",
+    "audit:resolvers": "node scripts/compare-resolvers.mjs",
+    "audit:playability": "MODDABLE_RULES_DIR=../moddable-rules/games node scripts/playability-matrix.mjs",
+    "bench:ai": "node scripts/bench-ai.mjs"
   },
   "engines": {
     "node": ">=18.0.0"

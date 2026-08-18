@@ -388,49 +388,107 @@ Assemble shared infrastructure. No plugin reimplements anything in Layers 0–4.
 
 ## 9. Layer 6 — Game configs (frontmatter only, no code)
 
-```yaml
-# dungeon-chess.yml
-game: dungeon-chess
-plugins: [grid-square, terrain, ai, audio, multiplayer]
-theme: dungeon
-phases: [play]
-grid-square: { rows: 8, cols: 8, startFen: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR }
-terrain: { tokens: [door, chest, portal, exit] }
-board: { style: checkered, tileSize: 60 }
-```
+A variant is one markdown file in [moddable-rules](https://github.com/Moddable-Games/moddable-rules)
+at `games/<family>/content/variants/<slug>.md`, or `games/<family>/content/rulebook.md`
+for the family hub. The filename is the slug. Everything the engine reads lives under
+`engine:`; everything outside it is metadata for the site.
+
+See [docs/authoring.html](docs/authoring.html) for the full authoring guide.
+
+### A variant
 
 ```yaml
-# endless-skies.yml
-game: endless-skies
-plugins: [grid-hex, worker-placement, card-deck, dice, resource-track, terrain, audio]
-theme: cosmic
-phases: [diplomatic, action, event]
-grid-hex: { tiles: 113, factions: 8 }
-terrain: { types: [asteroid-belt, wormhole, space-port, habitable, empty] }
-card-deck: { decks: [blueprints, contracts, events, discoveries, missions] }
-dice: { type: d10 }
-resource-track: { resources: [credits] }
-board: { style: hex, tileSize: 80 }
+---
+title: Oware
+slug: oware
+parent: mancala
+board: "2×6 pits"
+players: "2"
+win: Capture more than 24 seeds
+engine:
+  topology:
+    type: pit
+    cols: 6
+    stores: false
+  players: [south, north]
+  render:
+    cellSize: 24
+  setup: "4,4,4,4,4,4;0;4,4,4,4,4,4;0"
+---
+
+## Oware
+
+Sow seeds anticlockwise and capture from the opponent's row.
 ```
 
-```yaml
-# oware.yml
-game: oware
-plugins: [pit-sow]
-theme: classical
-pit-sow: { pits: 6, seeds: 4, stores: 2 }
-board: { style: mancala }
-```
+### A family hub
+
+The hub carries the defaults every variant in the family inherits. A variant declaring
+the same key overrides it.
 
 ```yaml
-# backgammon.yml
-game: backgammon
-plugins: [track, dice]
-theme: classical
-track: { positions: 24, circuit: false, direction: clockwise }
-dice: { count: 2, type: d6 }
-board: { style: backgammon }
+---
+title: "Backgammon — Official Rulebook"
+slug: "backgammon"
+mechanics: [dice, race, capture, track, push-your-luck, betting]
+engine:
+  topology:
+    type: track
+    shape: linear
+    positions: 24
+  surface:
+    colors:
+      board-outer: "#3a2416"
+      felt: "#1f4d3a"
+      point-a: "#d9c5a0"
+      point-b: "#8c3b2f"
+---
 ```
+
+### A variant with new pieces
+
+Movement definitions live under `engine.plugins.<family>.pieces`, and the symbols that
+represent them under `engine.vocabulary`, keyed by owner index. Note that `engine.pieces`
+is a different key: it selects the artwork set.
+
+```yaml
+---
+title: Zebra Chess
+slug: zebra-chess
+parent: chess
+playable: true
+engine:
+  topology: { type: grid, rows: 8, cols: 8 }
+  players: [white, black]
+  setup: "rzbqkbzr/pppppppp/8/8/8/8/PPPPPPPP/RZBQKBZR"
+  pieces:
+    set: wikimedia-standard
+  vocabulary:
+    zebra:
+      symbols: { 0: Z, 1: z }
+  plugins:
+    chess:
+      castling: false
+      pieces:
+        zebra:
+          type: leaper
+          offsets: [[2,3],[3,2],[-2,3],[-3,2],[2,-3],[3,-2],[-2,-3],[-3,-2]]
+---
+```
+
+### Structural versus rule keys
+
+Keys under `engine:` divide in two, and the split decides where a value is consumed.
+
+**Structural** — `topology`, `players`, `surface`, `render`, `pieces`, `components`,
+`meta`, `plugins`. Read by the topology and render layers.
+
+**Rule** — everything under `engine.plugins.<family>`. Passed to that family's plugin as
+its config. Each family page documents its own set.
+
+A non-structural key written at the top of `engine:` is folded into the plugin config and
+**overrides** the same key inside the plugin block. Prefer to write rule keys in the
+plugin block only.
 
 ---
 
