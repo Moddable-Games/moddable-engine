@@ -863,11 +863,10 @@ function landlordsWrapText(text, maxChars) {
   return lines
 }
 
-function landlordsCornerOrder(variant, spaces) {
+function landlordsCornerOrder(board, spaces) {
   const corners = spaces.filter(s => s.side === 'corner')
-  if (variant === '1932-prosperity') return [corners[1], corners[2], corners[3], corners[0]]
-  if (variant === '1906-egc') return [corners[3], corners[0], corners[1], corners[2]]
-  return [corners[0], corners[1], corners[2], corners[3]]
+  const order = board.cornerOrder || [0, 1, 2, 3]
+  return order.map(i => corners[i])
 }
 
 function landlordsSpaceRect(side, idx, count, cornerSize, boardW, boardH) {
@@ -916,7 +915,7 @@ function landlordsOps(colors, render) {
     if (s.side !== 'corner' && sideSpaces[s.side]) sideSpaces[s.side].push(s)
   }
 
-  const cornerOrder = landlordsCornerOrder(variant, spaces)
+  const cornerOrder = landlordsCornerOrder(board, spaces)
   const cornerPositions = [
     { x: boardW - cornerSize, y: boardH - cornerSize },
     { x: 0, y: boardH - cornerSize },
@@ -1017,7 +1016,7 @@ function landlordsOps(colors, render) {
     const children = []
     const t = (attrs, content) => children.push({ tag: 'text', attrs, text: content })
     if (variant === '1932-prosperity') {
-      const category = LANDLORDS_CATEGORIES[space.type] || ''
+      const category = (board.categories && board.categories[space.type]) || LANDLORDS_CATEGORIES[space.type] || ''
       const narrow = textW < textH
       const fontSize = narrow ? 5 : 6
       const catSize = narrow ? 3.2 : 3.8
