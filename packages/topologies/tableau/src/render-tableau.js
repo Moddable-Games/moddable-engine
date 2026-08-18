@@ -65,8 +65,8 @@ function emptyTableLayout(config) {
 }
 
 function renderRadial(dealResult, deckType, deckConfig, players, seed, config) {
-  const cardW = deckType === 'dominoes-28' ? 32 : deckType === 'standard-dice' ? 48 : 44
-  const cardH = deckType === 'dominoes-28' ? 60 : deckType === 'standard-dice' ? 48 : 64
+  const cardW = deckConfig.cardWidth || 44
+  const cardH = deckConfig.cardHeight || 64
   const maxHand = Math.max(...dealResult.hands.map(h => h.length), dealResult.community?.length || 0)
   const handWidth = maxHand * (cardW + 4)
   const handHalfW = handWidth / 2

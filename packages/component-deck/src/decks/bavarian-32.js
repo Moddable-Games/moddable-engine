@@ -6,6 +6,8 @@ const RANKS = ['7', '8', '9', '10', 'U', 'O', 'K', 'A']
 registerDeck('bavarian-32', {
   label: 'Bavarian 32',
   cardCount: 32,
+  cardWidth: 44,
+  cardHeight: 64,
   suits: SUITS,
   ranks: RANKS,
   pieceSet: 'mfrasca-skat',

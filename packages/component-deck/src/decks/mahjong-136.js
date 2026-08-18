@@ -7,6 +7,8 @@ const DRAGONS = ['red', 'green', 'white']
 registerDeck('mahjong-136', {
   label: 'Mahjong 136',
   cardCount: 136,
+  cardWidth: 44,
+  cardHeight: 64,
   suits: SUITS,
   winds: WINDS,
   dragons: DRAGONS,

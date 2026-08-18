@@ -6,6 +6,8 @@ const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
 registerDeck('standard-52', {
   label: 'Standard 52',
   cardCount: 52,
+  cardWidth: 44,
+  cardHeight: 64,
   suits: SUITS,
   ranks: RANKS,
   pieceSet: 'letele-cards',

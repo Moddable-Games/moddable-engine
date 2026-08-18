@@ -4,6 +4,8 @@ registerDeck('dominoes-28', {
   label: 'Double-Six Dominoes',
   cardCount: 28,
   maxPips: 6,
+  cardWidth: 32,
+  cardHeight: 60,
   pieceSet: 'dominoes-classic',
 
   getImagePath(card) {

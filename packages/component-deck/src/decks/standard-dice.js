@@ -4,6 +4,8 @@ import { createSeededRng } from '../../../core/index.js'
 registerDeck('standard-dice', {
   label: 'Standard Dice',
   cardCount: 0,
+  cardWidth: 48,
+  cardHeight: 48,
   pieceSet: 'playstrategy-backgammon',
 
   getImagePath(card) {

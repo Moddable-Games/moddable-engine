@@ -66,6 +66,8 @@ const CARD_DEFS = [
 registerDeck('hanafuda-48', {
   label: 'Hanafuda 48',
   cardCount: 48,
+  cardWidth: 44,
+  cardHeight: 64,
   months: MONTHS,
   types: TYPES,
   pieceSet: 'hanafuda-traditional',
