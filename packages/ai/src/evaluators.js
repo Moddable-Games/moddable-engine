@@ -139,24 +139,6 @@ export function draughtsEvaluate(state, playerIndex) {
   return score
 }
 
-export function mancalaEvaluate(state, playerIndex) {
-  if (!state.stores) return 0
-  const myStore = state.stores[playerIndex] || 0
-  const oppStore = state.stores[1 - playerIndex] || 0
-  const storeAdv = myStore - oppStore
-
-  const half = state.pitsPerSide || 6
-  const myStart = playerIndex * half
-  const myPits = state.pits.slice(myStart, myStart + half)
-  const oppStart = (1 - playerIndex) * half
-  const oppPits = state.pits.slice(oppStart, oppStart + half)
-
-  const mySeeds = myPits.reduce((a, b) => a + b, 0)
-  const oppSeeds = oppPits.reduce((a, b) => a + b, 0)
-
-  return (storeAdv * 3 + (mySeeds - oppSeeds)) * 20
-}
-
 export function goEvaluate(state, playerIndex) {
   if (!state.board) return 0
   const myColour = playerIndex === 0 ? 'black' : 'white'
@@ -174,45 +156,6 @@ export function goEvaluate(state, playerIndex) {
   const oppCaps = captures[1 - playerIndex] || 0
 
   return ((myStones - oppStones) + (myCaps - oppCaps) * 2) * 100
-}
-
-export function halmaEvaluate(state, playerIndex) {
-  if (!state.board) return 0
-  const cols = state._cols || 16
-  const rows = state.board.length / cols
-  let score = 0
-
-  for (let i = 0; i < state.board.length; i++) {
-    if (state.board[i] !== playerIndex) continue
-    const row = Math.floor(i / cols)
-    const col = i % cols
-    const distToTarget = playerIndex === 0
-      ? row + (cols - 1 - col)
-      : (rows - 1 - row) + col
-    score -= distToTarget
-  }
-
-  return score * 10
-}
-
-export function raceEvaluate(state, playerIndex) {
-  if (!state.pieces) return 0
-  const myPieces = state.pieces[playerIndex]
-  let score = 0
-  for (const piece of myPieces) {
-    if (piece.state === 'finished') score += 100
-    else if (piece.state === 'active') score += piece.position
-    else score += 0
-  }
-
-  const oppPieces = state.pieces[1 - playerIndex] || []
-  let oppScore = 0
-  for (const piece of oppPieces) {
-    if (piece.state === 'finished') oppScore += 100
-    else if (piece.state === 'active') oppScore += piece.position
-  }
-
-  return score - oppScore
 }
 
 export function shogiEvaluate(state, playerIndex) {
@@ -269,10 +212,7 @@ export const EVALUATORS = {
   chess: chessEvaluate,
   reversi: reversiEvaluate,
   draughts: draughtsEvaluate,
-  mancala: mancalaEvaluate,
   go: goEvaluate,
-  halma: halmaEvaluate,
-  race: raceEvaluate,
   shogi: shogiEvaluate,
   xiangqi: xiangqiEvaluate,
 }

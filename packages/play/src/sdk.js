@@ -14,7 +14,7 @@ import { createGoPlayoutPolicy, createGoExpansionPolicy } from '../../ai/src/go-
 import { interactionModelFor, FAMILY_INTERACTION } from './interaction.js'
 import { definitionFromVariant } from './variant-definition.js'
 
-const MCTS_FAMILIES = new Set(['go', 'hex'])
+const MCTS_FAMILIES = new Set(['go'])
 
 export { getFamilies, hasFamily, getVariantGroups, hasVariant, getVariantConfig }
 export { DIFFICULTIES as AI_DIFFICULTIES }
@@ -65,7 +65,8 @@ export function getGameStatus(family, variant, state, opts = {}) {
 
 export function createAI(family, variant, opts = {}) {
   const difficulty = opts.difficulty || 'medium'
-  const useMcts = opts.search === 'mcts' || (!opts.search && MCTS_FAMILIES.has(family))
+  const searchMethod = opts.search || variantSearchMethod(family, variant, opts.definition)
+  const useMcts = searchMethod === 'mcts' || (!searchMethod && MCTS_FAMILIES.has(family))
 
   const simulator = createSimulatorForFamily(family, opts.state || null, {
     variant,
@@ -162,6 +163,14 @@ function variantOpeningBook(family, variant, definition) {
   if (book) return book
   const config = getVariantConfig(family, variant)
   return (config && config.openingBook) || undefined
+}
+
+function variantSearchMethod(family, variant, definition) {
+  const search = definition?.engine?.plugins?.[family]?.search
+  if (search) return search
+  if (!variant) return undefined
+  const config = getVariantConfig(family, variant)
+  return (config && config.search) || undefined
 }
 
 function playerIndexOf(game) {
