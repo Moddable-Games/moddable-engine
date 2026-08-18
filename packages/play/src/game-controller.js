@@ -1,4 +1,5 @@
 import { interactionModelFor, availableActions } from './interaction.js'
+import { getFamilies } from './play.js'
 
 export function createGameController(game, opts = {}) {
   const players = opts.players || {}
@@ -261,8 +262,7 @@ export function createGameController(game, opts = {}) {
         if (state && state.board) return p.sliceName
       }
     }
-    const names = ['chess', 'go', 'draughts', 'shogi', 'xiangqi']
-    for (const name of names) {
+    for (const name of getFamilies()) {
       const state = game.getState(name)
       if (state && state.board) return name
     }
