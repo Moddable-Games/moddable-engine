@@ -13,17 +13,7 @@ import { getEvaluator } from '../../ai/src/evaluators.js'
 import { createGoPlayoutPolicy, createGoExpansionPolicy } from '../../ai/src/go-playout-policy.js'
 import { interactionModelFor, FAMILY_INTERACTION } from './interaction.js'
 import { definitionFromVariant } from './variant-definition.js'
-
-// Families that default to MCTS search (registered dynamically)
-const mctsDefaults = new Map()
-
-export function registerMctsDefault(family) {
-  mctsDefaults.set(family, true)
-}
-
-function usesMctsDefault(family) {
-  return mctsDefaults.get(family) === true
-}
+import { usesMctsDefault } from './mcts-registry.js'
 
 export { getFamilies, hasFamily, getVariantGroups, hasVariant, getVariantConfig }
 export { DIFFICULTIES as AI_DIFFICULTIES }

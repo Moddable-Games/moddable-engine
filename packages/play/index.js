@@ -45,8 +45,9 @@ export {
   getLegalMoves,
   renderSvg,
   AI_DIFFICULTIES,
-  registerMctsDefault,
 } from './src/sdk.js'
+
+export { registerMctsDefault } from './src/mcts-registry.js'
 
 export {
   renderInteractiveBoard,

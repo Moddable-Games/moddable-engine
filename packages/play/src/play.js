@@ -5,7 +5,7 @@ import { getVariantConfig, hasVariant, getSlugForKey, setVariantSources as _setV
 import { definitionFromVariant } from './variant-definition.js'
 import { parseVariantKey, applyFlags, familySupportsFlag, registerPluginFlags } from './variant-flags.js'
 import { registerFamilyInteraction } from './interaction.js'
-import { registerMctsDefault } from './sdk.js'
+import { registerMctsDefault } from './mcts-registry.js'
 import { resolveVariantSync } from './resolve-frontmatter.js'
 import { createGridTopology } from '../../topologies/grid/src/topology-grid.js'
 import { createHexTopology } from '../../topologies/hex/src/topology-hex.js'
