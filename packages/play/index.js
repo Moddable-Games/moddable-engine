@@ -1,5 +1,5 @@
 export { createGameController } from './src/game-controller.js'
-export { createGameForFamily, getPlugin, getFamilies, hasFamily, setRulesReader } from './src/play.js'
+export { createGameForFamily, getPlugin, getFamilies, hasFamily, setRulesReader, registerTopology, registerPluginFactory } from './src/play.js'
 export { createSimulatorForFamily } from './src/simulator-helper.js'
 export { renderStateAsSvg } from './src/render-helper.js'
 

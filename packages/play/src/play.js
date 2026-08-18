@@ -38,6 +38,15 @@ const PLUGIN_FACTORIES = {
   xiangqi: createXiangqiPlugin,
 }
 
+export function registerTopology(type, factory) {
+  TOPOLOGIES[type] = factory
+}
+
+export function registerPluginFactory(family, factory) {
+  PLUGIN_FACTORIES[family] = factory
+  if (factory.flags) registerPluginFlags(family, factory.flags)
+}
+
 // Register plugin-declared flags (static property on factory functions)
 for (const [family, factory] of Object.entries(PLUGIN_FACTORIES)) {
   if (factory.flags) registerPluginFlags(family, factory.flags)
