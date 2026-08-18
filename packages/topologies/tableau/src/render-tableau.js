@@ -441,68 +441,20 @@ function renderSingleCard(card, x, y, cardW, cardH, deckType, faceUp) {
 }
 
 export function getCardImagePath(card, deckType, opts) {
-  if (deckType === 'standard-52') {
-    if (card.suit === 'joker') return `../pieces/sets/letele-cards/J-1.svg`
-    const suitLetter = { spades: 'S', hearts: 'H', clubs: 'C', diamonds: 'D' }[card.suit]
-    return `../pieces/sets/letele-cards/${suitLetter}-${card.rank}.svg`
-  }
-  if (deckType === 'hanafuda-48') {
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-    const month = monthNames[card.monthIndex]
-    const type = card.type.charAt(0).toUpperCase() + card.type.slice(1)
-    if (card.name.match(/Plain \d/)) return `../pieces/sets/hanafuda-traditional/Hanafuda_${month}_${type}_${card.name.slice(-1)}_Alt.svg`
-    return `../pieces/sets/hanafuda-traditional/Hanafuda_${month}_${type}_Alt.svg`
-  }
-  if (deckType === 'bavarian-32') {
-    const suitMap = { acorns: 'eichel', leaves: 'blatt', hearts: 'hart', bells: 'schellen' }
-    const suit = suitMap[card.suit]
-    const faceMap = {
-      eichel: { U: '11_unter', O: '12_ober', K: '13_konig', A: '01_daus' },
-      hart: { U: '11_unter', O: '12_ober', K: '13_konig', A: '01_daus' },
-      blatt: { U: '11_jack', O: '12_queen', K: '13_king', A: '01_daus' },
-      schellen: { U: '11_jack', O: '12_queen', K: '13_king', A: '01' },
-    }
-    const numericMap = { 7: '07', 8: '08', 9: '09', 10: '10' }
-    const rank = faceMap[suit]?.[card.rank] || numericMap[card.rank] || card.rank
-    return `../pieces/sets/mfrasca-skat/Playing_card-german-${suit}-${rank}.svg`
-  }
-  if (deckType === 'mahjong-136') {
-    const tileSet = opts?.tileSet || 'mahjong-regular'
-    if (tileSet === 'mahjong-planar') {
-      const suitFileMap = { bamboo: 'tiao', circles: 'bing', characters: 'wan' }
-      const windFileMap = { east: 'Eastwind', south: 'Southwind', west: 'Westwind', north: 'Northwind' }
-      const dragonFileMap = { red: 'Reddragon', green: 'Greendragon', white: 'Whitedragon' }
-      if (card.suit === 'wind') return `../pieces/sets/mahjong-planar/MJ${windFileMap[card.rank]}.svg`
-      if (card.suit === 'dragon') return `../pieces/sets/mahjong-planar/MJ${dragonFileMap[card.rank]}.svg`
-      if (suitFileMap[card.suit]) return `../pieces/sets/mahjong-planar/MJ${card.rank}${suitFileMap[card.suit]}.svg`
-      return null
-    }
-    const suitFileMap = { bamboo: 'Sou', circles: 'Pin', characters: 'Man' }
-    const windFileMap = { east: 'Ton', south: 'Nan', west: 'Shaa', north: 'Pei' }
-    const dragonFileMap = { red: 'Chun', green: 'Hatsu', white: 'Haku' }
-    if (card.suit === 'wind') return `../pieces/sets/mahjong-regular/${windFileMap[card.rank]}.svg`
-    if (card.suit === 'dragon') return `../pieces/sets/mahjong-regular/${dragonFileMap[card.rank]}.svg`
-    if (suitFileMap[card.suit]) return `../pieces/sets/mahjong-regular/${suitFileMap[card.suit]}${card.rank}.svg`
-    return null
-  }
-  if (deckType === 'standard-dice') {
-    const valueNames = { 1: 'one', 2: 'two', 3: 'three', 4: 'four', 5: 'five', 6: 'six' }
-    const name = valueNames[card.value]
-    if (name) return `../pieces/sets/playstrategy-backgammon/wdice${name}.svg`
-    return `../pieces/sets/playstrategy-backgammon/wdicerandom.svg`
-  }
-  if (deckType === 'dominoes-28') {
-    const a = String(card.low).padStart(2, '0')
-    const b = String(card.high).padStart(2, '0')
-    return `../pieces/sets/dominoes-classic/domino-${a}-${b}.svg`
-  }
-  return null
+  const deckConfig = getDeckConfig(deckType)
+  if (!deckConfig?.getImagePath) return null
+  const filename = deckConfig.getImagePath(card, opts)
+  if (!filename) return null
+  const pieceSet = opts?.tileSet || deckConfig.pieceSet
+  return `../pieces/sets/${pieceSet}/${filename}`
 }
 
 export function getCardBackPath(deckType) {
-  if (deckType === 'standard-52') return `../pieces/sets/letele-cards/B-1.svg`
-  if (deckType === 'mahjong-136') return `../pieces/sets/mahjong-regular/Back.svg`
-  if (deckType === 'dominoes-28') return `../pieces/sets/dominoes-classic/domino-back.svg`
+  const deckConfig = getDeckConfig(deckType)
+  if (!deckConfig?.pieceSet) return null
+  if (deckConfig.getBackPath) {
+    return `../pieces/sets/${deckConfig.pieceSet}/${deckConfig.getBackPath()}`
+  }
   return null
 }
 

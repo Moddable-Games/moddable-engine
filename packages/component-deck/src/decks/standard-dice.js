@@ -4,7 +4,14 @@ import { createSeededRng } from '../../../core/index.js'
 registerDeck('standard-dice', {
   label: 'Standard Dice',
   cardCount: 0,
-  pieceSet: null,
+  pieceSet: 'playstrategy-backgammon',
+
+  getImagePath(card) {
+    const valueNames = { 1: 'one', 2: 'two', 3: 'three', 4: 'four', 5: 'five', 6: 'six' }
+    const name = valueNames[card.value]
+    if (name) return `wdice${name}.svg`
+    return 'wdicerandom.svg'
+  },
 
   create(opts = {}) {
     const count = opts.count || 5

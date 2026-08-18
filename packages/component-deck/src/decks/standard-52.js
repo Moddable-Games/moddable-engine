@@ -8,7 +8,17 @@ registerDeck('standard-52', {
   cardCount: 52,
   suits: SUITS,
   ranks: RANKS,
-  pieceSet: 'standard-52-cards',
+  pieceSet: 'letele-cards',
+
+  getImagePath(card) {
+    if (card.suit === 'joker') return 'J-1.svg'
+    const suitLetter = { spades: 'S', hearts: 'H', clubs: 'C', diamonds: 'D' }[card.suit]
+    return `${suitLetter}-${card.rank}.svg`
+  },
+
+  getBackPath() {
+    return 'B-1.svg'
+  },
 
   create(opts = {}) {
     const jokers = opts.jokers || 0

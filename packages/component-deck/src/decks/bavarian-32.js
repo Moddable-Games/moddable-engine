@@ -8,7 +8,21 @@ registerDeck('bavarian-32', {
   cardCount: 32,
   suits: SUITS,
   ranks: RANKS,
-  pieceSet: 'bavarian-skat',
+  pieceSet: 'mfrasca-skat',
+
+  getImagePath(card) {
+    const suitMap = { acorns: 'eichel', leaves: 'blatt', hearts: 'hart', bells: 'schellen' }
+    const suit = suitMap[card.suit]
+    const faceMap = {
+      eichel: { U: '11_unter', O: '12_ober', K: '13_konig', A: '01_daus' },
+      hart: { U: '11_unter', O: '12_ober', K: '13_konig', A: '01_daus' },
+      blatt: { U: '11_jack', O: '12_queen', K: '13_king', A: '01_daus' },
+      schellen: { U: '11_jack', O: '12_queen', K: '13_king', A: '01' },
+    }
+    const numericMap = { 7: '07', 8: '08', 9: '09', 10: '10' }
+    const rank = faceMap[suit]?.[card.rank] || numericMap[card.rank] || card.rank
+    return `Playing_card-german-${suit}-${rank}.svg`
+  },
 
   create(opts = {}) {
     const cards = []

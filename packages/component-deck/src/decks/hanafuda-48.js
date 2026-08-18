@@ -68,7 +68,15 @@ registerDeck('hanafuda-48', {
   cardCount: 48,
   months: MONTHS,
   types: TYPES,
-  pieceSet: 'hanafuda',
+  pieceSet: 'hanafuda-traditional',
+
+  getImagePath(card) {
+    const type = card.type.charAt(0).toUpperCase() + card.type.slice(1)
+    if (card.name.match(/Plain \d/)) {
+      return `Hanafuda_${card.monthName}_${type}_${card.name.slice(-1)}_Alt.svg`
+    }
+    return `Hanafuda_${card.monthName}_${type}_Alt.svg`
+  },
 
   create(opts = {}) {
     return CARD_DEFS.map((def, i) => ({

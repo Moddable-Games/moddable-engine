@@ -10,7 +10,31 @@ registerDeck('mahjong-136', {
   suits: SUITS,
   winds: WINDS,
   dragons: DRAGONS,
-  pieceSet: null,
+  pieceSet: 'mahjong-regular',
+
+  getImagePath(card, opts) {
+    const tileSet = opts?.tileSet || 'mahjong-regular'
+    if (tileSet === 'mahjong-planar') {
+      const suitFileMap = { bamboo: 'tiao', circles: 'bing', characters: 'wan' }
+      const windFileMap = { east: 'Eastwind', south: 'Southwind', west: 'Westwind', north: 'Northwind' }
+      const dragonFileMap = { red: 'Reddragon', green: 'Greendragon', white: 'Whitedragon' }
+      if (card.suit === 'wind') return `MJ${windFileMap[card.rank]}.svg`
+      if (card.suit === 'dragon') return `MJ${dragonFileMap[card.rank]}.svg`
+      if (suitFileMap[card.suit]) return `MJ${card.rank}${suitFileMap[card.suit]}.svg`
+      return null
+    }
+    const suitFileMap = { bamboo: 'Sou', circles: 'Pin', characters: 'Man' }
+    const windFileMap = { east: 'Ton', south: 'Nan', west: 'Shaa', north: 'Pei' }
+    const dragonFileMap = { red: 'Chun', green: 'Hatsu', white: 'Haku' }
+    if (card.suit === 'wind') return `${windFileMap[card.rank]}.svg`
+    if (card.suit === 'dragon') return `${dragonFileMap[card.rank]}.svg`
+    if (suitFileMap[card.suit]) return `${suitFileMap[card.suit]}${card.rank}.svg`
+    return null
+  },
+
+  getBackPath() {
+    return 'Back.svg'
+  },
 
   create(opts = {}) {
     const flowers = opts.flowers || 0
