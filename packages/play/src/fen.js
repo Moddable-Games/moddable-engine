@@ -27,7 +27,15 @@ function pluginOf(game) {
 
 function dimsOf(game) {
   const topo = game.topology
-  if (!topo || topo.rows === undefined) throw new Error('FEN support requires a grid topology')
+  if (!topo || topo.rows === undefined) {
+    throw new Error('FEN support requires a grid topology')
+  }
+  return { rows: topo.rows, cols: topo.cols }
+}
+
+function tryDimsOf(game) {
+  const topo = game.topology
+  if (!topo || topo.rows === undefined) return null
   return { rows: topo.rows, cols: topo.cols }
 }
 
@@ -73,13 +81,26 @@ function symbolToType(vocabulary, letter) {
  * remaining fields land in the slice keys the plugin actually reads.
  */
 export function loadFen(game, fen) {
-  const { rows, cols } = dimsOf(game)
+  const topo = game.topology
   const plugin = pluginOf(game)
+  const state = game.getState()
+  const family = state.family
+
+  if (topo && !topo.rows && topo.parsePosition) {
+    return loadFenHex(game, fen, topo, plugin)
+  }
+
+  const { rows, cols } = dimsOf(game)
   const parts = String(fen).trim().split(/\s+/)
+
+  if (family === 'shogi' && state.slice.hands) {
+    return loadFenShogi(game, fen, parts, topo, plugin, rows, cols)
+  }
+
   const [boardPart, turnPart = 'w', castlingPart = '-', epPart = '-', halfPart = '0', fullPart = '1'] = parts
 
-  const board = game.topology.parsePosition(boardPart, plugin.vocabulary)
-  const previous = game.getState().slice
+  const board = topo.parsePosition(boardPart, plugin.vocabulary)
+  const previous = state.slice
   const slice = { ...previous, board, halfmoveClock: Number(halfPart) || 0, fullmoveNumber: Number(fullPart) || 1 }
 
   if ('castlingRights' in previous || plugin.config?.castling) {
@@ -92,11 +113,114 @@ export function loadFen(game, fen) {
   if ('enPassantTarget' in previous || plugin.config?.enPassant) {
     const target = epPart === '-' ? null : squareToIndex(epPart, rows, cols)
     slice.enPassantTarget = target
-    // The plugin captures slice.enPassantPawn, not the target square. Derive it
-    // from the board rather than assuming which way pawns advance.
     slice.enPassantPawn = target === null ? null : findEnPassantPawn(board, target, cols, turnPart === 'w' ? 1 : 0, plugin)
   }
 
+  const turnIndex = turnPart === 'b' ? 1 : WHITE
+  game.loadState({ slice, players: { ...game.getState().players, currentIndex: turnIndex } })
+  return game
+}
+
+function loadFenShogi(game, fen, parts, topo, plugin, rows, cols) {
+  const [boardPart, turnPart = 'w', handPart = '-', halfPart = '0', fullPart = '1'] = parts
+  const board = parseBoardWithPromotions(boardPart, topo, plugin, rows, cols)
+  const previous = game.getState().slice
+  const hands = parseShogiHands(handPart, plugin.vocabulary, previous.hands.length)
+  const slice = { ...previous, board, hands, halfmoveClock: Number(halfPart) || 0, fullmoveNumber: Number(fullPart) || 1 }
+  const turnIndex = turnPart === 'b' ? 1 : WHITE
+  game.loadState({ slice, players: { ...game.getState().players, currentIndex: turnIndex } })
+  return game
+}
+
+function parseBoardWithPromotions(boardPart, topo, plugin, rows, cols) {
+  if (!boardPart.includes('+')) return topo.parsePosition(boardPart, plugin.vocabulary)
+
+  const vocabulary = plugin.vocabulary || {}
+  const fromSym = new Map()
+  for (const [type, def] of Object.entries(vocabulary)) {
+    if (def.symbols) {
+      for (const [owner, symbol] of Object.entries(def.symbols)) {
+        fromSym.set(symbol, { type, owner: /^\d+$/.test(owner) ? parseInt(owner, 10) : owner })
+      }
+    }
+  }
+
+  const promotionMap = plugin.config?.promotionMap || null
+  function getPromotedType(type) {
+    if (promotionMap) return promotionMap[type] || null
+    if (type.startsWith('promoted_')) return null
+    if (type === (plugin.config?.royalType || 'king') || type === 'gold') return null
+    return `promoted_${type}`
+  }
+
+  const cells = new Array(rows * cols).fill(null)
+  const rowStrings = boardPart.split('/')
+  for (let r = 0; r < rowStrings.length && r < rows; r++) {
+    let c = 0
+    let promoted = false
+    for (let i = 0; i < rowStrings[r].length; i++) {
+      const ch = rowStrings[r][i]
+      if (ch === '+') { promoted = true; continue }
+      if (ch >= '0' && ch <= '9') {
+        let num = ch
+        while (i + 1 < rowStrings[r].length && rowStrings[r][i + 1] >= '0' && rowStrings[r][i + 1] <= '9') {
+          num += rowStrings[r][++i]
+        }
+        c += parseInt(num, 10)
+        continue
+      }
+      const piece = fromSym.get(ch)
+      if (piece && c < cols) {
+        if (promoted) {
+          const pType = getPromotedType(piece.type)
+          cells[r * cols + c] = { type: pType || piece.type, owner: piece.owner }
+        } else {
+          cells[r * cols + c] = { ...piece }
+        }
+      }
+      promoted = false
+      c++
+    }
+  }
+  return cells
+}
+
+function parseShogiHands(handPart, vocabulary, playerCount) {
+  const hands = Array.from({ length: playerCount }, () => [])
+  if (handPart === '-') return hands
+
+  const fromSym = new Map()
+  for (const [type, def] of Object.entries(vocabulary)) {
+    if (def.symbols) {
+      for (const [owner, symbol] of Object.entries(def.symbols)) {
+        fromSym.set(symbol, { type, owner: /^\d+$/.test(owner) ? parseInt(owner, 10) : owner })
+      }
+    }
+  }
+
+  let count = 0
+  for (let i = 0; i < handPart.length; i++) {
+    const ch = handPart[i]
+    if (ch >= '0' && ch <= '9') {
+      count = count * 10 + parseInt(ch, 10)
+      continue
+    }
+    const piece = fromSym.get(ch)
+    if (piece) {
+      const n = count || 1
+      for (let j = 0; j < n; j++) hands[piece.owner].push(piece.type)
+    }
+    count = 0
+  }
+  return hands
+}
+
+function loadFenHex(game, fen, topo, plugin) {
+  const parts = String(fen).trim().split(/\s+/)
+  const [boardPart, turnPart = 'w', halfPart = '0', fullPart = '1'] = parts
+  const board = topo.parsePosition(boardPart, plugin.vocabulary)
+  const previous = game.getState().slice
+  const slice = { ...previous, board, halfmoveClock: Number(halfPart) || 0, fullmoveNumber: Number(fullPart) || 1 }
   const turnIndex = turnPart === 'b' ? 1 : WHITE
   game.loadState({ slice, players: { ...game.getState().players, currentIndex: turnIndex } })
   return game
@@ -113,12 +237,24 @@ function findEnPassantPawn(board, target, cols, owner, plugin) {
 
 /** Serialise a live game back to a full FEN. */
 export function toFen(game) {
-  const { rows, cols } = dimsOf(game)
+  const topo = game.topology
   const plugin = pluginOf(game)
   const state = game.getState()
   const slice = state.slice
-  const boardPart = game.topology.serializePosition(slice.board, plugin.vocabulary)
+  const family = state.family
+
+  if (topo && !topo.rows && topo.serializePosition) {
+    return toFenHex(game, topo, plugin, slice)
+  }
+
+  const { rows, cols } = dimsOf(game)
+  const boardPart = serializeBoardWithPromotions(slice.board, topo, plugin, rows, cols)
   const turnPart = playerIndex(game) === WHITE ? 'w' : 'b'
+
+  if (family === 'shogi' && slice.hands) {
+    const handPart = serializeShogiHands(slice.hands, plugin.vocabulary)
+    return [boardPart, turnPart, handPart, slice.halfmoveClock ?? 0, slice.fullmoveNumber ?? 1].join(' ')
+  }
 
   let castlingPart = '-'
   if (slice.castlingRights) {
@@ -145,6 +281,65 @@ export function toFen(game) {
   ].join(' ')
 }
 
+function serializeBoardWithPromotions(board, topo, plugin, rows, cols) {
+  const hasPromoted = board.some(c => c && typeof c.type === 'string' && c.type.startsWith('promoted_'))
+  if (!hasPromoted) return topo.serializePosition(board, plugin.vocabulary)
+
+  const vocabulary = plugin.vocabulary || {}
+  const rowStrings = []
+  for (let r = 0; r < rows; r++) {
+    let rowStr = ''
+    let empty = 0
+    for (let c = 0; c < cols; c++) {
+      const cell = board[r * cols + c]
+      if (cell === null || cell === undefined) {
+        empty++
+      } else {
+        if (empty > 0) { rowStr += String(empty); empty = 0 }
+        if (typeof cell.type === 'string' && cell.type.startsWith('promoted_')) {
+          const baseType = cell.type.slice('promoted_'.length)
+          const entry = vocabulary[baseType]
+          const sym = entry?.symbols?.[cell.owner]
+          rowStr += sym ? '+' + sym : '?'
+        } else {
+          const entry = vocabulary[cell.type]
+          const sym = entry?.symbols?.[cell.owner]
+          rowStr += sym || '?'
+        }
+      }
+    }
+    if (empty > 0) rowStr += String(empty)
+    rowStrings.push(rowStr)
+  }
+  return rowStrings.join('/')
+}
+
+function serializeShogiHands(hands, vocabulary) {
+  let result = ''
+  for (let owner = 0; owner < hands.length; owner++) {
+    const hand = hands[owner]
+    if (!hand || hand.length === 0) continue
+    const counts = {}
+    for (const type of hand) {
+      counts[type] = (counts[type] || 0) + 1
+    }
+    for (const [type, count] of Object.entries(counts)) {
+      const entry = vocabulary[type]
+      const sym = entry?.symbols?.[owner]
+      if (!sym) continue
+      if (count > 1) result += String(count)
+      result += sym
+    }
+  }
+  return result || '-'
+}
+
+function toFenHex(game, topo, plugin, slice) {
+  const boardPart = topo.serializePosition(slice.board, plugin.vocabulary)
+  const turnPart = playerIndex(game) === WHITE ? 'w' : 'b'
+  return [boardPart, turnPart, slice.halfmoveClock ?? 0, slice.fullmoveNumber ?? 1].join(' ')
+}
+
 function playerIndex(game) {
   const players = game.getState().players
   return players && typeof players.currentIndex === 'number' ? players.currentIndex : WHITE
@@ -153,13 +348,23 @@ function playerIndex(game) {
 /**
  * Find the engine's own move object for a move string among the legal moves.
  * UCI is the pool's usual notation; the six historical records carry SAN, so
- * both are accepted. Returns null when the move is not legal — callers decide
- * whether that is a data defect or an expected skip.
+ * both are accepted. Bare-square notation ("d3") matches placement moves
+ * (reversi, go) where the move has no from-square.
+ * Returns null when the move is not legal — callers decide whether that is a
+ * data defect or an expected skip.
  */
 export function findLegalMove(game, notation) {
-  const { rows, cols } = dimsOf(game)
+  const dims = tryDimsOf(game)
+  if (!dims) {
+    return findHexMove(game, notation)
+  }
+  const { rows, cols } = dims
   const parsed = parseUci(notation, rows, cols)
-  if (!parsed) return findSanMove(game, notation)
+  if (!parsed) {
+    const placement = findPlacementMove(game, notation, rows, cols)
+    if (placement) return placement
+    return findSanMove(game, notation)
+  }
   const plugin = pluginOf(game)
   const wanted = parsed.promotion ? symbolToType(plugin.vocabulary, parsed.promotion) : null
   const candidates = game.getLegalMoves()
@@ -173,14 +378,39 @@ export function findLegalMove(game, notation) {
   return plain || candidates[0]
 }
 
+function findPlacementMove(game, notation, rows, cols) {
+  const target = squareToIndex(notation, rows, cols)
+  if (target === null) return null
+  const candidates = game.getLegalMoves()
+    .filter(m => m.from === undefined && (m.coord === target || m.to === target))
+  if (candidates.length === 0) return null
+  return candidates[0]
+}
+
+function findHexMove(game, notation) {
+  const legal = game.getLegalMoves()
+  const sepIdx = notation.indexOf('>')
+  if (sepIdx !== -1) {
+    const from = notation.slice(0, sepIdx)
+    const to = notation.slice(sepIdx + 1)
+    const match = legal.find(m => m.from === from && m.to === to)
+    if (match) return match
+  }
+  const match = legal.find(m => m.from === notation || m.to === notation)
+  return match || null
+}
+
 /** SAN match, using the engine's own notation writer so disambiguation agrees. */
 function findSanMove(game, san) {
   const wanted = String(san).replace(/[+#!?]+$/, '')
   const board = game.getState().slice.board
   const legal = game.getLegalMoves()
+  if (!legal.length || legal[0].from === undefined) return null
   for (const move of legal) {
-    const written = moveToSAN(move, board, game.topology, legal).replace(/[+#!?]+$/, '')
-    if (written === wanted) return move
+    try {
+      const written = moveToSAN(move, board, game.topology, legal).replace(/[+#!?]+$/, '')
+      if (written === wanted) return move
+    } catch { continue }
   }
   return null
 }

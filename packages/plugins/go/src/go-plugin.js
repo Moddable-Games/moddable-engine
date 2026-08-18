@@ -325,7 +325,9 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
     vocabulary: {
       // b and w match the vocabulary the go hub declares in moddable-rules, so
       // the symbol a stone serialises to is the one the piece set resolves.
-      stone: { symbols: { 0: 'b', 1: 'w' } },
+      // cellStrings maps owner index to the raw string the plugin stores on the
+      // board, so the topology can round-trip string cells through FEN.
+      stone: { symbols: { 0: 'b', 1: 'w' }, cellStrings: ['black', 'white'] },
     },
     config,
 

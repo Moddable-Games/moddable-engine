@@ -366,6 +366,12 @@ export function createGridTopology(config) {
 
   function serializePosition(cellStates, vocabulary) {
     const symbolMap = buildSymbolMap(vocabulary)
+    const needsFen4 = detectFen4(cellStates, symbolMap)
+
+    if (needsFen4) {
+      return serializeFen4(cellStates, symbolMap, vocabulary)
+    }
+
     const rowStrings = []
     for (let r = 0; r < rows; r++) {
       let rowStr = ''
@@ -382,6 +388,52 @@ export function createGridTopology(config) {
       }
       if (empty > 0) rowStr += String(empty)
       rowStrings.push(rowStr)
+    }
+    return rowStrings.join('/')
+  }
+
+  function detectFen4(cellStates, symbolMap) {
+    for (let i = 0; i < rows * cols; i++) {
+      const cell = cellStates[i] || cellStates.get?.(i) || null
+      if (cell && typeof cell === 'object' && cell.owner > 1) return true
+    }
+    return false
+  }
+
+  function serializeFen4(cellStates, symbolMap, vocabulary) {
+    const FEN4_REVERSE = ['r', 'y', 'g', 'b']
+    const FEN4_REVERSE_TYPES = { rook: 'R', knight: 'N', bishop: 'B', queen: 'Q', king: 'K', pawn: 'P', elephant: 'E', horse: 'H', lance: 'L', silver: 'S', gold: 'G' }
+    const rowStrings = []
+
+    function letterFor(cell) {
+      const hardcoded = FEN4_REVERSE_TYPES[cell.type]
+      if (hardcoded) return hardcoded
+      if (vocabulary) {
+        const entry = vocabulary[cell.type]
+        if (entry && entry.symbols) {
+          const sym = entry.symbols['0'] || entry.symbols[0]
+          if (sym && typeof sym === 'string') return sym
+        }
+      }
+      return cell.type[0].toUpperCase()
+    }
+
+    for (let r = 0; r < rows; r++) {
+      const tokens = []
+      let empty = 0
+      for (let c = 0; c < cols; c++) {
+        const idx = toIndex(r, c)
+        const cell = cellStates[idx] || cellStates.get?.(idx) || null
+        if (cell === null || cell === undefined) {
+          empty++
+        } else {
+          if (empty > 0) { tokens.push(String(empty)); empty = 0 }
+          const prefix = FEN4_REVERSE[cell.owner] || 'r'
+          tokens.push(prefix + letterFor(cell))
+        }
+      }
+      if (empty > 0) tokens.push(String(empty))
+      rowStrings.push(tokens.join(','))
     }
     return rowStrings.join('/')
   }
@@ -426,6 +478,8 @@ export function createGridTopology(config) {
   function buildSymbolMap(vocabulary) {
     const toSym = new Map()
     const fromSym = new Map()
+    const stringToSymbol = new Map()
+    const symbolToString = new Map()
 
     if (!vocabulary) {
       return {
@@ -441,26 +495,57 @@ export function createGridTopology(config) {
           toSym.set(`${type}.${ownerKey}`, symbol)
           fromSym.set(symbol, { type, owner: ownerKey })
         }
+        if (def.cellStrings) {
+          for (let i = 0; i < def.cellStrings.length; i++) {
+            const sym = def.symbols[String(i)]
+            if (sym) {
+              stringToSymbol.set(def.cellStrings[i], sym)
+              symbolToString.set(sym, def.cellStrings[i])
+            }
+          }
+        }
       }
     }
 
     const FEN4_PREFIXES = { r: 0, y: 1, g: 2, b: 3 }
+    const FEN4_REVERSE = ['r', 'y', 'g', 'b']
     const FEN4_TYPES = { R: 'rook', N: 'knight', B: 'bishop', Q: 'queen', K: 'king', P: 'pawn', E: 'elephant', H: 'horse', L: 'lance', S: 'silver', G: 'gold' }
+    const FEN4_REVERSE_TYPES = Object.fromEntries(Object.entries(FEN4_TYPES).map(([k, v]) => [v, k]))
 
     return {
+      isFen4: false,
       toSymbol(cell) {
-        if (typeof cell === 'string') return cell
+        if (typeof cell === 'string') {
+          const mapped = stringToSymbol.get(cell)
+          if (mapped) return mapped
+          return cell
+        }
         const key = `${cell.type}.${cell.owner}`
-        return toSym.get(key) || '?'
+        const sym = toSym.get(key)
+        if (sym) return sym
+        if (cell.owner >= 0 && cell.owner <= 3) {
+          const prefix = FEN4_REVERSE[cell.owner]
+          const letter = FEN4_REVERSE_TYPES[cell.type] || cell.type[0].toUpperCase()
+          this.isFen4 = true
+          return prefix + letter
+        }
+        return '?'
       },
       fromSymbol(ch) {
         const direct = fromSym.get(ch)
-        if (direct) return direct
+        if (direct) {
+          const str = symbolToString.get(ch)
+          if (str) return str
+          return direct
+        }
         if (ch.length >= 2 && ch[0] in FEN4_PREFIXES) {
           const owner = FEN4_PREFIXES[ch[0]]
           const typeChar = ch.slice(1)
-          const type = FEN4_TYPES[typeChar] || typeChar.toLowerCase()
-          return { type, owner }
+          const known = FEN4_TYPES[typeChar]
+          if (known) return { type: known, owner }
+          const vocabHit = fromSym.get(typeChar)
+          if (vocabHit) return { type: vocabHit.type, owner }
+          return { type: typeChar.toLowerCase(), owner }
         }
         return null
       },
