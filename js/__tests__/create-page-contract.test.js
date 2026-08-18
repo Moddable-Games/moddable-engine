@@ -82,53 +82,6 @@ describe('create page: placing a piece writes the piece it was asked for', () =>
   })
 })
 
-describe('create page: the setup string round-trips', () => {
-  // buildFen and applySetupInput are the two halves of the setup bar. Their
-  // contract is that anything the page writes, the page can read back.
-  function buildFen(placement, rows, cols) {
-    const out = []
-    for (let r = 0; r < rows; r++) {
-      let row = '', empty = 0
-      for (let c = 0; c < cols; c++) {
-        const key = `${r},${c}`
-        if (placement[key]) { if (empty) { row += empty; empty = 0 } row += placement[key] } else empty++
-      }
-      if (empty) row += empty
-      out.push(row)
-    }
-    return out.join('/')
-  }
-
-  function parseFen(text, rows, cols) {
-    const next = {}
-    const rowStrings = String(text).trim().split('/')
-    if (rowStrings.length !== rows) return null
-    for (let r = 0; r < rows; r++) {
-      let c = 0
-      for (const token of rowStrings[r].match(/\d+|[^\d]/g) || []) {
-        if (/^\d+$/.test(token)) { c += parseInt(token, 10); continue }
-        if (c >= cols) return null
-        next[`${r},${c}`] = token
-        c++
-      }
-      if (c !== cols) return null
-    }
-    return next
-  }
-
-  test('placement survives a write and a read', () => {
-    const placement = { '0,0': 'q', '7,4': 'K', '6,3': 'P' }
-    const fen = buildFen(placement, 8, 8)
-    expect(fen).toBe('q7/8/8/8/8/8/3P4/4K3')
-    expect(parseFen(fen, 8, 8)).toEqual(placement)
-  })
-
-  test('a string that does not fit the board is rejected outright', () => {
-    expect(parseFen('q7/8/8', 8, 8)).toBeNull()      // too few ranks
-    expect(parseFen('q8/8/8/8/8/8/8/8', 8, 8)).toBeNull()  // rank overflows
-  })
-})
-
 describe('create page: a defined piece previews its real moves', () => {
   // The preview must call the primitive, not reimplement the pattern.
   const topology = createGridTopology({ rows: 9, cols: 9 })

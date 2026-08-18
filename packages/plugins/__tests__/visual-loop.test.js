@@ -140,7 +140,13 @@ function everyVariant() {
   return out
 }
 
+const VARIANT_FLOOR = 174
+
 describeWithAssets('every piece resolves to real artwork during play', () => {
+  it('variant coverage meets floor', () => {
+    expect(everyVariant().length).toBeGreaterThanOrEqual(VARIANT_FLOOR)
+  })
+
   it.each(everyVariant())('%s/%s renders every piece after moves', (family, key) => {
     const pieces = variantPieces(family, key)
     if (!pieces || !pieces.set) return

@@ -58,6 +58,9 @@ const extendsResolvers = sourceFiles.filter(f => {
     && content.includes('extends')
   return hasExtends && content.match(/extends.*=.*meta/g)?.length > 0
 })
+if (extendsResolvers.length > 0) {
+  errors.push(`Extends resolver duplicated: ${extendsResolvers.map(f => f.replace(ROOT + '/', '')).join(', ')}`)
+}
 
 // 4. computeStarPoints must not reappear (AUTO_STAR_POINTS is canonical)
 const starPointDups = sourceFiles.filter(f => {
@@ -97,7 +100,7 @@ const axialDups = sourceFiles.filter(f => {
   if (f.includes('__tests__') || f.includes('check-duplication') || f.includes('hex-math.js')) return false
   const content = readFileSync(f, 'utf8')
   return (content.includes('Math.sqrt(3) * q') || content.includes('Math.sqrt(3)/2 * q') || content.includes('Math.sqrt(3) / 2 * q'))
-    && content.includes('3 / 2 * q') || content.includes('3/2 * q')
+    && (content.includes('3 / 2 * q') || content.includes('3/2 * q'))
 })
 if (axialDups.length > 0) {
   errors.push(`Inline axialToPixel found (use HexMath): ${axialDups.map(f => f.replace(ROOT + '/', '')).join(', ')}`)
@@ -133,10 +136,15 @@ if (algDups.length > 0) {
   errors.push(`indexToAlgebraic defined outside topology-grid.js: ${algDups.map(f => f.replace(ROOT + '/', '')).join(', ')}`)
 }
 
+const FILE_FLOOR = 390
+if (sourceFiles.length < FILE_FLOOR) {
+  errors.push(`Source file count (${sourceFiles.length}) dropped below floor (${FILE_FLOOR}). Did files get removed without updating the guard?`)
+}
+
 if (errors.length > 0) {
   console.error('Duplication guard FAILED:')
   for (const e of errors) console.error('  - ' + e)
   process.exit(1)
 }
 
-console.log('Duplication guard: OK (no prohibited patterns found)')
+console.log(`Duplication guard: OK (${sourceFiles.length} files scanned, no prohibited patterns found)`)

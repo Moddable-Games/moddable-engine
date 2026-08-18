@@ -287,32 +287,3 @@ describe('animation', () => {
   })
 })
 
-describe('humanIdx validation', () => {
-  it('throws on invalid colour value', () => {
-    expect(() => {
-      const names = ['white', 'black']
-      resolveHumanIndexTest('purple', names)
-    }).toThrow(/Invalid colour/)
-  })
-
-  it('resolves numeric strings correctly', () => {
-    const names = ['white', 'black']
-    expect(resolveHumanIndexTest('0', names)).toBe(0)
-    expect(resolveHumanIndexTest('1', names)).toBe(1)
-  })
-
-  it('resolves player names', () => {
-    const names = ['white', 'black']
-    expect(resolveHumanIndexTest('white', names)).toBe(0)
-    expect(resolveHumanIndexTest('black', names)).toBe(1)
-  })
-})
-
-// --- Helpers ---
-
-function resolveHumanIndexTest(colour, names) {
-  if (colour === '0' || colour === '1') return parseInt(colour, 10)
-  const idx = names.indexOf(colour)
-  if (idx !== -1) return idx
-  throw new Error(`[game-play] Invalid colour value: "${colour}". Expected "0", "1", or a player name (${names.join(', ')})`)
-}

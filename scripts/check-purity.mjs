@@ -190,4 +190,17 @@ if (findings.length > 0) {
   process.exit(1)
 }
 
-console.log(`Purity check: OK (${sourceFiles.length} files scanned, ${ALLOWLIST.size} known violations allowlisted)`)
+const FILE_FLOOR = 130
+const ALLOWLIST_CEILING = 69
+
+if (sourceFiles.length < FILE_FLOOR) {
+  console.error(`Purity check FAILED: file count (${sourceFiles.length}) below floor (${FILE_FLOOR}). Was a package removed without updating the guard?`)
+  process.exit(1)
+}
+
+if (ALLOWLIST.size > ALLOWLIST_CEILING) {
+  console.error(`Purity check FAILED: allowlist grew to ${ALLOWLIST.size} (ceiling is ${ALLOWLIST_CEILING}). Remove violations, don't allowlist more.`)
+  process.exit(1)
+}
+
+console.log(`Purity check: OK (${sourceFiles.length} files scanned, ${ALLOWLIST.size}/${ALLOWLIST_CEILING} allowlisted)`)

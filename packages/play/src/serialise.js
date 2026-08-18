@@ -81,10 +81,15 @@ function boardToFen4(board, rows, cols, vocabulary, players) {
       const cell = board[r * cols + c]
       if (!cell) { empty++; continue }
       if (empty > 0) { tokens.push(String(empty)); empty = 0 }
-      const prefix = players[cell.owner]?.[0]?.toLowerCase() || 'w'
       const entry = vocabulary[cell.type]
-      const letter = entry?.symbols?.['0'] || cell.type[0].toUpperCase()
-      tokens.push(prefix + letter)
+      const ownerSym = entry?.symbols?.[String(cell.owner)]
+      if (ownerSym) {
+        tokens.push(ownerSym)
+      } else {
+        const prefix = players[cell.owner]?.[0]?.toLowerCase() || 'w'
+        const letter = entry?.symbols?.['0'] || cell.type[0].toUpperCase()
+        tokens.push(prefix + letter)
+      }
     }
     if (empty > 0) tokens.push(String(empty))
     fenRows.push(tokens.join(','))
