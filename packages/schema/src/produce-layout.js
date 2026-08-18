@@ -141,7 +141,7 @@ function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabel
 
 
 function buildOpsCellMap(zones, rows, cols, defaultFill) {
-  if (zones && zones.generator === 'cross') return buildCrossMap(rows, cols, zones.castles || [])
+  if (zones && zones.generator === 'cross') return buildCrossMap(rows, cols, zones.castles || [], zones.armHalf)
   const map = Array.from({ length: rows }, () => Array(cols).fill(defaultFill))
   if (!zones) return map
   if (zones.voids) {
@@ -376,7 +376,7 @@ function translateOp(decl, ctx) {
       if (decl.pattern === 'cross') {
         const light = colors[decl.light] || decl.light
         const dark = colors[decl.dark] || decl.dark
-        const map = buildCrossMap(rows, cols, decl.castles || [])
+        const map = buildCrossMap(rows, cols, decl.castles || [], decl.armHalf)
         const typeColors = {}
         const typeStrokes = {}
         if (decl.typeColors) for (const [t, v] of Object.entries(decl.typeColors)) typeColors[t] = colors[v] || v

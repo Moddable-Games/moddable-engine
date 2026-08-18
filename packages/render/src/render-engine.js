@@ -165,7 +165,7 @@ export function renderFromEngine(resolved, opts = {}) {
   if (topo.type === 'grid' && !render.cellMap && render.zones) {
     render.cellMap = buildCellMap(render.zones, topo.rows || 8, topo.cols || 8)
   } else if (topo.type === 'grid' && !render.cellMap && topo.layout === 'cross') {
-    render.cellMap = buildCrossMap(topo.rows || 19, topo.cols || 19, render.castles || [])
+    render.cellMap = buildCrossMap(topo.rows || 19, topo.cols || 19, render.castles || [], render.armHalf)
   }
 
   // Hex: derive grid from topology params for terrain games
@@ -639,7 +639,7 @@ function generateTriangularHexGrid(sideLength) {
 
 function buildCellMap(zones, rows, cols) {
   if (!zones) return null
-  if (zones.generator === 'cross') return buildCrossMap(rows, cols, zones.castles || [])
+  if (zones.generator === 'cross') return buildCrossMap(rows, cols, zones.castles || [], zones.armHalf)
   const fill = zones.fill || true
   const map = Array.from({ length: rows }, () => Array(cols).fill(fill))
   if (zones.voids) {
