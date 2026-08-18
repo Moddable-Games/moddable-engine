@@ -810,53 +810,13 @@ function backgammonOps(colors, render) {
 
 // --- Track: landlords (perimeter) ops builder ---
 //
-// Verbatim move of the historical landlords provider. Board THEMES and
-// CATEGORY labels are game data keyed by board id (→ data/landlords-game-
-// boards.json / frontmatter; annotated per #18). The per-board decoration
-// programs (medallions, split corners, stripes, inner content) select on
-// the board id from content.board — declared data, not renderer knowledge.
+// Verbatim move of the historical landlords provider. The palette arrives as
+// surface.colors from frontmatter and the category labels as `categories` on
+// the board record, so neither is knowledge this module holds. The per-board
+// decoration programs (medallions, split corners, stripes, inner content)
+// still select on the board id from content.board and are the remaining
+// hardcoded knowledge here — they need a decoration DSL (#133 tier 2).
 // Runtime pass-through: render._boardData (JSON), render._board (board id).
-
-const LANDLORDS_THEMES = {
-  '1904-patent': {
-    board: '#f0e4c8', border: '#5a4a30', innerBg: '#f0e4c8',
-    spaceStroke: '#5a4a30', cornerStroke: '#5a4a30',
-    text: '#3a2a15', titleText: '#3a2a15',
-    lot: '#f0e4c8', necessity: '#f0e4c8', railroad: '#f0e4c8',
-    franchise: '#f0e4c8', luxury: '#f0e4c8', legacy: '#f0e4c8',
-    'go-to-jail': '#e8d8b8', corner: '#e8d8b8',
-  },
-  '1906-egc': {
-    board: '#f5edd5', border: '#6b2020', innerBg: '#f8f4e8',
-    spaceStroke: '#3a3020', cornerStroke: '#3a3020',
-    text: '#2a2015', titleText: '#2a2015',
-    lot: '#6a9a50', necessity: '#7aaac0', railroad: '#d4889a',
-    franchise: '#d4c060', chance: '#cc3030', luxury: '#d4889a',
-    special: '#7aaac0', 'go-to-jail': '#d4883a', corner: '#d4c898',
-    broker: '#d4c060',
-  },
-  '1932-prosperity': {
-    board: '#f8f4ec', border: '#2a4a7a', innerBg: '#f8f4ec',
-    spaceStroke: '#2a4a7a', cornerStroke: '#2a4a7a',
-    text: '#1a2a40', titleText: '#6b2020',
-    lot: '#ffffff', taxes: '#ffffff', franchise: '#ffffff',
-    railroad: '#ffffff', luxury: '#ffffff', broker: '#ffffff',
-    jail: '#ffffff', corner: '#ffffff', 'go-to-jail': '#ffffff',
-    lotStripe: '#3a8a3a', taxesStripe: '#2a5a9a', franchiseStripe: '#d4a030',
-    railroadStripe: '#3a8a3a',
-    brokerStripe: '#c8b020', luxuryStripe: '#d4708a',
-    jailStripe: '#808080', 'go-to-jailStripe': '#808080',
-    cornerArc: '#8c2020',
-  },
-}
-
-const LANDLORDS_CATEGORIES = {
-  lot: 'Land In Use', necessity: 'Absolute Necessity', taxes: 'Personal Property',
-  railroad: 'Interstate Public Utility', franchise: 'Local Public Utility',
-  broker: 'Real Estate', luxury: 'Luxury', jail: 'Jail',
-  'go-to-jail': 'No Trespassing', chance: 'Chance', special: 'Speculation',
-  legacy: 'Legacy',
-}
 
 function landlordsWrapText(text, maxChars) {
   if (text.length <= maxChars) return [text]
@@ -908,8 +868,8 @@ function landlordsOps(colors, render) {
     return { type: 'track', config: { style: 'perimeter', ops: els, width: 400, height: 60 } }
   }
 
-  // Use colors from frontmatter, falling back to LANDLORDS_THEMES for backwards compatibility
-  const theme = (colors && Object.keys(colors).length > 5) ? colors : (LANDLORDS_THEMES[variant] || LANDLORDS_THEMES['1904-patent'])
+  // The palette is the board's surface colours, declared in frontmatter.
+  const theme = colors || {}
   const totalSpaces = board.totalSpaces
   const corners = 4
   const perSide = (totalSpaces - corners) / 4
@@ -938,7 +898,7 @@ function landlordsOps(colors, render) {
   const renderCorner = (space, x, y, size) => {
     const isGoToJail = space.notes && space.notes.includes('Go to Jail')
     const cornerFill = isGoToJail && theme['go-to-jail'] ? theme['go-to-jail'] : theme.corner
-    el('rect', { x, y, width: size, height: size, fill: cornerFill, stroke: theme.cornerStroke, 'stroke-width': 1.5, class: 'board-cell', 'data-sq': `pos-${space.pos}`, 'data-type': 'corner' })
+    el('rect', { x, y, width: size, height: size, fill: cornerFill, stroke: theme['corner-stroke'], 'stroke-width': 1.5, class: 'board-cell', 'data-sq': `pos-${space.pos}`, 'data-type': 'corner' })
 
     if (variant === '1904-patent') {
       // medallion rendered in second pass (after track cells) so it overlaps
@@ -950,7 +910,7 @@ function landlordsOps(colors, render) {
       if (isJail) {
         el('polygon', { points: `${x},${y} ${x + size},${y} ${x + size},${y + size}`, fill: spColor, stroke: 'none', class: 'board-cell', 'data-sq': `pos-${space.pos}b`, 'data-type': sp.type })
         el('polygon', { points: `${x},${y} ${x},${y + size} ${x + size},${y + size}`, fill: mainColor, stroke: 'none', class: 'board-cell', 'data-sq': `pos-${space.pos}a`, 'data-type': 'corner' })
-        el('line', { x1: x, y1: y, x2: x + size, y2: y + size, stroke: theme.cornerStroke, 'stroke-width': 1 })
+        el('line', { x1: x, y1: y, x2: x + size, y2: y + size, stroke: theme['corner-stroke'], 'stroke-width': 1 })
         const q1x = x + size * 0.7, q1y = y + size * 0.3
         const q2x = x + size * 0.3, q2y = y + size * 0.7
         el('text', { x: q1x, y: q1y - 3, 'text-anchor': 'middle', 'font-size': 5, 'font-weight': 'bold', 'font-family': 'serif', fill: theme.text, 'dominant-baseline': 'central' }, sp.name)
@@ -959,14 +919,14 @@ function landlordsOps(colors, render) {
       } else {
         el('polygon', { points: `${x},${y} ${x + size},${y} ${x},${y + size}`, fill: spColor, stroke: 'none', class: 'board-cell', 'data-sq': `pos-${space.pos}b`, 'data-type': sp.type })
         el('polygon', { points: `${x + size},${y} ${x + size},${y + size} ${x},${y + size}`, fill: mainColor, stroke: 'none', class: 'board-cell', 'data-sq': `pos-${space.pos}a`, 'data-type': 'corner' })
-        el('line', { x1: x, y1: y + size, x2: x + size, y2: y, stroke: theme.cornerStroke, 'stroke-width': 1 })
+        el('line', { x1: x, y1: y + size, x2: x + size, y2: y, stroke: theme['corner-stroke'], 'stroke-width': 1 })
         const q1x = x + size * 0.3, q1y = y + size * 0.3
         const q2x = x + size * 0.7, q2y = y + size * 0.7
         el('text', { x: q1x, y: q1y, 'text-anchor': 'middle', 'font-size': 5, 'font-weight': 'bold', 'font-family': 'serif', fill: theme.text, 'dominant-baseline': 'central' }, sp.name)
         el('text', { x: q2x, y: q2y - 3, 'text-anchor': 'middle', 'font-size': 5, 'font-weight': 'bold', 'font-family': 'serif', fill: theme.text, 'dominant-baseline': 'central' }, space.name)
         el('text', { x: q2x, y: q2y + 5, 'text-anchor': 'middle', 'font-size': 3.5, 'font-family': 'serif', fill: theme.text, 'dominant-baseline': 'central' }, 'Free')
       }
-      el('rect', { x, y, width: size, height: size, fill: 'none', stroke: theme.cornerStroke, 'stroke-width': 1.5 })
+      el('rect', { x, y, width: size, height: size, fill: 'none', stroke: theme['corner-stroke'], 'stroke-width': 1.5 })
       return
     } else if (variant === '1932-prosperity') {
       const cx = x + size / 2, cy = y + size / 2
@@ -981,7 +941,7 @@ function landlordsOps(colors, render) {
           el('path', { d: `M ${x1},${y1} A ${r},${r} 0 0,1 ${x2},${y2}`, fill: 'none', stroke: wagesColors[i], 'stroke-width': 4 })
         }
       } else if (space.fare) {
-        el('path', { d: `M ${cx - r},${cy} A ${r},${r} 0 1,1 ${cx + r},${cy} A ${r},${r} 0 1,1 ${cx - r},${cy}`, fill: 'none', stroke: theme.cornerArc, 'stroke-width': 3.5 })
+        el('path', { d: `M ${cx - r},${cy} A ${r},${r} 0 1,1 ${cx + r},${cy} A ${r},${r} 0 1,1 ${cx - r},${cy}`, fill: 'none', stroke: theme['corner-arc'], 'stroke-width': 3.5 })
       } else if (space.name === 'JAIL') {
         const bw = size * 0.85
         el('rect', { x: cx - bw / 2, y: cy - bw / 2, width: bw, height: bw, fill: 'none', stroke: '#4a4a4a', 'stroke-width': 2 })
@@ -1001,7 +961,7 @@ function landlordsOps(colors, render) {
       const lineH = size > 70 ? 11 : 9
       const nameY = cy - 8
       for (let i = 0; i < lines.length; i++) {
-        el('text', { x: cx, y: nameY + i * lineH, 'text-anchor': 'middle', 'font-size': size > 70 ? 8 : 7, 'font-weight': 'bold', 'font-family': 'sans-serif', fill: theme.titleText, 'dominant-baseline': 'central' }, lines[i])
+        el('text', { x: cx, y: nameY + i * lineH, 'text-anchor': 'middle', 'font-size': size > 70 ? 8 : 7, 'font-weight': 'bold', 'font-family': 'sans-serif', fill: theme['title-text'], 'dominant-baseline': 'central' }, lines[i])
       }
       let subtext = ''
       if (space.fare) subtext = `Fare $${space.fare}`
@@ -1020,7 +980,7 @@ function landlordsOps(colors, render) {
     for (let ci = 0; ci < 4; ci++) {
       const pos = cornerPositions[ci]
       const cx = pos.x + cornerSize / 2, cy = pos.y + cornerSize / 2
-      el('circle', { cx, cy, r: cornerSize * 0.72, fill: theme.corner, stroke: theme.cornerStroke, 'stroke-width': 1.5 })
+      el('circle', { cx, cy, r: cornerSize * 0.72, fill: theme.corner, stroke: theme['corner-stroke'], 'stroke-width': 1.5 })
     }
   }
 
@@ -1028,7 +988,7 @@ function landlordsOps(colors, render) {
     const children = []
     const t = (attrs, content) => children.push({ tag: 'text', attrs, text: content })
     if (variant === '1932-prosperity') {
-      const category = (board.categories && board.categories[space.type]) || LANDLORDS_CATEGORIES[space.type] || ''
+      const category = board.categories?.[space.type] || ''
       const narrow = textW < textH
       const fontSize = narrow ? 5 : 6
       const catSize = narrow ? 3.2 : 3.8
@@ -1101,10 +1061,10 @@ function landlordsOps(colors, render) {
       const { x, y, w, h } = landlordsSpaceRect(side, i, sideArr.length, cornerSize, boardW, boardH)
       const typeFill = theme[space.type] || '#f0f0f0'
       const strokeW = variant === '1904-patent' ? 1.5 : 0.75
-      el('rect', { x, y, width: w, height: h, fill: typeFill, stroke: theme.spaceStroke, 'stroke-width': strokeW, class: 'board-cell', 'data-sq': `pos-${space.pos}`, 'data-type': space.type })
+      el('rect', { x, y, width: w, height: h, fill: typeFill, stroke: theme['space-stroke'], 'stroke-width': strokeW, class: 'board-cell', 'data-sq': `pos-${space.pos}`, 'data-type': space.type })
 
       if (variant === '1932-prosperity') {
-        const stripeColor = theme[space.type + 'Stripe']
+        const stripeColor = theme[space.type + '-stripe']
         if (stripeColor) {
           const bandRatio = 0.22
           const lineW = 1.2
@@ -1133,7 +1093,7 @@ function landlordsOps(colors, render) {
       const blockH = lines.length * lineH
       const startY = cy - blockH / 2 + lineH / 2 - (space.notes ? 3 : 0)
       for (let i = 0; i < lines.length; i++) {
-        el('text', { x: cx, y: startY + i * lineH, 'text-anchor': 'middle', 'font-size': fontSize, 'font-weight': 'bold', 'font-family': 'serif', fill: theme.titleText, 'dominant-baseline': 'central' }, lines[i])
+        el('text', { x: cx, y: startY + i * lineH, 'text-anchor': 'middle', 'font-size': fontSize, 'font-weight': 'bold', 'font-family': 'serif', fill: theme['title-text'], 'dominant-baseline': 'central' }, lines[i])
       }
       if (space.notes) {
         const sub = space.notes.length > 22 ? space.notes.slice(0, 21) + '.' : space.notes
@@ -1150,7 +1110,7 @@ function landlordsOps(colors, render) {
 function landlordsInner(el, board, cornerSize, boardW, boardH, theme, variant) {
   const innerX = cornerSize, innerY = cornerSize
   const innerW = boardW - cornerSize * 2, innerH = boardH - cornerSize * 2
-  el('rect', { x: innerX, y: innerY, width: innerW, height: innerH, fill: theme.innerBg })
+  el('rect', { x: innerX, y: innerY, width: innerW, height: innerH, fill: theme['inner-bg'] })
 
   const cx = boardW / 2, cy = boardH / 2
 
@@ -1164,10 +1124,10 @@ function landlordsInner(el, board, cornerSize, boardW, boardH, theme, variant) {
       [0, r], [-c, b], [-b, b], [-b, c],
       [-r, 0], [-b, -c], [-b, -b], [-c, -b],
     ].map(([px, py]) => `${cx + px},${cy + py}`).join(' ')
-    el('polygon', { points: pts, fill: 'none', stroke: theme.titleText, 'stroke-width': 2.5 })
-    el('text', { x: cx, y: cy - 16, 'text-anchor': 'middle', 'font-size': 10, 'font-weight': 'bold', 'font-family': 'serif', fill: theme.titleText }, 'THE')
-    el('text', { x: cx, y: cy + 2, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 'bold', 'font-family': 'serif', fill: theme.titleText }, "LANDLORD'S GAME")
-    el('text', { x: cx, y: cy + 16, 'text-anchor': 'middle', 'font-size': 8, 'font-family': 'serif', fill: theme.titleText }, 'AND PROSPERITY')
+    el('polygon', { points: pts, fill: 'none', stroke: theme['title-text'], 'stroke-width': 2.5 })
+    el('text', { x: cx, y: cy - 16, 'text-anchor': 'middle', 'font-size': 10, 'font-weight': 'bold', 'font-family': 'serif', fill: theme['title-text'] }, 'THE')
+    el('text', { x: cx, y: cy + 2, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 'bold', 'font-family': 'serif', fill: theme['title-text'] }, "LANDLORD'S GAME")
+    el('text', { x: cx, y: cy + 16, 'text-anchor': 'middle', 'font-size': 8, 'font-family': 'serif', fill: theme['title-text'] }, 'AND PROSPERITY')
     el('text', { x: cx, y: cy + 36, 'text-anchor': 'middle', 'font-size': 5.5, 'font-family': 'serif', fill: theme.text }, 'A Magie Game — Patent No. 1,509,312')
     el('text', { x: cx, y: cy + 46, 'text-anchor': 'middle', 'font-size': 5, 'font-family': 'serif', fill: theme.text }, 'Adgame Company (Inc.), Washington, D.C.')
 
@@ -1204,13 +1164,13 @@ function landlordsInner(el, board, cornerSize, boardW, boardH, theme, variant) {
 
     el('line', { x1: leftMid, y1: leftArrowTopStart, x2: leftMid, y2: leftBoxTopY + boxH / 2 + 2, stroke: theme.text, 'stroke-width': 0.8 })
     el('path', { d: `M ${leftMid - 2},${leftBoxTopY + boxH / 2 + 5} L ${leftMid},${leftBoxTopY + boxH / 2 + 2} L ${leftMid + 2},${leftBoxTopY + boxH / 2 + 5}`, fill: 'none', stroke: theme.text, 'stroke-width': 0.8 })
-    el('rect', { x: leftMid - boxW / 2, y: leftBoxTopY - boxH / 2, width: boxW, height: boxH, fill: '#f8f4ec', stroke: theme.spaceStroke, 'stroke-width': 0.75, rx: 1, class: 'board-cell', 'data-sq': 'inner-1', 'data-type': 'land-in-use' })
+    el('rect', { x: leftMid - boxW / 2, y: leftBoxTopY - boxH / 2, width: boxW, height: boxH, fill: '#f8f4ec', stroke: theme['space-stroke'], 'stroke-width': 0.75, rx: 1, class: 'board-cell', 'data-sq': 'inner-1', 'data-type': 'land-in-use' })
     el('text', { x: leftMid, y: leftBoxTopY - 2, 'text-anchor': 'middle', 'font-size': 3.5, 'font-family': 'sans-serif', fill: theme.text }, 'For Sale')
     el('text', { x: leftMid, y: leftBoxTopY + 5, 'text-anchor': 'middle', 'font-size': 3.5, 'font-family': 'sans-serif', fill: theme.text }, 'Land in Use')
 
     el('line', { x1: leftMid, y1: leftArrowBotStart, x2: leftMid, y2: leftBoxBotY - boxH / 2 - 2, stroke: theme.text, 'stroke-width': 0.8 })
     el('path', { d: `M ${leftMid - 2},${leftBoxBotY - boxH / 2 - 5} L ${leftMid},${leftBoxBotY - boxH / 2 - 2} L ${leftMid + 2},${leftBoxBotY - boxH / 2 - 5}`, fill: 'none', stroke: theme.text, 'stroke-width': 0.8 })
-    el('rect', { x: leftMid - boxW / 2, y: leftBoxBotY - boxH / 2, width: boxW, height: boxH, fill: '#f8f4ec', stroke: theme.spaceStroke, 'stroke-width': 0.75, rx: 1, class: 'board-cell', 'data-sq': 'inner-2', 'data-type': 'idle-land' })
+    el('rect', { x: leftMid - boxW / 2, y: leftBoxBotY - boxH / 2, width: boxW, height: boxH, fill: '#f8f4ec', stroke: theme['space-stroke'], 'stroke-width': 0.75, rx: 1, class: 'board-cell', 'data-sq': 'inner-2', 'data-type': 'idle-land' })
     el('text', { x: leftMid, y: leftBoxBotY - 2, 'text-anchor': 'middle', 'font-size': 3.5, 'font-family': 'sans-serif', fill: theme.text }, 'For Sale')
     el('text', { x: leftMid, y: leftBoxBotY + 5, 'text-anchor': 'middle', 'font-size': 3.5, 'font-family': 'sans-serif', fill: theme.text }, 'Idle Land')
 
@@ -1221,18 +1181,18 @@ function landlordsInner(el, board, cornerSize, boardW, boardH, theme, variant) {
 
     el('line', { x1: rightMid, y1: rightArrowTopStart, x2: rightMid, y2: rightBoxTopY + boxH / 2 + 2, stroke: theme.text, 'stroke-width': 0.8 })
     el('path', { d: `M ${rightMid - 2},${rightBoxTopY + boxH / 2 + 5} L ${rightMid},${rightBoxTopY + boxH / 2 + 2} L ${rightMid + 2},${rightBoxTopY + boxH / 2 + 5}`, fill: 'none', stroke: theme.text, 'stroke-width': 0.8 })
-    el('rect', { x: rightMid - boxW / 2, y: rightBoxTopY - boxH / 2, width: boxW, height: boxH, fill: '#f8f4ec', stroke: theme.spaceStroke, 'stroke-width': 0.75, rx: 1, class: 'board-cell', 'data-sq': 'inner-3', 'data-type': 'general-fund' })
+    el('rect', { x: rightMid - boxW / 2, y: rightBoxTopY - boxH / 2, width: boxW, height: boxH, fill: '#f8f4ec', stroke: theme['space-stroke'], 'stroke-width': 0.75, rx: 1, class: 'board-cell', 'data-sq': 'inner-3', 'data-type': 'general-fund' })
     el('text', { x: rightMid, y: rightBoxTopY - 2, 'text-anchor': 'middle', 'font-size': 3.5, 'font-family': 'sans-serif', fill: theme.text }, 'General Fund')
     el('text', { x: rightMid, y: rightBoxTopY + 5, 'text-anchor': 'middle', 'font-size': 3.5, 'font-family': 'sans-serif', fill: theme.text }, '')
 
     el('line', { x1: rightMid, y1: rightArrowBotStart, x2: rightMid, y2: rightBoxBotY - boxH / 2 - 2, stroke: theme.text, 'stroke-width': 0.8 })
     el('path', { d: `M ${rightMid - 2},${rightBoxBotY - boxH / 2 - 5} L ${rightMid},${rightBoxBotY - boxH / 2 - 2} L ${rightMid + 2},${rightBoxBotY - boxH / 2 - 5}`, fill: 'none', stroke: theme.text, 'stroke-width': 0.8 })
-    el('rect', { x: rightMid - boxW / 2, y: rightBoxBotY - boxH / 2, width: boxW, height: boxH, fill: '#f8f4ec', stroke: theme.spaceStroke, 'stroke-width': 0.75, rx: 1, class: 'board-cell', 'data-sq': 'inner-4', 'data-type': 'rent-fund' })
+    el('rect', { x: rightMid - boxW / 2, y: rightBoxBotY - boxH / 2, width: boxW, height: boxH, fill: '#f8f4ec', stroke: theme['space-stroke'], 'stroke-width': 0.75, rx: 1, class: 'board-cell', 'data-sq': 'inner-4', 'data-type': 'rent-fund' })
     el('text', { x: rightMid, y: rightBoxBotY - 2, 'text-anchor': 'middle', 'font-size': 3.5, 'font-family': 'sans-serif', fill: theme.text }, 'Prosperity Land')
     el('text', { x: rightMid, y: rightBoxBotY + 5, 'text-anchor': 'middle', 'font-size': 3.5, 'font-family': 'sans-serif', fill: theme.text }, 'Rent Fund')
   } else if (variant === '1906-egc') {
     el('text', { x: cx, y: cy - 20, 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 'bold', 'font-family': 'serif', fill: theme.text }, 'MISCELLANEOUS')
-    el('text', { x: cx, y: cy + 6, 'text-anchor': 'middle', 'font-size': 9, 'font-weight': 'bold', 'font-family': 'serif', fill: theme.titleText }, 'PUBLIC TREASURY')
+    el('text', { x: cx, y: cy + 6, 'text-anchor': 'middle', 'font-size': 9, 'font-weight': 'bold', 'font-family': 'serif', fill: theme['title-text'] }, 'PUBLIC TREASURY')
     el('text', { x: cx, y: cy + 20, 'text-anchor': 'middle', 'font-size': 5, 'font-family': 'serif', fill: theme.text }, 'MONEY DENOMINATIONS')
 
     const coinY = cy + 34
@@ -1244,7 +1204,7 @@ function landlordsInner(el, board, cornerSize, boardW, boardH, theme, variant) {
     for (let i = 0; i < coins.length; i++) {
       const coinX = coinStartX + i * coinGap
       const textColor = i === 0 ? theme.text : '#fff'
-      el('circle', { cx: coinX, cy: coinY, r: coinR, fill: coinColors[i], stroke: theme.spaceStroke, 'stroke-width': 0.75 })
+      el('circle', { cx: coinX, cy: coinY, r: coinR, fill: coinColors[i], stroke: theme['space-stroke'], 'stroke-width': 0.75 })
       el('text', { x: coinX, y: coinY + 2, 'text-anchor': 'middle', 'font-size': 4, 'font-weight': 'bold', 'font-family': 'serif', fill: textColor }, coins[i])
     }
 
@@ -1330,13 +1290,13 @@ function landlordsInner(el, board, cornerSize, boardW, boardH, theme, variant) {
     ]
 
     for (const q of quads) {
-      el('rect', { x: q.x, y: q.y, width: qw, height: qh, fill: theme.innerBg, stroke: theme.spaceStroke, 'stroke-width': sw, class: 'board-cell', 'data-sq': q.sq, 'data-type': q.label.toLowerCase() })
+      el('rect', { x: q.x, y: q.y, width: qw, height: qh, fill: theme['inner-bg'], stroke: theme['space-stroke'], 'stroke-width': sw, class: 'board-cell', 'data-sq': q.sq, 'data-type': q.label.toLowerCase() })
       const qcx = q.x + qw / 2, qcy = q.y + qh / 2
       if (q.label === 'PUBLIC TREASURY') {
-        el('text', { x: qcx, y: qcy - 4, 'text-anchor': 'middle', 'font-size': 9, 'font-weight': 'bold', 'font-family': 'serif', fill: theme.titleText }, 'PUBLIC')
-        el('text', { x: qcx, y: qcy + 10, 'text-anchor': 'middle', 'font-size': 9, 'font-weight': 'bold', 'font-family': 'serif', fill: theme.titleText }, 'TREASURY')
+        el('text', { x: qcx, y: qcy - 4, 'text-anchor': 'middle', 'font-size': 9, 'font-weight': 'bold', 'font-family': 'serif', fill: theme['title-text'] }, 'PUBLIC')
+        el('text', { x: qcx, y: qcy + 10, 'text-anchor': 'middle', 'font-size': 9, 'font-weight': 'bold', 'font-family': 'serif', fill: theme['title-text'] }, 'TREASURY')
       } else {
-        el('text', { x: qcx, y: qcy + (q.sub ? -2 : 4), 'text-anchor': 'middle', 'font-size': 11, 'font-weight': 'bold', 'font-family': 'serif', fill: theme.titleText }, q.label)
+        el('text', { x: qcx, y: qcy + (q.sub ? -2 : 4), 'text-anchor': 'middle', 'font-size': 11, 'font-weight': 'bold', 'font-family': 'serif', fill: theme['title-text'] }, q.label)
         if (q.sub) el('text', { x: qcx, y: qcy + 10, 'text-anchor': 'middle', 'font-size': 5, 'font-family': 'serif', fill: theme.text }, q.sub)
       }
     }

@@ -1,5 +1,16 @@
+import { readFileSync } from 'fs'
+import path from 'path'
 import '../../component-deck/index.js'
-import { renderFromEngine } from '../../render/src/render-engine.js'
+import { renderFromEngine, attachPieceImages } from '../../render/src/render-engine.js'
+
+const gallery = JSON.parse(readFileSync(path.resolve(process.cwd(), 'pieces/gallery-index.json'), 'utf8'))
+
+// Card artwork reaches the tableau renderer the same way piece artwork reaches
+// every other topology: the frontmatter names a set, the gallery resolves it.
+function render(resolved) {
+  const images = attachPieceImages(resolved, gallery).images || {}
+  return renderFromEngine(resolved, { pieceImages: images })
+}
 
 describe('topology-tableau render pipeline', () => {
   test('radial layout produces valid SVG with dealt cards', () => {
@@ -7,10 +18,11 @@ describe('topology-tableau render pipeline', () => {
       topology: { type: 'tableau', layout: 'radial', players: 4 },
       surface: { colors: {} },
       render: {},
+      pieces: { set: 'letele-cards' },
       components: { deck: { type: 'standard-52' } },
       deal: { minPlayers: 4, maxPlayers: 4, defaultPlayers: 4, perPlayer: 'all', community: 0 },
     }
-    const svg = renderFromEngine(resolved)
+    const svg = render(resolved)
     expect(svg).not.toBeNull()
     expect(svg).toContain('<svg')
     expect(svg).toContain('data-zone="Player 1')
@@ -25,10 +37,11 @@ describe('topology-tableau render pipeline', () => {
       topology: { type: 'tableau', layout: 'tableau', columns: 7, cascade: [1, 2, 3, 4, 5, 6, 7], foundations: 4 },
       surface: { colors: {} },
       render: {},
+      pieces: { set: 'letele-cards' },
       components: { deck: { type: 'standard-52' } },
       deal: { minPlayers: 1, maxPlayers: 1, defaultPlayers: 1, perPlayer: 0, community: 0, remainder: 'draw', layout: 'tableau', tableau: { columns: 7, cascade: [1, 2, 3, 4, 5, 6, 7] } },
     }
-    const svg = renderFromEngine(resolved)
+    const svg = render(resolved)
     expect(svg).not.toBeNull()
     expect(svg).toContain('data-zone="Column 1')
     expect(svg).toContain('data-zone="Column 7')
@@ -42,10 +55,11 @@ describe('topology-tableau render pipeline', () => {
       topology: { type: 'tableau', layout: 'wall', players: 4, wallSegments: 4 },
       surface: { colors: {} },
       render: {},
-      components: { tiles: { total: 136 } },
-      deal: { minPlayers: 4, maxPlayers: 4, defaultPlayers: 4, perPlayer: 13, community: 0, remainder: 'wall', tileSet: 'mahjong-regular' },
+      pieces: { set: 'mahjong-regular' },
+      components: { tiles: { type: 'mahjong-136', total: 136 } },
+      deal: { minPlayers: 4, maxPlayers: 4, defaultPlayers: 4, perPlayer: 13, community: 0, remainder: 'wall' },
     }
-    const svg = renderFromEngine(resolved)
+    const svg = render(resolved)
     expect(svg).not.toBeNull()
     expect(svg).toContain('data-zone="Wall')
     expect(svg).toContain('South (you)')
@@ -57,10 +71,11 @@ describe('topology-tableau render pipeline', () => {
       topology: { type: 'tableau', layout: 'linear', players: 2 },
       surface: { colors: {} },
       render: {},
+      pieces: { set: 'letele-cards' },
       components: { deck: { type: 'standard-52' } },
       deal: { minPlayers: 2, maxPlayers: 2, defaultPlayers: 2, perPlayer: 'all', community: 0 },
     }
-    const svg = renderFromEngine(resolved)
+    const svg = render(resolved)
     expect(svg).not.toBeNull()
     expect(svg).toContain('data-zone="Player 1')
     expect(svg).toContain('data-zone="Player 2')
@@ -72,10 +87,11 @@ describe('topology-tableau render pipeline', () => {
       topology: { type: 'tableau', layout: 'radial', players: 6 },
       surface: { name: 'card-table' },
       render: {},
+      pieces: { set: 'letele-cards' },
       components: { deck: { type: 'standard-52', jokers: 0 } },
       deal: { minPlayers: 2, maxPlayers: 10, defaultPlayers: 6, perPlayer: 2, community: 5, remainder: 'draw' },
     }
-    const svg = renderFromEngine(resolved)
+    const svg = render(resolved)
     expect(svg).not.toBeNull()
     expect(svg).toContain('data-zone="Player 1')
     expect(svg).toContain('data-zone="Player 6')

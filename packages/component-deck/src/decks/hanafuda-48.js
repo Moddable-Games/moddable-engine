@@ -12,6 +12,17 @@ const MONTH_NAMES = [
 const TYPES = ['hikari', 'tane', 'tanzaku', 'kasu']
 const TYPE_LABELS = ['bright', 'animal', 'ribbon', 'plain']
 
+// A card's `art` is the gallery key its picture is filed under. Months carry
+// more than one plain card, so those keys are numbered; every other key is
+// month plus type. The piece set is chosen in frontmatter (engine.pieces.set).
+function cardArt(monthIndex, typeIndex, name) {
+  const type = TYPES[typeIndex].charAt(0).toUpperCase() + TYPES[typeIndex].slice(1)
+  const plain = name.match(/Plain (\d)/)
+  return plain
+    ? `${MONTH_NAMES[monthIndex]}-${type}-${plain[1]}`
+    : `${MONTH_NAMES[monthIndex]}-${type}`
+}
+
 const CARD_DEFS = [
   { month: 0, type: 0, name: 'Crane' },
   { month: 0, type: 2, name: 'Poetry Ribbon' },
@@ -70,15 +81,6 @@ registerDeck('hanafuda-48', {
   cardHeight: 64,
   months: MONTHS,
   types: TYPES,
-  pieceSet: 'hanafuda-traditional',
-
-  getImagePath(card) {
-    const type = card.type.charAt(0).toUpperCase() + card.type.slice(1)
-    if (card.name.match(/Plain \d/)) {
-      return `Hanafuda_${card.monthName}_${type}_${card.name.slice(-1)}_Alt.svg`
-    }
-    return `Hanafuda_${card.monthName}_${type}_Alt.svg`
-  },
 
   create(opts = {}) {
     return CARD_DEFS.map((def, i) => ({
@@ -90,6 +92,7 @@ registerDeck('hanafuda-48', {
       typeLabel: TYPE_LABELS[def.type],
       name: def.name,
       display: `${MONTH_NAMES[def.month]} — ${def.name}`,
+      art: cardArt(def.month, def.type, def.name),
     }))
   },
 })

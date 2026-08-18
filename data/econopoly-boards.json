@@ -14,6 +14,20 @@
       "direction": "counter-clockwise",
       "totalSpaces": 40,
       "corners": 4,
+      "categories": {
+        "lot": "Land In Use",
+        "necessity": "Absolute Necessity",
+        "taxes": "Personal Property",
+        "railroad": "Interstate Public Utility",
+        "franchise": "Local Public Utility",
+        "broker": "Real Estate",
+        "luxury": "Luxury",
+        "jail": "Jail",
+        "go-to-jail": "No Trespassing",
+        "chance": "Chance",
+        "special": "Speculation",
+        "legacy": "Legacy"
+      },
       "notes": "Rent = lot number. Price = 10x lot number. Perfectly linear progression.",
       "spaces": [
         {
@@ -395,6 +409,20 @@
       "direction": "counter-clockwise",
       "totalSpaces": 40,
       "corners": 4,
+      "categories": {
+        "lot": "Land In Use",
+        "necessity": "Absolute Necessity",
+        "taxes": "Personal Property",
+        "railroad": "Interstate Public Utility",
+        "franchise": "Local Public Utility",
+        "broker": "Real Estate",
+        "luxury": "Luxury",
+        "jail": "Jail",
+        "go-to-jail": "No Trespassing",
+        "chance": "Chance",
+        "special": "Speculation",
+        "legacy": "Legacy"
+      },
       "innerSpaces": 4,
       "notes": "Named lots in 4 price tiers. First commercial edition. 4 inner Natural Opportunity spaces accessible from perimeter.",
       "spaces": [
@@ -919,6 +947,20 @@
       "direction": "clockwise",
       "totalSpaces": 36,
       "corners": 4,
+      "categories": {
+        "lot": "Land In Use",
+        "necessity": "Absolute Necessity",
+        "taxes": "Personal Property",
+        "railroad": "Interstate Public Utility",
+        "franchise": "Local Public Utility",
+        "broker": "Real Estate",
+        "luxury": "Luxury",
+        "jail": "Jail",
+        "go-to-jail": "No Trespassing",
+        "chance": "Chance",
+        "special": "Speculation",
+        "legacy": "Legacy"
+      },
       "spacesPerSide": [
         8,
         8,

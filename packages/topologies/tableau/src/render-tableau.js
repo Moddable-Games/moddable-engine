@@ -14,6 +14,7 @@ export function renderTableauLayout(config) {
   const seed = config.seed || 42
   const colors = config.colors || {}
   const render = config.render || {}
+  const images = render._pieceImages || null
 
   const deckType = resolveDeckType(components)
   const deckConfig = deckType ? getDeckConfig(deckType) : null
@@ -25,14 +26,12 @@ export function renderTableauLayout(config) {
   const players = dealSpec.defaultPlayers || 4
   const activeDealSpec = { ...dealSpec, players }
 
-  const createOpts = deckType === 'standard-dice'
-    ? { count: (dealSpec.perPlayer || 0) * players + (dealSpec.community || 0) }
-    : dealSpec
+  const createOpts = deckConfig.dealOpts ? deckConfig.dealOpts(dealSpec, players) : dealSpec
   const cards = createDeck(deckType, createOpts)
   const shuffled = shuffle(cards, seed)
   const dealResult = deal(shuffled, activeDealSpec)
 
-  if (deckConfig.roll && deckType === 'standard-dice') {
+  if (deckConfig.roll) {
     for (let i = 0; i < dealResult.hands.length; i++) {
       dealResult.hands[i] = deckConfig.roll(dealResult.hands[i], seed + i)
     }
@@ -42,14 +41,14 @@ export function renderTableauLayout(config) {
   }
 
   if (dealResult.layout === 'tableau') {
-    return renderTableauSolitaire(dealResult, deckType, deckConfig, seed, config)
+    return renderTableauSolitaire(dealResult, deckConfig, seed, config, images)
   }
 
   if (layout === 'wall' || dealSpec.remainder === 'wall') {
-    return renderWall(dealResult, deckType, deckConfig, seed, config)
+    return renderWall(dealResult, deckConfig, seed, config, images)
   }
 
-  return renderRadial(dealResult, deckType, deckConfig, players, seed, config)
+  return renderRadial(dealResult, deckConfig, players, seed, config, images)
 }
 
 function emptyTableLayout(config) {
@@ -64,7 +63,7 @@ function emptyTableLayout(config) {
   }
 }
 
-function renderRadial(dealResult, deckType, deckConfig, players, seed, config) {
+function renderRadial(dealResult, deckConfig, players, seed, config, images) {
   const cardW = deckConfig.cardWidth || 44
   const cardH = deckConfig.cardHeight || 64
   const maxHand = Math.max(...dealResult.hands.map(h => h.length), dealResult.community?.length || 0)
@@ -98,7 +97,7 @@ function renderRadial(dealResult, deckType, deckConfig, players, seed, config) {
     const pos = positions[p]
     const faceUp = pos.faceUp
     const zoneDesc = faceUp ? `${pos.label} — ${hand.length} cards (visible)` : `${pos.label} — ${hand.length} cards (hidden)`
-    els.push({ tag: 'g', attrs: { class: 'hand', 'data-zone': zoneDesc }, children: renderHandCards(hand, pos, cardW, cardH, pad, deckType, faceUp, tableW) })
+    els.push({ tag: 'g', attrs: { class: 'hand', 'data-zone': zoneDesc }, children: renderHandCards(hand, pos, cardW, cardH, pad, deckConfig, images, faceUp, tableW) })
 
     const labelX = hand.length > 0 ? pos.x + pad : tableW / 2 + pad
     const labelY = pos.y + pad
@@ -111,7 +110,7 @@ function renderRadial(dealResult, deckType, deckConfig, players, seed, config) {
     const drawOffset = hasDrawPile ? (cardW + 8) / 2 : 0
     const commX = tableW / 2 + drawOffset
     const commY = tableH / 2
-    els.push({ tag: 'g', attrs: { class: 'community', 'data-zone': `Community / Field — ${dealResult.community.length} cards (face up)` }, children: renderSpreadCards(dealResult.community, commX, commY, cardW, cardH, pad, deckType, true, tableW * 0.4) })
+    els.push({ tag: 'g', attrs: { class: 'community', 'data-zone': `Community / Field — ${dealResult.community.length} cards (face up)` }, children: renderSpreadCards(dealResult.community, commX, commY, cardW, cardH, pad, deckConfig, images, true, tableW * 0.4) })
     const cy = commY + pad + cardH / 2 + 14
     els.push({ tag: 'text', attrs: { x: tableW / 2 + pad, y: cy, 'text-anchor': 'middle', 'font-size': 10, fill: 'rgba(255,255,255,0.5)', 'font-family': 'system-ui' }, text: `Field (${dealResult.community.length})` })
   }
@@ -129,7 +128,7 @@ function renderRadial(dealResult, deckType, deckConfig, players, seed, config) {
     }
     const drawY = tableH / 2
     const count = dp.length
-    const backPath = getCardBackPath(deckType)
+    const backPath = getCardBackPath(deckConfig, images)
     const children = []
     const stackDepth = Math.min(4, count)
     for (let s = stackDepth - 1; s >= 0; s--) {
@@ -150,7 +149,7 @@ function renderRadial(dealResult, deckType, deckConfig, players, seed, config) {
   return { width: w, height: h, elements: els, cells: [], labels: [], defs: [] }
 }
 
-function renderTableauSolitaire(dealResult, deckType, deckConfig, seed, config) {
+function renderTableauSolitaire(dealResult, deckConfig, seed, config, images) {
   const cardW = 44, cardH = 64, colGap = 6, cascadeStep = 18, pad = 20
   const numCols = dealResult.tableau.length
   const maxCascade = Math.max(...dealResult.tableau.map(col => col.length))
@@ -183,7 +182,7 @@ function renderTableauSolitaire(dealResult, deckType, deckConfig, seed, config) 
 
   const drawCount = dealResult.drawPile.length
   const drawX = outerPad + pad
-  const backPath = getCardBackPath(deckType)
+  const backPath = getCardBackPath(deckConfig, images)
   const drawChildren = []
   if (backPath) {
     drawChildren.push({ tag: 'image', attrs: { href: backPath, x: drawX, y: outerPad + foundationY, width: cardW, height: cardH, preserveAspectRatio: 'xMidYMid meet' } })
@@ -208,7 +207,7 @@ function renderTableauSolitaire(dealResult, deckType, deckConfig, seed, config) 
       const cy = outerPad + tableauY + row * cascadeStep
       const cardLabel = card.faceUp ? (card.display || card.id) : 'Face down'
       if (card.faceUp) {
-        const imgPath = getCardImagePath(card, deckType)
+        const imgPath = getCardImagePath(card, images)
         if (imgPath) {
           children.push({ tag: 'g', attrs: { 'data-card': cardLabel }, children: [{ tag: 'image', attrs: { href: imgPath, x: cx, y: cy, width: cardW, height: cardH, preserveAspectRatio: 'xMidYMid meet' } }] })
         } else {
@@ -233,9 +232,8 @@ function renderTableauSolitaire(dealResult, deckType, deckConfig, seed, config) 
   return { width: w, height: h, elements: els, cells: [], labels: [], defs: [] }
 }
 
-function renderWall(dealResult, deckType, deckConfig, seed, config) {
+function renderWall(dealResult, deckConfig, seed, config, images) {
   const tileW = 30, tileH = 40, tileGap = 2, stackOffset = 3, pad = 20, outerPad = 20
-  const tileSet = config.deal?.tileSet || 'mahjong-regular'
   const wallTiles = dealResult.drawPile.length
   const totalStacks = Math.ceil(wallTiles / 2)
   const stacksPerSide = Math.ceil(totalStacks / 4)
@@ -323,7 +321,7 @@ function renderWall(dealResult, deckType, deckConfig, seed, config) {
       const rh = isVertical ? tileW : tileH
 
       if (faceUp) {
-        const imgPath = getCardImagePath(card, deckType, { tileSet })
+        const imgPath = getCardImagePath(card, images)
         const inset = 2
         children.push({ tag: 'g', attrs: { 'data-card': cardLabel }, children: [
           { tag: 'rect', attrs: { x: outerPad + tx, y: outerPad + ty, width: rw, height: rh, fill: '#f0ede6', rx: 4, stroke: '#bbb', 'stroke-width': 0.8 } },
@@ -370,7 +368,7 @@ function getPlayerPositions(count, w, h, handHalfW, handHalfH) {
   return positions
 }
 
-function renderHandCards(hand, pos, cardW, cardH, pad, deckType, faceUp, tableW) {
+function renderHandCards(hand, pos, cardW, cardH, pad, deckConfig, images, faceUp, tableW) {
   const n = hand.length
   if (n === 0) return []
   const step = cardW + 4
@@ -380,12 +378,12 @@ function renderHandCards(hand, pos, cardW, cardH, pad, deckType, faceUp, tableW)
   for (let i = 0; i < n; i++) {
     const x = startX + i * step + pad - cardW / 2
     const y = pos.y + pad - cardH / 2
-    children.push(renderSingleCard(hand[i], x, y, cardW, cardH, deckType, faceUp))
+    children.push(renderSingleCard(hand[i], x, y, cardW, cardH, deckConfig, images, faceUp))
   }
   return children
 }
 
-function renderSpreadCards(cards, centerX, centerY, cardW, cardH, pad, deckType, faceUp, maxWidth) {
+function renderSpreadCards(cards, centerX, centerY, cardW, cardH, pad, deckConfig, images, faceUp, maxWidth) {
   const n = cards.length
   if (n === 0) return []
   const step = cardW + 4
@@ -395,18 +393,17 @@ function renderSpreadCards(cards, centerX, centerY, cardW, cardH, pad, deckType,
   for (let i = 0; i < n; i++) {
     const x = startX + i * step + pad - cardW / 2
     const y = centerY + pad - cardH / 2
-    children.push(renderSingleCard(cards[i], x, y, cardW, cardH, deckType, faceUp))
+    children.push(renderSingleCard(cards[i], x, y, cardW, cardH, deckConfig, images, faceUp))
   }
   return children
 }
 
-function renderSingleCard(card, x, y, cardW, cardH, deckType, faceUp) {
+function renderSingleCard(card, x, y, cardW, cardH, deckConfig, images, faceUp) {
   const cardLabel = faceUp ? (card.display || card.id || '?') : 'Face down'
-  const tileBgDecks = new Set(['mahjong-136', 'dominoes-28'])
-  const needsTileBg = tileBgDecks.has(deckType)
+  const needsTileBg = !!deckConfig?.tileBackground
 
   if (!faceUp) {
-    const backPath = getCardBackPath(deckType)
+    const backPath = getCardBackPath(deckConfig, images)
     if (backPath && needsTileBg) {
       return { tag: 'g', attrs: { 'data-card': cardLabel }, children: [
         { tag: 'rect', attrs: { x, y, width: cardW, height: cardH, fill: '#f0ede6', rx: 4, stroke: '#bbb', 'stroke-width': 0.8 } },
@@ -421,7 +418,7 @@ function renderSingleCard(card, x, y, cardW, cardH, deckType, faceUp) {
     return { tag: 'rect', attrs: { x, y, width: cardW, height: cardH, fill: '#2a3a6a', rx: 3, stroke: '#1a2a4a', 'stroke-width': 1, 'data-card': cardLabel } }
   }
 
-  const imgPath = getCardImagePath(card, deckType)
+  const imgPath = getCardImagePath(card, images)
   if (imgPath) {
     if (needsTileBg) {
       return { tag: 'g', attrs: { 'data-card': cardLabel }, children: [
@@ -440,29 +437,22 @@ function renderSingleCard(card, x, y, cardW, cardH, deckType, faceUp) {
   ] }
 }
 
-export function getCardImagePath(card, deckType, opts) {
-  const deckConfig = getDeckConfig(deckType)
-  if (!deckConfig?.getImagePath) return null
-  const filename = deckConfig.getImagePath(card, opts)
-  if (!filename) return null
-  const pieceSet = opts?.tileSet || deckConfig.pieceSet
-  return `../pieces/sets/${pieceSet}/${filename}`
+// A card knows the gallery key its picture is filed under (`card.art`); the
+// piece set is chosen in frontmatter (engine.pieces.set) and arrives here
+// already resolved to paths as render._pieceImages. Neither the deck nor the
+// artwork naming is knowledge this renderer holds.
+export function getCardImagePath(card, images) {
+  if (!card?.art || !images) return null
+  return images[card.art] || null
 }
 
-export function getCardBackPath(deckType) {
-  const deckConfig = getDeckConfig(deckType)
-  if (!deckConfig?.pieceSet) return null
-  if (deckConfig.getBackPath) {
-    return `../pieces/sets/${deckConfig.pieceSet}/${deckConfig.getBackPath()}`
-  }
-  return null
+export function getCardBackPath(deckConfig, images) {
+  if (!deckConfig?.backArt || !images) return null
+  return images[deckConfig.backArt] || null
 }
 
 function resolveTilesType(tiles) {
-  if (!tiles) return null
-  if (tiles.type) return tiles.type
-  if (tiles.total === 136 || tiles.total === 144 || tiles.total === 152) return 'mahjong-136'
-  return null
+  return tiles?.type || null
 }
 
 function resolveDeckType(components) {

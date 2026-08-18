@@ -39,7 +39,6 @@ const ALLOWLIST = new Set([
   'packages/component-deck/src/decks/dominoes-28.js:*',
   'packages/component-deck/src/decks/hanafuda-48.js:*',
   'packages/component-deck/src/decks/mahjong-136.js:*',
-  'packages/component-deck/src/decks/standard-dice.js:*',
 
   // --- hex-generators: generators named after their games (acceptable, no alternative) ---
   'packages/hex-generators/src/colony.js:*',
@@ -78,7 +77,6 @@ const ALLOWLIST = new Set([
   "packages/schema/src/validate.js|message: 'engine.pieces must be either an artwork ",
 
   // --- topologies: render code and coordinate systems ---
-  'packages/topologies/tableau/src/render-tableau.js:*',
   'packages/topologies/tableau/src/topology-tableau.js:*',
   "packages/topologies/grid/src/topology-grid.js|if (idStyle === 'go') return goId",
 

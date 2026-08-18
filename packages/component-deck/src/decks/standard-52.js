@@ -1,6 +1,10 @@
 import { registerDeck } from '../deck-registry.js'
 
 const SUITS = ['spades', 'hearts', 'clubs', 'diamonds']
+// Artwork key prefix per suit, positional with SUITS. A card's `art` is the
+// gallery key its picture is filed under; the piece set is chosen in
+// frontmatter (engine.pieces.set), not here.
+const SUIT_ART = ['S', 'H', 'C', 'D']
 const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
 
 registerDeck('standard-52', {
@@ -10,17 +14,7 @@ registerDeck('standard-52', {
   cardHeight: 64,
   suits: SUITS,
   ranks: RANKS,
-  pieceSet: 'letele-cards',
-
-  getImagePath(card) {
-    if (card.suit === 'joker') return 'J-1.svg'
-    const suitLetter = { spades: 'S', hearts: 'H', clubs: 'C', diamonds: 'D' }[card.suit]
-    return `${suitLetter}-${card.rank}.svg`
-  },
-
-  getBackPath() {
-    return 'B-1.svg'
-  },
+  backArt: 'B-1',
 
   create(opts = {}) {
     const jokers = opts.jokers || 0
@@ -34,6 +28,7 @@ registerDeck('standard-52', {
           rankValue: r + 1,
           suitIndex: s,
           display: `${RANKS[r]}${suitSymbol(s)}`,
+          art: `${SUIT_ART[s]}-${RANKS[r]}`,
         })
       }
     }
@@ -45,6 +40,7 @@ registerDeck('standard-52', {
         rankValue: 0,
         suitIndex: 4,
         display: 'Jkr',
+        art: 'J-1',
       })
     }
     return cards

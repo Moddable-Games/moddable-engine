@@ -4,6 +4,13 @@ const SUITS = ['bamboo', 'circles', 'characters']
 const WINDS = ['east', 'south', 'west', 'north']
 const DRAGONS = ['red', 'green', 'white']
 
+// A tile's `art` is the gallery key its picture is filed under. Suit plus rank
+// identifies a tile in every set, so no naming table is needed here; the set
+// itself is chosen in frontmatter (engine.pieces.set).
+function tileArt(suit, rank) {
+  return `${suit}-${rank}`
+}
+
 registerDeck('mahjong-136', {
   label: 'Mahjong 136',
   cardCount: 136,
@@ -12,31 +19,8 @@ registerDeck('mahjong-136', {
   suits: SUITS,
   winds: WINDS,
   dragons: DRAGONS,
-  pieceSet: 'mahjong-regular',
-
-  getImagePath(card, opts) {
-    const tileSet = opts?.tileSet || 'mahjong-regular'
-    if (tileSet === 'mahjong-planar') {
-      const suitFileMap = { bamboo: 'tiao', circles: 'bing', characters: 'wan' }
-      const windFileMap = { east: 'Eastwind', south: 'Southwind', west: 'Westwind', north: 'Northwind' }
-      const dragonFileMap = { red: 'Reddragon', green: 'Greendragon', white: 'Whitedragon' }
-      if (card.suit === 'wind') return `MJ${windFileMap[card.rank]}.svg`
-      if (card.suit === 'dragon') return `MJ${dragonFileMap[card.rank]}.svg`
-      if (suitFileMap[card.suit]) return `MJ${card.rank}${suitFileMap[card.suit]}.svg`
-      return null
-    }
-    const suitFileMap = { bamboo: 'Sou', circles: 'Pin', characters: 'Man' }
-    const windFileMap = { east: 'Ton', south: 'Nan', west: 'Shaa', north: 'Pei' }
-    const dragonFileMap = { red: 'Chun', green: 'Hatsu', white: 'Haku' }
-    if (card.suit === 'wind') return `${windFileMap[card.rank]}.svg`
-    if (card.suit === 'dragon') return `${dragonFileMap[card.rank]}.svg`
-    if (suitFileMap[card.suit]) return `${suitFileMap[card.suit]}${card.rank}.svg`
-    return null
-  },
-
-  getBackPath() {
-    return 'Back.svg'
-  },
+  tileBackground: true,
+  backArt: 'back',
 
   create(opts = {}) {
     const flowers = opts.flowers || 0
@@ -52,6 +36,7 @@ registerDeck('mahjong-136', {
             rank: r,
             copy,
             display: `${r} ${SUITS[s]}`,
+            art: tileArt(SUITS[s], r),
           })
         }
       }
@@ -63,6 +48,7 @@ registerDeck('mahjong-136', {
           rank: WINDS[w],
           copy,
           display: `${WINDS[w]} wind`,
+          art: tileArt('wind', WINDS[w]),
         })
       }
       for (let d = 0; d < 3; d++) {
@@ -73,6 +59,7 @@ registerDeck('mahjong-136', {
           rank: DRAGONS[d],
           copy,
           display: `${DRAGONS[d]} dragon`,
+          art: tileArt('dragon', DRAGONS[d]),
         })
       }
     }
@@ -87,6 +74,7 @@ registerDeck('mahjong-136', {
         rank: f + 1,
         copy: 0,
         display: flowerNames[f],
+        art: tileArt('flower', f + 1),
       })
     }
     for (let s = 0; s < Math.min(flowers - 4, 4); s++) {
@@ -97,6 +85,7 @@ registerDeck('mahjong-136', {
         rank: s + 1,
         copy: 0,
         display: seasonNames[s],
+        art: tileArt('season', s + 1),
       })
     }
 
