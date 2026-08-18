@@ -448,3 +448,5 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
     },
   }
 }
+
+createDraughtsPlugin.interaction = 'chain'

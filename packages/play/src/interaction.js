@@ -1,7 +1,12 @@
 const models = new Map()
+const familyInteractions = new Map()
 
 export function registerInteractionModel(name, model) {
   models.set(name, model)
+}
+
+export function registerFamilyInteraction(family, interactionName) {
+  familyInteractions.set(family, interactionName)
 }
 
 export function getInteractionModel(name) {
@@ -127,18 +132,12 @@ registerInteractionModel('place', placeModel)
 registerInteractionModel('chain', chainModel)
 registerInteractionModel('drop', dropModel)
 
-export const FAMILY_INTERACTION = {
-  chess: 'drop',
-  draughts: 'chain',
-  go: 'place',
-  shogi: 'drop',
-  xiangqi: 'move',
-  reversi: 'place',
-}
+// Fallback for families that haven't declared their interaction model (empty now that plugins can declare their own)
+export const FAMILY_INTERACTION = {}
 
 export function interactionModelFor(family, override) {
   if (override) return getInteractionModel(override)
-  return getInteractionModel(FAMILY_INTERACTION[family] || 'move')
+  return getInteractionModel(familyInteractions.get(family) || 'move')
 }
 
 export function availableActions(moves) {

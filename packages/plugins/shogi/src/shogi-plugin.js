@@ -589,3 +589,5 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
 
   return plugin
 }
+
+createShogiPlugin.interaction = 'drop'

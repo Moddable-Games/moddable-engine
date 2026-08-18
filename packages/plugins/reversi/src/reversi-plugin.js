@@ -232,3 +232,5 @@ export function createReversiPlugin(variantConfig = {}, context = {}) {
     },
   }
 }
+
+createReversiPlugin.interaction = 'place'

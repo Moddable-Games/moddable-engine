@@ -20,6 +20,7 @@ export {
 
 export {
   registerInteractionModel,
+  registerFamilyInteraction,
   getInteractionModel,
   listInteractionModels,
   interactionModelFor,

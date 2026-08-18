@@ -342,3 +342,5 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
     },
   }
 }
+
+createXiangqiPlugin.interaction = 'move'

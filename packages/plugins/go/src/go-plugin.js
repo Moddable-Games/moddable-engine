@@ -371,3 +371,5 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
     },
   }
 }
+
+createGoPlugin.interaction = 'place'

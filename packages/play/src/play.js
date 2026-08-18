@@ -4,6 +4,7 @@ import { produce } from '../../schema/src/produce.js'
 import { getVariantConfig, hasVariant, getSlugForKey, setVariantSources as _setVariantSources } from './variant-registry.js'
 import { definitionFromVariant } from './variant-definition.js'
 import { parseVariantKey, applyFlags, familySupportsFlag, registerPluginFlags } from './variant-flags.js'
+import { registerFamilyInteraction } from './interaction.js'
 import { resolveVariantSync } from './resolve-frontmatter.js'
 import { createGridTopology } from '../../topologies/grid/src/topology-grid.js'
 import { createHexTopology } from '../../topologies/hex/src/topology-hex.js'
@@ -45,11 +46,13 @@ export function registerTopology(type, factory) {
 export function registerPluginFactory(family, factory) {
   PLUGIN_FACTORIES[family] = factory
   if (factory.flags) registerPluginFlags(family, factory.flags)
+  if (factory.interaction) registerFamilyInteraction(family, factory.interaction)
 }
 
-// Register plugin-declared flags (static property on factory functions)
+// Register plugin-declared flags and interaction models (static properties on factory functions)
 for (const [family, factory] of Object.entries(PLUGIN_FACTORIES)) {
   if (factory.flags) registerPluginFlags(family, factory.flags)
+  if (factory.interaction) registerFamilyInteraction(family, factory.interaction)
 }
 
 const COMPONENT_FACTORIES = {

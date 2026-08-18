@@ -1198,5 +1198,6 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   }
 }
 
-// Static capability declaration: which URL flags this family supports
+// Static capability declarations
 createChessPlugin.flags = new Set(['drops', 'random'])
+createChessPlugin.interaction = 'drop'
