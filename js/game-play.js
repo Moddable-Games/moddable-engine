@@ -282,7 +282,7 @@ export function createPlaySession(options = {}) {
     ctrl = createGameController(game.raw, {
       family,
       players,
-      interactionModel: resolvedBoard.interactionModel,
+      interactionModel: resolvedBoard.interaction || resolvedBoard.interactionModel,
       aiDifficulty: difficulty,
       aiPickMove: ai
         ? () => {
