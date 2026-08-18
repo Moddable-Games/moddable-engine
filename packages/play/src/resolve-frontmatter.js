@@ -23,7 +23,13 @@ function resolveOnce(familyMd, variantMd, label) {
 
 export function resolveVariantSync(family, slug, readFile) {
   let familyMd, variantMd
-  try { familyMd = readFile(family, 'rulebook') } catch { return null }
+  try {
+    familyMd = readFile(family, 'rulebook')
+  } catch (e) {
+    throw new Error(`Failed to read rulebook for family "${family}". ` +
+      `Ensure your readFn handles the reserved slug 'rulebook' by returning ` +
+      `<family>/content/rulebook.md. Original error: ${e.message}`)
+  }
   try { variantMd = readFile(family, slug) } catch { variantMd = '' }
   if (!variantMd && slug && slug !== 'standard') return null
 

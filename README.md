@@ -98,6 +98,62 @@ See `SPEC.md` section 0 (Philosophy) for the full reasoning behind every archite
 
 ---
 
+## Getting started
+
+The engine does not ship any games. Every board, variant and starting position lives in
+[moddable-rules](https://github.com/Moddable-Games/moddable-rules). Clone both as siblings:
+
+```bash
+git clone https://github.com/Moddable-Games/moddable-engine.git
+git clone https://github.com/Moddable-Games/moddable-rules.git
+cd moddable-engine && npm ci
+```
+
+The browser resolves rules at `../../moddable-rules/` relative to the engine, so the two
+checkouts must sit under a common parent. Node tooling reads `MODDABLE_RULES_DIR` instead:
+
+```bash
+MODDABLE_RULES_DIR=../moddable-rules/games npm test
+```
+
+**Without that variable the test suite fails wholesale**, because the corpus it tests against
+is not present. That is expected on a fresh clone, not a broken checkout.
+
+### Using the engine as a dependency
+
+```js
+import { setRulesReader, createGameForFamily } from '@moddable/engine/play'
+import { readFileSync, readdirSync } from 'fs'
+
+const DIR = '/path/to/moddable-rules/games'
+
+setRulesReader(
+  // `rulebook` is a reserved slug: it resolves to the family hub, not a variant.
+  (family, slug) => slug === 'rulebook'
+    ? readFileSync(`${DIR}/${family}/content/rulebook.md`, 'utf8')
+    : readFileSync(`${DIR}/${family}/content/variants/${slug}.md`, 'utf8'),
+  (family) => readdirSync(`${DIR}/${family}/content/variants`)
+    .filter(f => f.endsWith('.md')).map(f => f.slice(0, -3)),
+)
+
+const game = createGameForFamily('chess', { variant: 'standard', rngSeed: 1 })
+console.log(game.getLegalMoves().length)   // 20
+```
+
+A reader that does not special-case `rulebook` will fail with
+`Unknown variant "standard" for family "chess"`, which names the wrong problem.
+
+### Adding a variant
+
+See [docs/authoring.html](docs/authoring.html). A variant is one markdown file and usually
+no JavaScript at all. After adding one, regenerate the manifest the play page reads:
+
+```bash
+MODDABLE_RULES_DIR=../moddable-rules/games node scripts/gen-playability-manifest.mjs
+```
+
+---
+
 ## Running tests
 
 ```bash

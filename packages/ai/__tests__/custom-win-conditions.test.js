@@ -11,12 +11,12 @@ import { createGameFromDefinition } from '../../game/index.js'
 import { createGridTopology } from '../../topologies/grid/index.js'
 import { getVariantConfig } from '../../play/src/variant-registry.js'
 
-function createVariantGame(variantKey, setup) {
+function createVariantGame(variantKey, setup, overrides = {}) {
   const vCfg = getVariantConfig('chess', variantKey) || {}
   const pluginConfig = { ...vCfg, setup }
   return createGameFromDefinition(
     {
-      topology: { type: 'grid', rows: vCfg.rows || 8, cols: vCfg.cols || 8 },
+      topology: { type: 'grid', rows: overrides.rows || vCfg.rows || 8, cols: overrides.cols || vCfg.cols || 8 },
       players: { names: ['white', 'black'], count: 2 },
       plugins: { chess: pluginConfig },
     },
@@ -98,13 +98,10 @@ describe('AI finds board-state win conditions', () => {
   })
 
   it('breakthrough: AI advances pawn to far rank', () => {
-    // White pawn on a2 (row 6, col 0 = 42 on 7x7), one step from a1.
-    // Actually breakthrough is 7x7. row0 = far rank for white pawn.
-    // White pawn at a2 on 7x7 = row 5, col 0 = 35. One step to row 4 = not winning yet.
-    // Let me use row 1: a7 = idx 7 on 7x7. Pawn on b2 of 7x7 = row 5, col 1 = 36.
-    // Far rank for white = row 0. Pawn on b2 of 7x7 (row 1, col 1 = 8).
+    // Breakthrough is 7x7. White pawn at row 1, col 1 (idx 8 on 7x7).
+    // Far rank for white = row 0. Pawn can advance to row 0 to win.
     const fen = '7/1P5/7/7/7/7/7'
-    const game = createVariantGame('breakthrough', fen)
+    const game = createVariantGame('breakthrough', fen, { rows: 7, cols: 7 })
     const move = findBestMove(game, 0)
     expect(move.to).toBeLessThan(7)
   })

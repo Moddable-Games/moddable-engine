@@ -9,6 +9,8 @@
     "js/tiles.js",
     "js/play.js",
     "js/game-play.js",
+    "js/families.js",
+    "js/play-shared.js",
     "packages/play/src/sdk.js",
     "scripts/*.mjs"
   ],

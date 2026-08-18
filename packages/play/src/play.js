@@ -233,6 +233,9 @@ function resolveMeta(family, variant) {
     }
     if (topo.type) def.engine.topology = { ...topo }
     if (resolved.render) def.engine.render = resolved.render
+    if (resolved.pieces) def.engine.pieces = resolved.pieces
+    if (resolved.components) def.engine.components = resolved.components
+    if (resolved.surface) def.engine.surface = resolved.surface
     return def
   }
 

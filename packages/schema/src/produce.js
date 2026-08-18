@@ -17,7 +17,9 @@ export function produce(meta) {
   }
 
   if (engine.pieces) {
-    definition.pieces = engine.pieces.map(normalisePiece)
+    definition.pieces = Array.isArray(engine.pieces)
+      ? engine.pieces.map(normalisePiece)
+      : engine.pieces
   }
 
   if (engine.components) {

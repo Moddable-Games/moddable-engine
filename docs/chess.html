@@ -48,6 +48,7 @@
   <div class="docs-toc-title">Pages</div>
   <ul class="docs-toc-list">
     <li><a href="./">Overview</a></li>
+    <li><a href="authoring.html">Authoring a Variant</a></li>
     <li><a href="frontmatter.html">Frontmatter</a></li>
     <li><a href="topologies.html">Topologies</a></li>
     <li><a href="surfaces.html">Surfaces</a></li>
@@ -66,6 +67,7 @@
   <ul class="docs-toc-list">
     <li><a href="#embed">Embed via iframe</a></li>
     <li><a href="#sdk">Chess SDK</a></li>
+    <li><a href="#knobs">Variant parameters</a></li>
     <li><a href="#variants">Variants</a></li>
     <li><a href="#ai">AI difficulties</a></li>
     <li><a href="#puzzles">Puzzle API</a></li>
@@ -184,6 +186,41 @@ const custom = renderSvg('standard', 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQK
   <pre><code>const game = createGame('chess', 'atomic')
 const moves = game.getLegalMoves()
 game.applyMove(moves[0])</code></pre>
+
+  <h2 id="knobs">Variant parameters</h2>
+  <p>Every chess variant is expressed through the plugin's parametric configuration, with no per-variant code. These keys go under <code>engine.plugins.chess</code> in the variant's frontmatter. See <a href="authoring.html">Authoring a Variant</a> for the file layout.</p>
+
+  <table class="docs-table">
+    <thead><tr><th>Parameter</th><th>Default</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr><td><code>setup</code></td><td>family</td><td>FEN-like starting position. One rank per <code>/</code>, digits for empty runs.</td></tr>
+      <tr><td><code>castling</code></td><td><code>true</code></td><td>Whether castling is available.</td></tr>
+      <tr><td><code>enPassant</code></td><td><code>true</code></td><td>Whether pawns may capture en passant.</td></tr>
+      <tr><td><code>doubleStep</code></td><td><code>true</code></td><td>Whether pawns may advance two squares from their start rank.</td></tr>
+      <tr><td><code>torpedo</code></td><td><code>false</code></td><td>Pawns may double-step from anywhere, not only the start rank.</td></tr>
+      <tr><td><code>promotionChoices</code></td><td>Q R B N</td><td>Piece types a pawn may promote to.</td></tr>
+      <tr><td><code>promotionRow</code></td><td>derived</td><td>Override the promotion rank when it is not the far edge.</td></tr>
+      <tr><td><code>pawnStartRow</code></td><td>derived</td><td>Override the double-step rank. Derived from the setup when absent.</td></tr>
+      <tr><td><code>royalType</code></td><td><code>king</code></td><td>Which piece type is royal. <code>none</code> removes check and checkmate entirely.</td></tr>
+      <tr><td><code>rookType</code></td><td><code>rook</code></td><td>Which piece type castles with the royal.</td></tr>
+      <tr><td><code>pawnType</code></td><td><code>pawn</code></td><td>Which piece type follows pawn rules.</td></tr>
+      <tr><td><code>noCheck</code></td><td><code>false</code></td><td>Skip check detection. Required when <code>royalType: none</code>.</td></tr>
+      <tr><td><code>stalemateMeaning</code></td><td><code>draw</code></td><td><code>draw</code>, <code>win</code> or <code>loss</code> for the stalemated player.</td></tr>
+      <tr><td><code>winCondition</code></td><td>checkmate</td><td>Alternative terminal condition, e.g. antichess.</td></tr>
+      <tr><td><code>checkThreshold</code></td><td>&mdash;</td><td>Number of checks that wins. Three-check chess sets <code>3</code>.</td></tr>
+      <tr><td><code>drops</code></td><td><code>false</code></td><td>Captured pieces enter a hand and may be dropped. The crazyhouse shape.</td></tr>
+      <tr><td><code>placementPieces</code></td><td>&mdash;</td><td>Pieces placed during a setup phase rather than present at the start.</td></tr>
+      <tr><td><code>randomSetup</code></td><td><code>false</code></td><td>Shuffle the back rank. The chess960 shape.</td></tr>
+      <tr><td><code>playerCount</code></td><td><code>2</code></td><td>Number of armies. Above two, declare <code>advancement</code> as well.</td></tr>
+      <tr><td><code>advancement</code></td><td><code>{0:-1, 1:1}</code></td><td>Which way each seat advances, by owner index. Scalar, or <code>[dr, dc]</code> on a cross-shaped board.</td></tr>
+      <tr><td><code>visibility</code></td><td>&mdash;</td><td>Fog-of-war and dark-chess style restrictions.</td></tr>
+      <tr><td><code>pieces</code></td><td>&mdash;</td><td>Movement definitions for pieces beyond the standard six. See <a href="authoring.html#pieces">Defining a new piece</a>.</td></tr>
+      <tr><td><code>vocabulary</code></td><td>&mdash;</td><td>Maps piece types to FEN symbols, keyed by owner index.</td></tr>
+      <tr><td><code>extends</code></td><td>&mdash;</td><td>Inherit another variant's rule config, then override.</td></tr>
+    </tbody>
+  </table>
+
+  <p>A key the plugin does not recognise is reported on the console as <code>[chess] Unknown config keys: &hellip;</code> and otherwise ignored, so the variant silently plays with the default. Check that warning first when a rule appears not to take effect.</p>
 
   <h2 id="variants">Variants</h2>
   <p><strong>100 variants</strong> registered and playable. Use the <code>key</code> as the <code>variant</code> URL parameter or SDK argument.</p>

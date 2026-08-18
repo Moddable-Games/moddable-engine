@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Authoring a Variant &mdash; Moddable Engine</title>
+<meta name="description" content="Define a new board game variant in one markdown file. No engine code required.">
+<meta property="og:title" content="Authoring a Variant &mdash; Moddable Engine">
+<meta property="og:description" content="Define a new board game variant in one markdown file. No engine code required.">
+<meta property="og:image" content="https://engine.moddable.games/og/docs.png?v=1.0.20">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://engine.moddable.games/docs/authoring.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Authoring a Variant &mdash; Moddable Engine">
+<meta name="twitter:description" content="Define a new board game variant in one markdown file. No engine code required.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/docs.png?v=1.0.20">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../css/home.css?v=1.0.20">
+<link rel="stylesheet" href="../css/docs.css?v=1.0.20">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../play/" class="nav-link">Play</a>
+      <a href="../create/" class="nav-link">Create</a>
+      <a href="../boards/" class="nav-link">Boards</a>
+      <a href="../pieces/" class="nav-link">Pieces</a>
+      <a href="../tiles/" class="nav-link">Tiles</a>
+      <a href="./" class="nav-link nav-link--active">Docs</a>
+      <a href="../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</header>
+<div class="docs-layout">
+<button class="docs-toc-toggle" onclick="this.classList.toggle('active');this.nextElementSibling.classList.toggle('open')">Navigation</button>
+<nav class="docs-toc">
+  <div class="docs-toc-title">Pages</div>
+  <ul class="docs-toc-list">
+    <li><a href="./">Overview</a></li>
+    <li><a href="authoring.html" class="active">Authoring a Variant</a></li>
+    <li><a href="frontmatter.html">Frontmatter</a></li>
+    <li><a href="topologies.html">Topologies</a></li>
+    <li><a href="surfaces.html">Surfaces</a></li>
+    <li><a href="pieces.html">Piece Sets</a></li>
+    <li><a href="plugins.html">Plugins</a></li>
+    <li><a href="render-pipeline.html">Render Pipeline</a></li>
+    <li><a href="chess.html">Chess</a></li>
+    <li><a href="go.html">Go</a></li>
+    <li><a href="draughts.html">Draughts</a></li>
+    <li><a href="xiangqi.html">Xiangqi</a></li>
+    <li><a href="shogi.html">Shogi</a></li>
+    <li><a href="reversi.html">Reversi</a></li>
+    <li><a href="hexmaps.html">Hex Maps</a></li>
+  </ul>
+  <div class="docs-toc-title" style="margin-top:20px">On this page</div>
+  <ul class="docs-toc-list">
+    <li><a href="#setup">Setting up</a></li>
+    <li><a href="#file">Where the file goes</a></li>
+    <li><a href="#minimal">A minimal variant</a></li>
+    <li><a href="#engine">The engine block</a></li>
+    <li><a href="#pieces">Defining a new piece</a></li>
+    <li><a href="#vocabulary">Symbols and vocabulary</a></li>
+    <li><a href="#precedence">Precedence</a></li>
+    <li><a href="#publish">Making it appear</a></li>
+    <li><a href="#mistakes">Common mistakes</a></li>
+  </ul>
+</nav>
+<div class="docs-body">
+
+  <h1>Authoring a Variant</h1>
+  <p class="docs-lede">A variant is one markdown file. If the rules you want are already expressible, you will not write any JavaScript.</p>
+
+  <h2 id="setup">Setting up</h2>
+  <p>The engine is inert on its own. Every game definition, every board and every starting position lives in a second repository, <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">moddable-rules</a>. Clone both as siblings:</p>
+
+  <pre><code>git clone https://github.com/Moddable-Games/moddable-engine.git
+git clone https://github.com/Moddable-Games/moddable-rules.git
+cd moddable-engine &amp;&amp; npm ci</code></pre>
+
+  <p>The browser resolves rules at <code>../../moddable-rules/</code> relative to the engine, so the two checkouts must sit under a common parent. Node tooling and tests read the <code>MODDABLE_RULES_DIR</code> environment variable instead:</p>
+
+  <pre><code>MODDABLE_RULES_DIR=../moddable-rules/games npm test</code></pre>
+
+  <p>Without that variable the suite fails wholesale, because the corpus it is testing against is not there. That is expected, not a broken checkout.</p>
+
+  <h2 id="file">Where the file goes</h2>
+  <p>Variants are discovered by path. A chess variant called Zebra Chess lives at:</p>
+
+  <pre><code>moddable-rules/games/chess/content/variants/zebra-chess.md</code></pre>
+
+  <p><strong>The filename is the slug.</strong> It is how the variant is addressed in URLs (<code>?family=chess&amp;variant=zebra-chess</code>), in the SDK, and in every API response. Use lowercase and hyphens.</p>
+
+  <p>The six families that can currently be extended this way are <code>chess</code>, <code>shogi</code>, <code>go</code>, <code>draughts</code>, <code>xiangqi</code> and <code>reversi</code>. Adding a seventh family is not yet a markdown-only operation.</p>
+
+  <h2 id="minimal">A minimal variant</h2>
+  <p>This is a complete, playable file. Nothing has been elided.</p>
+
+  <pre><code>---
+title: Zebra Chess
+slug: zebra-chess
+parent: chess
+playable: true
+engine:
+  topology:
+    type: grid
+    rows: 8
+    cols: 8
+  players: [white, black]
+  setup: "rzbqkbzr/pppppppp/8/8/8/8/PPPPPPPP/RZBQKBZR"
+  pieces:
+    set: wikimedia-standard
+  vocabulary:
+    zebra:
+      symbols: { 0: Z, 1: z }
+  plugins:
+    chess:
+      castling: false
+      pieces:
+        zebra:
+          type: leaper
+          offsets: [[2,3],[3,2],[-2,3],[-3,2],[2,-3],[3,-2],[-2,-3],[-3,-2]]
+---
+
+## Zebra Chess
+
+Knights are replaced by zebras, which leap (2,3) instead of (1,2).
+</code></pre>
+
+  <p>Four frontmatter fields outside <code>engine:</code> are load-bearing:</p>
+
+  <table class="docs-table">
+    <thead><tr><th>Field</th><th>Required</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>title</code></td><td>yes</td><td>Display name in the variant picker</td></tr>
+      <tr><td><code>slug</code></td><td>yes</td><td>Must match the filename. Addressed everywhere by this.</td></tr>
+      <tr><td><code>parent</code></td><td>yes</td><td>The family. Schema validation rejects the file without it.</td></tr>
+      <tr><td><code>playable</code></td><td>yes</td><td><code>true</code> puts it on the play page. Omit or set <code>false</code> and the variant renders but cannot be played.</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="engine">The engine block</h2>
+  <p>Everything the engine reads lives under <code>engine:</code>. The keys divide into two groups, and the distinction matters more than it looks.</p>
+
+  <p><strong>Structural keys</strong> describe the board and its presentation. They are consumed by the topology and render layers: <code>topology</code>, <code>players</code>, <code>surface</code>, <code>render</code>, <code>pieces</code>, <code>components</code>, <code>meta</code>, <code>plugins</code>.</p>
+
+  <p><strong>Rule keys</strong> describe how the game is played. They live under <code>engine.plugins.&lt;family&gt;</code> and are passed to that family's plugin as its config. Each family page documents its own set: see <a href="chess.html#knobs">Chess</a>, <a href="draughts.html#knobs">Draughts</a>, <a href="xiangqi.html">Xiangqi</a> and <a href="reversi.html">Reversi</a>.</p>
+
+  <div class="docs-callout">
+    <p><strong><code>pieces</code> means two different things.</strong> <code>engine.pieces</code> selects the <em>artwork</em>: <code>{ set: wikimedia-standard }</code>. <code>engine.plugins.&lt;family&gt;.pieces</code> defines <em>movement</em>. They are unrelated, and putting a movement definition in the first one silently does nothing.</p>
+  </div>
+
+  <h2 id="pieces">Defining a new piece</h2>
+  <p>A piece is a movement primitive plus its parameters, declared under <code>engine.plugins.&lt;family&gt;.pieces</code>. The available primitives:</p>
+
+  <table class="docs-table">
+    <thead><tr><th>type</th><th>Parameters</th><th>Behaviour</th></tr></thead>
+    <tbody>
+      <tr><td><code>rider</code></td><td><code>dirs</code>, <code>maxSteps</code>, <code>minSteps</code></td><td>Slides until blocked. A rook is <code>dirs: orthogonal</code>; a king is <code>dirs: all, maxSteps: 1</code>.</td></tr>
+      <tr><td><code>leaper</code></td><td><code>offsets</code></td><td>Jumps to fixed offsets, ignoring anything between.</td></tr>
+      <tr><td><code>hopper</code></td><td><code>dirs</code></td><td>Must jump exactly one piece to move or capture. The xiangqi cannon.</td></tr>
+      <tr><td><code>locust</code></td><td><code>dirs</code></td><td>Captures the piece it jumps over and lands beyond it.</td></tr>
+      <tr><td><code>bent</code></td><td><code>first</code>, <code>firstSteps</code>, <code>minSecondLeg</code></td><td>Moves in one direction then turns. Bent riders and crooked bishops.</td></tr>
+      <tr><td><code>divergent</code></td><td><code>move</code>, <code>capture</code></td><td>Different movement and capture patterns, each itself a primitive.</td></tr>
+      <tr><td><code>compose</code></td><td><code>parts</code></td><td>The union of several primitives. An amazon is a queen composed with a knight.</td></tr>
+    </tbody>
+  </table>
+
+  <p><code>dirs</code> accepts <code>orthogonal</code>, <code>diagonal</code> or <code>all</code>. <code>offsets</code> accepts either an explicit <code>[[row, col], ...]</code> list or one of the named presets:</p>
+
+  <pre><code>knight  camel  elephant  dabbaba  zebra  king  hex-knight</code></pre>
+
+  <p>Offsets are <code>[row, col]</code>, row first, with row increasing down the board as printed in the setup string.</p>
+
+  <h2 id="vocabulary">Symbols and vocabulary</h2>
+  <p>The <code>setup</code> string is FEN-like: one rank per <code>/</code>, digits for runs of empty squares, a character per piece. <code>vocabulary</code> maps piece types to the characters that represent them, keyed by <em>owner index</em>:</p>
+
+  <pre><code>  vocabulary:
+    zebra:
+      symbols: { 0: Z, 1: z }</code></pre>
+
+  <p>Owner 0 is the first entry in <code>players</code>. For boards with more than two armies, declare all of them:</p>
+
+  <pre><code>  vocabulary:
+    rook:
+      symbols: { 0: rR, 1: yR, 2: gR, 3: bR }</code></pre>
+
+  <p>Symbols may be more than one character. When they are, the setup string is comma-separated per rank rather than character-per-square. Artwork is resolved from the symbol by convention (<code>Z</code> looks for <code>wZ</code> in the chosen set), so a piece with no matching file renders as an empty square.</p>
+
+  <h2 id="precedence">Precedence</h2>
+  <p>A non-structural key written at <code>engine.&lt;key&gt;</code> is copied into the plugin config, and it <strong>overwrites</strong> the same key written at <code>engine.plugins.&lt;family&gt;.&lt;key&gt;</code>. The less specific location wins. This is the opposite of what most authors expect, so prefer to write rule keys in the plugin block only, and never in both places.</p>
+
+  <h2 id="publish">Making it appear</h2>
+  <p>The play page reads a generated manifest. After adding or changing a variant:</p>
+
+  <pre><code>MODDABLE_RULES_DIR=../moddable-rules/games node scripts/gen-playability-manifest.mjs</code></pre>
+
+  <p>Commit the resulting <code>play/playability-manifest.json</code> alongside your variant. CI checks that it is fresh.</p>
+
+  <h2 id="mistakes">Common mistakes</h2>
+
+  <table class="docs-table">
+    <thead><tr><th>Symptom</th><th>Cause</th></tr></thead>
+    <tbody>
+      <tr><td><code>Unknown variant "x" for family "y"</code></td><td>The file is not at <code>games/&lt;family&gt;/content/variants/&lt;slug&gt;.md</code>, or <code>MODDABLE_RULES_DIR</code> is not set.</td></tr>
+      <tr><td><code>Unmapped FEN symbol "Z"</code></td><td>A character in <code>setup</code> has no <code>vocabulary</code> entry.</td></tr>
+      <tr><td><code>Vocabulary declares "x" but no matching entry in pieces</code></td><td>A symbol was declared without a movement definition under <code>plugins.&lt;family&gt;.pieces</code>.</td></tr>
+      <tr><td><code>FEN has N ranks but topology has M rows</code></td><td>The setup string does not match the declared board.</td></tr>
+      <tr><td><code>[family] Unknown config keys: x</code></td><td>A rule key is misspelled. The plugin ignored it and used its default.</td></tr>
+      <tr><td>Board renders, no pieces</td><td><code>pieces.set</code> names a set that does not exist, or the symbols have no matching artwork in it.</td></tr>
+      <tr><td>Variant plays as the family default</td><td>Rule keys are under <code>engine:</code> rather than <code>engine.plugins.&lt;family&gt;:</code>, or <code>extends</code> names a parent that does not resolve.</td></tr>
+    </tbody>
+  </table>
+
+  <p>The <a href="https://github.com/Moddable-Games/moddable-rules/tree/main/games" target="_blank" rel="noopener">existing corpus</a> is the best reference. Every variant on the play page is one of these files, and reading a nearby one is usually faster than reading this page twice.</p>
+
+</div>
+</div>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../play/">Play</a>
+        <a href="../boards/">Boards</a>
+        <a href="../pieces/">Pieces</a>
+        <a href="../tiles/">Tiles</a>
+        <a href="../docs/">Docs</a>
+        <a href="../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Moddable Games</h4>
+        <a href="https://moddable.games" target="_blank" rel="noopener">Homepage</a>
+        <a href="https://rules.moddable.games" target="_blank" rel="noopener">Rules</a>
+        <a href="https://moddable.games/news/" target="_blank" rel="noopener">News</a>
+        <a href="https://discord.gg/VhsVGNq6Za" target="_blank" rel="noopener">Discord</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.20</span>
+    </div>
+  </div>
+</footer></body>
+</html>
