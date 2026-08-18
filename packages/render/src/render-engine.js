@@ -415,7 +415,7 @@ function renderPiecesFromCells(position, cells, tileSize, opts) {
     if (!cell) continue
     const pos = { x: cell.x, y: cell.y }
     const piece = typeof raw === 'object' ? raw : { type: String(raw) }
-    const colorPrefix = piece.color === 'white' ? 'w' : 'b'
+    const colorPrefix = (piece.owner === 0 || piece.color === 'white') ? 'w' : 'b'
     const imageKey = (piece.type === 'stone') ? colorPrefix + 'S'
       : (piece.type === 'man') ? colorPrefix + 'M'
       : (piece.type === 'king') ? colorPrefix + 'K'
@@ -454,14 +454,14 @@ function renderPiecesFromCells(position, cells, tileSize, opts) {
 }
 
 function drawStone(piece, cx, cy, r, C) {
-  const isW = piece.color === 'white'
+  const isW = piece.owner === 0 || piece.color === 'white'
   const fill = isW ? (C.whitePieceFill || '#fff') : (C.blackPieceFill || '#1c1c1c')
   const stroke = isW ? (C.whitePieceStroke || '#333') : (C.blackPieceStroke || '#888')
   return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>`
 }
 
 function drawDraughtsPiece(piece, cx, cy, r, C) {
-  const isW = piece.color === 'white'
+  const isW = piece.owner === 0 || piece.color === 'white'
   const fill = isW ? '#fff' : '#333'
   const stroke = isW ? '#333' : '#111'
   const inner = isW ? '#ccc' : '#555'

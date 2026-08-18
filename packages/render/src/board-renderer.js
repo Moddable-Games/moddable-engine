@@ -156,8 +156,9 @@ export function createBoardRenderer(opts = {}) {
     for (const cell of cells) {
       const piece = pieces[cell.key]
       if (!piece) continue
-      const fill = piece.color === 'white' ? (colors.whitePiece || '#fff') : (colors.blackPiece || '#1c1c1c')
-      const stroke = piece.color === 'white' ? (colors.whitePieceStroke || '#333') : (colors.blackPieceStroke || '#888')
+      const isLight = piece.owner === 0 || piece.color === 'white'
+      const fill = isLight ? (colors.whitePiece || '#fff') : (colors.blackPiece || '#1c1c1c')
+      const stroke = isLight ? (colors.whitePieceStroke || '#333') : (colors.blackPieceStroke || '#888')
       const r = (cell.attrs.width || cell.attrs.r || cell.attrs.rx || 20) * 0.35
       parts.push(`<circle cx="${cell.center.x}" cy="${cell.center.y}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>`)
       if (piece.label) {
