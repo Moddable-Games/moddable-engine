@@ -1,3 +1,13 @@
+const registeredEvaluators = new Map()
+
+export function registerEvaluator(family, evaluator) {
+  registeredEvaluators.set(family, evaluator)
+}
+
+export function getEvaluator(family) {
+  return registeredEvaluators.get(family) || EVALUATORS[family] || null
+}
+
 export const PIECE_VALUES = {
   king: 20000, queen: 900, rook: 500, bishop: 330, knight: 320, pawn: 100,
   archbishop: 650, chancellor: 830, cardinal: 650, marshal: 830,

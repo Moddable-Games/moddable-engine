@@ -9,12 +9,21 @@ import {
 } from './variant-registry.js'
 import { createMinimax, DIFFICULTIES } from '../../ai/src/minimax.js'
 import { createMCTS, MCTS_DIFFICULTIES } from '../../ai/src/mcts.js'
-import { EVALUATORS } from '../../ai/src/evaluators.js'
+import { getEvaluator } from '../../ai/src/evaluators.js'
 import { createGoPlayoutPolicy, createGoExpansionPolicy } from '../../ai/src/go-playout-policy.js'
 import { interactionModelFor, FAMILY_INTERACTION } from './interaction.js'
 import { definitionFromVariant } from './variant-definition.js'
 
-const MCTS_FAMILIES = new Set(['go'])
+// Families that default to MCTS search (registered dynamically)
+const mctsDefaults = new Map()
+
+export function registerMctsDefault(family) {
+  mctsDefaults.set(family, true)
+}
+
+function usesMctsDefault(family) {
+  return mctsDefaults.get(family) === true
+}
 
 export { getFamilies, hasFamily, getVariantGroups, hasVariant, getVariantConfig }
 export { DIFFICULTIES as AI_DIFFICULTIES }
@@ -66,7 +75,7 @@ export function getGameStatus(family, variant, state, opts = {}) {
 export function createAI(family, variant, opts = {}) {
   const difficulty = opts.difficulty || 'medium'
   const searchMethod = opts.search || variantSearchMethod(family, variant, opts.definition)
-  const useMcts = searchMethod === 'mcts' || (!searchMethod && MCTS_FAMILIES.has(family))
+  const useMcts = searchMethod === 'mcts' || (!searchMethod && usesMctsDefault(family))
 
   const simulator = createSimulatorForFamily(family, opts.state || null, {
     variant,
@@ -147,7 +156,7 @@ function searchDefinition(family, variant) {
 function variantEvaluator(family, variant) {
   const config = variant ? getVariantConfig(family, variant) : null
   if (!config || !config.evaluate) return undefined
-  const baseEval = EVALUATORS[family] || null
+  const baseEval = getEvaluator(family)
   const variantEval = config.evaluate
   return (state, playerIndex) => {
     const ctx = { currentPlayer: playerIndex, config }

@@ -45,6 +45,7 @@ export {
   getLegalMoves,
   renderSvg,
   AI_DIFFICULTIES,
+  registerMctsDefault,
 } from './src/sdk.js'
 
 export {

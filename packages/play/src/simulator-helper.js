@@ -1,5 +1,5 @@
 import { createSimulator } from '../../ai/src/simulator.js'
-import { EVALUATORS } from '../../ai/src/evaluators.js'
+import { getEvaluator } from '../../ai/src/evaluators.js'
 import { createGameForFamily } from './play.js'
 
 export function createSimulatorForFamily(family, state, opts = {}) {
@@ -24,7 +24,7 @@ export function createSimulatorForFamily(family, state, opts = {}) {
     ? playerNames.length
     : (rawGame.definition.players.length || 2)
 
-  const evaluate = opts.evaluate || EVALUATORS[family] || null
+  const evaluate = opts.evaluate || getEvaluator(family)
 
   return createSimulator(plugin, { playerCount, playerNames, evaluate })
 }

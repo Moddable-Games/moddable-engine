@@ -5,6 +5,7 @@ import { getVariantConfig, hasVariant, getSlugForKey, setVariantSources as _setV
 import { definitionFromVariant } from './variant-definition.js'
 import { parseVariantKey, applyFlags, familySupportsFlag, registerPluginFlags } from './variant-flags.js'
 import { registerFamilyInteraction } from './interaction.js'
+import { registerMctsDefault } from './sdk.js'
 import { resolveVariantSync } from './resolve-frontmatter.js'
 import { createGridTopology } from '../../topologies/grid/src/topology-grid.js'
 import { createHexTopology } from '../../topologies/hex/src/topology-hex.js'
@@ -47,12 +48,14 @@ export function registerPluginFactory(family, factory) {
   PLUGIN_FACTORIES[family] = factory
   if (factory.flags) registerPluginFlags(family, factory.flags)
   if (factory.interaction) registerFamilyInteraction(family, factory.interaction)
+  if (factory.mcts) registerMctsDefault(family)
 }
 
-// Register plugin-declared flags and interaction models (static properties on factory functions)
+// Register plugin-declared flags, interaction models, and MCTS defaults (static properties on factory functions)
 for (const [family, factory] of Object.entries(PLUGIN_FACTORIES)) {
   if (factory.flags) registerPluginFlags(family, factory.flags)
   if (factory.interaction) registerFamilyInteraction(family, factory.interaction)
+  if (factory.mcts) registerMctsDefault(family)
 }
 
 const COMPONENT_FACTORIES = {
