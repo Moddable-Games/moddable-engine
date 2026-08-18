@@ -1552,59 +1552,83 @@ function produceGraphLayout(topo, colors, render) {
   const structure = topo.structure || 'concentric-rings'
   const params = topo.params || {}
   const size = render.canvasSize || 320
-  const pointRadius = render.nodeRadius || (structure === 'star' ? 2.5 : structure === 'grid-cross' ? 6 : 7)
+  // star sizes its holes from `spacing`, so it takes no point radius.
+  const pointRadius = render.nodeRadius || (structure === 'grid-cross' ? 6 : 7)
 
   switch (structure) {
-    case 'perimeter-cross': return { type: 'graph', config: { ops: nyoutOps(size, 0, 0, colors, pointRadius), width: size, height: size } }
+    case 'perimeter-cross': return { type: 'graph', config: { ops: perimeterCrossOps(size, 0, 0, colors, pointRadius, params), width: size, height: size } }
     case 'concentric-rings': return { type: 'graph', config: { ops: morrisOps(size, 0, 0, colors, pointRadius, params), width: size, height: size } }
-    case 'grid-cross': return { type: 'graph', config: { ops: asaltoOps(size, 0, 0, colors, pointRadius, params, render), width: size, height: size } }
-    case 'star': return produceSternHalmaLayout(colors, render, pointRadius)
+    case 'grid-cross': return { type: 'graph', config: { ops: gridCrossOps(size, 0, 0, colors, pointRadius, params, render), width: size, height: size } }
+    case 'star': return produceStarLayout(colors, render, params)
     default: return { type: 'graph', config: { ops: [], width: size, height: size } }
   }
 }
 
 // --- Graph structure generators + ops builders ---
 
-function nyoutStations(size, ox, oy) {
+// A perimeter-cross board is a square circuit with `nodesPerSide` stations per
+// side, plus diagonals that run corner → centre → opposite corner with
+// `intermediatesPerDiagonal` stations on each half. `sides` selects how many of
+// the square's four sides are walked; the square is the structure's frame, so
+// values above 4 collapse to 4 rather than inventing a polygon.
+const PERIMETER_CROSS_MAX_SIDES = 4
+
+function perimeterCrossStations(size, ox, oy, params) {
+  const nodesPerSide = params.nodesPerSide || 5
+  const hasDiagonals = params.diagonals !== false
+  const intermediates = params.intermediatesPerDiagonal ?? 2
   const margin = size * 0.08
   const nodes = [], edges = []
   const x0 = ox + margin, x1 = ox + size - margin
   const y0 = oy + margin, y1 = oy + size - margin
   const cx = ox + size / 2, cy = oy + size / 2
-  const corners = [{ x: x1, y: y1 }, { x: x0, y: y1 }, { x: x0, y: y0 }, { x: x1, y: y0 }]
-  const outerNodes = []
-  for (let side = 0; side < 4; side++) {
-    const from = corners[side], to = corners[(side + 1) % 4]
-    outerNodes.push(from)
-    for (let i = 1; i <= 4; i++) outerNodes.push({ x: from.x + (to.x - from.x) * i / 5, y: from.y + (to.y - from.y) * i / 5 })
+  const square = [{ x: x1, y: y1 }, { x: x0, y: y1 }, { x: x0, y: y0 }, { x: x1, y: y0 }]
+  const sides = Math.min(params.sides || PERIMETER_CROSS_MAX_SIDES, PERIMETER_CROSS_MAX_SIDES)
+  const corners = square.slice(0, sides)
+  for (let side = 0; side < corners.length; side++) {
+    const from = corners[side], to = corners[(side + 1) % corners.length]
+    nodes.push(from)
+    for (let i = 1; i < nodesPerSide; i++) nodes.push({ x: from.x + (to.x - from.x) * i / nodesPerSide, y: from.y + (to.y - from.y) * i / nodesPerSide })
   }
-  for (let i = 0; i < 20; i++) edges.push([i, (i + 1) % 20])
-  for (const n of outerNodes) nodes.push(n)
+  const perimeterCount = nodes.length
+  for (let i = 0; i < perimeterCount; i++) edges.push([i, (i + 1) % perimeterCount])
+  const centreIdx = nodes.length
   nodes.push({ x: cx, y: cy })
-  const nw = corners[2], se = corners[0]
-  nodes.push({ x: nw.x + (cx - nw.x) * 1 / 3, y: nw.y + (cy - nw.y) * 1 / 3 })
-  nodes.push({ x: nw.x + (cx - nw.x) * 2 / 3, y: nw.y + (cy - nw.y) * 2 / 3 })
-  nodes.push({ x: cx + (se.x - cx) * 1 / 3, y: cy + (se.y - cy) * 1 / 3 })
-  nodes.push({ x: cx + (se.x - cx) * 2 / 3, y: cy + (se.y - cy) * 2 / 3 })
-  const ne = corners[3], sw = corners[1]
-  nodes.push({ x: ne.x + (cx - ne.x) * 1 / 3, y: ne.y + (cy - ne.y) * 1 / 3 })
-  nodes.push({ x: ne.x + (cx - ne.x) * 2 / 3, y: ne.y + (cy - ne.y) * 2 / 3 })
-  nodes.push({ x: cx + (sw.x - cx) * 1 / 3, y: cy + (sw.y - cy) * 1 / 3 })
-  nodes.push({ x: cx + (sw.x - cx) * 2 / 3, y: cy + (sw.y - cy) * 2 / 3 })
-  edges.push([10, 21], [21, 22], [22, 20], [20, 23], [23, 24], [24, 0])
-  edges.push([15, 25], [25, 26], [26, 20], [20, 27], [27, 28], [28, 5])
-  const junctions = new Set([0, 5, 10, 15, 20])
-  return { nodes, edges, junctions }
+  const junctions = new Set([centreIdx])
+  for (let side = 0; side < corners.length; side++) junctions.add(side * nodesPerSide)
+
+  if (hasDiagonals) {
+    const half = Math.floor(corners.length / 2)
+    for (let d = 0; d < half; d++) {
+      const inIdx = (d + half) * nodesPerSide, outIdx = d * nodesPerSide
+      const inCorner = nodes[inIdx], outCorner = nodes[outIdx]
+      let prev = inIdx
+      for (let i = 1; i <= intermediates; i++) {
+        nodes.push({ x: inCorner.x + (cx - inCorner.x) * i / (intermediates + 1), y: inCorner.y + (cy - inCorner.y) * i / (intermediates + 1) })
+        edges.push([prev, nodes.length - 1])
+        prev = nodes.length - 1
+      }
+      edges.push([prev, centreIdx])
+      prev = centreIdx
+      for (let i = 1; i <= intermediates; i++) {
+        nodes.push({ x: cx + (outCorner.x - cx) * i / (intermediates + 1), y: cy + (outCorner.y - cy) * i / (intermediates + 1) })
+        edges.push([prev, nodes.length - 1])
+        prev = nodes.length - 1
+      }
+      edges.push([prev, outIdx])
+    }
+  }
+  return { nodes, edges, junctions, centreIdx }
 }
 
-function nyoutOps(size, ox, oy, colors, pointRadius) {
-  const { nodes, edges, junctions } = nyoutStations(size, ox, oy)
-  const dotR = (i) => i === 20 ? pointRadius * 1.4 : junctions.has(i) ? pointRadius * 1.2 : pointRadius
+function perimeterCrossOps(size, ox, oy, colors, pointRadius, params) {
+  const { nodes, edges, junctions, centreIdx } = perimeterCrossStations(size, ox, oy, params)
+  const dotR = (i) => i === centreIdx ? pointRadius * 1.4 : junctions.has(i) ? pointRadius * 1.2 : pointRadius
   return [
     { op: 'rect', attrs: { x: ox, y: oy, width: size, height: size, fill: colors.background, rx: 4 } },
     { op: 'edges', attrs: { fill: 'none', stroke: colors.line, 'stroke-width': 2.5, 'stroke-linecap': 'round' }, nodes, pairs: edges },
     { op: 'nodes', group: {}, items: nodes,
-      dot: { radius: (n, i) => dotR(i), fill: (n, i) => i === 20 ? colors.centre : junctions.has(i) ? colors.junction : colors.point },
+      dot: { radius: (n, i) => dotR(i), fill: (n, i) => i === centreIdx ? colors.centre : junctions.has(i) ? colors.junction : colors.point },
       hit: { radius: (n, i) => dotR(i) * 2, id: (n, i) => `n${i + 1}`, dataType: 'node' } },
   ]
 }
@@ -1678,12 +1702,13 @@ function morrisOps(size, ox, oy, colors, pointRadius, params) {
   ]
 }
 
-const DEFAULT_ASALTO_GRID = {
+// Default grid-cross frame (alquerque cross) when no `rows` are declared.
+const DEFAULT_GRID_CROSS = {
   rows: [[2,3,4],[2,3,4],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[2,3,4],[2,3,4]],
   fortressRows: 2, fortressExtraRow: 2, fortressCols: [2,3,4],
 }
 
-function asaltoNodes(size, ox, oy, gridDef) {
+function gridCrossNodes(size, ox, oy, gridDef) {
   const nodes = [], edges = [], fortressNodes = new Set()
   const rowDefs = gridDef.rows.map((cols, y) => ({ cols, y }))
   const fortressRowCount = gridDef.fortressRows || 2
@@ -1736,7 +1761,7 @@ function asaltoNodes(size, ox, oy, gridDef) {
   return { nodes, edges, fortressNodes, nodeMap }
 }
 
-function asaltoFortressElements(nodes, fortressNodes, nodeMap, gridDef, colors) {
+function gridCrossFortressElements(nodes, fortressNodes, nodeMap, gridDef, colors) {
   const fNodes = [...fortressNodes].map(i => nodes[i])
   if (fNodes.length === 0) return []
   const parts = []
@@ -1771,12 +1796,12 @@ function asaltoFortressElements(nodes, fortressNodes, nodeMap, gridDef, colors) 
   return parts
 }
 
-function asaltoOps(size, ox, oy, colors, pointRadius, params, render) {
-  const gridDef = params.rows ? params : DEFAULT_ASALTO_GRID
-  const { nodes, edges, fortressNodes, nodeMap } = asaltoNodes(size, ox, oy, gridDef)
+function gridCrossOps(size, ox, oy, colors, pointRadius, params, render) {
+  const gridDef = params.rows ? params : DEFAULT_GRID_CROSS
+  const { nodes, edges, fortressNodes, nodeMap } = gridCrossNodes(size, ox, oy, gridDef)
   const ops = [
     { op: 'rect', attrs: { x: ox, y: oy, width: size, height: size, fill: colors.background, rx: 4 } },
-    { op: 'elements', items: asaltoFortressElements(nodes, fortressNodes, nodeMap, gridDef, colors) },
+    { op: 'elements', items: gridCrossFortressElements(nodes, fortressNodes, nodeMap, gridDef, colors) },
     { op: 'edges', attrs: { fill: 'none', stroke: colors.line, 'stroke-width': 2, 'stroke-linecap': 'round' }, nodes, pairs: edges },
     { op: 'nodes', group: { fill: colors.point }, items: nodes,
       dot: { radius: pointRadius, fill: colors.point },
@@ -1803,39 +1828,77 @@ function asaltoOps(size, ox, oy, colors, pointRadius, params, render) {
   return ops
 }
 
-function produceSternHalmaLayout(colors, render, _unused) {
-  const spacing = render.cellSize || 24
+// Six-pointed star lattice. Arm order is the drawing order of the six points,
+// clockwise from the top; every per-arm array below is indexed by it.
+const STAR_ARMS = ['N', 'NE', 'SE', 'S', 'SW', 'NW']
+
+// Fallback piece appearance per arm, used only when the resolved piece set has
+// no image for the arm. Indexed by STAR_ARMS. Not derivable from the resolved
+// engine: nothing in it maps a player colour name to a hex value.
+const STAR_ARM_PIECE_KEYS = ['red-circle', 'blue-circle', 'green-circle', 'black-circle', 'purple-circle', 'brown-circle']
+const STAR_ARM_COLORS = ['#d32f2f', '#1565c0', '#2e7d32', '#1a1a1a', '#6a1b9a', '#5d4037']
+
+// Star outline (inner hexagon + six tips) as offsets from the lattice centre,
+// calibrated at STAR_OUTLINE_REF_SPACING / STAR_OUTLINE_REF_ARM. Both the hole
+// lattice and the painted star scale linearly in spacing and in arm size, so
+// the table is scaled by (spacing/ref) * (armSize/refArm).
+const STAR_OUTLINE_REF_SPACING = 24
+const STAR_OUTLINE_REF_ARM = 4
+const STAR_HEX_OFFSETS = [[-50.5, -93], [50.5, -93], [104.3, 0], [50.5, 92.9], [-50.5, 92.9], [-104.3, 0]]
+const STAR_TIP_OFFSETS = [[0, -180.3], [158, -93], [158, 92.9], [0, 180.3], [-158, 92.9], [-158, -93]]
+
+// Row hole counts for a six-pointed star of arm size n: n arm rows counting up,
+// then 2n+1 body rows (central hexagon row + the two side arms), then n arm rows
+// counting down. n = 4 gives the classic [1,2,3,4,13,12,11,10,9,10,11,12,13,4,3,2,1].
+function starRowWidths(n) {
+  const widths = []
+  for (let row = 0; row < n; row++) widths.push(row + 1)
+  for (let m = 0; m <= 2 * n; m++) {
+    const central = n + 1 + Math.min(m, 2 * n - m)
+    const armWidth = m < n ? n - m : (m > n ? m - n : 0)
+    widths.push(central + 2 * armWidth)
+  }
+  for (let row = 3 * n + 1; row <= 4 * n; row++) widths.push(4 * n + 1 - row)
+  return widths
+}
+
+function produceStarLayout(colors, render, params) {
+  const armSize = params.armSize || 4
+  const spacing = params.spacing || render.cellSize || 24
+  const rowCount = 4 * armSize + 1
   const pieceR = spacing * 0.19
   const rim = spacing * 1.2, margin = spacing * 2.5
-  const innerW = spacing * 16 + margin * 2
-  const innerH = Math.round(spacing * Math.sqrt(3) / 2 * 16) + margin * 2 + spacing
+  const innerW = spacing * (rowCount - 1) + margin * 2
+  const innerH = Math.round(spacing * Math.sqrt(3) / 2 * (rowCount - 1)) + margin * 2 + spacing
   const boardW = innerW + rim * 2, boardH = innerH + rim * 2
   const ox = 0, oy = 0
   const rowH = spacing * Math.sqrt(3) / 2
-  const cx = ox + rim + spacing * 8 + margin, topY = oy + rim + margin + spacing * 0.5
-  const rowWidths = [1, 2, 3, 4, 13, 12, 11, 10, 9, 10, 11, 12, 13, 4, 3, 2, 1]
-  const positions = [], arms = { N: [], NE: [], SE: [], S: [], SW: [], NW: [] }
-  for (let row = 0; row < 17; row++) {
+  const cx = ox + rim + spacing * 2 * armSize + margin, topY = oy + rim + margin + spacing * 0.5
+  const rowWidths = starRowWidths(armSize)
+  const positions = [], arms = {}
+  for (const arm of STAR_ARMS) arms[arm] = []
+  for (let row = 0; row < rowCount; row++) {
     const w = rowWidths[row], y = topY + row * rowH, startX = cx - (w - 1) * spacing / 2
     for (let i = 0; i < w; i++) {
       const x = startX + i * spacing, idx = positions.length
       positions.push({ x, y, row, col: i })
-      if (row < 4) arms.N.push(idx)
-      else if (row >= 13) arms.S.push(idx)
-      else if (row >= 4 && row <= 7) { const armWidth = 4 - (row - 4); if (i < armWidth) arms.NW.push(idx); else if (i >= w - armWidth) arms.NE.push(idx) }
-      else if (row >= 9 && row <= 12) { const armWidth = row - 8; if (i < armWidth) arms.SW.push(idx); else if (i >= w - armWidth) arms.SE.push(idx) }
+      if (row < armSize) arms.N.push(idx)
+      else if (row > 3 * armSize) arms.S.push(idx)
+      else if (row <= 2 * armSize - 1) { const armWidth = armSize - (row - armSize); if (i < armWidth) arms.NW.push(idx); else if (i >= w - armWidth) arms.NE.push(idx) }
+      else if (row >= 2 * armSize + 1) { const armWidth = row - 2 * armSize; if (i < armWidth) arms.SW.push(idx); else if (i >= w - armWidth) arms.SE.push(idx) }
     }
   }
-  const s = spacing / 24, midY = topY + 8 * rowH, polyScale = 1.04
-  const hex = [[-50.5, -93], [50.5, -93], [104.3, 0], [50.5, 92.9], [-50.5, 92.9], [-104.3, 0]].map(([dx, dy]) => ({ x: cx + dx * s * polyScale, y: midY + dy * s * polyScale }))
-  const tips = [[0, -180.3], [158, -93], [158, 92.9], [0, 180.3], [-158, 92.9], [-158, -93]].map(([dx, dy]) => ({ x: cx + dx * s * polyScale, y: midY + dy * s * polyScale }))
+  const s = spacing / STAR_OUTLINE_REF_SPACING * (armSize / STAR_OUTLINE_REF_ARM)
+  const midY = topY + 2 * armSize * rowH, polyScale = 1.04
+  const hex = STAR_HEX_OFFSETS.map(([dx, dy]) => ({ x: cx + dx * s * polyScale, y: midY + dy * s * polyScale }))
+  const tips = STAR_TIP_OFFSETS.map(([dx, dy]) => ({ x: cx + dx * s * polyScale, y: midY + dy * s * polyScale }))
   const holeArm = new Array(positions.length).fill('')
   for (const [armName, idxs] of Object.entries(arms)) { for (const idx of idxs) holeArm[idx] = armName }
   const items = positions.map((hp, i) => ({ x: hp.x, y: hp.y, arm: holeArm[i] }))
-  const armFills = [colors.armN, colors.armNE, colors.armSE, colors.armS, colors.armSW, colors.armNW]
+  const armFills = STAR_ARMS.map(arm => colors['arm' + arm])
   const armPolys = []
-  for (let i = 0; i < 6; i++) {
-    armPolys.push({ tag: 'polygon', attrs: { points: `${tips[i].x},${tips[i].y} ${hex[i].x},${hex[i].y} ${hex[(i + 1) % 6].x},${hex[(i + 1) % 6].y}`, fill: armFills[i] } })
+  for (let i = 0; i < STAR_ARMS.length; i++) {
+    armPolys.push({ tag: 'polygon', attrs: { points: `${tips[i].x},${tips[i].y} ${hex[i].x},${hex[i].y} ${hex[(i + 1) % STAR_ARMS.length].x},${hex[(i + 1) % STAR_ARMS.length].y}`, fill: armFills[i] } })
   }
   const ops = [
     { op: 'element', tag: 'defs', children: [{ tag: 'filter', attrs: { id: 'board-shadow', x: '-5%', y: '-3%', width: '110%', height: '110%' }, children: [{ tag: 'feDropShadow', attrs: { dx: 0, dy: 4, stdDeviation: 6, 'flood-color': 'rgba(0,0,0,0.35)' } }] }] },
@@ -1852,16 +1915,13 @@ function produceSternHalmaLayout(colors, render, _unused) {
   ]
   const filledArms = render._filledArms || []
   const pieceImages = render._pieceImages || {}
-  const armPieceKeys = ['red-circle', 'blue-circle', 'green-circle', 'black-circle', 'purple-circle', 'brown-circle']
-  const armColors = ['#d32f2f', '#1565c0', '#2e7d32', '#1a1a1a', '#6a1b9a', '#5d4037']
-  const armOrder = ['N', 'NE', 'SE', 'S', 'SW', 'NW']
   const pieceSz = pieceR * 1.6
   const pieces = []
   for (let a = 0; a < filledArms.length; a++) {
     const armName = filledArms[a], holeIdxs = arms[armName]
-    const colorIdx = armOrder.indexOf(armName)
-    const img = pieceImages[armPieceKeys[colorIdx]] || null
-    const color = armColors[colorIdx] || armColors[a]
+    const colorIdx = STAR_ARMS.indexOf(armName)
+    const img = pieceImages[STAR_ARM_PIECE_KEYS[colorIdx]] || null
+    const color = STAR_ARM_COLORS[colorIdx] || STAR_ARM_COLORS[a]
     for (const idx of holeIdxs) {
       const hp = positions[idx]
       if (img) pieces.push({ tag: 'image', attrs: { href: img, x: hp.x - pieceSz / 2, y: hp.y - pieceSz / 2, width: pieceSz, height: pieceSz } })
