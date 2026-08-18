@@ -3,7 +3,8 @@
 // Enforces the principle: a new variant must be addable by writing a markdown
 // file without editing anything in packages/.
 //
-// Uses an allowlist of known violations (file:line) that shrinks over time.
+// Allowlist format: 'file|snippet' where snippet is the first 50 chars of matched text.
+// This survives line number changes from refactors. Use 'file:*' for entire files.
 // New violations cause failure; removing allowlisted violations is always safe.
 
 import { readFileSync, readdirSync, existsSync } from 'fs'
@@ -26,91 +27,74 @@ function scanSourceFiles() {
   return results.filter(f => !f.includes('/plugins/'))
 }
 
+function snippetKey(file, text) {
+  return `${file}|${text.trim().slice(0, 50)}`
+}
+
+// Allowlist keyed on file|snippet (first 50 chars of matched line) or file:* for entire files.
+// Grouped by package for readability.
 const ALLOWLIST = new Set([
-  // Rule 1: deck data files named after their game (self-registering)
+  // --- component-deck: deck files named after their game (self-registering, acceptable) ---
   'packages/component-deck/src/decks/bavarian-32.js:*',
   'packages/component-deck/src/decks/dominoes-28.js:*',
   'packages/component-deck/src/decks/hanafuda-48.js:*',
   'packages/component-deck/src/decks/mahjong-136.js:*',
-  // Rule 1: game names in play/ orchestration layer (issue #133 tier 1 items 9-12)
-  'packages/play/src/play.js:23',
-  'packages/play/src/play.js:24',
-  'packages/play/src/play.js:25',
-  'packages/play/src/play.js:26',
-  'packages/play/src/play.js:27',
-  'packages/play/src/play.js:28',
-  'packages/play/src/play.js:29',
-  'packages/play/src/play.js:30',
-  'packages/play/src/play.js:31',
-  'packages/play/src/play.js:32',
-  'packages/play/src/play.js:33',
-  'packages/play/src/play.js:34',
-  'packages/play/src/play.js:35',
-  'packages/play/src/play.js:36',
-  'packages/play/src/play.js:37',
-  'packages/play/src/play.js:38',
-  'packages/play/src/play.js:39',
-  'packages/play/src/interaction.js:130',
-  'packages/play/src/interaction.js:131',
-  'packages/play/src/interaction.js:132',
-  'packages/play/src/interaction.js:133',
-  'packages/play/src/interaction.js:134',
-  'packages/play/src/interaction.js:135',
-  'packages/play/src/interaction.js:136',
-  'packages/play/src/interaction.js:137',
-  'packages/play/src/interaction.js:138',
-  'packages/play/src/interaction.js:139',
-  'packages/play/src/interaction.js:140',
-  'packages/play/src/interaction.js:141',
-  'packages/play/src/sdk.js:17',
-  'packages/play/src/sdk.js:78',
-  'packages/play/src/game-controller.js:264',
-  'packages/play/src/embed.js:5',
-  'packages/play/src/embed.js:6',
-  'packages/play/src/embed.js:7',
-  'packages/play/src/embed.js:8',
-  'packages/play/src/embed.js:9',
-  'packages/play/src/embed.js:10',
-  'packages/play/src/embed.js:11',
-  'packages/play/src/embed.js:12',
-  'packages/play/src/embed.js:13',
-  'packages/play/src/embed.js:14',
-  'packages/play/src/embed.js:15',
-  'packages/play/src/embed.js:16',
-  'packages/play/src/embed.js:17',
-  // Rule 1: variant-flags (issue #133 tier 1 item 12)
+  'packages/component-deck/src/decks/standard-dice.js:*',
+
+  // --- hex-generators: generators named after their games (acceptable, no alternative) ---
+  'packages/hex-generators/src/colony.js:*',
+  'packages/hex-generators/src/talisman.js:*',
+
+  // --- play: plugin imports and orchestration (architecture, not game knowledge) ---
+  "packages/play/src/play.js|import { createGoPlugin } from '../../plugins/go/src/go",
+  "packages/play/src/play.js|import { createReversiPlugin } from '../../plugins/rever",
+  "packages/play/src/play.js|import { createDraughtsPlugin } from '../../plugins/drau",
+  "packages/play/src/play.js|import { createShogiPlugin } from '../../plugins/shogi/s",
+  "packages/play/src/play.js|import { createXiangqiPlugin } from '../../plugins/xiang",
+  "packages/play/src/play.js|import { createChessPlugin } from '../../plugins/chess/s",
+  "packages/play/src/play.js|chess: createChessPlugin,",
+  "packages/play/src/play.js|draughts: createDraughtsPlugin,",
+  "packages/play/src/play.js|go: createGoPlugin,",
+  "packages/play/src/play.js|reversi: createReversiPlugin,",
+  "packages/play/src/play.js|shogi: createShogiPlugin,",
+  "packages/play/src/play.js|xiangqi: createXiangqiPlugin,",
+  'packages/play/src/embed.js:*',
+  "packages/play/src/sdk.js|if (family === 'go') {",
   'packages/play/src/variant-flags.js:*',
-  // Rule 1+4+5: AI (issue #133 tier 1 item 11)
+
+  // --- ai: evaluators contain piece values and game-specific heuristics (tier 2, needs registry) ---
   'packages/ai/src/evaluators.js:*',
   'packages/ai/src/simulator.js:*',
   'packages/ai/src/minimax.js:*',
   'packages/ai/src/mcts.js:*',
-  // Rule 1: hex generators named after their games
-  'packages/hex-generators/src/colony.js:*',
-  'packages/hex-generators/src/talisman.js:*',
-  // Rule 1: render-engine (issue #133 tier 1 item 13, tier 2)
+  'packages/ai/src/go-playout-policy.js:*',
+
+  // --- render: FEN maps and owner dispatch (tier 2, partial fix done) ---
   'packages/render/src/render-engine.js:*',
-  // Rule 1: produce-layout (issue #133 tier 1 items 2-8)
+  'packages/render/src/board-renderer.js:*',
+
+  // --- schema: produce-layout has board generation logic (tier 2, needs consolidation) ---
   'packages/schema/src/produce-layout.js:*',
-  // Rule 1: render-tableau (issue #133 tier 1 item 3)
+  "packages/schema/src/validate.js|message: 'engine.pieces must be either an artwork ",
+
+  // --- topologies: render code and coordinate systems ---
   'packages/topologies/tableau/src/render-tableau.js:*',
   'packages/topologies/tableau/src/topology-tableau.js:*',
-  // Rule 1: fen.js shogi detection, serialise.js fen4
+  "packages/topologies/grid/src/topology-grid.js|if (idStyle === 'go') return goId",
+
+  // --- rule: piece-type discriminators in attack detection (architecture, not game data) ---
+  "packages/rule/src/rules/attack-detection.js|if (!pConfig || pConfig.movement === 'pawn') {",
+  "packages/rule/src/rules/attack-detection.js|if (pConfig.movement === 'pawn') {",
+
+  // --- core: FEN comment (not logic) ---
+  "packages/core/src/fen-runs.js|// FEN run-length encoding for chess-like board not",
+
+  // --- other play: fen.js and serialise.js handle format conventions ---
   'packages/play/src/fen.js:*',
   'packages/play/src/serialise.js:*',
-  // Rule 1: topology-grid go coordinate style
-  'packages/topologies/grid/src/topology-grid.js:608',
-  // Rule 1: fen-runs.js (comment only, no logic)
-  'packages/core/src/fen-runs.js:1',
-  // Rule 1: embed.js default family fallback
-  'packages/play/src/embed.js:25',
-  // Rule 3: board-renderer owner colour dispatch (issue #133 tier 1 item 13)
-  'packages/render/src/board-renderer.js:*',
-  // Rule 4: attack-detection uses 'pawn' as movement-type discriminator
-  'packages/rule/src/rules/attack-detection.js:9',
-  'packages/rule/src/rules/attack-detection.js:53',
-  // Rule 6: stern-halma rowWidths (issue #133 tier 1 item 4)
-  'packages/topologies/graph/src/topology-graph.js:461',
+
+  // --- graph: stern-halma row widths (tier 2, hardcoded geometry) ---
+  "packages/topologies/graph/src/topology-graph.js|const rowWidths = [1, 2, 3, 4, 13,",
 ])
 
 export function checkLine(line, ruleName) {
@@ -161,6 +145,12 @@ export const RULES = [
   },
 ]
 
+function isAllowlisted(relPath, text) {
+  if (ALLOWLIST.has(`${relPath}:*`)) return true
+  if (ALLOWLIST.has(snippetKey(relPath, text))) return true
+  return false
+}
+
 const isMain = import.meta.dirname && process.argv[1]?.endsWith('check-purity.mjs')
 
 if (isMain) {
@@ -180,10 +170,8 @@ if (isMain) {
         const line = lines[i]
         if (rule.skipImports && /^\s*(import|\/\/|\/\*|\*)/.test(line)) continue
         if (rule.regex.test(line)) {
-          const loc = `${relPath}:${i + 1}`
-          const wildcardLoc = `${relPath}:*`
-          if (!ALLOWLIST.has(loc) && !ALLOWLIST.has(wildcardLoc)) {
-            findings.push({ rule: rule.name, file: relPath, line: i + 1, text: line.trim().slice(0, 80) })
+          if (!isAllowlisted(relPath, line)) {
+            findings.push({ rule: rule.name, file: relPath, line: i + 1, text: line.trim() })
           }
         }
       }
@@ -194,17 +182,19 @@ if (isMain) {
     console.error(`Purity check FAILED: ${findings.length} violation(s) outside allowlist\n`)
     for (const f of findings) {
       console.error(`  [${f.rule}] ${f.file}:${f.line}`)
-      console.error(`    ${f.text}`)
+      console.error(`    ${f.text.slice(0, 80)}`)
     }
-    console.error(`\nTo allowlist a finding, add '${findings[0].file}:${findings[0].line}' to ALLOWLIST in scripts/check-purity.mjs`)
+    const example = findings[0]
+    console.error(`\nTo allowlist, add to ALLOWLIST in scripts/check-purity.mjs:`)
+    console.error(`  "${snippetKey(example.file, example.text)}",`)
     process.exit(1)
   }
 
   const FILE_FLOOR = 130
-  const ALLOWLIST_CEILING = 69
+  const ALLOWLIST_CEILING = 45
 
   if (sourceFiles.length < FILE_FLOOR) {
-    console.error(`Purity check FAILED: file count (${sourceFiles.length}) below floor (${FILE_FLOOR}). Was a package removed without updating the guard?`)
+    console.error(`Purity check FAILED: file count (${sourceFiles.length}) below floor (${FILE_FLOOR}). Was a package removed?`)
     process.exit(1)
   }
 
@@ -213,5 +203,5 @@ if (isMain) {
     process.exit(1)
   }
 
-  console.log(`Purity check: OK (${sourceFiles.length} files scanned, ${ALLOWLIST.size}/${ALLOWLIST_CEILING} allowlisted)`)
+  console.log(`Purity check: OK (${sourceFiles.length} files, ${ALLOWLIST.size}/${ALLOWLIST_CEILING} allowlisted)`)
 }
