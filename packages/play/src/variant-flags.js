@@ -3,10 +3,8 @@ const KNOWN_FLAGS = ['drops', 'random']
 // Plugin-declared flags (set by registerPluginFlags)
 const pluginFlags = new Map()
 
-// Fallback for families that haven't declared flags yet
-const FLAG_SUPPORT = {
-  chess: new Set(['drops', 'random']),
-}
+// Fallback for families that haven't declared flags yet (empty now that plugins declare their own)
+const FLAG_SUPPORT = {}
 
 export function registerPluginFlags(family, flags) {
   pluginFlags.set(family, flags)

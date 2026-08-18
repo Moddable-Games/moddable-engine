@@ -5,7 +5,12 @@ import {
   deriveCompatibleFlags,
   applyFlags,
   flagPositionKeySuffix,
+  registerPluginFlags,
 } from '../src/variant-flags.js'
+
+beforeAll(() => {
+  registerPluginFlags('chess', new Set(['drops', 'random']))
+})
 
 describe('variant-flags', () => {
   describe('parseVariantKey', () => {
