@@ -37,11 +37,20 @@ describe('parity record schema enforcement', () => {
     }
   })
 
-  it('unresolved divergences are documented (report, not gate)', () => {
+  // Shrink-only ratchet: new unresolved entries must be documented in the record,
+  // and the ceiling only drops when entries are resolved.
+  const UNRESOLVED_CEILING = 2  // antichess material draw, gridChess checkmate
+
+  it('unresolved count does not exceed ceiling (ratchet)', () => {
     const blocking = record.filter(e => e.status === 'unresolved')
     if (blocking.length > 0) {
       console.log(`Unresolved divergences (${blocking.length}): ${blocking.map(e => e.variant).join(', ')}`)
     }
-    expect(blocking.length).toBeGreaterThanOrEqual(0)
+    expect(blocking.length).toBeLessThanOrEqual(UNRESOLVED_CEILING)
+  })
+
+  it('ceiling is not stale (drop it when entries are resolved)', () => {
+    const blocking = record.filter(e => e.status === 'unresolved')
+    expect(blocking.length).toBe(UNRESOLVED_CEILING)
   })
 })

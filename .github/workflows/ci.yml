@@ -71,6 +71,17 @@ jobs:
         run: node scripts/check-duplication.mjs
       - name: Purity guard (no game knowledge in packages/)
         run: node scripts/check-purity.mjs
+      - name: Dead code detection (knip)
+        run: |
+          UNUSED_COUNT=$(npx knip --reporter compact 2>&1 | grep -c "^" || true)
+          echo "Unused exports: $UNUSED_COUNT"
+          # Shrink-only baseline: 17 unused exports as of 2026-08-18
+          # This ceiling must only decrease, never increase.
+          if [ "$UNUSED_COUNT" -gt 17 ]; then
+            echo "ERROR: Unused export count increased from baseline (17)"
+            npx knip
+            exit 1
+          fi
 
   playwright:
     runs-on: ubuntu-latest
