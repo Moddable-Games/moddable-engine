@@ -1,4 +1,4 @@
-import { chessEvaluate, reversiEvaluate, draughtsEvaluate, mancalaEvaluate, goEvaluate, halmaEvaluate, raceEvaluate, shogiEvaluate, xiangqiEvaluate, EVALUATORS } from '../src/evaluators.js'
+import { chessEvaluate, reversiEvaluate, draughtsEvaluate, goEvaluate, shogiEvaluate, xiangqiEvaluate, EVALUATORS } from '../src/evaluators.js'
 
 describe('AI — evaluators', () => {
   describe('chess', () => {
@@ -68,14 +68,6 @@ describe('AI — evaluators', () => {
     })
   })
 
-  describe('mancala', () => {
-    it('values store advantage', () => {
-      const state = { stores: [10, 5], pits: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], pitsPerSide: 6 }
-      expect(mancalaEvaluate(state, 0)).toBeGreaterThan(0)
-      expect(mancalaEvaluate(state, 1)).toBeLessThan(0)
-    })
-  })
-
   describe('go', () => {
     it('values stone and capture advantage', () => {
       const board = new Array(81).fill(null)
@@ -84,27 +76,6 @@ describe('AI — evaluators', () => {
       board[2] = 'white'
       const state = { board, captures: { 0: 3, 1: 0 } }
       expect(goEvaluate(state, 0)).toBeGreaterThan(0)
-    })
-  })
-
-  describe('halma', () => {
-    it('rewards pieces closer to target camp', () => {
-      const board = new Array(64).fill(null)
-      board[1] = 0
-      const state1 = { board: [...board], _cols: 8 }
-      board[1] = null
-      board[62] = 0
-      const state2 = { board, _cols: 8 }
-      expect(halmaEvaluate(state1, 0)).toBeGreaterThan(halmaEvaluate(state2, 0))
-    })
-  })
-
-  describe('race', () => {
-    it('values advanced and finished pieces', () => {
-      const state1 = { pieces: [[{ state: 'active', position: 10 }], [{ state: 'home', position: -1 }]] }
-      const state2 = { pieces: [[{ state: 'home', position: -1 }], [{ state: 'active', position: 10 }]] }
-      expect(raceEvaluate(state1, 0)).toBeGreaterThan(0)
-      expect(raceEvaluate(state2, 0)).toBeLessThan(0)
     })
   })
 
@@ -132,7 +103,7 @@ describe('AI — evaluators', () => {
   describe('EVALUATORS registry', () => {
     it('maps game families to evaluate functions', () => {
       expect(Object.keys(EVALUATORS)).toEqual(
-        expect.arrayContaining(['chess', 'reversi', 'draughts', 'mancala', 'go', 'halma', 'race', 'shogi', 'xiangqi'])
+        expect.arrayContaining(['chess', 'reversi', 'draughts', 'go', 'shogi', 'xiangqi'])
       )
     })
 

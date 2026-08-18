@@ -31,6 +31,7 @@ function chiefCaptureWin(state) {
 export const djambi = {
   key: 'djambi',
   slug: 'djambi',
+  hidden: true,
 
   moveFilter(moves, state, ctx) {
     // Step 2: Force corpse placement if pending
