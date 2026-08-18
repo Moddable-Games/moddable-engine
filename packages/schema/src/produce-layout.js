@@ -116,7 +116,7 @@ function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabel
   }
 
   const goStyle = idStyle === 'go'
-  const GO_ALPHABET = 'ABCDEFGHJKLMNOPQRST'
+  const GO_ALPHABET = 'ABCDEFGHJKLMNOPQRSTUVWXYZ'
   const fs = Math.min(13, pad * 0.55)
 
   const config = {
@@ -169,10 +169,21 @@ function buildOpsCellMap(zones, rows, cols, defaultFill) {
 }
 
 
-const AUTO_STAR_POINTS = {
-  9:  [[2,2],[2,6],[4,4],[6,2],[6,6]],
-  13: [[3,3],[3,6],[3,9],[6,3],[6,6],[6,9],[9,3],[9,6],[9,9]],
-  19: [[3,3],[3,9],[3,15],[9,3],[9,9],[9,15],[15,3],[15,9],[15,15]],
+function calculateStarPoints(size) {
+  if (size < 9) return []
+  const offset = size <= 9 ? 2 : 3
+  const mid = Math.floor(size / 2)
+  const last = size - 1 - offset
+  const points = []
+  // Corners
+  points.push([offset, offset], [offset, last], [last, offset], [last, last])
+  // Center (tengen)
+  if (size % 2 === 1) points.push([mid, mid])
+  // Edge midpoints for boards 13x13+
+  if (size >= 13 && size % 2 === 1) {
+    points.push([offset, mid], [mid, offset], [mid, last], [last, mid])
+  }
+  return points
 }
 
 function translateOp(decl, ctx) {
@@ -219,7 +230,7 @@ function translateOp(decl, ctx) {
       }
     case 'markers': {
       let items = decl.at
-      if (items === 'auto-star-points') items = AUTO_STAR_POINTS[rows] || []
+      if (items === 'auto-star-points') items = calculateStarPoints(rows)
       const fill = colors[decl.fill] || decl.fill
       const result = { op: 'markers', radius: decl.radius }
       if (decl.grouped) { result.grouped = true; result.groupFill = fill }
@@ -2070,7 +2081,7 @@ function produceMarkers(decorations, topo) {
     } else if (dec.auto === 'star-points') {
       const rows = topo.rows || 19
       const cols = topo.cols || 19
-      result.push(...(AUTO_STAR_POINTS[rows] || []).filter(() => rows === cols).map(p => ({ r: p[0], c: p[1], radius: dec.size || 3 })))
+      if (rows === cols) result.push(...calculateStarPoints(rows).map(p => ({ r: p[0], c: p[1], radius: dec.size || 3 })))
     }
   }
 
