@@ -366,10 +366,10 @@ export function createGridTopology(config) {
 
   function serializePosition(cellStates, vocabulary) {
     const symbolMap = buildSymbolMap(vocabulary)
-    const needsFen4 = detectFen4(cellStates, symbolMap)
+    const multiOwner = hasMultipleOwners(cellStates)
 
-    if (needsFen4) {
-      return serializeFen4(cellStates, symbolMap, vocabulary)
+    if (multiOwner) {
+      return serializeMultiChar(cellStates, symbolMap)
     }
 
     const rowStrings = []
@@ -392,7 +392,7 @@ export function createGridTopology(config) {
     return rowStrings.join('/')
   }
 
-  function detectFen4(cellStates, symbolMap) {
+  function hasMultipleOwners(cellStates) {
     for (let i = 0; i < rows * cols; i++) {
       const cell = cellStates[i] || cellStates.get?.(i) || null
       if (cell && typeof cell === 'object' && cell.owner > 1) return true
@@ -400,24 +400,8 @@ export function createGridTopology(config) {
     return false
   }
 
-  function serializeFen4(cellStates, symbolMap, vocabulary) {
-    const FEN4_REVERSE = ['r', 'y', 'g', 'b']
-    const FEN4_REVERSE_TYPES = { rook: 'R', knight: 'N', bishop: 'B', queen: 'Q', king: 'K', pawn: 'P', elephant: 'E', horse: 'H', lance: 'L', silver: 'S', gold: 'G' }
+  function serializeMultiChar(cellStates, symbolMap) {
     const rowStrings = []
-
-    function letterFor(cell) {
-      const hardcoded = FEN4_REVERSE_TYPES[cell.type]
-      if (hardcoded) return hardcoded
-      if (vocabulary) {
-        const entry = vocabulary[cell.type]
-        if (entry && entry.symbols) {
-          const sym = entry.symbols['0'] || entry.symbols[0]
-          if (sym && typeof sym === 'string') return sym
-        }
-      }
-      return cell.type[0].toUpperCase()
-    }
-
     for (let r = 0; r < rows; r++) {
       const tokens = []
       let empty = 0
@@ -428,8 +412,7 @@ export function createGridTopology(config) {
           empty++
         } else {
           if (empty > 0) { tokens.push(String(empty)); empty = 0 }
-          const prefix = FEN4_REVERSE[cell.owner] || 'r'
-          tokens.push(prefix + letterFor(cell))
+          tokens.push(symbolMap.toSymbol(cell))
         }
       }
       if (empty > 0) tokens.push(String(empty))
@@ -507,13 +490,7 @@ export function createGridTopology(config) {
       }
     }
 
-    const FEN4_PREFIXES = { r: 0, y: 1, g: 2, b: 3 }
-    const FEN4_REVERSE = ['r', 'y', 'g', 'b']
-    const FEN4_TYPES = { R: 'rook', N: 'knight', B: 'bishop', Q: 'queen', K: 'king', P: 'pawn', E: 'elephant', H: 'horse', L: 'lance', S: 'silver', G: 'gold' }
-    const FEN4_REVERSE_TYPES = Object.fromEntries(Object.entries(FEN4_TYPES).map(([k, v]) => [v, k]))
-
     return {
-      isFen4: false,
       toSymbol(cell) {
         if (typeof cell === 'string') {
           const mapped = stringToSymbol.get(cell)
@@ -523,12 +500,6 @@ export function createGridTopology(config) {
         const key = `${cell.type}.${cell.owner}`
         const sym = toSym.get(key)
         if (sym) return sym
-        if (cell.owner >= 0 && cell.owner <= 3) {
-          const prefix = FEN4_REVERSE[cell.owner]
-          const letter = FEN4_REVERSE_TYPES[cell.type] || cell.type[0].toUpperCase()
-          this.isFen4 = true
-          return prefix + letter
-        }
         return '?'
       },
       fromSymbol(ch) {
@@ -537,15 +508,6 @@ export function createGridTopology(config) {
           const str = symbolToString.get(ch)
           if (str) return str
           return direct
-        }
-        if (ch.length >= 2 && ch[0] in FEN4_PREFIXES) {
-          const owner = FEN4_PREFIXES[ch[0]]
-          const typeChar = ch.slice(1)
-          const known = FEN4_TYPES[typeChar]
-          if (known) return { type: known, owner }
-          const vocabHit = fromSym.get(typeChar)
-          if (vocabHit) return { type: vocabHit.type, owner }
-          return { type: typeChar.toLowerCase(), owner }
         }
         return null
       },

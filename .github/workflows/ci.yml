@@ -69,6 +69,8 @@ jobs:
           NODE_OPTIONS: '--experimental-vm-modules'
       - name: Duplication guard
         run: node scripts/check-duplication.mjs
+      - name: Purity guard (no game knowledge in packages/)
+        run: node scripts/check-purity.mjs
 
   playwright:
     runs-on: ubuntu-latest
