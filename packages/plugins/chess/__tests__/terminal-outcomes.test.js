@@ -2,6 +2,7 @@ import '../index.js'
 import '../../../play/test-helpers/setup-rules-reader.js'
 import { createGame } from '../../../play/src/sdk.js'
 import { createGameForFamily } from '../../../play/src/play.js'
+import { djambi } from '../src/variants/djambi.js'
 
 function setupGame(variant, fen, playerJustMoved = 0) {
   const game = createGame('chess', variant)
@@ -142,6 +143,20 @@ describe('terminal-outcome: duckChess', () => {
     const game = setupGame('duckChess', '4R3/8/8/8/8/8/8/4K3')
     const result = game.checkWin()
     expect(result).toBe(0)
+  })
+})
+
+describe('terminal-outcome: djambi', () => {
+  // Djambi's winCondition runs over raw board state, so we test it directly
+  // rather than through the game factory (which needs 4-player FEN4 parsing)
+  it('fires: only one chief left', () => {
+    const state = { board: [{ type: 'chief', owner: 0 }, null, null] }
+    expect(djambi.winCondition(state)).toBe(0)
+  })
+
+  it('continues: multiple chiefs alive', () => {
+    const state = { board: [{ type: 'chief', owner: 0 }, { type: 'chief', owner: 2 }, null] }
+    expect(djambi.winCondition(state)).toBeNull()
   })
 })
 
@@ -476,7 +491,7 @@ const COVERED_VARIANTS = new Set([
   'benedictChess', 'maharaja', 'atomic',
   'shatranj', 'chaturanga', 'darkChess', 'fogOfWar', 'duckChess',
   'hexapawn', 'oblong-chess', 'shatranj-kamil',
-  'empire', 'khans-chess',
+  'empire', 'khans-chess', 'djambi',
 ])
 
 describe('registration gate: outcome-affecting variants need fixtures', () => {
