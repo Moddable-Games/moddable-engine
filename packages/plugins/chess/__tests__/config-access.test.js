@@ -39,7 +39,7 @@ const ACCEPTED_KEYS = new Set([
 // Keys consumed by the play layer (variant-definition.js strips these
 // before passing to the plugin, so they never reach createChessPlugin)
 const PLAY_LAYER_KEYS = new Set([
-  'key', 'label', 'title', 'group', 'description', 'rule', 'board',
+  'key', 'slug', 'label', 'title', 'group', 'description', 'rule', 'board',
   'extends', 'hidden', 'render', 'playerNames', 'definition', 'topology',
   'rows', 'cols', 'size', 'players',
 ])
