@@ -39,7 +39,7 @@ export function deriveCompatibleFlags(definition, family) {
   if (!definition) return []
   const engine = definition.engine || definition
   const fam = family || engine.family || (engine.plugins ? Object.keys(engine.plugins)[0] : null)
-  const supported = FLAG_SUPPORT[fam]
+  const supported = pluginFlags.get(fam) || FLAG_SUPPORT[fam]
   if (!supported) return []
   const flags = []
   if (supported.has('random') && canRandomise(engine)) flags.push('random')
