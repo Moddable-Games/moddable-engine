@@ -13,7 +13,6 @@ const KEY = 'moddable:drafts:v1'
 const MAX_DRAFTS = 24
 
 export const WORKING_ID = 'working'
-export const STATE_VERSION = 1
 
 function readStore() {
   try {

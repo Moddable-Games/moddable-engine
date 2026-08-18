@@ -13,6 +13,7 @@ function kingCaptureWin(state) {
 
 export const fogOfWar = {
   key: 'fogOfWar',
+  slug: 'fog-of-war',
 
   visibility(slice, viewerIndex, { topology, generateMovesForPiece, allPositions, getCell }) {
     const knowledge = new Map()

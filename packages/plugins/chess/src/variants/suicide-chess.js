@@ -1,5 +1,6 @@
 export const suicideChess = {
   key: 'suicideChess',
+  slug: 'suicide-chess',
 
   moveFilter(moves, state, ctx) {
     const board = state.board

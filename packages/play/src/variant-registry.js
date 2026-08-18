@@ -181,6 +181,7 @@ function buildManifest(family) {
 
     const entry = {
       key,
+      slug: jsConfig.slug || key,
       label: jsConfig.label || jsConfig.title || key,
       group: jsConfig.group || 'Other',
       board: describeBoard(jsConfig),

@@ -1,5 +1,6 @@
 export const recruitmentChess = {
   key: 'recruitmentChess',
+  slug: 'recruitment-chess',
 
   afterMove(ctx) {
     const { move, captured, board, playerIdx } = ctx

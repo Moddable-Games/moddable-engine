@@ -13,6 +13,7 @@ function kingCaptureWin(state) {
 
 export const duckChess = {
   key: 'duckChess',
+  slug: 'duck-chess',
 
   moveFilter(moves, state) {
     if (state._blockerPhase) {

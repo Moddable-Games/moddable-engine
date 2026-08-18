@@ -13,6 +13,7 @@ function kingCaptureWin(state) {
 
 export const darkChess = {
   key: 'darkChess',
+  slug: 'dark-chess',
 
   visibility(slice, viewerIndex, { allPositions, getCell }) {
     const knowledge = new Map()

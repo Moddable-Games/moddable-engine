@@ -63,6 +63,19 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     ...variantConfig,
   }
 
+  const KNOWN_KEYS = new Set([
+    'setup', 'promotionChoices', 'castling', 'enPassant', 'royalType', 'pawnType',
+    'rookType', 'playerCount', 'doubleStep', 'stalemateMeaning', 'noCheck', 'drops',
+    'advancement', 'checkThreshold', 'pieces', 'vocabulary', 'extends', 'hooks',
+    'actions', 'afterMove', 'hexPawnConfig', 'initState', 'moveApply', 'moveFilter',
+    'onTurnEnd', 'pawnCaptureDirections', 'pawnConfig', 'pawnMoveDirections',
+    'pawnStartRow', 'placementPieces', 'promotionRow', 'randomSetup', 'torpedo',
+  ])
+  const unknownKeys = Object.keys(variantConfig).filter(k => !KNOWN_KEYS.has(k))
+  if (unknownKeys.length > 0) {
+    console.warn(`[chess] Unknown config keys: ${unknownKeys.join(', ')}. Check spelling.`)
+  }
+
   const pieceConfigs = { ...STANDARD_PIECES, ...config.pieces }
   const vocabulary = { ...DEFAULT_VOCABULARY, ...config.vocabulary }
 

@@ -1,5 +1,6 @@
 export const checklessChess = {
   key: 'checklessChess',
+  slug: 'checkless',
 
   moveFilter(moves, state, ctx) {
     const board = state.board

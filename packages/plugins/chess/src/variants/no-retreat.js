@@ -1,5 +1,6 @@
 export const noRetreat = {
   key: 'noRetreat',
+  slug: 'no-retreat',
 
   moveFilter(moves, state, ctx) {
     const cols = 8

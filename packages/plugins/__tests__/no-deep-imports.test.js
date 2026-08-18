@@ -97,10 +97,9 @@ const ALLOWLIST = new Set([
   'topologies/hex:core',
   'topologies/hex:hex-generators',
   'topologies/tableau:component-deck',
-  'schema:render',
   'schema:hex-generators',
 ])
-const ALLOWLIST_CEILING = ALLOWLIST.size
+const ALLOWLIST_CEILING = 44
 
 describe('no cross-package deep imports (engine#74)', () => {
   const packagesImports = scanImports(PACKAGES_DIR)

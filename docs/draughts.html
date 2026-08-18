@@ -141,7 +141,7 @@ ctrl.handleClick(secondJump)  // continue the same chain</code></pre>
   <h2 id="sdk">SDK</h2>
   <p>The SDK is the same across every family; only the family key and the shape of a move differ.</p>
 
-  <pre><code>import { createGame, getLegalMoves, getGameStatus, createAI, listVariants } from 'moddable-engine/play'
+  <pre><code>import { createGame, getLegalMoves, getGameStatus, createAI, listVariants } from '@moddable/engine/play'
 
 listVariants('draughts')                 // [{ key, label, group, board, description }]
 const game = createGame('draughts', 'international')
@@ -156,7 +156,7 @@ ai.pickMove(game.getState().slice, 0)    // minimax by default for draughts</cod
 
   <p>Because captures are compulsory in most variants, <code>getLegalMoves</code> already reflects the forced-capture and maximal-capture parameters &mdash; a quiet move simply will not be in the list when a capture is available. A multi-jump arrives as a sequence of separate moves rather than one move; see <a href="#chains">capture chains</a> above, and drive it through the <code>chain</code> interaction model:</p>
 
-  <pre><code>import { interactionModelFor } from 'moddable-engine/play'
+  <pre><code>import { interactionModelFor } from '@moddable/engine/play'
 
 const model = interactionModelFor('draughts')   // the 'chain' model
 model.handleClick(pos, ctx)                     // rejects clicks that abandon a live chain</code></pre>

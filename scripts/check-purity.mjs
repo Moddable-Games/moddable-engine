@@ -9,7 +9,7 @@
 import { readFileSync, readdirSync, existsSync } from 'fs'
 import { resolve, join, relative } from 'path'
 
-const ROOT = resolve(import.meta.dirname, '..')
+const ROOT = import.meta.dirname ? resolve(import.meta.dirname, '..') : process.cwd()
 
 function scanSourceFiles() {
   const results = []
@@ -99,7 +99,7 @@ const ALLOWLIST = new Set([
   'packages/play/src/fen.js:*',
   'packages/play/src/serialise.js:*',
   // Rule 1: topology-grid go coordinate style
-  'packages/topologies/grid/src/topology-grid.js:602',
+  'packages/topologies/grid/src/topology-grid.js:608',
   // Rule 1: fen-runs.js (comment only, no logic)
   'packages/core/src/fen-runs.js:1',
   // Rule 1: embed.js default family fallback
@@ -113,7 +113,14 @@ const ALLOWLIST = new Set([
   'packages/topologies/graph/src/topology-graph.js:461',
 ])
 
-const RULES = [
+export function checkLine(line, ruleName) {
+  const rule = RULES.find(r => r.name === ruleName)
+  if (!rule) return false
+  if (rule.skipImports && /^\s*(import|\/\/|\/\*|\*)/.test(line)) return false
+  return rule.regex.test(line)
+}
+
+export const RULES = [
   {
     name: 'game-names',
     description: 'Game/family names in non-plugin packages',
@@ -154,53 +161,57 @@ const RULES = [
   },
 ]
 
-const sourceFiles = scanSourceFiles()
-const findings = []
+const isMain = import.meta.dirname && process.argv[1]?.endsWith('check-purity.mjs')
 
-for (const file of sourceFiles) {
-  const relPath = relative(ROOT, file)
-  const content = readFileSync(file, 'utf8')
-  const lines = content.split('\n')
+if (isMain) {
+  const sourceFiles = scanSourceFiles()
+  const findings = []
 
-  for (const rule of RULES) {
-    if (rule.onlyPaths && !rule.onlyPaths.some(p => relPath.startsWith(p))) continue
-    if (rule.allowFiles && rule.allowFiles.some(p => relPath === p)) continue
+  for (const file of sourceFiles) {
+    const relPath = relative(ROOT, file)
+    const content = readFileSync(file, 'utf8')
+    const lines = content.split('\n')
 
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i]
-      if (rule.skipImports && /^\s*(import|\/\/|\/\*|\*)/.test(line)) continue
-      if (rule.regex.test(line)) {
-        const loc = `${relPath}:${i + 1}`
-        const wildcardLoc = `${relPath}:*`
-        if (!ALLOWLIST.has(loc) && !ALLOWLIST.has(wildcardLoc)) {
-          findings.push({ rule: rule.name, file: relPath, line: i + 1, text: line.trim().slice(0, 80) })
+    for (const rule of RULES) {
+      if (rule.onlyPaths && !rule.onlyPaths.some(p => relPath.startsWith(p))) continue
+      if (rule.allowFiles && rule.allowFiles.some(p => relPath === p)) continue
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]
+        if (rule.skipImports && /^\s*(import|\/\/|\/\*|\*)/.test(line)) continue
+        if (rule.regex.test(line)) {
+          const loc = `${relPath}:${i + 1}`
+          const wildcardLoc = `${relPath}:*`
+          if (!ALLOWLIST.has(loc) && !ALLOWLIST.has(wildcardLoc)) {
+            findings.push({ rule: rule.name, file: relPath, line: i + 1, text: line.trim().slice(0, 80) })
+          }
         }
       }
     }
   }
-}
 
-if (findings.length > 0) {
-  console.error(`Purity check FAILED: ${findings.length} violation(s) outside allowlist\n`)
-  for (const f of findings) {
-    console.error(`  [${f.rule}] ${f.file}:${f.line}`)
-    console.error(`    ${f.text}`)
+  if (findings.length > 0) {
+    console.error(`Purity check FAILED: ${findings.length} violation(s) outside allowlist\n`)
+    for (const f of findings) {
+      console.error(`  [${f.rule}] ${f.file}:${f.line}`)
+      console.error(`    ${f.text}`)
+    }
+    console.error(`\nTo allowlist a finding, add '${findings[0].file}:${findings[0].line}' to ALLOWLIST in scripts/check-purity.mjs`)
+    process.exit(1)
   }
-  console.error(`\nTo allowlist a finding, add '${findings[0].file}:${findings[0].line}' to ALLOWLIST in scripts/check-purity.mjs`)
-  process.exit(1)
+
+  const FILE_FLOOR = 130
+  const ALLOWLIST_CEILING = 69
+
+  if (sourceFiles.length < FILE_FLOOR) {
+    console.error(`Purity check FAILED: file count (${sourceFiles.length}) below floor (${FILE_FLOOR}). Was a package removed without updating the guard?`)
+    process.exit(1)
+  }
+
+  if (ALLOWLIST.size > ALLOWLIST_CEILING) {
+    console.error(`Purity check FAILED: allowlist grew to ${ALLOWLIST.size} (ceiling is ${ALLOWLIST_CEILING}). Remove violations, don't allowlist more.`)
+    process.exit(1)
+  }
+
+  console.log(`Purity check: OK (${sourceFiles.length} files scanned, ${ALLOWLIST.size}/${ALLOWLIST_CEILING} allowlisted)`)
 }
-
-const FILE_FLOOR = 130
-const ALLOWLIST_CEILING = 69
-
-if (sourceFiles.length < FILE_FLOOR) {
-  console.error(`Purity check FAILED: file count (${sourceFiles.length}) below floor (${FILE_FLOOR}). Was a package removed without updating the guard?`)
-  process.exit(1)
-}
-
-if (ALLOWLIST.size > ALLOWLIST_CEILING) {
-  console.error(`Purity check FAILED: allowlist grew to ${ALLOWLIST.size} (ceiling is ${ALLOWLIST_CEILING}). Remove violations, don't allowlist more.`)
-  process.exit(1)
-}
-
-console.log(`Purity check: OK (${sourceFiles.length} files scanned, ${ALLOWLIST.size}/${ALLOWLIST_CEILING} allowlisted)`)

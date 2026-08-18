@@ -60,6 +60,7 @@ function extractPieceList(width) {
 
 export const chess960 = {
   key: 'chess960',
+  slug: 'fischer-random',
   setup(rng) {
     const rank = randomBackRank(rng)
     return rank + '/pppppppp/8/8/8/8/PPPPPPPP/' + rank.toUpperCase()

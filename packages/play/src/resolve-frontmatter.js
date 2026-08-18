@@ -38,6 +38,8 @@ export function resolveVariantSync(family, slug, readFile) {
       delete merged.extends
       if (!resolved.plugins) resolved.plugins = {}
       resolved.plugins[family] = merged
+    } else {
+      throw new Error(`extends: "${pluginBlock.extends}" not found for family "${family}". Check the slug exists.`)
     }
   }
 
@@ -66,6 +68,8 @@ export async function resolveVariantAsync(family, slug, basePath) {
       delete merged.extends
       if (!resolved.plugins) resolved.plugins = {}
       resolved.plugins[family] = merged
+    } else {
+      throw new Error(`extends: "${pluginBlock.extends}" not found for family "${family}". Check the slug exists.`)
     }
   }
 

@@ -1,5 +1,6 @@
 export const teleportChess = {
   key: 'teleportChess',
+  slug: 'teleport-chess',
 
   initState(slice) {
     const board = slice.board

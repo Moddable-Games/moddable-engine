@@ -1,5 +1,6 @@
 export const fiveCheck = {
   key: 'fiveCheck',
+  slug: 'five-check',
 
   winCondition(state, ctx) {
     const threshold = ctx.config?.checkThreshold || 5

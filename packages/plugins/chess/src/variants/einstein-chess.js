@@ -2,6 +2,7 @@ const HIERARCHY = ['pawn', 'knight', 'bishop', 'rook', 'queen']
 
 export const einsteinChess = {
   key: 'einsteinChess',
+  slug: 'einstein-chess',
 
   afterMove(ctx) {
     const { move, captured, board } = ctx

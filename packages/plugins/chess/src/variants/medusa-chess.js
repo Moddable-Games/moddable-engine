@@ -1,5 +1,6 @@
 export const medusaChess = {
   key: 'medusaChess',
+  slug: 'medusa-chess',
 
   afterMove(ctx) {
     const { move, board, effects, topology, playerIdx } = ctx

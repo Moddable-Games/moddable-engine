@@ -21,6 +21,7 @@ function typeForAbilities(ab) {
 
 export const absorptionChess = {
   key: 'absorptionChess',
+  slug: 'absorption',
 
   afterMove(ctx) {
     const { move, captured, board } = ctx

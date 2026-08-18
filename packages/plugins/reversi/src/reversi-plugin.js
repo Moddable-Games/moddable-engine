@@ -12,6 +12,11 @@ export function createReversiPlugin(variantConfig = {}, context = {}) {
 
   const config = { ...defaults, ...variantConfig }
 
+  const unknownKeys = Object.keys(variantConfig).filter(k => !(k in defaults) && k !== 'vocabulary' && k !== 'pieces' && k !== 'extends' && k !== 'hooks')
+  if (unknownKeys.length > 0) {
+    console.warn(`[reversi] Unknown config keys: ${unknownKeys.join(', ')}. Check spelling.`)
+  }
+
   const hooks = {
     moveFilter: (moves) => moves,
     winCondition: null,

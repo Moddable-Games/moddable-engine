@@ -1,5 +1,6 @@
 export const singleCheck = {
   key: 'singleCheck',
+  slug: 'single-check',
 
   winCondition(state, ctx) {
     const threshold = ctx.config?.checkThreshold || 1

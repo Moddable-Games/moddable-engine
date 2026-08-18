@@ -1,5 +1,6 @@
 export const gridChess = {
   key: 'gridChess',
+  slug: 'grid-chess',
 
   moveFilter(moves, state, ctx) {
     const board = state.board

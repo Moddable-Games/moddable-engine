@@ -41,15 +41,7 @@ const EFFECT_FALLBACK = { stroke: 'rgba(255,200,50,0.7)', fill: 'rgba(255,200,50
 
 const effectRegistry = new Map()
 
-export function registerEffect(type, appearance) {
-  effectRegistry.set(type, appearance)
-}
-
-export function getEffectAppearance(type) {
-  return effectRegistry.get(type) || null
-}
-
-export function registerEffects(map) {
+function registerEffects(map) {
   for (const [type, appearance] of Object.entries(map)) {
     effectRegistry.set(type, appearance)
   }

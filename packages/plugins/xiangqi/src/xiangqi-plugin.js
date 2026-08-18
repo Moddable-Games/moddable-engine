@@ -12,6 +12,11 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
 
   const config = { ...defaults, ...variantConfig }
 
+  const unknownKeys = Object.keys(variantConfig).filter(k => !(k in defaults) && k !== 'vocabulary' && k !== 'pieces' && k !== 'extends' && k !== 'hooks' && k !== 'pieceMoves' && k !== 'palace' && k !== 'river')
+  if (unknownKeys.length > 0) {
+    console.warn(`[xiangqi] Unknown config keys: ${unknownKeys.join(', ')}. Check spelling.`)
+  }
+
   const palace = config.palace || {
     cols: [3, 5],
     rows: [[config.rows - 3, config.rows - 1], [0, 2]],

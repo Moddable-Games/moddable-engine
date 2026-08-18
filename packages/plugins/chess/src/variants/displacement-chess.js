@@ -1,5 +1,6 @@
 export const displacementChess = {
   key: 'displacementChess',
+  slug: 'displacement-chess',
 
   moveFilter(moves, state, ctx) {
     const board = state.board

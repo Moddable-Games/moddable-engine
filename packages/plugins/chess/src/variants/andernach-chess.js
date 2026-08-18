@@ -1,5 +1,6 @@
 export const andernachChess = {
   key: 'andernachChess',
+  slug: 'andernach',
 
   moveFilter(moves, state, ctx) {
     const board = state.board

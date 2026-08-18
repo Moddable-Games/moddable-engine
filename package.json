@@ -1,6 +1,5 @@
 {
   "name": "@moddable/engine",
-  "private": true,
   "description": "Micro-kernel master engine for all Moddable Games titles",
   "type": "module",
   "workspaces": [

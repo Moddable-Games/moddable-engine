@@ -1,5 +1,6 @@
 export const threeCheck = {
   key: 'threeCheck',
+  slug: 'three-check',
 
   winCondition(state, ctx) {
     const threshold = ctx.config?.checkThreshold || 3

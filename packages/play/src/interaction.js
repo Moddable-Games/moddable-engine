@@ -141,11 +141,6 @@ export function interactionModelFor(family, override) {
   return getInteractionModel(FAMILY_INTERACTION[family] || 'move')
 }
 
-export const ACTION_MOVES = {
-  pass: (moves) => moves.find(m => m.action === 'pass') || null,
-  resign: () => ({ action: 'resign' }),
-}
-
 export function availableActions(moves) {
   const actions = []
   if (moves.some(m => m.action === 'pass')) actions.push('pass')

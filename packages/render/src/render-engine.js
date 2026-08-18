@@ -18,7 +18,7 @@ import { renderTableauLayout } from '../../topologies/tableau/src/render-tableau
 import { elementsToFragment, elementToSvg } from './serialize-layout.js'
 import { renderSurfaceSVG } from './piece-surface.js'
 import { FEN4_OWNERS, fen4GetOwner } from './recolour.js'
-import { buildCrossMap } from './cross-map.js'
+import { buildCrossMap } from '../../schema/src/cross-map.js'
 
 const RENDER_FN = { grid: renderGridLayout, graph: renderGraphLayout, pit: renderPitLayout, track: renderTrackLayout, hex: renderHexLayout, tableau: renderTableauLayout }
 
@@ -95,6 +95,7 @@ export function buildPieceImages(pieceSetId, gallery, fenOverrides, skipFenMap) 
 
 export function attachPieceImages(resolved, gallery) {
   if (!resolved.pieces?.set || !gallery) return {}
+  validatePieceVocabulary(resolved, gallery)
   const topo = resolved.topology || {}
   const skipFenMap = topo.type === 'pit'
   const fenOverrides = resolved.pieces.fenMap || null
@@ -104,7 +105,10 @@ export function attachPieceImages(resolved, gallery) {
 export function validatePieceVocabulary(resolved, gallery) {
   if (!resolved.pieces?.set || !gallery) return
   const setDef = gallery.find(s => s.id === resolved.pieces.set)
-  if (!setDef) throw new Error(`Piece set '${resolved.pieces.set}' not found in gallery`)
+  if (!setDef) {
+    console.warn(`[render] Piece set '${resolved.pieces.set}' not found in gallery. Board will render without pieces.`)
+    return
+  }
   const fenMap = resolved.pieces.fenMap || resolved.pieces.vocabulary || {}
   const available = new Set(Object.keys(setDef.pieces || {}))
   const vocabulary = resolved.vocabulary || resolved.plugins?.[Object.keys(resolved.plugins || {})[0]]?.vocabulary || {}
@@ -117,7 +121,7 @@ export function validatePieceVocabulary(resolved, gallery) {
     }
   }
   if (missing.length) {
-    throw new Error(`Piece set '${resolved.pieces.set}' cannot draw ${missing.length} vocabulary symbol(s): ${missing.join(', ')}`)
+    console.warn(`[render] Piece set '${resolved.pieces.set}' cannot draw ${missing.length} symbol(s): ${missing.slice(0, 5).join(', ')}${missing.length > 5 ? '...' : ''}`)
   }
 }
 

@@ -2,6 +2,7 @@ const CENTER_SQUARES = [27, 28, 35, 36]
 
 export const kingOfTheHill = {
   key: 'kingOfTheHill',
+  slug: 'king-of-the-hill',
 
   winCondition(state, ctx) {
     const board = state.board

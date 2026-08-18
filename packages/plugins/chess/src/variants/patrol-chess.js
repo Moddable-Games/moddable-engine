@@ -1,5 +1,6 @@
 export const patrolChess = {
   key: 'patrolChess',
+  slug: 'patrol',
 
   moveFilter(moves, state, ctx) {
     const board = state.board

@@ -1,5 +1,6 @@
 export const berserkChess = {
   key: 'berserkChess',
+  slug: 'berserk',
 
   turnLogic(ctx) {
     const { movesThisTurn, inCheck } = ctx

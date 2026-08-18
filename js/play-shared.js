@@ -8,7 +8,6 @@ export const BOARD_THEMES = {
   transparent: { label: 'Transparent', light: 'rgba(128,128,128,0.12)', dark: 'rgba(128,128,128,0.3)', highlight: 'rgba(111,181,255,0.35)', lastMove: 'rgba(111,181,255,0.2)', dot: 'rgba(128,128,128,0.4)', ring: 'rgba(128,128,128,0.45)' },
 }
 
-export const DARK_THEMES = ['cosmic', 'neon', 'transparent']
 
 export const ANIM_THEME = {
   speeds: { instant: 0, fast: 120, normal: 220, slow: 400 },
@@ -28,14 +27,6 @@ const _pieceStyles = new Map([
 
 export const PIECE_STYLES = Object.fromEntries(_pieceStyles)
 
-export function registerPieceStyle(key, config) {
-  _pieceStyles.set(key, config)
-  PIECE_STYLES[key] = config
-}
-
-export function getPieceStyle(key) {
-  return _pieceStyles.get(key) || _pieceStyles.get('auto')
-}
 
 const _captureBurstTheme = {
   particles: 8,
@@ -48,9 +39,6 @@ const _captureBurstTheme = {
 
 export const CAPTURE_BURST_THEME = _captureBurstTheme
 
-export function setCaptureBurstTheme(overrides) {
-  Object.assign(_captureBurstTheme, overrides)
-}
 
 export const RULES_BASE = typeof location !== 'undefined' && location.hostname === 'engine.moddable.games'
   ? 'https://rules.moddable.games/'

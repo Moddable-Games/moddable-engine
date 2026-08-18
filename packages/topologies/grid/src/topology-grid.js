@@ -427,6 +427,10 @@ export function createGridTopology(config) {
     const rowStrings = notation.split(' ')[0].split('/')
     const isCommaSeparated = rowStrings.some(r => r.includes(','))
 
+    if (rowStrings.length !== rows && rowStrings[0] !== '') {
+      throw new Error(`FEN has ${rowStrings.length} ranks but topology has ${rows} rows.`)
+    }
+
     for (let r = 0; r < rowStrings.length && r < rows; r++) {
       let c = 0
       if (isCommaSeparated) {
@@ -442,6 +446,7 @@ export function createGridTopology(config) {
             c++
           }
         }
+        if (c > cols) throw new Error(`Rank ${r} has ${c} cells but topology has ${cols} columns.`)
       } else {
         for (const run of parseRankRuns(rowStrings[r])) {
           if (run.skip !== undefined) {
@@ -453,6 +458,7 @@ export function createGridTopology(config) {
             c++
           }
         }
+        if (c > cols) throw new Error(`Rank ${r} has ${c} cells but topology has ${cols} columns.`)
       }
     }
     return cells

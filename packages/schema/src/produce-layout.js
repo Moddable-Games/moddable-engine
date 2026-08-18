@@ -526,7 +526,7 @@ function produceHexDirect(topo, colors, render) {
 const HEX_EDGE_NEIGHBOURS = [[1, 0], [0, 1], [-1, 1], [-1, 0], [0, -1], [1, -1]]
 
 import { HexMath } from '../../hex-generators/src/hex-math.js'
-import { buildCrossMap } from '../../render/src/cross-map.js'
+import { buildCrossMap } from './cross-map.js'
 
 function axialToPixelPointy(q, r, size) {
   return HexMath.axialToPixelPointy(q, r, size)

@@ -6,6 +6,7 @@ const dicePair = createStandardDice({ count: 2, faces: 6 })
 
 export const diceChess = {
   key: 'diceChess',
+  slug: 'dice-chess',
 
   moveFilter(moves, state) {
     const seed = (state.halfmoveClock || 0) * 97 + (state.fullmoveNumber || 1) * 31 + 7

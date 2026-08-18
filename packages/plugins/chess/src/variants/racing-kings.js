@@ -1,5 +1,6 @@
 export const racingKings = {
   key: 'racingKings',
+  slug: 'racing-kings',
 
   moveFilter(moves, state, ctx) {
     return moves.filter(m => {

@@ -5,7 +5,7 @@
 import { readFileSync, readdirSync, existsSync } from 'fs'
 import { resolve, join } from 'path'
 
-const ROOT = resolve(import.meta.dirname, '..')
+const ROOT = import.meta.dirname ? resolve(import.meta.dirname, '..') : process.cwd()
 const errors = []
 
 function scanFiles(dir, ext = '.js') {
@@ -22,6 +22,10 @@ function scanFiles(dir, ext = '.js') {
   walk(dir)
   return results
 }
+
+const isMain = import.meta.dirname && process.argv[1]?.endsWith('check-duplication.mjs')
+
+if (isMain) {
 
 const sourceFiles = [
   ...scanFiles(resolve(ROOT, 'packages')),
@@ -116,7 +120,7 @@ if (rulesBaseDups.length > 0) {
   errors.push(`RULES_BASE defined outside play-shared.js: ${rulesBaseDups.map(f => f.replace(ROOT + '/', '')).join(', ')}`)
 }
 
-// 9. buildCrossMap must live in packages/render/src/cross-map.js only
+// 9. buildCrossMap must live in packages/schema/src/cross-map.js only
 const crossMapDups = sourceFiles.filter(f => {
   if (f.includes('__tests__') || f.includes('check-duplication') || f.includes('cross-map.js')) return false
   const content = readFileSync(f, 'utf8')
@@ -148,3 +152,14 @@ if (errors.length > 0) {
 }
 
 console.log(`Duplication guard: OK (${sourceFiles.length} files scanned, no prohibited patterns found)`)
+}
+
+export function checkFen4Owners(content, filePath) {
+  return content.includes('FEN4_OWNERS') && content.includes("r: 'red'") && !filePath.includes('recolour.js')
+}
+
+export function checkAxialDups(content, filePath) {
+  if (filePath.includes('hex-math.js')) return false
+  return (content.includes('Math.sqrt(3) * q') || content.includes('Math.sqrt(3)/2 * q') || content.includes('Math.sqrt(3) / 2 * q'))
+    && (content.includes('3 / 2 * q') || content.includes('3/2 * q'))
+}

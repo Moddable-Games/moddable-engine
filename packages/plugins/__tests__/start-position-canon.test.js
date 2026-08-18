@@ -113,16 +113,15 @@ describeWithRules('start position matches moddable-rules', () => {
     expect(variants.length).toBeGreaterThanOrEqual(VARIANT_FLOOR)
   })
 
-  const KNOWN_UNMAPPABLE = new Set(['chess/chess960'])
-
   it('every registered variant has a rules file', () => {
-    const missing = variants.filter(([f, k]) => variantSetup(f, k).missing && !KNOWN_UNMAPPABLE.has(`${f}/${k}`))
+    const missing = variants.filter(([f, k]) => variantSetup(f, k).missing)
     expect(missing.map(([f, k]) => `${f}/${k}`)).toEqual([])
   })
 
   const KNOWN_MISMATCH = new Set([
     'chess/breakthrough',
     'chess/chaturanga',
+    'chess/chess960',
     'chess/empire',
     'chess/hexapawn',
     'chess/horde',
@@ -134,7 +133,7 @@ describeWithRules('start position matches moddable-rules', () => {
     'chess/shatranj',
     'chess/sittuyin',
   ])
-  const MISMATCH_CEILING = 12
+  const MISMATCH_CEILING = 13
 
   it(`known mismatch count does not exceed ceiling (${MISMATCH_CEILING})`, () => {
     expect(KNOWN_MISMATCH.size).toBeLessThanOrEqual(MISMATCH_CEILING)

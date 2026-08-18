@@ -16,6 +16,3 @@ export function resolveRulesDir() {
   return candidates.find(dir => fs.existsSync(dir)) || null
 }
 
-export function hasRulesCheckout() {
-  return resolveRulesDir() !== null
-}

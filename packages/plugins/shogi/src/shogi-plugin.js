@@ -15,6 +15,11 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
 
   const config = { ...defaults, ...variantConfig }
 
+  const unknownKeys = Object.keys(variantConfig).filter(k => !(k in defaults) && k !== 'vocabulary' && k !== 'pieces' && k !== 'extends' && k !== 'hooks' && k !== 'pieceMoves' && k !== 'initialHands' && k !== 'nifuType' && k !== 'captureRule' && k !== 'promotionPieces' && k !== 'custodianCapture')
+  if (unknownKeys.length > 0) {
+    console.warn(`[shogi] Unknown config keys: ${unknownKeys.join(', ')}. Check spelling.`)
+  }
+
   let topology = null
 
   // Symbols match the setup SFEN/FEN used by the variant frontmatter in

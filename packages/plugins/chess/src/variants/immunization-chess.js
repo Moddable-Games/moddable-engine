@@ -1,5 +1,6 @@
 export const immunizationChess = {
   key: 'immunizationChess',
+  slug: 'immunization-chess',
 
   afterMove(ctx) {
     const { move, captured, board, effects, topology, playerIdx } = ctx

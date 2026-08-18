@@ -1,5 +1,6 @@
 export const poisonChess = {
   key: 'poisonChess',
+  slug: 'poison-chess',
 
   afterMove(ctx) {
     const { move, captured, board, effects, topology, playerIdx } = ctx

@@ -14,6 +14,12 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
   }
 
   const config = { ...defaults, ...variantConfig }
+
+  const unknownKeys = Object.keys(variantConfig).filter(k => !(k in defaults) && k !== 'vocabulary' && k !== 'pieces' && k !== 'extends' && k !== 'hooks' && k !== 'playerColours')
+  if (unknownKeys.length > 0) {
+    console.warn(`[go] Unknown config keys: ${unknownKeys.join(', ')}. Check spelling.`)
+  }
+
   const playerColours = config.playerColours || ['black', 'white']
 
   const hooks = {
