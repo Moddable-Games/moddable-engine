@@ -45,7 +45,7 @@ const LEGACY_CEILING = {
 }
 
 // Keys that are always acceptable in a registry entry (not data).
-const ALWAYS_ALLOWED = new Set(['key', 'extends'])
+const ALWAYS_ALLOWED = new Set(['key', 'slug', 'extends'])
 
 function isFunction(v) { return typeof v === 'function' }
 
