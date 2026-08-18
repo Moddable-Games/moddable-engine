@@ -93,12 +93,24 @@ export function buildPieceImages(pieceSetId, gallery, fenOverrides, skipFenMap) 
   return { images, surfaceMap, surface }
 }
 
+function buildFenMapFromVocabulary(vocabulary) {
+  if (!vocabulary) return null
+  const map = {}
+  for (const [type, def] of Object.entries(vocabulary)) {
+    for (const [owner, symbol] of Object.entries(def.symbols || {})) {
+      if (symbol && symbol.length > 0) map[symbol] = symbol
+    }
+  }
+  return Object.keys(map).length > 0 ? map : null
+}
+
 export function attachPieceImages(resolved, gallery) {
   if (!resolved.pieces?.set || !gallery) return {}
   validatePieceVocabulary(resolved, gallery)
   const topo = resolved.topology || {}
   const skipFenMap = topo.type === 'pit'
-  const fenOverrides = resolved.pieces.fenMap || null
+  const vocabulary = resolved.pieces?.vocabulary || resolved.vocabulary || resolved.plugins?.[Object.keys(resolved.plugins || {})[0]]?.vocabulary
+  const fenOverrides = resolved.pieces.fenMap || buildFenMapFromVocabulary(vocabulary)
   return buildPieceImages(resolved.pieces.set, gallery, fenOverrides, skipFenMap)
 }
 
