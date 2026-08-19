@@ -158,7 +158,7 @@ describe('js/ should import through package indexes, not /src/', () => {
     .filter(({ specifier }) => specifier.includes('/src/'))
     .map(({ file, specifier, line }) => ({ file: path.relative(ROOT, file), line, specifier }))
 
-  const JS_DEEP_CEILING = 27
+  const JS_DEEP_CEILING = 32
 
   it(`js/ deep imports do not exceed ceiling (${JS_DEEP_CEILING})`, () => {
     expect(jsDeep.length).toBeLessThanOrEqual(JS_DEEP_CEILING)

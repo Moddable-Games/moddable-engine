@@ -41,7 +41,7 @@ setRulesReader(
 const PLAY_LAYER_KEYS = new Set([
   'key', 'slug', 'label', 'title', 'group', 'description', 'rule', 'board',
   'extends', 'hidden', 'render', 'playerNames', 'definition', 'topology',
-  'rows', 'cols', 'size', 'players',
+  'rows', 'cols', 'size', 'players', 'search',
 ])
 
 // Per-family accepted keys (derived from reading each plugin's config.* accesses)

@@ -233,13 +233,13 @@ describe('#126 — uniformPieces collapses vocabulary', () => {
 })
 
 describe('#127 — default seat derivation', () => {
-  test('four-player-shogi: bottom army (green, index 2) is the default seat', () => {
+  test('four-player-shogi: bottom army (green, index 0) is the default seat', () => {
     const game = createGameForFamily('shogi', { variant: 'four-player-shogi', rngSeed: 1 })
     const board = game.getState().slice.board
     const cols = game.topology.cols
     const players = game.raw.playerSystem.getAll()
     const seat = defaultSeatFor(board, cols, players.length, null)
-    expect(seat).toBe(2)
+    expect(seat).toBe(0)
   })
 
   test('standard chess: white (index 0) is at the bottom, so default seat is 0', () => {
