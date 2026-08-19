@@ -1,5 +1,7 @@
 export { createBoardRenderer } from './src/board-renderer.js'
 export { serializeLayout } from './src/serialize-layout.js'
-export { buildPieceImages, attachPieceImages, renderFromEngine, validatePieceVocabulary } from './src/render-engine.js'
+export { buildPieceImages, attachPieceImages, renderFromEngine, validatePieceVocabulary, fenToPosition, pieceIdToFenChar } from './src/render-engine.js'
 export { FEN4_OWNERS, fen4GetOwner, recolourSvgText, recolourPieceSet } from './src/recolour.js'
 export { buildCrossMap } from '../schema/src/cross-map.js'
+export { createSurfaceDOM, getSurfaceRatios } from './src/piece-surface.js'
+export { escapeXml } from './src/svg-escape.js'
