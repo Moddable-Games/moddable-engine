@@ -178,7 +178,7 @@ describe('link-resolver', () => {
       MOCK_MANIFEST.categories[1],
       MOCK_MANIFEST
     )
-    expect(link).toBe('https://rules.moddable.games/dist/test/monsters/dragon')
+    expect(link).toBe('https://rules.moddable.games/test/monsters/dragon')
   })
 
   test('resolveLink falls back to rulesUrl', () => {
@@ -187,7 +187,7 @@ describe('link-resolver', () => {
       MOCK_MANIFEST.categories[0],
       MOCK_MANIFEST
     )
-    expect(link).toBe('https://rules.moddable.games/dist/test/')
+    expect(link).toBe('https://rules.moddable.games/test/')
   })
 
   test('resolveLink with custom base', () => {
