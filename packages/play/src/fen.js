@@ -84,7 +84,6 @@ export function loadFen(game, fen) {
   const topo = game.topology
   const plugin = pluginOf(game)
   const state = game.getState()
-  const family = state.family
 
   if (topo && !topo.rows && topo.parsePosition) {
     return loadFenHex(game, fen, topo, plugin)
@@ -93,8 +92,8 @@ export function loadFen(game, fen) {
   const { rows, cols } = dimsOf(game)
   const parts = String(fen).trim().split(/\s+/)
 
-  if (family === 'shogi' && state.slice.hands) {
-    return loadFenShogi(game, fen, parts, topo, plugin, rows, cols)
+  if (state.slice.hands && !plugin.config?.castling) {
+    return loadFenWithHands(game, fen, parts, topo, plugin, rows, cols)
   }
 
   const [boardPart, turnPart = 'w', castlingPart = '-', epPart = '-', halfPart = '0', fullPart = '1'] = parts
@@ -121,11 +120,11 @@ export function loadFen(game, fen) {
   return game
 }
 
-function loadFenShogi(game, fen, parts, topo, plugin, rows, cols) {
+function loadFenWithHands(game, fen, parts, topo, plugin, rows, cols) {
   const [boardPart, turnPart = 'w', handPart = '-', halfPart = '0', fullPart = '1'] = parts
   const board = parseBoardWithPromotions(boardPart, topo, plugin, rows, cols)
   const previous = game.getState().slice
-  const hands = parseShogiHands(handPart, plugin.vocabulary, previous.hands.length)
+  const hands = parseHands(handPart, plugin.vocabulary, previous.hands.length)
   const slice = { ...previous, board, hands, halfmoveClock: Number(halfPart) || 0, fullmoveNumber: Number(fullPart) || 1 }
   const turnIndex = turnPart === 'b' ? 1 : WHITE
   game.loadState({ slice, players: { ...game.getState().players, currentIndex: turnIndex } })
@@ -185,7 +184,7 @@ function parseBoardWithPromotions(boardPart, topo, plugin, rows, cols) {
   return cells
 }
 
-function parseShogiHands(handPart, vocabulary, playerCount) {
+function parseHands(handPart, vocabulary, playerCount) {
   const hands = Array.from({ length: playerCount }, () => [])
   if (handPart === '-') return hands
 
@@ -241,7 +240,6 @@ export function toFen(game) {
   const plugin = pluginOf(game)
   const state = game.getState()
   const slice = state.slice
-  const family = state.family
 
   if (topo && !topo.rows && topo.serializePosition) {
     return toFenHex(game, topo, plugin, slice)
@@ -251,8 +249,8 @@ export function toFen(game) {
   const boardPart = serializeBoardWithPromotions(slice.board, topo, plugin, rows, cols)
   const turnPart = playerIndex(game) === WHITE ? 'w' : 'b'
 
-  if (family === 'shogi' && slice.hands) {
-    const handPart = serializeShogiHands(slice.hands, plugin.vocabulary)
+  if (slice.hands && !plugin.config?.castling) {
+    const handPart = serializeHands(slice.hands, plugin.vocabulary)
     return [boardPart, turnPart, handPart, slice.halfmoveClock ?? 0, slice.fullmoveNumber ?? 1].join(' ')
   }
 
@@ -314,7 +312,7 @@ function serializeBoardWithPromotions(board, topo, plugin, rows, cols) {
   return rowStrings.join('/')
 }
 
-function serializeShogiHands(hands, vocabulary) {
+function serializeHands(hands, vocabulary) {
   let result = ''
   for (let owner = 0; owner < hands.length; owner++) {
     const hand = hands[owner]

@@ -42,7 +42,6 @@ const GAME_NAMES = /\b(chess|shogi|xiangqi|mancala|backgammon|draughts|reversi|h
 const allFiles = PACKAGES.flatMap(pkg => srcFiles(pkg))
 
 const ALLOWLIST = new Set([
-  'packages/play/src/fen.js|shogi',
   'packages/play/src/embed.js|chess',
   'packages/play/src/sdk.js|go',
   'packages/schema/src/validate.js|chess',
