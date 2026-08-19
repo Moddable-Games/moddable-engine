@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync } from 'fs'
 import { join } from 'path'
 import { setRulesReader } from '../src/play.js'
+import '../src/bootstrap-plugins.js'
 
 const RULES_ROOT = process.env.MODDABLE_RULES_DIR || join(process.cwd(), '..', 'moddable-rules', 'games')
 

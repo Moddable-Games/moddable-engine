@@ -3,6 +3,7 @@ import { createSimulator } from '../src/simulator.js'
 import { EVALUATORS } from '../src/evaluators.js'
 import { createGameForFamily } from '../../play/src/play.js'
 import { createChessPlugin } from '../../plugins/chess/index.js'
+import '../../play/src/bootstrap-plugins.js'
 import { createGameFromDefinition } from '../../game/index.js'
 import { createGridTopology } from '../../topologies/grid/index.js'
 

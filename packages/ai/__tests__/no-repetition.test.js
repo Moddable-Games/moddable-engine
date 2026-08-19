@@ -5,11 +5,6 @@
  */
 import { createGame, createAI } from '../../play/src/sdk.js'
 import '../../play/test-helpers/setup-rules-reader.js'
-import '../../plugins/chess/index.js'
-import '../../plugins/go/index.js'
-import '../../plugins/draughts/index.js'
-import '../../plugins/xiangqi/index.js'
-import '../../plugins/shogi/index.js'
 
 const CASES = [
   ['chess', 'standard'],

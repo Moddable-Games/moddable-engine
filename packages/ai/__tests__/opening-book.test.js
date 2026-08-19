@@ -1,7 +1,6 @@
 import { createOpeningBook } from '../src/opening-book.js'
 import { resolveFromDisk, setRulesReader } from '../../play/src/play.js'
 import { createAI } from '../../play/src/sdk.js'
-import '../../plugins/chess/index.js'
 import '../../play/test-helpers/setup-rules-reader.js'
 
 describe('AI — opening book', () => {

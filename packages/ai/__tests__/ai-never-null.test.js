@@ -10,11 +10,6 @@
 import { createGame, createAI, listVariants } from '../../play/src/sdk.js'
 import { getFamilies } from '../../play/src/play.js'
 import '../../play/test-helpers/setup-rules-reader.js'
-import '../../plugins/chess/index.js'
-import '../../plugins/go/index.js'
-import '../../plugins/draughts/index.js'
-import '../../plugins/xiangqi/index.js'
-import '../../plugins/shogi/index.js'
 
 const AI_FAMILIES = ['chess', 'go', 'draughts', 'xiangqi', 'shogi']
 

@@ -8,11 +8,7 @@ import {
 } from '../packages/play/index.js'
 import { renderFromEngine, attachPieceImages } from '../packages/render/index.js'
 
-import '../packages/plugins/chess/index.js'
-import '../packages/plugins/go/index.js'
-import '../packages/plugins/draughts/index.js'
-import '../packages/plugins/xiangqi/index.js'
-import '../packages/plugins/shogi/index.js'
+import '../packages/play/src/bootstrap-plugins.js'
 
 import { BOARD_THEMES, ANIM_THEME, CAPTURE_BURST_THEME, PIECE_STYLES, loadGalleryIndex, getGalleryIndex, loadVariantManifest, getManifestVariants, loadPlayabilityManifest, getPlayableVariants, getAllManifestVariants, PLAYABLE_FAMILIES, FAMILY_LABELS, loadRecolouredPieces } from './play-shared.js'
 import { createCellAddressing, createDirectAddressing } from './play-cells.js'
