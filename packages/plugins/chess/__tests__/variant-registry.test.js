@@ -1,4 +1,4 @@
-import '../index.js'
+import '../../../play/src/bootstrap-plugins.js'
 import { getVariantConfig } from '../../../play/src/variant-registry.js'
 
 describe('variant-registry (chess variants via play registry)', () => {

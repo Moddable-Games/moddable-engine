@@ -1,4 +1,4 @@
-import '../index.js'
+import '../../../play/src/bootstrap-plugins.js'
 import { listVariants, getVariantConfig } from '../../../play/src/variant-registry.js'
 
 // Existing variants pre-dating the functions-only rule.

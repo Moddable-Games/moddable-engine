@@ -1,4 +1,4 @@
-import '../index.js'
+import '../../../play/src/bootstrap-plugins.js'
 import { createGame, listVariants, getVariantConfig, getRegisteredFamilies } from '../../../play/index.js'
 
 describe('draughts variants', () => {

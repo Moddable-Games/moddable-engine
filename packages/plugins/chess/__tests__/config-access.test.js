@@ -1,6 +1,6 @@
 import { readFileSync, readdirSync } from 'fs'
 import { join } from 'path'
-import '../index.js'
+import '../../../play/src/bootstrap-plugins.js'
 import { listVariants, getVariantConfig } from '../../../play/src/variant-registry.js'
 import { resolveFromDisk, STRUCTURAL_KEYS, setRulesReader } from '../../../play/src/play.js'
 import { pluginConfigFromVariant } from '../../../play/src/variant-definition.js'
