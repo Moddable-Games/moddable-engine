@@ -120,4 +120,4 @@ export const FAMILY_LABELS = {
   reversi: 'Reversi',
 }
 
-export { recolourPieceSet as loadRecolouredPieces, FEN4_OWNERS } from '../packages/render/src/recolour.js'
+export { recolourPieceSet as loadRecolouredPieces, FEN4_OWNERS } from '../packages/render/index.js'

@@ -1,9 +1,6 @@
 import { loadRpgManifest } from './rpg-manifest-loader.js'
 import { renderCard } from './rpg-card-renderer.js'
-import { resolveLink } from '../packages/rpg/src/link-resolver.js'
-import { getField } from '../packages/rpg/src/card-data.js'
-import { loadCategoryData } from '../packages/rpg/src/manifest.js'
-import { searchEntities, getCategoryDataType, resolveDisplay } from '../packages/rpg/src/entity-search.js'
+import { resolveLink, getField, loadCategoryData, searchEntities, getCategoryDataType, resolveDisplay } from '../packages/rpg/index.js'
 import { RULES_BASE } from './play-shared.js'
 
 function deriveColors(hex) {

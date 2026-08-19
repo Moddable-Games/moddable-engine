@@ -1,6 +1,6 @@
 // View layer: browser-side caching and cache-busting around the package loader.
 // URL construction, fetch and the not-ok check live in packages/rpg/src/manifest.js.
-import { loadManifest } from '../packages/rpg/src/manifest.js'
+import { loadManifest } from '../packages/rpg/index.js'
 
 const manifestCache = {}
 

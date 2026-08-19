@@ -1,4 +1,4 @@
-import { renderFromEngine, attachPieceImages, pieceIdToFenChar } from '../packages/render/src/render-engine.js'
+import { renderFromEngine, attachPieceImages, pieceIdToFenChar } from '../packages/render/index.js'
 import { PLAYABLE_FAMILIES, FAMILY_LABELS, loadPlayabilityManifest, getPlayableVariants } from './play-shared.js'
 import { resolveVariantBoard } from './variant-frontmatter.js'
 import { defaultState, buildResolvedFromState, buildSetup, parseSetup, stateFromResolved, isGrid } from './create-state.js'

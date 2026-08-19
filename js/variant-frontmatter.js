@@ -1,8 +1,8 @@
 // Resolve a variant's frontmatter from moddable-rules into an engine block.
 // Thin wrapper over packages/play/src/resolve-frontmatter.js adding _variantMeta.
 
-import { resolveVariantAsync } from '../packages/play/src/resolve-frontmatter.js'
-import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
+import { resolveVariantAsync } from '../packages/play/index.js'
+import { parseFrontmatter } from '../packages/schema/index.js'
 import { RULES_BASE } from './play-shared.js'
 
 const RULES_FETCH = { cache: 'no-cache' }

@@ -1,6 +1,6 @@
 // View layer: turns the structured card produced by packages/rpg into markup.
 // All field resolution, templating and transforms live in packages/rpg/src/card-data.js.
-import { getCardData, getCardFields } from '../packages/rpg/src/card-data.js'
+import { getCardData, getCardFields } from '../packages/rpg/index.js'
 
 export function renderCard(item, category, manifest) {
   if (!getCardFields(category, manifest)) {

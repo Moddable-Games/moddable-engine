@@ -10,8 +10,8 @@
 // tables, which had already drifted apart: the hover copy accepted `camel`,
 // the definer copy did not list `all` in the same order. One table now.
 
-import { fromConfig } from '../packages/piece-behaviour/src/piece-definitions.js'
-import { algebraicId } from '../packages/topologies/grid/src/topology-grid.js'
+import { fromConfig } from '../packages/piece-behaviour/index.js'
+import { algebraicId } from '../packages/topologies/grid/index.js'
 
 const DIRS = {
   orthogonal: [[-1, 0], [1, 0], [0, -1], [0, 1]],

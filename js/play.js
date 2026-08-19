@@ -1,4 +1,4 @@
-import { renderFromEngine, attachPieceImages, fenToPosition } from '../packages/render/src/render-engine.js'
+import { renderFromEngine, attachPieceImages, fenToPosition } from '../packages/render/index.js'
 import { getGameConfig, getAllGames, HexSvg, createSeededRng } from '../packages/hex-generators/index.js'
 import { renderRpgProvider } from './rpg-provider.js'
 import { renderChargenProvider } from './rpg-chargen.js'
@@ -43,7 +43,7 @@ async function renderFromResolved(resolved, container) {
     } : null,
   }
 }
-import { resolveVariantAsync } from '../packages/play/src/resolve-frontmatter.js'
+import { resolveVariantAsync } from '../packages/play/index.js'
 
 async function loadContent(resolved, basePath) {
   const content = resolved.content

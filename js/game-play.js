@@ -1,13 +1,12 @@
-import { createGameForFamily, STRUCTURAL_KEYS } from '../packages/play/src/play.js'
-import { createGameController } from '../packages/play/src/game-controller.js'
-import { listVariants, getVariantConfig } from '../packages/play/src/variant-registry.js'
-import { parseUrlFlags, deriveCompatibleFlags, familySupportsFlag, serializeVariantKey } from '../packages/play/src/variant-flags.js'
-import { createAI } from '../packages/play/src/sdk.js'
-import { interactionModelFor } from '../packages/play/src/interaction.js'
-import { createEmbedBridge, parseEmbedParams, normaliseOutcome } from '../packages/play/src/embed.js'
-import { defaultSeatFor } from '../packages/play/src/default-seat.js'
-import { renderFromEngine, attachPieceImages } from '../packages/render/src/render-engine.js'
-import { boardToSetup as serialiseBoard } from '../packages/play/src/serialise.js'
+import {
+  createGameForFamily, STRUCTURAL_KEYS, createGameController,
+  listVariants, getVariantConfig,
+  parseUrlFlags, deriveCompatibleFlags, familySupportsFlag, serializeVariantKey,
+  createAI, interactionModelFor,
+  createEmbedBridge, parseEmbedParams, normaliseOutcome,
+  defaultSeatFor, boardToSetup as serialiseBoard,
+} from '../packages/play/index.js'
+import { renderFromEngine, attachPieceImages } from '../packages/render/index.js'
 
 import '../packages/plugins/chess/index.js'
 import '../packages/plugins/go/index.js'
@@ -21,7 +20,7 @@ import { paintHighlight, paintIndicator, paintFog, paintEffect, createOverlay } 
 import { bindBoardInteraction } from './play-interaction.js'
 import { renderHandPanel } from './play-hand.js'
 import { renderRulesPanel } from './play-rules.js'
-import { moveToSAN } from '../packages/plugins/chess/src/san.js'
+import { moveToSAN } from '../packages/plugins/chess/index.js'
 import { getDraft, resolveDraftId, listDrafts, WORKING_ID } from './create-drafts.js'
 import { buildResolvedFromState } from './create-state.js'
 import { resolveVariantBoard } from './variant-frontmatter.js'

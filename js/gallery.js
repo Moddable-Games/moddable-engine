@@ -1,5 +1,4 @@
-import { createSurfaceDOM, getSurfaceRatios } from '../packages/render/src/piece-surface.js'
-import { FEN4_OWNERS, recolourSvgText } from '../packages/render/src/recolour.js'
+import { createSurfaceDOM, getSurfaceRatios, FEN4_OWNERS, recolourSvgText } from '../packages/render/index.js'
 
 const base = document.querySelector('meta[name="base-path"]')?.content || ''
 const GALLERY_INDEX_PATH = `${base}/pieces/gallery-index.json?v=1.0.20`

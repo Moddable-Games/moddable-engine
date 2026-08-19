@@ -6,8 +6,7 @@
 // create writes state, play reads the same state, and "Edit in Create" reads it
 // back without either side re-deriving the other's shape.
 
-import { resolveSurface } from '../packages/schema/src/surfaces.js'
-import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolver.js'
+import { resolveSurface, cascadeResolve } from '../packages/schema/index.js'
 import { toPluginConfig, defaultRuleValues } from './create-rules.js'
 import { defaultPlayers, toPlayerConfig, playersFromResolved } from './create-players.js'
 
