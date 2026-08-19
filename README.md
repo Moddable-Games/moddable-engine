@@ -8,11 +8,9 @@ Every game in the Moddable Games collection — from standard chess to Endless S
 
 ## Status
 
-**Six families playable today** — chess (135 variants), shogi (13), draughts (13), go (10), xiangqi (3), reversi (3). 177 playable variants total. A further seven plugins exist for mancala, backgammon, morris, hex, halma, big 2, and race games, with playable variants to follow.
+**Six families playable today** — chess (135+ variants incl. 6 hex), shogi (13), draughts (13), go (10), xiangqi (3), reversi (3). 177 playable variants total. Non-grid families (mancala, backgammon, morris, hex-connection, halma, big 2, race) have topologies registered but no plugins yet (#62).
 
-Rules are implemented as plugin hooks — move filters, win conditions, turn logic, post-move effects. Chess has all eight extension points; shogi gained three this session (moveFilter, afterMove, winCondition); go has moveFilter and winCondition. Lifting these into a shared, composable rule layer is the next architectural step (#88).
-
-The play surface (interaction, embed protocol, variant registry, SDK) is family-agnostic and lives in `packages/play`. All six playable families share the same kit: embed, play page, simulator, and headless SDK.
+Rules are implemented as plugin hooks — move filters, win conditions, turn logic, post-move effects. A composable rule layer exists in `packages/rule` (registry, dependency resolution, 8 parametric rules). The play surface (interaction, embed protocol, variant registry, SDK) is family-agnostic and lives in `packages/play`.
 
 Read [`SPEC.md`](./SPEC.md) before contributing anything.
 
@@ -32,38 +30,31 @@ Chess has 135 variants. All share piece definitions through `fromConfig` in `pie
 moddable-engine/
   packages/
     core/                ← state, moves, players, history, events, RNG, traversal
-    topology-grid/       ← rectangular grids + position notation
-    topology-hex/        ← hex (hexagonal + rhombus) + position notation
-    topology-track/      ← linear/circuit paths
-    topology-pit/        ← mancala pit-sow layouts
-    topology-graph/      ← arbitrary node-edge + position notation
-    topology-tableau/    ← card table layouts (radial, tableau, wall, linear)
-    piece-behaviour/     ← movement primitives + composable definitions (rider, leaper, compose, divergent)
-    rule/                ← rule registry, composition engine (test-proven, not yet consumed by plugins)
-    render/              ← topology-agnostic SVG board renderer
-    surface/             ← board as resource type (frame, surface, divider, generators, filters)
+    topologies/
+      grid/              ← rectangular grids + position notation
+      hex/               ← hex (hexagonal + rhombus) + position notation
+      track/             ← linear/circuit paths
+      pit/               ← mancala pit-sow layouts
+      graph/             ← arbitrary node-edge + position notation
+      tableau/           ← card table layouts (radial, tableau, wall, linear)
+    piece-behaviour/     ← movement primitives + composable definitions
+    rule/                ← rule registry, composition engine, dependency resolution
+    render/              ← layer-compositing SVG board renderer
     schema/              ← frontmatter → game definitions
-    game/                ← factory, topology registry, component registry, rule registry
-    play/                ← universal game factory, interaction models, embed protocol, variant registry, SDK
-    board-theme/         ← board visual treatment (resolver, builtins)
-    piece-theme/         ← piece visual treatment (resolver, recolour)
+    game/                ← factory, topology + component registries
+    play/                ← universal game factory, interaction, embed, variant registry, SDK
+    plugins/
+      chess/             ← 135+ variants (topology-agnostic, grid + hex)
+      draughts/          ← 13 variants (all frontmatter-only)
+      go/                ← 10 variants (capture-go, gomoku, renju)
+      shogi/             ← 13 variants (fromConfig-driven, rule hooks)
+      xiangqi/           ← 3 variants (fromConfig-driven)
+      reversi/           ← 3 variants (flanking capture, anti-reversi)
     component-deck/      ← standard 52-card deck
-    component-dice/      ← standard dice (roll, doubles, movesFromRoll, expression parser, odds)
+    component-dice/      ← standard dice (roll, doubles, expression parser, odds)
     hex-generators/      ← hex map generation (Catan, Twilight, Colony, etc.)
     rpg/                 ← RPG entity search, oracle rolls, card data, manifest loader
-    plugin-chess/        ← 135 variants (topology-agnostic, hook-composed)
-    plugin-draughts/     ← 13 variants (all frontmatter-only, no variant code)
-    plugin-go/           ← 10 variants (capture-go, gomoku, renju, stoical have JS hooks)
-    plugin-shogi/        ← 13 variants (fromConfig-driven, rule hooks for hasami/custodian)
-    plugin-xiangqi/      ← 3 variants (fromConfig-driven, no variant code)
-    plugin-reversi/      ← 3 variants (flanking capture, anti-reversi)
-    plugin-mancala/      ← plugin only
-    plugin-backgammon/   ← plugin only
-    plugin-morris/       ← plugin only
-    plugin-hex/          ← plugin only
-    plugin-halma/        ← plugin only
-    plugin-big2/         ← plugin only
-    plugin-race/         ← plugin only
+    ai/                  ← minimax+TT+quiescence, MCTS, evaluators, opening book
   SPEC.md                ← architecture spec — read this first
   package.json           ← workspace root
 ```
@@ -74,14 +65,14 @@ moddable-engine/
 
 | Layer | Package(s) | Purpose |
 |---|---|---|
-| 0 | `@moddable/core` | State, moves, players, history, events, RNG, timer, plugin registry |
-| 1 | `@moddable/topology-*` | Coordinate systems: grid, hex, track, pit, graph, tableau (6 types) |
-| 2 | `@moddable/piece-behaviour` | Movement primitives + composable piece definitions |
-| 2 | `@moddable/rule` | Rule registry and composition engine (proven in tests, not yet consumed by plugins — see #88) |
-| 3 | `@moddable/render` | Topology-agnostic SVG board renderer |
-| 4 | `@moddable/schema` | Frontmatter → game definitions (done) |
-| 5 | `@moddable/component-*` | Non-spatial structure: deck, dice, timer |
-| 6 | `@moddable/plugin-*` | Game families — 6 playable (chess, draughts, go, shogi, xiangqi, reversi) + 7 in progress |
+| 0 | `core` | State, moves, players, history, events, RNG, timer, plugin registry |
+| 1 | `topologies/*` | Coordinate systems: grid, hex, track, pit, graph, tableau (6 types) |
+| 2 | `piece-behaviour` | Movement primitives + composable piece definitions |
+| 2 | `rule` | Rule registry, composition engine, dependency resolution |
+| 3 | `render` | Layer-compositing SVG board renderer |
+| 4 | `schema` | Frontmatter → game definitions |
+| 5 | `component-*` | Non-spatial structure: deck, dice |
+| 6 | `plugins/*` | Game families — 6 playable (chess, draughts, go, shogi, xiangqi, reversi) |
 | 7 | Game configs | Frontmatter only — no code |
 
 ---
@@ -172,6 +163,14 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ---
 
 ## Changelog
+
+#### 2026-08-19
+- Closed #133: removed all Tier 1 game-knowledge hardcodings from non-plugin packages (FEN4 owners, Go alphabet, shogi branching in fen.js, chess references in variant-flags.js, landlords naming in produce-layout)
+- Added `no-game-knowledge.test.js` purity gate: scans 124 non-plugin source files for game-family name references
+- Closed #129: kirin + dobutsu artwork resolved; djambi tracked separately on #131
+- Closed #58: hex already plays (chess plugin has hexPawnConfig + hex-knight)
+- Updated #62 with current provider playability state
+- README and CLAUDE.md updated to reflect actual package structure (topologies/, plugins/ subdirectories; deleted stub plugins removed from docs)
 
 #### 2026-08-14
 - Shogi 6 to 13: sho, yari, tori, cannon, hasami, chu (12x12, 21 types), four-player declared playable
