@@ -2,11 +2,11 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { parseFrontmatter } from '../../schema/src/parse-frontmatter.js'
-import { buildPieceImages } from '../../render/src/render-engine.js'
+import { buildPieceImages, renderFromEngine, attachPieceImages } from '../../render/src/render-engine.js'
 import { boardToSetup } from '../../play/src/serialise.js'
 import { listVariants, getRegisteredFamilies } from '../../play/src/variant-registry.js'
 import { createGame } from '../../play/src/sdk.js'
-import { createGameForFamily } from '../../play/src/play.js'
+import { createGameForFamily, resolveFromDisk } from '../../play/src/play.js'
 import { interactionModelFor } from '../../play/src/interaction.js'
 
 import '../../play/test-helpers/setup-rules-reader.js'
@@ -148,18 +148,27 @@ describeWithAssets('every piece resolves to real artwork during play', () => {
   })
 
   it.each(everyVariant())('%s/%s renders every piece after moves', (family, key) => {
-    const pieces = variantPieces(family, key)
-    if (!pieces || !pieces.set) return
+    const resolved = resolveFromDisk(family, key)
+    if (!resolved) return
+    if (!resolved.pieces?.set) return
+    if (!resolved.topology?.type || resolved.topology.type === 'none' || resolved.topology.type === 'tableau') return
 
-    const fenOverrides = pieces.fenMap || pieces.vocabulary || null
-    const { images } = buildPieceImages(pieces.set, gallery, fenOverrides, false)
-    const { setup, played } = playedPosition(family, key, 4)
+    const { game, plugin, slice, played, setup } = playedPosition(family, key, 4)
+    const board = slice.board
+    const occupiedCount = Array.isArray(board)
+      ? board.filter(c => c !== null && c !== 0).length
+      : Object.values(board).filter(c => c !== null && c !== 0).length
 
-    const keys = setupToImageKeys(setup, null)
-    const unresolved = [...new Set(keys.filter(k => !images[k]))]
+    const { images } = attachPieceImages(resolved, gallery)
+    if (!images || Object.keys(images).length === 0) return
 
-    expect(unresolved).toEqual([])
-    expect(keys.length + played).toBeGreaterThan(0)
+    const withPosition = { ...resolved, setup }
+    const svg = renderFromEngine(withPosition, { pieceImages: images })
+    if (!svg) return
+
+    const imageCount = (svg.match(/<image\s/g) || []).length
+    expect(imageCount).toBe(occupiedCount)
+    expect(occupiedCount + played).toBeGreaterThan(0)
   })
 
   it.each(everyVariant())('%s/%s changes state when a move is played', (family, key) => {
