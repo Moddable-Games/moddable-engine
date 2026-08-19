@@ -31,7 +31,7 @@ const NAMED_OFFSETS = {
 // A minimal board-view of a rectangular grid, sufficient for the primitives
 // this page can build. Not a replacement for topologies/grid: it exists so the
 // preview does not need a live game instance.
-export function gridTopology(rows, cols) {
+function gridTopology(rows, cols) {
   return {
     rays(from, directions, maxSteps) {
       const resolved = typeof directions === 'string' ? (DIRS[directions] || []) : (directions || [])

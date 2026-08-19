@@ -20,7 +20,7 @@ import { FEN4_OWNERS, recolourSvgText } from '../../packages/render/index.js'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export const ENGINE_ROOT = resolve(__dirname, '../..')
-export const RULES_ROOT = process.env.RULES_ROOT || resolve(ENGINE_ROOT, '../moddable-rules')
+const RULES_ROOT = process.env.RULES_ROOT || resolve(ENGINE_ROOT, '../moddable-rules')
 export const GAMES_DIR = resolve(RULES_ROOT, 'games')
 export const SNAP_DIR = resolve(ENGINE_ROOT, 'snapshots')
 export const SVG_DIR = resolve(ENGINE_ROOT, 'boards', 'svgs')
@@ -104,7 +104,7 @@ export function* walkCorpus({ familyFilter = null } = {}) {
 // Inkscape and Sodipodi leave editor metadata in exported SVGs. Removing it is
 // cosmetic, but it must be removed identically everywhere or two scripts
 // produce different bytes for the same board and a snapshot diff lies.
-export function stripSvgBloat(svgContent) {
+function stripSvgBloat(svgContent) {
   let s = svgContent
   s = s.replace(/<metadata[\s\S]*?<\/metadata>/gi, '')
   s = s.replace(/<sodipodi:[^>]*\/>/gi, '')

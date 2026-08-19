@@ -1,5 +1,5 @@
-export const BLACK = 'black'
-export const WHITE = 'white'
+const BLACK = 'black'
+const WHITE = 'white'
 
 export function emptyRegions(board, getNeighbours) {
   const regions = []

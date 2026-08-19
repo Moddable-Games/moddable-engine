@@ -27,8 +27,6 @@
   },
   "ignoreDependencies": [
     "@moddable/core",
-    "jest",
-    "@jest/globals",
-    "@playwright/test"
+    "@jest/globals"
   ]
 }

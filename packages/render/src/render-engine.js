@@ -24,7 +24,7 @@ const RENDER_FN = { grid: renderGridLayout, graph: renderGraphLayout, pit: rende
 
 // --- Piece image resolution ---
 
-export const FEN_TO_PIECE_ID = {
+const FEN_TO_PIECE_ID = {
   K: 'wK', Q: 'wQ', R: 'wR', B: 'wB', N: 'wN', P: 'wP',
   k: 'bK', q: 'bQ', r: 'bR', b: 'bB', n: 'bN', p: 'bP',
   A: 'wA', a: 'bA', C: 'wC', c: 'bC', D: 'wD', d: 'bD',

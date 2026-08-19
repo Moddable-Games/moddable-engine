@@ -416,7 +416,7 @@ function findSanMove(game, san) {
 }
 
 /** Play a UCI (or SAN) move through the engine. Throws when it is not legal. */
-export function applyMoveNotation(game, notation) {
+function applyMoveNotation(game, notation) {
   const move = findLegalMove(game, notation)
   if (!move) {
     throw new Error(`Move "${notation}" is not legal in ${toFen(game)}`)

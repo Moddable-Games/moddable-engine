@@ -37,4 +37,3 @@ globalThis.requestAnimationFrame = () => {}
 globalThis.URLSearchParams = class { get() { return null } }
 globalThis.IntersectionObserver = class { observe() {} disconnect() {} }
 
-export { stubEl }

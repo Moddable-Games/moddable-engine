@@ -7,7 +7,7 @@
 // own army and green advancing backwards, because `advancement` was absent and
 // `playerIndex === 0 ? -1 : 1` answered for all four seats.
 
-export const DEFAULT_PLAYER_NAMES = {
+const DEFAULT_PLAYER_NAMES = {
   chess: ['white', 'black', 'red', 'green'],
   shogi: ['sente', 'gote', 'red', 'blue'],
   go: ['black', 'white'],
@@ -20,7 +20,7 @@ export const DEFAULT_PLAYER_NAMES = {
 // take a scalar row direction; shogi takes either a scalar or a [dr, dc] vector,
 // which is what a cross-shaped board needs. Anything absent from this table gets
 // no direction control, because the key would not be consumed.
-export const ADVANCEMENT_SHAPE = {
+const ADVANCEMENT_SHAPE = {
   chess: 'scalar',
   xiangqi: 'scalar',
   shogi: 'vector',
@@ -68,7 +68,7 @@ function defaultDirectionFor(index, count, family) {
   return ['up', 'down', 'right', 'left'][index] || 'up'
 }
 
-export function directionOptions(family) {
+function directionOptions(family) {
   return ADVANCEMENT_SHAPE[family] === 'vector'
     ? [
         { value: 'up', label: 'Up' },

@@ -168,4 +168,4 @@ export function resolve({ surface, family, variant }) {
 }
 
 // --- Utility exports (for testing) ---
-export { deepMerge, deriveDefaults, validate }
+export { deepMerge, deriveDefaults }

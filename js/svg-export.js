@@ -9,7 +9,7 @@
 // inlineExternalImages already existed in js/play.js, used only by PNG export.
 // It is here so both pages and both formats use one copy.
 
-export async function inlineExternalImages(svgEl) {
+async function inlineExternalImages(svgEl) {
   const images = svgEl.querySelectorAll('image')
   const jobs = [...images].map(async img => {
     const href = img.getAttribute('href') || img.getAttributeNS('http://www.w3.org/1999/xlink', 'href')

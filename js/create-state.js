@@ -11,7 +11,7 @@ import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolv
 import { toPluginConfig, defaultRuleValues } from './create-rules.js'
 import { defaultPlayers, toPlayerConfig, playersFromResolved } from './create-players.js'
 
-export const STATE_VERSION = 1
+const STATE_VERSION = 1
 
 export function defaultState(family = 'chess') {
   return {
