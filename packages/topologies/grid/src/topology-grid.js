@@ -603,11 +603,9 @@ export function intersectionId(r, c, rows) {
   return INTERSECTION_ALPHABET[c] + (rows - r)
 }
 
-export { intersectionId as goId }
-
 function idFn(idStyle) {
   if (typeof idStyle === 'function') return idStyle
-  if (idStyle === 'go' || idStyle === 'intersection') return intersectionId
+  if (idStyle === 'intersection') return intersectionId
   return algebraicId
 }
 

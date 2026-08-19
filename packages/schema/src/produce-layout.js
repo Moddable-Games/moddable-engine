@@ -118,7 +118,7 @@ function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabel
     if (textItems.length) ops.push({ op: 'texts', items: textItems })
   }
 
-  const intersectionStyle = idStyle === 'go' || idStyle === 'intersection'
+  const intersectionStyle = idStyle === 'intersection'
   const labelAlphabet = render.labelAlphabet ? render.labelAlphabet.slice(0, cols) : null
   const fs = Math.min(13, pad * 0.55)
 
