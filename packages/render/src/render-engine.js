@@ -237,7 +237,6 @@ export function renderFromEngine(resolved, opts = {}) {
     }
   }
 
-  // Track: board data for landlords
   if (topo.type === 'track' && resolved.content?.data) {
     render._boardData = resolved.content.data
     if (resolved.content.board) render._board = resolved.content.board
