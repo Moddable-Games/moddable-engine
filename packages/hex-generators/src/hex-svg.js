@@ -1,4 +1,4 @@
-import { HexMath } from './hex-math.js';
+import { HexMath } from '../../topologies/hex/src/hex-math.js';
 
 const isLightColor = HexMath.isLightColor
 

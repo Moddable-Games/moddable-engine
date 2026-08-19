@@ -49,7 +49,7 @@ describe('guard negative fixtures: every predicate fires on its violation', () =
 
     it('checkAxialDups does NOT fire on hex-math.js', () => {
       const content = "const x = Math.sqrt(3) * q\nconst y = 3 / 2 * q"
-      expect(checkAxialDups(content, 'packages/hex-generators/src/hex-math.js')).toBe(false)
+      expect(checkAxialDups(content, 'packages/topologies/hex/src/hex-math.js')).toBe(false)
     })
 
     it('checkAxialDups fires on content with both halves of axialToPixel', () => {

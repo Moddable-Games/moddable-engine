@@ -1,5 +1,5 @@
 import { parseRankRuns } from '../../../core/src/fen-runs.js'
-import { HexMath } from '../../../hex-generators/src/hex-math.js'
+import { HexMath } from './hex-math.js'
 export const schema = {
   type: 'hex',
   required: [],
