@@ -45,16 +45,22 @@ export function deriveCompatibleFlags(definition, family) {
   return flags
 }
 
+function getPluginConfig(engine) {
+  if (!engine.plugins) return {}
+  const families = Object.keys(engine.plugins)
+  return families.length ? engine.plugins[families[0]] || {} : {}
+}
+
 function getSetupString(engine) {
   if (engine.setup && typeof engine.setup === 'string') return engine.setup
   if (engine.setup && engine.setup.position) return engine.setup.position
-  const chess = engine.plugins?.chess
-  if (chess && typeof chess.setup === 'string') return chess.setup
+  const pluginCfg = getPluginConfig(engine)
+  if (pluginCfg && typeof pluginCfg.setup === 'string') return pluginCfg.setup
   return null
 }
 
 function canRandomise(engine) {
-  const topoType = engine.topology?.type || (engine.plugins?.chess ? 'grid' : null)
+  const topoType = engine.topology?.type
   if (topoType !== 'grid') return false
 
   const setup = getSetupString(engine)
@@ -66,24 +72,23 @@ function canRandomise(engine) {
   const ranks = setup.split('/')
   if (ranks.length < rows) return false
 
-  const pawnChar = 'p'
   let hasPieceRank = false
   for (let i = Math.floor(rows / 2); i < rows; i++) {
     const chars = ranks[i].replace(/\d+/g, '').toLowerCase().split('')
-    const nonPawn = chars.filter(ch => ch !== pawnChar).length
-    if (nonPawn >= Math.floor(cols * 0.6)) { hasPieceRank = true; break }
+    const unique = new Set(chars)
+    if (unique.size >= Math.floor(cols * 0.6)) { hasPieceRank = true; break }
   }
   return hasPieceRank
 }
 
 function canDrop(engine) {
-  const topoType = engine.topology?.type || (engine.plugins?.chess ? 'grid' : null)
+  const topoType = engine.topology?.type
   if (topoType !== 'grid') return false
 
-  const chessConfig = engine.plugins?.chess || {}
-  const winCondition = chessConfig.winCondition ?? engine.winCondition
+  const pluginCfg = getPluginConfig(engine)
+  const winCondition = pluginCfg.winCondition ?? engine.winCondition
   if (winCondition === 'antichess' || winCondition === 'giveaway') return false
-  if (chessConfig.drops || engine.drops) return false
+  if (pluginCfg.drops || engine.drops) return false
 
   return true
 }
