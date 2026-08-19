@@ -441,12 +441,12 @@ function renderSingleCard(card, x, y, cardW, cardH, deckConfig, images, faceUp) 
 // piece set is chosen in frontmatter (engine.pieces.set) and arrives here
 // already resolved to paths as render._pieceImages. Neither the deck nor the
 // artwork naming is knowledge this renderer holds.
-export function getCardImagePath(card, images) {
+function getCardImagePath(card, images) {
   if (!card?.art || !images) return null
   return images[card.art] || null
 }
 
-export function getCardBackPath(deckConfig, images) {
+function getCardBackPath(deckConfig, images) {
   if (!deckConfig?.backArt || !images) return null
   return images[deckConfig.backArt] || null
 }

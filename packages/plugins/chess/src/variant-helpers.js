@@ -26,7 +26,7 @@ export function pieceAttacksSquare(piece, from, target, board, cols, rows) {
   }
 }
 
-export function pathIsClear(from, target, board, cols) {
+function pathIsClear(from, target, board, cols) {
   const fr = Math.floor(from / cols), fc = from % cols
   const tr = Math.floor(target / cols), tc = target % cols
   const dr = tr - fr, dc = tc - fc
