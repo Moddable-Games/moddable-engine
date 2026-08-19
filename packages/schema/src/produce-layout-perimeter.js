@@ -1,4 +1,4 @@
-function landlordsWrapText(text, maxChars) {
+function perimeterWrapText(text, maxChars) {
   if (text.length <= maxChars) return [text]
   const words = text.split(' ')
   const lines = []
@@ -15,13 +15,13 @@ function landlordsWrapText(text, maxChars) {
   return lines
 }
 
-function landlordsCornerOrder(board, spaces) {
+function perimeterCornerOrder(board, spaces) {
   const corners = spaces.filter(s => s.side === 'corner')
   const order = board.cornerOrder || [0, 1, 2, 3]
   return order.map(i => corners[i])
 }
 
-function landlordsSpaceRect(side, idx, count, cornerSize, boardW, boardH) {
+function perimeterSpaceRect(side, idx, count, cornerSize, boardW, boardH) {
   const spanW = boardW - cornerSize * 2
   const spanH = boardH - cornerSize * 2
   const cellW = spanW / count
@@ -33,7 +33,7 @@ function landlordsSpaceRect(side, idx, count, cornerSize, boardW, boardH) {
   return { x: 0, y: 0, w: cellW, h: cellH }
 }
 
-export function landlordsOps(colors, render) {
+export function perimeterOps(colors, render) {
   const variant = render._board || '1904-patent'
   const boardData = render._boardData || null
   const board = boardData ? boardData.boards[variant] : null
@@ -67,7 +67,7 @@ export function landlordsOps(colors, render) {
     if (s.side !== 'corner' && sideSpaces[s.side]) sideSpaces[s.side].push(s)
   }
 
-  const cornerOrder = landlordsCornerOrder(board, spaces)
+  const cornerOrder = perimeterCornerOrder(board, spaces)
   const cornerPositions = [
     { x: boardW - cornerSize, y: boardH - cornerSize },
     { x: 0, y: boardH - cornerSize },
@@ -137,7 +137,7 @@ export function landlordsOps(colors, render) {
     if (variant === '1904-patent') {
       // text rendered in medallion second pass
     } else {
-      const lines = landlordsWrapText(space.name, 10)
+      const lines = perimeterWrapText(space.name, 10)
       const lineH = size > 70 ? 11 : 9
       const nameY = cy - 8
       for (let i = 0; i < lines.length; i++) {
@@ -238,7 +238,7 @@ export function landlordsOps(colors, render) {
     if (!sideArr.length) continue
     for (let i = 0; i < sideArr.length; i++) {
       const space = sideArr[i]
-      const { x, y, w, h } = landlordsSpaceRect(side, i, sideArr.length, cornerSize, boardW, boardH)
+      const { x, y, w, h } = perimeterSpaceRect(side, i, sideArr.length, cornerSize, boardW, boardH)
       const typeFill = theme[space.type] || '#f0f0f0'
       const strokeW = variant === '1904-patent' ? 1.5 : 0.75
       el('rect', { x, y, width: w, height: h, fill: typeFill, stroke: theme['space-stroke'], 'stroke-width': strokeW, class: 'board-cell', 'data-sq': `pos-${space.pos}`, 'data-type': space.type })
@@ -268,7 +268,7 @@ export function landlordsOps(colors, render) {
       const r = cornerSize * 0.72
       const fontSize = space.name.length > 12 ? 6 : space.name.length > 8 ? 7 : 9
       const maxChars = Math.floor((r * 1.2) / (fontSize * 0.55))
-      const lines = landlordsWrapText(space.name, maxChars)
+      const lines = perimeterWrapText(space.name, maxChars)
       const lineH = fontSize + 3
       const blockH = lines.length * lineH
       const startY = cy - blockH / 2 + lineH / 2 - (space.notes ? 3 : 0)
@@ -282,12 +282,12 @@ export function landlordsOps(colors, render) {
     }
   }
 
-  landlordsInner(el, board, cornerSize, boardW, boardH, theme, variant)
+  perimeterInner(el, board, cornerSize, boardW, boardH, theme, variant)
 
   return { type: 'track', config: { style: 'perimeter', ops: els, width: boardW, height: boardH } }
 }
 
-function landlordsInner(el, board, cornerSize, boardW, boardH, theme, variant) {
+function perimeterInner(el, board, cornerSize, boardW, boardH, theme, variant) {
   const innerX = cornerSize, innerY = cornerSize
   const innerW = boardW - cornerSize * 2, innerH = boardH - cornerSize * 2
   el('rect', { x: innerX, y: innerY, width: innerW, height: innerH, fill: theme['inner-bg'] })

@@ -11,7 +11,7 @@
 
 import { resolveSurface } from './surfaces.js'
 import { triangularPointOps } from './produce-layout-triangular-points.js'
-import { landlordsOps } from './produce-layout-landlords.js'
+import { perimeterOps } from './produce-layout-perimeter.js'
 import { produceStarLayout } from './produce-layout-star.js'
 
 export function produceLayout(engine) {
@@ -708,7 +708,7 @@ function produceHexLegacy(topo, colors, render) {
 function produceTrackLayout(topo, colors, render) {
   const style = render.trackStyle || 'dots'
   if (style === 'triangular-points') return triangularPointOps(colors, render)
-  if (style === 'perimeter') return landlordsOps(colors, render)
+  if (style === 'perimeter') return perimeterOps(colors, render)
   return { type: 'track', config: { style, ops: [], width: 0, height: 0 } }
 }
 

@@ -90,33 +90,34 @@ function canDrop(engine) {
 
 export function applyFlags(definition, flags) {
   if (!flags || !flags.length) return definition
+  const family = definition.parent || deriveFamily(definition)
   let result = definition
   for (const flag of [...flags].sort()) {
-    if (flag === 'random') result = applyRandom(result)
-    if (flag === 'drops') result = applyDrops(result)
+    if (flag === 'random') result = mergePluginFlag(result, family, { randomSetup: true })
+    if (flag === 'drops') result = mergePluginFlag(result, family, { drops: true })
   }
   return result
 }
 
-function mergeChessFlag(definition, patch) {
+function deriveFamily(definition) {
+  const engine = definition.engine || definition
+  if (engine.family) return engine.family
+  if (engine.plugins) return Object.keys(engine.plugins)[0] || null
+  return null
+}
+
+function mergePluginFlag(definition, family, patch) {
+  if (!family) return definition
   if (definition.engine && definition.engine.plugins) {
     const engine = { ...definition.engine }
     const plugins = { ...engine.plugins }
-    plugins.chess = { ...(plugins.chess || {}), ...patch }
+    plugins[family] = { ...(plugins[family] || {}), ...patch }
     engine.plugins = plugins
     return { ...definition, engine }
   }
   const plugins = { ...(definition.plugins || {}) }
-  plugins.chess = { ...(plugins.chess || {}), ...patch }
+  plugins[family] = { ...(plugins[family] || {}), ...patch }
   return { ...definition, plugins }
-}
-
-function applyRandom(definition) {
-  return mergeChessFlag(definition, { randomSetup: true })
-}
-
-function applyDrops(definition) {
-  return mergeChessFlag(definition, { drops: true })
 }
 
 export function flagPositionKeySuffix(flags) {
