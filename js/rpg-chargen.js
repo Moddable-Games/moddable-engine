@@ -1,5 +1,6 @@
 import { createRng } from '../packages/core/src/rng.js'
 import { rollDiceExpression } from '../packages/component-dice/src/dice-expression.js'
+import { escapeXml as esc } from '../packages/render/src/svg-escape.js'
 import { loadRpgManifest } from './rpg-manifest-loader.js'
 
 import { RULES_BASE } from './play-shared.js'
@@ -472,9 +473,6 @@ function buildPalette(theme) {
 let _palette = null
 
 // ─── SVG HELPERS ───────────────────────────────────────────────────────────
-function esc(text) {
-  return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-}
 
 function svgText(x, y, text, opts = {}) {
   const size = opts.size || BODY_SIZE

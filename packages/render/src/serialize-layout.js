@@ -6,6 +6,7 @@
  */
 
 import { renderSurfaceSVG } from './piece-surface.js'
+import { escapeXml as esc } from './svg-escape.js'
 
 export function serializeLayout(layout, opts = {}) {
   const { title, pieces, pieceImages, pieceSurface, pieceSurfaceMap, pieceRotations } = opts
@@ -94,6 +95,3 @@ export function elementToSvg(el) {
   return `${open}/>`
 }
 
-function esc(v) {
-  return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}

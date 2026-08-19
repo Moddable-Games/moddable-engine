@@ -51,7 +51,7 @@ export function interpolate(template, item) {
   })
 }
 
-function getCardFields(category, manifest) {
+export function getCardFields(category, manifest) {
   if (category.cardFields) return category.cardFields
   const cf = manifest.cardFields
   if (!cf) return null

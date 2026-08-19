@@ -1,8 +1,8 @@
-import { searchEntities, filterByCategory, paginateResults } from '../src/entity-search.js'
+import { searchEntities, filterByCategory, paginateResults, getCategoryDataType, resolveDisplay, normalizeOracleEntries } from '../src/entity-search.js'
 import { rollOracle, rollRecipe, getOracleEntries } from '../src/oracle-roll.js'
-import { getCardData, interpolate, getField, TRANSFORMS } from '../src/card-data.js'
+import { getCardData, getCardFields, interpolate, getField, TRANSFORMS } from '../src/card-data.js'
 import { resolveLink } from '../src/link-resolver.js'
-import { resolveDataUrl } from '../src/manifest.js'
+import { resolveDataUrl, loadCategoryData, loadManifest } from '../src/manifest.js'
 
 const MOCK_MANIFEST = {
   label: 'Test RPG',
@@ -210,5 +210,79 @@ describe('manifest', () => {
   test('resolveDataUrl with custom base', () => {
     const url = resolveDataUrl(MOCK_MANIFEST, MOCK_MANIFEST.categories[0], 'http://localhost')
     expect(url).toBe('http://localhost/games/test/data/spells.json')
+  })
+})
+
+// ─── Contract for js/rpg-*.js view layers (issue #136 step 6) ──────────────
+// These symbols were shadow copies in js/rpg-*.js. They are exported so the
+// browser view layers can import them instead of re-declaring them.
+
+describe('view-layer contract', () => {
+  test('getCategoryDataType falls back category -> manifest -> entity', () => {
+    expect(getCategoryDataType({ dataType: 'oracle' }, {})).toBe('oracle')
+    expect(getCategoryDataType({}, { dataType: 'table' })).toBe('table')
+    expect(getCategoryDataType({}, {})).toBe('entity')
+  })
+
+  test('resolveDisplay applies pipe transforms in templates', () => {
+    const item = { name: 'Fire Ball', level: 0 }
+    expect(resolveDisplay(item, '{name|kebabCase}')).toBe('fire-ball')
+    expect(resolveDisplay(item, '{level|levelSlug}')).toBe('cantrips')
+  })
+
+  test('resolveDisplay keeps falsy-but-present values', () => {
+    expect(resolveDisplay({ level: 0 }, '{level}')).toBe('0')
+  })
+
+  test('resolveDisplay handles plain paths and no displayField', () => {
+    expect(resolveDisplay({ name: 'Zap' }, 'name')).toBe('Zap')
+    expect(resolveDisplay({ result: 'Advance' }, null)).toBe('Advance')
+  })
+
+  test('normalizeOracleEntries falls back to table id for _tableName', () => {
+    const entries = normalizeOracleEntries([{ id: 'dungeon-purpose', entries: [{ result: 'Vault' }] }])
+    expect(entries[0]._tableName).toBe('dungeon-purpose')
+  })
+
+  test('getCardFields resolves category, per-category and flat manifest shapes', () => {
+    expect(getCardFields({ cardFields: { title: 'a' } }, {})).toEqual({ title: 'a' })
+    expect(getCardFields({ id: 'spells' }, { cardFields: { spells: { title: 'b' } } })).toEqual({ title: 'b' })
+    expect(getCardFields({ id: 'x' }, { cardFields: { title: 'c' } })).toEqual({ title: 'c' })
+    expect(getCardFields({ id: 'x' }, {})).toBeNull()
+  })
+})
+
+describe('manifest loading', () => {
+  const okFetcher = (payload) => async () => ({ ok: true, json: async () => payload })
+
+  test('loadCategoryData tolerates a category with no arrayKey', async () => {
+    const manifest = { dataPath: 'games/test/data/', categories: [{ id: 'spells', file: 'spells.json' }] }
+    const data = await loadCategoryData(manifest, {
+      rulesBase: 'https://example.test',
+      fetcher: okFetcher({ data: [{ name: 'Fireball' }] }),
+    })
+    expect(data.spells).toEqual([{ name: 'Fireball' }])
+  })
+
+  test('loadCategoryData extracts through arrayKey when present', async () => {
+    const manifest = { dataPath: 'd/', categories: [{ id: 'spells', file: 's.json', arrayKey: 'tables[0].entries' }] }
+    const data = await loadCategoryData(manifest, {
+      rulesBase: 'https://example.test',
+      fetcher: okFetcher({ tables: [{ entries: [{ name: 'Fireball' }] }] }),
+    })
+    expect(data.spells).toEqual([{ name: 'Fireball' }])
+  })
+
+  test('loadManifest builds the rules URL and returns null on a bad response', async () => {
+    const seen = []
+    const manifest = await loadManifest('cairn', {
+      rulesBase: 'https://rules.example',
+      fetcher: async (url) => { seen.push(url); return { ok: true, json: async () => ({ label: 'Cairn' }) } },
+    })
+    expect(seen[0]).toBe('https://rules.example/games/cairn/rpg-manifest.json')
+    expect(manifest.label).toBe('Cairn')
+
+    const missing = await loadManifest('nope', { fetcher: async () => ({ ok: false }) })
+    expect(missing).toBeNull()
   })
 })

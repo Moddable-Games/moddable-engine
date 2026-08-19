@@ -1,7 +1,9 @@
 import { loadRpgManifest } from './rpg-manifest-loader.js'
 import { renderCard } from './rpg-card-renderer.js'
-import { resolveLink } from './rpg-link-resolver.js'
+import { resolveLink } from '../packages/rpg/src/link-resolver.js'
 import { getField } from '../packages/rpg/src/card-data.js'
+import { loadCategoryData } from '../packages/rpg/src/manifest.js'
+import { searchEntities, getCategoryDataType, resolveDisplay } from '../packages/rpg/src/entity-search.js'
 import { RULES_BASE } from './play-shared.js'
 
 function deriveColors(hex) {
@@ -92,55 +94,12 @@ export async function renderRpgProvider(gameKey) {
 
 async function loadAllData(basePath) {
   const manifest = rpgState.manifest
-  const dataBase = basePath + manifest.dataPath
-  const promises = manifest.categories.map(async cat => {
-    if (rpgState.data[cat.id]) return
-    try {
-      const resp = await fetch(dataBase + cat.file)
-      const json = await resp.json()
-      const dataType = getCategoryDataType(cat, manifest)
-      if (dataType === 'oracle' || dataType === 'table') {
-        const raw = cat.arrayKey ? extractByKey(json, cat.arrayKey) : null
-        const tables = raw ? (Array.isArray(raw) && raw[0] && raw[0].entries ? raw : [{ entries: raw }])
-          : json.tables || [json]
-        rpgState.data[cat.id] = tables.map(t => ({
-          ...t,
-          entries: (t.entries || []).map((e, i) => {
-            if (typeof e === 'string') return { result: e, min: i + 1, max: i + 1, roll: i + 1 }
-            if (e.min == null) return { ...e, min: i + 1, max: i + 1, roll: i + 1 }
-            return e
-          }),
-        }))
-      } else {
-        const extracted = cat.arrayKey ? extractByKey(json, cat.arrayKey) : null
-        rpgState.data[cat.id] = extracted || (Array.isArray(json) ? json : json.data || json.entries || [])
-      }
-    } catch {
-      rpgState.data[cat.id] = []
-    }
-  })
-  await Promise.all(promises)
+  rpgState.data = await loadCategoryData(manifest, { rulesBase: basePath.replace(/\/$/, '') })
   rpgState.category = manifest.categories[0].id
   document.querySelectorAll('.rpg-cat-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.catId === rpgState.category)
   })
   renderResults()
-}
-
-function getCategoryDataType(category, manifest) {
-  return category.dataType || manifest.dataType || 'entity'
-}
-
-function extractByKey(json, arrayKey) {
-  const bracketMatch = arrayKey.match(/^(.+?)\[(\d+)\]\.(.+)$/)
-  if (bracketMatch) {
-    const [, pre, idx, post] = bracketMatch
-    const arr = pre.split('.').reduce((o, k) => o && o[k], json)
-    if (!Array.isArray(arr)) return null
-    const obj = arr[parseInt(idx)]
-    return obj ? post.split('.').reduce((o, k) => o && o[k], obj) : null
-  }
-  return arrayKey.split('.').reduce((o, k) => o && o[k], json)
 }
 
 function selectCategory(catId) {
@@ -152,48 +111,14 @@ function selectCategory(catId) {
   renderResults()
 }
 
-function getAllResults() {
-  const manifest = rpgState.manifest
-  const query = rpgState.searchQuery.toLowerCase().trim()
-  let results = []
-
-  if (query) {
-    for (const cat of manifest.categories) {
-      const dataType = getCategoryDataType(cat, manifest)
-      const data = rpgState.data[cat.id] || []
-      if (dataType === 'oracle' || dataType === 'table') {
-        const entries = data.flatMap(table =>
-          (table.entries || []).map(e => ({ ...e, _tableName: table.name || table.id }))
-        )
-        const displayField = cat.displayField || 'result'
-        const matched = entries.filter(e => resolveDisplay(e, displayField).toLowerCase().includes(query))
-        results.push(...matched.map(item => ({ item, cat })))
-      } else {
-        const searchFields = cat.searchFields || ['name']
-        const matched = data.filter(item =>
-          searchFields.some(field => {
-            const val = getField(item, field)
-            return val && String(val).toLowerCase().includes(query)
-          })
-        )
-        results.push(...matched.map(item => ({ item, cat })))
-      }
-    }
-  } else {
-    const cat = manifest.categories.find(c => c.id === rpgState.category)
-    const dataType = getCategoryDataType(cat, manifest)
-    const data = rpgState.data[rpgState.category] || []
-    if (dataType === 'oracle' || dataType === 'table') {
-      const entries = data.flatMap(table =>
-        (table.entries || []).map(e => ({ ...e, _tableName: table.name || table.id }))
-      )
-      results = entries.map(item => ({ item, cat }))
-    } else {
-      results = data.map(item => ({ item, cat }))
-    }
-  }
-
-  return results
+function getVisibleResults(limit) {
+  const query = rpgState.searchQuery.trim()
+  return searchEntities(rpgState.manifest, rpgState.data, {
+    query,
+    category: query ? null : rpgState.category,
+    page: 1,
+    pageSize: limit,
+  })
 }
 
 function renderResults() {
@@ -201,10 +126,8 @@ function renderResults() {
   if (!container) return
 
   const manifest = rpgState.manifest
-  const allResults = getAllResults()
-  const totalCount = allResults.length
   const pageEnd = rpgState.page * PAGE_SIZE
-  const visible = allResults.slice(0, pageEnd)
+  const { results: visible, total: totalCount } = getVisibleResults(pageEnd)
 
   container.innerHTML = ''
   if (visible.length === 0) {
@@ -212,7 +135,7 @@ function renderResults() {
     return
   }
 
-  for (const { item, cat } of visible) {
+  for (const { item, category: cat } of visible) {
     const color = deriveColors(cat.color || '#888')
     const dataType = getCategoryDataType(cat, manifest)
     const row = document.createElement('div')
@@ -293,13 +216,4 @@ function renderTable() {
     card.appendChild(removeBtn)
     container.appendChild(card)
   }
-}
-
-
-function resolveDisplay(item, displayField) {
-  if (!displayField) return item.name || item.result || ''
-  if (displayField.includes('{')) {
-    return displayField.replace(/\{([^}]+)\}/g, (_, key) => getField(item, key) || '')
-  }
-  return getField(item, displayField) || ''
 }

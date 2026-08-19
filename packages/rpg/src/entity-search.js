@@ -66,23 +66,24 @@ export function paginateResults(results, page = 1, pageSize = 50) {
   return { results: items, total, page, pageSize, pages: Math.ceil(total / pageSize) }
 }
 
-function getCategoryDataType(category, manifest) {
+export function getCategoryDataType(category, manifest) {
   return category.dataType || manifest.dataType || 'entity'
 }
 
-function normalizeOracleEntries(tableData) {
+export function normalizeOracleEntries(tableData) {
   if (!Array.isArray(tableData)) return []
   return tableData.flatMap(table =>
     (table.entries || []).map((e, i) => {
       const entry = typeof e === 'string' ? { result: e } : { ...e }
       if (entry.min == null) { entry.min = i + 1; entry.max = i + 1 }
-      if (table.name) entry._tableName = table.name
+      const tableName = table.name || table.id
+      if (tableName) entry._tableName = tableName
       return entry
     })
   )
 }
 
-function resolveDisplay(item, displayField) {
+export function resolveDisplay(item, displayField) {
   if (!displayField) return item.name || item.result || ''
   if (displayField.includes('{')) {
     return interpolate(displayField, item)

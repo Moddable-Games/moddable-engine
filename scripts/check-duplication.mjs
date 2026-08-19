@@ -140,6 +140,39 @@ if (algDups.length > 0) {
   errors.push(`indexToAlgebraic defined outside topology-grid.js: ${algDups.map(f => f.replace(ROOT + '/', '')).join(', ')}`)
 }
 
+// 11. RPG helpers must live in packages/rpg/src only — js/rpg-*.js are view layers.
+//     (#136 step 6: TRANSFORMS, interpolate, getCardFields, getCategoryDataType,
+//      extractByKey, resolveDisplay, resolveLink were shadow copies in js/rpg-*.js.)
+const RPG_SHADOWED = [
+  'const TRANSFORMS',
+  'function interpolate',
+  'function getCardFields',
+  'function getCategoryDataType',
+  'function extractByKey',
+  'function resolveDisplay',
+  'function resolveLink',
+]
+const rpgShadows = sourceFiles.filter(f => {
+  if (f.includes('__tests__')) return false
+  if (!/\/js\/rpg-/.test(f)) return false
+  const content = readFileSync(f, 'utf8')
+  return RPG_SHADOWED.some(name => content.includes(name))
+})
+if (rpgShadows.length > 0) {
+  errors.push(`RPG helper redefined in a view layer (import from packages/rpg/src): ${rpgShadows.map(f => f.replace(ROOT + '/', '')).join(', ')}`)
+}
+
+// 12. Markup escaping must be escapeXml from packages/render/src/svg-escape.js.
+//     Local copies drift on whether they escape `"`, which breaks attribute values.
+const escDups = sourceFiles.filter(f => {
+  if (f.includes('__tests__') || f.includes('check-duplication') || f.includes('svg-escape.js')) return false
+  const content = readFileSync(f, 'utf8')
+  return /function esc\(|const esc\s*=\s*\(/.test(content)
+})
+if (escDups.length > 0) {
+  errors.push(`Local esc() defined (use escapeXml from packages/render/src/svg-escape.js): ${escDups.map(f => f.replace(ROOT + '/', '')).join(', ')}`)
+}
+
 const FILE_FLOOR = 390
 if (sourceFiles.length < FILE_FLOOR) {
   errors.push(`Source file count (${sourceFiles.length}) dropped below floor (${FILE_FLOOR}). Did files get removed without updating the guard?`)
@@ -152,6 +185,16 @@ if (errors.length > 0) {
 }
 
 console.log(`Duplication guard: OK (${sourceFiles.length} files scanned, no prohibited patterns found)`)
+}
+
+// Names that a name-matching duplication audit will keep reporting but that are
+// NOT duplicates. Consult this before filing another "duplicate symbol" finding.
+export const DUPLICATE_NAME_IGNORE = {
+  // js/play-cells.js defines each of these twice on purpose: once in the `grid`
+  // cell model and once in the `direct` cell model. Two implementations of one
+  // interface, deliberately different — not copies of each other. (#136)
+  toIndex: 'js/play-cells.js grid vs direct cell models: one interface, two implementations',
+  setFlipped: 'js/play-cells.js grid vs direct cell models: one interface, two implementations',
 }
 
 export function checkFen4Owners(content, filePath) {
