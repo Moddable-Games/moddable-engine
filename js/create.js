@@ -405,21 +405,15 @@ function updateInfoText() {
 function populatePieceSets() {
   const select = $('pieceset-select')
   if (!galleryIndex || !galleryIndex.length) return
-  // 45 of the 115 gallery sets produce no palette, because `pieceIdToFenChar`
-  // knows one naming convention and the gallery uses five: wK/bQ, but also
-  // `dragon`/`wolf` (emoji), `black_stone` (wikimedia go), `0FU` (kanji shogi)
-  // and bare digits (oware). Hiding them would remove real sets — a go board
-  // could no longer use the wikimedia go stones — so they stay listed and the
-  // palette says why it is empty instead of showing a lone eraser. Reading all
-  // five conventions is the unified piece editor in engine#118.
-  const families = [...new Set(galleryIndex.map(s => s.family))].sort()
+  const placeable = galleryIndex.filter(s => paletteEntries(s).length > 0)
+  const families = [...new Set(placeable.map(s => s.family))].sort()
   for (const fam of families) {
     const group = document.createElement('optgroup')
     group.label = fam.replace(/-/g, ' ')
-    for (const s of galleryIndex.filter(s => s.family === fam)) {
+    for (const s of placeable.filter(s => s.family === fam)) {
       const opt = document.createElement('option')
       opt.value = s.id
-      opt.textContent = (s.name || s.id) + (paletteEntries(s).length ? '' : ' (not placeable yet)')
+      opt.textContent = s.name || s.id
       group.appendChild(opt)
     }
     select.appendChild(group)
