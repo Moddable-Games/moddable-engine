@@ -297,9 +297,9 @@ export function renderFromEngine(resolved, opts = {}) {
   if (topo.type === 'grid' && position && Object.keys(position).length > 0 && layout.cells) {
     const tileSize = render.cellSize || 40
     const colors = surface.colors || {}
-    const idStyle = (resolved.render || {}).idStyle
+    const posAlpha = (resolved.render || {}).positionAlphabet || null
     const displayPosition = opts.flipped
-      ? flipPosition(position, topo.rows || 8, topo.cols || 8, idStyle === 'go' ? GO_ALPHA : null)
+      ? flipPosition(position, topo.rows || 8, topo.cols || 8, posAlpha)
       : position
     let effectiveRotations = opts.flipped ? flipRotations(resolved.pieceRotations) : resolved.pieceRotations
     if (opts.flipped && !effectiveRotations && resolved.pieces?.directional) {
@@ -355,8 +355,6 @@ function fallbackOwner(type) {
 
 // --- Position parsing ---
 
-const GO_ALPHA = 'abcdefghjklmnopqrst'
-
 function parsePosition(resolved, topo) {
   const setup = resolved.setup
   if (!setup) return {}
@@ -370,11 +368,11 @@ function parsePosition(resolved, topo) {
   const cols = topo.cols || 8
   const vocabulary = resolved.pieces?.vocabulary
   const render = resolved.render || {}
-  const idStyle = render.idStyle
+  const posAlpha = render.positionAlphabet || null
 
   const parseFen = (fen) => {
-    if (vocabulary) return parseVocabularyFen(fen, rows, cols, vocabulary, idStyle === 'go' ? GO_ALPHA : null)
-    return fenToPosition(fen, rows, cols, idStyle === 'go' ? GO_ALPHA : null)
+    if (vocabulary) return parseVocabularyFen(fen, rows, cols, vocabulary, posAlpha)
+    return fenToPosition(fen, rows, cols, posAlpha)
   }
 
   if (Array.isArray(setup)) {

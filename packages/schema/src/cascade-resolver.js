@@ -77,6 +77,11 @@ function deriveDefaults(resolved) {
     render.labels = LABEL_DEFAULTS[topo.type] || false
   }
 
+  if (render.idStyle === 'go') {
+    if (!render.labelAlphabet) render.labelAlphabet = 'ABCDEFGHJKLMNOPQRSTUVWXYZ'
+    if (!render.positionAlphabet) render.positionAlphabet = 'abcdefghjklmnopqrstuvwxyz'
+  }
+
   if (meta.category === undefined) {
     meta.category = deriveCategory(topo, components)
   }

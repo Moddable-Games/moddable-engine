@@ -119,7 +119,7 @@ function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabel
   }
 
   const goStyle = idStyle === 'go'
-  const GO_ALPHABET = 'ABCDEFGHJKLMNOPQRSTUVWXYZ'
+  const labelAlphabet = render.labelAlphabet ? render.labelAlphabet.slice(0, cols) : null
   const fs = Math.min(13, pad * 0.55)
 
   const config = {
@@ -134,7 +134,7 @@ function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabel
       color: goStyle ? (colors['label-text'] || '#5a4020') : (colors['label-text'] || '#5c3a1e'),
       fontSize: fs,
       fontFamily: goStyle ? 'sans-serif' : 'monospace',
-      alphabet: goStyle ? GO_ALPHABET.slice(0, cols) : null,
+      alphabet: labelAlphabet,
       offsetBaseline: true,
     } : null,
   }
