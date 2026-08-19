@@ -118,7 +118,7 @@ function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabel
     if (textItems.length) ops.push({ op: 'texts', items: textItems })
   }
 
-  const goStyle = idStyle === 'go'
+  const intersectionStyle = idStyle === 'go' || idStyle === 'intersection'
   const labelAlphabet = render.labelAlphabet ? render.labelAlphabet.slice(0, cols) : null
   const fs = Math.min(13, pad * 0.55)
 
@@ -131,9 +131,9 @@ function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabel
     ops,
     labels: showLabels ? {
       show: true,
-      color: goStyle ? (colors['label-text'] || '#5a4020') : (colors['label-text'] || '#5c3a1e'),
+      color: intersectionStyle ? (colors['label-text'] || '#5a4020') : (colors['label-text'] || '#5c3a1e'),
       fontSize: fs,
-      fontFamily: goStyle ? 'sans-serif' : 'monospace',
+      fontFamily: intersectionStyle ? 'sans-serif' : 'monospace',
       alphabet: labelAlphabet,
       offsetBaseline: true,
     } : null,

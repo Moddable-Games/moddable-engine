@@ -77,7 +77,7 @@ function deriveDefaults(resolved) {
     render.labels = LABEL_DEFAULTS[topo.type] || false
   }
 
-  if (render.idStyle === 'go') {
+  if (render.idStyle === 'go' || render.idStyle === 'intersection') {
     if (!render.labelAlphabet) render.labelAlphabet = 'ABCDEFGHJKLMNOPQRSTUVWXYZ'
     if (!render.positionAlphabet) render.positionAlphabet = 'abcdefghjklmnopqrstuvwxyz'
   }

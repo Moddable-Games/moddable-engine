@@ -581,7 +581,7 @@ export function createGridTopology(config) {
 
 // ─── Grid render pipeline (#18) ─────────────────────────────────────────────
 
-const GO_ALPHABET = 'abcdefghjklmnopqrst'
+const INTERSECTION_ALPHABET = 'abcdefghjklmnopqrst'
 
 export function algebraicId(r, c, rows) {
   return String.fromCharCode(97 + c) + (rows - r)
@@ -599,13 +599,15 @@ export function indexToAlgebraic(idx, rows, cols) {
   return algebraicId(r, c, rows)
 }
 
-export function goId(r, c, rows) {
-  return GO_ALPHABET[c] + (rows - r)
+export function intersectionId(r, c, rows) {
+  return INTERSECTION_ALPHABET[c] + (rows - r)
 }
+
+export { intersectionId as goId }
 
 function idFn(idStyle) {
   if (typeof idStyle === 'function') return idStyle
-  if (idStyle === 'go') return goId
+  if (idStyle === 'go' || idStyle === 'intersection') return intersectionId
   return algebraicId
 }
 
