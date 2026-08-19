@@ -103,7 +103,7 @@ function setupToImageKeys(setup, vocabulary) {
   return keys
 }
 
-function playedPosition(family, key, moveCount) {
+function playedPosition(family, key, moveCount, topo) {
   const game = createGame(family, key)
   const plugin = game.raw.registry.getPlugins().find(p => p.sliceName === family)
   let played = 0
@@ -115,8 +115,8 @@ function playedPosition(family, key, moveCount) {
     played++
   }
   const slice = game.getState().slice
-  const cols = slice.cols || slice._cols || Math.round(Math.sqrt(slice.board.length))
-  const rows = Math.round(slice.board.length / cols)
+  const cols = topo?.cols || slice.cols || slice._cols || Math.round(Math.sqrt(slice.board.length))
+  const rows = topo?.rows || Math.round(slice.board.length / cols)
   return {
     game,
     plugin,
@@ -153,16 +153,17 @@ describeWithAssets('every piece resolves to real artwork during play', () => {
     if (!resolved.pieces?.set) return
     if (!resolved.topology?.type || resolved.topology.type === 'none' || resolved.topology.type === 'tableau') return
 
-    const { game, plugin, slice, played, setup } = playedPosition(family, key, 4)
+    const { game, plugin, slice, played, setup } = playedPosition(family, key, 4, resolved.topology)
     const board = slice.board
     const occupiedCount = Array.isArray(board)
-      ? board.filter(c => c !== null && c !== 0).length
-      : Object.values(board).filter(c => c !== null && c !== 0).length
+      ? board.filter(c => c != null && c !== 0).length
+      : Object.values(board).filter(c => c != null && c !== 0).length
 
-    const { images } = attachPieceImages(resolved, gallery)
+    const withPluginVocab = { ...resolved, vocabulary: plugin.vocabulary }
+    const { images } = attachPieceImages(withPluginVocab, gallery)
     if (!images || Object.keys(images).length === 0) return
 
-    const withPosition = { ...resolved, setup }
+    const withPosition = { ...withPluginVocab, setup }
     const svg = renderFromEngine(withPosition, { pieceImages: images })
     if (!svg) return
 

@@ -98,7 +98,10 @@ function buildFenMapFromVocabulary(vocabulary) {
   const map = {}
   for (const [type, def] of Object.entries(vocabulary)) {
     for (const [owner, symbol] of Object.entries(def.symbols || {})) {
-      if (symbol && symbol.length > 0) map[symbol] = symbol
+      if (!symbol || symbol.length === 0) continue
+      const ownerIdx = typeof owner === 'number' ? owner : parseInt(owner, 10)
+      const prefix = ownerIdx === 0 ? 'w' : 'b'
+      map[symbol] = `${prefix}${symbol.toUpperCase()}`
     }
   }
   return Object.keys(map).length > 0 ? map : null
