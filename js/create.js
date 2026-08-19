@@ -231,7 +231,7 @@ function reanchorPlacement(oldRows, oldCols, rows, cols) {
 }
 
 async function loadGallery() {
-  try { galleryIndex = await fetch('../pieces/gallery-index.json?v=1.0.20').then(r => r.json()) }
+  try { galleryIndex = await fetch('../pieces/gallery-index.json?v=1.0.21').then(r => r.json()) }
   catch { galleryIndex = [] }
 }
 
