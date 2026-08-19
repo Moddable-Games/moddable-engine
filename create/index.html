@@ -156,12 +156,16 @@
       </div>
 
       <div class="control-group" style="margin-top:16px">
-        <label class="control-label">Export</label>
+        <label class="control-label">Import / Export</label>
         <div class="control-row">
+          <button class="btn btn-outline" id="import-yaml-btn">Import YAML</button>
+        </div>
+        <div class="control-row" style="margin-top:6px">
           <button class="btn btn-outline" id="export-yaml-btn">YAML</button>
           <button class="btn btn-outline" id="export-svg-btn">SVG</button>
           <button class="btn btn-outline" id="export-png-btn">PNG</button>
         </div>
+        <input type="file" id="import-yaml-file" accept=".md,.yaml,.yml,.txt" hidden>
       </div>
 
     </div>

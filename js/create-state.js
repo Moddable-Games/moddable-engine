@@ -280,6 +280,29 @@ export function stateFromResolved(resolved, family, opts = {}) {
   return state
 }
 
+export function resolveImported(parsed) {
+  const meta = parsed.meta || {}
+  const engine = meta.engine || {}
+  const surfaceRef = engine.surface || 'wood-classic'
+  const surface = resolveSurface(typeof surfaceRef === 'string' ? surfaceRef : 'wood-classic')
+
+  const family = Object.keys(engine.plugins || {})[0] || 'chess'
+
+  const variantEngine = { ...engine }
+  const { resolved } = cascadeResolve({
+    surface,
+    family: { engine: {}, meta: { label: '' } },
+    variant: { engine: variantEngine, meta: { label: meta.title || 'Imported' } },
+  })
+
+  return stateFromResolved(resolved, family, {
+    title: meta.title || 'Imported',
+    slug: meta.slug || '',
+    win: meta.win || '',
+    special: meta.special || '',
+  })
+}
+
 function plainEntries(obj) {
   const out = {}
   for (const [k, v] of Object.entries(obj)) if (v && typeof v === 'object') out[k] = v

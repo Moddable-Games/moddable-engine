@@ -1,7 +1,8 @@
 import { renderFromEngine, attachPieceImages, pieceIdToFenChar } from '../packages/render/index.js'
+import { parseFrontmatter } from '../packages/schema/index.js'
 import { PLAYABLE_FAMILIES, FAMILY_LABELS, loadPlayabilityManifest, getPlayableVariants } from './play-shared.js'
 import { resolveVariantBoard } from './variant-frontmatter.js'
-import { defaultState, buildResolvedFromState, buildSetup, parseSetup, stateFromResolved, isGrid } from './create-state.js'
+import { defaultState, buildResolvedFromState, buildSetup, parseSetup, stateFromResolved, resolveImported, isGrid } from './create-state.js'
 import { FAMILY_RULES, defaultRuleValues, buildRulesPanel, toPluginConfig } from './create-rules.js'
 import { movesForSpec, boardFromPlacement, paintDots } from './create-preview.js'
 import { defaultPlayers, buildPlayersPanel, resizePlayers, MAX_PLAYERS } from './create-players.js'
@@ -704,6 +705,25 @@ async function loadTemplate() {
 
 // --- export ---
 
+function importYaml(text) {
+  try {
+    const parsed = parseFrontmatter(text)
+    if (!parsed?.meta?.engine) {
+      setStatus('No engine block found in the imported file')
+      return false
+    }
+    const next = resolveImported(parsed)
+    applyState(next)
+    currentDraftId = null
+    syncDraftName()
+    setStatus(`Imported "${next.title}"`)
+    return true
+  } catch (e) {
+    setStatus(`Import failed: ${e.message}`)
+    return false
+  }
+}
+
 function exportYaml() {
   const resolved = buildResolvedFromState(state)
   const title = state.title || 'Custom Variant'
@@ -947,6 +967,14 @@ async function init() {
     renderDraftsPanel()
     syncDraftName()
     setStatus('Started a new board')
+  })
+
+  $('import-yaml-btn').addEventListener('click', () => $('import-yaml-file').click())
+  $('import-yaml-file').addEventListener('change', (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    file.text().then(text => importYaml(text))
+    e.target.value = ''
   })
 
   $('export-yaml-btn').addEventListener('click', exportYaml)
