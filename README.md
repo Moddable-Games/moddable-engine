@@ -165,6 +165,8 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-08-19
+- Fixed fairy-piece case mismatch: renamed wdE→wDE, bdE→bDE, wdH→wDH, bdH→bDH in mce-shogi-fairy (resolved recurring sync:boards collision with moddable-rules)
+- Removed `dist/` prefix from all rules.moddable.games links in topology/family HTML pages
 - Closed #133: removed all Tier 1 game-knowledge hardcodings from non-plugin packages (FEN4 owners, Go alphabet, shogi branching in fen.js, chess references in variant-flags.js, landlords naming in produce-layout)
 - Added `no-game-knowledge.test.js` purity gate: scans 124 non-plugin source files for game-family name references
 - Closed #129: kirin + dobutsu artwork resolved; djambi tracked separately on #131
