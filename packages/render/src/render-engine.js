@@ -17,7 +17,7 @@ import { renderHexLayout } from '../../topologies/hex/index.js'
 import { renderTableauLayout } from './render-tableau.js'
 import { elementsToFragment, elementToSvg } from './serialize-layout.js'
 import { renderSurfaceSVG } from './piece-surface.js'
-import { FEN4_OWNERS, fen4GetOwner } from './recolour.js'
+import { OWNER_PREFIXES, getOwnerFromPrefix } from './recolour.js'
 
 const RENDER_FN = { grid: renderGridLayout, graph: renderGraphLayout, pit: renderPitLayout, track: renderTrackLayout, hex: renderHexLayout, tableau: renderTableauLayout }
 
@@ -261,10 +261,9 @@ export function renderFromEngine(resolved, opts = {}) {
     console.warn('[render-engine] Non-empty setup produced empty position — possible fenMap or vocabulary mismatch', { setup: resolved.setup.slice(0, 40) })
   }
 
-  // Detect FEN4 for getOwner (4-player piece rotation)
   let getOwner = opts.getOwner || null
   if (!getOwner && typeof resolved.setup === 'string' && resolved.setup.includes(',') && resolved.setup.match(/[yrgb][A-Z]/)) {
-    getOwner = fen4GetOwner
+    getOwner = getOwnerFromPrefix
   }
 
   // Piece images (for grid piece rendering in SVG assembly)

@@ -1,5 +1,6 @@
 // Browser consumers: js/game-play.js, js/play.js, js/gallery.js, scripts/export-boards.mjs, scripts/build-board-index.mjs
-export const FEN4_OWNERS = { r: 'red', b: 'blue', y: 'yellow', g: 'green', w: 'white' }
+export const OWNER_PREFIXES = { r: 'red', b: 'blue', y: 'yellow', g: 'green', w: 'white' }
+export { OWNER_PREFIXES as FEN4_OWNERS }
 
 export function recolourSvgText(svgText, matchColor, fillColor) {
   return svgText.replaceAll(matchColor, fillColor)
@@ -19,7 +20,7 @@ export async function recolourPieceSet(pieceSetId, gallery, fetchFn = fetch) {
   const fetches = []
   for (const [pieceId, filename] of Object.entries(setDef.pieces || {})) {
     const ownerPrefix = pieceId[0]
-    const ownerName = FEN4_OWNERS[ownerPrefix]
+    const ownerName = OWNER_PREFIXES[ownerPrefix]
     const ownerColors = owners[ownerName]
     if (!ownerColors) continue
 
@@ -43,7 +44,9 @@ export async function recolourPieceSet(pieceSetId, gallery, fetchFn = fetch) {
   return Object.keys(images).length > 0 ? images : null
 }
 
-export function fen4GetOwner(pieceType) {
-  if (pieceType.length >= 2) return FEN4_OWNERS[pieceType[0]] || 'white'
+export function getOwnerFromPrefix(pieceType) {
+  if (pieceType.length >= 2) return OWNER_PREFIXES[pieceType[0]] || 'white'
   return pieceType === pieceType.toUpperCase() ? 'white' : 'black'
 }
+
+export { getOwnerFromPrefix as fen4GetOwner }
