@@ -1,4 +1,11 @@
-import { chessEvaluate, reversiEvaluate, draughtsEvaluate, goEvaluate, shogiEvaluate, xiangqiEvaluate, EVALUATORS } from '../src/evaluators.js'
+import { EVALUATORS } from '../src/evaluators.js'
+import '../../play/src/bootstrap-plugins.js'
+import { chessEvaluate } from '../../plugins/chess/src/evaluate.js'
+import { reversiEvaluate } from '../../plugins/reversi/src/evaluate.js'
+import { draughtsEvaluate } from '../../plugins/draughts/src/evaluate.js'
+import { goEvaluate } from '../../plugins/go/src/evaluate.js'
+import { shogiEvaluate } from '../../plugins/shogi/src/evaluate.js'
+import { xiangqiEvaluate } from '../../plugins/xiangqi/src/evaluate.js'
 
 describe('AI — evaluators', () => {
   describe('chess', () => {
