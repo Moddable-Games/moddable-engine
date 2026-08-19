@@ -1,4 +1,4 @@
-export function backgammonOps(colors, render) {
+export function triangularPointOps(colors, render) {
   const frameW = render.frameW || 16
   const barW = render.barW || 24
   const pointW = render.pointW || 32

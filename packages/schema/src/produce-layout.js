@@ -10,7 +10,7 @@
  */
 
 import { resolveSurface } from './surfaces.js'
-import { backgammonOps } from './produce-layout-backgammon.js'
+import { triangularPointOps } from './produce-layout-triangular-points.js'
 import { landlordsOps } from './produce-layout-landlords.js'
 import { produceStarLayout } from './produce-layout-star.js'
 
@@ -313,7 +313,7 @@ function translateOp(decl, ctx) {
         ]
       }
       if (children === 'arcs') {
-        children = surakartaArcElements(gx, gy, cellSize, rows, cols, colors, decl.rings || 2)
+        children = orbitArcElements(gx, gy, cellSize, rows, cols, colors, decl.rings || 2)
       }
       const attrs = { ...(decl.attrs || {}) }
       if (decl.fill) attrs.fill = colors[decl.fill] || decl.fill
@@ -476,7 +476,7 @@ function translateOp(decl, ctx) {
   }
 }
 
-function surakartaArcElements(gx, gy, tileSize, rows, cols, colors, rings = 2) {
+function orbitArcElements(gx, gy, tileSize, rows, cols, colors, rings = 2) {
   const ix = (i) => gx + i * tileSize
   const iy = (i) => gy + i * tileSize
   const result = []
@@ -707,7 +707,7 @@ function produceHexLegacy(topo, colors, render) {
 
 function produceTrackLayout(topo, colors, render) {
   const style = render.trackStyle || 'dots'
-  if (style === 'triangular-points') return backgammonOps(colors, render)
+  if (style === 'triangular-points') return triangularPointOps(colors, render)
   if (style === 'perimeter') return landlordsOps(colors, render)
   return { type: 'track', config: { style, ops: [], width: 0, height: 0 } }
 }
@@ -717,10 +717,10 @@ function producePitLayout(topo, colors, render) {
   return producePitOps(topo, colors, render)
 }
 
-// --- Pit (mancala) ops builder ---
+// --- Pit ops builder ---
 //
 // Emits the full drawing program for renderPitLayout() from resolved
-// frontmatter. Geometry is a verbatim move from the historical mancala
+// frontmatter.
 // provider — byte-identity contract (attribute order, element order).
 // Colors arrive from frontmatter and are normalized to camelCase by
 // produceLayout.
@@ -937,7 +937,7 @@ function produceGraphLayout(topo, colors, render) {
 
   switch (structure) {
     case 'perimeter-cross': return { type: 'graph', config: { ops: perimeterCrossOps(size, 0, 0, colors, pointRadius, params), width: size, height: size } }
-    case 'concentric-rings': return { type: 'graph', config: { ops: morrisOps(size, 0, 0, colors, pointRadius, params), width: size, height: size } }
+    case 'concentric-rings': return { type: 'graph', config: { ops: concentricRingOps(size, 0, 0, colors, pointRadius, params), width: size, height: size } }
     case 'grid-cross': return { type: 'graph', config: { ops: gridCrossOps(size, 0, 0, colors, pointRadius, params, render), width: size, height: size } }
     case 'star': return produceStarLayout(colors, render, params)
     default: return { type: 'graph', config: { ops: [], width: size, height: size } }
@@ -1013,7 +1013,7 @@ function perimeterCrossOps(size, ox, oy, colors, pointRadius, params) {
   ]
 }
 
-function morrisRings(rings, size, ox, oy) {
+function concentricRingRects(rings, size, ox, oy) {
   const rects = []
   const margin = size * 0.0625, maxInset = size * 0.375
   const step = rings > 1 ? (maxInset - margin) / (rings - 1) : 0
@@ -1024,7 +1024,7 @@ function morrisRings(rings, size, ox, oy) {
   return rects
 }
 
-function morrisPoints(ringRects, midpoints, cx, cy, rings) {
+function concentricRingPoints(ringRects, midpoints, cx, cy, rings) {
   const points = []
   for (const rect of ringRects) {
     points.push({ x: rect.x, y: rect.y }, { x: rect.x + rect.w, y: rect.y })
@@ -1038,12 +1038,12 @@ function morrisPoints(ringRects, midpoints, cx, cy, rings) {
   return points
 }
 
-function morrisOps(size, ox, oy, colors, pointRadius, params) {
+function concentricRingOps(size, ox, oy, colors, pointRadius, params) {
   const rings = params.rings || 3
   const diagonals = params.diagonals || false
   const midpoints = params.midpoints !== false
   const cx = ox + size / 2, cy = oy + size / 2
-  const ringRects = morrisRings(rings, size, ox, oy)
+  const ringRects = concentricRingRects(rings, size, ox, oy)
   const structure = []
   for (const rect of ringRects) structure.push({ tag: 'rect', attrs: { x: rect.x, y: rect.y, width: rect.w, height: rect.h } })
   if (midpoints) {
@@ -1072,7 +1072,7 @@ function morrisOps(size, ox, oy, colors, pointRadius, params) {
       structure.push({ tag: 'line', attrs: { x1: o.x + o.w, y1: o.y + o.h, x2: i.x + i.w, y2: i.y + i.h } })
     }
   }
-  const points = morrisPoints(ringRects, midpoints, cx, cy, rings)
+  const points = concentricRingPoints(ringRects, midpoints, cx, cy, rings)
   return [
     { op: 'rect', attrs: { x: ox, y: oy, width: size, height: size, fill: colors.background, rx: 4 } },
     { op: 'group', attrs: { fill: 'none', stroke: colors.line, 'stroke-width': 2.5, 'stroke-linecap': 'square' }, children: structure },

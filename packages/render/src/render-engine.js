@@ -166,14 +166,6 @@ export function renderFromEngine(resolved, opts = {}) {
     return renderMultiBoards(resolved, layers, opts)
   }
 
-  // Suppress labels for board styles that never show them (matching legacy behaviour)
-  if (topo.type === 'grid' && topo.layout === 'intersections') {
-    const bs = render.boardStyle
-    const cc = render.cellColor
-    if (bs === 'xiangqi' || bs === 'shogi' || cc === 'xiangqi' || cc === 'shogi') {
-      render.labels = false
-    }
-  }
 
   // Build cellMap from zones if needed (non-ops grid path)
   if (topo.type === 'grid' && !render.cellMap && render.zones) {
@@ -235,7 +227,7 @@ export function renderFromEngine(resolved, opts = {}) {
     render._seedsPerPit = render._parsedSetup.pits[0] || 4
   }
   if (topo.type === 'track' && resolved.setup && typeof resolved.setup === 'string') {
-    render._parsedSetup = parseBackgammonSetup(resolved.setup)
+    render._parsedSetup = parseTrackSetup(resolved.setup)
   }
   if (topo.type === 'graph' && resolved.setup) {
     if (typeof resolved.setup === 'string' && resolved.setup.includes(':')) {
@@ -443,7 +435,7 @@ function renderPiecesFromCells(position, cells, tileSize, opts) {
     } else if (piece.type === 'stone') {
       parts.push(drawStone(piece, pos.x, pos.y, tileSize * 0.42, opts.colors || {}))
     } else if (piece.type === 'man' || piece.type === 'king') {
-      parts.push(drawDraughtsPiece(piece, pos.x, pos.y, tileSize * 0.38, opts.colors || {}))
+      parts.push(drawDiscPiece(piece, pos.x, pos.y, tileSize * 0.38, opts.colors || {}))
     } else if (pieceImages[piece.type]) {
       const x = pos.x - tileSize / 2, y = pos.y - tileSize / 2
       parts.push(`<image href="${pieceImages[piece.type]}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" pointer-events="none"/>`)
@@ -462,7 +454,7 @@ function drawStone(piece, cx, cy, r, C) {
   return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>`
 }
 
-function drawDraughtsPiece(piece, cx, cy, r, C) {
+function drawDiscPiece(piece, cx, cy, r, C) {
   const isW = piece.owner === 0 || piece.color === 'white'
   const fill = isW ? '#fff' : '#333'
   const stroke = isW ? '#333' : '#111'
@@ -617,7 +609,7 @@ function parseHexPositionString(setup) {
   return position
 }
 
-function parseBackgammonSetup(notation) {
+function parseTrackSetup(notation) {
   const dark = new Array(24).fill(0)
   const light = new Array(24).fill(0)
   if (!notation || notation === 'empty') return { dark, light }
