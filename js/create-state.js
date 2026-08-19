@@ -17,6 +17,9 @@ export function defaultState(family = 'chess') {
     version: STATE_VERSION,
     family,
     title: 'Custom Variant',
+    slug: '',
+    win: '',
+    special: '',
     topology: { type: 'grid', rows: 8, cols: 8, layout: 'cells', radius: 5, structure: 'concentric-rings', rings: 3, positions: 24, pitCols: 6 },
     render: { surface: 'wood-classic', cellColor: 'checkered', labels: true, starPoints: false, inherited: null, surfaceColors: null },
     pieceSet: '',
@@ -217,6 +220,9 @@ export function stateFromResolved(resolved, family, opts = {}) {
   const render = resolved.render || {}
 
   state.title = opts.title || resolved.meta?.label || 'Custom Variant'
+  state.slug = opts.slug || resolved.meta?.slug || ''
+  state.win = opts.win || resolved.meta?.win || ''
+  state.special = opts.special || resolved.meta?.special || ''
   state.topology.type = topo.type || 'grid'
   if (topo.rows) state.topology.rows = topo.rows
   if (topo.cols) state.topology.cols = topo.type === 'pit' ? state.topology.cols : topo.cols

@@ -51,6 +51,10 @@ const num = (id, fallback) => parseInt($(id)?.value, 10) || fallback
 
 function readControlsIntoState() {
   state.family = val('family-select') || 'chess'
+  state.title = val('meta-title') || 'Custom Variant'
+  state.slug = val('meta-slug') || ''
+  state.win = val('meta-win') || ''
+  state.special = val('meta-special') || ''
   state.topology.type = val('topo-type') || 'grid'
   state.topology.rows = num('grid-rows', 8)
   state.topology.cols = num('grid-cols', 8)
@@ -69,6 +73,10 @@ function readControlsIntoState() {
 
 function writeStateIntoControls() {
   restoring = true
+  $('meta-title').value = state.title || ''
+  $('meta-slug').value = state.slug || ''
+  $('meta-win').value = state.win || ''
+  $('meta-special').value = state.special || ''
   $('family-select').value = state.family
   $('topo-type').value = state.topology.type
   $('grid-rows').value = state.topology.rows
@@ -676,7 +684,13 @@ async function loadTemplate() {
   setStatus(`Loading ${slug}…`)
   try {
     const resolved = await resolveVariantBoard(templateFamily, {}, slug, slug)
-    const next = stateFromResolved(resolved, templateFamily, { title: resolved.meta?.label || slug })
+    const variantMeta = resolved._variantMeta || {}
+    const next = stateFromResolved(resolved, templateFamily, {
+      title: resolved.meta?.label || slug,
+      slug,
+      win: variantMeta.win || '',
+      special: variantMeta.special || '',
+    })
     applyState(next)
     currentDraftId = null
     syncDraftName()
@@ -692,7 +706,12 @@ async function loadTemplate() {
 
 function exportYaml() {
   const resolved = buildResolvedFromState(state)
-  const lines = ['---', `title: ${state.title || 'Custom Variant'}`, 'engine:']
+  const title = state.title || 'Custom Variant'
+  const slug = state.slug || slugify(title)
+  const lines = ['---', `title: ${title}`, `slug: ${slug}`]
+  if (state.win) lines.push(`win: ${state.win}`)
+  if (state.special) lines.push(`special: ${state.special}`)
+  lines.push('engine:')
   lines.push('  topology:')
   for (const [k, v] of Object.entries(resolved.topology || {})) {
     if (k === 'params') {
@@ -904,6 +923,16 @@ async function init() {
       state.render.inherited = null
       state.render.surfaceColors = null
       onControlChange()
+    })
+  }
+
+  for (const id of ['meta-title', 'meta-slug', 'meta-win', 'meta-special']) {
+    $(id)?.addEventListener('input', () => {
+      readControlsIntoState()
+      if (id === 'meta-title' && !$('meta-slug').value) {
+        $('meta-slug').placeholder = slugify(state.title) || 'slug (auto from title)'
+      }
+      scheduleAutosave()
     })
   }
 
