@@ -1,5 +1,4 @@
-import { createSimulator } from '../../ai/src/simulator.js'
-import { getEvaluator } from '../../ai/src/evaluators.js'
+import { createSimulator, getEvaluator } from '../../ai/index.js'
 import { createGameForFamily } from './play.js'
 
 export function createSimulatorForFamily(family, state, opts = {}) {

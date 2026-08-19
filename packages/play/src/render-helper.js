@@ -1,4 +1,4 @@
-import { createBoardRenderer } from '../../render/src/board-renderer.js'
+import { createBoardRenderer } from '../../render/index.js'
 import { createGameForFamily } from './play.js'
 
 export function renderStateAsSvg(family, state, opts = {}) {

@@ -2,7 +2,7 @@ import { createGame } from './game-factory.js'
 import { createTopologyRegistry } from './topology-registry.js'
 import { createComponentRegistry } from './component-registry.js'
 import { createRuleRegistry, resolveRuleOverrides, wrapPluginWithRules } from './rule-registry.js'
-import { bindTraversal } from '../../core/src/bind-traversal.js'
+import { bindTraversal } from '../../core/index.js'
 
 export function createGameFromDefinition(definition, opts = {}) {
   const { plugins = [], pluginFactories = {}, topologies = {}, components = {}, rules = {}, rngSeed, boardTheme = null, pieceResolver = null } = opts

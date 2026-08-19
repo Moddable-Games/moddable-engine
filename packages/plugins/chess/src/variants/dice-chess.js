@@ -1,5 +1,5 @@
-import { createRng } from '../../../../core/src/rng.js'
-import { createStandardDice } from '../../../../component-dice/src/standard-dice.js'
+import { createRng } from '../../../../core/index.js'
+import { createStandardDice } from '../../../../component-dice/index.js'
 
 const DICE_TYPES = [null, 'pawn', 'knight', 'bishop', 'rook', 'queen', 'king']
 const dicePair = createStandardDice({ count: 2, faces: 6 })

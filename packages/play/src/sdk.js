@@ -7,10 +7,7 @@ import {
   getVariantGroups,
   hasVariant,
 } from './variant-registry.js'
-import { createMinimax, DIFFICULTIES } from '../../ai/src/minimax.js'
-import { createMCTS, MCTS_DIFFICULTIES } from '../../ai/src/mcts.js'
-import { getEvaluator } from '../../ai/src/evaluators.js'
-import { createGoPlayoutPolicy, createGoExpansionPolicy } from '../../ai/src/go-playout-policy.js'
+import { createMinimax, DIFFICULTIES, createMCTS, MCTS_DIFFICULTIES, getEvaluator, createGoPlayoutPolicy, createGoExpansionPolicy } from '../../ai/index.js'
 import { interactionModelFor } from './interaction.js'
 import { definitionFromVariant } from './variant-definition.js'
 import { usesMctsDefault } from './mcts-registry.js'

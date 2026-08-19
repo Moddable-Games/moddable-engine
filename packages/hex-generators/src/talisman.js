@@ -1,6 +1,6 @@
 import { registerGame } from './game-registry.js';
-import { createSeededRng } from '../../core/src/xorshift.js';
-import { HexMath } from '../../topologies/hex/src/hex-math.js';
+import { createSeededRng } from '../../core/index.js';
+import { HexMath } from '../../topologies/hex/index.js';
 
 var ringTypes = { 1: 'inner', 2: 'middle', 3: 'river', 4: 'outer', 5: 'dungeon' };
 

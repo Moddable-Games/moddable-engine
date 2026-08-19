@@ -3,16 +3,16 @@
 // avoiding the play ↔ plugins circular dependency.
 
 import { registerVariants } from './variant-registry.js'
-import { registerEvaluator } from '../../ai/src/evaluators.js'
+import { registerEvaluator } from '../../ai/index.js'
 
-import * as chessVariants from '../../plugins/chess/src/variants/index.js'
-import * as goVariants from '../../plugins/go/src/variants/index.js'
-import { chessEvaluate } from '../../plugins/chess/src/evaluate.js'
-import { goEvaluate } from '../../plugins/go/src/evaluate.js'
-import { draughtsEvaluate } from '../../plugins/draughts/src/evaluate.js'
-import { reversiEvaluate } from '../../plugins/reversi/src/evaluate.js'
-import { shogiEvaluate } from '../../plugins/shogi/src/evaluate.js'
-import { xiangqiEvaluate } from '../../plugins/xiangqi/src/evaluate.js'
+import * as chessVariants from '../../plugins/chess/index.js'
+import * as goVariants from '../../plugins/go/index.js'
+import { chessEvaluate } from '../../plugins/chess/index.js'
+import { goEvaluate } from '../../plugins/go/index.js'
+import { draughtsEvaluate } from '../../plugins/draughts/index.js'
+import { reversiEvaluate } from '../../plugins/reversi/index.js'
+import { shogiEvaluate } from '../../plugins/shogi/index.js'
+import { xiangqiEvaluate } from '../../plugins/xiangqi/index.js'
 
 const { longestRun: _goLongestRun, ...goRest } = goVariants
 

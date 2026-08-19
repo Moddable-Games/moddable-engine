@@ -12,7 +12,7 @@
 // same code path as standard chess.
 
 import { createGameForFamily } from './play.js'
-import { moveToSAN } from '../../plugins/chess/src/san.js'
+import { moveToSAN } from '../../plugins/chess/index.js'
 
 const WHITE = 0
 

@@ -1,4 +1,4 @@
-import { parseFrontmatter } from '../../schema/src/parse-frontmatter.js'
+import { parseFrontmatter } from '../../schema/index.js'
 
 const registries = new Map()
 const manifests = new Map()

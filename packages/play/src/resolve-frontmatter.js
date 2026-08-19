@@ -4,9 +4,7 @@
 // Single source for resolving variant frontmatter with extends recursion.
 // Takes a loader function (sync or async) so the same logic serves both.
 
-import { resolveSurface } from '../../schema/src/surfaces.js'
-import { resolve as cascadeResolve } from '../../schema/src/cascade-resolver.js'
-import { parseFrontmatter } from '../../schema/src/parse-frontmatter.js'
+import { resolveSurface, cascadeResolve, parseFrontmatter } from '../../schema/index.js'
 
 function resolveOnce(familyMd, variantMd, label) {
   const familyFm = parseFrontmatter(familyMd).meta || {}

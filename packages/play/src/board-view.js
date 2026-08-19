@@ -1,4 +1,4 @@
-import { createBoardRenderer } from '../../render/src/board-renderer.js'
+import { createBoardRenderer } from '../../render/index.js'
 
 // The shared board renderer emits presentation SVG with no hit targets, and its
 // output is snapshot-tested, so interactivity is added as a separate overlay

@@ -1,5 +1,5 @@
 import { registerGame } from './game-registry.js';
-import { seededRandom } from '../../core/src/xorshift.js';
+import { seededRandom } from '../../core/index.js';
 import { NukesHexData } from './data/nukes-hexes.js';
 
 var editTypes = ['water', 'grass', 'trees', 'mount', 'sand', 'base'];

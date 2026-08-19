@@ -1,1 +1,1 @@
-export { createGraphTopology, schema } from './src/topology-graph.js'
+export { createGraphTopology, schema, renderGraphLayout } from './src/topology-graph.js'

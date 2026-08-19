@@ -1,5 +1,5 @@
 import { registerGame } from './game-registry.js';
-import { createSeededRng } from '../../core/src/xorshift.js';
+import { createSeededRng } from '../../core/index.js';
 
 var terrainPool = {
     base: [

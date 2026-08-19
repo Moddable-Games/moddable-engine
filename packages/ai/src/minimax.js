@@ -1,4 +1,4 @@
-import { algebraicToIndex } from '../../topologies/grid/src/topology-grid.js'
+import { algebraicToIndex } from '../../topologies/grid/index.js'
 
 const TT_EXACT = 0
 const TT_LOWER = 1

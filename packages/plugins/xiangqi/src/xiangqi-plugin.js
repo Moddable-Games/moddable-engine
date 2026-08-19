@@ -1,4 +1,4 @@
-import { fromConfig } from '../../../piece-behaviour/src/piece-definitions.js'
+import { fromConfig } from '../../../piece-behaviour/index.js'
 
 export function createXiangqiPlugin(variantConfig = {}, context = {}) {
   const defaults = {

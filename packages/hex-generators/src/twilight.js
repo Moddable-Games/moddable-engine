@@ -1,5 +1,5 @@
 import { registerGame } from './game-registry.js';
-import { createSeededRng } from '../../core/src/xorshift.js';
+import { createSeededRng } from '../../core/index.js';
 import { TwilightTiles } from './data/twilight-tiles.js';
 import { TwilightImages } from './data/twilight-images.js';
 

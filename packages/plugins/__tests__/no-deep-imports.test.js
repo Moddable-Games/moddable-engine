@@ -54,52 +54,8 @@ function crossesBoundary(file, resolved) {
 }
 
 const ALLOWLIST = new Set([
-  'plugins/chess:topologies/grid',
-  'plugins/chess:core',
-  'plugins/chess:component-dice',
-  'plugins/shogi:piece-behaviour',
-  'plugins/xiangqi:piece-behaviour',
-  'plugins/go:play',
-  'plugins/draughts:play',
-  'plugins/shogi:play',
-  'plugins/chess:play',
-  'plugins/reversi:play',
-  'plugins/xiangqi:play',
-  'play:game',
-  'play:render',
-  'play:schema',
-  'play:topologies/grid',
-  'play:topologies/hex',
-  'play:topologies/track',
-  'play:topologies/pit',
-  'play:topologies/graph',
-  'play:topologies/tableau',
-  'play:plugins/go',
-  'play:plugins/reversi',
-  'play:plugins/draughts',
-  'play:plugins/shogi',
-  'play:plugins/xiangqi',
-  'play:plugins/chess',
-  'play:ai',
-  'play:component-deck',
-  'game:core',
-  'render:schema',
-  'render:core',
-  'render:topologies/grid',
-  'render:topologies/graph',
-  'render:topologies/pit',
-  'render:topologies/track',
-  'render:topologies/hex',
-  'render:topologies/tableau',
-  'ai:topologies/grid',
-  'hex-generators:core',
-  'topologies/grid:core',
-  'topologies/hex:core',
-  'topologies/hex:hex-generators',
-  'topologies/tableau:component-deck',
-  'schema:hex-generators',
 ])
-const ALLOWLIST_CEILING = 44
+const ALLOWLIST_CEILING = 0
 
 describe('no cross-package deep imports (engine#74)', () => {
   const packagesImports = scanImports(PACKAGES_DIR)

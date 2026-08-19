@@ -1,10 +1,4 @@
-import { createRegistry } from '../../core/src/plugin-registry.js'
-import { createStore } from '../../core/src/state-store.js'
-import { createPlayerSystem } from '../../core/src/player-system.js'
-import { createHistory } from '../../core/src/history.js'
-import { createEventBus } from '../../core/src/event-bus.js'
-import { createPipeline } from '../../core/src/move-pipeline.js'
-import { createRng } from '../../core/src/rng.js'
+import { createRegistry, createStore, createPlayerSystem, createHistory, createEventBus, createPipeline, createRng } from '../../core/index.js'
 
 export function createGame(definition, opts = {}) {
   const { plugins = [], topologyFactory, rngSeed, boardTheme = null, pieceResolver = null, components = {} } = opts

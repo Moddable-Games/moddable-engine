@@ -1,4 +1,4 @@
-import { parseRankRuns } from '../../../core/src/fen-runs.js'
+import { parseRankRuns } from '../../../core/index.js'
 export const schema = {
   type: 'grid',
   required: ['rows', 'cols'],

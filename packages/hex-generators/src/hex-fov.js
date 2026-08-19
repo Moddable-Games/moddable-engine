@@ -1,4 +1,4 @@
-import { HexMath } from '../../topologies/hex/src/hex-math.js'
+import { HexMath } from '../../topologies/hex/index.js'
 
 export function computeFov(hexes, origin, opts = {}) {
   const range = opts.range || 3

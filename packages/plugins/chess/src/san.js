@@ -1,4 +1,4 @@
-import { indexToAlgebraic } from '../../../topologies/grid/src/topology-grid.js'
+import { indexToAlgebraic } from '../../../topologies/grid/index.js'
 
 const PIECE_SYMBOLS = { king: 'K', queen: 'Q', rook: 'R', bishop: 'B', knight: 'N' }
 

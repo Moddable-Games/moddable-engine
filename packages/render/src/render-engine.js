@@ -7,18 +7,17 @@
  * and produces an SVG string.
  */
 
-import { produceLayout } from '../../schema/src/produce-layout.js'
-import { parseRankRuns } from '../../core/src/fen-runs.js'
-import { renderGridLayout } from '../../topologies/grid/src/topology-grid.js'
-import { renderGraphLayout } from '../../topologies/graph/src/topology-graph.js'
-import { renderPitLayout } from '../../topologies/pit/src/topology-pit.js'
-import { renderTrackLayout } from '../../topologies/track/src/topology-track.js'
-import { renderHexLayout } from '../../topologies/hex/src/topology-hex.js'
+import { produceLayout, buildCrossMap } from '../../schema/index.js'
+import { parseRankRuns } from '../../core/index.js'
+import { renderGridLayout } from '../../topologies/grid/index.js'
+import { renderGraphLayout } from '../../topologies/graph/index.js'
+import { renderPitLayout } from '../../topologies/pit/index.js'
+import { renderTrackLayout } from '../../topologies/track/index.js'
+import { renderHexLayout } from '../../topologies/hex/index.js'
 import { renderTableauLayout } from './render-tableau.js'
 import { elementsToFragment, elementToSvg } from './serialize-layout.js'
 import { renderSurfaceSVG } from './piece-surface.js'
 import { FEN4_OWNERS, fen4GetOwner } from './recolour.js'
-import { buildCrossMap } from '../../schema/src/cross-map.js'
 
 const RENDER_FN = { grid: renderGridLayout, graph: renderGraphLayout, pit: renderPitLayout, track: renderTrackLayout, hex: renderHexLayout, tableau: renderTableauLayout }
 

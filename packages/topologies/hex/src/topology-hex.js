@@ -1,4 +1,4 @@
-import { parseRankRuns } from '../../../core/src/fen-runs.js'
+import { parseRankRuns } from '../../../core/index.js'
 import { HexMath } from './hex-math.js'
 export const schema = {
   type: 'hex',
