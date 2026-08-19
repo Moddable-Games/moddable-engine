@@ -1,4 +1,5 @@
 import { fromConfig } from '../../../piece-behaviour/index.js'
+import { getCell } from '../cell-utils.js'
 
 export function createAttackDetectionRule(config = {}) {
   const builtPieces = new Map()
@@ -23,11 +24,6 @@ export function createAttackDetectionRule(config = {}) {
       return result
     }
     return Object.keys(board)
-  }
-
-  function getCell(board, pos) {
-    if (Array.isArray(board)) return board[pos]
-    return board[pos] || null
   }
 
   function isAttacked(target, state, ctx) {

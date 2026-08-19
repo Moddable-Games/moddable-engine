@@ -1,3 +1,5 @@
+import { getCell, setCell, cloneBoard } from '../cell-utils.js'
+
 export function createEnPassantRule(config = {}) {
   const enabled = config.enabled !== false
 
@@ -109,18 +111,4 @@ function getEPMovesViaGrid(state, topology, playerIndex, pawnType, epTarget, ctx
   }
 
   return moves.length > 0 ? moves : null
-}
-
-function getCell(board, pos) {
-  if (Array.isArray(board)) return board[pos]
-  return board[pos] || null
-}
-
-function setCell(board, pos, value) {
-  board[pos] = value
-}
-
-function cloneBoard(board) {
-  if (Array.isArray(board)) return [...board]
-  return { ...board }
 }

@@ -1,3 +1,5 @@
+import { getCell, setCell, cloneBoard } from '../cell-utils.js'
+
 export function createCaptureReplacementRule(config = {}) {
   const skipFlags = config.skipFlags || []
 
@@ -28,18 +30,4 @@ export function createCaptureReplacementRule(config = {}) {
       },
     },
   }
-}
-
-function getCell(board, pos) {
-  if (Array.isArray(board)) return board[pos]
-  return board[pos] || null
-}
-
-function setCell(board, pos, value) {
-  board[pos] = value
-}
-
-function cloneBoard(board) {
-  if (Array.isArray(board)) return [...board]
-  return { ...board }
 }

@@ -1,3 +1,5 @@
+import { getCell, setCell, cloneBoard } from '../cell-utils.js'
+
 export function createPromotionRule(config = {}) {
   const choices = config.choices || ['queen', 'rook', 'bishop', 'knight']
   const pawnType = config.pawnType || 'pawn'
@@ -51,18 +53,4 @@ export function createPromotionRule(config = {}) {
       },
     },
   }
-}
-
-function getCell(board, pos) {
-  if (Array.isArray(board)) return board[pos]
-  return board[pos] || null
-}
-
-function setCell(board, pos, value) {
-  board[pos] = value
-}
-
-function cloneBoard(board) {
-  if (Array.isArray(board)) return [...board]
-  return { ...board }
 }

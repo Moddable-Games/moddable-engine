@@ -1,3 +1,5 @@
+import { getCell, setCell, cloneBoard } from '../cell-utils.js'
+
 export function createCastlingRule(config = {}) {
   const enabled = config.enabled !== false
 
@@ -200,20 +202,6 @@ function canCastle(state, kingFrom, kingDest, rookFrom, rookDest, attackDetectio
   }
 
   return true
-}
-
-function getCell(board, pos) {
-  if (Array.isArray(board)) return board[pos]
-  return board[pos] || null
-}
-
-function setCell(board, pos, value) {
-  board[pos] = value
-}
-
-function cloneBoard(board) {
-  if (Array.isArray(board)) return [...board]
-  return { ...board }
 }
 
 function deepCopy(rights) {

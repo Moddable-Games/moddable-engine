@@ -1,3 +1,5 @@
+import { getCell, setCell } from '../cell-utils.js'
+
 export function createPromotionRankReachRule(config = {}) {
   const promotionRank = config.promotionRank !== undefined ? config.promotionRank : null
   const promotedType = config.promotedType || 'king'
@@ -64,15 +66,6 @@ export function createPromotionRankReachRule(config = {}) {
     }
     return false
   }
-}
-
-function getCell(board, pos) {
-  if (Array.isArray(board)) return board[pos]
-  return board[pos] || null
-}
-
-function setCell(board, pos, value) {
-  board[pos] = value
 }
 
 function cloneBoard(board) {
