@@ -164,6 +164,13 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Changelog
 
+#### 2026-08-20
+- Create page #118 steps 1–4: Tier A rule keys (15 new config keys across draughts/reversi/shogi/chess), piece-set filtering, metadata block (title/slug/win/special), YAML import with round-trip
+- Corpus round-trip test: 179 tests covering all 176 playable variants from moddable-rules
+- Extracted `serialize-frontmatter.js` as shared browser-safe YAML serializer; deleted hand-rolled export code
+- Fixed YAML export silently corrupting arrays (topology.voids, render.zones)
+- Fixed family detection in import for variants without explicit plugins block (uses meta.parent fallback)
+
 #### 2026-08-19
 - Fixed fairy-piece case mismatch: renamed wdE→wDE, bdE→bDE, wdH→wDH, bdH→bDH in mce-shogi-fairy (resolved recurring sync:boards collision with moddable-rules)
 - Removed `dist/` prefix from all rules.moddable.games links in topology/family HTML pages
