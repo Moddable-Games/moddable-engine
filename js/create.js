@@ -724,6 +724,21 @@ function importYaml(text) {
   }
 }
 
+function yamlValue(v, indent = '') {
+  if (v === null || v === undefined) return 'null'
+  if (typeof v === 'boolean' || typeof v === 'number') return String(v)
+  if (typeof v === 'string') return v.includes(':') || v.includes('#') ? `"${v}"` : v
+  if (Array.isArray(v)) {
+    if (!v.length) return '[]'
+    if (v.every(x => Array.isArray(x) || typeof x === 'number' || typeof x === 'string')) {
+      return JSON.stringify(v)
+    }
+    return '\n' + v.map(item => `${indent}  - ${yamlValue(item, indent + '  ')}`).join('\n')
+  }
+  if (typeof v === 'object') return JSON.stringify(v)
+  return String(v)
+}
+
 function exportYaml() {
   const resolved = buildResolvedFromState(state)
   const title = state.title || 'Custom Variant'
@@ -738,7 +753,7 @@ function exportYaml() {
       lines.push('    params:')
       for (const [pk, pv] of Object.entries(v)) lines.push(`      ${pk}: ${pv}`)
     } else {
-      lines.push(`    ${k}: ${v}`)
+      lines.push(`    ${k}: ${yamlValue(v, '    ')}`)
     }
   }
   lines.push(`  surface: ${state.render.surface}`)
@@ -748,8 +763,13 @@ function exportYaml() {
     if (k === 'decorations') {
       lines.push('    decorations:')
       for (const d of v) lines.push(`      - ${Object.entries(d).map(([dk, dv]) => `${dk}: ${dv}`).join(', ')}`)
-    } else if (typeof v !== 'object') {
-      lines.push(`    ${k}: ${v}`)
+    } else if (typeof v === 'object' && !Array.isArray(v)) {
+      lines.push(`    ${k}:`)
+      for (const [sk, sv] of Object.entries(v)) {
+        lines.push(`      ${sk}: ${yamlValue(sv, '      ')}`)
+      }
+    } else {
+      lines.push(`    ${k}: ${yamlValue(v, '    ')}`)
     }
   }
   if (state.pieceSet) lines.push(`  pieces:\n    set: ${state.pieceSet}`)

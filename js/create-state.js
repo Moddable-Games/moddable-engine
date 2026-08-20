@@ -286,7 +286,7 @@ export function resolveImported(parsed) {
   const surfaceRef = engine.surface || 'wood-classic'
   const surface = resolveSurface(typeof surfaceRef === 'string' ? surfaceRef : 'wood-classic')
 
-  const family = Object.keys(engine.plugins || {})[0] || 'chess'
+  const family = Object.keys(engine.plugins || {})[0] || meta.parent || 'chess'
 
   const variantEngine = { ...engine }
   const { resolved } = cascadeResolve({
