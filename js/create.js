@@ -1,5 +1,5 @@
 import { renderFromEngine, attachPieceImages, pieceIdToFenChar } from '../packages/render/index.js'
-import { parseFrontmatter } from '../packages/schema/index.js'
+import { parseFrontmatter, serializeFrontmatter } from '../packages/schema/index.js'
 import { PLAYABLE_FAMILIES, FAMILY_LABELS, loadPlayabilityManifest, getPlayableVariants } from './play-shared.js'
 import { resolveVariantBoard } from './variant-frontmatter.js'
 import { defaultState, buildResolvedFromState, buildSetup, parseSetup, stateFromResolved, resolveImported, isGrid } from './create-state.js'
@@ -724,84 +724,29 @@ function importYaml(text) {
   }
 }
 
-function yamlValue(v, indent = '') {
-  if (v === null || v === undefined) return 'null'
-  if (typeof v === 'boolean' || typeof v === 'number') return String(v)
-  if (typeof v === 'string') return v.includes(':') || v.includes('#') ? `"${v}"` : v
-  if (Array.isArray(v)) {
-    if (!v.length) return '[]'
-    if (v.every(x => Array.isArray(x) || typeof x === 'number' || typeof x === 'string')) {
-      return JSON.stringify(v)
-    }
-    return '\n' + v.map(item => `${indent}  - ${yamlValue(item, indent + '  ')}`).join('\n')
-  }
-  if (typeof v === 'object') return JSON.stringify(v)
-  return String(v)
-}
-
 function exportYaml() {
   const resolved = buildResolvedFromState(state)
   const title = state.title || 'Custom Variant'
   const slug = state.slug || slugify(title)
-  const lines = ['---', `title: ${title}`, `slug: ${slug}`]
-  if (state.win) lines.push(`win: ${state.win}`)
-  if (state.special) lines.push(`special: ${state.special}`)
-  lines.push('engine:')
-  lines.push('  topology:')
-  for (const [k, v] of Object.entries(resolved.topology || {})) {
-    if (k === 'params') {
-      lines.push('    params:')
-      for (const [pk, pv] of Object.entries(v)) lines.push(`      ${pk}: ${pv}`)
-    } else {
-      lines.push(`    ${k}: ${yamlValue(v, '    ')}`)
-    }
-  }
-  lines.push(`  surface: ${state.render.surface}`)
-  lines.push('  render:')
-  const render = resolved.render || {}
-  for (const [k, v] of Object.entries(render)) {
-    if (k === 'decorations') {
-      lines.push('    decorations:')
-      for (const d of v) lines.push(`      - ${Object.entries(d).map(([dk, dv]) => `${dk}: ${dv}`).join(', ')}`)
-    } else if (typeof v === 'object' && !Array.isArray(v)) {
-      lines.push(`    ${k}:`)
-      for (const [sk, sv] of Object.entries(v)) {
-        lines.push(`      ${sk}: ${yamlValue(sv, '      ')}`)
-      }
-    } else {
-      lines.push(`    ${k}: ${yamlValue(v, '    ')}`)
-    }
-  }
-  if (state.pieceSet) lines.push(`  pieces:\n    set: ${state.pieceSet}`)
-  if (Object.keys(state.placement).length) lines.push(`  setup: "${buildSetup(state)}"`)
 
-  const vocabulary = resolved.vocabulary || {}
-  if (Object.keys(vocabulary).length) {
-    lines.push('  vocabulary:')
-    for (const [name, def] of Object.entries(vocabulary)) {
-      lines.push(`    ${name}:`)
-      lines.push(`      symbols: ${JSON.stringify(def.symbols || {})}`)
-    }
-  }
+  const meta = { title, slug }
+  if (state.win) meta.win = state.win
+  if (state.special) meta.special = state.special
 
-  // Read the plugin block off the resolved engine rather than rebuilding it, so
-  // the exported file cannot disagree with the board being played. Players were
-  // missing from the export for exactly that reason: two paths, one updated.
+  const engine = { topology: resolved.topology }
+  engine.surface = state.render.surface || 'wood-classic'
+  if (resolved.render && Object.keys(resolved.render).length) engine.render = resolved.render
+  if (resolved.pieces) engine.pieces = resolved.pieces
+  if (Object.keys(state.placement || {}).length) engine.setup = buildSetup(state)
+  if (resolved.vocabulary && Object.keys(resolved.vocabulary).length) engine.vocabulary = resolved.vocabulary
+  if (Array.isArray(resolved.players) && resolved.players.length) engine.players = resolved.players
   const pluginConfig = resolved.plugins?.[state.family] || {}
-  if (Array.isArray(resolved.players) && resolved.players.length) {
-    lines.push(`  players: [${resolved.players.join(', ')}]`)
-  }
-  if (Object.keys(pluginConfig).length) {
-    lines.push('  plugins:')
-    lines.push(`    ${state.family}:`)
-    for (const [k, v] of Object.entries(pluginConfig)) {
-      if (v && typeof v === 'object') lines.push(`      ${k}: ${JSON.stringify(v)}`)
-      else lines.push(`      ${k}: ${v}`)
-    }
-  }
-  lines.push('---')
+  if (Object.keys(pluginConfig).length) engine.plugins = { [state.family]: pluginConfig }
 
-  const blob = new Blob([lines.join('\n')], { type: 'text/yaml' })
+  meta.engine = engine
+  const yaml = serializeFrontmatter(meta)
+
+  const blob = new Blob([yaml], { type: 'text/yaml' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
