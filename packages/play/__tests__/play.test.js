@@ -2,15 +2,15 @@ import { createGameForFamily, getFamilies, hasFamily, getPlugin } from '../src/p
 
 describe('play — universal game factory', () => {
   describe('registry', () => {
-    it('lists all 6 families', () => {
+    // Asserted as a floor plus membership rather than an exact count. Adding a
+    // game is the point of this project, and an exact count turns every new
+    // family into a test edit that says nothing about whether anything works.
+    const EXPECTED_FAMILIES = ['chess', 'draughts', 'go', 'mancala', 'reversi', 'shogi', 'xiangqi']
+
+    it('registers every expected family', () => {
       const families = getFamilies()
-      expect(families.length).toBe(6)
-      expect(families).toContain('chess')
-      expect(families).toContain('go')
-      expect(families).toContain('draughts')
-      expect(families).toContain('shogi')
-      expect(families).toContain('xiangqi')
-      expect(families).toContain('reversi')
+      for (const family of EXPECTED_FAMILIES) expect(families).toContain(family)
+      expect(families.length).toBeGreaterThanOrEqual(EXPECTED_FAMILIES.length)
     })
 
     it('hasFamily returns true for registered families', () => {

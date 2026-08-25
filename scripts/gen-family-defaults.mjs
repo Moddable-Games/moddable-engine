@@ -17,7 +17,16 @@ import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
 const RULES_ROOT = process.env.MODDABLE_RULES_DIR || join(process.cwd(), '..', 'moddable-rules', 'games')
 const OUT = process.env.DEFAULTS_OUT || join(process.cwd(), 'play', 'family-defaults.json')
 
-const FAMILIES = ['chess', 'go', 'draughts', 'shogi', 'xiangqi', 'reversi']
+// Derived from the plugins that exist, not restated. A hardcoded list here
+// means adding a game silently produces no default definition, and the family
+// then throws from the bare SDK path - createGameForFamily(family) with no
+// frontmatter and no variant - while working fine everywhere else.
+const PLUGINS_DIR = join(process.cwd(), 'packages', 'plugins')
+const FAMILIES = readdirSync(PLUGINS_DIR, { withFileTypes: true })
+  .filter(e => e.isDirectory() && !e.name.startsWith('__'))
+  .map(e => e.name)
+  .filter(name => existsSync(join(PLUGINS_DIR, name, 'index.js')))
+  .sort()
 
 function findDefaultVariant(family) {
   const variantsDir = join(RULES_ROOT, family, 'content', 'variants')

@@ -22,12 +22,15 @@ import {
   listVariants,
 } from '../index.js'
 
-const EXPECTED_FAMILIES = ['chess', 'draughts', 'go', 'reversi', 'shogi', 'xiangqi']
+const EXPECTED_FAMILIES = ['chess', 'draughts', 'go', 'mancala', 'reversi', 'shogi', 'xiangqi']
 
 describe('SDK consumer path (no frontmatter, no variant registration)', () => {
-  test('getFamilies returns exactly the expected set', () => {
+  // Every expected family must be present. Not asserted as an exact set:
+  // adding a game is the point of the project, and an exact-set assertion makes
+  // every new family a test edit that says nothing about whether it works.
+  test('getFamilies contains every expected family', () => {
     const families = getFamilies()
-    expect(families.sort()).toEqual(EXPECTED_FAMILIES.sort())
+    for (const family of EXPECTED_FAMILIES) expect(families).toContain(family)
   })
 
   test('hasFamily is true for all expected families', () => {
@@ -37,8 +40,10 @@ describe('SDK consumer path (no frontmatter, no variant registration)', () => {
   })
 
   test('hasFamily is false for non-existent families', () => {
+    // Families with no plugin yet. Implementing one moves it into
+    // EXPECTED_FAMILIES rather than being deleted from here.
     expect(hasFamily('backgammon')).toBe(false)
-    expect(hasFamily('mancala')).toBe(false)
+    expect(hasFamily('morris')).toBe(false)
     expect(hasFamily('hex')).toBe(false)
   })
 

@@ -73,6 +73,36 @@
       }
     }
   },
+  "draughts": {
+    "default": {
+      "title": "English Draughts",
+      "slug": "english",
+      "parent": "draughts",
+      "engine": {
+        "topology": {
+          "type": "grid",
+          "rows": 8,
+          "cols": 8
+        },
+        "players": [
+          "white",
+          "black"
+        ],
+        "plugins": {
+          "draughts": {
+            "piecesPerPlayer": 12,
+            "directions": "diagonal",
+            "manCapture": "forward",
+            "manMove": "forward",
+            "forcedCapture": true,
+            "maximalCapture": false,
+            "flyingKings": false,
+            "setup": "1b1b1b1b/b1b1b1b1/1b1b1b1b/8/8/w1w1w1w1/1w1w1w1w/w1w1w1w1"
+          }
+        }
+      }
+    }
+  },
   "go": {
     "default": {
       "title": "Standard Go (19×19)",
@@ -100,11 +130,35 @@
       }
     }
   },
-  "draughts": {
+  "mancala": {
     "default": {
-      "title": "English Draughts",
-      "slug": "english",
-      "parent": "draughts",
+      "title": "Kalah",
+      "slug": "kalah",
+      "parent": "mancala",
+      "engine": {
+        "topology": {
+          "type": "pit"
+        },
+        "players": [
+          "south",
+          "north"
+        ],
+        "plugins": {
+          "mancala": {
+            "sowIntoOwnStore": true,
+            "bonusTurnOnStore": true,
+            "captureRule": "oppositeOnEmptyOwn",
+            "setup": "4,4,4,4,4,4;0;4,4,4,4,4,4;0"
+          }
+        }
+      }
+    }
+  },
+  "reversi": {
+    "default": {
+      "title": "Standard Reversi",
+      "slug": "standard",
+      "parent": "reversi",
       "engine": {
         "topology": {
           "type": "grid",
@@ -112,19 +166,16 @@
           "cols": 8
         },
         "players": [
-          "white",
-          "black"
+          "black",
+          "white"
         ],
         "plugins": {
-          "draughts": {
-            "piecesPerPlayer": 12,
-            "directions": "diagonal",
-            "manCapture": "forward",
-            "manMove": "forward",
-            "forcedCapture": true,
-            "maximalCapture": false,
-            "flyingKings": false,
-            "setup": "1b1b1b1b/b1b1b1b1/1b1b1b1b/8/8/w1w1w1w1/1w1w1w1w/w1w1w1w1"
+          "reversi": {
+            "directions": "all",
+            "mustFlip": true,
+            "winBy": "most",
+            "passWhenNoMoves": true,
+            "setup": "8/8/8/3bw3/3wb3/8/8/8"
           }
         }
       }
@@ -175,33 +226,6 @@
             "flyingGeneralRule": true,
             "cannonJumpToMove": false,
             "setup": "rheakaehr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RHEAKAEHR"
-          }
-        }
-      }
-    }
-  },
-  "reversi": {
-    "default": {
-      "title": "Standard Reversi",
-      "slug": "standard",
-      "parent": "reversi",
-      "engine": {
-        "topology": {
-          "type": "grid",
-          "rows": 8,
-          "cols": 8
-        },
-        "players": [
-          "black",
-          "white"
-        ],
-        "plugins": {
-          "reversi": {
-            "directions": "all",
-            "mustFlip": true,
-            "winBy": "most",
-            "passWhenNoMoves": true,
-            "setup": "8/8/8/3bw3/3wb3/8/8/8"
           }
         }
       }

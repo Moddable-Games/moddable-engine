@@ -6,6 +6,7 @@ import { buildPieceImages, renderFromEngine, attachPieceImages } from '../../ren
 import { boardToSetup } from '../../play/src/serialise.js'
 import { listVariants, getRegisteredFamilies } from '../../play/src/variant-registry.js'
 import { createGame } from '../../play/src/sdk.js'
+import { getPlugin } from '../../play/src/play.js'
 import { createGameForFamily, resolveFromDisk } from '../../play/src/play.js'
 import { interactionModelFor } from '../../play/src/interaction.js'
 
@@ -129,11 +130,26 @@ function playedPosition(family, key, moveCount, topo) {
 
 const NONDETERMINISTIC = new Set(['chess960', 'sittuyin'])
 
+// Families whose state is counts rather than pieces on squares, declared by the
+// plugin itself. Skipping them silently on a missing `slice.board` would be
+// indistinguishable from a guard quietly ceasing to check anything, so the skip
+// is named and its size asserted below.
+function countBasedFamilies() {
+  const out = new Set()
+  for (const family of getRegisteredFamilies()) {
+    const factory = getPlugin(family)?.factory
+    if (factory && factory.rendersPieces === false) out.add(family)
+  }
+  return out
+}
+const COUNT_BASED = countBasedFamilies()
+
 function everyVariant() {
   const out = []
   for (const family of getRegisteredFamilies()) {
     for (const variant of listVariants(family)) {
       if (NONDETERMINISTIC.has(variant.key)) continue
+      if (COUNT_BASED.has(family)) continue
       out.push([family, variant.key])
     }
   }
@@ -145,6 +161,12 @@ const VARIANT_FLOOR = 174
 describeWithAssets('every piece resolves to real artwork during play', () => {
   it('variant coverage meets floor', () => {
     expect(everyVariant().length).toBeGreaterThanOrEqual(VARIANT_FLOOR)
+  })
+
+  // A skip list that grows without anyone noticing is how a guard stops
+  // guarding. One family (mancala) draws seed counts rather than pieces.
+  it('skips at most the families that declare they render no pieces', () => {
+    expect([...COUNT_BASED].sort()).toEqual(['mancala'])
   })
 
   it.each(everyVariant())('%s/%s renders every piece after moves', (family, key) => {

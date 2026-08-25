@@ -22,6 +22,7 @@ registerVariants('draughts', {})
 registerVariants('reversi', {})
 registerVariants('shogi', {})
 registerVariants('xiangqi', {})
+registerVariants('mancala', {})
 
 registerEvaluator('chess', chessEvaluate)
 registerEvaluator('go', goEvaluate)
