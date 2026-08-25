@@ -1,3 +1,14 @@
+import { warnUnknownConfigKeys } from '../../../core/index.js'
+// Every config key this plugin reads. Exported so the corpus guard and the
+// authoring docs share one source of truth, and kept separate from `defaults`,
+// which only lists the keys that carry a default value.
+export const CONFIG_KEYS = new Set([
+  'captureBackward', 'cols', 'directions', 'flyingKings', 'forcedCapture',
+  'kingCapturePriority', 'loseOnSinglePiece', 'majorityPrefersKing', 'manCapture', 'manMove',
+  'maximalCapture', 'menCannotCaptureKings', 'piecesPerPlayer', 'playerCount',
+  'promotionDuring', 'rows', 'setup', 'turnLogic', 'winCondition',
+])
+
 export function createDraughtsPlugin(variantConfig = {}, context = {}) {
   const defaults = {
     rows: 8,
@@ -19,10 +30,7 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
 
   const config = { ...defaults, ...variantConfig }
 
-  const unknownKeys = Object.keys(variantConfig).filter(k => !(k in defaults) && k !== 'vocabulary' && k !== 'pieces' && k !== 'extends' && k !== 'hooks')
-  if (unknownKeys.length > 0) {
-    console.warn(`[draughts] Unknown config keys: ${unknownKeys.join(', ')}. Check spelling.`)
-  }
+  warnUnknownConfigKeys('draughts', variantConfig, CONFIG_KEYS)
 
   const hooks = {
     moveFilter: (moves) => moves,
@@ -449,4 +457,5 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
   }
 }
 
+createDraughtsPlugin.configKeys = CONFIG_KEYS
 createDraughtsPlugin.interaction = 'chain'

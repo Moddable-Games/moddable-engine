@@ -7,10 +7,12 @@ import {
   getVariantGroups,
   hasVariant,
 } from './variant-registry.js'
-import { createMinimax, DIFFICULTIES, createMCTS, MCTS_DIFFICULTIES, getEvaluator, createGoPlayoutPolicy, createGoExpansionPolicy } from '../../ai/index.js'
+import { createMinimax, DIFFICULTIES, createMCTS, MCTS_DIFFICULTIES, getEvaluator } from '../../ai/index.js'
 import { interactionModelFor } from './interaction.js'
 import { definitionFromVariant } from './variant-definition.js'
+import { createRng } from '../../core/index.js'
 import { usesMctsDefault } from './mcts-registry.js'
+import { searchPoliciesFor } from './search-policy-registry.js'
 
 export { getFamilies, hasFamily, getVariantGroups, hasVariant, getVariantConfig }
 export { DIFFICULTIES as AI_DIFFICULTIES }
@@ -75,11 +77,10 @@ export function createAI(family, variant, opts = {}) {
     evaluate: opts.evaluate || variantEvaluator(family, variant),
   })
 
-  const mctsOpts = { difficulty, ...opts.searchOpts }
-  if (family === 'go') {
-    mctsOpts.rolloutPolicy = createGoPlayoutPolicy()
-    mctsOpts.expansionPolicy = createGoExpansionPolicy()
-  }
+  // Policies come from the plugin, not from a family name test here.
+  const policyRng = opts.rngSeed !== undefined ? createRng(opts.rngSeed) : null
+  const searchContext = { random: policyRng ? () => policyRng.next() : undefined }
+  const mctsOpts = { difficulty, ...searchPoliciesFor(family, searchContext), ...opts.searchOpts }
 
   const engine = useMcts
     ? createMCTS(simulator, mctsOpts)

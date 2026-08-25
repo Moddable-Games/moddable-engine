@@ -12,15 +12,16 @@ import { readFileSync, readdirSync, existsSync } from 'fs'
 import { join } from 'path'
 
 // Import all plugins to ensure they're registered
-import '../chess/index.js'
-import '../go/index.js'
-import '../draughts/index.js'
-import '../reversi/index.js'
-import '../shogi/index.js'
-import '../xiangqi/index.js'
+import { createChessPlugin } from '../chess/index.js'
+import { createGoPlugin } from '../go/index.js'
+import { createDraughtsPlugin } from '../draughts/index.js'
+import { createReversiPlugin } from '../reversi/index.js'
+import { createShogiPlugin } from '../shogi/index.js'
+import { createXiangqiPlugin } from '../xiangqi/index.js'
 
 import { getVariantConfig, getVariantKeys } from '../../play/src/variant-registry.js'
-import { resolveFromDisk, setRulesReader } from '../../play/src/play.js'
+import { resolveFromDisk, setRulesReader, STRUCTURAL_KEYS } from '../../play/src/play.js'
+import { unknownConfigKeys } from '../../core/index.js'
 
 const RULES_ROOT = process.env.MODDABLE_RULES_DIR || join(process.cwd(), '..', 'moddable-rules', 'games')
 setRulesReader(
@@ -44,45 +45,16 @@ const PLAY_LAYER_KEYS = new Set([
   'rows', 'cols', 'size', 'players', 'search',
 ])
 
-// Per-family accepted keys (derived from reading each plugin's config.* accesses)
+// Derived from each plugin's own exported CONFIG_KEYS rather than restated
+// here. The previous copy in this file had drifted from all six plugins, which
+// is how a duplicated allowlist always ends up.
 const FAMILY_ACCEPTED_KEYS = {
-  chess: new Set([
-    'setup', 'promotionChoices', 'castling', 'enPassant', 'royalType',
-    'pawnType', 'rookType', 'pieces', 'vocabulary', 'noCheck',
-    'stalemateMeaning', 'moveFilter', 'winCondition', 'evaluate',
-    'openingBook', 'torpedo', 'doubleStep', 'advancement', 'pawnConfig',
-    'checkThreshold', 'afterMove', 'turnLogic', 'onTurnEnd', 'pawnStartRow', 'moveApply',
-    'drops', 'visibility', 'placementPieces', 'actions', 'initState',
-    'hexPawnConfig', 'pawnMoveDirections', 'pawnCaptureDirections', 'promotionRow',
-    'playerCount', 'randomSetup', 'hooks',
-  ]),
-  go: new Set([
-    'setup', 'playerColours', 'komi', 'scoring', 'superko', 'allowPass',
-    'suicideAllowed', 'captures', 'captureTarget', 'winCondition', 'vocabulary',
-    'evaluate', 'directions', 'winBy', 'hooks',
-  ]),
-  draughts: new Set([
-    'setup', 'vocabulary', 'directions', 'manMove', 'manCapture', 'captureBackward',
-    'flyingKings', 'promotionDuring', 'piecesPerPlayer', 'forcedCapture',
-    'maxCapture', 'maximalCapture', 'captureMethod', 'captureRule', 'winCondition', 'hooks',
-    'menCannotCaptureKings', 'kingCapturePriority', 'removeImmediately',
-    'loseOnSinglePiece', 'majorityPrefersKing',
-  ]),
-  reversi: new Set([
-    'setup', 'vocabulary', 'winCondition', 'passRule', 'passWhenNoMoves',
-    'evaluate', 'hooks', 'directions', 'mustFlip', 'winBy',
-  ]),
-  shogi: new Set([
-    'setup', 'vocabulary', 'pieces', 'pieceMoves', 'promotionZone', 'drops', 'dropRestrictions',
-    'winCondition', 'checkEnabled', 'hooks', 'capturedPieces', 'playerCount',
-    'advancementDirection', 'advancement', 'custodianCapture', 'evaluate',
-    'initialHands', 'mustFlip', 'nifuLimit', 'nifuType', 'noDropLastRank', 'noDropSecondRank',
-    'dropCheckmateLimit', 'royalType', 'captureRule',
-  ]),
-  xiangqi: new Set([
-    'setup', 'vocabulary', 'pieces', 'palace', 'river', 'hasRiver', 'flyingGeneral', 'flyingGeneralRule',
-    'winCondition', 'winBy', 'checkEnabled', 'directions', 'cannonJumpToMove',
-  ]),
+  chess: createChessPlugin.configKeys,
+  go: createGoPlugin.configKeys,
+  draughts: createDraughtsPlugin.configKeys,
+  reversi: createReversiPlugin.configKeys,
+  shogi: createShogiPlugin.configKeys,
+  xiangqi: createXiangqiPlugin.configKeys,
 }
 
 const FAMILIES = Object.keys(FAMILY_ACCEPTED_KEYS)
@@ -110,35 +82,82 @@ for (const family of FAMILIES) {
   })
 }
 
-for (const family of FAMILIES) {
-  describe(`config-access validation: ${family} (frontmatter)`, () => {
-    const variantsDir = join(RULES_ROOT, family, 'content', 'variants')
-    let allSlugs = []
-    if (existsSync(variantsDir)) {
-      try {
-        allSlugs = readdirSync(variantsDir)
-          .filter(f => f.endsWith('.md'))
-          .map(f => f.replace('.md', ''))
-      } catch { /* no variants dir */ }
-    }
-
-    const acceptedKeys = FAMILY_ACCEPTED_KEYS[family]
-
-    if (allSlugs.length === 0) {
-      it.skip(`no frontmatter variants found for ${family}`, () => {})
-    } else {
-      it.each(allSlugs)('%s: resolved plugin config has no unknown keys', (slug) => {
-        const resolved = resolveFromDisk(family, slug)
-        if (!resolved) return
-
-        const pluginConfig = resolved.plugins?.[family] || {}
-        const allKeys = Object.keys(pluginConfig)
-        const unknown = allKeys.filter(k =>
-          !acceptedKeys.has(k) && !PLAY_LAYER_KEYS.has(k)
-        )
-
-        expect(unknown).toEqual([])
-      })
-    }
-  })
+// The frontmatter half of this file used to inspect `resolved.plugins[family]`
+// only. That is the nested block an author writes under `plugins:`; it is not
+// what the plugin receives. `resolveMeta` folds every non-structural key from
+// the whole engine block into the plugin config, so a rule declared at the top
+// level - `promotion_zone`, `dual_king`, `setup_phase` - never appeared in what
+// the old assertion looked at. For placement-chess and shogun the nested block
+// is literally empty, so the check passed on `{}` while the plugin was handed a
+// key it does not read. Four variants shipped `playable: true` with their
+// defining mechanic inert because of it.
+function foldedPluginConfig(family, slug) {
+  const resolved = resolveFromDisk(family, slug)
+  if (!resolved) return null
+  const config = { ...(resolved.plugins?.[family] || {}) }
+  for (const [k, v] of Object.entries(resolved)) {
+    if (STRUCTURAL_KEYS.has(k)) continue
+    if (v !== undefined) config[k] = v
+  }
+  return config
 }
+
+// Keys that survive the fold, are read by nobody, and are known to be there.
+// Shrink-only: fixing a variant removes its entry, and a new unclaimed key
+// fails the ratchet rather than joining the noise.
+const UNCLAIMED = {
+  'chess|approximations': 1,          // congo
+  'chess|asymmetric': 6,              // empire khans-chess shinobi shinobiplus spartan synochess
+  'chess|dual_king': 1,               // spartan - the second king is the whole variant
+  'chess|faceoff': 1,                 // synochess
+  'chess|gating': 1,                  // s-chess
+  'chess|hand': 5,                    // s-chess shinobi shinobiplus shogun synochess
+  'chess|promotion_zone': 2,          // shinobi shogun - plugin reads promotionRow
+  'chess|rendering_note': 1,          // raumschach
+  'chess|setup_phase': 1,             // placement-chess - the placement phase is the game
+  'chess|setup_status': 1,            // yalta-chess
+  'draughts|removeImmediately': 4,    // a default the plugin never reads
+  'draughts|unsupported': 20,         // deliberate prose in the draughts rulebook
+}
+const UNCLAIMED_CEILING = Object.values(UNCLAIMED).reduce((a, b) => a + b, 0)
+
+describe('resolved plugin config has no unclaimed keys (engine#139)', () => {
+  const counts = {}
+  let variantsChecked = 0
+
+  for (const family of FAMILIES) {
+    const variantsDir = join(RULES_ROOT, family, 'content', 'variants')
+    if (!existsSync(variantsDir)) continue
+    const slugs = readdirSync(variantsDir).filter(f => f.endsWith('.md')).map(f => f.replace('.md', ''))
+    for (const slug of slugs) {
+      const config = foldedPluginConfig(family, slug)
+      if (!config) continue
+      variantsChecked++
+      for (const key of unknownConfigKeys(config, FAMILY_ACCEPTED_KEYS[family])) {
+        counts[`${family}|${key}`] = (counts[`${family}|${key}`] || 0) + 1
+      }
+    }
+  }
+
+  // A guard that inspects nothing passes. Assert it inspected the corpus.
+  it('walks the whole variant corpus', () => {
+    expect(variantsChecked).toBeGreaterThan(200)
+  })
+
+  it('introduces no new unclaimed key', () => {
+    const novel = Object.keys(counts).filter(k => !(k in UNCLAIMED)).sort()
+    expect(novel).toEqual([])
+  })
+
+  it('does not widen an existing unclaimed key', () => {
+    const widened = Object.entries(counts)
+      .filter(([k, n]) => k in UNCLAIMED && n > UNCLAIMED[k])
+      .map(([k, n]) => `${k}: ${n} > ${UNCLAIMED[k]}`)
+    expect(widened).toEqual([])
+  })
+
+  it('ratchet only shrinks', () => {
+    const total = Object.values(counts).reduce((a, b) => a + b, 0)
+    expect(total).toBeLessThanOrEqual(UNCLAIMED_CEILING)
+  })
+})

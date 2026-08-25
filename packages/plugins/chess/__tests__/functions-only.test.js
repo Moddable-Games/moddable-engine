@@ -21,6 +21,12 @@ describe('functions-only registry rule (#71)', () => {
   const variants = listVariants('chess')
   const newVariants = variants.filter(v => !LEGACY_ALLOW.has(v.key))
 
+  // Without this the `if` below turns an empty registry into a silent skip.
+  const VARIANT_FLOOR = 40
+  it('registry coverage meets floor', () => {
+    expect(newVariants.length).toBeGreaterThanOrEqual(VARIANT_FLOOR)
+  })
+
   if (newVariants.length > 0) {
     it.each(newVariants.map(v => v.key))('%s: registry entry contains only functions + key', (key) => {
       const config = getVariantConfig('chess', key)

@@ -4,6 +4,7 @@ import { produce } from '../../schema/index.js'
 import { getVariantConfig, hasVariant, getSlugForKey, setVariantSources as _setVariantSources } from './variant-registry.js'
 import { definitionFromVariant } from './variant-definition.js'
 import { parseVariantKey, applyFlags, familySupportsFlag, registerPluginFlags } from './variant-flags.js'
+import { registerSearchPolicies } from './search-policy-registry.js'
 import { registerFamilyInteraction } from './interaction.js'
 import { registerMctsDefault } from './mcts-registry.js'
 import { resolveVariantSync } from './resolve-frontmatter.js'
@@ -49,6 +50,7 @@ export function registerPluginFactory(family, factory) {
   if (factory.flags) registerPluginFlags(family, factory.flags)
   if (factory.interaction) registerFamilyInteraction(family, factory.interaction)
   if (factory.mcts) registerMctsDefault(family)
+  if (factory.searchPolicies) registerSearchPolicies(family, factory.searchPolicies)
 }
 
 // Register plugin-declared flags, interaction models, and MCTS defaults (static properties on factory functions)
@@ -56,6 +58,7 @@ for (const [family, factory] of Object.entries(PLUGIN_FACTORIES)) {
   if (factory.flags) registerPluginFlags(family, factory.flags)
   if (factory.interaction) registerFamilyInteraction(family, factory.interaction)
   if (factory.mcts) registerMctsDefault(family)
+  if (factory.searchPolicies) registerSearchPolicies(family, factory.searchPolicies)
 }
 
 const COMPONENT_FACTORIES = {
@@ -116,6 +119,16 @@ export function createGameForFamily(family, opts = {}) {
 
   const game = createGameFromDefinition(definition, gameOpts)
 
+  // The store keys a plugin's state by the plugin's own `sliceName`, not by the
+  // family. All six shipped plugins happen to set the two equal, which hid the
+  // fact that everything below assumed it. A plugin that names its slice
+  // anything else kept working through getLegalMoves and applyMove while
+  // getState returned undefined and loadState wrote where nothing reads - a
+  // game that looks fine until someone tries to save it.
+  const familyPlugin = game.registry.getPlugins().find(p => p.sliceName === family)
+    || game.registry.getPlugins().find(p => typeof p.getLegalMoves === 'function')
+  const sliceKey = familyPlugin?.sliceName || family
+
   return {
     getLegalMoves() {
       return game.getLegalMoves()
@@ -126,8 +139,8 @@ export function createGameForFamily(family, opts = {}) {
     },
 
     checkWin() {
-      const slice = game.getState(family)
-      const plugin = game.registry.getPlugins().find(p => p.sliceName === family)
+      const slice = game.getState(sliceKey)
+      const plugin = familyPlugin
       if (plugin && plugin.checkWin) {
         return plugin.checkWin(slice, game.store.getAll())
       }
@@ -138,14 +151,14 @@ export function createGameForFamily(family, opts = {}) {
       return {
         family,
         currentPlayer: game.currentPlayer(),
-        slice: game.getState(family),
+        slice: game.getState(sliceKey),
         players: game.store.get('__players'),
       }
     },
 
     loadState(state) {
       if (state.slice) {
-        game.store.set(family, state.slice, family)
+        game.store.set(sliceKey, state.slice, sliceKey)
       }
       if (state.players) {
         game.store.set('__players', state.players, '__players')
@@ -161,8 +174,8 @@ export function createGameForFamily(family, opts = {}) {
     },
 
     getVisibility(viewerIndex) {
-      const slice = game.getState(family)
-      const plugin = game.registry.getPlugins().find(p => p.sliceName === family)
+      const slice = game.getState(sliceKey)
+      const plugin = familyPlugin
       if (plugin && plugin.getVisibility) {
         return plugin.getVisibility(slice, game.store.getAll(), viewerIndex)
       }

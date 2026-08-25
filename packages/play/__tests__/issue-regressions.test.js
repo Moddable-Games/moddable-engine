@@ -5,7 +5,8 @@ import { listVariants } from '../src/variant-registry.js'
 import { defaultSeatFor } from '../src/default-seat.js'
 import { renderFromEngine, buildPieceImages } from '../../render/src/render-engine.js'
 import { stateFromResolved, buildResolvedFromState } from '../../../js/create-state.js'
-import { readFileSync } from 'fs'
+import { readFileSync, readdirSync } from 'fs'
+import { join } from 'path'
 import '../test-helpers/setup-rules-reader.js'
 
 const GALLERY_PATH = 'pieces/gallery-index.json'
@@ -179,29 +180,114 @@ describe('#124 — flags only offered on families that consume them', () => {
   })
 })
 
+// The river marker is the only <text> the renderer emits in serif; coordinate
+// labels are monospace. The original version of these tests counted every
+// <text> element on the board and recomputed the expected y from cellSize and
+// an assumed inset. Both were proxies, and both broke the moment the xiangqi
+// rulebook declared `render.labels: true`: 19 coordinate labels appeared, and
+// the label pad shifted the whole grid down by 24px so the recomputed y was
+// 184.9 against a correct 208.9. The render was right the entire time. Two
+// tests sat red on dev looking like #125 had reopened.
+//
+// These assert the invariant #125 is actually about - the marker sits in the
+// river - and measure the river from the board the renderer drew rather than
+// duplicating its arithmetic, so padding, cell size and labels cannot break
+// them again.
+function riverTexts(svg) {
+  return [...svg.matchAll(/<text[^>]*font-family="serif"[^>]*>([^<]*)</g)]
+    .map(m => m[0])
+}
+
+function gridRowYs(svg) {
+  const horizontal = [...svg.matchAll(/<line[^>]*y1="([\d.]+)"[^>]*y2="([\d.]+)"/g)]
+    .filter(m => m[1] === m[2])
+    .map(m => parseFloat(m[1]))
+  return [...new Set(horizontal)].sort((a, b) => a - b)
+}
+
 describe('#125 — river text placement', () => {
-  test('standard xiangqi has 2 text elements at y=184.9 (river centre)', () => {
+  test('standard xiangqi puts both river markers in the river', () => {
     const resolved = resolveFromDisk('xiangqi', 'standard')
     const svg = renderFromEngine(resolved, { pieceImages: {} })
-    const textMatches = svg.match(/<text[^>]*y="([^"]+)"/g) || []
-    expect(textMatches.length).toBe(2)
-    const yValues = textMatches.map(t => parseFloat(t.match(/y="([^"]+)"/)[1]))
-    const cellSize = resolved.render?.cellSize || 36
-    const inset = cellSize / 2
-    const riverTop = 4, riverBot = 5
-    const expectedY = inset + ((riverTop + riverBot) / 2) * cellSize + Math.min(cellSize * 0.45, 14) * 0.35
-    for (const y of yValues) {
-      expect(Math.abs(y - expectedY)).toBeLessThan(1)
+
+    const markers = riverTexts(svg)
+    expect(markers).toHaveLength(2)
+
+    const rows = gridRowYs(svg)
+    expect(rows.length).toBeGreaterThanOrEqual(10)
+
+    // The river lies between the fifth and sixth rank lines.
+    const riverMid = (rows[4] + rows[5]) / 2
+    const cellSize = rows[1] - rows[0]
+    const baselineDrop = Math.min(cellSize * 0.45, 14) * 0.35
+
+    for (const marker of markers) {
+      const y = parseFloat(marker.match(/y="([\d.]+)"/)[1])
+      expect(Math.abs(y - (riverMid + baselineDrop))).toBeLessThan(0.5)
     }
   })
 
-  test('xiangqi-42 emits zero text elements', () => {
+  test('xiangqi-42 has no river, so emits no river markers', () => {
     const resolved = resolveFromDisk('xiangqi', 'xiangqi-42')
     const svg = renderFromEngine(resolved, { pieceImages: {} })
-    const textMatches = svg.match(/<text[^>]*>/g) || []
-    expect(textMatches.length).toBe(0)
+    expect(riverTexts(svg)).toHaveLength(0)
+  })
+
+  // Counting every <text> is what made the originals brittle. Assert instead
+  // that the two kinds stay distinguishable, so a future change that renders
+  // the river marker in the label font fails here rather than silently making
+  // the checks above vacuous.
+  // #125's own body listed janggi as a follow-up. Korean chess has no river,
+  // but janggi declared no render block, so it inherited the xiangqi family's
+  // split grid-lines op and 楚河漢界 decorations and was drawn as a Chinese
+  // board. No test could have discovered that fact - which games have rivers is
+  // content knowledge, not something an assertion can derive.
+  //
+  // What a test can do is make the declaration binding. `render.river: false`
+  // was accepted in frontmatter and read by nothing, so stating the fact had no
+  // effect. Now that it does, this asserts declaration and render agree across
+  // the whole family, in both directions: a board that says it has no river
+  // must not draw one, and one that says it has must.
+  test('every variant renders the river it declares', () => {
+    const rulesRoot = process.env.MODDABLE_RULES_DIR || join(process.cwd(), '..', 'moddable-rules', 'games')
+    const slugs = readdirSync(join(rulesRoot, 'xiangqi', 'content', 'variants'))
+      .filter(f => f.endsWith('.md')).map(f => f.replace(/\.md$/, ''))
+    expect(slugs.length).toBeGreaterThan(5)
+
+    const disagreements = []
+    let checked = 0
+    for (const slug of slugs) {
+      const resolved = resolveFromDisk('xiangqi', slug)
+      if (!resolved) continue
+      let svg
+      try { svg = renderFromEngine(resolved, { pieceImages: {} }) } catch { continue }
+      if (!svg) continue
+      checked++
+
+      const declaresRiver = resolved.render?.river !== false
+      const drawsRiver = riverTexts(svg).length > 0
+
+      // A variant may legitimately declare no river decorations of its own
+      // (minixiangqi, quang-trung), so only a board claiming a river and
+      // inheriting the family's markers is required to draw them.
+      const inheritsMarkers = (resolved.render?.decorations || [])
+        .some(d => d.type === 'texts' && (d.items || []).some(i => String(i.position || '').startsWith('river')))
+
+      if (!declaresRiver && drawsRiver) disagreements.push(`${slug}: river: false but markers drawn`)
+      if (declaresRiver && inheritsMarkers && !drawsRiver) disagreements.push(`${slug}: declares a river and inherits markers but draws none`)
+    }
+    expect(checked).toBeGreaterThan(5)
+    expect(disagreements).toEqual([])
+  })
+
+  test('river markers and coordinate labels use distinct fonts', () => {
+    const svg = renderFromEngine(resolveFromDisk('xiangqi', 'standard'), { pieceImages: {} })
+    const labels = [...svg.matchAll(/<text[^>]*font-family="monospace"[^>]*>/g)]
+    expect(labels.length).toBeGreaterThan(0)
+    expect(riverTexts(svg).length).toBeGreaterThan(0)
   })
 })
+
 
 describe('#126 — uniformPieces collapses vocabulary', () => {
   test('one-colour go resolves uniformPieces and board tracks two owners', () => {

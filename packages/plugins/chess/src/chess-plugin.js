@@ -1,5 +1,18 @@
+import { warnUnknownConfigKeys } from '../../../core/index.js'
 import { rider, leaper, compose, divergent, fromConfig, OFFSETS } from '../../../piece-behaviour/index.js'
 import { randomBackRank } from './variants/chess960.js'
+// Every config key this plugin reads. Exported so the corpus guard and the
+// authoring docs share one source of truth, and kept separate from `defaults`,
+// which only lists the keys that carry a default value.
+export const CONFIG_KEYS = new Set([
+  'actions', 'advancement', 'afterMove', 'castling', 'checkThreshold', 'cols', 'doubleStep',
+  'drops', 'enPassant', 'hexPawnConfig', 'initState', 'moveApply', 'moveFilter', 'noCheck',
+  'onTurnEnd', 'pawnCaptureDirections', 'pawnConfig', 'pawnMoveDirections', 'pawnStartRow',
+  'pawnType', 'placementPieces', 'playerCount', 'promotionChoices', 'promotionRow',
+  'promotionZone', 'randomSetup', 'rookType', 'rows', 'royalType', 'setup',
+  'stalemateMeaning', 'torpedo', 'turnLogic', 'visibility', 'winCondition',
+])
+
 
 function normalizePawnConfig(pc) {
   if (!pc) return pc
@@ -63,18 +76,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     ...variantConfig,
   }
 
-  const KNOWN_KEYS = new Set([
-    'setup', 'promotionChoices', 'castling', 'enPassant', 'royalType', 'pawnType',
-    'rookType', 'playerCount', 'doubleStep', 'stalemateMeaning', 'noCheck', 'drops',
-    'advancement', 'checkThreshold', 'pieces', 'vocabulary', 'extends', 'hooks',
-    'actions', 'afterMove', 'hexPawnConfig', 'initState', 'moveApply', 'moveFilter',
-    'onTurnEnd', 'pawnCaptureDirections', 'pawnConfig', 'pawnMoveDirections',
-    'pawnStartRow', 'placementPieces', 'promotionRow', 'randomSetup', 'torpedo',
-  ])
-  const unknownKeys = Object.keys(variantConfig).filter(k => !KNOWN_KEYS.has(k))
-  if (unknownKeys.length > 0) {
-    console.warn(`[chess] Unknown config keys: ${unknownKeys.join(', ')}. Check spelling.`)
-  }
+  warnUnknownConfigKeys('chess', variantConfig, CONFIG_KEYS)
 
   const pieceConfigs = { ...STANDARD_PIECES, ...config.pieces }
   const vocabulary = { ...DEFAULT_VOCABULARY, ...config.vocabulary }
@@ -1200,4 +1202,5 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
 // Static capability declarations
 createChessPlugin.flags = new Set(['drops', 'random'])
+createChessPlugin.configKeys = CONFIG_KEYS
 createChessPlugin.interaction = 'drop'

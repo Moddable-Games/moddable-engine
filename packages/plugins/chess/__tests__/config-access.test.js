@@ -45,6 +45,14 @@ const PLAY_LAYER_KEYS = new Set([
 ])
 
 describe('chess config validation (Tier 1: unknown keys)', () => {
+  // An it.each over an empty list is a pass that proves nothing. start-position-canon
+  // ran that way for weeks after #136 step 8 moved variant registration into
+  // bootstrap-plugins, and only its coverage floor made the collapse visible.
+  const VARIANT_FLOOR = 40
+  it('registry coverage meets floor', () => {
+    expect(ALL_VARIANTS.length).toBeGreaterThanOrEqual(VARIANT_FLOOR)
+  })
+
   it.each(ALL_VARIANTS)('%s: all config keys are recognized', (variantKey) => {
     const config = getVariantConfig('chess', variantKey)
     const allKeys = Object.keys(config)

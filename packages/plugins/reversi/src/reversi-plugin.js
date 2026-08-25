@@ -1,3 +1,12 @@
+import { warnUnknownConfigKeys } from '../../../core/index.js'
+// Every config key this plugin reads. Exported so the corpus guard and the
+// authoring docs share one source of truth, and kept separate from `defaults`,
+// which only lists the keys that carry a default value.
+export const CONFIG_KEYS = new Set([
+  'allowPass', 'cols', 'directions', 'mustFlip', 'passWhenNoMoves', 'playerCount', 'rows',
+  'scoreEmptyTo', 'setup', 'turnLogic', 'winBy',
+])
+
 export function createReversiPlugin(variantConfig = {}, context = {}) {
   const defaults = {
     rows: 8,
@@ -12,10 +21,7 @@ export function createReversiPlugin(variantConfig = {}, context = {}) {
 
   const config = { ...defaults, ...variantConfig }
 
-  const unknownKeys = Object.keys(variantConfig).filter(k => !(k in defaults) && k !== 'vocabulary' && k !== 'pieces' && k !== 'extends' && k !== 'hooks')
-  if (unknownKeys.length > 0) {
-    console.warn(`[reversi] Unknown config keys: ${unknownKeys.join(', ')}. Check spelling.`)
-  }
+  warnUnknownConfigKeys('reversi', variantConfig, CONFIG_KEYS)
 
   const hooks = {
     moveFilter: (moves) => moves,
@@ -233,4 +239,5 @@ export function createReversiPlugin(variantConfig = {}, context = {}) {
   }
 }
 
+createReversiPlugin.configKeys = CONFIG_KEYS
 createReversiPlugin.interaction = 'place'

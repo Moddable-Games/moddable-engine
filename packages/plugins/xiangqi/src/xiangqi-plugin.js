@@ -1,4 +1,14 @@
+import { warnUnknownConfigKeys } from '../../../core/index.js'
 import { fromConfig } from '../../../piece-behaviour/index.js'
+// Every config key this plugin reads. Exported so the corpus guard and the
+// authoring docs share one source of truth, and kept separate from `defaults`,
+// which only lists the keys that carry a default value.
+export const CONFIG_KEYS = new Set([
+  'advancement', 'cannonJumpToMove', 'cols', 'flyingGeneralRule', 'hasRiver', 'palace',
+  'passAllowed', 'pieceMoves', 'playerCount', 'promotionZone', 'river', 'rows', 'royalType',
+  'setup', 'turnLogic', 'winCondition',
+])
+
 
 export function createXiangqiPlugin(variantConfig = {}, context = {}) {
   const defaults = {
@@ -12,10 +22,7 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
 
   const config = { ...defaults, ...variantConfig }
 
-  const unknownKeys = Object.keys(variantConfig).filter(k => !(k in defaults) && k !== 'vocabulary' && k !== 'pieces' && k !== 'extends' && k !== 'hooks' && k !== 'pieceMoves' && k !== 'palace' && k !== 'river')
-  if (unknownKeys.length > 0) {
-    console.warn(`[xiangqi] Unknown config keys: ${unknownKeys.join(', ')}. Check spelling.`)
-  }
+  warnUnknownConfigKeys('xiangqi', variantConfig, CONFIG_KEYS)
 
   const palace = config.palace || {
     cols: [3, 5],
@@ -343,4 +350,5 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
   }
 }
 
+createXiangqiPlugin.configKeys = CONFIG_KEYS
 createXiangqiPlugin.interaction = 'move'

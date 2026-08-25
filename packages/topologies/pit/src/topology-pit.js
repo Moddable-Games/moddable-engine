@@ -12,7 +12,14 @@ export const schema = {
 }
 
 export function createPitTopology(config) {
-  const { pitsPerSide = config.cols || 6, players = 2, hasStores = true } = config
+  // The corpus declares this as `stores`, which is the word an author reaches
+  // for; the destructure only ever read `hasStores`, so five boards that
+  // declare themselves storeless - oware, ayo, bao, pallanguzhi and the mancala
+  // rulebook - silently got stores. Accept both, preferring the explicit one.
+  const { pitsPerSide = config.cols || 6, players = 2 } = config
+  const hasStores = config.hasStores !== undefined ? config.hasStores
+    : config.stores !== undefined ? config.stores
+    : true
   const totalPits = pitsPerSide * players
   const stores = hasStores ? players : 0
 

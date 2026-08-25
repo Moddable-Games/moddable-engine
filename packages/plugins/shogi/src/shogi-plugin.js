@@ -1,4 +1,16 @@
+import { warnUnknownConfigKeys } from '../../../core/index.js'
 import { fromConfig } from '../../../piece-behaviour/index.js'
+// Every config key this plugin reads. Exported so the corpus guard and the
+// authoring docs share one source of truth, and kept separate from `defaults`,
+// which only lists the keys that carry a default value.
+export const CONFIG_KEYS = new Set([
+  'advancement', 'afterMove', 'captureRule', 'cols', 'custodianCapture',
+  'dropCheckmateLimit', 'dropPawnFileLimit', 'drops', 'initialHands', 'moveFilter',
+  'nifuLimit', 'nifuType', 'noDropLastRank', 'noDropSecondRank', 'pieceMoves',
+  'pieceRotations', 'playerCount', 'promotionMap', 'promotionPieces', 'promotionZone',
+  'rows', 'royalType', 'setup', 'turnLogic', 'winCondition',
+])
+
 
 export function createShogiPlugin(variantConfig = {}, context = {}) {
   const defPlayers = context.definition?.players
@@ -15,10 +27,7 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
 
   const config = { ...defaults, ...variantConfig }
 
-  const unknownKeys = Object.keys(variantConfig).filter(k => !(k in defaults) && k !== 'vocabulary' && k !== 'pieces' && k !== 'extends' && k !== 'hooks' && k !== 'pieceMoves' && k !== 'initialHands' && k !== 'nifuType' && k !== 'captureRule' && k !== 'promotionPieces' && k !== 'custodianCapture')
-  if (unknownKeys.length > 0) {
-    console.warn(`[shogi] Unknown config keys: ${unknownKeys.join(', ')}. Check spelling.`)
-  }
+  warnUnknownConfigKeys('shogi', variantConfig, CONFIG_KEYS)
 
   let topology = null
 
@@ -590,4 +599,5 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
   return plugin
 }
 
+createShogiPlugin.configKeys = CONFIG_KEYS
 createShogiPlugin.interaction = 'drop'

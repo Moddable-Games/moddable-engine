@@ -1,4 +1,15 @@
+import { warnUnknownConfigKeys } from '../../../core/index.js'
 import { scoreGame } from './scoring.js'
+import { createGoPlayoutPolicy, createGoExpansionPolicy } from './playout-policy.js'
+// Every config key this plugin reads. Exported so the corpus guard and the
+// authoring docs share one source of truth, and kept separate from `defaults`,
+// which only lists the keys that carry a default value.
+export const CONFIG_KEYS = new Set([
+  'allowPass', 'autoScore', 'boardSize', 'captureTarget', 'captures', 'cols', 'evaluate',
+  'handicap', 'komi', 'playerColours', 'rows', 'scoring', 'setup', 'suicideAllowed',
+  'superko', 'turnLogic', 'winCondition',
+])
+
 
 export function createGoPlugin(variantConfig = {}, context = {}) {
   const { definition } = context
@@ -15,10 +26,7 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
 
   const config = { ...defaults, ...variantConfig }
 
-  const unknownKeys = Object.keys(variantConfig).filter(k => !(k in defaults) && k !== 'vocabulary' && k !== 'pieces' && k !== 'extends' && k !== 'hooks' && k !== 'playerColours')
-  if (unknownKeys.length > 0) {
-    console.warn(`[go] Unknown config keys: ${unknownKeys.join(', ')}. Check spelling.`)
-  }
+  warnUnknownConfigKeys('go', variantConfig, CONFIG_KEYS)
 
   const playerColours = config.playerColours || ['black', 'white']
 
@@ -373,5 +381,14 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
   }
 }
 
+// MCTS rollout and expansion policies for this family. sdk.js used to test
+// `family === 'go'` for these, which left a new territorial game no way to
+// bring its own.
+createGoPlugin.searchPolicies = ({ random } = {}) => ({
+  rolloutPolicy: createGoPlayoutPolicy(random),
+  expansionPolicy: createGoExpansionPolicy(),
+})
+
+createGoPlugin.configKeys = CONFIG_KEYS
 createGoPlugin.interaction = 'place'
 createGoPlugin.mcts = true

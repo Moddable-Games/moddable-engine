@@ -4,12 +4,14 @@ import { parseFrontmatter } from '../../schema/src/parse-frontmatter.js'
 import { listVariants, getRegisteredFamilies, getSlugForKey } from '../../play/src/variant-registry.js'
 import { createGame } from '../../play/src/sdk.js'
 
-import '../chess/index.js'
-import '../go/index.js'
-import '../draughts/index.js'
-import '../reversi/index.js'
-import '../xiangqi/index.js'
-import '../shogi/index.js'
+// bootstrap-plugins is what calls registerVariants. Importing the plugin
+// index files alone used to be enough, because plugins registered themselves
+// on import; #136 step 8 broke the play <-> plugins cycle by moving
+// registration into this composition root, and this file was left importing
+// only the plugins. The registry has been empty here ever since, which the
+// VARIANT_FLOOR guard below caught - the it.each was running over an empty
+// list, which is a pass that proves nothing.
+import '../../play/src/bootstrap-plugins.js'
 
 // The starting position for every variant is content, owned by moddable-rules,
 // and is the exact string the published board diagram is drawn from. These

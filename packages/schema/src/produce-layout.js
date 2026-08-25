@@ -76,8 +76,24 @@ function produceGridLayout(topo, colors, render) {
   return { type: 'grid', rows, cols, config: layout }
 }
 
+// `render.river: false` is how a variant says its board has no river. It was
+// accepted in frontmatter and read by nothing, so janggi - Korean chess, whose
+// file lines run unbroken and which has no 楚河漢界 inscription - inherited the
+// xiangqi family's split grid-lines op and river decorations and was drawn as a
+// Chinese board. Declaring the fact now has an effect, so a riverless variant
+// needs one line rather than a hand-copied ops override.
+function suppressRiver(render) {
+  if (render?.river !== false) return render
+  const ops = (render.ops || []).map(op =>
+    op.op === 'grid-lines' && op.split ? { ...op, split: undefined } : op)
+  const decorations = (render.decorations || []).filter(d =>
+    d.type !== 'gap' && !(d.type === 'texts' && (d.items || []).some(i => String(i.position || '').startsWith('river'))))
+  return { ...render, ops, decorations }
+}
+
 function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabels, colors, render) {
   const isIntersection = positionType === 'intersection'
+  render = suppressRiver(render)
   const inset = render.insetFactor != null ? cellSize * render.insetFactor : (render.inset != null ? render.inset : (isIntersection ? Math.round(cellSize * 0.5) : 0))
   const gridW = isIntersection ? (cols - 1) * cellSize : cols * cellSize
   const gridH = isIntersection ? (rows - 1) * cellSize : rows * cellSize
