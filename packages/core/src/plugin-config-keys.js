@@ -25,6 +25,8 @@ export const PLATFORM_KEYS = new Set([
   'unsupported',
   // read by the search and AI layer when picking an evaluator
   'evaluate',
+  // a Tier 2 JS variant definition's own flag: keep it out of the pickers.
+  'hidden',
   'handicaps',
   'interactionModel',
   'notation',

@@ -1,4 +1,5 @@
 import { interactionModelFor, availableActions } from './interaction.js'
+import { findFamilyPlugin } from './find-plugin.js'
 import { getFamilies } from './play.js'
 
 export function createGameController(game, opts = {}) {
@@ -374,12 +375,7 @@ export function createGameController(game, opts = {}) {
 
   function findPlugin() {
     if (!game.registry || !game.registry.getPlugins) return null
-    const plugins = game.registry.getPlugins()
-    if (family) {
-      const match = plugins.find(p => p.sliceName === family)
-      if (match) return match
-    }
-    return plugins[0] || null
+    return findFamilyPlugin(game.registry.getPlugins(), family)
   }
 
   function scheduleAIMove() {

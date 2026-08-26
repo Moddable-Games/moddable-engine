@@ -5,6 +5,7 @@ import { getVariantConfig, hasVariant, getSlugForKey, setVariantSources as _setV
 import { definitionFromVariant } from './variant-definition.js'
 import { parseVariantKey, applyFlags, familySupportsFlag, registerPluginFlags } from './variant-flags.js'
 import { registerSearchPolicies } from './search-policy-registry.js'
+import { findFamilyPlugin } from './find-plugin.js'
 import { registerFamilyInteraction } from './interaction.js'
 import { registerMctsDefault } from './mcts-registry.js'
 import { resolveVariantSync } from './resolve-frontmatter.js'
@@ -133,8 +134,7 @@ export function createGameForFamily(family, opts = {}) {
   // anything else kept working through getLegalMoves and applyMove while
   // getState returned undefined and loadState wrote where nothing reads - a
   // game that looks fine until someone tries to save it.
-  const familyPlugin = game.registry.getPlugins().find(p => p.sliceName === family)
-    || game.registry.getPlugins().find(p => typeof p.getLegalMoves === 'function')
+  const familyPlugin = findFamilyPlugin(game.registry.getPlugins(), family)
   const sliceKey = familyPlugin?.sliceName || family
 
   return {
@@ -169,7 +169,14 @@ export function createGameForFamily(family, opts = {}) {
         game.store.set(sliceKey, state.slice, sliceKey)
       }
       if (state.players) {
-        game.store.set('__players', state.players, '__players')
+        // Merge, do not replace. Callers routinely pass `{ currentIndex: 0 }`
+        // to set whose turn it is, and a wholesale write silently discarded
+        // `eliminated`, and now `controlledBy`, `interleavedIndex` and
+        // `lastNormalIndex` with it - leaving a player state whose fields the
+        // turn logic then reads as undefined. Same shape as an inline surface
+        // that replaced the palette instead of extending it.
+        const existing = game.store.get('__players') || {}
+        game.store.set('__players', { ...existing, ...state.players }, '__players')
       }
     },
 

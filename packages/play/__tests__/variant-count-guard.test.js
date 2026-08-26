@@ -21,8 +21,10 @@ const MINIMUM_PLAYABLE = {
   // 135 until s-chess was marked unsupported for its unimplemented gating
   // mechanic (engine#139). placement-chess and sittuyin stay in the count and
   // are now genuinely playable: they were listed here while their placement
-  // phase did nothing at all.
-  chess: 134,
+  // phase did nothing at all. 134 to 135 when djambi became playable for
+  // real: corpses, all six pieces, the centre cell and control transfer
+  // (engine#131).
+  chess: 135,
   draughts: 13,
   go: 10,
   hex: 8,

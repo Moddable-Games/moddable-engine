@@ -160,6 +160,10 @@ function everyVariant() {
 // and the engine reads neither, so the Hawk and Elephant never enter the board
 // and its defining mechanic is absent (engine#139). A floor going down should
 // always carry a reason, otherwise it stops being a floor.
+// Still 173, not 174, even though djambi joined: `rendersPieces = false` on
+// hex, mancala, morris and landlords-game excludes all four families from this
+// walk, and that flag is read by nothing else in the codebase. Raising the
+// floor cannot work until the exclusion goes.
 const VARIANT_FLOOR = 173
 
 describeWithAssets('every piece resolves to real artwork during play', () => {

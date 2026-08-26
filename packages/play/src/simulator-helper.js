@@ -1,5 +1,6 @@
 import { createSimulator, getEvaluator } from '../../ai/index.js'
 import { createGameForFamily } from './play.js'
+import { findFamilyPlugin } from './find-plugin.js'
 
 export function createSimulatorForFamily(family, state, opts = {}) {
   const game = createGameForFamily(family, {
@@ -13,7 +14,7 @@ export function createSimulatorForFamily(family, state, opts = {}) {
   }
 
   const rawGame = game.raw
-  const plugin = rawGame.registry.getPlugins().find(p => p.sliceName === family)
+  const plugin = findFamilyPlugin(rawGame.registry.getPlugins(), family)
   if (!plugin) {
     throw new Error(`Plugin "${family}" not found after game creation`)
   }

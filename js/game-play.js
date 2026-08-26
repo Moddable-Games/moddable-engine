@@ -4,7 +4,7 @@ import {
   parseUrlFlags, deriveCompatibleFlags, familySupportsFlag, serializeVariantKey,
   createAI, interactionModelFor,
   createEmbedBridge, parseEmbedParams, normaliseOutcome,
-  defaultSeatFor, boardToSetup as serialiseBoard,
+  defaultSeatFor, boardToSetup as serialiseBoard, findFamilyPlugin,
 } from '../packages/play/index.js'
 import { renderFromEngine, attachPieceImages } from '../packages/render/index.js'
 
@@ -186,7 +186,7 @@ export function createPlaySession(options = {}) {
   }
 
   function pluginFor() {
-    return game.raw.registry.getPlugins().find(p => p.sliceName === family) || null
+    return findFamilyPlugin(game.raw.registry.getPlugins(), family)
   }
 
   async function start() {

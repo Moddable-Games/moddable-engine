@@ -11,7 +11,7 @@ export const CONFIG_KEYS = new Set([
   'pawnType', 'placementDistinctColor', 'placementPieces', 'placementZone', 'playerCount',
   'promotionChoices', 'promotionRow',
   'faceoff', 'promotionZone', 'randomSetup', 'rookType', 'rows', 'royalType', 'setup',
-  'stalemateMeaning', 'torpedo', 'turnLogic', 'visibility', 'winCondition',
+  'stalemateMeaning', 'torpedo', 'turnEffects', 'turnLogic', 'visibility', 'winCondition',
 ])
 
 
@@ -788,6 +788,25 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   // hand-written winCondition; synochess simply shipped unwinnable.
   //
   // Accepts a string for the symmetric case, or a per-player list.
+  // A player moves their own pieces, and any belonging to a seat they have
+  // taken control of. Djambi's chief capture hands the dead party's surviving
+  // pieces to the killer, and the pieces keep their own owner so they keep
+  // their colour on the board.
+  function commandedSeats(full, playerIdx) {
+    const controlledBy = full?.__players?.controlledBy
+    if (!controlledBy) return null
+    const seats = [playerIdx]
+    for (const [seat, holder] of Object.entries(controlledBy)) {
+      if (Number(holder) === playerIdx) seats.push(Number(seat))
+    }
+    return seats.length > 1 ? seats : null
+  }
+
+  function movesFor(full, playerIdx) {
+    const seats = commandedSeats(full, playerIdx)
+    return seats ? (owner) => seats.includes(owner) : (owner) => owner === playerIdx
+  }
+
   function royalTypeFor(playerIdx) {
     const declared = config.royalType
     if (Array.isArray(declared)) return declared[playerIdx] ?? declared[0] ?? 'king'
@@ -873,7 +892,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     }
     const piece = getCell(slice.board, move.from)
     if (!piece) return false
-    if (piece.owner !== playerIdx) return false
+    if (!movesFor(full, playerIdx)(piece.owner)) return false
 
     const legal = getLegalMoves(slice, full)
     return legal.some(m =>
@@ -1152,11 +1171,12 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       return generatePlacementMoves(slice, playerIdx)
     }
     const allMoves = []
+    const mine = movesFor(full, playerIdx)
     const viewBoard = buildViewBoard(slice.board, playerIdx)
 
     for (const pos of allPositions()) {
       const piece = getCell(slice.board, pos)
-      if (!piece || piece.owner !== playerIdx) continue
+      if (!piece || !mine(piece.owner)) continue
       const moves = generateMovesForPiece(pos, slice, playerIdx, viewBoard)
       allMoves.push(...moves)
 
@@ -1392,6 +1412,16 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     applyMove,
     getLegalMoves,
     checkWin,
+    // Applied after every move, whether or not it ended anything: who now
+    // commands whose pieces, and who plays next. Kept out of `checkWin`, which
+    // answers only "is the game over".
+    turnEffects: config.turnEffects
+      ? (slice, full) => config.turnEffects(slice, {
+        currentPlayer: full.__players.currentIndex,
+        eliminated: full.__players.eliminated || [],
+        config,
+      })
+      : undefined,
     checkWinConditionOnly,
     getVisibility,
     positionKey,

@@ -3,6 +3,7 @@ export { createGameForFamily, getPlugin, getFamilies, hasFamily, setRulesReader,
 export { resolveVariantAsync } from './src/resolve-frontmatter.js'
 export { defaultSeatFor } from './src/default-seat.js'
 export { boardToSetup } from './src/serialise.js'
+export { findFamilyPlugin, familySliceKey } from './src/find-plugin.js'
 export { createSimulatorForFamily } from './src/simulator-helper.js'
 export { renderStateAsSvg } from './src/render-helper.js'
 

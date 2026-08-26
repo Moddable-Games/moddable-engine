@@ -36,14 +36,38 @@ export function createPipeline(registry, store, history, playerSystem, eventBus)
     const stateAfter = store.getAll()
     history.record(move, stateBefore, stateAfter)
 
+    // 5. Turn effects, then the win test.
+    //
+    // `checkWin` answers one question: is the game over. A variant may need to
+    // change who commands what, or who plays next, on a move that ends
+    // nothing - Djambi's centre cell grants its holder a turn between each of
+    // the others', and that has to be kept current every move. Folding those
+    // into `checkWin` made it return a non-null object on an ordinary move,
+    // and every caller reading `checkWin() != null` as "finished" believed it.
+    for (const plugin of plugins) {
+      if (typeof plugin.turnEffects !== 'function') continue
+      const effects = plugin.turnEffects(store.get(plugin.sliceName), store.getAll())
+      if (!effects) continue
+      if ('interleave' in effects) playerSystem.setInterleaved(effects.interleave, store)
+      if ('eliminate' in effects) {
+        playerSystem.eliminate(effects.eliminate, store)
+        if (effects.controlTo !== undefined && effects.controlTo !== null) {
+          playerSystem.setControl(effects.eliminate, effects.controlTo, store)
+        }
+      }
+    }
+
     // 5. Check win
     let winner = null
     for (const plugin of plugins) {
       if (typeof plugin.checkWin === 'function') {
         const result = plugin.checkWin(store.get(plugin.sliceName), store.getAll())
         if (result !== null && result !== undefined) {
-          if (typeof result === 'object' && 'eliminate' in result) {
+          if (typeof result === 'object' && result !== null && 'eliminate' in result) {
             playerSystem.eliminate(result.eliminate, store)
+            if (result.controlTo !== undefined && result.controlTo !== null) {
+              playerSystem.setControl(result.eliminate, result.controlTo, store)
+            }
             if (playerSystem.getActiveCount(store) === 1) {
               const players = playerSystem.getAll()
               winner = players.findIndex((_, i) => !playerSystem.isEliminated(i, store))
