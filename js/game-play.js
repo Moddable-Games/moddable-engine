@@ -10,7 +10,7 @@ import { renderFromEngine, attachPieceImages } from '../packages/render/index.js
 
 import '../packages/play/src/bootstrap-plugins.js'
 
-import { BOARD_THEMES, ANIM_THEME, CAPTURE_BURST_THEME, PIECE_STYLES, loadGalleryIndex, getGalleryIndex, loadVariantManifest, getManifestVariants, loadPlayabilityManifest, getPlayableVariants, getAllManifestVariants, PLAYABLE_FAMILIES, FAMILY_LABELS, loadRecolouredPieces } from './play-shared.js'
+import { BOARD_THEMES, ANIM_THEME, CAPTURE_BURST_THEME, PIECE_STYLES, loadGalleryIndex, getGalleryIndex, loadVariantManifest, getManifestVariants, loadPlayabilityManifest, getPlayableVariants, getAllManifestVariants, getPlayableFamilies, getFamilyLabel, loadRecolouredPieces } from './play-shared.js'
 import { createCellAddressing, createDirectAddressing } from './play-cells.js'
 import { paintHighlight, paintIndicator, paintFog, paintEffect, createOverlay } from './play-overlays.js'
 import { bindBoardInteraction } from './play-interaction.js'
@@ -1091,7 +1091,7 @@ export async function initGamePlay(container, defaults = {}) {
   container.appendChild(boardArea)
   if (!params.embed) container.appendChild(rightSidebar)
 
-  const familySelect = buildSelect(leftSidebar, 'Game', PLAYABLE_FAMILIES.map(f => ({ value: f, label: FAMILY_LABELS[f] })), family)
+  const familySelect = buildSelect(leftSidebar, 'Game', getPlayableFamilies().map(f => ({ value: f, label: getFamilyLabel(f) })), family)
   const variantSelect = buildGroupedSelect(leftSidebar, 'Variant', variantsForFamily(family), variant)
 
   const flagsContainer = document.createElement('div')

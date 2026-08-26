@@ -39,6 +39,27 @@ const MAX_PLIES = 200
 const MAX_CONTINUATION = 50
 const MAX_PLACEMENT = 100
 
+// The play page's family picker used to render a six-name literal in
+// js/play-shared.js, so hex, mancala, morris and landlords-game were playable
+// and invisible. The picker now reads the manifest, which means the manifest
+// has to carry a display name for the family as well as for the variant.
+//
+// Source of truth is the family rulebook's own frontmatter: `label` if it
+// declares one, otherwise its `title` with the shared " - Official Rulebook"
+// suffix removed, otherwise the slug humanized.
+function familyLabel(family, rulesRoot) {
+  try {
+    const text = readFileSync(join(rulesRoot, family, 'content', 'rulebook.md'), 'utf8')
+    const { meta } = parseFrontmatter(text)
+    if (meta.label) return meta.label
+    if (meta.title) {
+      const trimmed = String(meta.title).replace(/\s*[-\u2013\u2014]\s*Official Rulebook\s*$/i, '').trim()
+      if (trimmed) return trimmed
+    }
+  } catch { /* no rulebook */ }
+  return humanize(family)
+}
+
 function humanize(key) {
   return key
     .replace(/([a-z])([A-Z])/g, '$1 $2')
@@ -144,6 +165,7 @@ for (const family of FAMILIES) {
   } catch { /* no rules dir */ }
 
   let familyPlayable = 0
+  const label = familyLabel(family, RULES_ROOT)
   process.stdout.write(`${family}: ${allVariants.length} variants... `)
 
   for (const v of allVariants) {
@@ -152,6 +174,7 @@ for (const family of FAMILIES) {
 
     const entry = {
       family,
+      familyLabel: label,
       variant: v.slug || v.key,
       key: v.key,
       label: v.label === v.key ? humanize(v.key) : v.label,

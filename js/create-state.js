@@ -20,7 +20,7 @@ export function defaultState(family = 'chess') {
     slug: '',
     win: '',
     special: '',
-    topology: { type: 'grid', rows: 8, cols: 8, layout: 'cells', radius: 5, structure: 'concentric-rings', rings: 3, positions: 24, pitCols: 6 },
+    topology: { type: 'grid', rows: 8, cols: 8, layout: 'cells', radius: 5, shape: 'hexagonal', sideLength: 12, structure: 'concentric-rings', rings: 3, positions: 24, pitCols: 6 },
     render: { surface: 'wood-classic', cellColor: 'checkered', labels: true, starPoints: false, inherited: null, surfaceColors: null },
     pieceSet: '',
     pieceVocabulary: null,
@@ -111,8 +111,21 @@ function topologyFromState(state) {
     if (t.layout === 'intersections') topology.layout = 'intersections'
     if (Array.isArray(t.voids) && t.voids.length) topology.voids = t.voids
   } else if (type === 'hex') {
-    topology.radius = t.radius || 5
-    topology.shape = 'hexagonal'
+    // Hex was hexagonal-only when this was written, so the shape was a
+    // constant and the dimensions were always a radius. Rhombus and
+    // triangular boards arrived with the hex plugin, and this branch dropped
+    // their dimensions on the floor: every Hex and Y variant round-tripped
+    // through the Create page as an empty board.
+    const shape = t.shape || 'hexagonal'
+    topology.shape = shape
+    if (shape === 'rhombus') {
+      topology.rows = t.rows || 11
+      topology.cols = t.cols || 11
+    } else if (shape === 'triangular') {
+      topology.sideLength = t.sideLength || 12
+    } else {
+      topology.radius = t.radius || 5
+    }
   } else if (type === 'graph') {
     topology.structure = t.structure || 'concentric-rings'
     topology.params = { rings: t.rings || 3 }
@@ -230,6 +243,8 @@ export function stateFromResolved(resolved, family, opts = {}) {
   state.topology.layout = topo.layout === 'intersections' || topo.layout === 'cross' ? 'intersections' : 'cells'
   if (Array.isArray(topo.voids) && topo.voids.length) state.topology.voids = topo.voids
   if (topo.radius) state.topology.radius = topo.radius
+  if (topo.shape) state.topology.shape = topo.shape
+  if (topo.sideLength) state.topology.sideLength = topo.sideLength
   if (topo.structure) state.topology.structure = topo.structure
   if (topo.params?.rings) state.topology.rings = topo.params.rings
   if (topo.positions) state.topology.positions = topo.positions

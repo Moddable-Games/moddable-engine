@@ -1,6 +1,6 @@
 import { renderFromEngine, attachPieceImages, pieceIdToFenChar } from '../packages/render/index.js'
 import { parseFrontmatter, serializeFrontmatter } from '../packages/schema/index.js'
-import { PLAYABLE_FAMILIES, FAMILY_LABELS, loadPlayabilityManifest, getPlayableVariants } from './play-shared.js'
+import { getPlayableFamilies, getFamilyLabel, loadPlayabilityManifest, getPlayableVariants } from './play-shared.js'
 import { resolveVariantBoard } from './variant-frontmatter.js'
 import { defaultState, buildResolvedFromState, buildSetup, parseSetup, stateFromResolved, resolveImported, isGrid } from './create-state.js'
 import { FAMILY_RULES, defaultRuleValues, buildRulesPanel, toPluginConfig } from './create-rules.js'
@@ -634,7 +634,7 @@ function renderRules() {
   const panel = $('rules-panel')
   if (!panel) return
   const heading = $('rules-heading')
-  if (heading) heading.textContent = `${FAMILY_LABELS[state.family] || state.family} rules`
+  if (heading) heading.textContent = `${getFamilyLabel(state.family)} rules`
   buildRulesPanel(panel, state.family, state.rules, (key, value) => {
     state.rules[key] = value
     render()
@@ -647,10 +647,10 @@ function renderRules() {
 function populateTemplateFamilies() {
   const sel = $('template-family')
   if (!sel) return
-  for (const f of PLAYABLE_FAMILIES) {
+  for (const f of getPlayableFamilies()) {
     const o = document.createElement('option')
     o.value = f
-    o.textContent = FAMILY_LABELS[f] || f
+    o.textContent = getFamilyLabel(f)
     sel.appendChild(o)
   }
   sel.value = 'chess'

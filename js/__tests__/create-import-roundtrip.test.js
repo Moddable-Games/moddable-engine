@@ -4,8 +4,14 @@ import { FAMILY_RULES, toPluginConfig, defaultRuleValues } from '../create-rules
 import { readdirSync, readFileSync, existsSync } from 'fs'
 import { join } from 'path'
 
-const RULES_ROOT = join(process.cwd(), '..', 'moddable-rules', 'games')
-const PLAYABLE_FAMILIES = ['chess', 'draughts', 'go', 'reversi', 'shogi', 'xiangqi']
+const RULES_ROOT = process.env.MODDABLE_RULES_DIR || join(process.cwd(), '..', 'moddable-rules', 'games')
+
+// Read from the manifest, not restated. As a literal this named six families
+// and silently skipped every variant of the four that came after it, so the
+// round-trip it exists to prove was never run on hex, mancala, morris or
+// landlords-game.
+const MANIFEST = JSON.parse(readFileSync(join(process.cwd(), 'play', 'playability-manifest.json'), 'utf8'))
+const PLAYABLE_FAMILIES = [...new Set(MANIFEST.filter(e => e.playable).map(e => e.family))]
 
 // Keys the rules table declares for each family — these MUST round-trip.
 const MODELED_KEYS = {}

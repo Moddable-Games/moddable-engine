@@ -109,15 +109,30 @@ export function getAllManifestVariants(family) {
   return getPlayabilityManifest().filter(e => e.family === family)
 }
 
-export const PLAYABLE_FAMILIES = ['chess', 'go', 'draughts', 'xiangqi', 'shogi', 'reversi']
+// Both of these used to be literals: six family names and six labels, written
+// out here. The manifest generator was fixed to derive its family list from
+// the registered plugins after mancala's six variants shipped invisible, but
+// the page that renders the picker still read the literal, so hex, mancala,
+// morris and landlords-game were playable and absent from the dropdown. A
+// default that a new game cannot reach is the same trap as a hardcoded piece
+// map or player-name table.
+//
+// The manifest is now the single source: it carries the family display name
+// alongside each variant. Call `loadPlayabilityManifest()` before either of
+// these; both return empty until it resolves, the same contract the variant
+// helpers above already have.
+export function getPlayableFamilies() {
+  const seen = []
+  for (const entry of getPlayabilityManifest()) {
+    if (!entry.playable) continue
+    if (!seen.includes(entry.family)) seen.push(entry.family)
+  }
+  return seen
+}
 
-export const FAMILY_LABELS = {
-  chess: 'Chess',
-  go: 'Go',
-  draughts: 'Draughts',
-  xiangqi: 'Xiangqi',
-  shogi: 'Shogi',
-  reversi: 'Reversi',
+export function getFamilyLabel(family) {
+  const entry = getPlayabilityManifest().find(e => e.family === family && e.familyLabel)
+  return entry ? entry.familyLabel : family
 }
 
 export { recolourPieceSet as loadRecolouredPieces, FEN4_OWNERS } from '../packages/render/index.js'

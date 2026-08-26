@@ -1,6 +1,7 @@
 [
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "absorption",
     "key": "absorptionChess",
     "label": "Absorption Chess",
@@ -9,6 +10,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "almost-chess",
     "key": "almost-chess",
     "label": "Almost Chess",
@@ -17,6 +19,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "amazon-chess",
     "key": "amazon-chess",
     "label": "Amazon Chess",
@@ -25,6 +28,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "andernach",
     "key": "andernachChess",
     "label": "Andernach Chess",
@@ -33,6 +37,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "anti-king-chess-2",
     "key": "anti-king-chess-2",
     "label": "Anti-King Chess II",
@@ -41,6 +46,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "antichess",
     "key": "antichess",
     "label": "Antichess",
@@ -49,6 +55,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "archchess",
     "key": "archchess",
     "label": "Archchess",
@@ -57,6 +64,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "asean",
     "key": "asean",
     "label": "ASEAN Chess",
@@ -65,6 +73,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "atomic",
     "key": "atomic",
     "label": "Atomic Chess",
@@ -73,6 +82,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "avalanche",
     "key": "avalanche",
     "label": "Avalanche Chess",
@@ -81,6 +91,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "balbos-chess",
     "key": "balbos-chess",
     "label": "Balbo's Chess",
@@ -89,6 +100,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "benedict",
     "key": "benedictChess",
     "label": "Benedict Chess",
@@ -97,6 +109,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "berolina-chess",
     "key": "berolinaChess",
     "label": "Berolina Chess",
@@ -105,6 +118,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "berserk",
     "key": "berserkChess",
     "label": "Berserk Chess",
@@ -113,6 +127,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "birds-chess",
     "key": "birds-chess",
     "label": "Bird's Chess",
@@ -121,6 +136,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "breakthrough",
     "key": "breakthrough",
     "label": "Breakthrough",
@@ -129,6 +145,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "brusky",
     "key": "brusky",
     "label": "Brusky's Hexagonal Chess",
@@ -137,6 +154,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "byzantine-chess",
     "key": "byzantine-chess",
     "label": "Byzantine Chess",
@@ -145,6 +163,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "capablanca",
     "key": "capablanca",
     "label": "Capablanca Chess",
@@ -153,6 +172,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "carrera",
     "key": "carrera",
     "label": "Carrera's Chess",
@@ -161,6 +181,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "chak",
     "key": "chak",
     "label": "Chak",
@@ -169,6 +190,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "chancellor-chess",
     "key": "chancellor-chess",
     "label": "Chancellor Chess",
@@ -177,6 +199,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "chaturanga",
     "key": "chaturanga",
     "label": "Chaturanga",
@@ -185,6 +208,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "checkless",
     "key": "checklessChess",
     "label": "Checkless Chess",
@@ -193,6 +217,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "chennis",
     "key": "chennis",
     "label": "Chennis",
@@ -201,6 +226,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "chigorin",
     "key": "chigorin",
     "label": "Chigorin",
@@ -209,6 +235,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "circular-chess",
     "key": "circular-chess",
     "label": "Circular Chess",
@@ -217,6 +244,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "citadel-chess",
     "key": "citadel-chess",
     "label": "Citadel Chess",
@@ -225,6 +253,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "codrus",
     "key": "codrus",
     "label": "Codrus",
@@ -233,6 +262,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "congo",
     "key": "congo",
     "label": "Congo",
@@ -241,6 +271,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "courier",
     "key": "courier",
     "label": "Courier Chess",
@@ -249,6 +280,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "crazyhouse",
     "key": "crazyhouse",
     "label": "Crazyhouse",
@@ -257,6 +289,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "cylinder-chess",
     "key": "cylinder-chess",
     "label": "Cylinder Chess",
@@ -265,6 +298,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "cylindrical-chess",
     "key": "cylindrical-chess",
     "label": "Cylindrical Chess",
@@ -273,6 +307,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "dark-chess",
     "key": "darkChess",
     "label": "Dark Chess",
@@ -281,6 +316,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "de-vasa",
     "key": "de-vasa",
     "label": "De Vasa's Hexagonal Chess",
@@ -289,6 +325,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "diana",
     "key": "diana",
     "label": "Diana Chess",
@@ -297,6 +334,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "dice-chess",
     "key": "diceChess",
     "label": "Dice Chess",
@@ -305,6 +343,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "displacement-chess",
     "key": "displacementChess",
     "label": "Displacement Chess",
@@ -313,6 +352,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "dragon-chess",
     "key": "dragon-chess",
     "label": "Dragon Chess",
@@ -321,6 +361,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "duck-chess",
     "key": "duckChess",
     "label": "Duck Chess",
@@ -329,6 +370,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "einstein-chess",
     "key": "einsteinChess",
     "label": "Einstein Chess",
@@ -337,6 +379,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "empire",
     "key": "empire",
     "label": "Empire Chess",
@@ -345,6 +388,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "endgame-chess",
     "key": "endgame-chess",
     "label": "Endgame Chess",
@@ -353,6 +397,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "extinction",
     "key": "extinction",
     "label": "Extinction Chess",
@@ -361,6 +406,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "fanorona-chess",
     "key": "fanorona-chess",
     "label": "Fanorona Chess",
@@ -369,6 +415,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "fischer-random",
     "key": "chess960",
     "label": "Fischer Random (Chess960)",
@@ -377,6 +424,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "five-check",
     "key": "fiveCheck",
     "label": "Five-Check",
@@ -385,6 +433,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "fog-of-war",
     "key": "fogOfWar",
     "label": "Fog of War Chess",
@@ -393,6 +442,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "four-handed-chess",
     "key": "four-handed-chess",
     "label": "Four-Handed Chess (Chaturaji)",
@@ -401,6 +451,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "giveaway",
     "key": "giveaway",
     "label": "Giveaway",
@@ -409,6 +460,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "glinski",
     "key": "glinski",
     "label": "Glinski's Hexagonal Chess",
@@ -417,6 +469,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "grand",
     "key": "grand",
     "label": "Grand Chess",
@@ -425,6 +478,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "grasshopper",
     "key": "grasshopper",
     "label": "Standard Grasshopper Chess",
@@ -433,6 +487,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "grid-chess",
     "key": "gridChess",
     "label": "Grid Chess",
@@ -441,6 +496,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "gustav-iii-chess",
     "key": "gustav-iii-chess",
     "label": "Gustav III's Chess",
@@ -449,6 +505,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "half-chess",
     "key": "half-chess",
     "label": "Half Chess",
@@ -457,6 +514,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "hexapawn",
     "key": "hexapawn",
     "label": "Hexapawn",
@@ -465,6 +523,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "hole-chess",
     "key": "hole-chess",
     "label": "Hole Chess",
@@ -473,6 +532,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "hoppel-poppel",
     "key": "hoppel-poppel",
     "label": "Hoppel-Poppel",
@@ -481,6 +541,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "horde",
     "key": "horde",
     "label": "Horde Chess",
@@ -489,6 +550,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "hostage-chess",
     "key": "hostage-chess",
     "label": "Hostage Chess",
@@ -497,6 +559,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "immunization-chess",
     "key": "immunizationChess",
     "label": "Immunization Chess",
@@ -505,6 +568,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "janus",
     "key": "janus",
     "label": "Janus Chess",
@@ -513,6 +577,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "khans-chess",
     "key": "khans-chess",
     "label": "Khan's Chess",
@@ -521,6 +586,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "king-of-the-hill",
     "key": "kingOfTheHill",
     "label": "King of the Hill",
@@ -529,6 +595,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "knightmate",
     "key": "knightmate",
     "label": "Knightmate",
@@ -537,6 +604,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "kriegspiel",
     "key": "kriegspiel",
     "label": "Kriegspiel",
@@ -545,6 +613,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "legan-chess",
     "key": "leganChess",
     "label": "Legan Chess",
@@ -553,6 +622,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "los-alamos",
     "key": "los-alamos",
     "label": "Los Alamos",
@@ -561,6 +631,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "los-alamos-vierschach",
     "key": "los-alamos-vierschach",
     "label": "Los Alamos Vierschach",
@@ -569,6 +640,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "madrasi",
     "key": "madrasiChess",
     "label": "Madrasi Chess",
@@ -577,6 +649,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "maharaja",
     "key": "maharaja",
     "label": "Maharaja & Sepoys",
@@ -585,6 +658,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "makpong",
     "key": "makpong",
     "label": "Makpong",
@@ -593,6 +667,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "makruk",
     "key": "makruk",
     "label": "Makruk",
@@ -601,6 +676,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "mansindam",
     "key": "mansindam",
     "label": "Mansindam (Pantheon Tale)",
@@ -609,6 +685,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "marseillais",
     "key": "marseillais",
     "label": "Marseillais Chess",
@@ -617,6 +694,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "mccooey",
     "key": "mccooey",
     "label": "McCooey's Hexagonal Chess",
@@ -625,6 +703,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "medusa-chess",
     "key": "medusaChess",
     "label": "Medusa Chess",
@@ -633,6 +712,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "metamachy",
     "key": "metamachy",
     "label": "Metamachy",
@@ -641,6 +721,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "mini-hexchess",
     "key": "mini-hexchess",
     "label": "Mini Hexchess",
@@ -649,6 +730,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "minichess",
     "key": "minichess",
     "label": "Minichess",
@@ -657,6 +739,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "monster-chess",
     "key": "monsterChess",
     "label": "Monster Chess",
@@ -665,6 +748,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "nightrider",
     "key": "nightrider",
     "label": "Standard Nightrider Chess",
@@ -673,6 +757,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "no-castling",
     "key": "no-castling",
     "label": "No Castling Chess",
@@ -681,6 +766,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "no-retreat",
     "key": "noRetreat",
     "label": "No Retreat",
@@ -689,6 +775,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "oblong-chess",
     "key": "oblong-chess",
     "label": "Oblong Chess",
@@ -697,6 +784,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "omega-chess",
     "key": "omega-chess",
     "label": "Omega Chess",
@@ -705,6 +793,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "omnicide",
     "key": "omnicide",
     "label": "Omnicide",
@@ -713,6 +802,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "orda-chess",
     "key": "orda-chess",
     "label": "Orda Chess",
@@ -721,6 +811,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "orda-mirror",
     "key": "orda-mirror",
     "label": "Orda Mirror",
@@ -729,6 +820,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "ouk-chaktrang",
     "key": "ouk-chaktrang",
     "label": "Ouk Chaktrang (Cambodian Chess)",
@@ -737,6 +829,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "patrol",
     "key": "patrolChess",
     "label": "Patrol Chess",
@@ -745,6 +838,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "pawns-only",
     "key": "pawns-only",
     "label": "Pawns Only",
@@ -753,6 +847,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "peasants-revolt",
     "key": "peasants-revolt",
     "label": "Peasants' Revolt",
@@ -761,6 +856,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "petty",
     "key": "petty",
     "label": "Petty Chess",
@@ -769,6 +865,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "placement-chess",
     "key": "placement-chess",
     "label": "Placement Chess",
@@ -777,6 +874,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "pocket-knight",
     "key": "pocket-knight",
     "label": "Pocket Knight Chess",
@@ -785,6 +883,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "poison-chess",
     "key": "poisonChess",
     "label": "Poison Chess",
@@ -793,6 +892,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "progressive",
     "key": "progressive",
     "label": "Progressive",
@@ -801,6 +901,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "progressive-italian",
     "key": "progressive-italian",
     "label": "Progressive Italian",
@@ -809,6 +910,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "racing-kings",
     "key": "racingKings",
     "label": "Racing Kings",
@@ -817,6 +919,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "recruitment-chess",
     "key": "recruitmentChess",
     "label": "Recruitment Chess",
@@ -825,6 +928,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "rifle",
     "key": "rifle",
     "label": "Rifle Chess",
@@ -833,6 +937,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "rollerball",
     "key": "rollerball",
     "label": "Rollerball",
@@ -841,14 +946,7 @@
   },
   {
     "family": "chess",
-    "variant": "s-chess",
-    "key": "s-chess",
-    "label": "S-Chess (Seirawan Chess)",
-    "group": "Other",
-    "playable": true
-  },
-  {
-    "family": "chess",
+    "familyLabel": "Chess",
     "variant": "senterej",
     "key": "senterej",
     "label": "Senterej",
@@ -857,6 +955,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "shafran",
     "key": "shafran",
     "label": "Shafran's Hexagonal Chess",
@@ -865,6 +964,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "shako",
     "key": "shako",
     "label": "Shako",
@@ -873,6 +973,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "shatar",
     "key": "shatar",
     "label": "Shatar",
@@ -881,6 +982,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "shatranj",
     "key": "shatranj",
     "label": "Shatranj",
@@ -889,6 +991,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "shatranj-kamil",
     "key": "shatranj-kamil",
     "label": "Shatranj Kamil",
@@ -897,6 +1000,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "shinobi",
     "key": "shinobi",
     "label": "Shinobi Chess",
@@ -905,6 +1009,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "shinobiplus",
     "key": "shinobiplus",
     "label": "Shinobi+",
@@ -913,6 +1018,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "shogun",
     "key": "shogun",
     "label": "Shogun Chess",
@@ -921,6 +1027,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "single-check",
     "key": "singleCheck",
     "label": "Single-Check",
@@ -929,6 +1036,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "sittuyin",
     "key": "sittuyin",
     "label": "Sittuyin",
@@ -937,6 +1045,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "spartan",
     "key": "spartan",
     "label": "Spartan Chess",
@@ -945,6 +1054,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "stalemate-wins",
     "key": "stalemate-wins",
     "label": "Stalemate Wins",
@@ -953,6 +1063,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "standard",
     "key": "standard",
     "label": "Standard Chess",
@@ -961,6 +1072,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "suicide-chess",
     "key": "suicideChess",
     "label": "Suicide Chess",
@@ -969,6 +1081,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "synochess",
     "key": "synochess",
     "label": "Synochess",
@@ -977,6 +1090,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "tamerlane",
     "key": "tamerlane",
     "label": "Tamerlane Chess",
@@ -985,6 +1099,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "teleport-chess",
     "key": "teleportChess",
     "label": "Teleportation Chess",
@@ -993,6 +1108,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "three-check",
     "key": "threeCheck",
     "label": "Three-Check",
@@ -1001,6 +1117,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "toroidal-byzantine",
     "key": "toroidal-byzantine",
     "label": "Toroidal Byzantine Chess",
@@ -1009,6 +1126,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "toroidal-chess",
     "key": "toroidal-chess",
     "label": "Gadsden's Toroidal Chess",
@@ -1017,6 +1135,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "torpedo",
     "key": "torpedo",
     "label": "Torpedo Chess",
@@ -1025,6 +1144,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "turkish-great-chess-ii",
     "key": "turkish-great-chess-ii",
     "label": "Turkish Great Chess II (Atranj)",
@@ -1033,6 +1153,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "turkish-great-chess-iii",
     "key": "turkish-great-chess-iii",
     "label": "Turkish Great Chess III",
@@ -1041,6 +1162,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "turkish-great-chess-iv",
     "key": "turkish-great-chess-iv",
     "label": "Turkish Great Chess IV",
@@ -1049,6 +1171,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "upside-down",
     "key": "upside-down",
     "label": "Upside-Down",
@@ -1057,6 +1180,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "vierschach",
     "key": "vierschach",
     "label": "Vierschach",
@@ -1065,6 +1189,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "weak",
     "key": "weakChess",
     "label": "Weak!",
@@ -1073,6 +1198,7 @@
   },
   {
     "family": "chess",
+    "familyLabel": "Chess",
     "variant": "wildebeest",
     "key": "wildebeest",
     "label": "Standard Wildebeest Chess",
@@ -1081,6 +1207,7 @@
   },
   {
     "family": "draughts",
+    "familyLabel": "Draughts",
     "variant": "brazilian",
     "key": "brazilian",
     "label": "Brazilian Draughts",
@@ -1089,6 +1216,7 @@
   },
   {
     "family": "draughts",
+    "familyLabel": "Draughts",
     "variant": "canadian",
     "key": "canadian",
     "label": "Canadian Draughts",
@@ -1097,6 +1225,7 @@
   },
   {
     "family": "draughts",
+    "familyLabel": "Draughts",
     "variant": "czech",
     "key": "czech",
     "label": "Czech Draughts",
@@ -1105,6 +1234,7 @@
   },
   {
     "family": "draughts",
+    "familyLabel": "Draughts",
     "variant": "english",
     "key": "english",
     "label": "English Draughts",
@@ -1113,6 +1243,7 @@
   },
   {
     "family": "draughts",
+    "familyLabel": "Draughts",
     "variant": "german",
     "key": "german",
     "label": "German Draughts",
@@ -1121,6 +1252,7 @@
   },
   {
     "family": "draughts",
+    "familyLabel": "Draughts",
     "variant": "ghanaian",
     "key": "ghanaian",
     "label": "Ghanaian Draughts",
@@ -1129,6 +1261,7 @@
   },
   {
     "family": "draughts",
+    "familyLabel": "Draughts",
     "variant": "international",
     "key": "international",
     "label": "International Draughts",
@@ -1137,6 +1270,7 @@
   },
   {
     "family": "draughts",
+    "familyLabel": "Draughts",
     "variant": "italian",
     "key": "italian",
     "label": "Italian Draughts",
@@ -1145,6 +1279,7 @@
   },
   {
     "family": "draughts",
+    "familyLabel": "Draughts",
     "variant": "pool",
     "key": "pool",
     "label": "Pool Checkers",
@@ -1153,6 +1288,7 @@
   },
   {
     "family": "draughts",
+    "familyLabel": "Draughts",
     "variant": "russian",
     "key": "russian",
     "label": "Russian Draughts",
@@ -1161,6 +1297,7 @@
   },
   {
     "family": "draughts",
+    "familyLabel": "Draughts",
     "variant": "spanish",
     "key": "spanish",
     "label": "Spanish Draughts",
@@ -1169,6 +1306,7 @@
   },
   {
     "family": "draughts",
+    "familyLabel": "Draughts",
     "variant": "spantsiretti",
     "key": "spantsiretti",
     "label": "Spantsiretti",
@@ -1177,6 +1315,7 @@
   },
   {
     "family": "draughts",
+    "familyLabel": "Draughts",
     "variant": "turkish-draughts",
     "key": "turkish-draughts",
     "label": "Turkish Draughts",
@@ -1185,6 +1324,7 @@
   },
   {
     "family": "go",
+    "familyLabel": "Go",
     "variant": "13x13",
     "key": "13x13",
     "label": "13×13 Go",
@@ -1193,6 +1333,7 @@
   },
   {
     "family": "go",
+    "familyLabel": "Go",
     "variant": "9x9",
     "key": "9x9",
     "label": "9×9 Go",
@@ -1201,6 +1342,7 @@
   },
   {
     "family": "go",
+    "familyLabel": "Go",
     "variant": "capture-go",
     "key": "capture-go",
     "label": "Capture Go",
@@ -1209,6 +1351,7 @@
   },
   {
     "family": "go",
+    "familyLabel": "Go",
     "variant": "gomoku",
     "key": "gomoku",
     "label": "Gomoku",
@@ -1217,6 +1360,7 @@
   },
   {
     "family": "go",
+    "familyLabel": "Go",
     "variant": "ninuki-renju",
     "key": "ninuki-renju",
     "label": "Ninuki-Renju",
@@ -1225,6 +1369,7 @@
   },
   {
     "family": "go",
+    "familyLabel": "Go",
     "variant": "one-colour",
     "key": "one-colour",
     "label": "One-Colour Go",
@@ -1233,6 +1378,7 @@
   },
   {
     "family": "go",
+    "familyLabel": "Go",
     "variant": "renju",
     "key": "renju",
     "label": "Renju",
@@ -1241,6 +1387,7 @@
   },
   {
     "family": "go",
+    "familyLabel": "Go",
     "variant": "standard",
     "key": "standard",
     "label": "Standard Go (19×19)",
@@ -1249,6 +1396,7 @@
   },
   {
     "family": "go",
+    "familyLabel": "Go",
     "variant": "stoical",
     "key": "stoical",
     "label": "Stoical Go",
@@ -1257,6 +1405,7 @@
   },
   {
     "family": "go",
+    "familyLabel": "Go",
     "variant": "toroidal-go",
     "key": "toroidal-go",
     "label": "Toroidal Go",
@@ -1265,6 +1414,7 @@
   },
   {
     "family": "hex",
+    "familyLabel": "Hex",
     "variant": "13x13",
     "key": "13x13",
     "label": "Hex (13×13)",
@@ -1273,6 +1423,7 @@
   },
   {
     "family": "hex",
+    "familyLabel": "Hex",
     "variant": "14x14",
     "key": "14x14",
     "label": "Hex (14×14)",
@@ -1281,6 +1432,7 @@
   },
   {
     "family": "hex",
+    "familyLabel": "Hex",
     "variant": "19x19",
     "key": "19x19",
     "label": "Hex (19×19)",
@@ -1289,6 +1441,7 @@
   },
   {
     "family": "hex",
+    "familyLabel": "Hex",
     "variant": "9x9",
     "key": "9x9",
     "label": "Hex (9×9)",
@@ -1297,6 +1450,7 @@
   },
   {
     "family": "hex",
+    "familyLabel": "Hex",
     "variant": "standard",
     "key": "standard",
     "label": "Hex (11×11)",
@@ -1305,6 +1459,7 @@
   },
   {
     "family": "hex",
+    "familyLabel": "Hex",
     "variant": "y-game",
     "key": "y-game",
     "label": "Y",
@@ -1313,6 +1468,7 @@
   },
   {
     "family": "hex",
+    "familyLabel": "Hex",
     "variant": "y-large",
     "key": "y-large",
     "label": "Y (Large — 15)",
@@ -1321,6 +1477,7 @@
   },
   {
     "family": "hex",
+    "familyLabel": "Hex",
     "variant": "y-small",
     "key": "y-small",
     "label": "Y (Small — 9)",
@@ -1329,6 +1486,7 @@
   },
   {
     "family": "landlords-game",
+    "familyLabel": "The Landlord's Game",
     "variant": "1904-original",
     "key": "1904-original",
     "label": "1904 Original",
@@ -1337,6 +1495,7 @@
   },
   {
     "family": "mancala",
+    "familyLabel": "Mancala",
     "variant": "ayo",
     "key": "ayo",
     "label": "Ayo",
@@ -1345,6 +1504,7 @@
   },
   {
     "family": "mancala",
+    "familyLabel": "Mancala",
     "variant": "congkak",
     "key": "congkak",
     "label": "Congkak",
@@ -1353,6 +1513,7 @@
   },
   {
     "family": "mancala",
+    "familyLabel": "Mancala",
     "variant": "kalah",
     "key": "kalah",
     "label": "Kalah",
@@ -1361,6 +1522,7 @@
   },
   {
     "family": "mancala",
+    "familyLabel": "Mancala",
     "variant": "oware",
     "key": "oware",
     "label": "Oware",
@@ -1369,6 +1531,7 @@
   },
   {
     "family": "mancala",
+    "familyLabel": "Mancala",
     "variant": "sungka",
     "key": "sungka",
     "label": "Sungka",
@@ -1377,6 +1540,7 @@
   },
   {
     "family": "mancala",
+    "familyLabel": "Mancala",
     "variant": "toguz-korgool",
     "key": "toguz-korgool",
     "label": "Toguz Korgool",
@@ -1385,6 +1549,7 @@
   },
   {
     "family": "morris",
+    "familyLabel": "Nine Men's Morris",
     "variant": "lasker-morris",
     "key": "lasker-morris",
     "label": "Lasker Morris",
@@ -1393,6 +1558,7 @@
   },
   {
     "family": "morris",
+    "familyLabel": "Nine Men's Morris",
     "variant": "morabaraba",
     "key": "morabaraba",
     "label": "Morabaraba",
@@ -1401,6 +1567,7 @@
   },
   {
     "family": "morris",
+    "familyLabel": "Nine Men's Morris",
     "variant": "nine-mens-morris",
     "key": "nine-mens-morris",
     "label": "Nine Men's Morris",
@@ -1409,6 +1576,7 @@
   },
   {
     "family": "morris",
+    "familyLabel": "Nine Men's Morris",
     "variant": "shax",
     "key": "shax",
     "label": "Shax",
@@ -1417,6 +1585,7 @@
   },
   {
     "family": "morris",
+    "familyLabel": "Nine Men's Morris",
     "variant": "six-mens-morris",
     "key": "six-mens-morris",
     "label": "Six Men's Morris",
@@ -1425,6 +1594,7 @@
   },
   {
     "family": "morris",
+    "familyLabel": "Nine Men's Morris",
     "variant": "three-mens-morris",
     "key": "three-mens-morris",
     "label": "Three Men's Morris",
@@ -1433,6 +1603,7 @@
   },
   {
     "family": "morris",
+    "familyLabel": "Nine Men's Morris",
     "variant": "twelve-mens-morris",
     "key": "twelve-mens-morris",
     "label": "Twelve Men's Morris",
@@ -1441,6 +1612,7 @@
   },
   {
     "family": "reversi",
+    "familyLabel": "Reversi",
     "variant": "anti-reversi",
     "key": "anti-reversi",
     "label": "Anti-Reversi",
@@ -1449,6 +1621,7 @@
   },
   {
     "family": "reversi",
+    "familyLabel": "Reversi",
     "variant": "six-by-six",
     "key": "six-by-six",
     "label": "Six-by-Six Reversi",
@@ -1457,6 +1630,7 @@
   },
   {
     "family": "reversi",
+    "familyLabel": "Reversi",
     "variant": "standard",
     "key": "standard",
     "label": "Standard Reversi",
@@ -1465,6 +1639,7 @@
   },
   {
     "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "cannon-shogi",
     "key": "cannon-shogi",
     "label": "Cannon Shogi",
@@ -1473,6 +1648,7 @@
   },
   {
     "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "chu-shogi",
     "key": "chu-shogi",
     "label": "Chu Shogi",
@@ -1481,6 +1657,7 @@
   },
   {
     "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "dobutsu",
     "key": "dobutsu",
     "label": "Dobutsu Shogi",
@@ -1489,6 +1666,7 @@
   },
   {
     "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "four-player-shogi",
     "key": "four-player-shogi",
     "label": "Four Player Shogi",
@@ -1497,6 +1675,7 @@
   },
   {
     "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "gorogoro-plus",
     "key": "gorogoro-plus",
     "label": "Gorogoro+",
@@ -1505,6 +1684,7 @@
   },
   {
     "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "heian-shogi",
     "key": "heian-shogi",
     "label": "Heian Shogi",
@@ -1513,6 +1693,7 @@
   },
   {
     "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "judkins-shogi",
     "key": "judkins-shogi",
     "label": "Judkins' Shogi",
@@ -1521,6 +1702,7 @@
   },
   {
     "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "minishogi",
     "key": "minishogi",
     "label": "Minishogi",
@@ -1529,6 +1711,7 @@
   },
   {
     "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "sho-shogi",
     "key": "sho-shogi",
     "label": "Sho Shogi",
@@ -1537,6 +1720,7 @@
   },
   {
     "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "standard",
     "key": "standard",
     "label": "Standard Shogi",
@@ -1545,6 +1729,7 @@
   },
   {
     "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "tori-shogi",
     "key": "tori-shogi",
     "label": "Tori Shogi",
@@ -1553,6 +1738,7 @@
   },
   {
     "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "yari-shogi",
     "key": "yari-shogi",
     "label": "Yari Shogi",
@@ -1561,6 +1747,7 @@
   },
   {
     "family": "xiangqi",
+    "familyLabel": "Xiangqi",
     "variant": "minixiangqi",
     "key": "minixiangqi",
     "label": "Minixiangqi",
@@ -1569,6 +1756,7 @@
   },
   {
     "family": "xiangqi",
+    "familyLabel": "Xiangqi",
     "variant": "standard",
     "key": "standard",
     "label": "Standard Xiangqi",
@@ -1577,6 +1765,7 @@
   },
   {
     "family": "xiangqi",
+    "familyLabel": "Xiangqi",
     "variant": "xiangqi-42",
     "key": "xiangqi-42",
     "label": "Xiangqi 42",
