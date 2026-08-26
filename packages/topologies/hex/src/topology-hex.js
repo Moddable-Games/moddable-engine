@@ -1,3 +1,4 @@
+import { rhombusCells, triangularCells, shapeEdges } from './shapes.js'
 import { parseRankRuns } from '../../../core/index.js'
 import { HexMath } from './hex-math.js'
 export const schema = {
@@ -41,7 +42,11 @@ const DIRECTION_CATEGORIES = {
 }
 
 export function createHexTopology(config) {
-  const { radius, size, shape = 'hexagonal', orientation = 'pointy', grid } = config
+  const { radius, shape = 'hexagonal', orientation = 'pointy', grid } = config
+  // Every hex variant in the corpus writes `rows` and `cols`; the rhombus
+  // generator only ever read `size`, so those boards came out empty.
+  const size = config.size || (config.rows && config.cols ? Math.max(config.rows, config.cols) : null)
+  const sideLength = config.sideLength || null
   const cells = new Map()
 
   if (grid && Array.isArray(grid)) {
@@ -50,7 +55,9 @@ export function createHexTopology(config) {
       cells.set(key(q, r), { q, r, ring: Math.max(Math.abs(q), Math.abs(r), Math.abs(-q - r)) })
     }
   } else if (shape === 'rhombus' && size) {
-    generateRhombus(size, cells)
+    for (const c of rhombusCells(size)) cells.set(key(c.q, c.r), { ...c, ring: 0 })
+  } else if (shape === 'triangular' && sideLength) {
+    for (const c of triangularCells(sideLength)) cells.set(key(c.q, c.r), { ...c, ring: 0 })
   } else {
     generateHexGrid(radius, cells)
   }
@@ -663,6 +670,9 @@ export function createHexTopology(config) {
     radius,
     size: cells.size,
     shape,
+    // The named edges a connection game has to join. Empty for a hexagonal
+    // board, which has no two sides a player is trying to link.
+    getEdges: () => shapeEdges(shape, { size, sideLength }),
     boardSize: size || null,
     orientation,
     isValid,

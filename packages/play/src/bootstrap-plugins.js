@@ -24,6 +24,7 @@ registerVariants('shogi', {})
 registerVariants('xiangqi', {})
 registerVariants('mancala', {})
 registerVariants('morris', {})
+registerVariants('hex', {})
 
 registerEvaluator('chess', chessEvaluate)
 registerEvaluator('go', goEvaluate)

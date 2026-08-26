@@ -130,6 +130,28 @@
       }
     }
   },
+  "hex": {
+    "default": {
+      "title": "Hex (11×11)",
+      "slug": "standard",
+      "parent": "hex",
+      "engine": {
+        "topology": {
+          "type": "hex",
+          "shape": "rhombus",
+          "rows": 11,
+          "cols": 11
+        },
+        "players": [
+          "black",
+          "white"
+        ],
+        "plugins": {
+          "hex": {}
+        }
+      }
+    }
+  },
   "mancala": {
     "default": {
       "title": "Kalah",

@@ -167,7 +167,7 @@ describeWithAssets('every piece resolves to real artwork during play', () => {
   // guarding. Mancala draws seed counts and morris draws occupants of named
   // points; neither places a piece image per grid cell.
   it('skips at most the families that declare they render no pieces', () => {
-    expect([...COUNT_BASED].sort()).toEqual(['mancala', 'morris'])
+    expect([...COUNT_BASED].sort()).toEqual(['hex', 'mancala', 'morris'])
   })
 
   it.each(everyVariant())('%s/%s renders every piece after moves', (family, key) => {

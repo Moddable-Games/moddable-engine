@@ -1,3 +1,4 @@
+import { triangularCells } from '../../topologies/hex/index.js'
 import { fileLabel } from '../../core/index.js'
 // Browser consumers: js/game-play.js, js/play.js, js/boards.js, scripts/export-boards.mjs
 /**
@@ -190,7 +191,7 @@ export function renderFromEngine(resolved, opts = {}) {
   // Hex: derive grid/params from topology
   if (topo.type === 'hex' && !render._hexes) {
     if (topo.grid) render._hexes = topo.grid.map(c => Array.isArray(c) ? { q: c[0], r: c[1] } : c)
-    else if (topo.shape === 'triangular' && topo.sideLength) render._hexes = generateTriangularHexGrid(topo.sideLength)
+    else if (topo.shape === 'triangular' && topo.sideLength) render._hexes = triangularCells(topo.sideLength)
     else if ((topo.shape === 'hexagonal' || !topo.shape) && topo.radius) render._hexRadius = topo.radius
     else if (topo.shape === 'rhombus' && topo.size) {
       const hexes = []
@@ -628,14 +629,6 @@ function parsePitSetup(setup) {
     else stores.push(Number(part))
   }
   return { pits, stores }
-}
-
-function generateTriangularHexGrid(sideLength) {
-  const hexes = []
-  for (let row = 0; row < sideLength; row++) {
-    for (let i = 0; i <= row; i++) hexes.push({ q: -row + i, r: row })
-  }
-  return hexes
 }
 
 // --- Zone map builders ---

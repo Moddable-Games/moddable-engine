@@ -1264,6 +1264,70 @@
     "playable": true
   },
   {
+    "family": "hex",
+    "variant": "13x13",
+    "key": "13x13",
+    "label": "Hex (13×13)",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "hex",
+    "variant": "14x14",
+    "key": "14x14",
+    "label": "Hex (14×14)",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "hex",
+    "variant": "19x19",
+    "key": "19x19",
+    "label": "Hex (19×19)",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "hex",
+    "variant": "9x9",
+    "key": "9x9",
+    "label": "Hex (9×9)",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "hex",
+    "variant": "standard",
+    "key": "standard",
+    "label": "Hex (11×11)",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "hex",
+    "variant": "y-game",
+    "key": "y-game",
+    "label": "Y",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "hex",
+    "variant": "y-large",
+    "key": "y-large",
+    "label": "Y (Large — 15)",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "hex",
+    "variant": "y-small",
+    "key": "y-small",
+    "label": "Y (Small — 9)",
+    "group": "Other",
+    "playable": true
+  },
+  {
     "family": "mancala",
     "variant": "ayo",
     "key": "ayo",

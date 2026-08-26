@@ -21,6 +21,7 @@ const MINIMUM_PLAYABLE = {
   chess: 134,
   draughts: 13,
   go: 10,
+  hex: 8,
   mancala: 6,
   morris: 7,
   // 13 until hasami-shogi was measured capturing 11 times by displacement
