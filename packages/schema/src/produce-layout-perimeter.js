@@ -33,10 +33,30 @@ function perimeterSpaceRect(side, idx, count, cornerSize, boardW, boardH) {
   return { x: 0, y: 0, w: cellW, h: cellH }
 }
 
+// Each historical edition of the game was printed differently: the patent
+// drawing puts its corners in circular medallions, the 1906 board splits its
+// corner squares diagonally, the 1932 board uses pie wedges and coloured
+// stripes. Those are three drawing styles, and they used to be selected by
+// twelve `style === 'medallion'` tests inside this file - a layout
+// producer that is not supposed to know one game from another, holding the
+// slugs of three specific editions.
+//
+// The style is now a property of the board, declared alongside the spaces it
+// applies to, so a new edition picks one without touching this file. Boards
+// that declare nothing get the plain style, which is what a board with no
+// special printing should look like.
+const PERIMETER_STYLES = new Set(['medallion', 'split-corner', 'stripe', 'plain'])
+
+function perimeterStyle(board) {
+  const declared = board && board.style
+  return PERIMETER_STYLES.has(declared) ? declared : 'plain'
+}
+
 export function perimeterOps(colors, render) {
   const variant = render._board || '1904-patent'
   const boardData = render._boardData || null
   const board = boardData ? boardData.boards[variant] : null
+  const style = perimeterStyle(board)
 
   const els = []
   const el = (tag, attrs, text) => els.push({ op: 'element', tag, attrs, text })
@@ -84,9 +104,9 @@ export function perimeterOps(colors, render) {
     const cornerFill = isGoToJail && theme['go-to-jail'] ? theme['go-to-jail'] : theme.corner
     el('rect', { x, y, width: size, height: size, fill: cornerFill, stroke: theme['corner-stroke'], 'stroke-width': 1.5, class: 'board-cell', 'data-sq': `pos-${space.pos}`, 'data-type': 'corner' })
 
-    if (variant === '1904-patent') {
+    if (style === 'medallion') {
       // medallion rendered in second pass (after track cells) so it overlaps
-    } else if (variant === '1906-egc' && space.split) {
+    } else if (style === 'split-corner' && space.split) {
       const sp = space.split
       const spColor = theme[sp.type] || theme.corner
       const mainColor = theme.corner
@@ -112,7 +132,7 @@ export function perimeterOps(colors, render) {
       }
       el('rect', { x, y, width: size, height: size, fill: 'none', stroke: theme['corner-stroke'], 'stroke-width': 1.5 })
       return
-    } else if (variant === '1932-prosperity') {
+    } else if (style === 'stripe') {
       const cx = x + size / 2, cy = y + size / 2
       const r = size * 0.42
       if (space.name === 'WAGES') {
@@ -138,7 +158,7 @@ export function perimeterOps(colors, render) {
     }
 
     const cx = x + size / 2, cy = y + size / 2
-    if (variant === '1904-patent') {
+    if (style === 'medallion') {
       // text rendered in medallion second pass
     } else {
       const lines = perimeterWrapText(space.name, 10)
@@ -160,7 +180,7 @@ export function perimeterOps(colors, render) {
     renderCorner(cornerOrder[ci], cornerPositions[ci].x, cornerPositions[ci].y, cornerSize)
   }
 
-  if (variant === '1904-patent') {
+  if (style === 'medallion') {
     for (let ci = 0; ci < 4; ci++) {
       const pos = cornerPositions[ci]
       const cx = pos.x + cornerSize / 2, cy = pos.y + cornerSize / 2
@@ -171,7 +191,7 @@ export function perimeterOps(colors, render) {
   const renderSpaceTexts = (space, textW, textH) => {
     const children = []
     const t = (attrs, content) => children.push({ tag: 'text', attrs, text: content })
-    if (variant === '1932-prosperity') {
+    if (style === 'stripe') {
       const category = board.categories?.[space.type] || ''
       const narrow = textW < textH
       const fontSize = narrow ? 5 : 6
@@ -193,7 +213,7 @@ export function perimeterOps(colors, render) {
       if (detail) {
         t({ 'text-anchor': 'middle', 'font-size': detSize, 'font-family': 'sans-serif', fill: theme.text, x: 0, y: textH * 0.39 }, detail)
       }
-    } else if (variant === '1906-egc') {
+    } else if (style === 'split-corner') {
       const narrow = textW < textH
       const fontSize = narrow ? 4.5 : 6
       const detSize = narrow ? 3.5 : 4.5
@@ -244,10 +264,10 @@ export function perimeterOps(colors, render) {
       const space = sideArr[i]
       const { x, y, w, h } = perimeterSpaceRect(side, i, sideArr.length, cornerSize, boardW, boardH)
       const typeFill = theme[space.type] || '#f0f0f0'
-      const strokeW = variant === '1904-patent' ? 1.5 : 0.75
+      const strokeW = style === 'medallion' ? 1.5 : 0.75
       el('rect', { x, y, width: w, height: h, fill: typeFill, stroke: theme['space-stroke'], 'stroke-width': strokeW, class: 'board-cell', 'data-sq': `pos-${space.pos}`, 'data-type': space.type })
 
-      if (variant === '1932-prosperity') {
+      if (style === 'stripe') {
         const stripeColor = theme[space.type + '-stripe']
         if (stripeColor) {
           const bandRatio = 0.22
@@ -264,7 +284,7 @@ export function perimeterOps(colors, render) {
     }
   }
 
-  if (variant === '1904-patent') {
+  if (style === 'medallion') {
     for (let ci = 0; ci < 4; ci++) {
       const space = cornerOrder[ci]
       const pos = cornerPositions[ci]
@@ -286,19 +306,19 @@ export function perimeterOps(colors, render) {
     }
   }
 
-  perimeterInner(el, board, cornerSize, boardW, boardH, theme, variant)
+  perimeterInner(el, board, cornerSize, boardW, boardH, theme, style)
 
   return { type: 'track', config: { style: 'perimeter', ops: els, width: boardW, height: boardH } }
 }
 
-function perimeterInner(el, board, cornerSize, boardW, boardH, theme, variant) {
+function perimeterInner(el, board, cornerSize, boardW, boardH, theme, style) {
   const innerX = cornerSize, innerY = cornerSize
   const innerW = boardW - cornerSize * 2, innerH = boardH - cornerSize * 2
   el('rect', { x: innerX, y: innerY, width: innerW, height: innerH, fill: theme['inner-bg'] })
 
   const cx = boardW / 2, cy = boardH / 2
 
-  if (variant === '1932-prosperity') {
+  if (style === 'stripe') {
     const r = innerW * 0.32
     const b = r / Math.SQRT2
     const c = r * (1 - 1 / Math.SQRT2)
@@ -374,7 +394,7 @@ function perimeterInner(el, board, cornerSize, boardW, boardH, theme, variant) {
     el('rect', { x: rightMid - boxW / 2, y: rightBoxBotY - boxH / 2, width: boxW, height: boxH, fill: '#f8f4ec', stroke: theme['space-stroke'], 'stroke-width': 0.75, rx: 1, class: 'board-cell', 'data-sq': 'inner-4', 'data-type': 'rent-fund' })
     el('text', { x: rightMid, y: rightBoxBotY - 2, 'text-anchor': 'middle', 'font-size': 3.5, 'font-family': 'sans-serif', fill: theme.text }, 'Prosperity Land')
     el('text', { x: rightMid, y: rightBoxBotY + 5, 'text-anchor': 'middle', 'font-size': 3.5, 'font-family': 'sans-serif', fill: theme.text }, 'Rent Fund')
-  } else if (variant === '1906-egc') {
+  } else if (style === 'split-corner') {
     el('text', { x: cx, y: cy - 20, 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 'bold', 'font-family': 'serif', fill: theme.text }, 'MISCELLANEOUS')
     el('text', { x: cx, y: cy + 6, 'text-anchor': 'middle', 'font-size': 9, 'font-weight': 'bold', 'font-family': 'serif', fill: theme['title-text'] }, 'PUBLIC TREASURY')
     el('text', { x: cx, y: cy + 20, 'text-anchor': 'middle', 'font-size': 5, 'font-family': 'serif', fill: theme.text }, 'MONEY DENOMINATIONS')
