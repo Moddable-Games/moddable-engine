@@ -18,6 +18,10 @@
 // of these still receives it, it simply stops being reported as a mystery.
 export const PLATFORM_KEYS = new Set([
   'defaultSeat',
+  // read by packages/schema/src/unsupported.js, not by any plugin
+  'unsupported',
+  // read by the search and AI layer when picking an evaluator
+  'evaluate',
   'handicaps',
   'interactionModel',
   'notation',

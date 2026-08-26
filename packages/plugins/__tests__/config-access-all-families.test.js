@@ -106,18 +106,13 @@ function foldedPluginConfig(family, slug) {
 // Shrink-only: fixing a variant removes its entry, and a new unclaimed key
 // fails the ratchet rather than joining the noise.
 const UNCLAIMED = {
-  'chess|approximations': 1,          // congo
-  'chess|asymmetric': 6,              // empire khans-chess shinobi shinobiplus spartan synochess
-  'chess|dual_king': 1,               // spartan - the second king is the whole variant
+  'chess|approximations': 1,          // congo - a note about which rules are simplified
   'chess|faceoff': 1,                 // synochess
-  'chess|gating': 1,                  // s-chess
-  'chess|hand': 5,                    // s-chess shinobi shinobiplus shogun synochess
-  'chess|promotion_zone': 2,          // shinobi shogun - plugin reads promotionRow
+  'chess|gating': 1,                  // s-chess - its defining mechanic, now marked unsupported
+  'chess|hand': 1,                    // s-chess - only ever a by-product of `drops`
   'chess|rendering_note': 1,          // raumschach
-  'chess|setup_phase': 1,             // placement-chess - the placement phase is the game
   'chess|setup_status': 1,            // yalta-chess
   'draughts|removeImmediately': 4,    // a default the plugin never reads
-  'draughts|unsupported': 20,         // deliberate prose in the draughts rulebook
 }
 const UNCLAIMED_CEILING = Object.values(UNCLAIMED).reduce((a, b) => a + b, 0)
 

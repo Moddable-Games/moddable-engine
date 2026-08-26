@@ -8,7 +8,8 @@ export const CONFIG_KEYS = new Set([
   'actions', 'advancement', 'afterMove', 'castling', 'checkThreshold', 'cols', 'doubleStep',
   'drops', 'enPassant', 'hexPawnConfig', 'initState', 'moveApply', 'moveFilter', 'noCheck',
   'onTurnEnd', 'pawnCaptureDirections', 'pawnConfig', 'pawnMoveDirections', 'pawnStartRow',
-  'pawnType', 'placementPieces', 'playerCount', 'promotionChoices', 'promotionRow',
+  'pawnType', 'placementDistinctColor', 'placementPieces', 'placementZone', 'playerCount',
+  'promotionChoices', 'promotionRow',
   'promotionZone', 'randomSetup', 'rookType', 'rows', 'royalType', 'setup',
   'stalemateMeaning', 'torpedo', 'turnLogic', 'visibility', 'winCondition',
 ])
@@ -251,13 +252,26 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       const defaultStart = isVertical ? (dr === -1 ? rows - 2 : 1) : (dc === -1 ? cols - 2 : 1)
       const startRow = derivedRows ? derivedRows[player] : defaultStart
       const defaultPromo = isVertical ? (dr === -1 ? 0 : rows - 1) : (dc === -1 ? 0 : cols - 1)
-      const promoRow = config.promotionRow ? config.promotionRow[player] : defaultPromo
+      // A variant may name a single promotion rank (`promotionRow`) or a band
+      // of them (`promotionZone`), the way the shogi-derived chess variants do.
+      // The zone is given from the far edge inwards and mirrored for the player
+      // moving the other way, so one declaration serves both sides.
+      const zone = config.promotionZone
+      const promoRows = zone
+        ? zone.map(r => (dr === 1 || dc === 1 ? rows - 1 - r : r))
+        : [config.promotionRow ? config.promotionRow[player] : defaultPromo]
       if (isVertical) {
         for (let c = 0; c < cols; c++) startCells[player].add(topo.toIndex(startRow, c))
-        for (let c = 0; c < cols; c++) promotionCells[player].add(topo.toIndex(promoRow, c))
+        for (const pr of promoRows) {
+          if (pr < 0 || pr >= rows) continue
+          for (let c = 0; c < cols; c++) promotionCells[player].add(topo.toIndex(pr, c))
+        }
       } else {
         for (let r = 0; r < rows; r++) startCells[player].add(topo.toIndex(r, startRow))
-        for (let r = 0; r < rows; r++) promotionCells[player].add(topo.toIndex(r, promoRow))
+        for (const pc of promoRows) {
+          if (pc < 0 || pc >= cols) continue
+          for (let r = 0; r < rows; r++) promotionCells[player].add(topo.toIndex(r, pc))
+        }
       }
       if (isVertical) {
         captureDirections[player] = [[dr, -1], [dr, 1]]
@@ -765,21 +779,46 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return false
   }
 
+  // A player with more than one royal piece - Spartan Chess gives black two
+  // kings - is only in check when every one of them is attacked. Stopping at
+  // the first royal found, as this did, meant the second king was invisible:
+  // black could be mated with a spare king standing safely beside it.
   function isInCheck(board, playerIdx) {
     const royalType = config.royalType || 'king'
-    let kingPos = null
+    const royals = []
     for (const pos of allPositions()) {
       const cell = getCell(board, pos)
-      if (cell && cell.type === royalType && cell.owner === playerIdx) {
-        kingPos = pos
-        break
-      }
+      if (cell && cell.type === royalType && cell.owner === playerIdx) royals.push(pos)
     }
-    if (kingPos === null) return false
-    return isSquareAttacked(board, kingPos, playerIdx)
+    if (royals.length === 0) return false
+    return royals.every(pos => isSquareAttacked(board, pos, playerIdx))
   }
 
   const actions = { ...(config.actions || {}) }
+  // Placement goes through the same action registry the drop rule uses. A
+  // `place` move handled by a branch of its own outside the registry fell
+  // through to the piece-move path in validateMove, which read `move.from`,
+  // found nothing there and rejected every placement.
+  if (config.placementPieces && !actions.place) {
+    actions.place = {
+      skipsCheckFilter: true,
+      generate(slice, playerIdx) {
+        if (slice.phase !== 'placement') return []
+        return generatePlacementMoves(slice, playerIdx)
+      },
+      apply(move, { board, slice, playerIdx, setCell: set }) {
+        set(board, move.to, { type: move.type, owner: playerIdx })
+        const toPlace = [slice._toPlace[0].slice(), slice._toPlace[1].slice()]
+        const index = toPlace[playerIdx].indexOf(move.type)
+        if (index >= 0) toPlace[playerIdx].splice(index, 1)
+        const done = toPlace[0].length === 0 && toPlace[1].length === 0
+        return {
+          board,
+          sliceKeys: { _toPlace: toPlace, phase: done ? 'play' : 'placement' },
+        }
+      },
+    }
+  }
   if (config.drops && !actions.drop) {
     actions.drop = {
       skipsCheckFilter: true,
@@ -833,6 +872,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
   function applyMove(move, slice, full) {
     const playerIdx = full.__players.currentIndex
+
     const board = cloneBoard(slice.board)
     const hands = slice.hands ? [slice.hands[0].slice(), slice.hands[1].slice()] : null
 
@@ -981,8 +1021,110 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     }
   }
 
+  // Which cells a player may place into during the opening phase. Defaults to
+  // their own home rank; a variant whose rule is wider - sittuyin lets a player
+  // place anywhere behind their pawns - declares `placementZone` as rows
+  // counted from its own edge. A variant that narrows the zone for one piece
+  // type - sittuyin again, whose rooks must stand on the back rank - declares
+  // an object keyed by type, with `default` covering the rest.
+  function placementRows(type) {
+    const declared = config.placementZone
+    if (!declared) return [0]
+    if (Array.isArray(declared)) return declared
+    return declared[type] || declared.default || [0]
+  }
+
+  function placementCells(slice, playerIdx, type) {
+    const rows = topology?.rows || config.rows || 8
+    const cols = topology?.cols || config.cols || 8
+    const bands = placementRows(type).map(r => (playerIdx === 0 ? rows - 1 - r : r))
+    const out = []
+    for (const row of bands) {
+      if (row < 0 || row >= rows) continue
+      for (let c = 0; c < cols; c++) {
+        const pos = topology.toIndex(row, c)
+        if (!getCell(slice.board, pos)) out.push(pos)
+      }
+    }
+    return out
+  }
+
+  // Placement Chess keeps the standard rule that a player's two bishops stand
+  // on opposite colours. `placementDistinctColor` lists the types this binds,
+  // and a square is refused when the player already has one of that type on a
+  // square of the same colour.
+  function colorOf(pos) {
+    const cols = topology?.cols || config.cols || 8
+    return (Math.trunc(pos / cols) + (pos % cols)) % 2
+  }
+
+  function occupiedColors(board, playerIdx, type) {
+    const seen = new Set()
+    for (const pos of allPositions()) {
+      const cell = getCell(board, pos)
+      if (cell && cell.owner === playerIdx && cell.type === type) seen.add(colorOf(pos))
+    }
+    return seen
+  }
+
+  // `placementPieces` set a phase and a list and was consumed by nothing, so
+  // both variants that declare it - placement-chess and sittuyin - opened
+  // straight into ordinary play with the phase still flagged and the pieces
+  // never placed.
+  // Cells a piece of this type may go on right now, given what the player has
+  // already placed.
+  function admissibleCells(board, playerIdx, type) {
+    const distinct = config.placementDistinctColor || []
+    const cells = placementCells({ board }, playerIdx, type)
+    if (!distinct.includes(type)) return cells
+    const banned = occupiedColors(board, playerIdx, type)
+    return cells.filter(pos => !banned.has(colorOf(pos)))
+  }
+
+  function generatePlacementMoves(slice, playerIdx) {
+    const waiting = slice._toPlace?.[playerIdx] || []
+    if (waiting.length === 0) return []
+    const types = [...new Set(waiting)]
+    const out = []
+    for (const type of types) {
+      for (const to of admissibleCells(slice.board, playerIdx, type)) {
+        // A placement that leaves a piece still in hand with nowhere legal to
+        // go is not a legal placement. Without this the bishop rule could fill
+        // every square of the colour the second bishop needed, and the player
+        // was left holding a piece the board had no room for.
+        if (!leavesRestPlaceable(slice, playerIdx, type, to)) continue
+        out.push({ action: 'place', type, to })
+      }
+    }
+    return out
+  }
+
+  function leavesRestPlaceable(slice, playerIdx, type, to) {
+    const waiting = slice._toPlace[playerIdx].slice()
+    const index = waiting.indexOf(type)
+    if (index >= 0) waiting.splice(index, 1)
+    if (waiting.length === 0) return true
+    const board = cloneBoard(slice.board)
+    setCell(board, to, { type, owner: playerIdx })
+    // Count what is left type by type: a type needing more squares than remain
+    // admissible to it cannot all be placed.
+    const counts = new Map()
+    for (const t of waiting) counts.set(t, (counts.get(t) || 0) + 1)
+    for (const [t, needed] of counts) {
+      if (admissibleCells(board, playerIdx, t).length < needed) return false
+    }
+    return true
+  }
+
   function getLegalMoves(slice, full) {
     const playerIdx = full.__players.currentIndex
+    // During the opening phase a player with pieces in hand places one; no
+    // other move is on offer. Falling through to ordinary moves when the
+    // placement list came back empty let a player who was stuck holding a
+    // piece start playing chess with it still in hand.
+    if (slice.phase === 'placement' && (slice._toPlace?.[playerIdx]?.length || 0) > 0) {
+      return generatePlacementMoves(slice, playerIdx)
+    }
     const allMoves = []
     const viewBoard = buildViewBoard(slice.board, playerIdx)
 
