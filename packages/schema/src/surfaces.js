@@ -5,6 +5,9 @@
  * (js/surface-resolver.js) mirrors this data — consolidate later.
  */
 
+// The palette an inline surface extends when it names no base.
+export const DEFAULT_SURFACE = 'wood-classic'
+
 export const BUILTIN_SURFACES = {
   'wood-classic': {
     name: 'wood-classic',
@@ -176,5 +179,18 @@ export function resolveSurface(ref) {
     return result
   }
 
-  return { ...ref }
+  // An inline surface declaring only the colours it cares about used to get
+  // nothing underneath it: `{ ...ref }` returned exactly what the author
+  // wrote, with no palette and none of the derived cross-topology colours. So
+  // declaring three terrain colours cost you `cell-light`, `cell-dark`,
+  // `cell-mid` and `background`, and the hex renderer's three-colour fallback
+  // put the literal string "undefined" into a third of the cells - 37 of them
+  // on the nukes board, 28 on sankaku-shogi.
+  //
+  // A partial override is an override, not a replacement. It extends the
+  // default surface, the same way `base` does explicitly.
+  const base = BUILTIN_SURFACES[DEFAULT_SURFACE]
+  const result = { ...base, ...ref }
+  result.colors = deriveCrossTopoDefaults({ ...base.colors, ...(ref.colors || {}) })
+  return result
 }
