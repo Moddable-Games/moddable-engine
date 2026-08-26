@@ -9,7 +9,9 @@
  * 5. The maze: occupancy, extra turn, militant immunity
  * 6. Control transfer (requires core change)
  *
- * Currently implements steps 1-2. playable: false until step 5.
+ * Steps 1-2 were written against `hooks.afterCapture` and a `turnLogic` the
+ * plugin declined to call above two players, so neither ran. They run now.
+ * Steps 3-6 remain; playable: false until then.
  */
 
 const MAZE_CELL = 40 // 9*4 + 4 = center of 9x9
@@ -38,10 +40,19 @@ export const djambi = {
     if (state._pendingCorpse !== undefined) {
       return moves.filter(m => m.action === 'placeCorpse')
     }
-    // Step 5: Maze occupancy — only chief may end turn on center
-    // (other pieces can pass through when empty)
     return moves.filter(m => {
       if (m.action) return true
+      const target = state.board[m.to]
+
+      // A corpse is not a capture. Ordinary generation treats any cell the
+      // mover does not own as takeable, so every piece could eat the bodies -
+      // seven of them reached the board in one playthrough and none survived
+      // to the end. Only the necromobile touches a corpse, and it moves one
+      // rather than taking it.
+      if (target && target.owner < 0) return false
+
+      // Maze occupancy: only the chief may end a turn on the centre. Others
+      // pass through it while it is empty.
       if (m.to === MAZE_CELL) {
         const piece = state.board[m.from]
         return piece && piece.type === 'chief'
@@ -50,28 +61,36 @@ export const djambi = {
     })
   },
 
+  // A kill that leaves a body to place does not end the turn. `turnLogic` used
+  // to be gated to two-player variants, so this was never called either.
   turnLogic(ctx) {
-    // Step 2: Force placement phase after a kill
     if (ctx.slice._pendingCorpse !== undefined) return true
-    // Step 5: Extra turn while chief in maze (TODO)
     return false
   },
 
-  // Step 2: Hook captures to create pending corpse placement
-  hooks: {
-    afterCapture(move, captured, { slice, board }) {
-      const mover = board[move.to]
-      if (!mover) return
-      // Chief and militant: captured piece becomes pending corpse
-      if (mover.type === 'chief' || mover.type === 'militant') {
-        slice._pendingCorpse = captured.type
-        slice._pendingCorpseOwner = captured.owner
-      }
-      // Step 3: Assassin places corpse at origin (immediate, no choice)
-      if (mover.type === 'assassin') {
-        board[move.from] = { type: 'corpse', owner: -1 }
-      }
-    },
+  // Captures go through `afterMove`, which the chess plugin actually calls.
+  // This was written as `hooks: { afterCapture }`, and the chess plugin has no
+  // hooks system at all - only the go plugin does, and its set has no
+  // afterCapture either. So the corpse rule, the whole point of the variant,
+  // was declared and read by nothing: pieces were captured and removed exactly
+  // as in ordinary chess. Playing it out, 25 of 36 pieces vanished in 24 plies
+  // and not one corpse ever reached the board.
+  afterMove(ctx) {
+    const { move, captured, board, slice } = ctx
+    if (!captured || captured.owner < 0) return
+    const mover = board[move.to]
+    if (!mover) return
+
+    // The assassin's victim drops where the assassin set out from, so the
+    // corpse placement is forced and needs no second phase.
+    if (mover.type === 'assassin') {
+      board[move.from] = { type: 'corpse', owner: -1 }
+      return
+    }
+
+    // Everyone else chooses where the body goes, which is a second phase.
+    slice._pendingCorpse = captured.type
+    slice._pendingCorpseOwner = captured.owner
   },
 
   actions: {

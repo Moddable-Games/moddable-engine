@@ -1005,9 +1005,20 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     })
     if (effects.length > 0 || slice.effects) newSlice.effects = effects
 
-    if (config.turnLogic && (config.playerCount || 2) <= 2) {
-      const opponent = 1 - playerIdx
-      const inCheck = isInCheck(board, opponent)
+    // `turnLogic` is how a variant takes another move before yielding the
+    // turn - progressive chess, marseillais, and any variant with a forced
+    // second phase. It used to be gated to two players, so a variant with more
+    // could declare it and never be called: djambi's forced corpse placement
+    // and its maze extra turn both sat behind that gate. A player count is not
+    // a reason to withhold a capability.
+    //
+    // `inCheck` is the one part that genuinely needs two players, since with
+    // more there is no single opponent to ask about. It is undefined rather
+    // than false above two, so a variant that reads it gets nothing rather
+    // than a confident wrong answer.
+    if (config.turnLogic) {
+      const twoPlayer = (config.playerCount || 2) <= 2
+      const inCheck = twoPlayer ? isInCheck(board, 1 - playerIdx) : undefined
       const movesThisTurn = (slice.movesThisTurn || 0) + 1
       const ctx = { movesThisTurn, inCheck, playerIdx, fullmoveNumber, config, slice: newSlice }
       const shouldContinue = config.turnLogic(ctx)
