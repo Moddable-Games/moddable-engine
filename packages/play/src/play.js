@@ -22,6 +22,7 @@ import { createXiangqiPlugin } from '../../plugins/xiangqi/index.js'
 import { createMancalaPlugin } from '../../plugins/mancala/index.js'
 import { createMorrisPlugin } from '../../plugins/morris/index.js'
 import { createHexPlugin } from '../../plugins/hex/index.js'
+import { createLandlordsPlugin } from '../../plugins/landlords-game/index.js'
 import { createChessPlugin } from '../../plugins/chess/index.js'
 import { createStandard52Deck } from '../../component-deck/index.js'
 import GENERATED_DEFAULTS from '../../../play/family-defaults.json' with { type: 'json' }
@@ -45,6 +46,7 @@ const PLUGIN_FACTORIES = {
   mancala: createMancalaPlugin,
   morris: createMorrisPlugin,
   hex: createHexPlugin,
+  'landlords-game': createLandlordsPlugin,
 }
 
 export function registerTopology(type, factory) {

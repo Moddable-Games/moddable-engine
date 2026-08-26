@@ -1328,6 +1328,14 @@
     "playable": true
   },
   {
+    "family": "landlords-game",
+    "variant": "1904-original",
+    "key": "1904-original",
+    "label": "1904 Original",
+    "group": "Other",
+    "playable": true
+  },
+  {
     "family": "mancala",
     "variant": "ayo",
     "key": "ayo",

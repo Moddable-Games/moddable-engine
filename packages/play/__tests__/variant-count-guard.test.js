@@ -22,6 +22,7 @@ const MINIMUM_PLAYABLE = {
   draughts: 13,
   go: 10,
   hex: 8,
+  'landlords-game': 1,
   mancala: 6,
   morris: 7,
   // 13 until hasami-shogi was measured capturing 11 times by displacement

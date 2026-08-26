@@ -738,7 +738,8 @@
           "type": "luxury",
           "side": "right",
           "price": 75,
-          "notes": "Forced payment"
+          "notes": "Forced payment | counts 100 at the end (1906 EGC rules)",
+          "endValue": 100
         },
         {
           "pos": 40,

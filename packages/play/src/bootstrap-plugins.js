@@ -25,6 +25,7 @@ registerVariants('xiangqi', {})
 registerVariants('mancala', {})
 registerVariants('morris', {})
 registerVariants('hex', {})
+registerVariants('landlords-game', {})
 
 registerEvaluator('chess', chessEvaluate)
 registerEvaluator('go', goEvaluate)

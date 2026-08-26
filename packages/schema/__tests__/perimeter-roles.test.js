@@ -1,4 +1,4 @@
-import { readFileSync, existsSync } from 'fs'
+import { readFileSync, existsSync, readdirSync } from 'fs'
 import { join } from 'path'
 import { perimeterOps } from '../src/produce-layout-perimeter.js'
 
@@ -12,15 +12,50 @@ import { perimeterOps } from '../src/produce-layout-perimeter.js'
 // This asserts the declaration reaches the drawing, so a role that is declared
 // in the wrong file, or dropped, or renamed, fails here.
 
-const DATA = join(process.cwd(), 'data', 'landlords-game-boards.json')
-const THEME = { corner: '#aaaaaa', 'go-to-jail': '#ff0000', 'corner-stroke': '#000000' }
+// Every perimeter board file, not one of them. The first version of this guard
+// read only the landlords file, and econopoly carries its own copy of the same
+// three boards. That is how the same mistake happened twice: a `role` added to
+// one copy and not the other, then a `style` added to one copy and not the
+// other, each time leaving econopoly's board rendering plain while this test
+// stayed green.
+const DATA_DIR = join(process.cwd(), 'data')
+const THEME = { corner: '#aaaaaa', 'go-to-jail': '#ff0000', 'corner-stroke': '#000000', 'lot-stripe': '#00ff00' }
 
-const boards = existsSync(DATA) ? JSON.parse(readFileSync(DATA, 'utf8')).boards : null
+const FILES = existsSync(DATA_DIR)
+  ? readdirSync(DATA_DIR).filter(f => f.endsWith('-boards.json'))
+  : []
+
+function boardsIn(file) {
+  return JSON.parse(readFileSync(join(DATA_DIR, file), 'utf8')).boards || {}
+}
+
+const boards = FILES.length ? boardsIn(FILES[0]) : null
 
 describe('perimeter boards render the roles they declare', () => {
-  it('the board data is where the renderer looks for it', () => {
-    expect(boards).not.toBeNull()
-    expect(Object.keys(boards).length).toBeGreaterThan(0)
+  it('finds every perimeter board file', () => {
+    expect(FILES.length).toBeGreaterThanOrEqual(2)
+  })
+
+  // The style selects the board art. A board that declares none renders plain,
+  // which is a silent downgrade rather than an error, so it is asserted.
+  it.each(FILES)('%s: every board declares a perimeter style', (file) => {
+    const undeclared = Object.entries(boardsIn(file))
+      .filter(([, board]) => !board.style)
+      .map(([key]) => key)
+    expect(undeclared).toEqual([])
+  })
+
+  it.each(FILES)('%s: renders every declared go-to-jail space', (file) => {
+    const all = boardsIn(file)
+    const wrong = []
+    for (const [key, board] of Object.entries(all)) {
+      const declared = (board.spaces || []).filter(
+        s => s.role === 'go-to-jail' || s.type === 'go-to-jail').length
+      const rendered = JSON.stringify(perimeterOps(THEME, { _board: key, _boardData: { boards: all } }))
+      const tinted = (rendered.match(/#ff0000/g) || []).length
+      if (declared === 0 || tinted !== declared) wrong.push(`${key}: declared ${declared}, tinted ${tinted}`)
+    }
+    expect(wrong).toEqual([])
   })
 
   // "Every declared role is tinted" is not enough on its own: when the two

@@ -22,7 +22,7 @@ import {
   listVariants,
 } from '../index.js'
 
-const EXPECTED_FAMILIES = ['chess', 'draughts', 'go', 'hex', 'mancala', 'morris', 'reversi', 'shogi', 'xiangqi']
+const EXPECTED_FAMILIES = ['chess', 'draughts', 'go', 'hex', 'landlords-game', 'mancala', 'morris', 'reversi', 'shogi', 'xiangqi']
 
 describe('SDK consumer path (no frontmatter, no variant registration)', () => {
   // Every expected family must be present. Not asserted as an exact set:

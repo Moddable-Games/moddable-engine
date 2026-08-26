@@ -152,6 +152,30 @@
       }
     }
   },
+  "landlords-game": {
+    "default": {
+      "title": "1904 Original",
+      "slug": "1904-original",
+      "parent": "landlords-game",
+      "engine": {
+        "topology": {
+          "type": "track",
+          "positions": 40
+        },
+        "players": [
+          "player1",
+          "player2"
+        ],
+        "plugins": {
+          "landlords-game": {
+            "startingCash": 500,
+            "wages": 100,
+            "circuits": 5
+          }
+        }
+      }
+    }
+  },
   "mancala": {
     "default": {
       "title": "Kalah",
