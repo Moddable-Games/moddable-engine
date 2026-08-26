@@ -136,6 +136,37 @@ describe('variant count guard (published manifest)', () => {
     }
   })
 
+  // The check above reads the source. That is not enough on its own, and there
+  // is a concrete reason to say so: probe-rng.mjs was dropped from a push, the
+  // generator could not import it and stopped running entirely, and this file
+  // kept reporting "draws no unseeded randomness" because the text still said
+  // `probePicker(`. The only thing that noticed was the freshness check, forty
+  // seconds later, failing with a module path rather than a cause.
+  //
+  // So load the thing and use it. A missing or broken picker fails here, in
+  // milliseconds, saying what is wrong.
+  it('the picker exists, and the same variant always draws the same sequence', async () => {
+    const { probePicker, seedFor } = await import('../../../scripts/lib/probe-rng.mjs')
+    expect(typeof probePicker).toBe('function')
+    expect(typeof seedFor).toBe('function')
+
+    const list = Array.from({ length: 20 }, (_, i) => i)
+    const draw = () => {
+      const pick = probePicker('chess', 'standard')
+      return Array.from({ length: 30 }, () => pick(list))
+    }
+    expect(draw()).toEqual(draw())
+
+    // ...and a different variant draws a different one, or the seed is doing
+    // nothing and every walk is the same walk.
+    const other = probePicker('chess', 'progressive')
+    const otherSeq = Array.from({ length: 30 }, () => other(list))
+    expect(otherSeq).not.toEqual(draw())
+
+    expect(seedFor('chess', 'standard')).toBe(seedFor('chess', 'standard'))
+    expect(seedFor('chess', 'standard')).not.toBe(seedFor('chess', 'progressive'))
+  })
+
   it('committed manifest is fresh (matches what gen-playability-manifest.mjs produces)', () => {
     const committed = readFileSync(MANIFEST_PATH, 'utf8').trim()
     expect(generate('fresh')).toBe(committed)
