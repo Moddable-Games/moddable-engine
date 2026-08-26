@@ -24,7 +24,7 @@
     "xiangqi": 3
   },
   "variantPluginsByFamily": {
-    "chess": 54,
+    "chess": 53,
     "draughts": 0,
     "go": 3,
     "hex": 0,
@@ -36,7 +36,7 @@
     "xiangqi": 0
   },
   "frontmatterOnlyByFamily": {
-    "chess": 80,
+    "chess": 81,
     "draughts": 13,
     "go": 7,
     "hex": 8,
