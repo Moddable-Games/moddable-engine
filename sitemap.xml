@@ -53,6 +53,10 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/families/mancala/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/families/reversi/</loc>
     <priority>0.9</priority>
   </url>
@@ -87,6 +91,10 @@
   <url>
     <loc>https://engine.moddable.games/topologies/tableau/</loc>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/docs/authoring.html</loc>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://engine.moddable.games/docs/chess.html</loc>
@@ -154,6 +162,10 @@
   </url>
   <url>
     <loc>https://engine.moddable.games/play/?game=go</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/play/?game=mancala</loc>
     <priority>0.8</priority>
   </url>
   <url>

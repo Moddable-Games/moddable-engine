@@ -1,28 +1,30 @@
 {
-  "generated": "2026-08-18",
-  "pieces": 115,
+  "generated": "2026-08-26",
+  "pieces": 117,
   "boards": 333,
   "boardFamilies": 33,
   "tiles": 8,
-  "puzzles": 1728,
+  "puzzles": 1726,
   "puzzlesByType": {
-    "standard": 1118,
+    "standard": 1116,
     "variants": 610
   },
-  "playableVariants": 176,
-  "playableFamilies": 6,
+  "playableVariants": 183,
+  "playableFamilies": 7,
   "playableByFamily": {
-    "chess": 134,
+    "chess": 135,
     "draughts": 13,
     "go": 10,
+    "mancala": 6,
     "reversi": 3,
     "shogi": 13,
     "xiangqi": 3
   },
   "variantPluginsByFamily": {
-    "chess": 53,
+    "chess": 54,
     "draughts": 0,
     "go": 3,
+    "mancala": 0,
     "reversi": 0,
     "shogi": 0,
     "xiangqi": 0
@@ -31,6 +33,7 @@
     "chess": 81,
     "draughts": 13,
     "go": 7,
+    "mancala": 6,
     "reversi": 3,
     "shogi": 13,
     "xiangqi": 3
