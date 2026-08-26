@@ -143,4 +143,3 @@ createHexPlugin.configKeys = CONFIG_KEYS
 
 // Stones sit on named hex cells rather than grid squares, so guards that place
 // one piece image per grid cell do not apply.
-createHexPlugin.rendersPieces = false

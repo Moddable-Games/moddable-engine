@@ -37,8 +37,59 @@ export function cellToSymbol(cell, vocabulary = {}) {
   return null
 }
 
+// A board whose occupied cells are all numbers is a count board. Checked by
+// shape rather than by family name, so a new sowing game needs no edit here.
+function isCountBoard(board) {
+  if (!Array.isArray(board) || board.length === 0) return false
+  let seen = 0
+  for (const cell of board) {
+    if (cell === null || cell === undefined) continue
+    if (typeof cell !== 'number') return false
+    seen++
+  }
+  return seen > 0
+}
+
+// The board is laid out as every pit, then the stores: for kalah,
+// [ ...6 pits, ...6 pits, store0, store1 ]. The corpus writes the same
+// position as "4,4,4,4,4,4;0;4,4,4,4,4,4;0", which is what the renderer parses,
+// so this is a regrouping rather than a translation.
+function pitBoardToSetup(board, slice, topo) {
+  const counts = board.map(n => Number(n) || 0)
+  const perSide = topo.cols || topo.pitsPerSide || Math.trunc(counts.length / 2)
+  if (!perSide) return counts.join(',')
+
+  const sides = Math.max(2, Math.round(counts.length / perSide) - 1 || 2)
+  const pitTotal = perSide * sides
+  const pits = counts.slice(0, pitTotal)
+  const stores = counts.slice(pitTotal)
+
+  const parts = []
+  for (let side = 0; side < sides; side++) {
+    parts.push(pits.slice(side * perSide, (side + 1) * perSide).join(','))
+    // A storeless board still writes a zero here: every setup in the corpus
+    // has the four-part shape and the parser reads a comma-free part as a
+    // store, so the position round-trips either way.
+    parts.push(String(stores[side] ?? 0))
+  }
+  return parts.join(';')
+}
+
 export function boardToSetup(slice, topo = {}, vocabulary = {}, opts = {}) {
   const board = slice.board || []
+
+  // A sowing board holds seed counts, not pieces. Running integers through FEN
+  // serialisation produced "2sS2/2sS2" - a piece letter per pit, arrived at by
+  // treating a number as a cell - and the pit renderer, handed that, drew its
+  // default empty board. Every mancala variant showed twelve empty pits on the
+  // play page while the engine had the seeds all along.
+  //
+  // The format is the one the corpus already writes:
+  //   4,4,4,4,4,4;0;4,4,4,4,4,4;0
+  if (topo.type === 'pit' || isCountBoard(board)) {
+    return pitBoardToSetup(board, slice, topo)
+  }
+
   if (!Array.isArray(board)) {
     const entries = []
     for (const [coord, cell] of Object.entries(board)) {

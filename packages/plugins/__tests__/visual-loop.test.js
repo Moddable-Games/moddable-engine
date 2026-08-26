@@ -3,6 +3,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { parseFrontmatter } from '../../schema/src/parse-frontmatter.js'
 import { buildPieceImages, renderFromEngine, attachPieceImages } from '../../render/src/render-engine.js'
+import { findFamilyPlugin } from '../../play/index.js'
 import { boardToSetup } from '../../play/src/serialise.js'
 import { listVariants, getRegisteredFamilies } from '../../play/src/variant-registry.js'
 import { createGame } from '../../play/src/sdk.js'
@@ -106,7 +107,10 @@ function setupToImageKeys(setup, vocabulary) {
 
 function playedPosition(family, key, moveCount, topo) {
   const game = createGame(family, key)
-  const plugin = game.raw.registry.getPlugins().find(p => p.sliceName === family)
+  // The landlords plugin names its slice `landlords` and its family is
+  // `landlords-game`, so a bare sliceName comparison returns undefined here
+  // exactly as it did on the play page.
+  const plugin = findFamilyPlugin(game.raw.registry.getPlugins(), family)
   let played = 0
   for (let i = 0; i < moveCount; i++) {
     const moves = game.getLegalMoves().filter(m => m.action !== 'pass' && m.action !== 'resign')
@@ -134,22 +138,17 @@ const NONDETERMINISTIC = new Set(['chess960', 'sittuyin'])
 // plugin itself. Skipping them silently on a missing `slice.board` would be
 // indistinguishable from a guard quietly ceasing to check anything, so the skip
 // is named and its size asserted below.
-function countBasedFamilies() {
-  const out = new Set()
-  for (const family of getRegisteredFamilies()) {
-    const factory = getPlugin(family)?.factory
-    if (factory && factory.rendersPieces === false) out.add(family)
-  }
-  return out
-}
-const COUNT_BASED = countBasedFamilies()
+// `rendersPieces = false` used to sit on hex, mancala, morris and
+// landlords-game, and this was the only thing in the codebase that read it. It
+// had no effect on rendering. Its sole function was to exempt those four
+// families from the one test that plays a game and checks the pieces arrived -
+// which is why all four shipped playable with empty boards. The flag is gone.
 
 function everyVariant() {
   const out = []
   for (const family of getRegisteredFamilies()) {
     for (const variant of listVariants(family)) {
       if (NONDETERMINISTIC.has(variant.key)) continue
-      if (COUNT_BASED.has(family)) continue
       out.push([family, variant.key])
     }
   }
@@ -160,22 +159,23 @@ function everyVariant() {
 // and the engine reads neither, so the Hawk and Elephant never enter the board
 // and its defining mechanic is absent (engine#139). A floor going down should
 // always carry a reason, otherwise it stops being a floor.
-// Still 173, not 174, even though djambi joined: `rendersPieces = false` on
-// hex, mancala, morris and landlords-game excludes all four families from this
-// walk, and that flag is read by nothing else in the codebase. Raising the
-// floor cannot work until the exclusion goes.
-const VARIANT_FLOOR = 173
+// 173 while four families were excluded from this walk by `rendersPieces`.
+// That flag is gone and so is the exclusion, so the floor is what the corpus
+// actually offers.
+const VARIANT_FLOOR = 195
 
 describeWithAssets('every piece resolves to real artwork during play', () => {
   it('variant coverage meets floor', () => {
     expect(everyVariant().length).toBeGreaterThanOrEqual(VARIANT_FLOOR)
   })
 
-  // A skip list that grows without anyone noticing is how a guard stops
-  // guarding. Mancala draws seed counts and morris draws occupants of named
-  // points; neither places a piece image per grid cell.
-  it('skips at most the families that declare they render no pieces', () => {
-    expect([...COUNT_BASED].sort()).toEqual(['hex', 'landlords-game', 'mancala', 'morris'])
+  // No family is skipped now. The list that used to sit here named the four
+  // that were exempt, which is how they shipped playable with empty boards.
+  it('skips no family', () => {
+    const families = new Set(everyVariant().map(([family]) => family))
+    for (const family of ['hex', 'landlords-game', 'mancala', 'morris']) {
+      expect([family, families.has(family)]).toEqual([family, true])
+    }
   })
 
   it.each(everyVariant())('%s/%s renders every piece after moves', (family, key) => {
@@ -203,13 +203,17 @@ describeWithAssets('every piece resolves to real artwork during play', () => {
     expect(occupiedCount + played).toBeGreaterThan(0)
   })
 
+  // The whole slice, not `slice.board`. A game's state need not live in a cell
+  // array: landlords keeps its tokens in `positions` and its board is forty
+  // nulls from start to finish, so a board-only comparison called a working
+  // game broken.
   it.each(everyVariant())('%s/%s changes state when a move is played', (family, key) => {
     const before = createGame(family, key)
-    const opening = JSON.stringify(before.getState().slice.board)
+    const opening = JSON.stringify(before.getState().slice)
 
     const { slice, played } = playedPosition(family, key, 2)
     expect(played).toBeGreaterThan(0)
-    expect(JSON.stringify(slice.board)).not.toBe(opening)
+    expect(JSON.stringify(slice)).not.toBe(opening)
   })
 })
 

@@ -9,7 +9,7 @@ import { fileLabel } from '../../core/index.js'
  * and produces an SVG string.
  */
 
-import { produceLayout, buildCrossMap } from '../../schema/index.js'
+import { produceLayout, buildCrossMap, pieceImageKey, symbolToPiece } from '../../schema/index.js'
 import { parseRankRuns } from '../../core/index.js'
 import { renderGridLayout } from '../../topologies/grid/index.js'
 import { renderGraphLayout } from '../../topologies/graph/index.js'
@@ -215,7 +215,7 @@ export function renderFromEngine(resolved, opts = {}) {
     if (typeof resolved.setup === 'object' && !Array.isArray(resolved.setup)) {
       render._position = resolved.setup
     } else if (typeof resolved.setup === 'string' && resolved.setup.includes(',') && resolved.setup.includes(':')) {
-      render._position = parseHexPositionString(resolved.setup)
+      render._position = parseHexPositionString(resolved.setup, resolved.vocabulary || {})
     }
   }
 
@@ -233,7 +233,7 @@ export function renderFromEngine(resolved, opts = {}) {
   }
   if (topo.type === 'graph' && resolved.setup) {
     if (typeof resolved.setup === 'string' && resolved.setup.includes(':')) {
-      render._position = parseGraphSetup(resolved.setup)
+      render._position = parseGraphSetup(resolved.setup, resolved.vocabulary || {})
     } else if (resolved.setup?.arms) {
       render._filledArms = resolved.setup.arms
     }
@@ -390,7 +390,7 @@ function parsePosition(resolved, topo) {
   }
 
   if (topo.type === 'graph' && typeof setup === 'string' && setup.includes(':')) {
-    return parseGraphSetup(setup)
+    return parseGraphSetup(setup, resolved.vocabulary || {})
   }
 
   return {}
@@ -407,12 +407,7 @@ function renderPiecesFromCells(position, cells, tileSize, opts) {
     if (!cell) continue
     const pos = { x: cell.x, y: cell.y }
     const piece = typeof raw === 'object' ? raw : { type: String(raw) }
-    const colorPrefix = (piece.owner === 0 || piece.color === 'white') ? 'w' : 'b'
-    const imageKey = (piece.type === 'stone') ? colorPrefix + 'S'
-      : (piece.type === 'man') ? colorPrefix + 'M'
-      : (piece.type === 'king') ? colorPrefix + 'K'
-      : (piece.type === 'piece') ? colorPrefix + 'P'
-      : piece.type
+    const imageKey = pieceImageKey(piece, pieceImages)
 
     if (pieceImages[imageKey]) {
       const x = pos.x - tileSize / 2, y = pos.y - tileSize / 2
@@ -587,22 +582,22 @@ function parseSfenToPosition(fen, rows, cols) {
   return position
 }
 
-function parseGraphSetup(setup) {
+function parseGraphSetup(setup, vocabulary = {}) {
   const position = {}
   for (const entry of setup.split(',')) {
     const [node, piece] = entry.trim().split(':')
-    if (node && piece) position[node] = piece
+    if (node && piece) position[node] = symbolToPiece(piece, vocabulary)
   }
   return position
 }
 
-function parseHexPositionString(setup) {
+function parseHexPositionString(setup, vocabulary = {}) {
   const position = {}
   const entries = setup.match(/-?\d+,-?\d+:[A-Za-z+]+/g)
   if (!entries) return position
   for (const entry of entries) {
     const colonIdx = entry.lastIndexOf(':')
-    position[entry.substring(0, colonIdx)] = { type: entry.substring(colonIdx + 1) }
+    position[entry.substring(0, colonIdx)] = symbolToPiece(entry.substring(colonIdx + 1), vocabulary)
   }
   return position
 }

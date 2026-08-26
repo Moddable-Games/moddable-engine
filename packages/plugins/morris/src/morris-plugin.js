@@ -251,4 +251,3 @@ createMorrisPlugin.configKeys = CONFIG_KEYS
 // A morris slice holds one occupant per named point, not pieces on a grid, so
 // guards that walk `slice.board` and match a piece image per occupied cell do
 // not apply to it.
-createMorrisPlugin.rendersPieces = false

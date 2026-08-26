@@ -7,6 +7,7 @@ export { produceLayout } from './src/produce-layout.js'
 export { resolveSurface, BUILTIN_SURFACES } from './src/surfaces.js'
 export { resolve as cascadeResolve, deepMerge, deriveDefaults } from './src/cascade-resolver.js'
 export { buildCrossMap } from './src/cross-map.js'
+export { pieceImageKey, pieceImageKeys, symbolToPiece } from './src/piece-symbols.js'
 // Node-only exports (loader, rules-dir) are in ./node.js to avoid
 // pulling node:fs/promises into browser bundles via barrel import.
 export { unsupportedVariants, unsupportedReason, unsupportedForFamily } from './src/unsupported.js'

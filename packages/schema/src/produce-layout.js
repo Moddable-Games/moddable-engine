@@ -1,3 +1,4 @@
+import { pieceImageKey } from './piece-symbols.js'
 // Browser consumers: js/boards.js (via schema loader), js/play.js, packages/render/src/render-engine.js
 /**
  * Produce layout config from resolved frontmatter.
@@ -694,8 +695,7 @@ function hexBoardOps(colors, render) {
       const [q, r] = key.split(',').map(Number)
       const p = flat ? axialToPixelFlat(q, r, size) : axialToPixelPointy(q, r, size)
       const cx = oX + p.x, cy = oY + p.y
-      const pieceId = typeof piece === 'string' ? piece : piece.type
-      const imgPath = render._pieceImages[pieceId]
+      const imgPath = render._pieceImages[pieceImageKey(piece, render._pieceImages)]
       if (imgPath) {
         const ps = size * 1.6
         pieces.push({ tag: 'image', attrs: { href: imgPath, x: (cx - ps / 2).toFixed(1), y: (cy - ps / 2).toFixed(1), width: ps.toFixed(1), height: ps.toFixed(1) } })
@@ -785,8 +785,13 @@ function producePitOps(topo, colors, render) {
     el('circle', { cx, cy, r: pitRadius, fill: colors.pit, stroke: colors['pit-stroke'], 'stroke-width': 1.5, class: 'board-cell', 'data-sq': `pit-${idx}` })
   }
 
+  // A store drew its bowl and never its contents, so a kalah store filling up
+  // through a whole game showed nothing at all.
+  const storeCountAt = (side) => (parsedSetup && parsedSetup.stores) ? (parsedSetup.stores[side] || 0) : 0
   const store = (cx, cy, sq) => {
     el('ellipse', { cx, cy, rx: storeRx, ry: storeRy, fill: colors.pit, stroke: colors['pit-stroke'], 'stroke-width': 1.5, class: 'board-cell', 'data-sq': sq })
+    const side = sq === 'store-0' ? 0 : 1
+    seeds(cx, cy, storeCountAt(side))
   }
 
   const seedCountAt = (idx) => (parsedSetup && parsedSetup.pits) ? parsedSetup.pits[idx] : seedsPerPit
@@ -953,7 +958,7 @@ function produceGraphLayout(topo, colors, render) {
 
   switch (structure) {
     case 'perimeter-cross': return { type: 'graph', config: { ops: perimeterCrossOps(size, 0, 0, colors, pointRadius, params), width: size, height: size } }
-    case 'concentric-rings': return { type: 'graph', config: { ops: concentricRingOps(size, 0, 0, colors, pointRadius, params), width: size, height: size } }
+    case 'concentric-rings': return { type: 'graph', config: { ops: concentricRingOps(size, 0, 0, colors, pointRadius, params, render), width: size, height: size } }
     case 'grid-cross': return { type: 'graph', config: { ops: gridCrossOps(size, 0, 0, colors, pointRadius, params, render), width: size, height: size } }
     case 'star': return produceStarLayout(colors, render, params)
     default: return { type: 'graph', config: { ops: [], width: size, height: size } }
@@ -1054,7 +1059,31 @@ function concentricRingPoints(ringRects, midpoints, cx, cy, rings) {
   return points
 }
 
-function concentricRingOps(size, ox, oy, colors, pointRadius, params) {
+// Pieces standing on named nodes. `gridCrossOps` had this loop; the concentric
+// rings had none at all, so every morris board drew its points and its lines
+// and nothing standing on them, however many pieces had been placed.
+function nodePieceOps(nodes, render) {
+  const position = render?._position || {}
+  const pieceImages = render?._pieceImages || {}
+  const pointRadius = render?.nodeRadius || 7
+  const pieceSize = pointRadius * 3.5
+  const pieces = []
+  for (let i = 0; i < nodes.length; i++) {
+    const piece = position[`n${i + 1}`]
+    if (!piece) continue
+    const p = typeof piece === 'object' ? piece : { type: String(piece) }
+    const href = pieceImages[pieceImageKey(p, pieceImages)]
+    if (href) {
+      pieces.push({ tag: 'image', attrs: { href, x: nodes[i].x - pieceSize / 2, y: nodes[i].y - pieceSize / 2, width: pieceSize, height: pieceSize, 'pointer-events': 'none' } })
+    } else {
+      const white = p.owner === 0 || p.color === 'white'
+      pieces.push({ tag: 'circle', attrs: { cx: nodes[i].x, cy: nodes[i].y, r: pointRadius * 1.5, fill: white ? '#f2efe6' : '#2b2622', stroke: white ? '#8a8272' : '#000', 'stroke-width': 1.5, 'pointer-events': 'none' } })
+    }
+  }
+  return { op: 'elements', items: pieces }
+}
+
+function concentricRingOps(size, ox, oy, colors, pointRadius, params, render) {
   const rings = params.rings || 3
   const diagonals = params.diagonals || false
   const midpoints = params.midpoints !== false
@@ -1095,6 +1124,7 @@ function concentricRingOps(size, ox, oy, colors, pointRadius, params) {
     { op: 'nodes', group: { fill: colors.point }, items: points,
       dot: { radius: pointRadius },
       hit: { radius: pointRadius * 2, id: (n, i) => `n${i + 1}`, dataType: 'node' } },
+    nodePieceOps(points, render),
   ]
 }
 
@@ -1203,24 +1233,7 @@ function gridCrossOps(size, ox, oy, colors, pointRadius, params, render) {
       dot: { radius: pointRadius, fill: colors.point },
       hit: { radius: pointRadius * 2, id: (n, i) => `n${i + 1}`, dataType: 'node' } },
   ]
-  const position = render._position || {}
-  const pieceImages = render._pieceImages || {}
-  const pieceSize = pointRadius * 3.5
-  const pieces = []
-  for (let i = 0; i < nodes.length; i++) {
-    const sq = `n${i + 1}`, piece = position[sq]
-    if (!piece) continue
-    const p = typeof piece === 'object' ? piece : { type: String(piece) }
-    const href = pieceImages[p.type]
-    if (href) {
-      pieces.push({ tag: 'image', attrs: { href, x: nodes[i].x - pieceSize / 2, y: nodes[i].y - pieceSize / 2, width: pieceSize, height: pieceSize, 'pointer-events': 'none' } })
-    } else {
-      const fill = p.type.includes('red') ? '#cc2222' : '#44aa44'
-      const stroke = p.type.includes('red') ? '#881111' : '#227722'
-      pieces.push({ tag: 'circle', attrs: { cx: nodes[i].x, cy: nodes[i].y, r: pointRadius * 1.5, fill, stroke, 'stroke-width': 1.5 } })
-    }
-  }
-  ops.push({ op: 'elements', items: pieces })
+  ops.push(nodePieceOps(nodes, render))
   return ops
 }
 

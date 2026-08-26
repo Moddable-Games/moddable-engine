@@ -256,4 +256,3 @@ createLandlordsPlugin.configKeys = CONFIG_KEYS
 
 // Checkers sit on numbered track spaces, and the board is drawn from the
 // perimeter board data rather than as a grid of piece images.
-createLandlordsPlugin.rendersPieces = false

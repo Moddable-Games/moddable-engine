@@ -299,5 +299,4 @@ createMancalaPlugin.interaction = 'select'
 // walk `slice.board` and match one piece image per occupied cell do not apply,
 // and would otherwise throw rather than skip. Declared here so the guard can
 // name what it is skipping instead of inferring it from a missing field.
-createMancalaPlugin.rendersPieces = false
 createMancalaPlugin.configKeys = CONFIG_KEYS
