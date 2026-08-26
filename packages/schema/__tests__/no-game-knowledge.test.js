@@ -89,12 +89,13 @@ const ALLOWLIST = new Set([
   'packages/component-deck/src/decks/standard-dice.js|standard dice',
   'packages/component-deck/src/standard-52.js|standard-52',
   'packages/render/src/render-tableau.js|standard-dice',    // deck-type fallback, engine#140
-  'packages/topologies/tableau/src/topology-tableau.js|mahjong', // prose sniff in dead parseBoard, engine#140
 ])
 
-// Shrink-only. Two of these are real leaks pending engine#140, the rest are
-// component identities. Deleting one is progress; adding one is a regression.
-const ALLOWLIST_CEILING = 14
+// Shrink-only. The remaining entries are component identities and one
+// deck-type fallback; the tableau prose sniff left with the dead board-
+// inference path in engine#140. Deleting one is progress; adding one is a
+// regression.
+const ALLOWLIST_CEILING = 13
 
 describe('no game knowledge in non-plugin packages', () => {
   // A guard that scans nothing passes. Without the corpus this test would

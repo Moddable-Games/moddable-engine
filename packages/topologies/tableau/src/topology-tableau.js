@@ -1,21 +1,6 @@
 export const schema = {
   type: 'tableau',
   required: ['layout'],
-  parseBoard(board) {
-    if (/tableau|column|cascade/i.test(board)) {
-      return { type: 'tableau', layout: 'tableau' }
-    }
-    if (/wall|mahjong/i.test(board)) {
-      return { type: 'tableau', layout: 'wall' }
-    }
-    if (/radial|table|hand/i.test(board)) {
-      return { type: 'tableau', layout: 'radial' }
-    }
-    return null
-  },
-  matchBoard(board) {
-    return /tableau|radial|wall|card\s*table|hand|column/i.test(board)
-  },
 }
 
 export function createTableauTopology(config) {

@@ -7,7 +7,9 @@ import { resolveDataUrl, loadCategoryData, loadManifest } from '../src/manifest.
 const MOCK_MANIFEST = {
   label: 'Test RPG',
   dataPath: 'games/test/data/',
-  rulesUrl: 'dist/test/',
+  // b5208f4 moved rules.moddable.games off dist/ and updated the assertions
+  // below but not this fixture, so the two halves of the test disagreed.
+  rulesUrl: 'test/',
   categories: [
     { id: 'spells', label: 'Spells', file: 'spells.json', searchFields: ['name', 'school'], color: '#7b5ea7' },
     { id: 'monsters', label: 'Monsters', file: 'monsters.json', searchFields: ['name'], color: '#c62828',
@@ -197,7 +199,7 @@ describe('link-resolver', () => {
       MOCK_MANIFEST,
       'http://localhost:8080'
     )
-    expect(link).toBe('http://localhost:8080/dist/test/monsters/dragon')
+    expect(link).toBe('http://localhost:8080/test/monsters/dragon')
   })
 })
 

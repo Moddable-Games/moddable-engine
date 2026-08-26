@@ -1,14 +1,6 @@
 export const schema = {
   type: 'pit',
   required: [],
-  parseBoard(board) {
-    const match = board.match(/(\d+)\s*[×x]\s*(\d+)/)
-    if (!match) return null
-    return { type: 'pit', cols: parseInt(match[2], 10) }
-  },
-  matchBoard(board) {
-    return /\d+\s*[×x]\s*\d+\s*pits?/i.test(board)
-  },
 }
 
 export function createPitTopology(config) {

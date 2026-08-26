@@ -7,14 +7,6 @@ export const schema = {
   validate(config) {
     return config.radius !== undefined || config.size !== undefined
   },
-  parseBoard(board) {
-    const match = board.match(/(\d+)\s*[×x]\s*(\d+)/)
-    if (!match) return null
-    return { type: 'hex', radius: Math.floor(parseInt(match[1], 10) / 2) }
-  },
-  matchBoard(board) {
-    return /hex/i.test(board)
-  },
 }
 
 const DIRECTIONS = [

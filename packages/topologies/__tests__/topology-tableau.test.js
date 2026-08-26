@@ -9,20 +9,6 @@ describe('topology-tableau schema', () => {
     expect(schema.required).toContain('layout')
   })
 
-  test('matchBoard matches tableau-related terms', () => {
-    expect(schema.matchBoard('tableau with 7 columns')).toBe(true)
-    expect(schema.matchBoard('radial table layout')).toBe(true)
-    expect(schema.matchBoard('mahjong wall')).toBe(true)
-    expect(schema.matchBoard('player hand zones')).toBe(true)
-    expect(schema.matchBoard('8x8 grid')).toBe(false)
-  })
-
-  test('parseBoard extracts layout type', () => {
-    expect(schema.parseBoard('tableau columns')).toEqual({ type: 'tableau', layout: 'tableau' })
-    expect(schema.parseBoard('mahjong wall')).toEqual({ type: 'tableau', layout: 'wall' })
-    expect(schema.parseBoard('radial table')).toEqual({ type: 'tableau', layout: 'radial' })
-    expect(schema.parseBoard('8x8')).toBeNull()
-  })
 })
 
 describe('topology-tableau radial', () => {

@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { parseFrontmatter } from '../src/parse-frontmatter.js'
-import { serializeFrontmatter } from '../src/enrich.js'
+import { serializeFrontmatter } from '../src/serialize-frontmatter.js'
 import { validate } from '../src/validate.js'
 import { produce } from '../src/produce.js'
 import { schema as gridSchema, createGridTopology } from '../../topologies/grid/src/topology-grid.js'

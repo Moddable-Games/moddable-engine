@@ -2,12 +2,6 @@ import { concentricRings } from './concentric-rings.js'
 export const schema = {
   type: 'graph',
   required: ['nodes', 'edges'],
-  parseBoard() {
-    return null
-  },
-  matchBoard() {
-    return false
-  },
 }
 
 export function createGraphTopology(config) {

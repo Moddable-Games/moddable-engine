@@ -104,7 +104,11 @@ export async function loadEngineReady(gamesDir, topologySchemas = []) {
   for (const family of families) {
     for (const variant of family.variants) {
       if (variant.meta.engine) {
-        const validation = validate(variant.meta, topologySchemas)
+        // The caller knows this came from content/variants/, so it says so
+        // rather than leaving validate to guess. The guess was
+        // `slug === title.toLowerCase()`, which exempted three tafl variants
+        // named after themselves from the parent check entirely.
+        const validation = validate(variant.meta, topologySchemas, { isRulebook: false })
         if (validation.valid) {
           ready.push({
             path: variant.path,
