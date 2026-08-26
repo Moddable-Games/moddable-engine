@@ -1,3 +1,4 @@
+import { fileLabel } from '../../core/index.js'
 // Browser consumers: js/game-play.js, js/play.js, js/boards.js, scripts/export-boards.mjs
 /**
  * renderFromEngine — renders SVG directly from a resolved cascade object.
@@ -329,7 +330,7 @@ function flipPosition(position, rows, cols, alpha) {
     const rank = parseInt(alg.slice(1), 10)
     const newFile = cols - 1 - file
     const newRank = rows + 1 - rank
-    const newFileChar = alpha ? alpha[newFile] : String.fromCharCode(97 + newFile)
+    const newFileChar = alpha ? alpha[newFile] : fileLabel(newFile)
     if (!newFileChar) continue
     flipped[`${newFileChar}${newRank}`] = piece
   }
@@ -503,7 +504,7 @@ export function fenToPosition(fen, rows, cols, alphabet) {
       if (run.skip !== undefined) {
         c += run.skip
       } else {
-        const file = alphabet ? alphabet[c] : String.fromCharCode(97 + c)
+        const file = alphabet ? alphabet[c] : fileLabel(c)
         const rankNum = rows - r
         position[`${file}${rankNum}`] = run.symbol
         c++
@@ -521,7 +522,7 @@ function parseVocabularyFen(fen, rows, cols, vocabulary, alphabet) {
     for (const run of parseRankRuns(ranks[r])) {
       if (c >= cols) break
       if (run.skip !== undefined) { c += run.skip; continue }
-      const file = alphabet ? alphabet[c] : String.fromCharCode(97 + c)
+      const file = alphabet ? alphabet[c] : fileLabel(c)
       const rankNum = rows - r
       const vocabEntry = vocabulary[run.symbol]
       if (vocabEntry) {
@@ -544,7 +545,7 @@ function parseFen4(fen4, rows, cols) {
     for (const cell of cells) {
       const trimmed = cell.trim()
       if (/^\d+$/.test(trimmed)) { c += parseInt(trimmed, 10) }
-      else { position[`${String.fromCharCode(97 + c)}${rows - r}`] = trimmed; c++ }
+      else { position[`${fileLabel(c)}${rows - r}`] = trimmed; c++ }
     }
   }
   return position
@@ -563,7 +564,7 @@ function parseSfenToPosition(fen, rows, cols) {
         if (close === -1) { i++; continue }
         const code = rank.substring(i + 1, close)
         const isGote = code === code.toUpperCase()
-        position[`${String.fromCharCode(97 + c)}${rows - r}`] = (isGote ? 'b' : 'w') + code.toUpperCase()
+        position[`${fileLabel(c)}${rows - r}`] = (isGote ? 'b' : 'w') + code.toUpperCase()
         c++; i = close + 1
       } else if (rank[i] >= '1' && rank[i] <= '9') {
         const next = rank[i + 1]
@@ -572,12 +573,12 @@ function parseSfenToPosition(fen, rows, cols) {
       } else if (rank[i] === '+' && i + 1 < rank.length) {
         const ch = rank[i + 1]
         const isGote = ch === ch.toUpperCase()
-        position[`${String.fromCharCode(97 + c)}${rows - r}`] = (isGote ? 'b' : 'w') + '+' + ch.toUpperCase()
+        position[`${fileLabel(c)}${rows - r}`] = (isGote ? 'b' : 'w') + '+' + ch.toUpperCase()
         c++; i += 2
       } else {
         const ch = rank[i]
         const isGote = ch === ch.toUpperCase()
-        position[`${String.fromCharCode(97 + c)}${rows - r}`] = (isGote ? 'b' : 'w') + ch.toUpperCase()
+        position[`${fileLabel(c)}${rows - r}`] = (isGote ? 'b' : 'w') + ch.toUpperCase()
         c++; i++
       }
     }

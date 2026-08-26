@@ -1,3 +1,4 @@
+import { fileLabel } from '../../core/index.js'
 // Loading a FEN and applying a move is the one operation every puzzle consumer
 // needs and every consumer has so far reimplemented as string surgery on the
 // FEN itself. Those hand-rolled mutators lose castling rights, forget to move
@@ -52,7 +53,7 @@ function squareToIndex(square, rows, cols) {
 function indexToSquare(index, rows, cols) {
   const r = Math.floor(index / cols)
   const c = index % cols
-  return String.fromCharCode(97 + c) + (rows - r)
+  return fileLabel(c) + (rows - r)
 }
 
 /** Split "e2e4" / "i7h8q" / "c10g10" into from/to/promotion without assuming 8x8. */

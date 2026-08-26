@@ -76,7 +76,11 @@ export function perimeterOps(colors, render) {
   ]
 
   const renderCorner = (space, x, y, size) => {
-    const isGoToJail = space.notes && space.notes.includes('Go to Jail')
+    // The role is declared in the board data, not inferred from the English in
+    // `notes`. Reading prose to pick a fill made the renderer depend on the
+    // exact wording of a transcription, and put a game's vocabulary inside a
+    // layout producer that is not supposed to know one game from another.
+    const isGoToJail = space.role === 'go-to-jail' || space.type === 'go-to-jail'
     const cornerFill = isGoToJail && theme['go-to-jail'] ? theme['go-to-jail'] : theme.corner
     el('rect', { x, y, width: size, height: size, fill: cornerFill, stroke: theme['corner-stroke'], 'stroke-width': 1.5, class: 'board-cell', 'data-sq': `pos-${space.pos}`, 'data-type': 'corner' })
 

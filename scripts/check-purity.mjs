@@ -33,7 +33,29 @@ function snippetKey(file, text) {
 
 // Allowlist keyed on file|snippet (first 50 chars of matched line) or file:* for entire files.
 // Grouped by package for readability.
+// Composition roots wire the families together, so naming them is the whole
+// job. packages/schema/__tests__/no-game-knowledge.test.js has always exempted
+// these two by name; this script did not, so the two guards disagreed about the
+// same files and this one reported 15 violations the other called correct.
+const COMPOSITION_ROOTS = new Set([
+  'packages/play/src/bootstrap-plugins.js',
+  'packages/play/src/play.js',
+])
+
 const ALLOWLIST = new Set([
+  // --- false positives on the word 'go' ---
+  // The theme key is 'go-to-jail', a Monopoly-family corner, nothing to do with
+  // the game Go. The rule matches on a word boundary and cannot tell them apart;
+  // no-game-knowledge.test.js sidesteps the same problem by excluding 'go' from
+  // its family list entirely.
+  "packages/schema/src/produce-layout-perimeter.js|const isGoToJail = space.role === 'go-to-jail' || ",
+  "packages/schema/src/produce-layout-perimeter.js|const cornerFill = isGoToJail && theme['go-to-jail",
+
+  // --- explanatory comment, not data ---
+  // A worked example of the row widths the function computes, for a reader
+  // checking the arithmetic. The array is in prose, not in code.
+  'packages/schema/src/produce-layout-star.js|// counting down. n = 4 gives the classic [1,2,3,4',
+
   // --- component-deck: deck files named after their game (self-registering, acceptable) ---
   'packages/component-deck/src/decks/bavarian-32.js:*',
   'packages/component-deck/src/decks/dominoes-28.js:*',
@@ -157,6 +179,7 @@ if (isMain) {
 
   for (const file of sourceFiles) {
     const relPath = relative(ROOT, file)
+    if (COMPOSITION_ROOTS.has(relPath)) continue
     const content = readFileSync(file, 'utf8')
     const lines = content.split('\n')
 

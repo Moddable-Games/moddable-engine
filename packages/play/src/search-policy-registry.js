@@ -1,6 +1,6 @@
 // Per-family MCTS rollout and expansion policies, supplied by the plugin.
 //
-// This used to be `if (family === 'go')` in sdk.js, which meant a new
+// This used to be a family-name test in sdk.js, which meant a new
 // territorial or placement game had no supported way to bring its own playout
 // policy: it got generic MCTS or nothing, and the only fix was editing core.
 // A plugin now declares them as a static on its factory, alongside `flags`,

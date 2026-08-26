@@ -1,4 +1,4 @@
-import { parseRankRuns } from '../../../core/index.js'
+import { parseRankRuns, fileLabel, fileIndex, intersectionLabel, splitCellId } from '../../../core/index.js'
 export const schema = {
   type: 'grid',
   required: ['rows', 'cols'],
@@ -250,7 +250,7 @@ export function createGridTopology(config) {
       getLabels() {
         const labels = []
         for (let c = 0; c < cols; c++) {
-          labels.push({ x: c * tileSize + tileSize / 2, y: rows * tileSize + 12, text: String.fromCharCode(97 + c), anchor: 'middle' })
+          labels.push({ x: c * tileSize + tileSize / 2, y: rows * tileSize + 12, text: fileLabel(c), anchor: 'middle' })
         }
         for (let r = 0; r < rows; r++) {
           labels.push({ x: -10, y: r * tileSize + tileSize / 2, text: String(rows - r), anchor: 'middle', baseline: 'central' })
@@ -581,15 +581,16 @@ export function createGridTopology(config) {
 
 // ─── Grid render pipeline (#18) ─────────────────────────────────────────────
 
-const INTERSECTION_ALPHABET = 'abcdefghjklmnopqrst'
 
 export function algebraicId(r, c, rows) {
-  return String.fromCharCode(97 + c) + (rows - r)
+  return fileLabel(c) + (rows - r)
 }
 
 export function algebraicToIndex(alg, rows, cols) {
-  const c = alg.charCodeAt(0) - 97
-  const r = rows - parseInt(alg.slice(1))
+  const parts = splitCellId(alg)
+  if (!parts) return -1
+  const c = fileIndex(parts.file)
+  const r = rows - parts.rank
   return r * cols + c
 }
 
@@ -600,7 +601,7 @@ export function indexToAlgebraic(idx, rows, cols) {
 }
 
 export function intersectionId(r, c, rows) {
-  return INTERSECTION_ALPHABET[c] + (rows - r)
+  return intersectionLabel(c) + (rows - r)
 }
 
 function idFn(idStyle) {
@@ -674,7 +675,7 @@ export function renderGridLayout(rows, cols, config = {}) {
     const bottomY = origin.y + boardH + origin.y * 0.65
     const leftX = origin.x * 0.5
     for (let c = 0; c < cols; c++) {
-      const text = lc.alphabet ? lc.alphabet[c] : String.fromCharCode(97 + c)
+      const text = lc.alphabet ? lc.alphabet[c] : fileLabel(c)
       labels.push({ tag: 'text', attrs: { x: posX(c), y: bottomY, 'text-anchor': 'middle', 'font-size': lc.fontSize, fill: lc.color, 'font-family': lc.fontFamily }, text })
     }
     for (let r = 0; r < rows; r++) {
