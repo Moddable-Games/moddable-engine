@@ -20,6 +20,7 @@ import { createDraughtsPlugin } from '../../plugins/draughts/index.js'
 import { createShogiPlugin } from '../../plugins/shogi/index.js'
 import { createXiangqiPlugin } from '../../plugins/xiangqi/index.js'
 import { createMancalaPlugin } from '../../plugins/mancala/index.js'
+import { createMorrisPlugin } from '../../plugins/morris/index.js'
 import { createChessPlugin } from '../../plugins/chess/index.js'
 import { createStandard52Deck } from '../../component-deck/index.js'
 import GENERATED_DEFAULTS from '../../../play/family-defaults.json' with { type: 'json' }
@@ -41,6 +42,7 @@ const PLUGIN_FACTORIES = {
   shogi: createShogiPlugin,
   xiangqi: createXiangqiPlugin,
   mancala: createMancalaPlugin,
+  morris: createMorrisPlugin,
 }
 
 export function registerTopology(type, factory) {

@@ -154,6 +154,35 @@
       }
     }
   },
+  "morris": {
+    "default": {
+      "title": "Three Men's Morris",
+      "slug": "three-mens-morris",
+      "parent": "morris",
+      "engine": {
+        "topology": {
+          "type": "graph",
+          "structure": "concentric-rings",
+          "params": {
+            "rings": 1,
+            "midpoints": true
+          }
+        },
+        "players": [
+          "white",
+          "black"
+        ],
+        "plugins": {
+          "morris": {
+            "piecesPerPlayer": 3,
+            "movement": "anywhere",
+            "winOnMill": true,
+            "flying": false
+          }
+        }
+      }
+    }
+  },
   "reversi": {
     "default": {
       "title": "Standard Reversi",

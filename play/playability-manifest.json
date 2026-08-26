@@ -1312,6 +1312,62 @@
     "playable": true
   },
   {
+    "family": "morris",
+    "variant": "lasker-morris",
+    "key": "lasker-morris",
+    "label": "Lasker Morris",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "morris",
+    "variant": "morabaraba",
+    "key": "morabaraba",
+    "label": "Morabaraba",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "morris",
+    "variant": "nine-mens-morris",
+    "key": "nine-mens-morris",
+    "label": "Nine Men's Morris",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "morris",
+    "variant": "shax",
+    "key": "shax",
+    "label": "Shax",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "morris",
+    "variant": "six-mens-morris",
+    "key": "six-mens-morris",
+    "label": "Six Men's Morris",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "morris",
+    "variant": "three-mens-morris",
+    "key": "three-mens-morris",
+    "label": "Three Men's Morris",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "morris",
+    "variant": "twelve-mens-morris",
+    "key": "twelve-mens-morris",
+    "label": "Twelve Men's Morris",
+    "group": "Other",
+    "playable": true
+  },
+  {
     "family": "reversi",
     "variant": "anti-reversi",
     "key": "anti-reversi",

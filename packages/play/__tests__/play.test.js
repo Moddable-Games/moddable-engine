@@ -5,7 +5,7 @@ describe('play — universal game factory', () => {
     // Asserted as a floor plus membership rather than an exact count. Adding a
     // game is the point of this project, and an exact count turns every new
     // family into a test edit that says nothing about whether anything works.
-    const EXPECTED_FAMILIES = ['chess', 'draughts', 'go', 'mancala', 'reversi', 'shogi', 'xiangqi']
+    const EXPECTED_FAMILIES = ['chess', 'draughts', 'go', 'mancala', 'morris', 'reversi', 'shogi', 'xiangqi']
 
     it('registers every expected family', () => {
       const families = getFamilies()

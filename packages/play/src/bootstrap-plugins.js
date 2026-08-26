@@ -23,6 +23,7 @@ registerVariants('reversi', {})
 registerVariants('shogi', {})
 registerVariants('xiangqi', {})
 registerVariants('mancala', {})
+registerVariants('morris', {})
 
 registerEvaluator('chess', chessEvaluate)
 registerEvaluator('go', goEvaluate)

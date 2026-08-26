@@ -22,6 +22,7 @@ const MINIMUM_PLAYABLE = {
   draughts: 13,
   go: 10,
   mancala: 6,
+  morris: 7,
   // 13 until hasami-shogi was measured capturing 11 times by displacement
   // against 2 custodially - it was playing shogi capture on a hasami board -
   // and marked playable: false (engine#143). A floor going down should always

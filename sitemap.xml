@@ -57,6 +57,10 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/families/morris/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/families/reversi/</loc>
     <priority>0.9</priority>
   </url>
@@ -166,6 +170,10 @@
   </url>
   <url>
     <loc>https://engine.moddable.games/play/?game=mancala</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/play/?game=morris</loc>
     <priority>0.8</priority>
   </url>
   <url>

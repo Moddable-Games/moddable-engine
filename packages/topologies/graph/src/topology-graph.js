@@ -1,3 +1,4 @@
+import { concentricRings } from './concentric-rings.js'
 export const schema = {
   type: 'graph',
   required: ['nodes', 'edges'],
@@ -10,7 +11,17 @@ export const schema = {
 }
 
 export function createGraphTopology(config) {
-  const { nodes, edges, directed = false } = config
+  // A graph board may be given its points and lines outright, or it may name a
+  // structure and let the structure generate them. `structure:
+  // concentric-rings` existed only as a rendering instruction, so every morris
+  // variant carried a complete engine block and still had no board to play on.
+  const generated = !config.nodes && config.structure === 'concentric-rings'
+    ? concentricRings(config.params || {})
+    : null
+  const nodes = config.nodes || generated?.nodes || []
+  const edges = config.edges || generated?.edges || []
+  const mills = config.mills || generated?.mills || []
+  const { directed = false } = config
   const adjacency = new Map()
   const nodeSet = new Set()
 
@@ -28,6 +39,16 @@ export function createGraphTopology(config) {
 
   function isValid(node) {
     return nodeSet.has(node)
+  }
+
+  // The lines of three a structure defines. Empty for a graph that declares
+  // none, which is every graph board that is not a mill game.
+  function getMills() {
+    return mills
+  }
+
+  function getNodes() {
+    return [...nodes]
   }
 
   function neighbours(node) {
@@ -356,6 +377,8 @@ export function createGraphTopology(config) {
     renderLayout,
     serializePosition,
     parsePosition,
+    getMills,
+    getNodes,
   }
 }
 

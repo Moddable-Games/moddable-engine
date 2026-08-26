@@ -9,13 +9,14 @@
     "standard": 1116,
     "variants": 610
   },
-  "playableVariants": 182,
-  "playableFamilies": 7,
+  "playableVariants": 189,
+  "playableFamilies": 8,
   "playableByFamily": {
     "chess": 135,
     "draughts": 13,
     "go": 10,
     "mancala": 6,
+    "morris": 7,
     "reversi": 3,
     "shogi": 12,
     "xiangqi": 3
@@ -25,6 +26,7 @@
     "draughts": 0,
     "go": 3,
     "mancala": 0,
+    "morris": 0,
     "reversi": 0,
     "shogi": 0,
     "xiangqi": 0
@@ -34,6 +36,7 @@
     "draughts": 13,
     "go": 7,
     "mancala": 6,
+    "morris": 7,
     "reversi": 3,
     "shogi": 12,
     "xiangqi": 3
