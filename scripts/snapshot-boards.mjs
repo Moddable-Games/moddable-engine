@@ -29,6 +29,7 @@ const doCapture = has('--capture')
 const doDiff = has('--diff')
 
 let count = 0, captured = 0, skipped = 0, errors = 0
+const nullRenders = []
 let identical = 0, different = 0, missing = 0
 
 for (const { family, familyEngine, slug, meta, engine: variantEngine } of walkCorpus({ familyFilter })) {
@@ -68,7 +69,11 @@ for (const { family, familyEngine, slug, meta, engine: variantEngine } of walkCo
       pieceSurfaceMap: pieceResult.surfaceMap || {},
       pieceSurface: pieceResult.surface || null,
     })
-    if (!svg) { skipped++; continue }
+    // A variant whose render returns null is invisible to every guard: the
+    // render tests skip anything returning null and the playability tests skip
+    // anything not marked playable, so a variant that is both is checked by
+    // nothing. san-kwo-ki sat in that gap (engine#144, engine#142). Name them.
+    if (!svg) { nullRenders.push(`${family}/${slug}`); skipped++; continue }
 
     const snapPath = resolve(SNAP_DIR, `${family}--${slug}.svg`)
 
@@ -96,6 +101,11 @@ for (const { family, familyEngine, slug, meta, engine: variantEngine } of walkCo
     console.error(`  ✗ ${family}/${slug}: ${e.message}`)
     errors++
   }
+}
+
+if (nullRenders.length) {
+  console.log(`\nRendered null (checked by no other guard): ${nullRenders.length}`)
+  for (const n of nullRenders) console.log(`  - ${n}`)
 }
 
 if (!doCapture && !doDiff) {

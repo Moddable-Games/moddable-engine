@@ -22,7 +22,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 export const ENGINE_ROOT = resolve(__dirname, '../..')
 const RULES_ROOT = process.env.RULES_ROOT || resolve(ENGINE_ROOT, '../moddable-rules')
 export const GAMES_DIR = resolve(RULES_ROOT, 'games')
-export const SNAP_DIR = resolve(ENGINE_ROOT, 'snapshots')
+// Overridable so a check can render into a scratch directory without
+// touching the committed set.
+export const SNAP_DIR = process.env.SNAP_DIR
+  ? resolve(process.env.SNAP_DIR)
+  : resolve(ENGINE_ROOT, 'snapshots')
 export const SVG_DIR = resolve(ENGINE_ROOT, 'boards', 'svgs')
 
 // Topology aliases that render through the same pipeline.

@@ -94,8 +94,10 @@ tags
 .cache/
 .turbo/
 
-# SVG snapshots (provider migration acceptance tests)
-snapshots/
+# SVG snapshots are the acceptance baseline for the renderer, so they are
+# committed and compared (engine#142). Ignoring them is how 143 of them came to
+# be left over from a hub rename with nothing to compare against, and how the
+# 140 that were force-added went 137-of-140 stale unnoticed.
 
 # Export sync cache
 .export-cache.json
