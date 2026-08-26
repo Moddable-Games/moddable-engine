@@ -26,6 +26,7 @@ import { join } from 'node:path'
 import { createGameForFamily, getFamilies } from '../packages/play/src/play.js'
 import { listVariants, getVariantConfig, getVariantKeys } from '../packages/play/src/variant-registry.js'
 import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
+import { probePicker } from './lib/probe-rng.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUTPUT = process.env.MANIFEST_OUT || resolve(__dirname, '..', 'play', 'playability-manifest.json')
@@ -67,7 +68,9 @@ function humanize(key) {
     .replace(/\b\w/g, c => c.toUpperCase())
 }
 
+// Picks are reproducible per variant. See scripts/lib/probe-rng.mjs for why.
 function runGame(family, variantKey) {
+  const pick = probePicker(family, variantKey)
   try {
     const game = createGameForFamily(family, { variant: variantKey })
 
@@ -81,7 +84,7 @@ function runGame(family, variantKey) {
         if (s._phase !== 'placement' && s.phase !== 'placement') break
         const moves = game.getLegalMoves()
         if (moves.length === 0) break
-        game.applyMove(moves[Math.floor(Math.random() * moves.length)])
+        game.applyMove(pick(moves))
         placementMoves++
       }
       const afterPlacement = game.getState()?.slice || game.getState()
@@ -96,7 +99,7 @@ function runGame(family, variantKey) {
       const moves = game.getLegalMoves()
       if (moves.length === 0) return true // terminal (no moves = game over)
 
-      const move = moves[Math.floor(Math.random() * moves.length)]
+      const move = pick(moves)
       const res = game.applyMove(move)
 
       if (!res || !res.ok) return false // move rejected = broken
@@ -110,7 +113,7 @@ function runGame(family, variantKey) {
         while (subPlies < MAX_CONTINUATION) {
           const subMoves = game.getLegalMoves()
           if (subMoves.length === 0) return true // no moves mid-turn = terminal
-          const sub = game.applyMove(subMoves[Math.floor(Math.random() * subMoves.length)])
+          const sub = game.applyMove(pick(subMoves))
           subPlies++
           if (!sub || !sub.ok) return false
           if (sub.winner) return true

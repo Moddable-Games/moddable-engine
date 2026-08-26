@@ -88,16 +88,16 @@ describe('variant count guard (published manifest)', () => {
       Object.values(MINIMUM_PLAYABLE).reduce((a, b) => a + b, 0))
   })
 
-  it('committed manifest is fresh (matches what gen-playability-manifest.mjs produces)', () => {
-    const committed = readFileSync(MANIFEST_PATH, 'utf8').trim()
-    const tmpPath = join(process.cwd(), 'play', '.manifest-freshness-check.json')
+  // Regenerating into a temp file, so the two cases below can share one run
+  // each rather than paying the generator's cost twice.
+  function generate(suffix) {
+    const tmpPath = join(process.cwd(), 'play', `.manifest-check-${suffix}.json`)
     try {
       execSync(
         `node scripts/gen-playability-manifest.mjs`,
         { cwd: process.cwd(), stdio: 'pipe', env: { ...process.env, NODE_OPTIONS: '--experimental-vm-modules', MANIFEST_OUT: tmpPath } }
       )
-      const fresh = readFileSync(tmpPath, 'utf8').trim()
-      expect(fresh).toBe(committed)
+      return readFileSync(tmpPath, 'utf8').trim()
     } catch (e) {
       if (e.status) {
         throw new Error('gen-playability-manifest.mjs failed: ' + (e.stderr?.toString() || e.message).slice(0, 300))
@@ -106,5 +106,38 @@ describe('variant count guard (published manifest)', () => {
     } finally {
       try { unlinkSync(tmpPath) } catch {}
     }
+  }
+
+  // The generator walks each variant by picking moves at random to decide
+  // whether it is playable. Those picks used to come from `Math.random()`, so
+  // the same input produced different manifests: four consecutive runs on one
+  // commit reported placement-chess unplayable once and playable three times.
+  // The freshness check below was intermittently red for that reason and
+  // passed on every retry, which is the habit that trains everyone to re-run
+  // rather than look (engine#145).
+  //
+  // The disagreement was the bug, not the check. This asserts the property
+  // directly, so a future unseeded call fails here with a reason rather than
+  // showing up as a flake somewhere else.
+  // Proving byte-identical output directly costs a second full generation, and
+  // this file already pays for one. The freshness check below is the empirical
+  // half: it compares a fresh run against the committed artifact every CI run,
+  // and an unseeded generator makes it red intermittently, which is exactly
+  // how this was found. What it could not do was say why. This says why, for
+  // the price of reading a file.
+  it('the generator draws no unseeded randomness', () => {
+    // Both probes that decide playability, not just the one that writes the
+    // manifest: the matrix script is the same walk and drifted the same way.
+    for (const script of ['gen-playability-manifest.mjs', 'playability-matrix.mjs']) {
+      const source = readFileSync(join(process.cwd(), 'scripts', script), 'utf8')
+      const code = source.split('\n').filter(line => !line.trimStart().startsWith('//')).join('\n')
+      expect([script, code.match(/Math\.random/)]).toEqual([script, null])
+      expect(code).toMatch(/probePicker\(/)
+    }
+  })
+
+  it('committed manifest is fresh (matches what gen-playability-manifest.mjs produces)', () => {
+    const committed = readFileSync(MANIFEST_PATH, 'utf8').trim()
+    expect(generate('fresh')).toBe(committed)
   }, 120_000)
 })

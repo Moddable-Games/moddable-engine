@@ -7,6 +7,7 @@
 import '../packages/plugins/chess/index.js'
 import { createGame } from '../packages/play/src/sdk.js'
 import { listVariants, getVariantConfig } from '../packages/play/src/variant-registry.js'
+import { probePicker } from './lib/probe-rng.mjs'
 
 const MAX_PLIES = 400
 const variants = listVariants('chess').map(v => v.key).sort()
@@ -21,6 +22,7 @@ for (const key of variants) {
   }
 
   try {
+    const pick = probePicker('chess', key)
     const game = createGame('chess', key)
 
     if (cfg.placementPieces) {
@@ -30,7 +32,7 @@ for (const key of variants) {
         while (game.getState().slice._phase === 'placement' && placementMoves < 50) {
           const moves = game.getLegalMoves()
           if (moves.length === 0) break
-          game.applyMove(moves[Math.floor(Math.random() * moves.length)])
+          game.applyMove(pick(moves))
           placementMoves++
         }
         if (game.getState().slice._phase === 'placement') {
@@ -48,7 +50,7 @@ for (const key of variants) {
         outcome = 'no-moves'
         break
       }
-      const move = moves[Math.floor(Math.random() * moves.length)]
+      const move = pick(moves)
       const result = game.applyMove(move)
       if (!result || !result.ok) {
         outcome = 'move-rejected'
@@ -64,7 +66,7 @@ for (const key of variants) {
         while (subPlies < 50) {
           const subMoves = game.getLegalMoves()
           if (subMoves.length === 0) { outcome = 'deadlock-continuation'; break }
-          const sub = game.applyMove(subMoves[Math.floor(Math.random() * subMoves.length)])
+          const sub = game.applyMove(pick(subMoves))
           subPlies++
           if (!sub || !sub.ok) { outcome = 'move-rejected'; break }
           if (sub.winner) { outcome = `winner:${sub.winner}`; break }
