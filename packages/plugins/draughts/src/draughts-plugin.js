@@ -6,7 +6,7 @@ export const CONFIG_KEYS = new Set([
   'captureBackward', 'cols', 'directions', 'flyingKings', 'forcedCapture',
   'kingCapturePriority', 'loseOnSinglePiece', 'majorityPrefersKing', 'manCapture', 'manMove',
   'maximalCapture', 'menCannotCaptureKings', 'piecesPerPlayer', 'playerCount',
-  'promotionDuring', 'rows', 'setup', 'turnLogic', 'winCondition',
+  'promotionDuring', 'removeImmediately', 'rows', 'setup', 'turnLogic', 'winCondition',
 ])
 
 export function createDraughtsPlugin(variantConfig = {}, context = {}) {
@@ -198,7 +198,15 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
           const newCaptured = [...alreadyCaptured, enemyPos]
           const tempBoard = [...board]
           tempBoard[pos] = null
-          tempBoard[enemyPos] = null
+          // `removeImmediately: false` means a captured piece stays on the
+          // board until the whole chain ends, so it blocks the rest of the
+          // chain - a flying king may not pass back over a piece it has
+          // already taken. International draughts declares it and nothing read
+          // it: the square was emptied here, so the `alreadyCaptured` guard
+          // below could never fire, because the piece it was looking for was
+          // gone. The declaration was inert and every variant played as if it
+          // were true.
+          if (config.removeImmediately !== false) tempBoard[enemyPos] = null
           tempBoard[landingIdx] = piece
 
           let promoted = piece
