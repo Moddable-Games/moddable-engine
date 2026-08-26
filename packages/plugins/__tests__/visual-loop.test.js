@@ -156,7 +156,11 @@ function everyVariant() {
   return out
 }
 
-const VARIANT_FLOOR = 174
+// 174 until s-chess was marked unsupported: it declares `hand` and `gating`
+// and the engine reads neither, so the Hawk and Elephant never enter the board
+// and its defining mechanic is absent (engine#139). A floor going down should
+// always carry a reason, otherwise it stops being a floor.
+const VARIANT_FLOOR = 173
 
 describeWithAssets('every piece resolves to real artwork during play', () => {
   it('variant coverage meets floor', () => {
@@ -231,6 +235,20 @@ describeWithAssets('click round-trip reaches a legal move', () => {
       const result = model.handleClick(placeTarget.coord, { moves: placeMoves })
       expect(result.type).toBe('move')
       expect(game.applyMove(result.move).ok).toBe(true)
+      return
+    }
+
+    // A variant can open in a phase where nothing on the board moves yet:
+    // Placement Chess and sittuyin start with every legal move a placement
+    // onto an empty square, with no `from` at all. Those never reach the
+    // interaction model - game-controller.js commits them from its action-hit
+    // branch first - so pushing one through the move model asserted the wrong
+    // thing and reported a deselect.
+    if (target.from === undefined) {
+      const actionHits = allMoves.filter(m =>
+        m.action && m.from === undefined && String(m.to) === String(target.to))
+      expect(actionHits.length).toBeGreaterThan(0)
+      expect(game.applyMove(actionHits[0]).ok).toBe(true)
       return
     }
 
