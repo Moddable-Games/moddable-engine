@@ -44,18 +44,7 @@ async function renderFromResolved(resolved, container) {
   }
 }
 import { resolveVariantAsync } from '../packages/play/index.js'
-
-async function loadContent(resolved, basePath) {
-  const content = resolved.content
-  if (!content || (content.data && !content.source) || !content.source) return resolved
-  const url = content.source.startsWith('http') ? content.source
-    : content.source.endsWith('.json') && !content.source.includes('/') ? '../data/' + content.source
-    : (basePath?.endsWith('/') ? basePath : (basePath || '') + '/') + content.source
-  try {
-    const data = await fetch(url).then(r => r.ok ? r.json() : null)
-    return data ? { ...resolved, content: { ...content, data } } : resolved
-  } catch { return resolved }
-}
+import { loadBoardContent as loadContent } from './variant-frontmatter.js'
 
 async function loadVariant({ familyPath, variantPath, basePath }) {
   const family = familyPath.split('/')[0]

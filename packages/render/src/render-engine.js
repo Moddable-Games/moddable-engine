@@ -305,7 +305,7 @@ export function renderFromEngine(resolved, opts = {}) {
     if (opts.flipped && !effectiveRotations && resolved.pieces?.directional) {
       effectiveRotations = Object.fromEntries((resolved.players || ['white', 'black']).map(p => [p, 180]))
     }
-    parts.push(`<g pointer-events="none">${renderPiecesFromCells(displayPosition, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: effectiveRotations, getOwner, pieceDefs: opts.pieceDefs, colors })}</g>`)
+    parts.push(`<g pointer-events="none">${renderPiecesFromCells(displayPosition, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: effectiveRotations, getOwner, pieceDefs: opts.pieceDefs, colors, vocabulary: resolved.vocabulary || {} })}</g>`)
   } else if (position && Object.keys(position).length > 0) {
     parts.push(`<g pointer-events="none"></g>`)
   }
@@ -406,7 +406,12 @@ function renderPiecesFromCells(position, cells, tileSize, opts) {
     const cell = cellMap.get(alg)
     if (!cell) continue
     const pos = { x: cell.x, y: cell.y }
-    const piece = typeof raw === 'object' ? raw : { type: String(raw) }
+    // A grid position holds raw board symbols. Passing one straight through as
+    // a piece type meant `w` and `b` both fell to the same fallback key, so
+    // every white stone on a Go or Hex board drew as a black one. Resolving
+    // the symbol against the vocabulary first recovers the type, the seat and
+    // the colour letter.
+    const piece = typeof raw === 'object' ? raw : symbolToPiece(String(raw), opts.vocabulary || {})
     const imageKey = pieceImageKey(piece, pieceImages)
 
     if (pieceImages[imageKey]) {
@@ -414,7 +419,12 @@ function renderPiecesFromCells(position, cells, tileSize, opts) {
       const surfaceMap = opts.pieceSurfaceMap || {}
       const hasSurface = opts.pieceBorders || surfaceMap[imageKey]
       const rotations = opts.pieceRotations
-      const ownerForRot = opts.getOwner ? opts.getOwner(piece.type) : fallbackOwner(piece.type)
+      // The seat is read off the board symbol, not the piece type: a
+      // four-player set writes `yL` and the `y` is the seat. Resolving the
+      // symbol to a type first left this with `lance`, no seat, and every
+      // rotation on the board was lost.
+      const rotSource = piece.symbol ?? piece.type
+      const ownerForRot = opts.getOwner ? opts.getOwner(rotSource) : fallbackOwner(rotSource)
       const rot = rotations ? (rotations[ownerForRot] || 0) : 0
       if (hasSurface) {
         const surface = opts.pieceSurface?.owners?.[ownerForRot]

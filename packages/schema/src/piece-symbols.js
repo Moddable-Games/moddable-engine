@@ -20,18 +20,31 @@ export function pieceImageKeys(piece) {
   if (!piece) return []
   const type = typeof piece === 'string' ? piece : piece.type
   if (!type) return []
-  // Seat 0 takes the light prefix. Which colour that is, is the variant's
-  // business - the gallery keys are `w` and `b` whatever a game calls its
-  // sides, so this compares a seat index rather than a colour name.
+  // The prefix is the colour, and the variant says which seat is which. Hex
+  // and Go both declare seat 0 as `b`; deriving the prefix from the seat index
+  // gave both of them white stones for black and black for white. Where the
+  // vocabulary symbol is itself a colour letter, that is the answer; only
+  // where it is not - chess, whose symbols are piece letters - does the seat
+  // decide.
   const owner = typeof piece === 'object' ? piece.owner : undefined
-  const prefix = owner === 0 ? 'w' : 'b'
+  const symbol = typeof piece === 'object' ? piece.symbol : undefined
+  const colourLetter = typeof symbol === 'string' && /^[wb]$/i.test(symbol)
+    ? symbol.toLowerCase()
+    : null
+  const prefix = colourLetter || (owner === 0 ? 'w' : 'b')
   const keys = []
+  // The board symbol first. A four-player set is keyed by exactly that - `rC`
+  // for the red chief - and resolving the symbol to a type before looking it
+  // up threw those keys away: djambi went from 36 pieces drawn to none, and
+  // every vierschach board from 64 to 3. `pieceImageKey` takes the first
+  // candidate the gallery actually has, so an unhelpful one costs nothing.
+  if (symbol) keys.push(symbol)
   const initial = KEYED_BY_INITIAL[type]
   if (initial) keys.push(prefix + initial)
   keys.push(type)
   if (!initial) keys.push(prefix + type)
   keys.push(prefix + 'S')
-  return [...new Set(keys)]
+  return [...new Set(keys.filter(Boolean))]
 }
 
 export function pieceImageKey(piece, images) {
@@ -50,10 +63,10 @@ export function symbolToPiece(symbol, vocabulary = {}) {
   for (const [type, entry] of Object.entries(vocabulary)) {
     const symbols = entry?.symbols || {}
     for (const [owner, sym] of Object.entries(symbols)) {
-      if (sym === text) return { type, owner: Number(owner) }
+      if (sym === text) return { type, owner: Number(owner), symbol: text }
     }
   }
   // A symbol the vocabulary does not claim is passed through as its own type,
   // which is what a variant declaring artwork by piece name relies on.
-  return { type: text }
+  return { type: text, symbol: text }
 }

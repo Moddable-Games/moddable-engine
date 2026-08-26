@@ -9,8 +9,14 @@ export function registerFamilyInteraction(family, interactionName) {
   familyInteractions.set(family, interactionName)
 }
 
+// Strict. This used to fall back to the move model for any name it did not
+// recognise, so mancala's `interaction = 'select'` - a model nobody had
+// registered - silently became the move model, which wants a from and a to.
+// A sowing game has neither, so every click on every pit did nothing at all,
+// and no warning fired because a name HAD been declared. It just pointed at
+// nothing. Callers that want a default ask for one.
 export function getInteractionModel(name) {
-  return models.get(name) || models.get('move')
+  return models.get(name) || null
 }
 
 export function listInteractionModels() {
@@ -127,23 +133,81 @@ const dropModel = {
   },
 }
 
+
+// One click is the whole move. A sowing game has no from-and-to: you choose a
+// pit and its seeds go round. Mancala declared `interaction = 'select'` and no
+// model of that name existed, so `interactionModelFor` returned undefined, the
+// controller had no model to consult, and not one click on the board did
+// anything at all.
+const selectModel = {
+  name: 'select',
+  needsSelection: false,
+
+  targetsFor(pos, moves) {
+    return moves.filter(m => sameCell(m.to, pos) || sameCell(m.coord, pos))
+  },
+
+  handleClick(pos, ctx) {
+    const { moves } = ctx
+    const candidates = moves.filter(m => sameCell(m.to, pos) || sameCell(m.coord, pos))
+    if (candidates.length === 0) return { type: 'reject', reason: 'illegal' }
+    return { type: 'move', move: candidates[0] }
+  },
+}
+
 registerInteractionModel('move', moveModel)
 registerInteractionModel('place', placeModel)
 registerInteractionModel('chain', chainModel)
 registerInteractionModel('drop', dropModel)
-
-export function interactionModelFor(family, override) {
-  if (override) return getInteractionModel(override)
-  const declared = familyInteractions.get(family)
-  if (!declared) {
-    console.warn(`[interaction] Family "${family}" has no interactionModel declared. Defaulting to 'move'.`)
-  }
-  return getInteractionModel(declared || 'move')
+// The board is not where the turn starts. Landlords rolls before anyone moves,
+// so a click on the track means "take the action that is waiting". It declared
+// `interaction = 'roll'` with no such model registered, and silently got the
+// move model, which wants a from and a to.
+const rollModel = {
+  name: 'roll',
+  needsSelection: false,
+  targetsFor() { return [] },
+  handleClick(pos, ctx) {
+    const pending = (ctx.moves || []).find(m => m.action && m.to === undefined && m.from === undefined)
+    if (pending) return { type: 'move', move: pending }
+    const onCell = (ctx.moves || []).filter(m => sameCell(m.to, pos) || sameCell(m.coord, pos))
+    if (onCell.length) return { type: 'move', move: onCell[0] }
+    return { type: 'reject', reason: 'illegal' }
+  },
 }
 
+registerInteractionModel('select', selectModel)
+registerInteractionModel('roll', rollModel)
+
+export function interactionModelFor(family, override) {
+  const name = override || familyInteractions.get(family)
+  if (!name) {
+    console.warn(`[interaction] Family "${family}" has no interactionModel declared. Defaulting to 'move'.`)
+    return getInteractionModel('move')
+  }
+  const model = getInteractionModel(name)
+  // Returning undefined for a name nobody registered is how mancala came to
+  // have no interaction at all: every click reached a model that was not
+  // there, and the board simply did not respond. Say so instead.
+  if (!model) {
+    throw new Error(
+      `[interaction] Family "${family}" declares interaction model "${name}", which is not registered. ` +
+      `Known models: ${listInteractionModels().join(', ')}.`
+    )
+  }
+  return model
+}
+
+// Any move that names an action and no square is something the player takes
+// with a button rather than a click. Hardcoding `pass` meant a game whose turn
+// begins with an action - landlords rolls first - offered no way to begin it.
 export function availableActions(moves) {
   const actions = []
-  if (moves.some(m => m.action === 'pass')) actions.push('pass')
-  actions.push('resign')
+  for (const move of moves || []) {
+    if (!move.action) continue
+    if (move.to !== undefined || move.from !== undefined || move.coord !== undefined) continue
+    if (!actions.includes(move.action)) actions.push(move.action)
+  }
+  if (!actions.includes('resign')) actions.push('resign')
   return actions
 }

@@ -194,7 +194,9 @@ export function createMancalaPlugin(variantConfig = {}, context = {}) {
   function rawMoves(cells, player) {
     const out = []
     for (let i = player * pitsPerSide; i < (player + 1) * pitsPerSide; i++) {
-      if (cells[i] > 0) out.push({ action: 'sow', pit: i })
+      // `to` is the board coordinate the renderer labels the pit with, so a
+      // click can be matched to a move. `pit` stays for the sowing itself.
+      if (cells[i] > 0) out.push({ action: 'sow', pit: i, to: `pit-${i}` })
     }
     return out
   }

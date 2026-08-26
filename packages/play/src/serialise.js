@@ -93,7 +93,11 @@ export function boardToSetup(slice, topo = {}, vocabulary = {}, opts = {}) {
   if (!Array.isArray(board)) {
     const entries = []
     for (const [coord, cell] of Object.entries(board)) {
-      if (!cell) continue
+      // `if (!cell)` drops seat 0, because seat 0 is the number 0. Hex and
+      // morris store the owner index directly in the cell, so every one of the
+      // first player's stones vanished on the way to the renderer and only the
+      // second player's appeared on the board.
+      if (cell === null || cell === undefined || cell === '') continue
       const sym = cellToSymbol(cell, vocabulary)
       if (sym) entries.push(`${coord}:${sym}`)
     }

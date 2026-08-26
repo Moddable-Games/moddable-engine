@@ -186,9 +186,16 @@ describeWithAssets('every piece resolves to real artwork during play', () => {
 
     const { game, plugin, slice, played, setup } = playedPosition(family, key, 4, resolved.topology)
     const board = slice.board
+    // `c !== 0` excluded seat 0, whose cells hold the number 0 on the boards
+    // that store an owner index. The count agreed with a half-empty board and
+    // the test passed while every first-player stone was missing. A pit
+    // holding no seeds is genuinely empty, so that stays excluded for arrays
+    // of counts only.
+    const isCountBoard = Array.isArray(board) && board.every(c => c === null || typeof c === 'number')
+    const occupied = (c) => c !== null && c !== undefined && !(isCountBoard && c === 0)
     const occupiedCount = Array.isArray(board)
-      ? board.filter(c => c != null && c !== 0).length
-      : Object.values(board).filter(c => c != null && c !== 0).length
+      ? board.filter(occupied).length
+      : Object.values(board).filter(occupied).length
 
     const withPluginVocab = { ...resolved, vocabulary: plugin.vocabulary }
     const { images } = attachPieceImages(withPluginVocab, gallery)
