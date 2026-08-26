@@ -10,6 +10,7 @@
  */
 import { readFileSync, readdirSync, existsSync } from 'fs'
 import { join } from 'path'
+import { parseFrontmatter } from '../../schema/src/parse-frontmatter.js'
 
 // Import all plugins to ensure they're registered
 import { createChessPlugin } from '../chess/index.js'
@@ -105,14 +106,24 @@ function foldedPluginConfig(family, slug) {
 // Keys that survive the fold, are read by nobody, and are known to be there.
 // Shrink-only: fixing a variant removes its entry, and a new unclaimed key
 // fails the ratchet rather than joining the noise.
+//
+// It started at 176 warnings across 176 playable variants - every one of them,
+// so the guard said nothing. What is left are four notes on three variants,
+// all of them prose about why something is not implemented rather than a rule
+// the engine was meant to read. The keys that were rules have been either
+// implemented or renamed to what the plugin reads:
+//
+//   promotion_zone -> promotionZone      shinobi, shogun
+//   setup_phase    -> placementPieces    placement-chess
+//   dual_king      -> the setup already said it   spartan
+//   faceoff        -> implemented, config-driven  synochess, empire
+//   approximations -> reclassified as content, not plugin config   congo
+//   removeImmediately -> implemented                              international
 const UNCLAIMED = {
-  'chess|approximations': 1,          // congo - a note about which rules are simplified
-  'chess|faceoff': 1,                 // synochess
   'chess|gating': 1,                  // s-chess - its defining mechanic, now marked unsupported
   'chess|hand': 1,                    // s-chess - only ever a by-product of `drops`
   'chess|rendering_note': 1,          // raumschach
   'chess|setup_status': 1,            // yalta-chess
-  'draughts|removeImmediately': 4,    // a default the plugin never reads
 }
 const UNCLAIMED_CEILING = Object.values(UNCLAIMED).reduce((a, b) => a + b, 0)
 
@@ -154,5 +165,30 @@ describe('resolved plugin config has no unclaimed keys (engine#139)', () => {
   it('ratchet only shrinks', () => {
     const total = Object.values(counts).reduce((a, b) => a + b, 0)
     expect(total).toBeLessThanOrEqual(UNCLAIMED_CEILING)
+  })
+
+  // What engine#139 actually asked for: load every playable variant and assert
+  // that not one of them warns. The four entries above sit on variants that
+  // are not playable, so this is genuinely zero rather than zero-by-allowlist.
+  it('no playable variant emits an unknown-key warning', () => {
+    const noisy = []
+    let playableChecked = 0
+    for (const family of FAMILIES) {
+      const variantsDir = join(RULES_ROOT, family, 'content', 'variants')
+      if (!existsSync(variantsDir)) continue
+      for (const file of readdirSync(variantsDir).filter(f => f.endsWith('.md'))) {
+        const slug = file.replace('.md', '')
+        const { meta } = parseFrontmatter(readFileSync(join(variantsDir, file), 'utf8'))
+        if (meta.playable !== true) continue
+        const config = foldedPluginConfig(family, slug)
+        if (!config) continue
+        playableChecked++
+        for (const key of unknownConfigKeys(config, FAMILY_ACCEPTED_KEYS[family])) {
+          noisy.push(`${family}/${slug}: ${key}`)
+        }
+      }
+    }
+    expect(playableChecked).toBeGreaterThan(150)
+    expect(noisy).toEqual([])
   })
 })

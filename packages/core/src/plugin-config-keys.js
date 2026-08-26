@@ -18,6 +18,9 @@
 // of these still receives it, it simply stops being reported as a mystery.
 export const PLATFORM_KEYS = new Set([
   'defaultSeat',
+  // authored documentation of which rules a playable variant simplifies, the
+  // sibling of `unsupported` for variants that do ship. Content, not config.
+  'approximations',
   // read by packages/schema/src/unsupported.js, not by any plugin
   'unsupported',
   // read by the search and AI layer when picking an evaluator

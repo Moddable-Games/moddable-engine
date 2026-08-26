@@ -10,7 +10,7 @@ export const CONFIG_KEYS = new Set([
   'onTurnEnd', 'pawnCaptureDirections', 'pawnConfig', 'pawnMoveDirections', 'pawnStartRow',
   'pawnType', 'placementDistinctColor', 'placementPieces', 'placementZone', 'playerCount',
   'promotionChoices', 'promotionRow',
-  'promotionZone', 'randomSetup', 'rookType', 'rows', 'royalType', 'setup',
+  'faceoff', 'promotionZone', 'randomSetup', 'rookType', 'rows', 'royalType', 'setup',
   'stalemateMeaning', 'torpedo', 'turnLogic', 'visibility', 'winCondition',
 ])
 
@@ -444,7 +444,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     if (piece && state.castlingRights) {
       const cr = state.castlingRights
       let changed = false
-      const royalType = config.royalType || 'king'
+      const royalType = royalTypeFor(playerIdx)
       const rookType = config.rookType || 'rook'
       if (piece.type === royalType) {
         if (cr[playerIdx]?.king || cr[playerIdx]?.queen) {
@@ -779,12 +779,27 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return false
   }
 
+  // Which piece is royal for a given player. `royalType` was a single string,
+  // which cannot describe an asymmetric variant: synochess pairs a Western
+  // King against an Eastern Chancellor, and empire a King against an Emperor.
+  // Both declared nothing, so both fell back to `king`, and the side without
+  // one had no royal at all - it could not be checked, could not be mated, and
+  // its royal walked into attacked squares. Empire papered over it with a
+  // hand-written winCondition; synochess simply shipped unwinnable.
+  //
+  // Accepts a string for the symmetric case, or a per-player list.
+  function royalTypeFor(playerIdx) {
+    const declared = config.royalType
+    if (Array.isArray(declared)) return declared[playerIdx] ?? declared[0] ?? 'king'
+    return declared || 'king'
+  }
+
   // A player with more than one royal piece - Spartan Chess gives black two
   // kings - is only in check when every one of them is attacked. Stopping at
   // the first royal found, as this did, meant the second king was invisible:
   // black could be mated with a spare king standing safely beside it.
   function isInCheck(board, playerIdx) {
-    const royalType = config.royalType || 'king'
+    const royalType = royalTypeFor(playerIdx)
     const royals = []
     for (const pos of allPositions()) {
       const cell = getCell(board, pos)
@@ -905,7 +920,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
     if (hands) {
       const captured = move.captured != null ? getCell(slice.board, move.captured) : getCell(slice.board, move.to)
-      if (captured && captured.owner !== playerIdx && captured.type !== (config.royalType || 'king')) {
+      if (captured && captured.owner !== playerIdx && captured.type !== royalTypeFor(captured.owner)) {
         const handType = captured.wasPromoted ? (config.pawnType || 'pawn') : captured.type
         hands[playerIdx].push(handType)
       }
@@ -945,7 +960,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     }
 
     if (castlingRights) {
-      const royalType = config.royalType || 'king'
+      const royalType = royalTypeFor(playerIdx)
       const rookType = config.rookType || 'rook'
       if (piece.type === royalType) {
         castlingRights[playerIdx] = { king: false, queen: false }
@@ -1134,7 +1149,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       const moves = generateMovesForPiece(pos, slice, playerIdx, viewBoard)
       allMoves.push(...moves)
 
-      if (piece.type === (config.royalType || 'king')) {
+      if (piece.type === royalTypeFor(playerIdx)) {
         allMoves.push(...generateCastlingMoves(pos, slice, playerIdx))
       }
     }
@@ -1218,7 +1233,37 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     })
   }
 
+  // The faceoff rule: if the two royal pieces stand on the same file with
+  // nothing between them, the player who created that position loses at once.
+  // Empire and Synochess both declare it. Empire implemented it as a
+  // hand-written winCondition in JavaScript that hardcoded `king`, `emperor`
+  // and `cols = 8`; Synochess declared `faceoff: true` and the engine read
+  // nothing of the kind, so the rule its own page calls a win condition never
+  // fired. One config-driven rule serves both, and works on any board width.
+  function faceoffLoser(board, playerIdx) {
+    if (!config.faceoff) return null
+    const cols = topology?.cols || config.cols || 8
+    const found = []
+    for (const pos of allPositions()) {
+      const cell = getCell(board, pos)
+      if (cell && cell.type === royalTypeFor(cell.owner)) found[cell.owner] = pos
+    }
+    const a = found[0], b = found[1]
+    if (a === undefined || b === undefined) return null
+    if (a % cols !== b % cols) return null
+    const col = a % cols
+    const from = Math.min(Math.trunc(a / cols), Math.trunc(b / cols))
+    const to = Math.max(Math.trunc(a / cols), Math.trunc(b / cols))
+    for (let row = from + 1; row < to; row++) {
+      if (getCell(board, row * cols + col) !== null) return null
+    }
+    // The mover created it, so the mover loses.
+    return 1 - playerIdx
+  }
+
   function checkWinConditionOnly(slice, playerIdx) {
+    const faceoff = faceoffLoser(slice.board, playerIdx)
+    if (faceoff !== null) return faceoff
     if (!config.winCondition) return null
     const result = config.winCondition(slice, { currentPlayer: playerIdx, config })
     if (result !== null && result !== undefined) return result
@@ -1231,17 +1276,20 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const eliminated = full.__players.eliminated || []
     const isMultiplayer = config.playerCount > 2
 
+    const faceoff = faceoffLoser(slice.board, playerIdx)
+    if (faceoff !== null) return faceoff
+
     if (config.winCondition) {
       const result = config.winCondition(slice, { currentPlayer: playerIdx, config })
       if (result !== null && result !== undefined) return result
     }
 
     if (isMultiplayer) {
-      const royalType = config.royalType || 'king'
       for (let opp = 0; opp < config.playerCount; opp++) {
         if (opp === playerIdx) continue
         if (eliminated.includes(opp)) continue
-        const hasRoyal = slice.board.some(cell => cell && cell.type === royalType && cell.owner === opp)
+        const oppRoyal = royalTypeFor(opp)
+        const hasRoyal = slice.board.some(cell => cell && cell.type === oppRoyal && cell.owner === opp)
         if (!hasRoyal) return { eliminate: opp }
       }
       return null
