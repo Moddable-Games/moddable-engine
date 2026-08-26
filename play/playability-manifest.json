@@ -265,6 +265,14 @@
   },
   {
     "family": "chess",
+    "variant": "cylindrical-chess",
+    "key": "cylindrical-chess",
+    "label": "Cylindrical Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
     "variant": "dark-chess",
     "key": "darkChess",
     "label": "Dark Chess",
@@ -1252,6 +1260,54 @@
     "variant": "toroidal-go",
     "key": "toroidal-go",
     "label": "Toroidal Go",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "mancala",
+    "variant": "ayo",
+    "key": "ayo",
+    "label": "Ayo",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "mancala",
+    "variant": "congkak",
+    "key": "congkak",
+    "label": "Congkak",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "mancala",
+    "variant": "kalah",
+    "key": "kalah",
+    "label": "Kalah",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "mancala",
+    "variant": "oware",
+    "key": "oware",
+    "label": "Oware",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "mancala",
+    "variant": "sungka",
+    "key": "sungka",
+    "label": "Sungka",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "mancala",
+    "variant": "toguz-korgool",
+    "key": "toguz-korgool",
+    "label": "Toguz Korgool",
     "group": "Other",
     "playable": true
   },

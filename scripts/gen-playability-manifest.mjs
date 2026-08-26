@@ -18,23 +18,23 @@ import { fileURLToPath } from 'node:url'
 import '../packages/play/test-helpers/setup-rules-reader.js'
 
 // Side-effect registration of all plugin families
-import '../packages/plugins/chess/index.js'
-import '../packages/plugins/go/index.js'
-import '../packages/plugins/draughts/index.js'
-import '../packages/plugins/xiangqi/index.js'
-import '../packages/plugins/shogi/index.js'
-import '../packages/plugins/reversi/index.js'
+// Registration lives in the composition root, and getFamilies() below reads
+// from it, so the plugin list is not restated here either.
 
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { createGameForFamily } from '../packages/play/src/play.js'
+import { createGameForFamily, getFamilies } from '../packages/play/src/play.js'
 import { listVariants, getVariantConfig, getVariantKeys } from '../packages/play/src/variant-registry.js'
 import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUTPUT = process.env.MANIFEST_OUT || resolve(__dirname, '..', 'play', 'playability-manifest.json')
 
-const FAMILIES = ['chess', 'go', 'draughts', 'xiangqi', 'shogi', 'reversi']
+// Derived from the families that have a plugin, not restated. A hardcoded list
+// here is worse than the one in gen-family-defaults.mjs was: this manifest is
+// what the site offers as playable, so a family missing from it ships in the
+// corpus and never appears. Mancala's six variants were invisible this way.
+const FAMILIES = getFamilies().slice().sort()
 const MAX_PLIES = 200
 const MAX_CONTINUATION = 50
 const MAX_PLACEMENT = 100
