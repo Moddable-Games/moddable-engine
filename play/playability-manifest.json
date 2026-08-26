@@ -1377,14 +1377,6 @@
   },
   {
     "family": "shogi",
-    "variant": "hasami-shogi",
-    "key": "hasami-shogi",
-    "label": "Hasami Shogi",
-    "group": "Other",
-    "playable": true
-  },
-  {
-    "family": "shogi",
     "variant": "heian-shogi",
     "key": "heian-shogi",
     "label": "Heian Shogi",

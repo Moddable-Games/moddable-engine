@@ -9,7 +9,7 @@
     "standard": 1116,
     "variants": 610
   },
-  "playableVariants": 183,
+  "playableVariants": 182,
   "playableFamilies": 7,
   "playableByFamily": {
     "chess": 135,
@@ -17,7 +17,7 @@
     "go": 10,
     "mancala": 6,
     "reversi": 3,
-    "shogi": 13,
+    "shogi": 12,
     "xiangqi": 3
   },
   "variantPluginsByFamily": {
@@ -35,7 +35,7 @@
     "go": 7,
     "mancala": 6,
     "reversi": 3,
-    "shogi": 13,
+    "shogi": 12,
     "xiangqi": 3
   }
 }
