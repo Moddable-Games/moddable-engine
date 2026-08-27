@@ -8,7 +8,7 @@ Every game in the Moddable Games collection — from standard chess to Endless S
 
 ## Status
 
-**Six families playable today** — chess (135+ variants incl. 6 hex), shogi (13), draughts (13), go (10), xiangqi (3), reversi (3). 177 playable variants total. Non-grid families (mancala, backgammon, morris, hex-connection, halma, big 2, race) have topologies registered but no plugins yet (#62).
+**Ten families playable today** — chess (135+ variants incl. 6 hex), draughts (13), shogi (13), go (10), hex (8), mancala (6), morris (7), xiangqi (3), reversi (3), landlords-game (1). 198 playable variants total. Non-grid families remaining: backgammon (track), big 2 (tableau), halma (grid), race (track) — topologies registered but no plugins yet (#62).
 
 Rules are implemented as plugin hooks — move filters, win conditions, turn logic, post-move effects. A composable rule layer exists in `packages/rule` (registry, dependency resolution, 8 parametric rules). The play surface (interaction, embed protocol, variant registry, SDK) is family-agnostic and lives in `packages/play`.
 
@@ -47,6 +47,10 @@ moddable-engine/
       chess/             ← 135+ variants (topology-agnostic, grid + hex)
       draughts/          ← 13 variants (all frontmatter-only)
       go/                ← 10 variants (capture-go, gomoku, renju)
+      hex/               ← 8 variants (standard + Y, bridge rollout policy)
+      landlords-game/    ← 1 variant (1904 patent, dice roll, circuit win)
+      mancala/           ← 6 variants (kalah, oware, congkak, sungka)
+      morris/            ← 7 variants (concentric-rings graph, mill removal)
       shogi/             ← 13 variants (fromConfig-driven, rule hooks)
       xiangqi/           ← 3 variants (fromConfig-driven)
       reversi/           ← 3 variants (flanking capture, anti-reversi)
@@ -72,7 +76,7 @@ moddable-engine/
 | 3 | `render` | Layer-compositing SVG board renderer |
 | 4 | `schema` | Frontmatter → game definitions |
 | 5 | `component-*` | Non-spatial structure: deck, dice |
-| 6 | `plugins/*` | Game families — 6 playable (chess, draughts, go, shogi, xiangqi, reversi) |
+| 6 | `plugins/*` | Game families — 10 playable (chess, draughts, go, hex, landlords-game, mancala, morris, shogi, xiangqi, reversi) |
 | 7 | Game configs | Frontmatter only — no code |
 
 ---
@@ -163,6 +167,18 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ---
 
 ## Changelog
+
+#### 2026-08-27
+- Fixed five gameplay bugs: Morris unplayable past move 18 (falsy-zero + fixed interaction model), mill removal auto-picked without asking, Kalah bonus turn never fired (continuesTurn implemented but uncalled), Landlords invisible (CSS nowrap hid long turns, history never scrolled, no wealth display)
+- Hex 2x performance: single flood fill per ply (only the player who moved), cached adjacency lookups, one-pass getLegalMoves
+- Hex bridge rollout policy (#148): teaches MCTS playouts to defend bridges (MoHex pattern), 74k to 151k simulated moves
+- Hex and Landlords seat objectives (#149): describeSeat hook shows each player's goal and holdings
+- Djambi four-player readability: move log groups by seat count, algebraic notation gated to two-player chess only
+- Test-count reporter guard: opt-in publishing via MODDABLE_PUBLISH_TEST_COUNTS env var (partial tiers can no longer overwrite the project's figure)
+- Rewrote e2e every-family-clickable test: uses move log as witness, finds targets by what appeared since rest
+- Seeded playability-standard and go-playout-policy tests (four unseeded statistical tests in one day)
+- Declared 11 unsupported chess variants with measured failure modes in moddable-rules
+- 176 suites, 6363 passing, 67 Playwright e2e tests
 
 #### 2026-08-20
 - Create page #118 steps 1–4: Tier A rule keys (15 new config keys across draughts/reversi/shogi/chess), piece-set filtering, metadata block (title/slug/win/special), YAML import with round-trip
