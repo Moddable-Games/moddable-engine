@@ -827,14 +827,24 @@ function producePitOps(topo, colors, render) {
         topY += curveOffset
         botY -= curveOffset
       }
-      const topIdx = pitsPerSide - 1 - i
+      // Seat 0 owns pits 0 to pitsPerSide-1 and sows counter-clockwise into
+      // its own store, so on a board drawn with seat 0 nearest the viewer its
+      // pits run left to right along the bottom, the store on the right, then
+      // the opponent's pits back right to left along the top.
+      //
+      // These two rows were the other way round, which put the player whose
+      // turn it is on the far side of the board - the status said South to
+      // move and the only pits South could touch were the ones across the top
+      // - and broke the circuit as well: sowing ran off the left of the top
+      // row and continued at a store drawn on the right.
       const botIdx = i
+      const topIdx = pitsPerSide + (pitsPerSide - 1 - i)
       pit(px, topY, topIdx)
-      pit(px, botY, pitsPerSide + botIdx)
+      pit(px, botY, botIdx)
       if (markerSet.has(topIdx)) marker(px, topY)
-      if (markerSet.has(pitsPerSide + botIdx)) marker(px, botY)
+      if (markerSet.has(botIdx)) marker(px, botY)
       seeds(px, topY, seedCountAt(topIdx))
-      seeds(px, botY, seedCountAt(pitsPerSide + botIdx))
+      seeds(px, botY, seedCountAt(botIdx))
     }
 
     return { type: 'pit', config: { ops: els, width: boardW, height: boardH } }
@@ -874,15 +884,19 @@ function producePitOps(topo, colors, render) {
 
   const topPitCenter = frameInset + pad
   const botPitCenter = boardH - frameInset - pad
+  // Rows are listed from the near side outwards, because row 0 holds pit 0 and
+  // pit 0 belongs to seat 0. Listing them from the top put the player whose
+  // turn it is across the board from the viewer, so the only pits they were
+  // allowed to touch were the far ones.
   const rowCenters = []
   if (boardRows === 2) {
-    rowCenters.push(topPitCenter, botPitCenter)
+    rowCenters.push(botPitCenter, topPitCenter)
   } else if (boardRows === 4) {
-    rowCenters.push(topPitCenter, topPitCenter + interRow, botPitCenter - interRow, botPitCenter)
+    rowCenters.push(botPitCenter, botPitCenter - interRow, topPitCenter + interRow, topPitCenter)
   }
 
   for (let row = 0; row < boardRows; row++) {
-    const isTopHalf = row < boardRows / 2
+    const isTopHalf = row >= boardRows / 2
     const baseCy = rowCenters[row]
     for (let i = 0; i < pitsPerSide; i++) {
       const displayIdx = isTopHalf ? (pitsPerSide - 1 - i) : i

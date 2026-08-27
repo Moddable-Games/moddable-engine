@@ -1,6 +1,12 @@
 export function createSimulator(plugin, opts = {}) {
   const playerCount = opts.playerCount || 2
-  const evaluate = opts.evaluate || null
+  // A plugin may know how to score its own positions. Go, chess and the rest
+  // register an evaluator by family name in the composition root; a family that
+  // needs its own board geometry to evaluate at all - which is every connection
+  // game - cannot, because the geometry lives in the plugin instance. Reading it
+  // off the plugin costs nothing and closes that gap.
+  const evaluate = opts.evaluate
+    || (typeof plugin?.evaluate === 'function' ? (state, playerIndex) => plugin.evaluate(state, playerIndex) : null)
   const playerNames = opts.playerNames || null
 
   function cloneState(state) {

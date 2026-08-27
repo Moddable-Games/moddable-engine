@@ -77,8 +77,16 @@ export function elementToSvg(el) {
   if (!el || !el.tag) return ''
   const { tag, attrs = {}, text, children } = el
   const finalAttrs = { ...attrs }
-  if (!finalAttrs['pointer-events'] && !(finalAttrs.class && finalAttrs.class.includes('board-cell'))) {
-    finalAttrs['pointer-events'] = 'none'
+  // Decoration must not swallow clicks, so everything that is not a hit target
+  // opts out. Leaving the hit targets with no value of their own was not the
+  // same as opting them in: `pointer-events` inherits, so a `board-cell` drawn
+  // inside a wrapping `<g>` picked up that group's `none` and stopped being
+  // clickable. Every node on a morris board is drawn inside one such group,
+  // which is why the board rendered correctly, showed its pieces, answered
+  // every test that asked whether the hit targets existed, and could not be
+  // played at all.
+  if (!finalAttrs['pointer-events']) {
+    finalAttrs['pointer-events'] = (finalAttrs.class && finalAttrs.class.includes('board-cell')) ? 'all' : 'none'
   }
   const attrStr = Object.entries(finalAttrs)
     .map(([k, v]) => `${k}="${esc(String(v))}"`)

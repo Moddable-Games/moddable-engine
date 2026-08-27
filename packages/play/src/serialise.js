@@ -56,6 +56,12 @@ function isCountBoard(board) {
 // so this is a regrouping rather than a translation.
 function pitBoardToSetup(board, slice, topo) {
   const counts = board.map(n => Number(n) || 0)
+  // Oware and ayo have no store on the board: captured seeds are held to the
+  // side, in `slice.held`. Writing a zero there regardless meant a player
+  // could take twenty seeds and the board would show none of them, so there
+  // was no way to see who was winning a game whose win condition is exactly
+  // that count.
+  const heldAside = Array.isArray(slice?.held) ? slice.held : null
   const perSide = topo.cols || topo.pitsPerSide || Math.trunc(counts.length / 2)
   if (!perSide) return counts.join(',')
 
@@ -67,10 +73,10 @@ function pitBoardToSetup(board, slice, topo) {
   const parts = []
   for (let side = 0; side < sides; side++) {
     parts.push(pits.slice(side * perSide, (side + 1) * perSide).join(','))
-    // A storeless board still writes a zero here: every setup in the corpus
-    // has the four-part shape and the parser reads a comma-free part as a
-    // store, so the position round-trips either way.
-    parts.push(String(stores[side] ?? 0))
+    // Where the board has no store, the seeds a player is holding go in the
+    // same slot: it is the same quantity, and the renderer draws it in the
+    // same bowl.
+    parts.push(String(stores[side] ?? heldAside?.[side] ?? 0))
   }
   return parts.join(';')
 }
@@ -88,6 +94,14 @@ export function boardToSetup(slice, topo = {}, vocabulary = {}, opts = {}) {
   //   4,4,4,4,4,4;0;4,4,4,4,4,4;0
   if (topo.type === 'pit' || isCountBoard(board)) {
     return pitBoardToSetup(board, slice, topo)
+  }
+
+  // A track game keeps its players on the track, not in cells: landlords holds
+  // forty nulls in `board` from start to finish and its tokens in `positions`.
+  // Serialising the board gave an empty string, so the renderer was handed a
+  // board with nobody on it and drew exactly that.
+  if (topo.type === 'track' && Array.isArray(slice?.positions)) {
+    return slice.positions.map((pos, seat) => `pos-${pos}:p${seat}`).join(',')
   }
 
   if (!Array.isArray(board)) {

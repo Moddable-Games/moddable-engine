@@ -1,5 +1,6 @@
 import { warnUnknownConfigKeys } from '../../../core/index.js'
 import { createHexTopology } from '../../../topologies/hex/index.js'
+import { connectionScore } from './connection-eval.js'
 
 export const CONFIG_KEYS = new Set([
   'connect', 'cols', 'playerCount', 'rows', 'setup', 'shape', 'sideLength',
@@ -31,6 +32,11 @@ export function createHexPlugin(variantConfig = {}, context = {}) {
   let cells = []
   let edges = {}
   let targets = []
+  // The evaluator walks the board tens of thousands of times per move, and
+  // `topology.neighbours` builds a fresh array on every call. Built once here,
+  // where the board is built, because the adjacency cannot change: no stone
+  // ever moves and no cell is ever added.
+  let adjacency = new Map()
 
   // Which edges each player is trying to join. A rhombus gives each player one
   // opposing pair; a triangle gives both players the same three sides, so the
@@ -58,6 +64,8 @@ export function createHexPlugin(variantConfig = {}, context = {}) {
     edges = {}
     for (const [name, list] of Object.entries(named)) edges[name] = new Set(list.map(c => `${c.q},${c.r}`))
     targets = connectionTargets(Object.keys(edges))
+    adjacency = new Map()
+    for (const cell of cells) adjacency.set(cell, topology.neighbours(cell))
   }
 
   const currentPlayer = full => (full && full.__players ? full.__players.currentIndex : 0)
@@ -135,11 +143,32 @@ export function createHexPlugin(variantConfig = {}, context = {}) {
       for (let player = 0; player < 2; player++) if (connects(slice.board, player)) return player
       return null
     },
+
+    // The search asks the plugin what a position is worth, because nothing
+    // outside the plugin knows which edges this board has or who is trying to
+    // join them. Without it the family had no evaluator at all and the search
+    // was choosing between moves it scored identically.
+    evaluate(slice, playerIndex) {
+      if (!slice || !slice.board || !targets.length) return 0
+      return connectionScore(slice.board, playerIndex, targets, edges, adjacency, cells)
+    },
   }
 }
 
 createHexPlugin.interaction = 'place'
 createHexPlugin.configKeys = CONFIG_KEYS
+
+// Minimax has nothing to prune on a board where every legal move is a stone on
+// an empty cell and the branching factor is the number of empty cells, so the
+// search is best first over the distance evaluation instead.
+createHexPlugin.mcts = true
+
+// A hex rollout has to fill the board before it produces a result: nothing is
+// captured, no player can pass, and a position is only decided once someone's
+// edges are joined. The default cut-off of 100 plies is shorter than the 121
+// cells of the standard board, so every rollout on the board most people play
+// was being abandoned before it could say anything.
+createHexPlugin.searchPolicies = () => ({ maxRolloutDepth: 400 })
 
 // Stones sit on named hex cells rather than grid squares, so guards that place
 // one piece image per grid cell do not apply.

@@ -240,6 +240,53 @@ export function createLandlordsPlugin(variantConfig = {}, context = {}) {
       return resolveLanding(next, player)
     },
 
+    // What the move log says. Without this a turn read only "roll": the dice
+    // were rolled inside applyMove and never shown, and the checker moved
+    // without saying from where, to where, or what it cost - so a player could
+    // watch a whole game and see none of it. The interface has no business
+    // knowing about dice, so the plugin says it in words instead.
+    describeMove(move, prev, next, seatIndex) {
+      if (!next) return null
+      // The seat is passed in: describeMove is handed slices, and a slice has
+      // no `__players` to read the mover from.
+      const seat = Number.isInteger(seatIndex) ? seatIndex : 0
+      if (move.action === 'buy') {
+        const space = at(move.pos)
+        return `buy ${space ? space.name : move.pos} (${space && space.price ? '$' + space.price : 'no price'})`
+      }
+      if (move.action === 'take-luxury') {
+        const space = at(move.pos)
+        return `luxury ${space ? space.name : move.pos}`
+      }
+      if (move.action === 'pay-fine') return `pay fine $${config.jailFine}`
+      if (move.action === 'pass') return 'pass'
+
+      const dice = Array.isArray(next.pending) ? next.pending : null
+      const roll = dice ? dice.join('+') : '?'
+      if (move.action === 'roll-for-double') {
+        const freed = prev && prev.jailed && prev.jailed[seat] && !(next.jailed && next.jailed[seat])
+        return `roll ${roll} in jail${freed ? ' - out' : ''}`
+      }
+      if (move.action !== 'roll') return move.action
+
+      const from = prev && Array.isArray(prev.positions) ? prev.positions[seat] : null
+      const to = Array.isArray(next.positions) ? next.positions[seat] : null
+      const before = prev && Array.isArray(prev.cash) ? prev.cash[seat] : null
+      const after = Array.isArray(next.cash) ? next.cash[seat] : null
+      const delta = (before !== null && after !== null) ? after - before : 0
+      const money = delta === 0 ? '' : ` ${delta > 0 ? '+' : '-'}$${Math.abs(delta)}`
+      // NO TRESPASSING moves the checker on again after it lands, so the square
+      // it finished on is not the square the dice sent it to. Naming only the
+      // last one read as though the dice had done something they had not.
+      const steps = dice ? dice.reduce((a, b) => a + b, 0) : null
+      const landed = (from !== null && steps !== null) ? ((from - 1 + steps) % size) + 1 : to
+      const nameOf = pos => (at(pos) ? at(pos).name : String(pos))
+      const trail = (landed !== to && to !== null)
+        ? `${landed} ${nameOf(landed)} to ${to} ${nameOf(to)}`
+        : `${to} ${nameOf(to)}`
+      return `roll ${roll}: ${from} to ${trail}${money}`
+    },
+
     checkWin(slice) {
       const done = slice.circuits.every(c => c >= config.circuits)
       if (!done) return null

@@ -52,6 +52,49 @@ function perimeterStyle(board) {
   return PERIMETER_STYLES.has(declared) ? declared : 'plain'
 }
 
+
+// Players standing on the track. The perimeter layout drew its spaces and
+// nothing else - it had no concept of a token at all - so a landlords game
+// rendered a board with both players invisible and no way to see the game
+// being played. Every space already carries `data-sq="pos-N"` with its
+// rectangle, so the positions come from what has just been drawn.
+const TOKEN_COLOURS = ['#c0392b', '#2471a3', '#1e8449', '#b7950b', '#6c3483', '#117864']
+
+function tokenElements(els, tokens) {
+  if (!tokens || !tokens.length) return []
+  const rects = new Map()
+  for (const entry of els) {
+    const attrs = entry?.attrs
+    const square = attrs?.['data-sq']
+    if (!square || attrs.x === undefined || attrs.width === undefined) continue
+    if (!rects.has(square)) rects.set(square, attrs)
+  }
+  const out = []
+  const perSquare = new Map()
+  for (const token of tokens) {
+    const attrs = rects.get(token.square)
+    if (!attrs) continue
+    // Two players on one space must not sit exactly on top of each other.
+    const seen = perSquare.get(token.square) || 0
+    perSquare.set(token.square, seen + 1)
+    const w = Number(attrs.width) || 0
+    const h = Number(attrs.height) || w
+    const r = Math.max(3, Math.min(w, h) * 0.22)
+    const cx = Number(attrs.x) + w / 2 + (seen - 0.5) * r * 1.2
+    const cy = Number(attrs.y) + h / 2
+    out.push({
+      op: 'element',
+      tag: 'circle',
+      attrs: {
+        cx: cx.toFixed(1), cy: cy.toFixed(1), r: r.toFixed(1),
+        fill: TOKEN_COLOURS[token.seat % TOKEN_COLOURS.length],
+        stroke: '#1a1a1a', 'stroke-width': 1.2, 'pointer-events': 'none',
+      },
+    })
+  }
+  return out
+}
+
 export function perimeterOps(colors, render) {
   const variant = render._board || '1904-patent'
   const boardData = render._boardData || null
@@ -307,6 +350,8 @@ export function perimeterOps(colors, render) {
   }
 
   perimeterInner(el, board, cornerSize, boardW, boardH, theme, style)
+
+  els.push(...tokenElements(els, render._tokens))
 
   return { type: 'track', config: { style: 'perimeter', ops: els, width: boardW, height: boardH } }
 }

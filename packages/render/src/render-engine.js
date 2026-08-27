@@ -229,7 +229,16 @@ export function renderFromEngine(resolved, opts = {}) {
     render._seedsPerPit = render._parsedSetup.pits[0] || 4
   }
   if (topo.type === 'track' && resolved.setup && typeof resolved.setup === 'string') {
-    render._parsedSetup = parseTrackSetup(resolved.setup)
+    // Two different things arrive here. Backgammon writes counts of checkers
+    // per point; a track game with one token per player writes `pos-22:p0`.
+    if (/^pos-\d+:p\d+/.test(resolved.setup)) {
+      render._tokens = resolved.setup.split(',').map(entry => {
+        const [square, seat] = entry.trim().split(':')
+        return { square, seat: Number(String(seat).replace('p', '')) }
+      }).filter(t => t.square && Number.isFinite(t.seat))
+    } else {
+      render._parsedSetup = parseTrackSetup(resolved.setup)
+    }
   }
   if (topo.type === 'graph' && resolved.setup) {
     if (typeof resolved.setup === 'string' && resolved.setup.includes(':')) {

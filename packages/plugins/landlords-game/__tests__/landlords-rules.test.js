@@ -243,3 +243,70 @@ describe('the dice', () => {
     }
   })
 })
+
+// What a turn looks like in the move log.
+//
+// The dice are rolled inside `applyMove`, so a log written from the move object
+// alone says "roll" and nothing else - not what came up, not where the checker
+// went, not what it cost. A player could watch a whole game and see none of it.
+describe('describeMove', () => {
+  function plugin(config = {}) {
+    let n = 0
+    const seq = [3, 4, 2, 2, 6, 1, 5, 5]
+    const rng = { next: () => (seq[n++ % seq.length] - 1) / 6 + 0.01 }
+    const p = createLandlordsPlugin({ board: '1904-patent', ...config })
+    const slice = p.init({}, { request: key => (key === 'core.rng' ? rng : null) })
+    return { p, slice }
+  }
+
+  it('says what the dice were and where the checker went', () => {
+    const { p, slice } = plugin()
+    const full = { __players: { currentIndex: 0, count: 2 } }
+    const next = p.applyMove({ action: 'roll' }, slice, full)
+    const text = p.describeMove({ action: 'roll' }, slice, next, 0)
+    expect(text).toMatch(/^roll \d\+\d: \d+ to \d+/)
+    expect(text).toContain(String(next.positions[0]))
+    expect(next.pending).toHaveLength(2)
+  })
+
+  it('names both squares when a space moves the checker on again', () => {
+    const { p, slice } = plugin()
+    // NO TRESPASSING moves the checker on after it lands, so the square the
+    // dice sent it to is not the square it finished on. Built by hand rather
+    // than rolled for, because the point under test is what the sentence says,
+    // not which numbers came up.
+    const spaces = BOARDS.boards['1904-patent'].spaces
+    const corner = spaces.find(s => s.type === 'go-to-jail' || s.role === 'go-to-jail')
+    const jail = spaces.find(s => s.type === 'jail' || /^JAIL$/i.test(s.name))
+    expect(corner).toBeDefined()
+    expect(jail).toBeDefined()
+
+    const dice = [3, 4]
+    const from = { ...slice, positions: [corner.pos - 7, 1] }
+    const next = { ...slice, positions: [jail.pos, 1], pending: dice }
+    const text = p.describeMove({ action: 'roll' }, from, next, 0)
+
+    expect(text).toContain(corner.name)
+    expect(text).toContain(jail.name)
+    expect(text.match(/ to /g)).toHaveLength(2)
+  })
+
+  it('reports money changing hands', () => {
+    const { p, slice } = plugin()
+    const full = { __players: { currentIndex: 0, count: 2 } }
+    let text = null
+    for (let start = 1; start <= 40 && !text; start++) {
+      const from = { ...slice, positions: [start, 1] }
+      const next = p.applyMove({ action: 'roll' }, from, full)
+      if (next.cash[0] !== from.cash[0]) text = p.describeMove({ action: 'roll' }, from, next, 0)
+    }
+    expect(text).not.toBeNull()
+    expect(text).toMatch(/[+-]\$\d+/)
+  })
+
+  it('describes the moves that are not rolls', () => {
+    const { p, slice } = plugin()
+    expect(p.describeMove({ action: 'pass' }, slice, slice, 0)).toBe('pass')
+    expect(p.describeMove({ action: 'pay-fine' }, slice, slice, 0)).toMatch(/^pay fine \$\d+$/)
+  })
+})

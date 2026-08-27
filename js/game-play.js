@@ -178,6 +178,7 @@ export function createPlaySession(options = {}) {
   let cells = null
   let moveHistory = []
   let boardSnapshot = null
+  let sliceSnapshot = null
   let captureHistory = []
   const fogViewSide = parseInt(seat, 10) || 0
 
@@ -195,6 +196,7 @@ export function createPlaySession(options = {}) {
     moveHistory = []
     captured = {}
     boardSnapshot = null
+    sliceSnapshot = null
     captureHistory = []
 
     // The draft is part of the session's configuration, not of the page URL.
@@ -307,13 +309,15 @@ export function createPlaySession(options = {}) {
       onChoiceNeeded: showChoiceDialog,
       onBeforeMove: (move, player) => {
         const slice = game.getState().slice
+        sliceSnapshot = slice
         boardSnapshot = slice.board
           ? (Array.isArray(slice.board) ? [...slice.board] : { ...slice.board })
           : null
         if (boardSnapshot) boardSnapshot._legalMoves = ctrl ? ctrl.getLegalMoves() : null
       },
       onMove: (move, player) => {
-        moveHistory.push({ move, player, notation: moveToNotation(move) })
+        const notation = moveToNotation(move, player)
+        moveHistory.push({ move, player, notation })
         const isCapture = move.capture || (move.captures && move.captures.length > 0) || move.enPassant
         if (isCapture && boardSnapshot) {
           detectCaptures(move, player, boardSnapshot)
@@ -323,7 +327,7 @@ export function createPlaySession(options = {}) {
         boardSnapshot = null
         if (isCapture && onCapture) onCapture(move)
         if (isCapture && move.to !== undefined) captureBurst(move.to)
-        if (onStatus) onStatus({ text: `${capitalize(game.currentPlayer())} to move`, gameOver: false, lastMove: moveToNotation(move) })
+        if (onStatus) onStatus({ text: `${capitalize(game.currentPlayer())} to move`, gameOver: false, lastMove: notation })
         if (embed) embed.post('move', { move, state: summarise() })
       },
       onAnimateMove: (move, state, done) => {
@@ -917,7 +921,28 @@ export function createPlaySession(options = {}) {
     return serialiseBoard(slice, topo, (pluginFor() || {}).vocabulary || {}, { players: playerNames() })
   }
 
-  function moveToNotation(move) {
+  // A plugin may know things about its own move that no generic writer can
+  // reconstruct from the move object: landlords rolls its dice inside applyMove
+  // and puts them in the resulting slice, so a log written from the move alone
+  // said only "roll" for every turn of the game.
+  function describeFromPlugin(move, playerName) {
+    if (!game) return null
+    let plugin = null
+    try { plugin = pluginFor() } catch { return null }
+    if (!plugin || typeof plugin.describeMove !== 'function') return null
+    const seat = playerName ? playerNames().indexOf(playerName) : -1
+    try {
+      const text = plugin.describeMove(move, sliceSnapshot, game.getState().slice, seat < 0 ? undefined : seat)
+      return (typeof text === 'string' && text) ? text : null
+    } catch (err) {
+      console.warn(`[play] describeMove failed for ${family}:`, err)
+      return null
+    }
+  }
+
+  function moveToNotation(move, playerName) {
+    const described = describeFromPlugin(move, playerName)
+    if (described) return described
     if (family === 'chess') {
       const board = boardSnapshot || game.getState().slice?.board
       const topo = resolvedBoard?.topology

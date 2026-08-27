@@ -41,7 +41,7 @@ export function createMCTS(simulator, opts = {}) {
         ? evaluatedRollout(node.state, node.playerIndex, playerIndex)
         : randomRollout(node.state, node.playerIndex, playerIndex)
 
-      backpropagate(node, score)
+      backpropagate(node, score, playerIndex)
     }
 
     if (root.children.length === 0) {
@@ -144,7 +144,20 @@ export function createMCTS(simulator, opts = {}) {
       depth++
     }
 
-    return 0.5
+    // The rollout ran out of depth before the game ended. Returning 0.5 says
+    // "an even position", which is a claim about the position rather than an
+    // admission that we did not find out - and every such rollout is a vote
+    // for nothing in particular. Where the simulator can score the position,
+    // scoring it is strictly more information than a shrug.
+    return truncatedValue(current, rootPlayer)
+  }
+
+  // Both the truncation fallback and the evaluated rollout land here, so a
+  // position is worth the same number whichever way the search arrived at it.
+  function truncatedValue(state, rootPlayer) {
+    const score = simulator.evaluatePosition(state, rootPlayer)
+    if (!Number.isFinite(score)) return 0.5
+    return Math.max(0, Math.min(1, (score + 1) / 2))
   }
 
   function evaluatedRollout(state, currentPlayer, rootPlayer) {
@@ -155,15 +168,28 @@ export function createMCTS(simulator, opts = {}) {
       return winnerIdx === rootPlayer ? 1 : 0
     }
 
-    const score = simulator.evaluatePosition(state, rootPlayer)
-    return (score + 1) / 2
+    return truncatedValue(state, rootPlayer)
   }
 
-  function backpropagate(node, score) {
+  // A node's score is kept from the point of view of whoever moved into it,
+  // because that is the player `selectChild` is choosing for when it reads the
+  // node's average without negating it.
+  //
+  // This used to flip the score once per level on the way up, starting from
+  // the expanded node - which is only the same thing when the players strictly
+  // alternate AND the value handed in belongs to the expanded node's parent.
+  // Neither held. The rollout returns a value for the player at the root, so
+  // odd depths were scored correctly and even depths were scored inverted: the
+  // search was rewarding half its own tree for the opponent's good positions.
+  // And a game where one player moves twice in a row - which the simulator
+  // supports through `continueTurn` - broke the alternation the flip assumed.
+  //
+  // Asking each node who moved into it removes both assumptions.
+  function backpropagate(node, rootScore, rootPlayer) {
     while (node !== null) {
       node.visits++
-      node.totalScore += score
-      score = 1 - score
+      const mover = node.parent ? node.parent.playerIndex : rootPlayer
+      node.totalScore += mover === rootPlayer ? rootScore : 1 - rootScore
       node = node.parent
     }
   }
