@@ -1,6 +1,7 @@
 import { warnUnknownConfigKeys } from '../../../core/index.js'
 import { createHexTopology } from '../../../topologies/hex/index.js'
 import { connectionScore } from './connection-eval.js'
+import { createBridgePolicy } from './bridge-policy.js'
 
 export const CONFIG_KEYS = new Set([
   'connect', 'cols', 'playerCount', 'rows', 'setup', 'shape', 'sideLength',
@@ -165,7 +166,9 @@ export function createHexPlugin(variantConfig = {}, context = {}) {
       }
       // Who moved, so the win check does not have to flood fill for a player
       // who cannot possibly have just completed a connection.
-      return { ...slice, board: { ...slice.board, [move.to]: player }, moves: slice.moves + 1, lastPlayer: player }
+      // `lastPlaced` is what the bridge policy answers: a rollout can only
+      // maintain a connection if it knows which cell was just taken.
+      return { ...slice, board: { ...slice.board, [move.to]: player }, moves: slice.moves + 1, lastPlayer: player, lastPlaced: move.to }
     },
 
     checkWin(slice) {
@@ -182,6 +185,22 @@ export function createHexPlugin(variantConfig = {}, context = {}) {
       }
       for (let player = 0; player < 2; player++) if (connects(slice.board, player)) return player
       return null
+    },
+
+    // Which edges this seat is trying to join, in words.
+    //
+    // A Hex board is a rhombus in one uniform colour, and nothing on it says
+    // which pair of sides is yours. Every published set colours them, because
+    // the game is unreadable otherwise. Colour alone will not do for Y, where
+    // both players need all three sides and there is no owner to colour, so the
+    // objective is stated instead - which is true on either board.
+    describeSeat(slice, seat) {
+      const need = targets[seat]
+      if (!need || need.length < 2) return null
+      const shared = targets.every(t => t && t.join() === need.join())
+      const named = need.join(', ')
+      if (shared) return `connect all ${need.length} sides (${named})`
+      return `connect ${need.join(' to ')}`
     },
 
     // The search asks the plugin what a position is worth, because nothing
@@ -208,7 +227,15 @@ createHexPlugin.mcts = true
 // edges are joined. The default cut-off of 100 plies is shorter than the 121
 // cells of the standard board, so every rollout on the board most people play
 // was being abandoned before it could say anything.
-createHexPlugin.searchPolicies = () => ({ maxRolloutDepth: 400 })
+// A rollout that fills the board at random is a decent estimator and a blind
+// one: it does not know a bridge when it sees one. The policy teaches it that
+// and nothing else, which is exactly what MoHex adds to its playouts.
+//
+// It rules nothing out. Every legal move stays reachable.
+createHexPlugin.searchPolicies = ({ random } = {}) => ({
+  maxRolloutDepth: 400,
+  rolloutPolicy: createBridgePolicy(random),
+})
 
 // Stones sit on named hex cells rather than grid squares, so guards that place
 // one piece image per grid cell do not apply.
