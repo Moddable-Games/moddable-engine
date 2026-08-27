@@ -56,32 +56,57 @@ export function createGridTopology(config) {
     return r >= 0 && r < rows && c >= 0 && c < cols && !isVoid(toIndex(r, c))
   }
 
-  function neighbours(coord) {
-    const [r, c] = typeof coord === 'number' ? toRC(coord) : coord
-    const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]]
+  // These four were rebuilt on every call, which for a Go search means a fresh
+  // pair of arrays per direction per cell per rollout ply. A board's directions
+  // are a property of the grid, not of the cell being asked about.
+  const ORTHOGONAL = [[-1, 0], [1, 0], [0, -1], [0, 1]]
+  const DIAGONAL = [[-1, -1], [-1, 1], [1, -1], [1, 1]]
+
+  function adjacentIn(dirs, r, c) {
     const result = []
-    for (const [dr, dc] of dirs) {
-      let nr = r + dr, nc = c + dc
-      if (wrap) [nr, nc] = wrapCoords(nr, nc)
-      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && !isVoid(toIndex(nr, nc))) {
-        result.push(toIndex(nr, nc))
+    for (let i = 0; i < dirs.length; i++) {
+      let nr = r + dirs[i][0], nc = c + dirs[i][1]
+      if (wrap) {
+        const wrapped = wrapCoords(nr, nc)
+        nr = wrapped[0]
+        nc = wrapped[1]
+      }
+      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+        const idx = nr * cols + nc
+        if (!isVoid(idx)) result.push(idx)
       }
     }
     return result
   }
 
-  function diagonalNeighbours(coord) {
-    const [r, c] = typeof coord === 'number' ? toRC(coord) : coord
-    const dirs = [[-1, -1], [-1, 1], [1, -1], [1, 1]]
-    const result = []
-    for (const [dr, dc] of dirs) {
-      let nr = r + dr, nc = c + dc
-      if (wrap) [nr, nc] = wrapCoords(nr, nc)
-      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && !isVoid(toIndex(nr, nc))) {
-        result.push(toIndex(nr, nc))
-      }
+  // Which cells touch which never changes for a given board: no move adds a
+  // cell, removes one, or moves one. Go's flood fills walk this millions of
+  // times in a single search and it was recomputed every time. Cached per
+  // index; a coordinate pair still computes, since only the index form is
+  // hot and callers treat the result as read-only.
+  const _orthoCache = []
+  const _diagCache = []
+
+  function neighbours(coord) {
+    if (typeof coord === 'number') {
+      const cached = _orthoCache[coord]
+      if (cached !== undefined) return cached
+      const computed = adjacentIn(ORTHOGONAL, (coord / cols) | 0, coord % cols)
+      _orthoCache[coord] = computed
+      return computed
     }
-    return result
+    return adjacentIn(ORTHOGONAL, coord[0], coord[1])
+  }
+
+  function diagonalNeighbours(coord) {
+    if (typeof coord === 'number') {
+      const cached = _diagCache[coord]
+      if (cached !== undefined) return cached
+      const computed = adjacentIn(DIAGONAL, (coord / cols) | 0, coord % cols)
+      _diagCache[coord] = computed
+      return computed
+    }
+    return adjacentIn(DIAGONAL, coord[0], coord[1])
   }
 
   function allNeighbours(coord) {
@@ -109,7 +134,11 @@ export function createGridTopology(config) {
   }
 
   function ray(from, dr, dc, maxSteps) {
-    const [r, c] = typeof from === 'number' ? toRC(from) : from
+    // `toRC` allocates a pair for every call, and a slider asks for one ray per
+    // direction per piece per node of the search.
+    const isIdx = typeof from === 'number'
+    const r = isIdx ? (from / cols) | 0 : from[0]
+    const c = isIdx ? from % cols : from[1]
     const origin = toIndex(r, c)
     const result = []
     const limit = maxSteps || Math.max(rows, cols)
@@ -143,11 +172,15 @@ export function createGridTopology(config) {
 
   function leapTargets(from, offsets) {
     const resolved = typeof offsets === 'string' ? getDirections(offsets) : offsets
-    const [r, c] = toRC(from)
+    const r = (from / cols) | 0, c = from % cols
     const targets = []
-    for (const [dr, dc] of resolved) {
-      let nr = r + dr, nc = c + dc
-      if (wrap) [nr, nc] = wrapCoords(nr, nc)
+    for (let i = 0; i < resolved.length; i++) {
+      let nr = r + resolved[i][0], nc = c + resolved[i][1]
+      if (wrap) {
+        const wrapped = wrapCoords(nr, nc)
+        nr = wrapped[0]
+        nc = wrapped[1]
+      }
       if (onBoard(nr, nc)) targets.push(toIndex(nr, nc))
     }
     return targets
@@ -525,10 +558,13 @@ export function createGridTopology(config) {
   }
 
   function step(from, direction) {
-    const [dr, dc] = direction
-    const [r, c] = toRC(from)
-    let nr = r + dr, nc = c + dc
-    if (wrap) [nr, nc] = wrapCoords(nr, nc)
+    const dr = direction[0], dc = direction[1]
+    let nr = ((from / cols) | 0) + dr, nc = (from % cols) + dc
+    if (wrap) {
+      const wrapped = wrapCoords(nr, nc)
+      nr = wrapped[0]
+      nc = wrapped[1]
+    }
     if (!onBoard(nr, nc)) return null
     return toIndex(nr, nc)
   }

@@ -102,6 +102,11 @@ export function createHexPlugin(variantConfig = {}, context = {}) {
 
   return {
     sliceName: 'hex',
+    // `applyMove` returns a new slice and does not touch the one it is handed,
+    // so the search does not have to hand it a private copy. Proved rather than
+    // asserted: `applymove-is-pure.test.js` plays every playable variant and
+    // fails if any of them changes the slice it was given.
+    pureApplyMove: true,
     pieceTypes: ['stone'],
     vocabulary: { stone: { symbols: { 0: 'b', 1: 'w' } } },
     config,

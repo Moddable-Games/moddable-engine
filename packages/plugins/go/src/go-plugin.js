@@ -105,6 +105,14 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
     return slice.previousStates.includes(boardKey(board))
   }
 
+  // The same question asked against a set built once, rather than a linear scan
+  // of the history for every candidate on the board. The history grows as the
+  // game goes on, so the old shape was cells times history, per move
+  // generation.
+  function violatesSuperkoIn(previous, board) {
+    return previous.has(boardKey(board))
+  }
+
   function simulatePlacement(coord, slice, full) {
     const board = [...slice.board]
     const playerIndex = full && full.__players ? full.__players.currentIndex : 0
@@ -186,11 +194,25 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
   function defaultGetLegalMoves(slice, full) {
     const moves = config.allowPass === false ? [] : [{ action: 'pass' }]
 
+    const previous = (config.superko && slice.previousStates)
+      ? new Set(slice.previousStates)
+      : null
+    const annotates = config.captures !== false
+
     for (let i = 0; i < slice.board.length; i++) {
       if (slice.board[i] !== null || i === slice.ko) continue
       if (!config.suicideAllowed && wouldBeSuicide(i, slice, full)) continue
-      if (config.superko && slice.previousStates && violatesSuperko(i, slice, full)) continue
-      moves.push(annotateMove(i, slice, full))
+
+      // One simulation per candidate. The superko test and the capture
+      // annotation both need to know what the board would look like after this
+      // stone, and each used to work it out for itself, so every playable point
+      // was simulated twice on the way to being offered once.
+      const sim = (previous || annotates) ? simulatePlacement(i, slice, full) : null
+
+      if (previous && violatesSuperkoIn(previous, sim.board)) continue
+
+      if (!annotates || sim.captured.length === 0) moves.push({ coord: i })
+      else moves.push({ coord: i, wouldCapture: true, captures: sim.captured })
     }
 
     return hooks.moveFilter(moves, slice, full)
@@ -330,12 +352,28 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
     return captured[0]
   }
 
+  // One character per point, for the superko history.
+  //
+  // This was `board.map(...).join('')`, which allocates an array of 361
+  // one-character strings and throws it away, and it is called once per
+  // candidate move per move generation. It was the single largest cost in a Go
+  // search, at a quarter of the whole profile.
   function boardKey(board) {
-    return board.map(c => c === null ? '.' : c[0]).join('')
+    let key = ''
+    for (let i = 0; i < board.length; i++) {
+      const cell = board[i]
+      key += cell === null ? '.' : cell[0]
+    }
+    return key
   }
 
   return {
     sliceName: 'go',
+    // `applyMove` returns a new slice and does not touch the one it is handed,
+    // so the search does not have to hand it a private copy. Proved rather than
+    // asserted: `applymove-is-pure.test.js` plays every playable variant and
+    // fails if any of them changes the slice it was given.
+    pureApplyMove: true,
     pieceTypes: ['stone'],
     vocabulary: {
       // b and w match the vocabulary the go hub declares in moddable-rules, so

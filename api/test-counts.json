@@ -1,7 +1,7 @@
 {
-  "tests": 5723,
-  "passed": 5717,
+  "tests": 6346,
+  "passed": 6340,
   "skipped": 6,
-  "suites": 168,
+  "suites": 174,
   "snapshots": 334
 }

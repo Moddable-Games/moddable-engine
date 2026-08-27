@@ -158,6 +158,11 @@ export function createMorrisPlugin(variantConfig = {}, context = {}) {
 
   return {
     sliceName: 'morris',
+    // `applyMove` returns a new slice and does not touch the one it is handed,
+    // so the search does not have to hand it a private copy. Proved rather than
+    // asserted: `applymove-is-pure.test.js` plays every playable variant and
+    // fails if any of them changes the slice it was given.
+    pureApplyMove: true,
     pieceTypes: ['man'],
     vocabulary: { man: { symbols: { 0: 'w', 1: 'b' } } },
     config,

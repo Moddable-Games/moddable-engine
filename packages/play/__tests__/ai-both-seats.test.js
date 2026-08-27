@@ -9,16 +9,37 @@
  * This catches the class of bugs where the AI works as one seat but
  * fails as the other (Turkish IV, Go, seat-inversion issues).
  */
+import { readFileSync } from 'fs'
+import { join } from 'path'
 import { createGame, createAI, listVariants } from '../src/sdk.js'
 import { getFamilies } from '../src/play.js'
 import '../test-helpers/setup-rules-reader.js'
+import '../src/bootstrap-plugins.js'
 import '../../plugins/chess/index.js'
 import '../../plugins/go/index.js'
 import '../../plugins/draughts/index.js'
 import '../../plugins/xiangqi/index.js'
 import '../../plugins/shogi/index.js'
 
-const AI_FAMILIES = ['chess', 'go', 'draughts', 'xiangqi', 'shogi']
+// This was a hand-written list of five families.
+//
+// Hex, morris, mancala, reversi and landlords shipped playable and were not on
+// it, so the guard whose entire job is checking that the AI works never looked
+// at them. Hex was then found to have no evaluator registered at all: every
+// position on the board scored zero and the search returned whichever move came
+// back first, which is how it lost every game it played second against a
+// uniformly random opponent. This file was green throughout.
+//
+// The list now comes from the manifest, so a family is covered the day it
+// becomes playable and nobody has to remember.
+const MANIFEST = JSON.parse(
+  readFileSync(join(process.cwd(), 'play', 'playability-manifest.json'), 'utf8')
+)
+const AI_FAMILIES = [...new Set(MANIFEST.filter(e => e.playable).map(e => e.family))].sort()
+
+// A floor, because `if (variants.length === 0) continue` below means a family
+// that resolves to nothing disappears without saying so.
+const FAMILY_FLOOR = 10
 
 const SKIP = new Set([
   'chess:duckChess',
@@ -27,6 +48,16 @@ const SKIP = new Set([
   'go:one-colour-go',
   'go:stoical-go',
 ])
+
+describe('the both-seats guard covers what ships', () => {
+  it('reads the family list from the manifest, not from a literal', () => {
+    expect(AI_FAMILIES.length).toBeGreaterThanOrEqual(FAMILY_FLOOR)
+  })
+
+  it.each(AI_FAMILIES)('%s resolves to at least one variant', (family) => {
+    expect(listVariants(family).length).toBeGreaterThan(0)
+  })
+})
 
 for (const family of AI_FAMILIES) {
   const variants = listVariants(family)

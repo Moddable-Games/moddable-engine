@@ -1,7 +1,20 @@
 import { createGoPlayoutPolicy } from '../src/playout-policy.js'
+import { createRng } from '../../../core/index.js'
 import { createMCTS, createSimulator } from '../../../ai/index.js'
 import { createGoPlugin } from '../index.js'
 import { createGridTopology } from '../../../topologies/grid/index.js'
+
+// Two of the assertions below compare a smart rollout against a random one and
+// declare the smart one better. That is a statistical claim, and it was drawing
+// from the ambient generator: the same code passed or failed depending on the
+// draw. It failed once during this session and passed on a rerun with no change
+// in between, which is a red build nobody can reproduce and nobody learns
+// anything from. The policy under test already takes an injected generator for
+// this exact reason, and the purity guard exists to keep ambient randomness out
+// of the engine. The tests are held to the same rule now.
+const SEED = 20260827
+const testRng = createRng(SEED)
+const rand = () => testRng.next()
 
 function createGoSimulator(size = 9) {
   const topology = createGridTopology({ type: 'grid', rows: size, cols: size })
@@ -39,7 +52,7 @@ function rolloutWithPolicy(simulator, state, rootPlayer, policyFn) {
 
     const move = policyFn
       ? policyFn(current, player, moves)
-      : moves[Math.floor(Math.random() * moves.length)]
+      : moves[Math.floor(rand() * moves.length)]
 
     const { state: newState, continueTurn } = simulator.applyMove(current, move, player)
     current = newState
@@ -284,7 +297,7 @@ describe('Go playout policy', () => {
           if (terminal.over) { terminated = true; break }
           const moves = simulator.getLegalMoves(current, player)
           if (moves.length === 0) { terminated = true; break }
-          const move = moves[Math.floor(Math.random() * moves.length)]
+          const move = moves[Math.floor(rand() * moves.length)]
           const { state: ns, continueTurn } = simulator.applyMove(current, move, player)
           current = ns
           player = simulator.nextPlayer(player, continueTurn)
