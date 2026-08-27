@@ -310,3 +310,48 @@ describe('describeMove', () => {
     expect(p.describeMove({ action: 'pay-fine' }, slice, slice, 0)).toMatch(/^pay fine \$\d+$/)
   })
 })
+
+// What the interface shows beside each player's name.
+//
+// The whole game is an argument about wealth and none of it was on screen: a
+// player could buy lots, pay rent, collect wages and finish five circuits
+// without ever being told what any of it had done to their money.
+describe('describeSeat', () => {
+  const fresh = () => {
+    const p = createLandlordsPlugin({ board: '1904-patent' })
+    return { p, slice: p.init({}, {}) }
+  }
+
+  it('reports cash for a seat that has done nothing yet', () => {
+    const { p, slice } = fresh()
+    const line = p.describeSeat(slice, 0)
+    expect(line).toContain('$500')
+    expect(line).toMatch(/circuit 1\/5/)
+  })
+
+  it('counts what a seat owns', () => {
+    const { p, slice } = fresh()
+    const owned = { ...slice, owners: { 3: 0, 7: 0, 11: 1 }, charters: { 5: 0 } }
+    const line = p.describeSeat(owned, 0)
+    expect(line).toContain('2 lots')
+    expect(line).toContain('1 franchise')
+    expect(p.describeSeat(owned, 1)).toContain('1 lot')
+    expect(p.describeSeat(owned, 1)).not.toContain('lots')
+  })
+
+  it('says when a seat is in jail', () => {
+    const { p, slice } = fresh()
+    expect(p.describeSeat({ ...slice, jailed: { 0: true } }, 0)).toContain('in jail')
+    expect(p.describeSeat(slice, 0)).not.toContain('in jail')
+  })
+
+  it('reports wealth, which is what the game is won on', () => {
+    const { p, slice } = fresh()
+    const withLot = { ...slice, owners: { 3: 0 } }
+    const space = BOARDS.boards['1904-patent'].spaces.find(s => s.pos === 3)
+    const line = p.describeSeat(withLot, 0)
+    expect(line).toMatch(/worth \d+/)
+    // Holding a lot is worth more than the cash alone.
+    expect(Number(/worth (\d+)/.exec(line)[1])).toBe(500 + (space.price || 0))
+  })
+})

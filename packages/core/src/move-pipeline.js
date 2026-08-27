@@ -21,6 +21,22 @@ export function createPipeline(registry, store, history, playerSystem, eventBus)
     let continueTurn = false
     for (const plugin of plugins) {
       if (typeof plugin.applyMove === 'function') {
+        // Whether a move earns another turn can depend on the position BEFORE
+        // it is applied. Kalah's rule is that a last seed landing in your own
+        // store means you go again, and once the move has been applied there is
+        // no longer a "before" to ask about, so the plugin is asked first.
+        //
+        // `continuesTurn` was implemented on the mancala plugin, declared in
+        // kalah's and congkak's frontmatter as `bonusTurnOnStore: true`, and
+        // called by nothing at all. The rule simply did not happen: the turn
+        // passed to the opponent every time, in every variant that has it.
+        if (typeof plugin.continuesTurn === 'function') {
+          try {
+            if (plugin.continuesTurn(move, store.get(plugin.sliceName), store.getAll())) continueTurn = true
+          } catch (err) {
+            console.warn(`[move-pipeline] ${plugin.sliceName}.continuesTurn threw:`, err)
+          }
+        }
         const result = plugin.applyMove(move, store.get(plugin.sliceName), store.getAll())
         if (result === undefined) continue
         if (result !== null && typeof result === 'object' && 'state' in result) {

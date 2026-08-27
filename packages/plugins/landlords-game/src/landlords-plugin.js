@@ -245,6 +245,25 @@ export function createLandlordsPlugin(variantConfig = {}, context = {}) {
       return resolveLanding(next, player)
     },
 
+    // What each player has, for the interface to show beside their name.
+    //
+    // The whole game is an argument about wealth - the winner is whoever holds
+    // the most at the end - and none of it was on screen. A player could buy a
+    // lot, pay rent, collect wages and a legacy, and finish five circuits
+    // without ever being told what any of it had done to their money.
+    describeSeat(slice, seat) {
+      if (!slice || !Array.isArray(slice.cash)) return null
+      const lots = Object.values(slice.owners || {}).filter(o => o === seat).length
+      const charters = Object.values(slice.charters || {}).filter(o => o === seat).length
+      const parts = [`$${slice.cash[seat]}`]
+      if (lots) parts.push(`${lots} lot${lots === 1 ? '' : 's'}`)
+      if (charters) parts.push(`${charters} franchise${charters === 1 ? '' : 's'}`)
+      if (slice.luxuries && slice.luxuries[seat]) parts.push(`luxuries ${slice.luxuries[seat]}`)
+      parts.push(`circuit ${Math.min((slice.circuits?.[seat] || 0) + 1, config.circuits)}/${config.circuits}`)
+      if (slice.jailed && slice.jailed[seat]) parts.push('in jail')
+      return `${parts.join(' · ')}  (worth ${wealth(slice, seat)})`
+    },
+
     // What the move log says. Without this a turn read only "roll": the dice
     // were rolled inside applyMove and never shown, and the checker moved
     // without saying from where, to where, or what it cost - so a player could

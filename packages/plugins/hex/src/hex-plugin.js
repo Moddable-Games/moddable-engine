@@ -37,6 +37,8 @@ export function createHexPlugin(variantConfig = {}, context = {}) {
   // where the board is built, because the adjacency cannot change: no stone
   // ever moves and no cell is ever added.
   let adjacency = new Map()
+  let edgeLists = {}
+  const EMPTY = []
 
   // Which edges each player is trying to join. A rhombus gives each player one
   // opposing pair; a triangle gives both players the same three sides, so the
@@ -66,6 +68,8 @@ export function createHexPlugin(variantConfig = {}, context = {}) {
     targets = connectionTargets(Object.keys(edges))
     adjacency = new Map()
     for (const cell of cells) adjacency.set(cell, topology.neighbours(cell))
+    edgeLists = {}
+    for (const [name, set] of Object.entries(edges)) edgeLists[name] = [...set]
   }
 
   const currentPlayer = full => (full && full.__players ? full.__players.currentIndex : 0)
@@ -83,21 +87,33 @@ export function createHexPlugin(variantConfig = {}, context = {}) {
     const seen = new Set()
     const queue = []
     for (const cell of start) if (board[cell] === player) { queue.push(cell); seen.add(cell) }
+    // Nothing of this player's on the starting edge means nothing to search.
+    if (queue.length === 0) return false
 
     while (queue.length) {
       const cell = queue.pop()
-      for (const next of topology.neighbours(cell)) {
-        if (seen.has(next)) continue
-        if (board[next] !== player) continue
+      // The cached adjacency, not `topology.neighbours`, which parses the
+      // "q,r" key out of a string and builds a fresh array every call. This
+      // loop runs on every ply of every rollout.
+      const around = adjacency.get(cell) || EMPTY
+      for (let i = 0; i < around.length; i++) {
+        const next = around[i]
+        if (seen.has(next) || board[next] !== player) continue
         seen.add(next)
         queue.push(next)
       }
     }
 
-    return need.slice(1).every(name => {
-      const edge = edges[name]
-      return edge && [...edge].some(cell => seen.has(cell))
-    })
+    for (let i = 1; i < need.length; i++) {
+      const edge = edgeLists[need[i]]
+      if (!edge) return false
+      let reached = false
+      for (let j = 0; j < edge.length; j++) {
+        if (seen.has(edge[j])) { reached = true; break }
+      }
+      if (!reached) return false
+    }
+    return true
   }
 
   return {
@@ -120,7 +136,13 @@ export function createHexPlugin(variantConfig = {}, context = {}) {
     },
 
     getLegalMoves(slice, full) {
-      const moves = cells.filter(c => slice.board[c] == null).map(c => ({ action: 'place', to: c }))
+      // One pass. `filter().map()` builds two arrays of up to 121 entries each,
+      // on every ply of every rollout.
+      const moves = []
+      for (let i = 0; i < cells.length; i++) {
+        const cell = cells[i]
+        if (slice.board[cell] == null) moves.push({ action: 'place', to: cell })
+      }
       // The pie rule: after the opening stone the second player may take it
       // over instead of replying, which is what stops a strong first move from
       // deciding the game.
@@ -139,12 +161,25 @@ export function createHexPlugin(variantConfig = {}, context = {}) {
       if (move.action === 'swap') {
         const board = { ...slice.board }
         for (const cell of cells) if (board[cell] != null) board[cell] = player
-        return { ...slice, board, moves: slice.moves + 1, swapped: true }
+        return { ...slice, board, moves: slice.moves + 1, swapped: true, lastPlayer: player }
       }
-      return { ...slice, board: { ...slice.board, [move.to]: player }, moves: slice.moves + 1 }
+      // Who moved, so the win check does not have to flood fill for a player
+      // who cannot possibly have just completed a connection.
+      return { ...slice, board: { ...slice.board, [move.to]: player }, moves: slice.moves + 1, lastPlayer: player }
     },
 
     checkWin(slice) {
+      // A connection is completed by placing a stone, so only the player who
+      // just placed one can have completed it. Testing both, on every ply of
+      // every rollout, was the single largest cost in a Hex search at 27% of
+      // the profile: two flood fills over the whole board where one will do,
+      // and one of them for a player who had not moved.
+      //
+      // A slice with no `lastPlayer` has not been moved in yet - a loaded
+      // position, or the opening - so both are still checked.
+      if (typeof slice.lastPlayer === 'number') {
+        return connects(slice.board, slice.lastPlayer) ? slice.lastPlayer : null
+      }
       for (let player = 0; player < 2; player++) if (connects(slice.board, player)) return player
       return null
     },

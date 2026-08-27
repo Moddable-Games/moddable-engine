@@ -29,7 +29,7 @@
     "./draughts-sdk": "./packages/plugins/draughts/index.js"
   },
   "scripts": {
-    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "test": "MODDABLE_PUBLISH_TEST_COUNTS=1 node --experimental-vm-modules node_modules/.bin/jest",
     "test:fast": "node scripts/run-tests.mjs fast",
     "test:slow": "node scripts/run-tests.mjs slow",
     "test:perf": "node scripts/run-tests.mjs perf",

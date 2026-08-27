@@ -21,7 +21,14 @@ import { SLOW_SUITES, PERF_SUITE } from '../jest.config.js'
 const tier = process.argv[2] || 'fast'
 const passthrough = process.argv.slice(3)
 
-const env = { ...process.env, NODE_OPTIONS: [process.env.NODE_OPTIONS, '--experimental-vm-modules'].filter(Boolean).join(' ') }
+// Only a run over everything is allowed to publish the project's test count.
+// The `all` tier says so; `fast`, `slow`, `perf` and `related` do not, and
+// neither does a bare `npx jest`.
+const env = {
+  ...process.env,
+  NODE_OPTIONS: [process.env.NODE_OPTIONS, '--experimental-vm-modules'].filter(Boolean).join(' '),
+  MODDABLE_PUBLISH_TEST_COUNTS: tier === 'all' ? '1' : '0',
+}
 
 const escaped = p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 

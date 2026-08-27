@@ -161,13 +161,22 @@
   color: var(--text-muted, #8a8580);
   line-height: 1.6;
   padding: 8px 0;
-  max-height: 120px;
+  max-height: 160px;
   overflow-y: auto;
   word-wrap: break-word;
 }
 
 .game-play-history .move-pair {
-  white-space: nowrap;
+  /* `nowrap` suits "1. e4 e5" and hides a landlords turn, which reads
+     "roll 4+3: 24 to 31 NO TRESPASSING to 11 JAIL". Those ran off the right
+     edge of a box with no horizontal scrollbar, so most of the game was
+     simply not visible. */
+  display: block;
+  white-space: normal;
+}
+
+.game-play-history .move-pair + .move-pair {
+  margin-top: 2px;
 }
 
 .game-play-export {
@@ -358,4 +367,28 @@ body.embed-mode .game-play-board svg {
   height: 100%;
   max-height: 100vh;
   object-fit: contain;
+}
+
+/* What each player holds. A family says this for itself through
+   `describeSeat`, because only the plugin knows whether a seat has money,
+   captured seeds, or nothing worth showing. */
+.game-play-seats {
+  padding: 8px 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-muted, #8a8580);
+}
+
+.game-play-seats .seat-line {
+  padding: 2px 0;
+}
+
+.game-play-seats .seat-line.active .seat-name {
+  color: var(--accent, #7aa2f7);
+  font-weight: 600;
+}
+
+.game-play-seats .seat-name {
+  display: inline-block;
+  min-width: 58px;
 }

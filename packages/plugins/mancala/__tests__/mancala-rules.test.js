@@ -1,4 +1,7 @@
 import { createMancalaPlugin } from '../index.js'
+import { createGameForFamily } from '../../../play/src/play.js'
+import '../../../play/src/bootstrap-plugins.js'
+import '../../../play/test-helpers/setup-rules-reader.js'
 
 // Positions are hand-checked against the rules text in moddable-rules rather
 // than captured from the implementation, so a wrong capture rule fails here
@@ -112,5 +115,61 @@ describe('sungka', () => {
     const { plugin, slice } = position(SUNGKA, [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
     const after = plugin.applyMove({ action: 'sow', pit: 0 }, slice, turn(0))
     expect([after.board[0], after.board[1], after.board[2]]).toEqual([0, 0, 1])
+  })
+})
+
+// The bonus turn, which is a core Kalah rule and which never once happened.
+//
+// "If the last seed lands in your own store, you take another turn." Kalah's
+// frontmatter declares `bonusTurnOnStore: true`, the plugin implements
+// `continuesTurn()` and returns the right answer, and nothing in the engine
+// called it. The turn passed to the opponent every time, in every variant that
+// has the rule.
+//
+// It has to be asked BEFORE the move is applied, because the question is about
+// where this move's last seed lands, and once the move is applied there is no
+// "before" left to ask about. That is why it is its own hook rather than a
+// field on the result.
+describe('a last seed in your own store earns another turn', () => {
+  const setup = (variant) => {
+    const game = createGameForFamily('mancala', { variant })
+    return { game, first: game.currentPlayer() }
+  }
+
+  it('kalah: sowing pit 2 from the opening ends in the store and the turn stays', () => {
+    const { game, first } = setup('kalah')
+    const perSide = game.getState().slice._pitsPerSide
+    // Four seeds from pit 2 reach pits 3, 4, 5 and then the store.
+    const result = game.applyMove({ action: 'sow', pit: 2, to: 'pit-2' })
+    expect(game.getState().slice.board[perSide * 2]).toBe(1)
+    expect(result.continueTurn).toBe(true)
+    expect(game.currentPlayer()).toBe(first)
+  })
+
+  it('kalah: a sow that ends in a pit passes the turn', () => {
+    const { game, first } = setup('kalah')
+    const perSide = game.getState().slice._pitsPerSide
+    const result = game.applyMove({ action: 'sow', pit: 0, to: 'pit-0' })
+    expect(game.getState().slice.board[perSide * 2]).toBe(0)
+    expect(result.continueTurn).toBe(false)
+    expect(game.currentPlayer()).not.toBe(first)
+  })
+
+  it('oware has no store and no bonus turn, so the turn always passes', () => {
+    const { game, first } = setup('oware')
+    const moves = game.getLegalMoves()
+    const result = game.applyMove(moves[0])
+    expect(result.continueTurn).toBe(false)
+    expect(game.currentPlayer()).not.toBe(first)
+  })
+
+  // The sowing itself, checked seed by seed against the published rule: one
+  // seed per pit anticlockwise, into your own store, skipping the opponent's.
+  it('kalah sows anticlockwise through its own store', () => {
+    const { game } = setup('kalah')
+    game.applyMove({ action: 'sow', pit: 5, to: 'pit-5' })
+    // From pit 5 the next four places are the store, then the opponent's
+    // first three pits.
+    expect(game.getState().slice.board).toEqual([4, 4, 4, 4, 4, 0, 5, 5, 5, 4, 4, 4, 1, 0])
   })
 })

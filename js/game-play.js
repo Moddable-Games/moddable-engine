@@ -943,7 +943,12 @@ export function createPlaySession(options = {}) {
   function moveToNotation(move, playerName) {
     const described = describeFromPlugin(move, playerName)
     if (described) return described
-    if (family === 'chess') {
+    // Algebraic notation is a two-player convention, and its disambiguation
+    // assumes one other army. Djambi has four, all with the same piece types,
+    // so SAN disambiguated against three opponents at once and produced
+    // "M9d9" and "Maa4" - a log nobody can read. Plain coordinates below say
+    // what happened.
+    if (family === 'chess' && playerNames().length <= 2) {
       const board = boardSnapshot || game.getState().slice?.board
       const topo = resolvedBoard?.topology
       const legal = boardSnapshot?._legalMoves || null
@@ -968,6 +973,28 @@ export function createPlaySession(options = {}) {
     return boardToSetup(game.getState().slice, resolvedBoard.topology)
   }
 
+  // Asked from inside the session, because the plugin and the game live here.
+  // The first attempt at this reached for `game` from the outer interface
+  // scope, where it does not exist, and took the whole play page down with
+  // `ReferenceError: game is not defined`.
+  function describeSeats() {
+    if (!game) return []
+    let plugin = null
+    try { plugin = pluginFor() } catch { return [] }
+    if (!plugin || typeof plugin.describeSeat !== 'function') return []
+    const slice = game.getState().slice
+    const names = playerNames()
+    const current = game.currentPlayer()
+    const rows = []
+    for (let seat = 0; seat < names.length; seat++) {
+      let detail = null
+      try { detail = plugin.describeSeat(slice, seat) } catch { detail = null }
+      if (!detail) continue
+      rows.push({ name: names[seat], detail, active: names[seat] === current })
+    }
+    return rows
+  }
+
   const session = {
     get controller() { return ctrl },
     get game() { return game },
@@ -981,6 +1008,7 @@ export function createPlaySession(options = {}) {
     start,
     draw,
     summarise,
+    describeSeats,
     pass: () => ctrl.performAction('pass'),
     resign: () => ctrl.performAction('resign'),
     undo: () => ctrl.undo(),
@@ -1204,6 +1232,12 @@ export async function initGamePlay(container, defaults = {}) {
 
   rightSidebar.appendChild(handEl)
 
+  // What each player currently has, when the family can say. A game about money
+  // showed none of it.
+  const seatsEl = document.createElement('div')
+  seatsEl.className = 'game-play-seats'
+  rightSidebar.appendChild(seatsEl)
+
   const historyEl = document.createElement('div')
   historyEl.className = 'game-play-history'
   rightSidebar.appendChild(historyEl)
@@ -1283,7 +1317,7 @@ export async function initGamePlay(container, defaults = {}) {
 
   function updateRules() {
     const meta = session?.variantMeta
-    renderRulesPanel(rulesEl, meta || {})
+    renderRulesPanel(rulesEl, { ...(meta || {}), family: config.family, variant: config.variant })
   }
 
   // The other half of the round-trip. Without it a draft could be played but
@@ -1316,21 +1350,47 @@ export async function initGamePlay(container, defaults = {}) {
     statusEl.textContent = info.text || ''
     statusEl.classList.toggle('game-over', !!info.gameOver)
     renderActions()
+    renderSeats()
     renderHistory()
+  }
+
+  function renderSeats() {
+    const rows = session && session.describeSeats ? session.describeSeats() : []
+    if (!rows.length) { seatsEl.innerHTML = ''; return }
+    seatsEl.innerHTML = rows.map(r =>
+      `<div class="seat-line${r.active ? ' active' : ''}">` +
+      `<span class="seat-name">${capitalize(r.name)}</span> ` +
+      `<span class="seat-detail">${r.detail}</span></div>`
+    ).join('')
   }
 
   function renderHistory() {
     if (!session) { historyEl.innerHTML = ''; return }
     const moves = session.history
     if (moves.length === 0) { historyEl.innerHTML = ''; return }
-    const pairs = []
-    for (let i = 0; i < moves.length; i += 2) {
-      const num = Math.floor(i / 2) + 1
-      const w = moves[i]?.notation || ''
-      const b = moves[i + 1]?.notation || ''
-      pairs.push(`<span class="move-pair">${num}. ${w} ${b}</span>`)
+    // A round is one move per seat, not always two. Djambi has four armies, and
+    // pairing its log two at a time numbered every half-round as a full one and
+    // put two different players' moves under the same number.
+    // Through the session, not the closure `playerNames`: that one lives inside
+    // the session and is not in scope here. Reaching for it silently threw and
+    // the whole move log stopped rendering, which is the second time this
+    // afternoon that a sidebar helper grabbed the wrong scope.
+    const perRound = Math.max(2, (session.playerNames || []).length || 2)
+    const rounds = []
+    for (let i = 0; i < moves.length; i += perRound) {
+      const num = Math.floor(i / perRound) + 1
+      const inRound = []
+      for (let seat = 0; seat < perRound; seat++) {
+        const entry = moves[i + seat]
+        if (entry) inRound.push(entry.notation || '')
+      }
+      rounds.push(`<span class="move-pair">${num}. ${inRound.join(' ')}</span>`)
     }
-    historyEl.innerHTML = pairs.join(' ')
+    historyEl.innerHTML = rounds.join(' ')
+    // The newest move is the one worth seeing. This box scrolls, and it never
+    // scrolled, so a long game showed only its opening and looked finished
+    // after six rounds when it had played forty.
+    historyEl.scrollTop = historyEl.scrollHeight
   }
 
   function renderActions() {

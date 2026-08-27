@@ -18,17 +18,26 @@ const { join, resolve } = require('path')
 class TestCountReporter {
   constructor(globalConfig, options) {
     this.root = (options && options.root) || process.cwd()
-    // A partial run must not overwrite the published figure with its own
-    // subset. Only a run over the whole suite is allowed to publish.
-    this.partial = Boolean(
-      (globalConfig.testPathPattern && globalConfig.testPathPattern !== '') ||
-      (globalConfig.testNamePattern && globalConfig.testNamePattern !== '') ||
-      (globalConfig.testPathIgnorePatterns || []).some(p => p.includes('__tests__'))
-    )
+
+    // Publishing is opt-in, and the reason is a bug this guard already had.
+    //
+    // The first version tried to WORK OUT whether a run was partial, by
+    // sniffing `testPathPattern`, `testNamePattern` and the ignore list. That
+    // caught `npx jest <one file>`, which is the case it was tested against, and
+    // missed `--testPathIgnorePatterns` entirely, because CLI ignore patterns do
+    // not arrive on `globalConfig`. So `npm run test:fast` published its own
+    // subset - 5,735 tests across 169 suites - as the project's figure, which is
+    // precisely the class of wrong number this reporter exists to prevent.
+    //
+    // Guessing was the mistake. A run says whether it is the whole suite, and
+    // only `npm test` and `npm run test:all` say so. Anything else - a tier, a
+    // single file, a watch, an editor integration - stays silent by default and
+    // cannot lower the published figure to whatever it happened to run.
+    this.mayPublish = process.env.MODDABLE_PUBLISH_TEST_COUNTS === '1'
   }
 
   onRunComplete(_contexts, results) {
-    if (this.partial) return
+    if (!this.mayPublish) return
     if (results.numFailedTests > 0 || results.numRuntimeErrorTestSuites > 0) return
 
     const snapDir = resolve(this.root, 'snapshots')

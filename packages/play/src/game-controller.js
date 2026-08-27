@@ -1,4 +1,4 @@
-import { interactionModelFor, availableActions } from './interaction.js'
+import { interactionModelFor, availableActions, modelForMoves } from './interaction.js'
 import { findFamilyPlugin } from './find-plugin.js'
 import { getFamilies } from './play.js'
 
@@ -135,17 +135,17 @@ export function createGameController(game, opts = {}) {
       }
     }
 
-    const result = interaction.handleClick(pos, {
+    // The model is chosen from the moves actually on offer, because a family
+    // can need more than one over a game. Morris places, then moves.
+    const model = modelForMoves(interaction, moves)
+
+    const result = model.handleClick(pos, {
       selected,
       chainAnchor,
       dropType,
       moves,
       playerIndex: getPlayerIndex(),
-      getOwnerAt: (p) => {
-        const piece = getPieceAt(p)
-        if (!piece) return null
-        return typeof piece.owner === 'number' ? piece.owner : getPlayerIndexOf(piece.owner)
-      },
+      getOwnerAt: (p) => ownerAt(p),
     })
 
     applyInteractionResult(result, moves)
@@ -158,7 +158,7 @@ export function createGameController(game, opts = {}) {
       case 'select': {
         selected = result.pos
         const piece = getPieceAt(result.pos)
-        if (onSelect) onSelect(result.pos, piece, interaction.targetsFor(result.pos, moves))
+        if (onSelect) onSelect(result.pos, piece, modelForMoves(interaction, moves).targetsFor(result.pos, moves))
         render()
         break
       }
@@ -247,12 +247,32 @@ export function createGameController(game, opts = {}) {
     return idx === -1 ? null : idx
   }
 
+  // Who owns what is in a cell. A cell is not always an object: chess stores a
+  // piece with an `owner`, morris and hex store the seat index itself, and some
+  // boards store a colour name. Reading `.owner` off a number gives undefined,
+  // which is how every morris piece came to have no owner and no piece could be
+  // selected to move.
+  function ownerAt(pos) {
+    const cell = getPieceAt(pos)
+    if (cell === null || cell === undefined) return null
+    if (typeof cell === 'number') return cell
+    if (typeof cell === 'string') return getPlayerIndexOf(cell)
+    if (typeof cell.owner === 'number') return cell.owner
+    if (typeof cell.owner === 'string') return getPlayerIndexOf(cell.owner)
+    return null
+  }
+
   function getPieceAt(pos) {
     const sliceName = findBoardSlice()
     if (!sliceName) return null
     const state = game.getState(sliceName)
     if (!state || !state.board) return null
-    return state.board[pos] || null
+    // `|| null` again. Morris and hex store a bare seat index in the cell, so
+    // every piece belonging to seat 0 read as an empty square and the player
+    // could not select one. An empty cell is `null` or `undefined`; zero is a
+    // player.
+    const cell = state.board[pos]
+    return cell === undefined ? null : cell
   }
 
   function findBoardSlice() {

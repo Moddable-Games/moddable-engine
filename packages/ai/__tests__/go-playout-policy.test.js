@@ -1,8 +1,23 @@
 import { createGoPlayoutPolicy } from '../src/go-playout-policy.js'
+import { createRng } from '../../core/index.js'
 import { createMCTS } from '../src/mcts.js'
 import { createSimulator } from '../src/simulator.js'
 import { createGoPlugin } from '../../plugins/go/src/go-plugin.js'
 import { createGridTopology } from '../../topologies/grid/index.js'
+
+
+// Seeded, for the same reason as its twin in packages/plugins/go: two of the
+// assertions here compare a smart rollout against a random one and declare the
+// smart one better, which is a statistical claim. Drawing from the ambient
+// generator meant the same code passed or failed on the numbers. This one
+// failed the full suite at 42 against 43 - a single game either way.
+//
+// Worth noting that this file and packages/plugins/go/__tests__/playout-policy
+// are near-identical copies of each other, and seeding one of them left the
+// other flaky. See the duplication note on the issue.
+const SEED = 20260827
+const testRng = createRng(SEED)
+const rand = () => testRng.next()
 
 function createGoSimulator(size = 9) {
   const topology = createGridTopology({ type: 'grid', rows: size, cols: size })
@@ -40,7 +55,7 @@ function rolloutWithPolicy(simulator, state, rootPlayer, policyFn) {
 
     const move = policyFn
       ? policyFn(current, player, moves)
-      : moves[Math.floor(Math.random() * moves.length)]
+      : moves[Math.floor(rand() * moves.length)]
 
     const { state: newState, continueTurn } = simulator.applyMove(current, move, player)
     current = newState
@@ -285,7 +300,7 @@ describe('Go playout policy', () => {
           if (terminal.over) { terminated = true; break }
           const moves = simulator.getLegalMoves(current, player)
           if (moves.length === 0) { terminated = true; break }
-          const move = moves[Math.floor(Math.random() * moves.length)]
+          const move = moves[Math.floor(rand() * moves.length)]
           const { state: ns, continueTurn } = simulator.applyMove(current, move, player)
           current = ns
           player = simulator.nextPlayer(player, continueTurn)
