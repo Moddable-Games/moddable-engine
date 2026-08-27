@@ -185,41 +185,46 @@ test.describe('game-play surface — browser assertions', () => {
     expect(moved).toBe(true)
   })
 
-  test('flip/shogi: glyph orientation rotates 180° (ownership indicated by direction)', async ({ page }) => {
+  // Shogi shows ownership by which way a piece points, and engine#122 changed
+  // HOW: the art is pre-rotated, one glyph per side, rather than one glyph
+  // rotated at render time. `standard shogi emits zero rotations` in
+  // `issue-regressions.test.js` is the unit test that records the decision.
+  //
+  // This test was still asserting the old mechanism and had been failing ever
+  // since. It looked exactly like a broken board - and a shogi board where
+  // ownership does not show WOULD be unplayable - so it is rewritten to assert
+  // the property rather than deleted: both sides' glyphs are on the board, and
+  // flipping moves the pieces rather than turning them.
+  test('flip/shogi: both sides have their own glyphs, and flipping does not rotate them', async ({ page }) => {
     await page.goto(BASE + '/play/?family=shogi&variant=minishogi&opponent=human', { waitUntil: 'networkidle' })
     await page.waitForSelector('svg image', { timeout: 15000 })
 
-    // Before flip: gote pieces rotated 180°, sente not rotated
-    // After flip: sente pieces rotated 180°, gote not rotated
-    // Identify by image href (the SVG filename differs per piece type/owner)
+    const glyphs = () => page.locator('#game-play-root svg image').evaluateAll(els =>
+      els.map(e => (e.getAttribute('href') || '').split('/').pop()).filter(Boolean))
+    const positions = () => page.locator('#game-play-root svg image').evaluateAll(els =>
+      els.map(e => `${e.getAttribute('href')}@${e.getAttribute('x')},${e.getAttribute('y')}`).sort())
 
-    const getRotatedHrefs = async () => {
-      return page.locator('svg g[pointer-events="none"] g[transform]').evaluateAll(els =>
-        els.filter(el => el.getAttribute('transform')?.includes('rotate(180'))
-          .map(el => {
-            const img = el.querySelector('image')
-            return img ? img.getAttribute('href') : null
-          })
-          .filter(Boolean)
-          .sort()
-      )
-    }
+    const before = await glyphs()
+    expect(before.length).toBeGreaterThan(0)
 
-    const beforeHrefs = await getRotatedHrefs()
-    expect(beforeHrefs.length).toBeGreaterThan(0)
+    // Pre-rotated art means the two sides use different files. If they did not,
+    // a player could not tell their pieces from their opponent's.
+    const sente = before.filter(g => g.startsWith('0'))
+    const gote = before.filter(g => g.startsWith('1'))
+    expect(sente.length).toBeGreaterThan(0)
+    expect(gote.length).toBeGreaterThan(0)
 
+    const beforePositions = await positions()
     await page.locator('button', { hasText: 'Flip' }).click()
     await page.waitForTimeout(300)
 
-    const afterHrefs = await getRotatedHrefs()
-    expect(afterHrefs.length).toBeGreaterThan(0)
+    // Flipping turns the board round, so the same glyphs are in new places.
+    expect((await glyphs()).sort()).toEqual(before.slice().sort())
+    expect(await positions()).not.toEqual(beforePositions)
 
-    // Different pieces must be rotated after flip (different hrefs)
-    const beforeSet = new Set(beforeHrefs)
-    const afterSet = new Set(afterHrefs)
-    const overlap = [...beforeSet].filter(h => afterSet.has(h))
-    // At most partial overlap (king href may appear in both if same glyph for both colors)
-    expect(overlap.length).toBeLessThan(beforeHrefs.length)
+    // And nothing is rotated, because nothing needs to be.
+    const rotated = await page.locator('#game-play-root svg [transform*="rotate"]').count()
+    expect(rotated).toBe(0)
   })
 
   test('piece recolouring applies filter to images, no circles added', async ({ page }) => {

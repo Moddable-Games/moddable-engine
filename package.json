@@ -30,6 +30,11 @@
   },
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "test:fast": "node scripts/run-tests.mjs fast",
+    "test:slow": "node scripts/run-tests.mjs slow",
+    "test:perf": "node scripts/run-tests.mjs perf",
+    "test:related": "node scripts/run-tests.mjs related",
+    "test:all": "node scripts/run-tests.mjs all",
     "build": "npm run build --workspaces",
     "variant-report": "node --experimental-vm-modules scripts/variant-report.mjs",
     "build:discovery": "node scripts/build-discovery.mjs",

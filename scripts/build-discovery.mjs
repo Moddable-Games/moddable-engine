@@ -75,10 +75,34 @@ for (const family of playableFamilies) {
 }
 
 
-const readmeText = fs.readFileSync(resolve('README.md'), 'utf-8')
-const testCountMatch = readmeText.match(/(\d[\d,]*)\s+tests\s+across\s+(\d+)\s+suites/)
-const testCount = testCountMatch ? parseInt(testCountMatch[1].replace(/,/g, ''), 10) : 0
-const testSuites = testCountMatch ? parseInt(testCountMatch[2], 10) : 0
+// The test count comes from the test run, via the reporter in
+// `scripts/lib/test-count-reporter.cjs`, which writes `api/test-counts.json`
+// whenever the full suite passes.
+//
+// It used to come from a regex over README.md. The first line that matched sat
+// inside a dated changelog entry from July, so `api/stats.json`, `llms.txt` and
+// the site published "1367 tests across 104 suites" for five weeks while the
+// real figures were 6267 and 173. `--check` passed throughout, because it only
+// compared the generated files against the scrape and never asked whether the
+// scrape was true. A number that describes the test suite is now produced by
+// running the test suite, and there is nowhere left to type it by hand.
+const countsPath = resolve('api/test-counts.json')
+let testCount = 0
+let testsPassing = 0
+let testSuites = 0
+let snapshotCount = 0
+if (fs.existsSync(countsPath)) {
+  const counts = JSON.parse(fs.readFileSync(countsPath, 'utf-8'))
+  testCount = counts.tests || 0
+  // The site's card is labelled "Tests passing", so it gets the tests that
+  // passed rather than the tests that ran. Six are skipped.
+  testsPassing = counts.passed || 0
+  testSuites = counts.suites || 0
+  snapshotCount = counts.snapshots || 0
+} else {
+  console.warn('  ! api/test-counts.json is missing. Run `npm test` to produce it.')
+  console.warn('    Publishing zero rather than a number nobody measured.')
+}
 
 const FAMILY_TOPOLOGY = {
   'moddable-chess': 'grid', draughts: 'grid', go: 'grid', reversi: 'grid',
@@ -122,7 +146,9 @@ const stats = {
   topoCounts,
   uniqueTopologies,
   testCount,
+  testsPassing,
   testSuites,
+  snapshotCount,
 }
 
 console.log('Counts from data:')
@@ -131,7 +157,7 @@ console.log(`  Boards: ${stats.boards}`)
 console.log(`  Tiles: ${stats.tiles}`)
 console.log(`  Puzzles: ${stats.puzzles} (${stats.puzzleStandard} standard + ${stats.puzzleVariant} variant)`)
 console.log(`  Playable: ${stats.playableVariants} variants across ${stats.playableFamilies} families`)
-console.log(`  Tests: ${stats.testCount} across ${stats.testSuites} suites`)
+console.log(`  Tests: ${stats.testCount} across ${stats.testSuites} suites, ${stats.snapshotCount} snapshots`)
 console.log(`  Topologies: ${JSON.stringify(stats.topoCounts)}`)
 
 // --- Generate files ---
@@ -157,6 +183,11 @@ const statsJson = {
   playableByFamily: stats.familyCounts,
   variantPluginsByFamily: variantPluginCounts,
   frontmatterOnlyByFamily: frontmatterOnlyCounts,
+  // Measured by the test run, via scripts/lib/test-count-reporter.cjs.
+  tests: stats.testCount,
+  testsPassing: stats.testsPassing,
+  testSuites: stats.testSuites,
+  snapshots: stats.snapshotCount,
 }
 outputs.push({ path: 'api/stats.json', content: JSON.stringify(statsJson, null, 2) + '\n' })
 
@@ -304,7 +335,7 @@ const htmlPatches = [
       [/(\d+) hex terrain sets/g, `${stats.tiles} hex terrain sets`],
       [/(\d+) packages/g, '14 packages'],
       // Stats section: test count
-      [/(<span class="stat-value">)[\d,]+\+?(<\/span>\s*<span class="stat-label">Tests passing<\/span>)/g, `$1${stats.testCount.toLocaleString()}$2`],
+      [/(<span class="stat-value">)[\d,]+\+?(<\/span>\s*<span class="stat-label">Tests passing<\/span>)/g, `$1${stats.testsPassing.toLocaleString()}$2`],
       // Hero lede: variant counts
       [/across (\d+) variants/g, `across ${stats.playableVariants} variants`],
       [/playing chess, go, draughts, shogi, xiangqi, and reversi across \d+ variants/g, `playing chess, go, draughts, shogi, xiangqi, and reversi across ${stats.playableVariants} variants`],

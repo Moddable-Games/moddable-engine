@@ -1549,30 +1549,44 @@ function ownerPrefix(names, idx) {
   return name[0].toLowerCase()
 }
 
+// Every piece image a variant will need, so the Pieces menu can offer only the
+// sets that can draw them.
+//
+// The pieces a variant PLACES are as necessary as the pieces it STARTS with,
+// and `placementPieces` used to be read only when there was no starting
+// position at all. Sittuyin has one: eight pawns a side and an empty back rank,
+// because its rooks, generals and elephants are placed by the players during
+// the opening. So the answer was "this variant needs pawns", every one of the
+// 47 sets in the gallery has pawns, and the menu offered all of them while
+// standard chess, which asks for six real piece types, was correctly cut to 18.
+// Choosing one of the other 29 for sittuyin gives a board with holes in it as
+// soon as the placement phase starts.
+function placementKeys(pluginBlock, resolved, keys) {
+  const placementPieces = pluginBlock.placementPieces
+  if (!placementPieces) return keys
+  const vocab = pluginBlock.vocabulary || resolved?.vocabulary || {}
+  for (const side of placementPieces) {
+    for (const type of side) {
+      const entry = vocab[type]
+      if (entry?.symbols) {
+        const syms = Object.values(entry.symbols)
+        if (syms[0]) keys.add('w' + String(syms[0]).toUpperCase())
+        if (syms[1]) keys.add('b' + String(syms[1]).toUpperCase())
+      } else {
+        const sym = type[0].toUpperCase()
+        keys.add('w' + sym)
+        keys.add('b' + sym)
+      }
+    }
+  }
+  return keys
+}
+
 function getVariantPieceKeys(family, variantKey, fallbackSetup, resolved) {
   const pluginBlock = resolved?.plugins?.[family] || {}
   const fen = pluginBlock.setup || resolved?.setup || fallbackSetup
-  if (typeof fen !== 'string') {
-    const keys = new Set(['wK', 'wP', 'bK', 'bP'])
-    const placementPieces = pluginBlock.placementPieces
-    if (placementPieces) {
-      const vocab = pluginBlock.vocabulary || resolved?.vocabulary || {}
-      for (const side of placementPieces) {
-        for (const type of side) {
-          const entry = vocab[type]
-          if (entry?.symbols) {
-            const syms = Object.values(entry.symbols)
-            if (syms[0]) keys.add('w' + syms[0])
-            if (syms[1]) keys.add('b' + syms[1].toUpperCase())
-          } else {
-            const sym = type[0].toUpperCase()
-            keys.add('w' + sym)
-            keys.add('b' + sym)
-          }
-        }
-      }
-    }
-    return keys
+  if (typeof fen !== 'string' || fen.trim() === '') {
+    return placementKeys(pluginBlock, resolved, new Set(['wK', 'wP', 'bK', 'bP']))
   }
   const fenPieces = fen.split(' ')[0].replace(/[\d\/\[\]+,;:.\-]/g, '')
   const chars = new Set(fenPieces.split(''))
@@ -1584,7 +1598,7 @@ function getVariantPieceKeys(family, variantKey, fallbackSetup, resolved) {
       keys.add('b' + ch.toUpperCase())
     }
   }
-  return keys
+  return placementKeys(pluginBlock, resolved, keys)
 }
 
 export { BOARD_THEMES, DIFFICULTIES, getVariantConfig }

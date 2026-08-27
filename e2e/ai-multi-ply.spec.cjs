@@ -63,15 +63,29 @@ async function makeHumanMove(page) {
   })
 
   for (const id of occupiedCells) {
-    const cell = page.locator(`[data-sq="${id}"]`)
-    await cell.scrollIntoViewIfNeeded()
-    await cell.click({ force: true })
+    // The board re-renders between attempts, which detaches the element this
+    // loop is holding. That did not show while every click was forced, because
+    // a forced click does not wait for anything. Re-query per attempt, and
+    // treat a cell that went away as one to skip rather than a failure: the
+    // loop is already trying cells until one of them works.
+    const cell = page.locator(`[data-sq="${id}"]`).first()
+    try {
+      await cell.scrollIntoViewIfNeeded({ timeout: 5000 })
+      // A hit target must be clickable on its own merits, so no `force` here.
+      await cell.click({ timeout: 10000 })
+    } catch (err) {
+      if (/not attached|detached|Timeout/i.test(String(err.message))) continue
+      throw err
+    }
     await page.waitForTimeout(200)
 
     const indicators = await page.locator('#game-play-root svg circle').count()
     if (indicators > 0) {
       const indicator = page.locator('#game-play-root svg circle').first()
-      await indicator.scrollIntoViewIfNeeded()
+      await indicator.scrollIntoViewIfNeeded({ timeout: 5000 })
+      // The indicator is an overlay circle that deliberately carries
+      // `pointer-events: none` so the click reaches the cell underneath it, so
+      // this one is forced on purpose.
       await indicator.click({ force: true })
       await page.waitForTimeout(200)
       return true

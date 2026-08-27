@@ -24,8 +24,14 @@ async function waitForBoard(page) {
   await page.waitForSelector('[data-sq]', { timeout: 15000 })
 }
 
+// No `force`. `force: true` disables Playwright's actionability checks, and the
+// one it disables is "does this element receive pointer events" - which is the
+// only thing separating a board you can play from a board that merely renders.
+// Every hit target on every morris, asalto, nyout and stern-halma board
+// inherited `pointer-events: none` from a wrapping group and answered no
+// clicks at all. This file clicked them happily for as long as it forced them.
 async function clickCell(page, id) {
-  await page.locator(`[data-sq="${id}"]`).click({ force: true })
+  await page.locator(`[data-sq="${id}"]`).click({ timeout: 10000 })
 }
 
 async function pieceCount(page) {
