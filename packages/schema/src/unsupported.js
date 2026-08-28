@@ -28,13 +28,32 @@ function blockFrom(meta) {
   return null
 }
 
+// A rulebook may carry a `_family` entry: the part of the reason that is true
+// of every variant it names, stated once instead of copied into each. Tafl's
+// four variants are all blocked on the same missing plugin and differ only in
+// board size, so without this the same paragraph appears four times and the one
+// sentence that distinguishes them is buried at the end of it.
+//
+// It is not a slug and never surfaces as one. Variant slugs are kebab-case, so
+// the leading underscore cannot collide with a real variant.
+const FAMILY_KEY = '_family'
+
+function joinReason(shared, own) {
+  if (!shared) return own
+  if (!own) return shared
+  return `${shared} ${own}`
+}
+
 // A rulebook's declarations, as a Map of slug -> reason.
 export function unsupportedVariants(rulebookMeta) {
   const block = blockFrom(rulebookMeta)
   const out = new Map()
   if (!block || typeof block !== 'object' || Array.isArray(block)) return out
+  const shared = typeof block[FAMILY_KEY] === 'string' ? block[FAMILY_KEY].trim() : ''
   for (const [slug, reason] of Object.entries(block)) {
-    if (typeof reason === 'string' && reason.trim()) out.set(slug, reason.trim())
+    if (slug === FAMILY_KEY) continue
+    if (typeof reason === 'string' && reason.trim()) out.set(slug, joinReason(shared, reason.trim()))
+    else if (reason === null && shared) out.set(slug, shared)
   }
   return out
 }
