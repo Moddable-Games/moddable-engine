@@ -13,15 +13,25 @@ describe('variant-registry (chess variants via play registry)', () => {
   })
 
   describe('hook-based variants', () => {
-    it('threeCheck has winCondition hook', () => {
+    // threeCheck used to assert a winCondition hook here. It no longer has one:
+    // the rule is `win.threshold` in the shared registry, configured from the
+    // `checkThreshold` its frontmatter already declared, and the behaviour is
+    // asserted in check-threshold.test.js against a real game rather than
+    // against a function on a config object (engine#88).
+    //
+    // Kept as the inverse assertion so a hook creeping back is a failure rather
+    // than a silent second implementation.
+    it('threeCheck carries no winCondition hook, because the registry owns it', () => {
       const config = getVariantConfig('chess', 'threeCheck')
-      expect(typeof config.winCondition).toBe('function')
+      expect(config.winCondition).toBeUndefined()
     })
 
-    it('threeCheck winCondition triggers at 3 checks', () => {
-      const config = getVariantConfig('chess', 'threeCheck')
-      const result = config.winCondition({ checkCount: { 0: 3, 1: 1 } }, { currentPlayer: 0 })
-      expect(result).toBe(0)
+    it('the three check variants differ only in their frontmatter threshold', () => {
+      for (const key of ['singleCheck', 'threeCheck', 'fiveCheck']) {
+        const config = getVariantConfig('chess', key)
+        expect(config).not.toBeNull()
+        expect(config.winCondition).toBeUndefined()
+      }
     })
 
     it('kingOfTheHill winCondition detects king on centre', () => {

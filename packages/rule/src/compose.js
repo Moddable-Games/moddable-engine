@@ -52,15 +52,25 @@ export function composeRules(rules, ruleConfigs = {}) {
     return current
   }
 
+  // Returns null when no rule contributed, rather than the state it was
+  // handed. The caller MERGES this over the plugin's own applyMove result, so
+  // returning the untouched input meant a rule set with no applyMove hook
+  // spread the entire pre-move slice back over the post-move one and undid the
+  // move. A `win.threshold` rule, which only implements checkWin, was enough to
+  // trigger it (engine#88).
   composed.applyMove = function applyMoveComposed(move, state, baseCtx) {
     let current = state
+    let contributed = false
     for (const rule of ordered) {
       if (!rule.hooks || !rule.hooks.applyMove) continue
       const ctx = buildContext({ ...baseCtx, sliceState: current }, rule)
       const fragment = rule.hooks.applyMove(move, current, ctx)
-      if (fragment) current = { ...current, ...fragment }
+      if (fragment) {
+        current = { ...current, ...fragment }
+        contributed = true
+      }
     }
-    return current
+    return contributed ? current : null
   }
 
   composed.afterMove = function afterMoveComposed(move, state, baseCtx) {

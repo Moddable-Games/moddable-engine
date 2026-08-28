@@ -125,6 +125,26 @@ export function wrapPluginWithRules(plugin, registry, overrides = []) {
     }
   }
 
+  // The AI does not call checkWin. `minimax.js` calls `checkWinConditionOnly`,
+  // a cheap terminal test that skips the checkmate search, so a terminal rule
+  // wired only into checkWin is invisible to the search that has to play for
+  // it: three-check would end correctly and the AI would never aim for the
+  // third check. Both are wrapped, or neither is any use.
+  if (composed.checkWin && typeof plugin.checkWinConditionOnly === 'function') {
+    const originalConditionOnly = plugin.checkWinConditionOnly
+    plugin.checkWinConditionOnly = function wrappedConditionOnly(slice, playerIndex) {
+      const baseResult = originalConditionOnly.call(plugin, slice, playerIndex)
+      if (baseResult !== null && baseResult !== undefined) return baseResult
+      return composed.checkWin(slice, {
+        topology: plugin._topology,
+        playerIndex,
+        playerCount: 2,
+        sliceState: slice,
+        config: plugin._ruleConfig || {},
+      })
+    }
+  }
+
   if (composed.checkWin) {
     plugin.checkWin = function wrappedCheckWin(slice, full) {
       const baseResult = originalCheckWin.call(plugin, slice, full)

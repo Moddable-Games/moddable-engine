@@ -361,6 +361,16 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     if (config.drops) {
       state.hands = [[], []]
     }
+    // Seeded here because nothing else ever created it. The only code that
+    // incremented `checkCount` sat inside searchMakeMove - the AI's make and
+    // unmake path - behind a `state.checkCount &&` guard that was never true,
+    // so in a real game the counter did not exist and was never raised.
+    // single-check, three-check and five-check have therefore never ended on a
+    // check: all three are in the playable count and all three played as
+    // ordinary chess (engine#88, and the same class as #158).
+    if (config.checkThreshold) {
+      state.checkCount = { 0: 0, 1: 0 }
+    }
     if (config.placementPieces) {
       state.phase = 'placement'
       state._toPlace = [config.placementPieces[0].slice(), config.placementPieces[1].slice()]
@@ -1400,8 +1410,53 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return parts.join('')
   }
 
+  // Rules this variant composes from the shared registry rather than
+  // implementing here. `checkThreshold` is declared in the variant's own
+  // frontmatter - `single-check: 1`, `three-check: 3`, `five-check: 5` - and
+  // until now three JavaScript modules existed to restate it, identical apart
+  // from that integer (engine#88).
+  //
+  // The plugin still counts the checks, because counting one requires knowing
+  // what a check is. Deciding that N of them ends the game does not, so that
+  // half is the registry's.
+  const composedRules = []
+  const composedRuleDefaults = {}
+  if (config.checkThreshold) {
+    composedRules.push('win.threshold')
+    composedRuleDefaults['win.threshold'] = {
+      counter: 'checkCount',
+      threshold: config.checkThreshold,
+    }
+  }
+
+  // Counting a check requires knowing what one is, so it stays here. Deciding
+  // that N of them ends the game does not, and that half is `win.threshold`
+  // in the shared registry.
+  //
+  // Wrapped at the boundary rather than edited into applyMove, which has
+  // several return paths, and left pure: the counter is written onto the new
+  // slice, never onto the one handed in.
+  function applyMoveCountingChecks(move, slice, full) {
+    const result = applyMove(move, slice, full)
+    const state = result && result.state ? result.state : result
+    if (!state || !slice.checkCount) return result
+
+    const mover = full.__players.currentIndex
+    const opponent = 1 - mover
+    if ((config.playerCount || 2) > 2) return result
+    if (!isInCheck(state.board, opponent)) return result
+
+    const counted = {
+      ...state,
+      checkCount: { ...slice.checkCount, [mover]: (slice.checkCount[mover] || 0) + 1 },
+    }
+    return result && result.state ? { ...result, state: counted } : counted
+  }
+
   return {
     sliceName: 'chess',
+    rules: composedRules,
+    ruleDefaults: composedRuleDefaults,
     // `applyMove` returns a new slice and does not touch the one it is handed,
     // so the search does not have to hand it a private copy. Proved rather than
     // asserted: `applymove-is-pure.test.js` plays every playable variant and
@@ -1414,7 +1469,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
     init,
     validateMove,
-    applyMove,
+    applyMove: config.checkThreshold ? applyMoveCountingChecks : applyMove,
     getLegalMoves,
     checkWin,
     // Applied after every move, whether or not it ended anything: who now

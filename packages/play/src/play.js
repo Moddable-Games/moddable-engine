@@ -1,5 +1,6 @@
 // Browser consumers: js/game-play.js, js/play.js, js/create.js
 import { createGameFromDefinition } from '../../game/index.js'
+import { WIRED_RULES } from './rules.js'
 import { produce } from '../../schema/index.js'
 import { getVariantConfig, hasVariant, getSlugForKey, setVariantSources as _setVariantSources } from './variant-registry.js'
 import { definitionFromVariant } from './variant-definition.js'
@@ -123,6 +124,7 @@ export function createGameForFamily(family, opts = {}) {
     topologies: TOPOLOGIES,
     pluginFactories: { [family]: factory },
     components: COMPONENT_FACTORIES,
+    rules: WIRED_RULES,
     rngSeed: effectiveSeed,
   }
 

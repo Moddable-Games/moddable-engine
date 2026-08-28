@@ -38,6 +38,7 @@ import {
   createForcedCaptureRule,
   createPromotionRankReachRule,
   createRepetitionRule,
+  createThresholdWinRule,
   createTurnContinuationRule,
 } from '../../rule/index.js'
 
@@ -48,4 +49,20 @@ export const RULES = {
   'promotion.rank-reach': createPromotionRankReachRule,
   'repetition': createRepetitionRule,
   'turn-continuation': createTurnContinuationRule,
+  'win.threshold': createThresholdWinRule,
 }
+
+// The subset actually passed to the game factory.
+//
+// An id moves from RULES into this list when the family that declares it has
+// been migrated and its OWN tests prove the migration - not when the rule
+// exists. `capture.replacement` is the reason for the distinction: it is
+// implemented, draughts declares it, and wiring it left captured pieces on the
+// board because a draughts capture is a jump rather than a replacement.
+//
+// So this list grows one family at a time and never by default.
+const WIRED_IDS = ['win.threshold']
+
+export const WIRED_RULES = Object.fromEntries(
+  Object.entries(RULES).filter(([id]) => WIRED_IDS.includes(id))
+)
