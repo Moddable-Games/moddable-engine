@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reversi &mdash; Moddable Engine</title>
-<meta name="description" content="Three Reversi variants with flanking capture, positional AI, and embed support.">
-<meta property="og:title" content="Reversi &mdash; Moddable Engine">
-<meta property="og:description" content="Three Reversi variants with flanking capture, positional AI, and embed support.">
+<title>Hex &mdash; Moddable Engine</title>
+<meta name="description" content="Eight Hex and Y connection variants with MCTS search, pie rule, and embed support.">
+<meta property="og:title" content="Hex &mdash; Moddable Engine">
+<meta property="og:description" content="Eight Hex and Y connection variants with MCTS search, pie rule, and embed support.">
 <meta property="og:image" content="https://engine.moddable.games/og/docs.png?v=1.0.25">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:url" content="https://engine.moddable.games/docs/reversi.html">
+<meta property="og:url" content="https://engine.moddable.games/docs/hex.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Moddable Engine">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Reversi &mdash; Moddable Engine">
-<meta name="twitter:description" content="Three Reversi variants with flanking capture, positional AI, and embed support.">
+<meta name="twitter:title" content="Hex &mdash; Moddable Engine">
+<meta name="twitter:description" content="Eight Hex and Y connection variants with MCTS search, pie rule, and embed support.">
 <meta name="twitter:image" content="https://engine.moddable.games/og/docs.png?v=1.0.25">
 <meta name="theme-color" content="#0a0d2a">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
@@ -58,12 +58,12 @@
     <li><a href="chess.html">Chess</a></li>
     <li><a href="go.html">Go</a></li>
     <li><a href="draughts.html">Draughts</a></li>
-    <li><a href="hex.html">Hex</a></li>
+    <li><a href="hex.html" class="active">Hex</a></li>
     <li><a href="mancala.html">Mancala</a></li>
     <li><a href="morris.html">Morris</a></li>
     <li><a href="xiangqi.html">Xiangqi</a></li>
     <li><a href="shogi.html">Shogi</a></li>
-    <li><a href="reversi.html" class="active">Reversi</a></li>
+    <li><a href="reversi.html">Reversi</a></li>
     <li><a href="landlords-game.html">Landlord's Game</a></li>
     <li><a href="hexmaps.html">Hex Maps</a></li>
   </ul>
@@ -77,16 +77,16 @@
 </nav>
 <div class="docs-body">
 
-  <h1>Reversi</h1>
-  <p class="docs-lede">Three Reversi variants with flanking capture, a positional AI, and the same embed and SDK every family uses.</p>
+  <h1>Hex</h1>
+  <p class="docs-lede">Eight connection game variants across rhombus and triangular boards, with bridge-aware MCTS search, pie rule, and the same embed and SDK every family uses.</p>
 
   <h2 id="embed">Embed via iframe</h2>
   <p>Every game family shares one embed surface. Select the family and variant through the URL.</p>
 
   <pre><code>&lt;iframe
-  src="https://engine.moddable.games/play/?embed=1&amp;family=reversi&amp;variant=standard"
+  src="https://engine.moddable.games/play/?embed=1&amp;family=hex&amp;variant=standard"
   style="width:100%;max-width:560px;aspect-ratio:1/1;border:none"
-  title="Play Reversi"
+  title="Play Hex"
 &gt;&lt;/iframe&gt;</code></pre>
 
   <h3>URL parameters</h3>
@@ -94,7 +94,7 @@
     <thead><tr><th>Param</th><th>Values</th><th>Default</th></tr></thead>
     <tbody>
       <tr><td><code>embed</code></td><td><code>1</code></td><td>Required for embed mode</td></tr>
-      <tr><td><code>family</code></td><td><code>reversi</code></td><td><code>chess</code></td></tr>
+      <tr><td><code>family</code></td><td><code>hex</code></td><td><code>chess</code></td></tr>
       <tr><td><code>variant</code></td><td>Any variant key below</td><td><code>standard</code></td></tr>
       <tr><td><code>opponent</code></td><td><code>ai</code> | <code>human</code></td><td><code>ai</code></td></tr>
       <tr><td><code>difficulty</code></td><td><code>beginner</code> | <code>easy</code> | <code>medium</code> | <code>hard</code> | <code>expert</code></td><td><code>medium</code></td></tr>
@@ -103,9 +103,9 @@
   </table>
 
   <h3>postMessage control</h3>
-  <p>Commands accept either the generic <code>game:</code> prefix or the family prefix, so <code>game:undo</code> and <code>reversi:undo</code> both work.</p>
+  <p>Commands accept either the generic <code>game:</code> prefix or the family prefix, so <code>game:undo</code> and <code>hex:undo</code> both work.</p>
 
-  <pre><code>iframe.contentWindow.postMessage({ type: 'game:setVariant', variant: 'anti-reversi' }, '*')
+  <pre><code>iframe.contentWindow.postMessage({ type: 'game:setVariant', variant: 'y-game' }, '*')
 iframe.contentWindow.postMessage({ type: 'game:setDifficulty', difficulty: 'hard' }, '*')
 iframe.contentWindow.postMessage({ type: 'game:newGame' }, '*')
 iframe.contentWindow.postMessage({ type: 'game:undo' }, '*')
@@ -124,41 +124,46 @@ iframe.contentWindow.postMessage({ type: 'game:requestState' }, '*')</code></pre
 })</code></pre>
 
   <h2 id="variants">Variants</h2>
-  <p>All three variants from the moddable-rules Reversi hub are playable. Each is fully declared in frontmatter; the plugin holds no variant-specific code.</p>
+  <p>All eight variants from the moddable-rules Hex hub are playable. Five are standard Hex on different board sizes; three are Y, played on a triangular board where both players must connect all three sides.</p>
 
   <table class="docs-table">
     <thead><tr><th>Key</th><th>Board</th><th>Distinguishing rule</th></tr></thead>
     <tbody>
-      <tr><td><code>standard</code></td><td>8&times;8</td><td>Most discs wins; flanking in all 8 directions</td></tr>
-      <tr><td><code>six-by-six</code></td><td>6&times;6</td><td>Same rules, smaller board; faster games</td></tr>
-      <tr><td><code>anti-reversi</code></td><td>8&times;8</td><td>Fewest discs wins (mis&egrave;re); forced moves unchanged</td></tr>
+      <tr><td><code>standard</code></td><td>11&times;11 rhombus</td><td>Tournament size; connect opposite edges; pie rule</td></tr>
+      <tr><td><code>9x9</code></td><td>9&times;9 rhombus</td><td>Smaller board for faster games</td></tr>
+      <tr><td><code>13x13</code></td><td>13&times;13 rhombus</td><td>Larger board; deeper strategy</td></tr>
+      <tr><td><code>14x14</code></td><td>14&times;14 rhombus</td><td>International competition size</td></tr>
+      <tr><td><code>19x19</code></td><td>19&times;19 rhombus</td><td>Largest standard size</td></tr>
+      <tr><td><code>y-game</code></td><td>12-side triangle</td><td>Connect all 3 sides; both players share the same objective</td></tr>
+      <tr><td><code>y-large</code></td><td>16-side triangle</td><td>Larger Y board</td></tr>
+      <tr><td><code>y-small</code></td><td>8-side triangle</td><td>Compact Y board</td></tr>
     </tbody>
   </table>
 
   <h2 id="mechanics">Mechanics</h2>
-  <p>The plugin is pure logic with zero game knowledge. All configuration arrives via frontmatter:</p>
+  <p>The plugin is pure connection logic. All configuration arrives via frontmatter:</p>
 
   <table class="docs-table">
     <thead><tr><th>Config key</th><th>Effect</th></tr></thead>
     <tbody>
-      <tr><td><code>directions</code></td><td><code>"all"</code> | <code>"orthogonal"</code> | <code>"diagonal"</code></td></tr>
-      <tr><td><code>mustFlip</code></td><td>Placement must flip at least one disc</td></tr>
-      <tr><td><code>winBy</code></td><td><code>"most"</code> | <code>"fewest"</code></td></tr>
-      <tr><td><code>passWhenNoMoves</code></td><td>Auto-pass when no legal placement exists</td></tr>
+      <tr><td><code>connect</code></td><td><code>"edges"</code> (Hex: opposite pair) | <code>"all-sides"</code> (Y: all three)</td></tr>
+      <tr><td><code>pieRule</code></td><td>After the first stone, second player may swap instead of replying</td></tr>
+      <tr><td><code>shape</code></td><td><code>"rhombus"</code> | <code>"triangle"</code></td></tr>
+      <tr><td><code>sideLength</code></td><td>Board size (cells per edge)</td></tr>
     </tbody>
   </table>
 
-  <p>The game ends when the board is full or neither player can move. A wipeout (one player has zero discs) also ends immediately.</p>
+  <p>No draws are possible on a hex grid. The search is MCTS with a bridge-aware rollout policy: if an opponent probes any bridge carrier, the defender always replies to maintain the connection.</p>
 
   <h2 id="sdk">SDK</h2>
-  <pre><code>import { createGame, getLegalMoves, createAI, listVariants } from 'moddable-engine/play'
+  <pre><code>import { createGame, createAI, listVariants } from 'moddable-engine/play'
 
-listVariants('reversi')                      // [{ key, label, group, board }]
-const game = createGame('reversi', 'standard')
-game.applyMove({ action: 'place', coord: 20 })
+listVariants('hex')                           // [{ key, label, group, board }]
+const game = createGame('hex', 'standard')
+game.applyMove({ action: 'place', to: '5,5' })
 
-const ai = createAI('reversi', 'standard', { difficulty: 'hard' })
-ai.pickMove(game.getState().slice, 0)        // minimax with positional weighting</code></pre>
+const ai = createAI('hex', 'standard', { difficulty: 'hard' })
+ai.pickMove(game.getState().slice, 0)         // MCTS with bridge-aware rollouts</code></pre>
 
 
 </div>

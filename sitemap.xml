@@ -125,11 +125,27 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/docs/hex.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/docs/hexmaps.html</loc>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://engine.moddable.games/docs/index.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/docs/landlords-game.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/docs/mancala.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/docs/morris.html</loc>
     <priority>0.7</priority>
   </url>
   <url>
