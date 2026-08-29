@@ -325,11 +325,14 @@ if (puzzleParsed.meta.count !== puzzleTotal) {
 // 7. Patch HTML stat values
 const frontmatterOnlyCount = stats.playableVariants - 1
 const frontmatterPct = Math.floor((frontmatterOnlyCount / stats.playableVariants) * 100)
+const ogDesc = `One engine for every board game. ${stats.playableFamilies} playable families, ${stats.playableVariants} variants, ${stats.uniqueTopologies} topologies. Games are configuration files, not code.`
 
 const htmlPatches = [
   {
     file: 'index.html',
     replacements: [
+      // OG and meta descriptions with stats
+      [/(content="One engine for every board game\.) \d+ playable families, \d+ variants, \d+ topologies\./g, `$1 ${stats.playableFamilies} playable families, ${stats.playableVariants} variants, ${stats.uniqueTopologies} topologies.`],
       [/(\d+) piece sets/g, `${stats.pieces} piece sets`],
       [/(\d+,?\d*) terrain and game tiles/g, `${stats.tiles} terrain and game tiles`],
       [/(\d+) hex terrain sets/g, `${stats.tiles} hex terrain sets`],
@@ -338,7 +341,7 @@ const htmlPatches = [
       [/(<span class="stat-value">)[\d,]+\+?(<\/span>\s*<span class="stat-label">Tests passing<\/span>)/g, `$1${stats.testsPassing.toLocaleString()}$2`],
       // Hero lede: variant counts
       [/across (\d+) variants/g, `across ${stats.playableVariants} variants`],
-      [/playing chess, go, draughts, shogi, xiangqi, and reversi across \d+ variants/g, `playing chess, go, draughts, shogi, xiangqi, and reversi across ${stats.playableVariants} variants`],
+      [/playing [\w, ]+and the Landlord's Game across \d+ variants/g, `playing chess, go, draughts, hex, shogi, xiangqi, mancala, morris, reversi, and the Landlord's Game across ${stats.playableVariants} variants`],
       [/(\d+) carry zero JavaScript/g, `${frontmatterOnlyCount} carry zero JavaScript`],
       // Stats section
       [/(<span class="stat-value">)\d+(<\/span>\s*<span class="stat-label">Variants<\/span>)/g, `$1${stats.playableVariants}$2`],
@@ -348,13 +351,11 @@ const htmlPatches = [
       // Section heading: playable families
       [/(\d+) Playable Families/g, `${stats.playableFamilies} Playable Families`],
       [/(\d+) Topology Types/g, `${stats.uniqueTopologies} Topology Types`],
-      // Family chips
-      [/(Chess <span class="family-count">)\d+(<\/span>)/g, `$1${stats.familyCounts.chess || 0}$2`],
-      [/(Draughts <span class="family-count">)\d+(<\/span>)/g, `$1${stats.familyCounts.draughts || 0}$2`],
-      [/(Go <span class="family-count">)\d+(<\/span>)/g, `$1${stats.familyCounts.go || 0}$2`],
-      [/(Shogi <span class="family-count">)\d+(<\/span>)/g, `$1${stats.familyCounts.shogi || 0}$2`],
-      [/(Xiangqi <span class="family-count">)\d+(<\/span>)/g, `$1${stats.familyCounts.xiangqi || 0}$2`],
-      [/(Reversi <span class="family-count">)\d+(<\/span>)/g, `$1${stats.familyCounts.reversi || 0}$2`],
+      // Family chips — one entry per playable family
+      ...playableFamilies.map(f => {
+        const label = f === 'landlords-game' ? "Landlord's Game" : f.charAt(0).toUpperCase() + f.slice(1)
+        return [new RegExp(`(${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} <span class="family-count">)\\d+(<\\/span>)`, 'g'), `$1${stats.familyCounts[f] || 0}$2`]
+      }),
       // Topology cards
       [/(<h4 class="topo-name">Grid<\/h4>[\s\S]*?<span class="topo-count">)\d+ variants(<\/span>)/g, `$1${stats.topoCounts.grid || 0} variants$2`],
       [/(<h4 class="topo-name">Hex<\/h4>[\s\S]*?<span class="topo-count">)\d+ variants(<\/span>)/g, `$1${stats.topoCounts.hex || 0} variants$2`],

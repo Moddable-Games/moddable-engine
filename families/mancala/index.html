@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en" data-family="mancala">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mancala — Moddable Engine</title>
+<meta name="description" content="Mancala variants from one engine. 6 variants including Kalah, Oware, Congkak, and Sungka. Pit topology, sow mechanic, bonus turns, and capture by count.">
+<meta property="og:title" content="Mancala — Moddable Engine">
+<meta property="og:description" content="Mancala variants from one engine. 6 variants including Kalah, Oware, Congkak, and Sungka. Pit topology, sow mechanic, bonus turns, and capture by count.">
+<meta property="og:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.24">
+<meta property="og:url" content="https://engine.moddable.games/families/mancala/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Mancala — Moddable Engine">
+<meta name="twitter:description" content="Mancala variants from one engine. 6 variants including Kalah, Oware, Congkak, and Sungka. Pit topology, sow mechanic, bonus turns, and capture by count.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.24">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="stylesheet" href="../../css/families.css?v=1.0.24">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../../play/" class="nav-link">Play</a>
+      <a href="../../create/" class="nav-link">Create</a>
+      <a href="../../boards/" class="nav-link">Boards</a>
+      <a href="../../pieces/" class="nav-link">Pieces</a>
+      <a href="../../tiles/" class="nav-link">Tiles</a>
+      <a href="../../docs/" class="nav-link">Docs</a>
+      <a href="../../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<section class="family-hero">
+  <div class="family-hero-inner">
+    <span class="hero-symbol">&#x25CB;</span>
+    <h1>Mancala</h1>
+    <p class="hero-lede"><span data-stat="variants">6</span> variants of the oldest game family on earth. Kalah, Oware, Congkak, Sungka, Ayo, and Toguz Korgool. Seeds sown anticlockwise around a pit topology, captured by count or by landing.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-value" data-stat="variants">6</span>
+        <span class="hero-meta-label">Variants</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">1</span>
+        <span class="hero-meta-label">Plugin</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">&#x2713;</span>
+        <span class="hero-meta-label">Frontmatter-only</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="showcase">
+  <div class="showcase-intro">
+    <h2>Sow and Capture</h2>
+    <p>Pick up every seed in a pit and drop them one by one around the board. Where the last seed lands determines whether you capture, take another turn, or pass. Six regional rulesets from one parametric plugin.</p>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Kalah <a href="https://rules.moddable.games/mancala/variants/kalah/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">The most widely known mancala. Six pits per side, four seeds each. If your last seed lands in your own store, you take another turn. If it lands in an empty pit on your side, you capture the opposite pit.</p>
+      <pre><code>engine:
+  topology:
+    type: pit
+    pitsPerSide: 6
+    stores: true
+  players: [south, north]
+  plugins:
+    mancala:
+      seedsPerPit: 4
+      captureRule: opposite-if-empty
+      bonusTurnOnStore: true
+      skipOpponentStore: true</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=mancala&variant=kalah" loading="lazy" title="Kalah"></iframe>
+      <p class="board-caption">Kalah (6 pits, 4 seeds) — bonus turn on store landing</p>
+    </div>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Oware <a href="https://rules.moddable.games/mancala/variants/oware/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">The West African tournament standard. No stores on the board. Capture by sowing the last seed into a pit holding two or three seeds on the opponent's side, then walk back collecting.</p>
+      <pre><code>engine:
+  topology:
+    type: pit
+    pitsPerSide: 6
+    stores: false
+  players: [south, north]
+  plugins:
+    mancala:
+      seedsPerPit: 4
+      captureRule: two-three-walkback
+      grandSlam: forbidden</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=mancala&variant=oware" loading="lazy" title="Oware"></iframe>
+      <p class="board-caption">Oware (no stores) — capture by count on the opponent's side</p>
+    </div>
+  </div>
+</section>
+
+<section class="family-cta">
+  <h2>Play All <span data-stat="variants">6</span> Variants</h2>
+  <p>Every mancala variant is playable with AI opponents at multiple difficulty levels.</p>
+  <div class="cta-actions">
+    <a href="../../play/?family=mancala" class="btn btn--primary">Play Mancala</a>
+    <a href="../../boards/?family=mancala" class="btn btn--ghost">Browse Boards</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../../play/">Play</a>
+        <a href="../../boards/">Boards</a>
+        <a href="../../pieces/">Pieces</a>
+        <a href="../../tiles/">Tiles</a>
+        <a href="../../docs/">Docs</a>
+        <a href="../../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Families</h4>
+        <a href="../chess/">Chess</a>
+        <a href="../draughts/">Draughts</a>
+        <a href="../go/">Go</a>
+        <a href="../hex/">Hex</a>
+        <a href="../mancala/">Mancala</a>
+        <a href="../morris/">Morris</a>
+        <a href="../shogi/">Shogi</a>
+        <a href="../xiangqi/">Xiangqi</a>
+        <a href="../reversi/">Reversi</a>
+        <a href="../landlords-game/">Landlord's Game</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.24</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../../js/families.js?v=1.0.24"></script>
+</body>
+</html>

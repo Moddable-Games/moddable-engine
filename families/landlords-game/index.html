@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en" data-family="landlords-game">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Landlord's Game — Moddable Engine</title>
+<meta name="description" content="The Landlord's Game from one engine. Lizzie Magie's 1904 patent: roll dice, circle the board, buy lots, pay rent, and race to complete five circuits.">
+<meta property="og:title" content="The Landlord's Game — Moddable Engine">
+<meta property="og:description" content="The Landlord's Game from one engine. Lizzie Magie's 1904 patent: roll dice, circle the board, buy lots, pay rent, and race to complete five circuits.">
+<meta property="og:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.24">
+<meta property="og:url" content="https://engine.moddable.games/families/landlords-game/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Landlord's Game — Moddable Engine">
+<meta name="twitter:description" content="The Landlord's Game from one engine. Lizzie Magie's 1904 patent: roll dice, circle the board, buy lots, pay rent, and race to complete five circuits.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.24">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="stylesheet" href="../../css/families.css?v=1.0.24">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../../play/" class="nav-link">Play</a>
+      <a href="../../create/" class="nav-link">Create</a>
+      <a href="../../boards/" class="nav-link">Boards</a>
+      <a href="../../pieces/" class="nav-link">Pieces</a>
+      <a href="../../tiles/" class="nav-link">Tiles</a>
+      <a href="../../docs/" class="nav-link">Docs</a>
+      <a href="../../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<section class="family-hero">
+  <div class="family-hero-inner">
+    <span class="hero-symbol">&#x1F3E0;</span>
+    <h1>The Landlord's Game</h1>
+    <p class="hero-lede"><span data-stat="variants">1</span> variant of Lizzie Magie's 1904 patent. Roll dice, circle a 40-space board, buy numbered lots, pay rent to your opponents, and race to be the first to complete five circuits.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-value" data-stat="variants">1</span>
+        <span class="hero-meta-label">Variants</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">1</span>
+        <span class="hero-meta-label">Plugin</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">Track</span>
+        <span class="hero-meta-label">Topology</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="showcase">
+  <div class="showcase-intro">
+    <h2>The Original Property Game</h2>
+    <p>Patented in 1904 by Elizabeth Magie to demonstrate the economic consequences of land monopolies. Roll two dice, move around the circuit, buy the lot you land on, and collect rent from anyone who lands on yours. First to complete five circuits with the most wealth wins.</p>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>1904 Patent <a href="https://rules.moddable.games/landlords-game/variants/1904-original/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">The game as patented. 40 spaces, 22 numbered lots with rent equal to the lot number and price at ten times that. Wages on passing the start, jail on landing, franchises for utilities. Wealth display shows cash, lots, and circuit progress.</p>
+      <pre><code>engine:
+  topology:
+    type: track
+    layout: circuit
+    spaces: 40
+  components:
+    dice:
+      count: 2
+      sides: 6
+  players: [red, blue]
+  plugins:
+    landlords-game:
+      board: 1904-patent
+      circuits: 5
+      startingCash: 500
+      wages: 100</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&family=landlords-game&variant=1904-original" loading="lazy" title="The Landlord's Game (1904)"></iframe>
+      <p class="board-caption">1904 Patent — 40 spaces, dice, lots, rent, five circuits to win</p>
+    </div>
+  </div>
+</section>
+
+<section class="family-cta">
+  <h2>Play the 1904 Patent</h2>
+  <p>The original property game, playable with AI opponents.</p>
+  <div class="cta-actions">
+    <a href="../../play/?family=landlords-game" class="btn btn--primary">Play</a>
+    <a href="../../boards/?family=landlords-game" class="btn btn--ghost">Browse Boards</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../../play/">Play</a>
+        <a href="../../boards/">Boards</a>
+        <a href="../../pieces/">Pieces</a>
+        <a href="../../tiles/">Tiles</a>
+        <a href="../../docs/">Docs</a>
+        <a href="../../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Families</h4>
+        <a href="../chess/">Chess</a>
+        <a href="../draughts/">Draughts</a>
+        <a href="../go/">Go</a>
+        <a href="../hex/">Hex</a>
+        <a href="../mancala/">Mancala</a>
+        <a href="../morris/">Morris</a>
+        <a href="../shogi/">Shogi</a>
+        <a href="../xiangqi/">Xiangqi</a>
+        <a href="../reversi/">Reversi</a>
+        <a href="../landlords-game/">Landlord's Game</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.24</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../../js/families.js?v=1.0.24"></script>
+</body>
+</html>
