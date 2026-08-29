@@ -168,6 +168,20 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Changelog
 
+#### 2026-08-29
+- Unsupported coverage gate (#109): every unplayable variant now says why, CI ratchet at zero silent variants
+- `_family` key for shared unsupported reasons (write the common part once, not per variant)
+- Rule registry gap measurement (#88): 4 of 23 declared rule ids have factories, 19 do not; shrink-only ratchet
+- `win.threshold` rule: three-check variants migrated to shared registry, three JS modules replaced by one frontmatter value
+- Fixed: checkCount never initialised (three-check variants never worked), composeRules returned stale state, AI never saw composed win conditions
+- 4 family landing pages: hex, mancala, morris, landlords-game (all 10 families now have pages)
+- 4 family doc pages with embed, variants, mechanics, and SDK sections
+- Homepage: 10 family chips, hero lede lists all families, OG/meta descriptions auto-patched by build-discovery
+- build-discovery.mjs: OG/meta descriptions now data-driven (was manual), family chip counts driven from playability manifest
+- All 19 doc page sidebars updated to list all 10 playable families
+- 43 unplayable variants declared across 17 families in moddable-rules (silent gap is zero)
+- Version 1.0.26, 180 suites, 6390 passing
+
 #### 2026-08-27
 - Fixed five gameplay bugs: Morris unplayable past move 18 (falsy-zero + fixed interaction model), mill removal auto-picked without asking, Kalah bonus turn never fired (continuesTurn implemented but uncalled), Landlords invisible (CSS nowrap hid long turns, history never scrolled, no wealth display)
 - Hex 2x performance: single flood fill per ply (only the player who moved), cached adjacency lookups, one-pass getLegalMoves
