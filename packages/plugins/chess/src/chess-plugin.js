@@ -6,7 +6,7 @@ import { randomBackRank } from './variants/chess960.js'
 // which only lists the keys that carry a default value.
 export const CONFIG_KEYS = new Set([
   'actions', 'advancement', 'afterMove', 'castling', 'checkThreshold', 'cols', 'doubleStep',
-  'drops', 'enPassant', 'hexPawnConfig', 'initState', 'moveApply', 'moveFilter', 'noCheck',
+  'dropZone', 'drops', 'enPassant', 'hexPawnConfig', 'initState', 'moveApply', 'moveFilter', 'noCheck',
   'onTurnEnd', 'pawnCaptureDirections', 'pawnConfig', 'pawnMoveDirections', 'pawnStartRow',
   'pawnType', 'placementDistinctColor', 'placementPieces', 'placementZone', 'playerCount',
   'promotionChoices', 'promotionRow',
@@ -872,8 +872,17 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
         const uniqueTypes = [...new Set(hand)]
         const promoRows = pc ? pc.promotionCells[playerIdx] : new Set()
         const moves = []
+        // Crazyhouse drops anywhere, which is why this generator never had a
+        // zone. Xiang Fu drops only within its owner's first two ranks, so
+        // enabling `drops` for it without saying so would have given it
+        // crazyhouse's rule under its own name (engine#158). Rows are counted
+        // from the player's own edge, the same way `placementZone` counts them.
+        const zone = config.dropZone
+          ? new Set(ownEdgeRowCells(slice, playerIdx, config.dropZone))
+          : null
         for (const type of uniqueTypes) {
           for (const pos of allPositions()) {
+            if (zone && !zone.has(pos)) continue
             if (getCell(slice.board, pos) !== null) continue
             if (type === (config.pawnType || 'pawn') && promoRows.has(pos)) continue
             moves.push({ action: 'drop', type, to: pos })
@@ -1089,19 +1098,30 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return declared[type] || declared.default || [0]
   }
 
-  function placementCells(slice, playerIdx, type) {
+  // Empty cells in a set of rows counted from a player's own edge, where 0 is
+  // their back rank. Shared by placement and by drops, which express the same
+  // idea and were about to express it twice: `placementZone` for the opening
+  // phase, `dropZone` for Xiang Fu's rule that a captured piece re-enters only
+  // within its owner's first two ranks.
+  function ownEdgeRowCells(slice, playerIdx, rowsFromEdge) {
     const rows = topology?.rows || config.rows || 8
     const cols = topology?.cols || config.cols || 8
-    const bands = placementRows(type).map(r => (playerIdx === 0 ? rows - 1 - r : r))
+    const onBoard = new Set(allPositions())
+    const bands = rowsFromEdge.map(r => (playerIdx === 0 ? rows - 1 - r : r))
     const out = []
     for (const row of bands) {
       if (row < 0 || row >= rows) continue
       for (let c = 0; c < cols; c++) {
         const pos = topology.toIndex(row, c)
+        if (!onBoard.has(pos)) continue
         if (!getCell(slice.board, pos)) out.push(pos)
       }
     }
     return out
+  }
+
+  function placementCells(slice, playerIdx, type) {
+    return ownEdgeRowCells(slice, playerIdx, placementRows(type))
   }
 
   // Placement Chess keeps the standard rule that a player's two bishops stand

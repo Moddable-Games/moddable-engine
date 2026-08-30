@@ -18,19 +18,34 @@ export function createGridTopology(config) {
     return [Math.floor(index / cols), index % cols]
   }
 
-  const wrapR = wrap === true || wrap === 'torus' || wrap === 'ranks' || wrap === 'klein-bottle' || wrap === 'spherical'
-  const wrapC = wrap === true || wrap === 'torus' || wrap === 'files' || wrap === 'cylinder' || wrap === 'mobius' || wrap === 'klein-bottle' || wrap === 'spherical'
+  // The half-twist belongs to the RANK seam, not the file wrap.
+  //
+  // Moebius Chess joins rank 11 to rank 12 mirrored across the files - "a11
+  // would join h12, b11 would join g12" - so crossing that seam maps column c
+  // to cols-1-c. Both variants say so in their own frontmatter, and the engine
+  // did the opposite: it twisted the file wrap and gave mobius no rank wrap at
+  // all, so the feature both variants are named for was absent (engine#159).
+  //
+  // The two differ in what happens to the OTHER pair of edges, and that is the
+  // definition of the two surfaces rather than a choice:
+  //
+  //   mobius        one pair joined with a twist; the other pair is a genuine
+  //                 boundary, because a Moebius strip has an edge
+  //   klein-bottle  both pairs joined, one plainly and one with the twist
+  //
+  // So mobius wraps ranks only and klein-bottle wraps both.
+  const wrapR = wrap === true || wrap === 'torus' || wrap === 'ranks' || wrap === 'mobius' || wrap === 'klein-bottle' || wrap === 'spherical'
+  const wrapC = wrap === true || wrap === 'torus' || wrap === 'files' || wrap === 'cylinder' || wrap === 'klein-bottle' || wrap === 'spherical'
 
   function wrapCoords(r, c) {
     if (!wrap) return [r, c]
     let wr = r, wc = c
     if (wrapC && (wc < 0 || wc >= cols)) {
       wc = ((wc % cols) + cols) % cols
-      if (wrap === 'mobius' || wrap === 'klein-bottle') wr = rows - 1 - wr
     }
     if (wrapR && (wr < 0 || wr >= rows)) {
       wr = ((wr % rows) + rows) % rows
-      if (wrap === 'klein-bottle') wc = cols - 1 - wc
+      if (wrap === 'mobius' || wrap === 'klein-bottle') wc = cols - 1 - wc
       if (wrap === 'spherical') wc = (wc + Math.floor(cols / 2)) % cols
     }
     return [wr, wc]

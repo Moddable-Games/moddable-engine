@@ -605,6 +605,15 @@
   {
     "family": "chess",
     "familyLabel": "Chess",
+    "variant": "klein-bottle-chess",
+    "key": "klein-bottle-chess",
+    "label": "Klein Bottle Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "familyLabel": "Chess",
     "variant": "knightmate",
     "key": "knightmate",
     "label": "Knightmate",
@@ -743,6 +752,15 @@
     "variant": "minichess",
     "key": "minichess",
     "label": "Minichess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "familyLabel": "Chess",
+    "variant": "mobius-strip-chess",
+    "key": "mobius-strip-chess",
+    "label": "Möbius Strip Chess",
     "group": "Other",
     "playable": true
   },
@@ -950,6 +968,15 @@
     "variant": "rollerball",
     "key": "rollerball",
     "label": "Rollerball",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "familyLabel": "Chess",
+    "variant": "romanchenkos-chess",
+    "key": "romanchenkos-chess",
+    "label": "Romanchenko's Chess",
     "group": "Other",
     "playable": true
   },
