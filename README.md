@@ -168,6 +168,13 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Changelog
 
+#### 2026-08-31
+- `dropZone` (#158): a captured piece re-enters only within its owner's declared ranks, which is xiang-fu's drop rule
+- Wrap seams on the grid topology (#159): klein-bottle and mobius-strip chess join the wrapped edge with a twist
+- romanchenkos-chess needed no engine change: voids were already honoured, its setup FEN was misaligned with them
+- Board snapshots recaptured for romanchenkos-chess and ultima after their corrected setups
+- Chess 135 to 138 playable, 198 to 201 across the corpus
+
 #### 2026-08-29
 - Unsupported coverage gate (#109): every unplayable variant now says why, CI ratchet at zero silent variants
 - `_family` key for shared unsupported reasons (write the common part once, not per variant)
