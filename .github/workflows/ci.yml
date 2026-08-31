@@ -14,11 +14,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Pair the corpus branch with the branch being built. This was `ref: dev`
+      # for every branch including main, which meant a run on main was not a
+      # property of main at all: engine main carries a frozen
+      # playability-manifest.json and the job below regenerates it against
+      # whatever moddable-rules dev happens to be, then fails on the diff.
+      #
+      # So every rules push that changed playability turned engine main red
+      # without anyone touching engine, and it stayed red until the next
+      # promotion of dev to main. Measured on 2026-08-31: engine main against
+      # rules dev regenerates to 201 against a committed 198 and fails, and
+      # against rules main regenerates to 198 byte-identical and passes.
+      #
+      # `base_ref` first so a pull request pairs with the branch it targets;
+      # `ref_name` is a merge ref like "123/merge" on pull_request events.
       - uses: actions/checkout@v4
         with:
           repository: Moddable-Games/moddable-rules
           path: moddable-rules
-          ref: dev
+          ref: ${{ (github.base_ref || github.ref_name) == 'main' && 'main' || 'dev' }}
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -61,11 +75,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Corpus branch paired with the branch being built. See the unit-tests job.
       - uses: actions/checkout@v4
         with:
           repository: Moddable-Games/moddable-rules
           path: moddable-rules
-          ref: dev
+          ref: ${{ (github.base_ref || github.ref_name) == 'main' && 'main' || 'dev' }}
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -115,11 +130,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           path: moddable-engine
+      # Corpus branch paired with the branch being built. See the unit-tests job.
       - uses: actions/checkout@v4
         with:
           repository: Moddable-Games/moddable-rules
           path: moddable-rules
-          ref: dev
+          ref: ${{ (github.base_ref || github.ref_name) == 'main' && 'main' || 'dev' }}
       - uses: actions/setup-node@v4
         with:
           node-version: 20
