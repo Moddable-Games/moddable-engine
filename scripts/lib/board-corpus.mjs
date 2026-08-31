@@ -20,8 +20,17 @@ import { FEN4_OWNERS, recolourSvgText } from '../../packages/render/index.js'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export const ENGINE_ROOT = resolve(__dirname, '../..')
+// Two env vars name the same corpus, because two callers do the naming.
+// moddable-rules' sync-boards.sh passes RULES_ROOT, the repo root, and appends
+// nothing. Everything on the engine side - CI, and the fourteen other readers
+// of the corpus - passes MODDABLE_RULES_DIR, which is the games directory
+// itself. This file honoured only the first, so on a CI runner, where the two
+// repos are siblings inside the workspace rather than beside it, it fell back
+// to a path one level too high and every corpus walk died on ENOENT.
 const RULES_ROOT = process.env.RULES_ROOT || resolve(ENGINE_ROOT, '../moddable-rules')
-export const GAMES_DIR = resolve(RULES_ROOT, 'games')
+export const GAMES_DIR = process.env.MODDABLE_RULES_DIR
+  ? resolve(process.env.MODDABLE_RULES_DIR)
+  : resolve(RULES_ROOT, 'games')
 // Overridable so a check can render into a scratch directory without
 // touching the committed set.
 export const SNAP_DIR = process.env.SNAP_DIR

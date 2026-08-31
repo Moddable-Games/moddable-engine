@@ -103,10 +103,15 @@ jobs:
           MODDABLE_RULES_DIR: ${{ github.workspace }}/moddable-rules/games
       - name: Verify family defaults are up to date
         run: git diff --exit-code play/family-defaults.json || (echo "Family defaults are stale — run scripts/gen-family-defaults.mjs" && exit 1)
+      # This step reads variant frontmatter through setup-rules-reader, so it
+      # needs the corpus like every other step in this job. It was the only one
+      # without MODDABLE_RULES_DIR, and fell back to a sibling path that does
+      # not exist on a runner, failing on all 1116 standard puzzles at once.
       - name: Verify puzzles are normalised
         run: node scripts/normalise-puzzles.mjs --check
         env:
           NODE_OPTIONS: '--experimental-vm-modules'
+          MODDABLE_RULES_DIR: ${{ github.workspace }}/moddable-rules/games
       - name: Duplication guard
         run: node scripts/check-duplication.mjs
       - name: Purity guard (no game knowledge in packages/)
