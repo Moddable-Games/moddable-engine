@@ -169,6 +169,12 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-08-31
+- `kingLandsBehindCapture` (#161): a Thai king still flies to reach a capture but comes to rest on the square immediately beyond it, which needed a condition on the landing loop rather than turning flying kings off
+- diagonal draughts was a stale unplayable entry, not a gap: its anti-diagonal setup was already declared and correct, now asserted in a test
+- Draughts 13 to 15 playable, 201 to 203 across the corpus
+- CI pairs the moddable-rules branch with the branch being built (#164), so a rules push can no longer turn engine main red on its own
+- Four rebuilt plugin workspaces added to the lockfile: npm ci had aborted every CI run on both branches since 2026-08-29, before any job reached its own logic
+- board-corpus honours MODDABLE_RULES_DIR, and the puzzle normalisation step is told where the corpus is; neither gate had ever executed on a runner
 - `dropZone` (#158): a captured piece re-enters only within its owner's declared ranks, which is xiang-fu's drop rule
 - Wrap seams on the grid topology (#159): klein-bottle and mobius-strip chess join the wrapped edge with a twist
 - romanchenkos-chess needed no engine change: voids were already honoured, its setup FEN was misaligned with them
