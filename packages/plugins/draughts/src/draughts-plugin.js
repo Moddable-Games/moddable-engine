@@ -4,7 +4,8 @@ import { warnUnknownConfigKeys } from '../../../core/index.js'
 // which only lists the keys that carry a default value.
 export const CONFIG_KEYS = new Set([
   'captureBackward', 'cols', 'directions', 'flyingKings', 'forcedCapture',
-  'kingCapturePriority', 'loseOnSinglePiece', 'majorityPrefersKing', 'manCapture', 'manMove',
+  'kingCapturePriority', 'kingLandsBehindCapture', 'loseOnSinglePiece', 'majorityPrefersKing',
+  'manCapture', 'manMove',
   'maximalCapture', 'menCannotCaptureKings', 'piecesPerPlayer', 'playerCount',
   'promotionDuring', 'removeImmediately', 'rows', 'setup', 'turnLogic', 'winCondition',
 ])
@@ -24,6 +25,7 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
     captureBackward: false,
     promotionDuring: false,
     flyingKings: false,
+    kingLandsBehindCapture: false,
     removeImmediately: true,
     playerNames: null,
   }
@@ -230,7 +232,14 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
             }
           }
 
-          if (piece.type !== 'king' || !config.flyingKings) break
+          // A flying king normally chooses any empty square beyond the piece
+          // it took. Thai draughts (Makhos) is the exception: Wikipedia's
+          // Draughts article describes "Thai checkers, which has a king that
+          // can only land on the vacant square immediately beyond a captured
+          // piece". The king still FLIES to reach the capture - the
+          // restriction is on where it comes to rest - so this cannot be
+          // expressed by turning `flyingKings` off (engine#161).
+          if (piece.type !== 'king' || !config.flyingKings || config.kingLandsBehindCapture) break
         }
       }
     }
