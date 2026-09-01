@@ -26,7 +26,8 @@
     <path
        style="fill:#888888;fill-opacity:1;stroke:#888888;stroke-width:1.96329;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="M 77.01174,6.6646411 H 57.922216 V 43.633418 H 87.464014 C 84.800606,33.069099 80.963403,19.989506 77.01174,6.6646411 Z"
-       id="path1728" />
+       id="path1728"
+       />
     <circle
        style="fill:#888888;fill-opacity:1;stroke:#888888;stroke-width:1.96329;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="circle2293"
@@ -36,15 +37,18 @@
     <path
        style="fill:#888888;fill-opacity:1;stroke:#888888;stroke-width:1.96329;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="M 77.01174,6.6646411 V 43.898808"
-       id="path2295" />
+       id="path2295"
+       />
     <path
        style="fill:#888888;fill-opacity:1;stroke:#888888;stroke-width:1.96329;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="M 58.21581,25.298871 H 82.676576"
-       id="path2297" />
+       id="path2297"
+       />
     <path
        style="fill:#888888;fill-opacity:1;stroke:#888888;stroke-width:1.96329;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="M 57.922214,43.633419 77.02705,25.654604"
-       id="path2299" />
+       id="path2299"
+       />
     <circle
        style="fill:#888888;fill-opacity:1;stroke:#888888;stroke-width:1.96329;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path2291"
@@ -54,7 +58,8 @@
     <path
        style="fill:#888888;fill-opacity:1;stroke:#888888;stroke-width:1.96329;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="M 57.922214,6.6837255 77.02705,25.654604"
-       id="path2303" />
+       id="path2303"
+       />
   </g></symbol>
 <symbol id="piece-mce-chess-bK" viewBox="0 0 45 45"><g style="fill:#000;stroke:#000;stroke-width:1.5;stroke-linejoin:round"><path d="M 22.5,11.63 L 22.5,6" style="fill:none;stroke:#fff;stroke-linejoin:miter"/><path d="M 20,8 L 25,8" style="fill:none;stroke:#fff;stroke-linejoin:miter"/><path d="M 22.5,25 C 22.5,25 27,17.5 25.5,14.5 C 25.5,14.5 24.5,12 22.5,12 C 20.5,12 19.5,14.5 19.5,14.5 C 18,17.5 22.5,25 22.5,25"/><path d="M 12.5,37 C 18,40.5 27,40.5 32.5,37 L 32.5,30 C 32.5,30 41.5,25.5 38.5,19.5 C 34.5,13 25,16 22.5,23.5 L 22.5,27 L 22.5,23.5 C 20,16 10.5,13 6.5,19.5 C 3.5,25.5 12.5,30 12.5,30 L 12.5,37"/><path d="M 12.5,30 C 18,27 27,27 32.5,30" style="fill:none;stroke:#fff"/><path d="M 12.5,33.5 C 18,30.5 27,30.5 32.5,33.5" style="fill:none;stroke:#fff"/><path d="M 12.5,37 C 18,34 27,34 32.5,37" style="fill:none;stroke:#fff"/></g></symbol>
 <symbol id="piece-mce-chess-bS" viewBox="0 0 45 45"><path d="M 22,9 C 19.79,9 18,10.79 18,13 C 18,13.89 18.29,14.71 18.78,15.38 C 16.83,16.5 15.5,18.59 15.5,21 C 15.5,23.03 16.44,24.84 17.91,26.03 C 14.91,27.09 10.5,31.58 10.5,39.5 L 33.5,39.5 C 33.5,31.58 29.09,27.09 26.09,26.03 C 27.56,24.84 28.5,23.03 28.5,21 C 28.5,18.59 27.17,16.5 25.22,15.38 C 25.71,14.71 26,13.89 26,13 C 26,10.79 24.21,9 22,9 z" style="fill:#000;stroke:#000;stroke-width:1.5;stroke-linecap:round"/><g transform="translate(14,23) scale(0.35)"><path d="M 22.5,25 C 22.5,25 27,17.5 25.5,14.5 C 25.5,14.5 24.5,12 22.5,12 C 20.5,12 19.5,14.5 19.5,14.5 C 18,17.5 22.5,25 22.5,25" style="fill:#fff;stroke:none"/><path d="M 12.5,37 C 18,40.5 27,40.5 32.5,37 L 32.5,30 C 32.5,30 41.5,25.5 38.5,19.5 C 34.5,13 25,16 22.5,23.5 L 22.5,27 L 22.5,23.5 C 20,16 10.5,13 6.5,19.5 C 3.5,25.5 12.5,30 12.5,30 L 12.5,37" style="fill:#fff;stroke:none"/></g></symbol>

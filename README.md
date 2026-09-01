@@ -169,6 +169,8 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-01
+- Dobutsu Shogi and two mahjong boards were blank cards in the gallery, board and all: their artwork is an editor export carrying `sodipodi:` and `osb:` attributes whose namespace declarations live on the source file's own root, which is discarded when the piece is inlined as a `<symbol>`. The prefix was then undeclared and the browser refused the whole document
+- Editor namespace attributes are stripped when embedding, and a test parses all 334 gallery SVGs, because a malformed SVG is still a file of the right name and size and only a parser can tell
 - The board gallery had no freshness gate at all, so it drifted silently: it served 180 of 334 boards, kept the superseded Dai Shogi position and inverted seat artwork, and drew Dobutsu with 4 of its 8 pieces from the wrong piece set in a 1.1MB file
 - `build-board-index.mjs --check` added and gated in CI, so the gallery can no longer disagree with the snapshots it is built from
 - 153 orphaned `moddable-chess--*` gallery SVGs deleted, left from the chess hub rename and referenced by nothing; the published board count was counting them, reporting 487 boards against 334 real ones

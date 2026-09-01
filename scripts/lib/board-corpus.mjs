@@ -172,6 +172,16 @@ export function embedPieceImages(svg, setDef) {
       content = readFileSync(filePath, 'utf8')
       content = content.replace(/<\?xml[^>]*\?>\s*/, '').replace(/<!DOCTYPE[^>]*>\s*/, '').trim()
       content = content.replace(/xlink:href/g, 'href')
+      // Editor exports carry sodipodi: and inkscape: attributes, and their
+      // xmlns declarations live on the source file's own <svg> root, which is
+      // discarded when the artwork is inlined as a <symbol>. The prefix is then
+      // undeclared, the whole gallery SVG is malformed XML, and the browser
+      // renders none of it: Dobutsu Shogi and two mahjong boards were blank
+      // cards in the gallery for this reason, board and all.
+      // Any prefix but xlink and xml: sodipodi, inkscape, osb and whatever the
+      // next editor invents. Naming them one at a time only finds the ones
+      // already known to be broken.
+      content = content.replace(/\s(?!xlink:|xml:)[\w-]+:[\w-]+="[^"]*"/g, '')
       fileCache.set(filePath, content)
     }
     const svgTag = content.match(/<svg[^>]*>/)?.[0] || ''

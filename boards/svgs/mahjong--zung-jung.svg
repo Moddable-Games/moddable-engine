@@ -3,7 +3,7 @@
 <symbol id="piece-mahjong-regular-Pei" viewBox="0 0 300 400"><defs>
     <linearGradient
        id="linearGradient10055"
-       osb:paint="solid">
+      >
       <stop
          style="stop-color:#000000;stop-opacity:1;"
          offset="0"
@@ -14,12 +14,14 @@
        refY="0"
        refX="0"
        id="Arrow1Lstart"
-       style="overflow:visible">
+       style="overflow:visible"
+      >
       <path
          id="path4978"
          d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
          style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#ff5c00;stroke-width:1pt;stroke-opacity:1"
-         transform="matrix(0.8,0,0,0.8,10,0)" />
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         />
     </marker>
     <clipPath
        clipPathUnits="userSpaceOnUse"
@@ -115,7 +117,7 @@
 <symbol id="piece-mahjong-regular-Pin7" viewBox="0 0 300 400"><defs>
     <linearGradient
        id="linearGradient10055"
-       osb:paint="solid">
+      >
       <stop
          style="stop-color:#000000;stop-opacity:1;"
          offset="0"
@@ -126,12 +128,14 @@
        refY="0"
        refX="0"
        id="Arrow1Lstart"
-       style="overflow:visible">
+       style="overflow:visible"
+      >
       <path
          id="path4978"
          d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
          style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#ff5c00;stroke-width:1pt;stroke-opacity:1"
-         transform="matrix(0.8,0,0,0.8,10,0)" />
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         />
     </marker>
     <clipPath
        clipPathUnits="userSpaceOnUse"
@@ -502,7 +506,7 @@
 <symbol id="piece-mahjong-regular-Man8" viewBox="0 0 300 400"><defs>
     <linearGradient
        id="linearGradient10055"
-       osb:paint="solid">
+      >
       <stop
          style="stop-color:#000000;stop-opacity:1;"
          offset="0"
@@ -513,12 +517,14 @@
        refY="0"
        refX="0"
        id="Arrow1Lstart"
-       style="overflow:visible">
+       style="overflow:visible"
+      >
       <path
          id="path4978"
          d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
          style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#ff5c00;stroke-width:1pt;stroke-opacity:1"
-         transform="matrix(0.8,0,0,0.8,10,0)" />
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         />
     </marker>
     <clipPath
        clipPathUnits="userSpaceOnUse"
@@ -652,7 +658,7 @@
 <symbol id="piece-mahjong-regular-Man4" viewBox="0 0 300 400"><defs>
     <linearGradient
        id="linearGradient10055"
-       osb:paint="solid">
+      >
       <stop
          style="stop-color:#000000;stop-opacity:1;"
          offset="0"
@@ -663,12 +669,14 @@
        refY="0"
        refX="0"
        id="Arrow1Lstart"
-       style="overflow:visible">
+       style="overflow:visible"
+      >
       <path
          id="path4978"
          d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
          style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#ff5c00;stroke-width:1pt;stroke-opacity:1"
-         transform="matrix(0.8,0,0,0.8,10,0)" />
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         />
     </marker>
     <clipPath
        clipPathUnits="userSpaceOnUse"
@@ -806,7 +814,7 @@
 <symbol id="piece-mahjong-regular-Sou2" viewBox="0 0 300 400"><defs>
     <linearGradient
        id="linearGradient10055"
-       osb:paint="solid">
+      >
       <stop
          style="stop-color:#000000;stop-opacity:1;"
          offset="0"
@@ -817,12 +825,14 @@
        refY="0"
        refX="0"
        id="Arrow1Lstart"
-       style="overflow:visible">
+       style="overflow:visible"
+      >
       <path
          id="path4978"
          d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
          style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#ff5c00;stroke-width:1pt;stroke-opacity:1"
-         transform="matrix(0.8,0,0,0.8,10,0)" />
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         />
     </marker>
     <clipPath
        clipPathUnits="userSpaceOnUse"
@@ -923,7 +933,8 @@
         <path
            style="fill:none;fill-rule:evenodd;stroke:#004900;stroke-width:55.00000381;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
            d="m 149.58492,818.81626 0,-134.67362"
-           id="path4345" />
+           id="path4345"
+           />
         <ellipse
            style="opacity:1;fill:#004900;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:30;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
            id="ellipse4347"
@@ -948,7 +959,8 @@
         <path
            style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:12.51099205;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
            d="m 149.58492,685.72349 0,37.84241"
-           id="path4353" />
+           id="path4353"
+           />
         <path
            id="path4355"
            d="m 149.58491,777.56215 0,46.73373"
@@ -963,11 +975,13 @@
         <path
            id="path4359"
            d="m 140.22861,761.81761 c 4.22825,-6.44075 15.55968,-6.16314 19.11822,0"
-           style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+           style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           />
         <path
            style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
            d="m 140.22861,743.53117 c 4.22825,-6.44075 15.55968,-6.16314 19.11822,0"
-           id="path4361" />
+           id="path4361"
+           />
       </g>
       <g
          id="g4320"
@@ -1025,7 +1039,8 @@
         <path
            style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:12.51099205;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
            d="m 149.58491,777.56215 0,46.73373"
-           id="path4338" />
+           id="path4338"
+           />
         <ellipse
            cy="683.5329"
            cx="149.58495"
@@ -1036,18 +1051,20 @@
         <path
            style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
            d="m 140.22861,761.81761 c 4.22825,-6.44075 15.55968,-6.16314 19.11822,0"
-           id="path4344" />
+           id="path4344"
+           />
         <path
            id="path4335"
            d="m 140.22861,743.53117 c 4.22825,-6.44075 15.55968,-6.16314 19.11822,0"
-           style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+           style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           />
       </g>
     </g>
   </g></symbol>
 <symbol id="piece-mahjong-regular-Sou5" viewBox="0 0 300 400"><defs>
     <linearGradient
        id="linearGradient10055"
-       osb:paint="solid">
+      >
       <stop
          style="stop-color:#000000;stop-opacity:1;"
          offset="0"
@@ -1058,12 +1075,14 @@
        refY="0"
        refX="0"
        id="Arrow1Lstart"
-       style="overflow:visible">
+       style="overflow:visible"
+      >
       <path
          id="path4978"
          d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
          style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#ff5c00;stroke-width:1pt;stroke-opacity:1"
-         transform="matrix(0.8,0,0,0.8,10,0)" />
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         />
     </marker>
     <clipPath
        clipPathUnits="userSpaceOnUse"
@@ -1162,7 +1181,8 @@
       <path
          style="fill:none;fill-rule:evenodd;stroke:#004900;stroke-width:55.00000381;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 149.58492,818.81626 0,-134.67362"
-         id="path4279" />
+         id="path4279"
+         />
       <ellipse
          style="opacity:1;fill:#004900;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:30;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
          id="ellipse4281"
@@ -1187,7 +1207,8 @@
       <path
          style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:12.51099205;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 149.58492,685.72349 0,37.84241"
-         id="path4287" />
+         id="path4287"
+         />
       <path
          id="path4289"
          d="m 149.58491,777.56215 0,46.73373"
@@ -1202,11 +1223,13 @@
       <path
          id="path4293"
          d="m 140.22861,761.81761 c 4.22825,-6.44075 15.55968,-6.16314 19.11822,0"
-         style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         />
       <path
          style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 140.22861,743.53117 c 4.22825,-6.44075 15.55968,-6.16314 19.11822,0"
-         id="path4295" />
+         id="path4295"
+         />
     </g>
     <g
        transform="matrix(0.95915654,0,0,0.95915654,109.62944,235.23614)"
@@ -1235,7 +1258,8 @@
       <path
          style="fill:none;fill-rule:evenodd;stroke:#004900;stroke-width:55.00000381;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 149.58492,818.81626 0,-134.67362"
-         id="path4305" />
+         id="path4305"
+         />
       <ellipse
          style="opacity:1;fill:#004900;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:30;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
          id="ellipse4307"
@@ -1260,7 +1284,8 @@
       <path
          style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:12.51099205;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 149.58492,685.72349 0,37.84241"
-         id="path4313" />
+         id="path4313"
+         />
       <path
          id="path4315"
          d="m 149.58491,777.56215 0,46.73373"
@@ -1275,11 +1300,13 @@
       <path
          id="path4319"
          d="m 140.22861,761.81761 c 4.22825,-6.44075 15.55968,-6.16314 19.11822,0"
-         style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         />
       <path
          style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 140.22861,743.53117 c 4.22825,-6.44075 15.55968,-6.16314 19.11822,0"
-         id="path4321" />
+         id="path4321"
+         />
     </g>
     <g
        id="g4337"
@@ -1337,7 +1364,8 @@
       <path
          style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:12.51099205;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 149.58491,777.56215 0,46.73373"
-         id="path4355" />
+         id="path4355"
+         />
       <ellipse
          cy="683.5329"
          cx="149.58495"
@@ -1348,11 +1376,13 @@
       <path
          style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 140.22861,761.81761 c 4.22825,-6.44075 15.55968,-6.16314 19.11822,0"
-         id="path4359" />
+         id="path4359"
+         />
       <path
          id="path4361"
          d="m 140.22861,743.53117 c 4.22825,-6.44075 15.55968,-6.16314 19.11822,0"
-         style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         />
     </g>
     <g
        id="g4307"
@@ -1410,7 +1440,8 @@
       <path
          style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:12.51099205;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 149.58491,777.56215 0,46.73373"
-         id="path4327" />
+         id="path4327"
+         />
       <ellipse
          cy="683.5329"
          cx="149.58495"
@@ -1421,11 +1452,13 @@
       <path
          style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 140.22861,761.81761 c 4.22825,-6.44075 15.55968,-6.16314 19.11822,0"
-         id="path4331" />
+         id="path4331"
+         />
       <path
          id="path4333"
          d="m 140.22861,743.53117 c 4.22825,-6.44075 15.55968,-6.16314 19.11822,0"
-         style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         />
     </g>
     <g
        id="g4335"
@@ -1483,7 +1516,8 @@
       <path
          style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:12.51099205;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 149.58491,777.56215 0,46.73373"
-         id="path4354" />
+         id="path4354"
+         />
       <ellipse
          cy="683.5329"
          cx="149.58495"
@@ -1494,17 +1528,19 @@
       <path
          style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 140.22861,761.81761 c 4.22825,-6.44075 15.55968,-6.16314 19.11822,0"
-         id="path4358" />
+         id="path4358"
+         />
       <path
          id="path4360"
          d="m 140.22861,743.53117 c 4.22825,-6.44075 15.55968,-6.16314 19.11822,0"
-         style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         />
     </g>
   </g></symbol>
 <symbol id="piece-mahjong-regular-Pin8" viewBox="0 0 300 400"><defs>
     <linearGradient
        id="linearGradient10055"
-       osb:paint="solid">
+      >
       <stop
          style="stop-color:#000000;stop-opacity:1;"
          offset="0"
@@ -1515,12 +1551,14 @@
        refY="0"
        refX="0"
        id="Arrow1Lstart"
-       style="overflow:visible">
+       style="overflow:visible"
+      >
       <path
          id="path4978"
          d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
          style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#ff5c00;stroke-width:1pt;stroke-opacity:1"
-         transform="matrix(0.8,0,0,0.8,10,0)" />
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         />
     </marker>
     <clipPath
        clipPathUnits="userSpaceOnUse"
@@ -1894,7 +1932,7 @@
 <symbol id="piece-mahjong-regular-Ton" viewBox="0 0 300 400"><defs>
     <linearGradient
        id="linearGradient10055"
-       osb:paint="solid">
+      >
       <stop
          style="stop-color:#000000;stop-opacity:1;"
          offset="0"
@@ -1905,12 +1943,14 @@
        refY="0"
        refX="0"
        id="Arrow1Lstart"
-       style="overflow:visible">
+       style="overflow:visible"
+      >
       <path
          id="path4978"
          d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
          style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#ff5c00;stroke-width:1pt;stroke-opacity:1"
-         transform="matrix(0.8,0,0,0.8,10,0)" />
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         />
     </marker>
     <clipPath
        clipPathUnits="userSpaceOnUse"
@@ -2010,7 +2050,7 @@
 <symbol id="piece-mahjong-regular-Man7" viewBox="0 0 300 400"><defs>
     <linearGradient
        id="linearGradient10055"
-       osb:paint="solid">
+      >
       <stop
          style="stop-color:#000000;stop-opacity:1;"
          offset="0"
@@ -2021,12 +2061,14 @@
        refY="0"
        refX="0"
        id="Arrow1Lstart"
-       style="overflow:visible">
+       style="overflow:visible"
+      >
       <path
          id="path4978"
          d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
          style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#ff5c00;stroke-width:1pt;stroke-opacity:1"
-         transform="matrix(0.8,0,0,0.8,10,0)" />
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         />
     </marker>
     <clipPath
        clipPathUnits="userSpaceOnUse"
@@ -2111,35 +2153,43 @@
       <path
          style="fill:#b93c3c;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          d="m -973.89996,230.33452 c 101.51009,10.77646 95.08642,-15.76217 180.06105,-18.57669 18.88461,-2.74566 17.63524,-17.45957 -0.44879,-16.01707 -90.36841,2.24313 -58.77943,34.93937 -177.69318,16.09165 -28.99732,-5.17596 -24.26375,14.56756 -1.91908,18.50211 z"
-         id="path6014" />
+         id="path6014"
+         />
       <path
          style="fill:#b93c3c;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          d="m -882.63587,187.13598 c 1.31149,-3.92427 -7.9972,-10.18109 -13.21935,-3.47239 -4.83118,7.47941 -6.26401,12.15587 -10.86019,17.41995 -1.95819,2.39301 -2.24128,7.72517 -0.21694,9.26756 7.56831,6.19882 6.72442,4.78418 11.49965,14.73834 l 20.53068,-1.76196 c -6.51994,-8.58948 -7.59705,-7.83487 -10.13116,-16.42437 -1.16483,-9.32704 -0.80813,-10.17567 2.39731,-19.76713 z"
-         id="path6017" />
+         id="path6017"
+         />
       <path
          style="fill:#b93c3c;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          d="m -856.84278,149.17395 c -2.07241,-2.1647 -3.30957,-2.93207 -6.21343,0 l -15.39121,15.54072 c -1.34759,1.50043 -1.37158,3.7049 -0.26356,4.96996 l 9.16958,8.83355 c 4.35362,4.25203 5.46399,7.31404 2.89974,12.33575 -3.41972,9.61649 -5.98603,19.36747 -6.09656,24.7078 l 21.1809,-3.48708 c -3.95944,-9.81743 -3.87088,-12.35734 2.86523,-21.64648 5.55911,-6.32692 10.93309,-7.7739 5.99542,-16.41723 z"
-         id="path6019" />
+         id="path6019"
+         />
       <path
          style="fill:#b93c3c;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          d="m -834.43931,229.52922 c -2.37961,3.3e-4 -5.11545,0.35227 -7.98633,0.67579 -25.98124,4.23953 -44.63197,13.66167 -87.7832,12.14062 -5.84133,0.0296 -10.79709,3.10802 -10.5918,7.58984 0.41578,9.89302 7.70014,62.17673 8.30469,66.88868 0.85285,6.41756 9.79015,6.98803 10.96679,1.34179 0.21553,-1.03423 0.2214,-3.95763 0.0977,-7.99609 0.54781,-1.14352 1.39786,-2.02021 2.30859,-2.18359 l 56.98242,-5.0918 c 0.57955,0.007 1.01412,0.54453 1.32032,1.33008 -0.4418,20.09339 -0.68432,39.74185 -0.25391,46.62304 0.12358,1.52015 0.0514,3.12015 1.57031,4.48635 3.62687,3.0336 24.10801,1.3634 29.40821,-1.9473 1.46854,-1.0778 1.9999,-1.583 2.19726,-3.83006 -2.96095,-33.99173 -0.66802,-77.2174 1.60547,-110.87305 0.59643,-7.45293 -2.91134,-9.15502 -8.14648,-9.1543 z m -26.98047,16.76368 c 5.65219,-1.38928 2.02203,15.82857 0.0879,15.87695 l -58.82813,4.61133 c -5.12716,-1.0242 -4.8804,-13.06608 -1.42188,-13.22852 26.63848,-0.89616 35.74375,-3.18112 60.16211,-7.25976 z m -0.12891,29.15234 c 1.70565,-0.1306 2.01753,12.38455 -0.38086,12.58598 l -57.32031,4.79687 c -4.10107,-1.15065 -4.35221,-11.96168 -0.7793,-12.49218 z"
-         id="path6021" />
+         id="path6021"
+         />
       <path
          style="fill:#b93c3c;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          d="m -881.54242,246.32019 -19.23296,0.63476 -5.29091,90.55948 c -0.75114,10.29193 4.49195,20.6109 11.24113,20.7628 l 18.7421,-6.5465 z"
-         id="path6023" />
+         id="path6023"
+         />
       <path
          style="fill:#b93c3c;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          d="m -942.63635,354.94033 0.84624,8.0276 c 54.24616,18.2836 41.63669,-8.576 96.89447,-15.15097 l -0.63469,-4.92845 c -42.24197,-2.98719 -64.35269,13.17942 -97.10602,12.05182 z"
-         id="path6025" />
+         id="path6025"
+         />
       <path
          style="fill:#b93c3c;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          d="m -947.81557,295.50699 c -4.79067,-14.34919 -18.0476,-11.53087 -15.5695,0.88508 13.89663,43.4482 17.94173,67.49746 19.79888,70.85866 10.79236,18.2285 18.40255,13.4537 19.07847,-2.4339 0.11137,-4.8491 -14.23436,-43.49455 -23.30785,-69.30984 z"
-         id="path6027" />
+         id="path6027"
+         />
       <path
          style="fill:#b93c3c;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          d="m -990.50324,324.51204 c -8.35911,-1.30406 -7.60048,9.08422 -3.31653,11.28821 59.84729,26.46758 123.8383,-8.86564 177.96674,-5.69096 2.05825,0.36905 5.31253,1.56409 8.29438,3.20196 9.55669,5.04809 3.73393,19.51008 -0.97638,22.47878 -21.53617,9.8449 -16.51418,0.091 -40.67325,11.2497 -2.27744,1.4605 -8.25717,2.5966 -10.48172,1.6848 -8.94326,-2.9779 -16.30179,-8.1024 -22.15012,-12.6641 l -11.18847,5.6458 c 6.90544,8.6009 17.09988,12.6716 25.54075,16.3714 6.74722,3.2135 14.12571,2.8541 19.02891,3.0056 25.10802,0.3448 48.58902,-9.2971 60.40286,-10.7554 3.45799,-0.5303 7.48318,-6.5254 9.05051,-9.3096 9.69143,-15.8724 5.68822,-18.57024 -1.08565,-35.18913 -3.84938,-6.23214 -14.98024,-8.01151 -20.8275,-8.80455 -60.71768,-2.57426 -138.25414,18.81176 -189.58453,7.48749 z"
-         id="path6029" />
+         id="path6029"
+         />
     </g>
     <g
        transform="matrix(1.1103116,0,0,1,-20.0629,0)"
@@ -2147,17 +2197,19 @@
       <path
          style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          d="m 122.12365,655.71644 c -9.04375,-1.38864 -18.45494,18.7911 -19.0105,23.98575 1.47894,11.46445 10.50381,15.44155 11.95913,20.17827 6.50446,25.75105 8.4039,67.28056 10.49584,75.3199 2.20074,8.02132 55.9263,13.84495 59.72476,11.7353 11.84665,-8.00981 17.24866,-31.32164 6.85982,-29.21397 -21.90078,3.13098 -39.53972,3.41801 -44.17005,0.63215 -3.97158,-2.69778 -12.89187,-48.4919 -10.86615,-52.66272 2.48997,-5.51509 11.95588,-12.68542 10.81645,-17.48596 -1.03414,-5.10364 -15.0153,-30.79118 -25.8093,-32.48872 z"
-         id="path13514" />
+         id="path13514"
+         />
       <path
          style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          d="M 71.063411,776.82976 C 59.009706,777.70468 60.345873,760.83508 70.622258,758.0431 209.49254,737.5656 108.95092,704.0102 237.90225,682.07575 c 5.62581,-1.10813 4.97456,27.02373 -0.70918,27.69935 -129.99354,18.71741 -22.68823,40.7935 -166.129659,67.05466 z"
-         id="path13516" />
+         id="path13516"
+         />
     </g>
   </g></symbol>
 <symbol id="piece-mahjong-regular-Pin9" viewBox="0 0 300 400"><defs>
     <linearGradient
        id="linearGradient10055"
-       osb:paint="solid">
+      >
       <stop
          style="stop-color:#000000;stop-opacity:1;"
          offset="0"
@@ -2168,12 +2220,14 @@
        refY="0"
        refX="0"
        id="Arrow1Lstart"
-       style="overflow:visible">
+       style="overflow:visible"
+      >
       <path
          id="path4978"
          d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
          style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#ff5c00;stroke-width:1pt;stroke-opacity:1"
-         transform="matrix(0.8,0,0,0.8,10,0)" />
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         />
     </marker>
     <clipPath
        clipPathUnits="userSpaceOnUse"
@@ -2592,7 +2646,7 @@
 <symbol id="piece-mahjong-regular-Sou3" viewBox="0 0 300 400"><defs>
     <linearGradient
        id="linearGradient10055"
-       osb:paint="solid">
+      >
       <stop
          style="stop-color:#000000;stop-opacity:1;"
          offset="0"
@@ -2603,12 +2657,14 @@
        refY="0"
        refX="0"
        id="Arrow1Lstart"
-       style="overflow:visible">
+       style="overflow:visible"
+      >
       <path
          id="path4978"
          d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
          style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#ff5c00;stroke-width:1pt;stroke-opacity:1"
-         transform="matrix(0.8,0,0,0.8,10,0)" />
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         />
     </marker>
     <clipPath
        clipPathUnits="userSpaceOnUse"
@@ -2750,7 +2806,8 @@
       <path
          style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:12.51099205;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 149.58491,777.56215 0,46.73373"
-         id="path4355" />
+         id="path4355"
+         />
       <ellipse
          cy="683.5329"
          cx="149.58495"
@@ -2761,11 +2818,13 @@
       <path
          style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 140.22861,761.81761 c 4.22825,-6.44075 15.55968,-6.16314 19.11822,0"
-         id="path4359" />
+         id="path4359"
+         />
       <path
          id="path4361"
          d="m 140.22861,743.53117 c 4.22825,-6.44075 15.55968,-6.16314 19.11822,0"
-         style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         />
     </g>
     <g
        transform="matrix(0.95915654,0,0,0.95915654,-93.20763,235.23614)"
@@ -2794,7 +2853,8 @@
       <path
          style="fill:none;fill-rule:evenodd;stroke:#004900;stroke-width:55.00000381;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 149.58492,818.81626 0,-134.67362"
-         id="path4279" />
+         id="path4279"
+         />
       <ellipse
          style="opacity:1;fill:#004900;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:30;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
          id="ellipse4281"
@@ -2819,7 +2879,8 @@
       <path
          style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:12.51099205;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 149.58492,685.72349 0,37.84241"
-         id="path4287" />
+         id="path4287"
+         />
       <path
          id="path4289"
          d="m 149.58491,777.56215 0,46.73373"
@@ -2834,11 +2895,13 @@
       <path
          id="path4293"
          d="m 140.22861,761.81761 c 4.22825,-6.44075 15.55968,-6.16314 19.11822,0"
-         style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         />
       <path
          style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 140.22861,743.53117 c 4.22825,-6.44075 15.55968,-6.16314 19.11822,0"
-         id="path4295" />
+         id="path4295"
+         />
     </g>
     <g
        transform="matrix(0.95915654,0,0,0.95915654,109.62944,235.23614)"
@@ -2867,7 +2930,8 @@
       <path
          style="fill:none;fill-rule:evenodd;stroke:#004900;stroke-width:55.00000381;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 149.58492,818.81626 0,-134.67362"
-         id="path4305" />
+         id="path4305"
+         />
       <ellipse
          style="opacity:1;fill:#004900;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:30;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
          id="ellipse4307"
@@ -2892,7 +2956,8 @@
       <path
          style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:12.51099205;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 149.58492,685.72349 0,37.84241"
-         id="path4313" />
+         id="path4313"
+         />
       <path
          id="path4315"
          d="m 149.58491,777.56215 0,46.73373"
@@ -2907,17 +2972,19 @@
       <path
          id="path4319"
          d="m 140.22861,761.81761 c 4.22825,-6.44075 15.55968,-6.16314 19.11822,0"
-         style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         />
       <path
          style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:10.42582703;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 140.22861,743.53117 c 4.22825,-6.44075 15.55968,-6.16314 19.11822,0"
-         id="path4321" />
+         id="path4321"
+         />
     </g>
   </g></symbol>
 <symbol id="piece-mahjong-regular-Pin1" viewBox="0 0 300 400"><defs>
     <linearGradient
        id="linearGradient10055"
-       osb:paint="solid">
+      >
       <stop
          style="stop-color:#000000;stop-opacity:1;"
          offset="0"
@@ -2928,12 +2995,14 @@
        refY="0"
        refX="0"
        id="Arrow1Lstart"
-       style="overflow:visible">
+       style="overflow:visible"
+      >
       <path
          id="path4978"
          d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
          style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#ff5c00;stroke-width:1pt;stroke-opacity:1"
-         transform="matrix(0.8,0,0,0.8,10,0)" />
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         />
     </marker>
     <clipPath
        clipPathUnits="userSpaceOnUse"
@@ -3034,8 +3103,7 @@
            style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:8.95532227;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
            d="m 392.32741,496.48087 c -8.27246,-82.93549 24.08267,-82.93853 15.28731,0"
            id="path5460"
-           inkscape:tile-x0="384.53113"
-           inkscape:tile-y0="430.98601" />
+           />
         <g
            id="g5914"
            transform="translate(-31,-64.5)">
@@ -3195,11 +3263,13 @@
         <path
            style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:23.10970306;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
            d="m 401.33152,554.24492 c -3.14542,-9.94018 -29.56798,-32.56818 -1.22213,-34.01501 29.36983,1.60064 0.87135,23.52895 -1.71866,34.17839"
-           id="path5994" />
+           id="path5994"
+           />
         <path
            style="fill:none;fill-rule:evenodd;stroke:#b93c3c;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
            d="m 400,555.19145 0,-25.65771"
-           id="path6018" />
+           id="path6018"
+           />
         <circle
            style="opacity:1;fill:#b93c3c;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
            id="path6028"
@@ -3209,7 +3279,8 @@
         <path
            style="fill:none;fill-rule:evenodd;stroke:#b93c3c;stroke-width:4;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
            d="m 404.6875,557.4872 6.5651,-16.10951"
-           id="path6030" />
+           id="path6030"
+           />
         <use
            x="0"
            y="0"
