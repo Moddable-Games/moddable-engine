@@ -6,6 +6,7 @@
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { withStableGeneratedDate } from './lib/stable-generated-date.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -189,7 +190,14 @@ const statsJson = {
   testSuites: stats.testSuites,
   snapshots: stats.snapshotCount,
 }
-outputs.push({ path: 'api/stats.json', content: JSON.stringify(statsJson, null, 2) + '\n' })
+// Carried forward when only the clock moved, so a push on a later day than
+// the last regeneration does not fail --check on its own. See the module.
+const statsPath = resolve('api/stats.json')
+const stableStats = withStableGeneratedDate(
+  statsJson,
+  fs.existsSync(statsPath) ? fs.readFileSync(statsPath, 'utf-8') : ''
+)
+outputs.push({ path: 'api/stats.json', content: JSON.stringify(stableStats, null, 2) + '\n' })
 
 // 2. api/index.json
 const existingIndex = readJSON('api/index.json')

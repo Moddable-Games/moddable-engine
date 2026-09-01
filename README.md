@@ -168,6 +168,10 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Changelog
 
+#### 2026-09-01
+- `api/stats.json` carries a datestamp and `build-discovery.mjs --check` compares byte for byte, so the file went stale at midnight on its own and any push on a later day than the last regeneration turned CI red with no commit behind it
+- The date is carried forward when every other figure matches, and moves when a figure moves, so it keeps meaning when the numbers were measured rather than when the script last ran
+
 #### 2026-08-31
 - `kingLandsBehindCapture` (#161): a Thai king still flies to reach a capture but comes to rest on the square immediately beyond it, which needed a condition on the landing loop rather than turning flying kings off
 - diagonal draughts was a stale unplayable entry, not a gap: its anti-diagonal setup was already declared and correct, now asserted in a test
