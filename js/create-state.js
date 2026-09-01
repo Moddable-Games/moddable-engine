@@ -1,3 +1,4 @@
+import { readPosition } from '../packages/core/index.js'
 // The create page's document model.
 //
 // A single serialisable object describes everything the editor holds, and one
@@ -85,19 +86,16 @@ export function parseSetup(text, { type, rows, cols }) {
     return next
   }
 
+  // The walk is `readPosition`, shared with the renderer, the grid topology and
+  // the play serialiser. This used to be a fourth tokeniser, one character at a
+  // time, which took a multi-character code apart into its letters.
+  const { cells, widths, rankCount } = readPosition(trimmed)
+  if (rankCount !== rows) return null
+  if (widths.length !== rows || widths.some(w => w !== cols)) return null
   const next = {}
-  const rowStrings = trimmed.split('/')
-  if (rowStrings.length !== rows) return null
-  for (let r = 0; r < rows; r++) {
-    let c = 0
-    const run = rowStrings[r].match(/\d+|\[[^\]]+\]|[^\d]/g) || []
-    for (const token of run) {
-      if (/^\d+$/.test(token)) { c += parseInt(token, 10); continue }
-      if (c >= cols) return null
-      next[`${r},${c}`] = token.startsWith('[') ? token.slice(1, -1) : token
-      c++
-    }
-    if (c !== cols) return null
+  for (const { row, col, symbol, promoted } of cells) {
+    if (col >= cols) return null
+    next[`${row},${col}`] = promoted ? `+${symbol}` : symbol
   }
   return next
 }

@@ -1,4 +1,4 @@
-import { parseRankRuns, fileLabel, fileIndex, intersectionLabel, splitCellId } from '../../../core/index.js'
+import { readPosition, parseRankRuns, fileLabel, fileIndex, intersectionLabel, splitCellId } from '../../../core/index.js'
 export const schema = {
   type: 'grid',
   required: ['rows', 'cols'],
@@ -494,16 +494,13 @@ export function createGridTopology(config) {
         }
         if (c > cols) throw new Error(`Rank ${r} has ${c} cells but topology has ${cols} columns.`)
       } else {
-        for (const run of parseRankRuns(rowStrings[r])) {
-          if (run.skip !== undefined) {
-            c += run.skip
-          } else {
-            const piece = symbolMap.fromSymbol(run.symbol)
-            if (!piece) throw new Error(`Unmapped FEN symbol "${run.symbol}" at row ${r}, col ${c}. Declare it in vocabulary.`)
-            if (c < cols) cells[toIndex(r, c)] = piece
-            c++
-          }
+        const { cells: read, widths } = readPosition(rowStrings[r])
+        for (const { col, symbol } of read) {
+          const piece = symbolMap.fromSymbol(symbol)
+          if (!piece) throw new Error(`Unmapped FEN symbol "${symbol}" at row ${r}, col ${col}. Declare it in vocabulary.`)
+          if (col < cols) cells[toIndex(r, col)] = piece
         }
+        c = widths[0] ?? 0
         if (c > cols) throw new Error(`Rank ${r} has ${c} cells but topology has ${cols} columns.`)
       }
     }

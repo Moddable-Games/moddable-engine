@@ -10,7 +10,7 @@ import { fileLabel } from '../../core/index.js'
  */
 
 import { produceLayout, buildCrossMap, pieceImageKey, symbolToPiece } from '../../schema/index.js'
-import { parseRankRuns } from '../../core/index.js'
+import { parseRankRuns, readPosition } from '../../core/index.js'
 import { renderGridLayout } from '../../topologies/grid/index.js'
 import { renderGraphLayout } from '../../topologies/graph/index.js'
 import { renderPitLayout } from '../../topologies/pit/index.js'
@@ -509,46 +509,47 @@ function renderOverlays(overlays, ctx) {
 
 // --- Setup parsers ---
 
-export function fenToPosition(fen, rows, cols, alphabet) {
-  const positionPart = fen.split(' ')[0]
-  const ranks = positionPart.split('/')
+// One walk, three readings. These were three separate functions with three
+// copies of the same loop over ranks, digits and brackets, and they disagreed:
+// the bracketed one had its own tokeniser and read an uppercase symbol as the
+// wrong seat. The walk is `readPosition` in core now, and all that differs
+// between them is what a cell becomes.
+function positionFromRanks(setup, rows, cols, alphabet, cellValue) {
   const position = {}
-  for (let r = 0; r < ranks.length; r++) {
-    let c = 0
-    for (const run of parseRankRuns(ranks[r])) {
-      if (run.skip !== undefined) {
-        c += run.skip
-      } else {
-        const file = alphabet ? alphabet[c] : fileLabel(c)
-        const rankNum = rows - r
-        position[`${file}${rankNum}`] = run.symbol
-        c++
-      }
-    }
+  const { cells } = readPosition(setup, { rows })
+  for (const { row, col, symbol, promoted } of cells) {
+    if (col >= cols) continue
+    const file = alphabet ? alphabet[col] : fileLabel(col)
+    position[`${file}${rows - row}`] = cellValue(symbol, promoted)
   }
   return position
 }
 
+// Uppercase is sente, seat 0, drawn with the `w` artwork. This is the same
+// rule as `buildFenMapFromVocabulary` above and as chu-shogi's own fenMap,
+// which spells it `C: wxC`. It is stated once because the copy that stated it
+// backwards drew six boards with the camps swapped.
+function seatPrefix(symbol) {
+  return symbol === symbol.toUpperCase() ? 'w' : 'b'
+}
+
+export function fenToPosition(fen, rows, cols, alphabet) {
+  return positionFromRanks(fen, rows, cols, alphabet, (symbol) => symbol)
+}
+
 function parseVocabularyFen(fen, rows, cols, vocabulary, alphabet) {
-  const position = {}
-  const ranks = fen.split('/')
-  for (let r = 0; r < ranks.length && r < rows; r++) {
-    let c = 0
-    for (const run of parseRankRuns(ranks[r])) {
-      if (c >= cols) break
-      if (run.skip !== undefined) { c += run.skip; continue }
-      const file = alphabet ? alphabet[c] : fileLabel(c)
-      const rankNum = rows - r
-      const vocabEntry = vocabulary[run.symbol]
-      if (vocabEntry) {
-        position[`${file}${rankNum}`] = typeof vocabEntry === 'string' ? vocabEntry : { ...vocabEntry }
-      } else {
-        position[`${file}${rankNum}`] = run.symbol
-      }
-      c++
-    }
-  }
-  return position
+  return positionFromRanks(fen, rows, cols, alphabet, (symbol) => {
+    const entry = vocabulary[symbol]
+    if (!entry) return symbol
+    return typeof entry === 'string' ? entry : { ...entry }
+  })
+}
+
+// Bracketed setups: the large shogi variants, whose piece codes are longer
+// than a letter. The artwork key is the seat prefix and the code.
+function parseSfenToPosition(fen, rows, cols) {
+  return positionFromRanks(fen, rows, cols, null, (symbol, promoted) =>
+    seatPrefix(symbol) + (promoted ? '+' : '') + symbol.toUpperCase())
 }
 
 function parseFen4(fen4, rows, cols) {
@@ -567,50 +568,6 @@ function parseFen4(fen4, rows, cols) {
 }
 
 
-// In SFEN, an UPPERCASE symbol is sente - the player at the bottom of the
-// board, drawn with the `w` artwork by every other path in this file. This
-// parser had it the other way round and called the uppercase side gote, so
-// every bracketed setup rendered with the two sides' artwork swapped: the
-// sente camp drawn in gote pieces and the gote camp in sente pieces, pointing
-// the wrong way.
-//
-// Only bracketed setups reach here, which is why it stayed hidden. Chu Shogi
-// uses single-character symbols, takes `parseVocabularyFen`, and has always
-// been right; Dai and the other large variants use bracketed codes, take this
-// path, and have always been wrong. Same piece set, opposite results.
-function parseSfenToPosition(fen, rows, cols) {
-  const position = {}
-  const ranks = fen.split(' ')[0].split('/')
-  for (let r = 0; r < ranks.length && r < rows; r++) {
-    let c = 0, i = 0
-    const rank = ranks[r]
-    while (i < rank.length && c < cols) {
-      if (rank[i] === '[') {
-        const close = rank.indexOf(']', i)
-        if (close === -1) { i++; continue }
-        const code = rank.substring(i + 1, close)
-        const isSente = code === code.toUpperCase()
-        position[`${fileLabel(c)}${rows - r}`] = (isSente ? 'w' : 'b') + code.toUpperCase()
-        c++; i = close + 1
-      } else if (rank[i] >= '1' && rank[i] <= '9') {
-        const next = rank[i + 1]
-        if (next >= '0' && next <= '9') { c += parseInt(rank[i] + next); i += 2 }
-        else { c += parseInt(rank[i]); i++ }
-      } else if (rank[i] === '+' && i + 1 < rank.length) {
-        const ch = rank[i + 1]
-        const isSente = ch === ch.toUpperCase()
-        position[`${fileLabel(c)}${rows - r}`] = (isSente ? 'w' : 'b') + '+' + ch.toUpperCase()
-        c++; i += 2
-      } else {
-        const ch = rank[i]
-        const isSente = ch === ch.toUpperCase()
-        position[`${fileLabel(c)}${rows - r}`] = (isSente ? 'w' : 'b') + ch.toUpperCase()
-        c++; i++
-      }
-    }
-  }
-  return position
-}
 
 function parseGraphSetup(setup, vocabulary = {}) {
   const position = {}

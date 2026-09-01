@@ -178,6 +178,61 @@ if (sourceFiles.length < FILE_FLOOR) {
   errors.push(`Source file count (${sourceFiles.length}) dropped below floor (${FILE_FLOOR}). Did files get removed without updating the guard?`)
 }
 
+// 12. A rank-based position string must be tokenised in ONE place.
+//
+//     Checks 1 to 11 each name a specific thing that was consolidated once and
+//     must not come back. That is a regression guard, not a duplicate detector:
+//     it cannot see a duplicate of anything not already listed, which is how
+//     six separate walks over a FEN rank accumulated - three of them with their
+//     own tokeniser - and drifted until the bracketed one read the wrong seat
+//     and drew six shogi boards with the two camps swapped.
+//
+//     This check is written the other way round: it looks for the SHAPE of a
+//     rank tokeniser wherever it appears, so a seventh is caught without anyone
+//     having to predict it.
+const RANK_TOKENISER_TELLS = [
+  /indexOf\(['"]\]['"]/,                 // scanning for a closing bracket
+  /===\s*['"]\[['"]/,                    // testing for an opening bracket
+  />=\s*['"]0['"]\s*&&[^\n]*<=\s*['"]9['"]/, // hand-rolled digit-run test
+  /\\\[\^\\\]\\\]\+\\\]/,    // a /\[^\]]+\]/ style token regex
+]
+const rankWalkers = sourceFiles.filter(f => {
+  const rel = f.replace(ROOT + '/', '')
+  if (rel.includes('__tests__') || rel.includes('check-duplication')) return false
+  // The one place allowed to know how a rank is spelled.
+  if (rel === 'packages/core/src/fen-runs.js') return false
+  const content = readFileSync(f, 'utf8')
+  if (!content.includes(".split('/')") && !content.includes('.split("/")')) return false
+  // A bracket scanner in a YAML or path helper is not a rank tokeniser. Require
+  // the file to be about positions at all before reading its brackets as FEN.
+  if (!/\b(fen|rank|sfen)\b/i.test(content)) return false
+  return RANK_TOKENISER_TELLS.some(re => re.test(content))
+})
+if (rankWalkers.length > 0) {
+  errors.push(
+    `rank tokenising outside packages/core/src/fen-runs.js: ${rankWalkers.map(f => f.replace(ROOT + '/', '')).join(', ')}` +
+    ` — use readPosition() rather than walking ranks, digits and brackets again`
+  )
+}
+
+// 13. The seat a symbol's case denotes must be decided in ONE place per layer.
+//     `parseSfenToPosition` decided it independently and decided it backwards:
+//     uppercase is sente, seat 0, the `w` artwork.
+const seatDeciders = sourceFiles.filter(f => {
+  const rel = f.replace(ROOT + '/', '')
+  if (rel.includes('__tests__') || rel.includes('check-duplication')) return false
+  if (rel === 'packages/render/src/render-engine.js') return false
+  const content = readFileSync(f, 'utf8')
+  // `x === x.toUpperCase() ? 'w' : 'b'` and its inverse, in either order.
+  return /toUpperCase\(\)\s*(?:\?|&&|\))[^\n]*['"][wb]['"]\s*:\s*['"][wb]['"]/.test(content)
+})
+if (seatDeciders.length > 0) {
+  errors.push(
+    `seat derived from symbol case outside render-engine.js: ${seatDeciders.map(f => f.replace(ROOT + '/', '')).join(', ')}` +
+    ` — uppercase is sente/seat 0; use seatPrefix() or the vocabulary`
+  )
+}
+
 if (errors.length > 0) {
   console.error('Duplication guard FAILED:')
   for (const e of errors) console.error('  - ' + e)

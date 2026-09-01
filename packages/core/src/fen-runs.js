@@ -56,3 +56,55 @@ export function parseRankRuns(rank) {
 export function parsePositionRuns(position) {
   return String(position).split(' ')[0].split('/').map(parseRankRuns)
 }
+
+/**
+ * One walk over a rank-based position string.
+ *
+ * `parseRankRuns` gave every caller the same tokeniser, and then six callers
+ * each wrote their own walk over its output - or, in three cases, their own
+ * tokeniser as well. They drifted, as copies do:
+ *
+ *   render-engine  parseSfenToPosition   its own char loop, and it read an
+ *                                        UPPERCASE symbol as gote when
+ *                                        uppercase is sente, so every
+ *                                        bracketed board drew both camps in
+ *                                        the other camp's pieces
+ *   play/fen.js    parseBoardWithPromotions  its own char loop; brackets were
+ *                                        added to it separately
+ *   js/create-state parseSetup           its own regex; multi-character codes
+ *                                        came apart into their letters
+ *   topology-grid  parsePosition         parseRankRuns, but no `+` handling
+ *
+ * A promoted piece is written `+P`, and whether that is one cell or two is
+ * exactly the kind of question six implementations will answer differently.
+ * It is answered here.
+ *
+ * Returns the cells in reading order and the width each rank actually spans,
+ * so a caller that wants to reject a malformed rank still can.
+ */
+export function readPosition(position, { rows = Infinity } = {}) {
+  const ranks = String(position).split(' ')[0].split('/')
+  const cells = []
+  const widths = []
+  for (let row = 0; row < ranks.length && row < rows; row++) {
+    let col = 0
+    let promoted = false
+    for (const run of parseRankRuns(ranks[row])) {
+      if (run.skip !== undefined) {
+        col += run.skip
+        promoted = false
+        continue
+      }
+      // `+` is a modifier on the symbol that follows it, not a cell of its own.
+      if (run.symbol === '+') {
+        promoted = true
+        continue
+      }
+      cells.push({ row, col, symbol: run.symbol, promoted })
+      promoted = false
+      col++
+    }
+    widths.push(col)
+  }
+  return { cells, widths, rankCount: ranks.length }
+}

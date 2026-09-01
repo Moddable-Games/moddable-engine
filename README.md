@@ -169,6 +169,9 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-01
+- Six separate walks over a FEN rank collapsed onto one, `readPosition` in `packages/core`: the grid topology, three parsers inside the renderer, the play serialiser and the Create page. Three of the six carried their own tokeniser, which is how they drifted far enough for one to read the wrong seat
+- `check-duplication.mjs` gains two checks written by shape rather than by name, so a seventh rank tokeniser or a second place deriving a seat from symbol case is caught without anyone predicting it first
+- Proven behaviour-preserving: all 334 board snapshots byte-identical across the refactor
 - A fourth position parser, `parseSfenToPosition`, reached only by setups containing a bracket, called an uppercase symbol gote. Uppercase is sente, and every other path maps it to the seat-0 artwork, so the six large shogi boards drew each camp in the other's pieces while every single-character board was correct
 - `check-duplication.mjs` is a blocklist of nine specific past consolidations, not a duplicate detector: it cannot see a new duplicate of anything not already named in it, which is how four position parsers accumulated
 - Three separate writers serialised a board position and each wrote multi-character piece symbols raw, so Dai Shogi's `PW` read back as a pawn and a silver and `GB` as a gold and a bishop: every row served to the play page was twice too long and the pieces shown were never on the board

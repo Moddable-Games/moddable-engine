@@ -1,4 +1,4 @@
-import { fileLabel } from '../../core/index.js'
+import { fileLabel, readPosition } from '../../core/index.js'
 // Loading a FEN and applying a move is the one operation every puzzle consumer
 // needs and every consumer has so far reimplemented as string surgery on the
 // FEN itself. Those hand-rolled mutators lose castling rights, forget to move
@@ -162,39 +162,18 @@ function parseBoardWithPromotions(boardPart, topo, plugin, rows, cols) {
   }
 
   const cells = new Array(rows * cols).fill(null)
-  const rowStrings = boardPart.split('/')
-  for (let r = 0; r < rowStrings.length && r < rows; r++) {
-    let c = 0
-    let promoted = false
-    for (let i = 0; i < rowStrings[r].length; i++) {
-      const ch = rowStrings[r][i]
-      if (ch === '+') { promoted = true; continue }
-      if (ch >= '0' && ch <= '9') {
-        let num = ch
-        while (i + 1 < rowStrings[r].length && rowStrings[r][i + 1] >= '0' && rowStrings[r][i + 1] <= '9') {
-          num += rowStrings[r][++i]
-        }
-        c += parseInt(num, 10)
-        continue
-      }
-      let sym = ch
-      if (ch === '[') {
-        const close = rowStrings[r].indexOf(']', i)
-        if (close === -1) { promoted = false; continue }
-        sym = rowStrings[r].slice(i + 1, close)
-        i = close
-      }
-      const piece = fromSym.get(sym)
-      if (piece && c < cols) {
-        if (promoted) {
-          const pType = getPromotedType(piece.type)
-          cells[r * cols + c] = { type: pType || piece.type, owner: piece.owner }
-        } else {
-          cells[r * cols + c] = { ...piece }
-        }
-      }
-      promoted = false
-      c++
+  // The walk is `readPosition`; this decides only what a cell becomes. The
+  // hand-rolled loop that used to be here had brackets bolted on separately
+  // from the three other copies of the same walk.
+  for (const { row, col, symbol, promoted } of readPosition(boardPart, { rows }).cells) {
+    if (col >= cols) continue
+    const piece = fromSym.get(symbol)
+    if (!piece) continue
+    if (promoted) {
+      const pType = getPromotedType(piece.type)
+      cells[row * cols + col] = { type: pType || piece.type, owner: piece.owner }
+    } else {
+      cells[row * cols + col] = { ...piece }
     }
   }
   return cells
