@@ -169,6 +169,8 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-01
+- A fourth position parser, `parseSfenToPosition`, reached only by setups containing a bracket, called an uppercase symbol gote. Uppercase is sente, and every other path maps it to the seat-0 artwork, so the six large shogi boards drew each camp in the other's pieces while every single-character board was correct
+- `check-duplication.mjs` is a blocklist of nine specific past consolidations, not a duplicate detector: it cannot see a new duplicate of anything not already named in it, which is how four position parsers accumulated
 - Three separate writers serialised a board position and each wrote multi-character piece symbols raw, so Dai Shogi's `PW` read back as a pawn and a silver and `GB` as a gold and a bishop: every row served to the play page was twice too long and the pieces shown were never on the board
 - `topology-grid.serializePosition`, `play/src/fen.js` and `play/src/serialise.js` now all bracket a symbol longer than one character; the reader, `parseRankRuns`, had handled brackets all along
 - The Create page tokenised a setup one character at a time, so importing any variant with multi-character codes lost the board entirely

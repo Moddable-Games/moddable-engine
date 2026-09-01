@@ -567,6 +567,17 @@ function parseFen4(fen4, rows, cols) {
 }
 
 
+// In SFEN, an UPPERCASE symbol is sente - the player at the bottom of the
+// board, drawn with the `w` artwork by every other path in this file. This
+// parser had it the other way round and called the uppercase side gote, so
+// every bracketed setup rendered with the two sides' artwork swapped: the
+// sente camp drawn in gote pieces and the gote camp in sente pieces, pointing
+// the wrong way.
+//
+// Only bracketed setups reach here, which is why it stayed hidden. Chu Shogi
+// uses single-character symbols, takes `parseVocabularyFen`, and has always
+// been right; Dai and the other large variants use bracketed codes, take this
+// path, and have always been wrong. Same piece set, opposite results.
 function parseSfenToPosition(fen, rows, cols) {
   const position = {}
   const ranks = fen.split(' ')[0].split('/')
@@ -578,8 +589,8 @@ function parseSfenToPosition(fen, rows, cols) {
         const close = rank.indexOf(']', i)
         if (close === -1) { i++; continue }
         const code = rank.substring(i + 1, close)
-        const isGote = code === code.toUpperCase()
-        position[`${fileLabel(c)}${rows - r}`] = (isGote ? 'b' : 'w') + code.toUpperCase()
+        const isSente = code === code.toUpperCase()
+        position[`${fileLabel(c)}${rows - r}`] = (isSente ? 'w' : 'b') + code.toUpperCase()
         c++; i = close + 1
       } else if (rank[i] >= '1' && rank[i] <= '9') {
         const next = rank[i + 1]
@@ -587,13 +598,13 @@ function parseSfenToPosition(fen, rows, cols) {
         else { c += parseInt(rank[i]); i++ }
       } else if (rank[i] === '+' && i + 1 < rank.length) {
         const ch = rank[i + 1]
-        const isGote = ch === ch.toUpperCase()
-        position[`${fileLabel(c)}${rows - r}`] = (isGote ? 'b' : 'w') + '+' + ch.toUpperCase()
+        const isSente = ch === ch.toUpperCase()
+        position[`${fileLabel(c)}${rows - r}`] = (isSente ? 'w' : 'b') + '+' + ch.toUpperCase()
         c++; i += 2
       } else {
         const ch = rank[i]
-        const isGote = ch === ch.toUpperCase()
-        position[`${fileLabel(c)}${rows - r}`] = (isGote ? 'b' : 'w') + ch.toUpperCase()
+        const isSente = ch === ch.toUpperCase()
+        position[`${fileLabel(c)}${rows - r}`] = (isSente ? 'w' : 'b') + ch.toUpperCase()
         c++; i++
       }
     }
