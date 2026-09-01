@@ -13,8 +13,8 @@
     {
       "path": "/api/boards/index.json",
       "type": "json",
-      "description": "Board gallery — 333 rendered SVG diagrams spanning 33 game families",
-      "count": 333
+      "description": "Board gallery — 334 rendered SVG diagrams spanning 33 game families",
+      "count": 334
     },
     {
       "path": "/api/tiles/index.json",

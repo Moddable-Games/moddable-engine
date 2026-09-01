@@ -65,6 +65,15 @@ jobs:
         env:
           NODE_OPTIONS: '--experimental-vm-modules'
           MODDABLE_RULES_DIR: ${{ github.workspace }}/moddable-rules/games
+      # The board gallery is a published surface built from snapshots/, and
+      # nothing looked at it. It kept a superseded Dai Shogi position and the
+      # inverted seat artwork long after both were fixed, because the only way
+      # it updated was somebody remembering to run the script.
+      - name: Verify board gallery is up to date
+        run: node scripts/build-board-index.mjs --check
+        env:
+          NODE_OPTIONS: '--experimental-vm-modules'
+          MODDABLE_RULES_DIR: ${{ github.workspace }}/moddable-rules/games
       - uses: actions/upload-artifact@v4
         if: always()
         with:

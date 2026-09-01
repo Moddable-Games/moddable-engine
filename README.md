@@ -169,6 +169,9 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-01
+- The board gallery had no freshness gate at all, so it drifted silently: it served 180 of 334 boards, kept the superseded Dai Shogi position and inverted seat artwork, and drew Dobutsu with 4 of its 8 pieces from the wrong piece set in a 1.1MB file
+- `build-board-index.mjs --check` added and gated in CI, so the gallery can no longer disagree with the snapshots it is built from
+- 153 orphaned `moddable-chess--*` gallery SVGs deleted, left from the chess hub rename and referenced by nothing; the published board count was counting them, reporting 487 boards against 334 real ones
 - Six separate walks over a FEN rank collapsed onto one, `readPosition` in `packages/core`: the grid topology, three parsers inside the renderer, the play serialiser and the Create page. Three of the six carried their own tokeniser, which is how they drifted far enough for one to read the wrong seat
 - `check-duplication.mjs` gains two checks written by shape rather than by name, so a seventh rank tokeniser or a second place deriving a seat from symbol case is caught without anyone predicting it first
 - Proven behaviour-preserving: all 334 board snapshots byte-identical across the refactor

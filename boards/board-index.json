@@ -112,6 +112,1230 @@
     "svg": "svgs/chaupar--standard.svg"
   },
   {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "absorption",
+    "variantTitle": "Absorption Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--absorption.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "alice",
+    "variantTitle": "Alice Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--alice.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "almost-chess",
+    "variantTitle": "Almost Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--almost-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "amazon-chess",
+    "variantTitle": "Amazon Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--amazon-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "andernach",
+    "variantTitle": "Andernach Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--andernach.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "anti-king-chess-2",
+    "variantTitle": "Anti-King Chess II",
+    "topology": "grid",
+    "svg": "svgs/chess--anti-king-chess-2.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "antichess",
+    "variantTitle": "Antichess",
+    "topology": "grid",
+    "svg": "svgs/chess--antichess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "archchess",
+    "variantTitle": "Archchess",
+    "topology": "grid",
+    "svg": "svgs/chess--archchess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "asean",
+    "variantTitle": "ASEAN Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--asean.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "atomic",
+    "variantTitle": "Atomic Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--atomic.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "avalanche",
+    "variantTitle": "Avalanche Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--avalanche.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "balbos-chess",
+    "variantTitle": "Balbo's Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--balbos-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "benedict",
+    "variantTitle": "Benedict Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--benedict.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "berolina-chess",
+    "variantTitle": "Berolina Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--berolina-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "berserk",
+    "variantTitle": "Berserk Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--berserk.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "birds-chess",
+    "variantTitle": "Bird's Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--birds-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "blind-chess",
+    "variantTitle": "Blind Chess (Banqi)",
+    "topology": "grid",
+    "svg": "svgs/chess--blind-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "breakthrough",
+    "variantTitle": "Breakthrough",
+    "topology": "grid",
+    "svg": "svgs/chess--breakthrough.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "brusky",
+    "variantTitle": "Brusky's Hexagonal Chess",
+    "topology": "hex",
+    "svg": "svgs/chess--brusky.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "byzantine-chess",
+    "variantTitle": "Byzantine Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--byzantine-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "capablanca",
+    "variantTitle": "Capablanca Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--capablanca.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "carrera",
+    "variantTitle": "Carrera's Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--carrera.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "centennial-chess",
+    "variantTitle": "Centennial Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--centennial-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "chak",
+    "variantTitle": "Chak",
+    "topology": "grid",
+    "svg": "svgs/chess--chak.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "chancellor-chess",
+    "variantTitle": "Chancellor Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--chancellor-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "chaturanga",
+    "variantTitle": "Chaturanga",
+    "topology": "grid",
+    "svg": "svgs/chess--chaturanga.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "checkless",
+    "variantTitle": "Checkless Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--checkless.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "chennis",
+    "variantTitle": "Chennis",
+    "topology": "grid",
+    "svg": "svgs/chess--chennis.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "chigorin",
+    "variantTitle": "Chigorin",
+    "topology": "grid",
+    "svg": "svgs/chess--chigorin.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "circular-chess",
+    "variantTitle": "Circular Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--circular-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "citadel-chess",
+    "variantTitle": "Citadel Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--citadel-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "codrus",
+    "variantTitle": "Codrus",
+    "topology": "grid",
+    "svg": "svgs/chess--codrus.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "congo",
+    "variantTitle": "Congo",
+    "topology": "grid",
+    "svg": "svgs/chess--congo.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "courier",
+    "variantTitle": "Courier Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--courier.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "crazy-38s",
+    "variantTitle": "Crazy 38's",
+    "topology": "grid",
+    "svg": "svgs/chess--crazy-38s.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "crazyhouse",
+    "variantTitle": "Crazyhouse",
+    "topology": "grid",
+    "svg": "svgs/chess--crazyhouse.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "cylinder-chess",
+    "variantTitle": "Cylinder Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--cylinder-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "cylindrical-chess",
+    "variantTitle": "Cylindrical Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--cylindrical-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "dark-chess",
+    "variantTitle": "Dark Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--dark-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "de-vasa",
+    "variantTitle": "De Vasa's Hexagonal Chess",
+    "topology": "hex",
+    "svg": "svgs/chess--de-vasa.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "delirious-bughouse",
+    "variantTitle": "Delirious Bughouse",
+    "topology": "grid",
+    "svg": "svgs/chess--delirious-bughouse.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "diana",
+    "variantTitle": "Diana Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--diana.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "dice-chess",
+    "variantTitle": "Dice Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--dice-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "displacement-chess",
+    "variantTitle": "Displacement Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--displacement-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "djambi",
+    "variantTitle": "Djambi",
+    "topology": "grid",
+    "svg": "svgs/chess--djambi.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "dragon-chess",
+    "variantTitle": "Dragon Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--dragon-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "duck-chess",
+    "variantTitle": "Duck Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--duck-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "einstein-chess",
+    "variantTitle": "Einstein Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--einstein-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "empire",
+    "variantTitle": "Empire Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--empire.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "endgame-chess",
+    "variantTitle": "Endgame Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--endgame-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "extinction",
+    "variantTitle": "Extinction Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--extinction.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "fanorona-chess",
+    "variantTitle": "Fanorona Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--fanorona-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "fischer-random",
+    "variantTitle": "Fischer Random (Chess960)",
+    "topology": "grid",
+    "svg": "svgs/chess--fischer-random.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "five-check",
+    "variantTitle": "Five-Check",
+    "topology": "grid",
+    "svg": "svgs/chess--five-check.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "flip-chess",
+    "variantTitle": "Flip Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--flip-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "fog-of-war",
+    "variantTitle": "Fog of War Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--fog-of-war.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "four-handed-chess",
+    "variantTitle": "Four-Handed Chess (Chaturaji)",
+    "topology": "grid",
+    "svg": "svgs/chess--four-handed-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "giveaway",
+    "variantTitle": "Giveaway",
+    "topology": "grid",
+    "svg": "svgs/chess--giveaway.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "glinski",
+    "variantTitle": "Glinski's Hexagonal Chess",
+    "topology": "hex",
+    "svg": "svgs/chess--glinski.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "grand",
+    "variantTitle": "Grand Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--grand.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "grande-acedrex",
+    "variantTitle": "Grande Acedrex",
+    "topology": "grid",
+    "svg": "svgs/chess--grande-acedrex.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "grasshopper",
+    "variantTitle": "Standard Grasshopper Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--grasshopper.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "grid-chess",
+    "variantTitle": "Grid Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--grid-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "gustav-iii-chess",
+    "variantTitle": "Gustav III's Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--gustav-iii-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "gygax",
+    "variantTitle": "Gygax Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--gygax.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "half-chess",
+    "variantTitle": "Half Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--half-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "hexapawn",
+    "variantTitle": "Hexapawn",
+    "topology": "grid",
+    "svg": "svgs/chess--hexapawn.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "hole-chess",
+    "variantTitle": "Hole Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--hole-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "hoppel-poppel",
+    "variantTitle": "Hoppel-Poppel",
+    "topology": "grid",
+    "svg": "svgs/chess--hoppel-poppel.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "horde",
+    "variantTitle": "Horde Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--horde.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "hostage-chess",
+    "variantTitle": "Hostage Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--hostage-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "immunization-chess",
+    "variantTitle": "Immunization Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--immunization-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "janus",
+    "variantTitle": "Janus Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--janus.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "khans-chess",
+    "variantTitle": "Khan's Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--khans-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "king-of-the-hill",
+    "variantTitle": "King of the Hill",
+    "topology": "grid",
+    "svg": "svgs/chess--king-of-the-hill.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "klein-bottle-chess",
+    "variantTitle": "Klein Bottle Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--klein-bottle-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "knightmate",
+    "variantTitle": "Knightmate",
+    "topology": "grid",
+    "svg": "svgs/chess--knightmate.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "kriegspiel",
+    "variantTitle": "Kriegspiel",
+    "topology": "grid",
+    "svg": "svgs/chess--kriegspiel.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "legan-chess",
+    "variantTitle": "Legan Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--legan-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "los-alamos",
+    "variantTitle": "Los Alamos",
+    "topology": "grid",
+    "svg": "svgs/chess--los-alamos.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "los-alamos-vierschach",
+    "variantTitle": "Los Alamos Vierschach",
+    "topology": "grid",
+    "svg": "svgs/chess--los-alamos-vierschach.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "madrasi",
+    "variantTitle": "Madrasi Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--madrasi.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "maharaja",
+    "variantTitle": "Maharaja & Sepoys",
+    "topology": "grid",
+    "svg": "svgs/chess--maharaja.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "makpong",
+    "variantTitle": "Makpong",
+    "topology": "grid",
+    "svg": "svgs/chess--makpong.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "makruk",
+    "variantTitle": "Makruk",
+    "topology": "grid",
+    "svg": "svgs/chess--makruk.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "mansindam",
+    "variantTitle": "Mansindam (Pantheon Tale)",
+    "topology": "grid",
+    "svg": "svgs/chess--mansindam.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "marseillais",
+    "variantTitle": "Marseillais Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--marseillais.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "mccooey",
+    "variantTitle": "McCooey's Hexagonal Chess",
+    "topology": "hex",
+    "svg": "svgs/chess--mccooey.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "medusa-chess",
+    "variantTitle": "Medusa Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--medusa-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "metamachy",
+    "variantTitle": "Metamachy",
+    "topology": "grid",
+    "svg": "svgs/chess--metamachy.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "mini-hexchess",
+    "variantTitle": "Mini Hexchess",
+    "topology": "hex",
+    "svg": "svgs/chess--mini-hexchess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "minichess",
+    "variantTitle": "Minichess",
+    "topology": "grid",
+    "svg": "svgs/chess--minichess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "mobius-strip-chess",
+    "variantTitle": "Möbius Strip Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--mobius-strip-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "monster-chess",
+    "variantTitle": "Monster Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--monster-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "nightrider",
+    "variantTitle": "Standard Nightrider Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--nightrider.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "no-castling",
+    "variantTitle": "No Castling Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--no-castling.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "no-retreat",
+    "variantTitle": "No Retreat",
+    "topology": "grid",
+    "svg": "svgs/chess--no-retreat.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "oblong-chess",
+    "variantTitle": "Oblong Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--oblong-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "omega-chess",
+    "variantTitle": "Omega Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--omega-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "omnicide",
+    "variantTitle": "Omnicide",
+    "topology": "grid",
+    "svg": "svgs/chess--omnicide.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "orda-chess",
+    "variantTitle": "Orda Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--orda-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "orda-mirror",
+    "variantTitle": "Orda Mirror",
+    "topology": "grid",
+    "svg": "svgs/chess--orda-mirror.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "ouk-chaktrang",
+    "variantTitle": "Ouk Chaktrang (Cambodian Chess)",
+    "topology": "grid",
+    "svg": "svgs/chess--ouk-chaktrang.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "patrol",
+    "variantTitle": "Patrol Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--patrol.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "pawns-only",
+    "variantTitle": "Pawns Only",
+    "topology": "grid",
+    "svg": "svgs/chess--pawns-only.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "peasants-revolt",
+    "variantTitle": "Peasants' Revolt",
+    "topology": "grid",
+    "svg": "svgs/chess--peasants-revolt.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "petty",
+    "variantTitle": "Petty Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--petty.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "placement-chess",
+    "variantTitle": "Placement Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--placement-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "pocket-knight",
+    "variantTitle": "Pocket Knight Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--pocket-knight.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "poison-chess",
+    "variantTitle": "Poison Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--poison-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "progressive",
+    "variantTitle": "Progressive",
+    "topology": "grid",
+    "svg": "svgs/chess--progressive.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "progressive-italian",
+    "variantTitle": "Progressive Italian",
+    "topology": "grid",
+    "svg": "svgs/chess--progressive-italian.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "racing-kings",
+    "variantTitle": "Racing Kings",
+    "topology": "grid",
+    "svg": "svgs/chess--racing-kings.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "raumschach",
+    "variantTitle": "Raumschach",
+    "topology": "grid",
+    "svg": "svgs/chess--raumschach.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "recruitment-chess",
+    "variantTitle": "Recruitment Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--recruitment-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "rifle",
+    "variantTitle": "Rifle Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--rifle.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "rollerball",
+    "variantTitle": "Rollerball",
+    "topology": "grid",
+    "svg": "svgs/chess--rollerball.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "romanchenkos-chess",
+    "variantTitle": "Romanchenko's Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--romanchenkos-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "s-chess",
+    "variantTitle": "S-Chess (Seirawan Chess)",
+    "topology": "grid",
+    "svg": "svgs/chess--s-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "senterej",
+    "variantTitle": "Senterej",
+    "topology": "grid",
+    "svg": "svgs/chess--senterej.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "shafran",
+    "variantTitle": "Shafran's Hexagonal Chess",
+    "topology": "hex",
+    "svg": "svgs/chess--shafran.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "shako",
+    "variantTitle": "Shako",
+    "topology": "grid",
+    "svg": "svgs/chess--shako.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "shatar",
+    "variantTitle": "Shatar",
+    "topology": "grid",
+    "svg": "svgs/chess--shatar.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "shatranj",
+    "variantTitle": "Shatranj",
+    "topology": "grid",
+    "svg": "svgs/chess--shatranj.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "shatranj-kamil",
+    "variantTitle": "Shatranj Kamil",
+    "topology": "grid",
+    "svg": "svgs/chess--shatranj-kamil.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "shinobi",
+    "variantTitle": "Shinobi Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--shinobi.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "shinobiplus",
+    "variantTitle": "Shinobi+",
+    "topology": "grid",
+    "svg": "svgs/chess--shinobiplus.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "shogun",
+    "variantTitle": "Shogun Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--shogun.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "single-check",
+    "variantTitle": "Single-Check",
+    "topology": "grid",
+    "svg": "svgs/chess--single-check.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "sittuyin",
+    "variantTitle": "Sittuyin",
+    "topology": "grid",
+    "svg": "svgs/chess--sittuyin.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "spartan",
+    "variantTitle": "Spartan Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--spartan.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "spherical-chess",
+    "variantTitle": "Spherical Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--spherical-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "stalemate-wins",
+    "variantTitle": "Stalemate Wins",
+    "topology": "grid",
+    "svg": "svgs/chess--stalemate-wins.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "standard",
+    "variantTitle": "Standard Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--standard.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "stupidhouse",
+    "variantTitle": "Stupidhouse",
+    "topology": "grid",
+    "svg": "svgs/chess--stupidhouse.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "suicide-chess",
+    "variantTitle": "Suicide Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--suicide-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "synochess",
+    "variantTitle": "Synochess",
+    "topology": "grid",
+    "svg": "svgs/chess--synochess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "tamerlane",
+    "variantTitle": "Tamerlane Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--tamerlane.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "tandem-chess",
+    "variantTitle": "Tandem Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--tandem-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "teleport-chess",
+    "variantTitle": "Teleportation Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--teleport-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "three-check",
+    "variantTitle": "Three-Check",
+    "topology": "grid",
+    "svg": "svgs/chess--three-check.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "toroidal-byzantine",
+    "variantTitle": "Toroidal Byzantine Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--toroidal-byzantine.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "toroidal-chess",
+    "variantTitle": "Gadsden's Toroidal Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--toroidal-chess.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "torpedo",
+    "variantTitle": "Torpedo Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--torpedo.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "turkish-great-chess-ii",
+    "variantTitle": "Turkish Great Chess II (Atranj)",
+    "topology": "grid",
+    "svg": "svgs/chess--turkish-great-chess-ii.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "turkish-great-chess-iii",
+    "variantTitle": "Turkish Great Chess III",
+    "topology": "grid",
+    "svg": "svgs/chess--turkish-great-chess-iii.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "turkish-great-chess-iv",
+    "variantTitle": "Turkish Great Chess IV",
+    "topology": "grid",
+    "svg": "svgs/chess--turkish-great-chess-iv.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "ultima",
+    "variantTitle": "Ultima (Baroque Chess)",
+    "topology": "grid",
+    "svg": "svgs/chess--ultima.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "upside-down",
+    "variantTitle": "Upside-Down",
+    "topology": "grid",
+    "svg": "svgs/chess--upside-down.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "vierschach",
+    "variantTitle": "Vierschach",
+    "topology": "grid",
+    "svg": "svgs/chess--vierschach.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "weak",
+    "variantTitle": "Weak!",
+    "topology": "grid",
+    "svg": "svgs/chess--weak.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "wildebeest",
+    "variantTitle": "Standard Wildebeest Chess",
+    "topology": "grid",
+    "svg": "svgs/chess--wildebeest.svg"
+  },
+  {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "xiang-fu",
+    "variantTitle": "Xiang Fu",
+    "topology": "grid",
+    "svg": "svgs/chess--xiang-fu.svg"
+  },
+  {
     "family": "dou-shou-qi",
     "familyTitle": "Dou Shou Qi (斗兽棋 / Jungle)",
     "variant": "standard",
@@ -902,6 +2126,14 @@
     "variantTitle": "Royal Game of Ur (Standard)",
     "topology": "grid",
     "svg": "svgs/royal-ur--standard.svg"
+  },
+  {
+    "family": "senet",
+    "familyTitle": "Senet",
+    "variant": "standard",
+    "variantTitle": "Senet (Kendall Reconstruction)",
+    "topology": "grid",
+    "svg": "svgs/senet--standard.svg"
   },
   {
     "family": "shogi",
