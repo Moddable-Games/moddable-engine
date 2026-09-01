@@ -4776,8 +4776,6 @@
       "b+B": "b+B.svg",
       "wE": "wE.svg",
       "bE": "bE.svg",
-      "wdG": "wdG.svg",
-      "bdG": "bdG.svg",
       "wdL": "wdL.svg",
       "bdL": "bdL.svg",
       "wdE": "wdE.svg",
@@ -5384,20 +5382,48 @@
     "authorUrl": "https://commons.wikimedia.org/wiki/User:Rsalen",
     "playable": true,
     "owners": {
-      "red":    { "fill": "#d32f2f", "stroke": "#000" },
-      "yellow": { "fill": "#fdd835", "stroke": "#000" },
-      "green":  { "fill": "#2e7d32", "stroke": "#000" },
-      "blue":   { "fill": "#1565c0", "stroke": "#000" }
+      "red": {
+        "fill": "#d32f2f",
+        "stroke": "#000"
+      },
+      "yellow": {
+        "fill": "#fdd835",
+        "stroke": "#000"
+      },
+      "green": {
+        "fill": "#2e7d32",
+        "stroke": "#000"
+      },
+      "blue": {
+        "fill": "#1565c0",
+        "stroke": "#000"
+      }
     },
     "pieces": {
-      "rC": "Djambi_chief.svg", "rA": "Djambi_assassin.svg", "rR": "Djambi_reporter.svg",
-      "rD": "Djambi_diplomat.svg", "rN": "Djambi_necromobile.svg", "rM": "Djambi_militant.svg",
-      "yC": "Djambi_chief.svg", "yA": "Djambi_assassin.svg", "yR": "Djambi_reporter.svg",
-      "yD": "Djambi_diplomat.svg", "yN": "Djambi_necromobile.svg", "yM": "Djambi_militant.svg",
-      "gC": "Djambi_chief.svg", "gA": "Djambi_assassin.svg", "gR": "Djambi_reporter.svg",
-      "gD": "Djambi_diplomat.svg", "gN": "Djambi_necromobile.svg", "gM": "Djambi_militant.svg",
-      "bC": "Djambi_chief.svg", "bA": "Djambi_assassin.svg", "bR": "Djambi_reporter.svg",
-      "bD": "Djambi_diplomat.svg", "bN": "Djambi_necromobile.svg", "bM": "Djambi_militant.svg",
+      "rC": "Djambi_chief.svg",
+      "rA": "Djambi_assassin.svg",
+      "rR": "Djambi_reporter.svg",
+      "rD": "Djambi_diplomat.svg",
+      "rN": "Djambi_necromobile.svg",
+      "rM": "Djambi_militant.svg",
+      "yC": "Djambi_chief.svg",
+      "yA": "Djambi_assassin.svg",
+      "yR": "Djambi_reporter.svg",
+      "yD": "Djambi_diplomat.svg",
+      "yN": "Djambi_necromobile.svg",
+      "yM": "Djambi_militant.svg",
+      "gC": "Djambi_chief.svg",
+      "gA": "Djambi_assassin.svg",
+      "gR": "Djambi_reporter.svg",
+      "gD": "Djambi_diplomat.svg",
+      "gN": "Djambi_necromobile.svg",
+      "gM": "Djambi_militant.svg",
+      "bC": "Djambi_chief.svg",
+      "bA": "Djambi_assassin.svg",
+      "bR": "Djambi_reporter.svg",
+      "bD": "Djambi_diplomat.svg",
+      "bN": "Djambi_necromobile.svg",
+      "bM": "Djambi_militant.svg",
       "X": "Djambi_corpse.svg"
     }
   }
