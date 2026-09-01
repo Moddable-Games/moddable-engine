@@ -1712,6 +1712,15 @@
   {
     "family": "shogi",
     "familyLabel": "Shogi",
+    "variant": "dai-shogi",
+    "key": "dai-shogi",
+    "label": "Dai Shogi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "dobutsu",
     "key": "dobutsu",
     "label": "Dobutsu Shogi",

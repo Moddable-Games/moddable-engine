@@ -53,7 +53,10 @@ export function buildSetup(state) {
       const piece = placement[`${r},${c}`]
       if (piece) {
         if (empty > 0) { row += empty; empty = 0 }
-        row += piece
+        // Multi-character piece codes are written bracketed, which is how the
+        // large shogi variants address 29 or more piece types on one board.
+        // Unbracketed they would read as a run of separate single-char pieces.
+        row += piece.length > 1 ? `[${piece}]` : piece
       } else {
         empty++
       }
@@ -87,11 +90,11 @@ export function parseSetup(text, { type, rows, cols }) {
   if (rowStrings.length !== rows) return null
   for (let r = 0; r < rows; r++) {
     let c = 0
-    const run = rowStrings[r].match(/\d+|[^\d]/g) || []
+    const run = rowStrings[r].match(/\d+|\[[^\]]+\]|[^\d]/g) || []
     for (const token of run) {
       if (/^\d+$/.test(token)) { c += parseInt(token, 10); continue }
       if (c >= cols) return null
-      next[`${r},${c}`] = token
+      next[`${r},${c}`] = token.startsWith('[') ? token.slice(1, -1) : token
       c++
     }
     if (c !== cols) return null

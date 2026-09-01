@@ -423,7 +423,13 @@ export function createGridTopology(config) {
           empty++
         } else {
           if (empty > 0) { rowStr += String(empty); empty = 0 }
-          rowStr += symbolMap.toSymbol(cell)
+          // A symbol longer than one character is bracketed. A plugin
+          // vocabulary may use multi-character codes when a variant has more
+          // piece types than there are letters - Dai Shogi has 29 - and
+          // written raw, `LN` reads back as an `L` and an `N`, so the row
+          // parses to twice its width and the position is not the one served.
+          const sym = symbolMap.toSymbol(cell)
+          rowStr += String(sym).length > 1 ? `[${sym}]` : sym
         }
       }
       if (empty > 0) rowStr += String(empty)

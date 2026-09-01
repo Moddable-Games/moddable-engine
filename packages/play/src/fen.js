@@ -66,6 +66,14 @@ function parseUci(uci, rows, cols) {
   return { from, to, promotion: match[3] || null }
 }
 
+// A vocabulary symbol longer than one character is written bracketed, which is
+// how the large shogi variants address 29 or more piece types on one board.
+// Written raw, `LN` reads back as an `L` and an `N`: Dai Shogi exported a FEN
+// whose every row was twice too long and re-imported as a different position.
+function encodeSymbol(sym) {
+  return String(sym).length > 1 ? `[${sym}]` : String(sym)
+}
+
 function symbolToType(vocabulary, letter) {
   const lower = letter.toLowerCase()
   for (const [type, def] of Object.entries(vocabulary)) {
@@ -169,7 +177,14 @@ function parseBoardWithPromotions(boardPart, topo, plugin, rows, cols) {
         c += parseInt(num, 10)
         continue
       }
-      const piece = fromSym.get(ch)
+      let sym = ch
+      if (ch === '[') {
+        const close = rowStrings[r].indexOf(']', i)
+        if (close === -1) { promoted = false; continue }
+        sym = rowStrings[r].slice(i + 1, close)
+        i = close
+      }
+      const piece = fromSym.get(sym)
       if (piece && c < cols) {
         if (promoted) {
           const pType = getPromotedType(piece.type)
@@ -299,11 +314,11 @@ function serializeBoardWithPromotions(board, topo, plugin, rows, cols) {
           const baseType = cell.type.slice('promoted_'.length)
           const entry = vocabulary[baseType]
           const sym = entry?.symbols?.[cell.owner]
-          rowStr += sym ? '+' + sym : '?'
+          rowStr += sym ? '+' + encodeSymbol(sym) : '?'
         } else {
           const entry = vocabulary[cell.type]
           const sym = entry?.symbols?.[cell.owner]
-          rowStr += sym || '?'
+          rowStr += sym ? encodeSymbol(sym) : '?'
         }
       }
     }

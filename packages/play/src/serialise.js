@@ -133,7 +133,11 @@ export function boardToSetup(slice, topo = {}, vocabulary = {}, opts = {}) {
       const symbol = cellToSymbol(board[r * cols + c], vocabulary)
       if (!symbol) { empty++; continue }
       if (empty > 0) { row += empty; empty = 0 }
-      row += symbol
+      // Bracketed when the symbol is longer than one character. Dai Shogi's
+      // vocabulary is two-character codes, and written raw `LN` reads back as
+      // an `L` and an `N`, so every row served to the renderer was twice too
+      // long and the board came back with pieces that were never on it.
+      row += String(symbol).length > 1 ? `[${symbol}]` : symbol
     }
     if (empty > 0) row += empty
     fenRows.push(row)

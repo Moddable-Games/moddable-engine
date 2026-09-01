@@ -169,6 +169,10 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-01
+- Three separate writers serialised a board position and each wrote multi-character piece symbols raw, so Dai Shogi's `PW` read back as a pawn and a silver and `GB` as a gold and a bishop: every row served to the play page was twice too long and the pieces shown were never on the board
+- `topology-grid.serializePosition`, `play/src/fen.js` and `play/src/serialise.js` now all bracket a symbol longer than one character; the reader, `parseRankRuns`, had handled brackets all along
+- The Create page tokenised a setup one character at a time, so importing any variant with multi-character codes lost the board entirely
+- Dai Shogi playable, taking shogi to 13 and the corpus to 204
 - `api/stats.json` carries a datestamp and `build-discovery.mjs --check` compares byte for byte, so the file went stale at midnight on its own and any push on a later day than the last regeneration turned CI red with no commit behind it
 - The date is carried forward when every other figure matches, and moves when a figure moves, so it keeps meaning when the numbers were measured rather than when the script last ran
 
