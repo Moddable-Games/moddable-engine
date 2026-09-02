@@ -562,7 +562,7 @@ registerGame('colony', {
     ],
     defaultSize: 2,
     defaultPlayers: 0,
-    styles: ['classic', 'kenney', 'realistic'],
+    styles: ['classic', 'kenney'],
     labels: false,
     hasEditor: false,
     layouts: [
@@ -597,17 +597,16 @@ registerGame('colony', {
     getImages: function(style) {
         if (style === 'classic') return null;
         var base = '../';
-        var folder = style === 'realistic' ? 'colony-realistic' : 'colony';
+        var folder = 'colony';
+        // sea, gold and fog have no artwork yet. Omitting them lets the renderer
+        // fall back to the classic colour fill rather than request a missing file.
         return {
             forest: base + 'tiles/sets/' + folder + '/forest.png',
             pasture: base + 'tiles/sets/' + folder + '/pasture.png',
             fields: base + 'tiles/sets/' + folder + '/fields.png',
             hills: base + 'tiles/sets/' + folder + '/hills.png',
             mountains: base + 'tiles/sets/' + folder + '/mountains.png',
-            desert: base + 'tiles/sets/' + folder + '/desert.png',
-            sea: base + 'tiles/sets/' + folder + '/sea.png',
-            gold: base + 'tiles/sets/' + folder + '/gold.png',
-            fog: base + 'tiles/sets/' + folder + '/fog.png'
+            desert: base + 'tiles/sets/' + folder + '/desert.png'
         };
     },
 

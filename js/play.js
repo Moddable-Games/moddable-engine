@@ -1,5 +1,5 @@
 import { renderFromEngine, attachPieceImages, fenToPosition } from '../packages/render/index.js'
-import { getGameConfig, getAllGames, HexSvg, createSeededRng } from '../packages/hex-generators/index.js'
+import { getGameConfig, getAllGames, HexSvg } from '../packages/hex-generators/index.js'
 import { renderRpgProvider } from './rpg-provider.js'
 import { renderChargenProvider } from './rpg-chargen.js'
 import { loadRecolouredPieces, FEN4_OWNERS, RULES_BASE, loadGalleryIndex, getGalleryIndex } from './play-shared.js'
@@ -363,6 +363,26 @@ async function render() {
   }
 }
 
+/**
+ * Resolve tile artwork for a hex map.
+ *
+ * Generators expose art two ways: getImages(style) returns a terrain-type map,
+ * and some generators instead assign hex.imagePath during generate(). Nothing
+ * called getImages, so terrain-mapped styles (nukes, talisman, colony) rendered
+ * as flat colour whatever style was asked for.
+ *
+ * Classic is the flat-colour style and must suppress both sources, including
+ * for generators such as twilight that assign imagePath unconditionally and so
+ * could never be shown flat.
+ */
+function hexImageOpts(gameConfig, hexes, style) {
+  if (style === 'classic') return { images: null, imageMode: 'none' }
+  const images = gameConfig.getImages ? gameConfig.getImages(style) : null
+  const hasPerHex = hexes.some(h => h.imagePath)
+  if (!images && !hasPerHex) return { images: null, imageMode: 'none' }
+  return { images, imageMode: 'link' }
+}
+
 function renderHexGenerator(entry) {
   const gameKey = entry.generator || entry.family
   const gameConfig = getGameConfig(gameKey)
@@ -376,19 +396,22 @@ function renderHexGenerator(entry) {
   const defaultPlayers = gameConfig.defaultPlayers || (manifestCounts.length ? manifestCounts[0] : 2)
   const players = state.players || defaultPlayers
   const seed = state.seed
-  const rng = createSeededRng(seed)
-  const result = gameConfig.generate(size, players, seed, rng)
+  // Fourth argument is the layout, not an RNG; generators seed themselves.
+  const result = gameConfig.generate(size, players, seed, state.layout || null)
   const hexes = result.hexes || result
   const annotations = result.annotations || null
   const style = state.style || (gameConfig.styles && gameConfig.styles[0]) || 'classic'
 
   const colors = gameConfig.getColors ? gameConfig.getColors(style) : {}
+  const { images, imageMode } = hexImageOpts(gameConfig, hexes, style)
 
   const svgOpts = {
     size: 30,
     orientation: gameConfig.orientation || 'pointy',
     bgColor: '#1a1a2e',
     colors,
+    images,
+    imageMode,
   }
 
   const svg = annotations
@@ -411,8 +434,25 @@ function renderHexGenerator(entry) {
   } else {
     playerGroup.style.display = 'none'
   }
-  document.getElementById('hex-style-group').style.display = gameConfig.styles ? '' : 'none'
+  populateStyleSelect(gameConfig, style)
   document.getElementById('hex-seed-group').style.display = ''
+}
+
+function populateStyleSelect(gameConfig, current) {
+  const group = document.getElementById('hex-style-group')
+  const select = document.getElementById('hex-style-select')
+  const styles = gameConfig.styles
+  if (!styles || !styles.length) {
+    group.style.display = 'none'
+    return
+  }
+  // Driven by the generator rather than fixed markup, which offered every game
+  // the same three styles and left 'realistic' unreachable.
+  const labels = { classic: 'Classic (flat colour)', artistic: 'Artistic', kenney: 'Kenney', realistic: 'Realistic' }
+  select.innerHTML = styles
+    .map(st => `<option value="${st}"${st === current ? ' selected' : ''}>${labels[st] || st}</option>`)
+    .join('')
+  group.style.display = ''
 }
 
 async function renderComponentGameFromFrontmatter(entry) {
@@ -769,8 +809,8 @@ if (_hexEmbed) {
       if (!gameConfig) return
       const size = hexSize || gameConfig.defaultSize || 5
       const players = hexPlayers || gameConfig.defaultPlayers || 2
-      const rng = createSeededRng(hexSeed)
-      const result = gameConfig.generate(size, players, hexSeed, rng)
+      // Fourth argument is the layout, not an RNG; generators seed themselves.
+      const result = gameConfig.generate(size, players, hexSeed, hexLayout)
       const hexes = result.hexes || result
       lastHexes = hexes
       const annotations = result.annotations || null
@@ -778,13 +818,14 @@ if (_hexEmbed) {
       const rawBg = _embedParams.get('bg')
       const bg = rawBg ? (rawBg.startsWith('#') ? rawBg : '#' + rawBg) : null
 
-      const hasImages = hexes.some(h => h.imagePath)
+      const { images, imageMode } = hexImageOpts(gameConfig, hexes, hexStyle)
       const svgOpts = {
         size: 40,
         orientation: gameConfig.orientation || 'pointy',
         bgColor: bg,
         colors,
-        imageMode: hasImages ? 'link' : 'none',
+        images,
+        imageMode,
         fitToViewport: true,
       }
 
