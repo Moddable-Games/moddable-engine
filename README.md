@@ -169,6 +169,7 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-01
+- Piece-file resolution ratcheted: a manifest naming a file whose case does not match disk fails outright (it renders on macOS and silently drops artwork on Linux), while the 32 entries naming files absent everywhere are a shrink-only baseline
 - Dobutsu Shogi and two mahjong boards were blank cards in the gallery, board and all: their artwork is an editor export carrying `sodipodi:` and `osb:` attributes whose namespace declarations live on the source file's own root, which is discarded when the piece is inlined as a `<symbol>`. The prefix was then undeclared and the browser refused the whole document
 - Editor namespace attributes are stripped when embedding, and a test parses all 334 gallery SVGs, because a malformed SVG is still a file of the right name and size and only a parser can tell
 - The board gallery had no freshness gate at all, so it drifted silently: it served 180 of 334 boards, kept the superseded Dai Shogi position and inverted seat artwork, and drew Dobutsu with 4 of its 8 pieces from the wrong piece set in a 1.1MB file
