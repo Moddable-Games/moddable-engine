@@ -37,7 +37,7 @@ sizes: [
 ],
 defaultSize: 6,
 defaultPlayers: 0,
-styles: ['artistic', 'classic', 'kenney', 'realistic'],
+styles: ['artistic', 'classic', 'kenney'],
 labels: false,
 hasEditor: true,
 
@@ -208,7 +208,7 @@ importMap: function(data, hexData) {
 getImages: function(style) {
     if (style === 'classic') return null;
     var base = '../';
-    var folders = { artistic: 'nukes', kenney: 'nukes-kenney', realistic: 'nukes-realistic' };
+    var folders = { artistic: 'nukes', kenney: 'nukes-kenney' };
     var folder = folders[style] || 'nukes';
     return {
         water: base + 'tiles/sets/' + folder + '/water.png',

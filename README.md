@@ -168,6 +168,13 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Changelog
 
+#### 2026-09-02
+- Hex tile styles now reach the renderer. `getImages(style)` was defined on every generator and called by nothing, so artistic, kenney and realistic all fell back to the flat colour fill that classic already gave. Twilight was the inverse, assigning `imagePath` regardless of style so it could never render flat
+- `hexImageOpts()` resolves both artwork sources for the embed and interactive paths, and treats classic as the style that suppresses artwork however a generator assigns it
+- Tile style select is populated from `gameConfig.styles` instead of fixed markup, which offered every game the same three options and left one unreachable
+- `generate()`'s fourth argument is the layout, not an RNG; both call sites passed a freshly built RNG, so the layout parameter was parsed and discarded
+- Dropped the realistic style from nukes, talisman and colony: no tile set exists for it. Colony's absent sea, gold and fog tiles now fall back to the colour fill rather than requesting missing files
+
 #### 2026-09-01
 - Piece-file resolution ratcheted: a manifest naming a file whose case does not match disk fails outright (it renders on macOS and silently drops artwork on Linux), while the 32 entries naming files absent everywhere are a shrink-only baseline
 - Dobutsu Shogi and two mahjong boards were blank cards in the gallery, board and all: their artwork is an editor export carrying `sodipodi:` and `osb:` attributes whose namespace declarations live on the source file's own root, which is discarded when the piece is inlined as a `<symbol>`. The prefix was then undeclared and the browser refused the whole document

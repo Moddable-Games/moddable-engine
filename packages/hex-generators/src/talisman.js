@@ -162,7 +162,7 @@ sizes: [
 ],
 defaultSize: 4,
 defaultPlayers: 0,
-styles: ['artistic', 'classic', 'kenney', 'realistic'],
+styles: ['artistic', 'classic', 'kenney'],
 hasEditor: false,
 
 playerCounts: function() { return []; },
@@ -178,7 +178,7 @@ getColors: function() {
 getImages: function(style) {
     if (style === 'classic') return null;
     var base = '../';
-    var folders = { artistic: 'talisman', kenney: 'talisman-kenney', realistic: 'talisman-realistic' };
+    var folders = { artistic: 'talisman', kenney: 'talisman-kenney' };
     var folder = folders[style] || 'talisman';
     var allTiles = {};
     var allTypes = Object.keys(classicColors);
