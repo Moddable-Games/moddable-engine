@@ -899,7 +899,11 @@ function producePitOps(topo, colors, render) {
   if (boardRows === 2) {
     rowCenters.push(botPitCenter, topPitCenter)
   } else if (boardRows === 4) {
-    rowCenters.push(botPitCenter, botPitCenter - interRow, topPitCenter + interRow, topPitCenter)
+    // On four rows the index order is inner then outer, per player, because
+    // that is the order a player's own circuit runs in. Drawn, the inner rows
+    // are the two that face each other across the divider and the outer rows
+    // sit behind them - so the first block is the second row up, not the first.
+    rowCenters.push(botPitCenter - interRow, botPitCenter, topPitCenter + interRow, topPitCenter)
   }
 
   for (let row = 0; row < boardRows; row++) {

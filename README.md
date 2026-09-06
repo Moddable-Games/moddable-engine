@@ -169,6 +169,9 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-06
+- Bao plays, and the mancala family is now entirely configuration. It is the one variant that is not two players sharing a ring: each has a private sixteen-pit circuit, inner row and outer, and a sow never leaves the sower's half. The capture is the only thing that crosses
+- Three things had assumed one row a side and were wrong on four: the pit serialiser wrote three groups of eight and dropped half the board, the renderer drew each player's inner and outer rows the wrong way round, and the create page's round-trip lost `rows` entirely
+- The family's seed-conservation guard counted the board and the held seeds but not the reserve, so Bao looked as though it created a seed every time it played one from hand
 - Frisian Draughts plays. Movement on the diagonals and capture in all eight directions were one direction table asking one question; they are now two. Its majority rule weighs captures rather than counting them - a king is 1.5 men, two kings 3.5 - and the same king may not make a fourth consecutive quiet move while its owner still has a man
 - Xiang Fu plays. Three glyphs were missing from a piece set we wrote ourselves, so drawing them was the same job as the Banner and the Vao already in it: Champion 傑, Pupil 徒, Mahout 馭, Crossbow 弩. Half its pieces had been rendering as empty squares
 - The undrawable-piece warning no longer names pieces that are not on the board. A variant's vocabulary is merged over its family's, so Xiang Fu declares a Knight and inherits a Horse it never places

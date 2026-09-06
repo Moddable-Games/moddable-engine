@@ -21,7 +21,7 @@ export function defaultState(family = 'chess') {
     slug: '',
     win: '',
     special: '',
-    topology: { type: 'grid', rows: 8, cols: 8, layout: 'cells', radius: 5, shape: 'hexagonal', sideLength: 12, structure: 'concentric-rings', rings: 3, positions: 24, pitCols: 6 },
+    topology: { type: 'grid', rows: 8, cols: 8, layout: 'cells', radius: 5, shape: 'hexagonal', sideLength: 12, structure: 'concentric-rings', rings: 3, positions: 24, pitCols: 6, pitRows: 2 },
     render: { surface: 'wood-classic', cellColor: 'checkered', labels: true, starPoints: false, inherited: null, surfaceColors: null },
     pieceSet: '',
     pieceVocabulary: null,
@@ -134,6 +134,9 @@ function topologyFromState(state) {
     topology.positions = t.positions || 24
   } else if (type === 'pit') {
     topology.cols = t.pitCols || 6
+    // Bao gives each player two rows. Dropping `rows` turned it back into an
+    // ordinary two-row board on the way out of the editor.
+    if (t.pitRows && t.pitRows !== 2) topology.rows = t.pitRows
   }
   return topology
 }
@@ -241,6 +244,7 @@ export function stateFromResolved(resolved, family, opts = {}) {
   if (topo.rows) state.topology.rows = topo.rows
   if (topo.cols) state.topology.cols = topo.type === 'pit' ? state.topology.cols : topo.cols
   if (topo.type === 'pit' && topo.cols) state.topology.pitCols = topo.cols
+  if (topo.type === 'pit' && topo.rows) state.topology.pitRows = topo.rows
   state.topology.layout = topo.layout === 'intersections' || topo.layout === 'cross' ? 'intersections' : 'cells'
   if (Array.isArray(topo.voids) && topo.voids.length) state.topology.voids = topo.voids
   if (topo.radius) state.topology.radius = topo.radius

@@ -8,7 +8,12 @@ export function createPitTopology(config) {
   // for; the destructure only ever read `hasStores`, so five boards that
   // declare themselves storeless - oware, ayo, bao, pallanguzhi and the mancala
   // rulebook - silently got stores. Accept both, preferring the explicit one.
-  const { pitsPerSide = config.cols || 6, players = 2 } = config
+  // A player's half is one row of pits in every variant but Bao, which gives
+  // each player two: an inner row facing the opponent and an outer row behind
+  // it. `rows` is the whole board, so a half is rows/players of them.
+  const { players = 2 } = config
+  const rowsPerSide = config.rows ? Math.max(1, Math.round(config.rows / players)) : 1
+  const { pitsPerSide = (config.cols || 6) * rowsPerSide } = config
   const hasStores = config.hasStores !== undefined ? config.hasStores
     : config.stores !== undefined ? config.stores
     : true
@@ -113,6 +118,14 @@ export function createPitTopology(config) {
 
   function getPitsPerSide() {
     return pitsPerSide
+  }
+
+  function getRowsPerSide() {
+    return rowsPerSide
+  }
+
+  function getCols() {
+    return config.cols || pitsPerSide / rowsPerSide
   }
 
   function getTotalPits() {
@@ -222,6 +235,8 @@ export function createPitTopology(config) {
     fromJSON,
     getCount,
     getPitsPerSide,
+    getRowsPerSide,
+    getCols,
     getTotalPits,
     getLayout,
     serializePosition,

@@ -4,8 +4,9 @@ import { warnUnknownConfigKeys } from '../../../core/index.js'
 // `defaults`, which only lists the keys that carry a default value.
 export const CONFIG_KEYS = new Set([
   'bonusTurnOnStore', 'captureChainBackwards', 'captureCounts', 'captureRule',
-  'feedingObligation', 'grandSlamProhibited', 'hasStores', 'pitsPerSide',
-  'playerCount', 'relay', 'setup', 'skipOpponentStore', 'skipOriginOnWrap',
+  'chooseDirection', 'cols', 'feedingObligation', 'grandSlamProhibited', 'hasStores',
+  'namuaReserve', 'pitsPerSide',
+  'playerCount', 'relay', 'rowsPerSide', 'setup', 'skipOpponentStore', 'skipOriginOnWrap',
   'sowIntoOwnStore', 'stores', 'winBy',
 ])
 
@@ -14,11 +15,12 @@ export const CONFIG_KEYS = new Set([
 // circuit. The whole family is one loop plus a capture test, so the differences
 // between kalah, oware and toguz korgool are configuration rather than code.
 //
-// What is deliberately NOT modelled: bao la kiswahili, a four-row game with a
-// separate stocking phase and rules that do not fit this shape at all. It is
-// declared unsupported by its frontmatter rather than approximated, because a
-// mancala variant played with the wrong capture rule looks like it works and
-// silently is not the game.
+// Every variant in the family is now configuration. Bao was the last holdout
+// and needed three axes rather than a branch: two rows a side with a private
+// circuit per player, a direction chosen each turn, and a capture that empties
+// the facing pit of the enemy inner row into the kichwa. A mancala variant
+// played with the wrong capture rule looks like it works and silently is not
+// the game, which is what the corpus guard is for.
 export function createMancalaPlugin(variantConfig = {}, context = {}) {
   const defaults = {
     pitsPerSide: 6,
@@ -52,15 +54,61 @@ export function createMancalaPlugin(variantConfig = {}, context = {}) {
   let pitsPerSide = config.pitsPerSide
   let hasStores = declaredStores
   let totalPits = pitsPerSide * 2
+  // Bao gives each player two rows rather than one. Everything below that says
+  // "inner row" is meaningless on a one-row board and is guarded by this.
+  let rowsPerSide = config.rowsPerSide || 1
+  let cols = config.cols || pitsPerSide
 
   function storeIndex(player) { return hasStores ? totalPits + player : -1 }
   function isStore(idx) { return hasStores && idx >= totalPits }
   function ownsPit(idx, player) { return idx >= player * pitsPerSide && idx < (player + 1) * pitsPerSide }
-  function opposite(idx) { return totalPits - 1 - idx }
+
+  // Which pit faces which across the board.
+  //
+  // On one row a side the board is a ring and the facing pit is its mirror. On
+  // Bao's two rows only the INNER rows face each other, and a player's inner row
+  // runs left to right from where they sit - so it runs right to left from the
+  // other side, and the mirror is within the row rather than across the whole
+  // board.
+  function opposite(idx) {
+    if (rowsPerSide === 1) return totalPits - 1 - idx
+    const player = Math.floor(idx / pitsPerSide)
+    const withinSide = idx - player * pitsPerSide
+    if (withinSide >= cols) return -1
+    return (1 - player) * pitsPerSide + (cols - 1 - withinSide)
+  }
+
+  function isInnerPit(idx) {
+    if (rowsPerSide === 1) return true
+    return (idx - Math.floor(idx / pitsPerSide) * pitsPerSide) < cols
+  }
+
+  // The kichwa are the two ends of a player's inner row, and which one a capture
+  // is sown into is what chooses the direction of the sowing that follows.
+  function kichwaFor(player, direction) {
+    const base = player * pitsPerSide
+    return direction === 'clockwise' ? base : base + cols - 1
+  }
+
+  function innerRowSeeds(cells, player) {
+    let n = 0
+    for (let i = 0; i < cols; i++) n += cells[player * pitsPerSide + i]
+    return n
+  }
 
   // The circuit, in sowing order, for one player. Rebuilt per player because
   // which store is skipped depends on who is sowing.
-  function circuitFor(player) {
+  function circuitFor(player, direction) {
+    // Bao is not one circuit shared by two players: a sow never leaves the
+    // sower's own half. The ring runs along the inner row and back along the
+    // outer, and the player picks which way round at the start of the turn.
+    if (rowsPerSide === 2) {
+      const base = player * pitsPerSide
+      const ring = []
+      for (let i = 0; i < cols; i++) ring.push(base + i)
+      for (let i = cols - 1; i >= 0; i--) ring.push(base + cols + i)
+      return direction === 'clockwise' ? [ring[0], ...ring.slice(1).reverse()] : ring
+    }
     const path = []
     for (let i = 0; i < pitsPerSide; i++) path.push(i)
     if (hasStores) path.push(totalPits)
@@ -214,7 +262,58 @@ export function createMancalaPlugin(variantConfig = {}, context = {}) {
     return { cells: out, captured }
   }
 
-  function resolveMove(cells, from, player) {
+  // Bao's sow, which differs from every other variant here in that the capture
+  // is tested after each individual lap rather than once at the end.
+  //
+  //   "If the last seed lands in a non-empty pit, pick up all seeds in that pit
+  //    and continue sowing."
+  //   "If the final seed of a sow lands in a pit directly opposite a non-empty
+  //    opponent inner-row pit, capture the opponent's seeds from that pit.
+  //    Place captured seeds into your kichwa ... then sow from the kichwa."
+  //
+  // So a turn is a chain of sowings joined either by a relay or by a capture,
+  // and it ends when a lap finishes in a pit that was empty before that seed.
+  function sowBao(cells, from, player, direction) {
+    const out = [...cells]
+    let captured = 0
+    let origin = from
+    let landed = from
+
+    for (let lap = 0; lap < 512; lap++) {
+      const circuit = circuitFor(player, direction)
+      let seeds = out[origin]
+      out[origin] = 0
+      let pos = circuit.indexOf(origin)
+      while (seeds > 0) {
+        pos = (pos + 1) % circuit.length
+        landed = circuit[pos]
+        out[landed]++
+        seeds--
+      }
+
+      const facing = isInnerPit(landed) ? opposite(landed) : -1
+      if (facing >= 0 && out[facing] > 0) {
+        const taken = out[facing]
+        out[facing] = 0
+        captured += taken
+        const kichwa = kichwaFor(player, direction)
+        out[kichwa] += taken
+        origin = kichwa
+        continue
+      }
+
+      if (out[landed] <= 1) break
+      origin = landed
+    }
+
+    return { cells: out, landed, captured }
+  }
+
+  function resolveMove(cells, from, player, direction) {
+    if (config.captureRule === 'oppositeInnerRow') {
+      const result = sowBao(cells, from, player, direction)
+      return { cells: result.cells, landed: result.landed, captured: result.captured, endedInOwnStore: false }
+    }
     const sown = sow(cells, from, player)
     const after = applyCapture(sown.cells, sown.landed, player)
     return { cells: after.cells, landed: sown.landed, captured: after.captured, endedInOwnStore: sown.endedInOwnStore }
@@ -234,6 +333,40 @@ export function createMancalaPlugin(variantConfig = {}, context = {}) {
   // you to feed them when they already are. Both are filters over the raw list
   // rather than special cases inside the sow, so a variant that declares
   // neither behaves exactly as before.
+  // Bao is played in two phases. Namua introduces seeds from a reserve, one a
+  // turn, into a non-empty pit of the player's own inner row; mtaji begins when
+  // both reserves are spent and sows from any non-empty pit. In both, a capture
+  // must be played if one is available, and the direction of the sowing is the
+  // player's choice each turn.
+  function baoMoves(slice, player) {
+    const cells = slice.board
+    const inNamua = (slice.reserve || [0, 0])[player] > 0
+    const base = player * pitsPerSide
+    const directions = config.chooseDirection === false ? [undefined] : ['counterclockwise', 'clockwise']
+    const out = []
+
+    const from = inNamua
+      ? Array.from({ length: cols }, (_, i) => base + i).filter(i => cells[i] > 0)
+      : Array.from({ length: pitsPerSide }, (_, i) => base + i).filter(i => cells[i] > 0)
+
+    for (const pit of from) {
+      for (const direction of directions) {
+        const probe = inNamua ? cells.map((n, i) => (i === pit ? n + 1 : n)) : cells
+        const result = sowBao(probe, pit, player, direction)
+        out.push({
+          action: inNamua ? 'namua' : 'sow',
+          pit,
+          direction,
+          to: `pit-${pit}`,
+          captures: result.captured,
+        })
+      }
+    }
+
+    const capturing = out.filter(m => m.captures > 0)
+    return capturing.length ? capturing : out
+  }
+
   function legalMoves(cells, player) {
     let moves = rawMoves(cells, player)
     if (!moves.length) return moves
@@ -284,12 +417,24 @@ export function createMancalaPlugin(variantConfig = {}, context = {}) {
       }
       totalPits = pitsPerSide * 2
       const setup = pluginConfig.setup || config.setup || null
-      return { board: boardFromSetup(setup), held: [0, 0], _pitsPerSide: pitsPerSide, _hasStores: hasStores, lastLanded: null, lastCaptured: 0 }
+      if (topology) {
+        if (typeof topology.getRowsPerSide === 'function') rowsPerSide = topology.getRowsPerSide()
+        if (typeof topology.getCols === 'function') cols = topology.getCols()
+      }
+      const state = { board: boardFromSetup(setup), held: [0, 0], _pitsPerSide: pitsPerSide, _hasStores: hasStores, lastLanded: null, lastCaptured: 0 }
+      // The reserve each player introduces during namua. Declared rather than
+      // derived: it is a property of the ruleset, not of the board.
+      if (config.namuaReserve) state.reserve = [config.namuaReserve, config.namuaReserve]
+      return state
     },
 
     validateMove(move, slice, full) {
       const player = currentPlayer(full)
       if (move.action === 'resign') return true
+      if (config.captureRule === 'oppositeInnerRow') {
+        return baoMoves(slice, player).some(m =>
+          m.pit === move.pit && m.action === move.action && m.direction === move.direction)
+      }
       if (move.action !== 'sow') return false
       if (!Number.isInteger(move.pit)) return false
       return legalMoves(slice.board, player).some(m => m.pit === move.pit)
@@ -297,14 +442,29 @@ export function createMancalaPlugin(variantConfig = {}, context = {}) {
 
     applyMove(move, slice, full) {
       const player = currentPlayer(full)
-      const result = resolveMove(slice.board, move.pit, player)
+      let board = slice.board
+      let reserve = slice.reserve
+      if (move.action === 'namua') {
+        board = board.slice()
+        board[move.pit]++
+        reserve = (slice.reserve || [0, 0]).slice()
+        reserve[player]--
+      }
+      const result = resolveMove(board, move.pit, player, move.direction)
       const held = [...(slice.held || [0, 0])]
-      if (!hasStores) held[player] += result.captured
-      return { ...slice, board: result.cells, held, lastLanded: result.landed, lastCaptured: result.captured }
+      // Bao's captures are not taken off the board: they go into the kichwa and
+      // are sown on from there, which is why it can go on for hundreds of plies.
+      // Adding them to `held` as well counted every captured seed twice.
+      if (!hasStores && config.captureRule !== 'oppositeInnerRow') held[player] += result.captured
+      const next = { ...slice, board: result.cells, held, lastLanded: result.landed, lastCaptured: result.captured }
+      if (reserve) next.reserve = reserve
+      return next
     },
 
     getLegalMoves(slice, full) {
-      return legalMoves(slice.board, currentPlayer(full))
+      const player = currentPlayer(full)
+      if (config.captureRule === 'oppositeInnerRow') return baoMoves(slice, player)
+      return legalMoves(slice.board, player)
     },
 
     // A bonus turn is the turn system's business, not the move's, so it is
@@ -318,6 +478,18 @@ export function createMancalaPlugin(variantConfig = {}, context = {}) {
     checkWin(slice, full) {
       const cells = slice.board
       const player = currentPlayer(full)
+
+      // "The game ends when a player is left without seeds in his or her inner
+      // row, or when he or she cannot move anymore. In both cases, this player
+      // loses" - so Bao is decided by who is left standing, not by a count.
+      if (config.captureRule === 'oppositeInnerRow') {
+        for (const seat of [0, 1]) {
+          if (innerRowSeeds(cells, seat) === 0) return 1 - seat
+        }
+        if (baoMoves(slice, player).length === 0) return 1 - player
+        return null
+      }
+
       const starved = seedsOnSide(cells, 0) === 0 || seedsOnSide(cells, 1) === 0
       if (!starved && legalMoves(cells, player).length > 0) return null
 

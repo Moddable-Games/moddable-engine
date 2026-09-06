@@ -1595,6 +1595,15 @@
   {
     "family": "mancala",
     "familyLabel": "Mancala",
+    "variant": "bao",
+    "key": "bao",
+    "label": "Bao",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "mancala",
+    "familyLabel": "Mancala",
     "variant": "congkak",
     "key": "congkak",
     "label": "Congkak",

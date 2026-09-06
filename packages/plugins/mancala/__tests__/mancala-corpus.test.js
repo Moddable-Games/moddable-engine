@@ -23,9 +23,7 @@ setRulesReader(
 // name rather than skipped silently, because a mancala variant played with the
 // wrong capture rule looks like it works. Shrink-only: implementing one removes
 // its entry, and nothing may be added without a decision.
-const UNSUPPORTED = new Set([
-  'bao',          // four rows and a separate stocking phase; a different game shape
-])
+const UNSUPPORTED = new Set([])
 
 const CONFIGURED = readdirSync(join(RULES_ROOT, 'mancala', 'content', 'variants'))
   .filter(f => f.endsWith('.md')).map(f => f.replace(/\.md$/, ''))
@@ -42,9 +40,14 @@ describe('mancala corpus', () => {
   // miscounts, or a relay that loops all show up here as a changed total.
   it.each(CONFIGURED)('%s: conserves every seed through a full game', (slug) => {
     const game = createGameForFamily('mancala', { variant: slug, rngSeed: 7 })
+    // Seeds live in three places, not two: on the board, held off it by a
+    // storeless capture, and - in Bao alone - in the reserve a player has yet
+    // to introduce during namua. Counting only the first two made Bao look as
+    // though it was creating seeds every time it played one from hand.
     const count = () => {
       const s = game.getState().slice
-      return s.board.reduce((a, b) => a + b, 0) + (s.held || [0, 0]).reduce((a, b) => a + b, 0)
+      const sum = (list) => (list || []).reduce((a, b) => a + b, 0)
+      return sum(s.board) + sum(s.held) + sum(s.reserve)
     }
 
     const opening = count()

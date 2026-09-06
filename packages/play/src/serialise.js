@@ -62,7 +62,13 @@ function pitBoardToSetup(board, slice, topo) {
   // was no way to see who was winning a game whose win condition is exactly
   // that count.
   const heldAside = Array.isArray(slice?.held) ? slice.held : null
-  const perSide = topo.cols || topo.pitsPerSide || Math.trunc(counts.length / 2)
+  // A side is a row of pits in every variant but Bao, which gives each player
+  // two. Taking `cols` as the side length there wrote three groups of eight and
+  // dropped the last eight pits entirely, so half of Bao's board serialised to
+  // nothing and the renderer drew it empty.
+  const rowsPerSide = topo.rows ? Math.max(1, Math.round(topo.rows / 2)) : 1
+  const perSide = topo.pitsPerSide
+    || ((topo.cols || Math.trunc(counts.length / 2)) * rowsPerSide)
   if (!perSide) return counts.join(',')
 
   const sides = Math.max(2, Math.round(counts.length / perSide) - 1 || 2)
