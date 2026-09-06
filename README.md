@@ -169,6 +169,7 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-06
+- Ultima plays. Its premise is that every piece has its own way of taking and none of them is "move onto it", and the engine gave all seven the queen's slide and ordinary displacement capture - so the movement was right and the game was not. Withdrawal, coordination, leaping, pinching, immobilisation and the Chameleon's mimicry are all in, and the King is taken outright rather than mated
 - Bao plays, and the mancala family is now entirely configuration. It is the one variant that is not two players sharing a ring: each has a private sixteen-pit circuit, inner row and outer, and a sow never leaves the sower's half. The capture is the only thing that crosses
 - Three things had assumed one row a side and were wrong on four: the pit serialiser wrote three groups of eight and dropped half the board, the renderer drew each player's inner and outer rows the wrong way round, and the create page's round-trip lost `rows` entirely
 - The family's seed-conservation guard counted the board and the held seeds but not the reserve, so Bao looked as though it created a seed every time it played one from hand

@@ -1217,6 +1217,15 @@
   {
     "family": "chess",
     "familyLabel": "Chess",
+    "variant": "ultima",
+    "key": "ultima",
+    "label": "Ultima (Baroque Chess)",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "familyLabel": "Chess",
     "variant": "upside-down",
     "key": "upside-down",
     "label": "Upside-Down",
