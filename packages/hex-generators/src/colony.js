@@ -562,7 +562,7 @@ registerGame('colony', {
     ],
     defaultSize: 2,
     defaultPlayers: 0,
-    styles: ['classic', 'kenney'],
+    styles: ['artistic', 'classic', 'realistic'],
     labels: false,
     hasEditor: false,
     layouts: [
@@ -596,18 +596,21 @@ registerGame('colony', {
 
     getImages: function(style) {
         if (style === 'classic') return null;
-        var base = '../';
-        var folder = 'colony';
-        // sea, gold and fog have no artwork yet. Omitting them lets the renderer
-        // fall back to the classic colour fill rather than request a missing file.
-        return {
-            forest: base + 'tiles/sets/' + folder + '/forest.png',
-            pasture: base + 'tiles/sets/' + folder + '/pasture.png',
-            fields: base + 'tiles/sets/' + folder + '/fields.png',
-            hills: base + 'tiles/sets/' + folder + '/hills.png',
-            mountains: base + 'tiles/sets/' + folder + '/mountains.png',
-            desert: base + 'tiles/sets/' + folder + '/desert.png'
+        var folders = { artistic: 'colony', realistic: 'colony-realistic' };
+        var base = '../tiles/sets/' + (folders[style] || 'colony') + '/';
+        // gold and fog have no artwork in either set, and sea only in realistic.
+        // Types omitted here fall back to the classic colour fill rather than
+        // requesting a file that does not exist.
+        var images = {
+            forest: base + 'forest.png',
+            pasture: base + 'pasture.png',
+            fields: base + 'fields.png',
+            hills: base + 'hills.png',
+            mountains: base + 'mountains.png',
+            desert: base + 'desert.png'
         };
+        if (style === 'realistic') images.sea = base + 'sea.png';
+        return images;
     },
 
     rendererOptions: function() {

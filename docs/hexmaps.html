@@ -235,12 +235,12 @@ const result = exportGameData('twilight', { size: 3, seed: '12345' })
   <table class="docs-table">
     <thead><tr><th>Key</th><th>Game</th><th>Sizes</th><th>Styles</th></tr></thead>
     <tbody>
-      <tr><td><code>nukes</code></td><td>Nukes (area control)</td><td>2–6 rings</td><td>artistic, classic, kenney</td></tr>
+      <tr><td><code>nukes</code></td><td>Nukes (area control)</td><td>2–6 rings</td><td>artistic, classic, kenney, realistic</td></tr>
       <tr><td><code>twilight</code></td><td>Twilight Imperium (galactic)</td><td>3–8 players</td><td>artistic, classic</td></tr>
-      <tr><td><code>colony</code></td><td>Colony (resource/trade)</td><td>3–4 rings</td><td>classic, kenney, realistic</td></tr>
-      <tr><td><code>talisman</code></td><td>Talisman (fantasy adventure)</td><td>3–5 rings</td><td>artistic, classic</td></tr>
-      <tr><td><code>mongo</code></td><td>Planet Mongo (pulp sci-fi)</td><td>Fixed layout</td><td>artistic</td></tr>
-      <tr><td><code>endless</code></td><td>Endless Skies (exploration)</td><td>Fixed layout</td><td>artistic</td></tr>
+      <tr><td><code>colony</code></td><td>Colony (resource/trade)</td><td>3–4 rings</td><td>artistic, classic, realistic</td></tr>
+      <tr><td><code>talisman</code></td><td>Talisman (fantasy adventure)</td><td>3–5 rings</td><td>artistic, classic, kenney, realistic</td></tr>
+      <tr><td><code>mongo</code></td><td>Planet Mongo (pulp sci-fi)</td><td>Fixed layout</td><td>artistic, classic</td></tr>
+      <tr><td><code>endless</code></td><td>Endless Skies (exploration)</td><td>Fixed layout</td><td>artistic, classic</td></tr>
     </tbody>
   </table>
 
@@ -272,7 +272,7 @@ const svg = HexSvg.toAnnotatedSVG(hexes, annotations, opts)</code></pre>
   <pre><code>const res = await fetch('https://engine.moddable.games/api/tiles/index.json')
 const data = await res.json()
 // { sets: [{ id, label, game, tileCount, path }] }</code></pre>
-  <p>8 tile sets: nukes, nukes-kenney, talisman, talisman-kenney, colony, mongo, endless, twilight.</p>
+  <p>11 tile sets: nukes, nukes-kenney, talisman, talisman-kenney, colony, mongo, endless, colony-realistic, nukes-realistic, talisman-realistic, twilight.</p>
 
 </div>
 </div>

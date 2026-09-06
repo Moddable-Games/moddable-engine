@@ -168,6 +168,16 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Changelog
 
+#### 2026-09-06
+- The realistic tile style is back for nukes, talisman and colony. The artwork existed all along in `moddable-hexmaps` as remapped Screaming Brain Studios CC0 tiles; it had never been copied across, so the style could only ever have requested files that were not there
+- Colony's seafarers layouts render their sea: half a Seafarers board was flat blue against illustrated land. Realistic now covers five of the seven layouts completely, leaving gold (2 hexes) and the deliberately face-down fog
+- Colony advertised a `kenney` style and served the artistic set under that name. There is no colony-kenney artwork anywhere; the style is now called what it is
+- Endless Skies asked for every one of its tiles under `img/tiles/`, a path that exists in `moddable-hexmaps` and not here, so all 91 hexes were broken image requests
+- A requested tile style is clamped to one the generator actually offers. It survives a game switch, arrives by URL and arrives by postMessage, and `getImages()` answered an unknown style with its first folder, rendering one game's artwork under another game's label
+- Tile artwork is now guarded: every style a generator advertises must resolve to files on disk, every per-hex `imagePath` must exist, and `tiles/tile-index.json` must cover every set and be mirrored by the published API copy. The three realistic sets and twilight are indexed, so the gallery and the generators finally agree on what exists
+- Two bishops with two free squares of the same colour left a player stranded in placement chess: `leavesRestPlaceable` counted admissible squares without noticing that a distinct-colour type needs distinct colours. The phase never ended and the game carried on as ordinary chess with a piece still in hand. One random placement in thirty hit it
+- The playability gate is reproducible. Every variant drew from one shared stream, so its result depended on how many numbers the variants before it had consumed, and the game's own generator was seeded from the clock. Each variant now has its own stream and its own game seed, and four variants assert that two runs play the same game
+
 #### 2026-09-02
 - Hex tile styles now reach the renderer. `getImages(style)` was defined on every generator and called by nothing, so artistic, kenney and realistic all fell back to the flat colour fill that classic already gave. Twilight was the inverse, assigning `imagePath` regardless of style so it could never render flat
 - `hexImageOpts()` resolves both artwork sources for the embed and interactive paths, and treats classic as the style that suppresses artwork however a generator assigns it

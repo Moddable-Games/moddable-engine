@@ -6,6 +6,7 @@
 import { createChessPlugin } from '../index.js'
 import { createGameFromDefinition } from '../../../game/index.js'
 import { createGridTopology } from '../../../topologies/grid/index.js'
+import { createRng } from '../../../core/index.js'
 
 const COLS = 8
 const fileOf = (i) => 'abcdefgh'[i % COLS]
@@ -161,6 +162,31 @@ describe('placement phase', () => {
       expect(rookRanks[1]).toEqual([8, 8])
     })
   })
+
+  // The strided pickers above are a handful of fixed paths through a space of
+  // thousands, and they all happened to miss the one that mattered: a back rank
+  // filled so that the last two free squares share a colour strands both
+  // bishops, and the phase never ends. Random play found it in one run in
+  // thirty. Seeded so a failure names the run that produced it.
+  describe.each([['placement chess', PLACEMENT_CHESS], ['sittuyin', SITTUYIN]])(
+    '%s under random placement',
+    (_label, variantConfig) => {
+      it('finishes in sixteen plies from every one of 200 seeds', () => {
+        const stranded = []
+        for (let seed = 1; seed <= 200; seed++) {
+          const rng = createRng(seed)
+          const game = createGame(variantConfig)
+          try {
+            const plies = playPlacement(game, (_i, n) => Math.floor(rng.next() * n))
+            if (plies !== 16) stranded.push(`seed ${seed}: ${plies} plies`)
+          } catch (e) {
+            stranded.push(`seed ${seed}: ${e.message}`)
+          }
+        }
+        expect(stranded).toEqual([])
+      })
+    }
+  )
 
   it('a variant that declares no placement pieces never enters the phase', () => {
     const game = createGame({})

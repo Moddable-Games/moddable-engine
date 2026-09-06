@@ -63,8 +63,19 @@ import '../../plugins/shogi/index.js'
 // Seeded. Rotating SEED deliberately is how coverage is widened - a value
 // nobody chose is not coverage, it is chance.
 const SEED = 20260827
-const testRng = createRng(SEED)
-const rand = () => testRng.next()
+
+// One shared generator was still not reproducible in practice: every variant
+// drew from wherever the variants before it had left the stream, so a result
+// depended on test order, and the two things that vary that order - a
+// `-t` filter and jest's own scheduling - were exactly the conditions under
+// which #166 could not be reproduced. Each variant now gets its own stream,
+// derived from SEED and its own name, so running one variant alone plays the
+// same game the full suite plays.
+function seedFor(family, variantKey) {
+  let h = SEED
+  for (const ch of `${family}:${variantKey}`) h = (Math.imul(h, 31) + ch.charCodeAt(0)) | 0
+  return h >>> 0
+}
 
 const MAX_PLIES = 400
 const MAX_CONTINUATION = 50
@@ -94,9 +105,15 @@ function classifyMechanisms(family, cfg) {
 function runGame(family, variantKey) {
   const cfg = getVariantConfig(family, variantKey) || {}
   const result = { family, variant: variantKey, mechanisms: classifyMechanisms(family, cfg) }
+  const seed = seedFor(family, variantKey)
+  const variantRng = createRng(seed)
+  const rand = () => variantRng.next()
 
   try {
-    const game = createGameForFamily(family, { variant: variantKey })
+    // The game's own generator was seeded from the clock, so variants that roll
+    // dice played a different game every run however carefully the move picker
+    // was seeded.
+    const game = createGameForFamily(family, { variant: variantKey, rngSeed: seed })
     result.instantiated = true
 
     const state = game.getState()
@@ -172,6 +189,29 @@ function runGame(family, variantKey) {
 
   return result
 }
+
+// The whole point of seeding is that a red build can be reproduced. That only
+// holds while nothing under runGame() reaches for the clock or Math.random, and
+// nothing in the suite can tell you when something has: a variant that plays a
+// different game every run still passes most of the time.
+//
+// chess960 shuffles its back rank from the game's own generator, so it is the
+// one entry that fails outright if the game stops being seeded. The Landlord's
+// Game rolls its dice from the same generator and is here to catch the same
+// regression in a second family, though its outcome happens to survive a
+// reseed; the last two cover the move picker rather than the game.
+describe('reproducibility', () => {
+  it.each([
+    ['chess', 'chess960'],
+    ['landlords-game', '1904-original'],
+    ['chess', 'placement-chess'],
+    ['draughts', 'english'],
+  ])('%s/%s plays the same game twice', (family, variant) => {
+    const first = runGame(family, variant)
+    const second = runGame(family, variant)
+    expect(second).toEqual(first)
+  })
+})
 
 describe('Playability Standard', () => {
   const allResults = {}

@@ -364,6 +364,20 @@ async function render() {
 }
 
 /**
+ * Clamp a requested tile style to one the generator actually offers.
+ *
+ * The style survives a game switch, arrives as a URL parameter and arrives by
+ * postMessage, so it routinely names a style the current generator has never
+ * heard of. getImages() falls back to its first folder in that case, which
+ * renders the wrong artwork under the right label rather than failing.
+ */
+function resolveHexStyle(gameConfig, requested) {
+  const styles = gameConfig.styles || []
+  if (!styles.length) return 'classic'
+  return styles.includes(requested) ? requested : styles[0]
+}
+
+/**
  * Resolve tile artwork for a hex map.
  *
  * Generators expose art two ways: getImages(style) returns a terrain-type map,
@@ -400,7 +414,7 @@ function renderHexGenerator(entry) {
   const result = gameConfig.generate(size, players, seed, state.layout || null)
   const hexes = result.hexes || result
   const annotations = result.annotations || null
-  const style = state.style || (gameConfig.styles && gameConfig.styles[0]) || 'classic'
+  const style = resolveHexStyle(gameConfig, state.style)
 
   const colors = gameConfig.getColors ? gameConfig.getColors(style) : {}
   const { images, imageMode } = hexImageOpts(gameConfig, hexes, style)
@@ -814,11 +828,12 @@ if (_hexEmbed) {
       const hexes = result.hexes || result
       lastHexes = hexes
       const annotations = result.annotations || null
-      const colors = gameConfig.getColors ? gameConfig.getColors(hexStyle) : {}
+      const style = resolveHexStyle(gameConfig, hexStyle)
+      const colors = gameConfig.getColors ? gameConfig.getColors(style) : {}
       const rawBg = _embedParams.get('bg')
       const bg = rawBg ? (rawBg.startsWith('#') ? rawBg : '#' + rawBg) : null
 
-      const { images, imageMode } = hexImageOpts(gameConfig, hexes, hexStyle)
+      const { images, imageMode } = hexImageOpts(gameConfig, hexes, style)
       const svgOpts = {
         size: 40,
         orientation: gameConfig.orientation || 'pointy',

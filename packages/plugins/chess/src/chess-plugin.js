@@ -1185,8 +1185,16 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     // admissible to it cannot all be placed.
     const counts = new Map()
     for (const t of waiting) counts.set(t, (counts.get(t) || 0) + 1)
+    const distinct = config.placementDistinctColor || []
     for (const [t, needed] of counts) {
-      if (admissibleCells(board, playerIdx, t).length < needed) return false
+      const cells = admissibleCells(board, playerIdx, t)
+      if (cells.length < needed) return false
+      // Counting squares is not enough for a type bound to distinct colours.
+      // Two bishops with two free squares left passed this check even when both
+      // squares were the same colour, so the player was stranded holding a
+      // bishop, `phase` never left 'placement', and the game carried on as
+      // ordinary chess with a piece still in hand (engine#166).
+      if (distinct.includes(t) && new Set(cells.map(colorOf)).size < needed) return false
     }
     return true
   }

@@ -195,7 +195,7 @@ function generate(size, players, seed) {
             type = 'spaceport';
             label = 'SP';
             system = { name: 'Central Space Port', code: null, region: 'Neutral', faction: 'Shared', events: 0, planets: 0, habitats: 1, population: 0, wormholes: '0' };
-            imagePath = base + 'img/tiles/endless/space_port.png';
+            imagePath = base + 'tiles/sets/endless/space_port.png';
         } else if (hex.faction && pools[hex.faction] && pools[hex.faction].length > 0) {
             system = pools[hex.faction].shift();
         } else if (overflow.length > 0) {
@@ -206,13 +206,13 @@ function generate(size, players, seed) {
             }
         }
         if (!imagePath && !system) {
-            imagePath = base + 'img/tiles/endless/void.png';
+            imagePath = base + 'tiles/sets/endless/void.png';
             system = { name: 'Empty Space', region: 'Void', faction: 'None', events: 0, planets: 0, habitats: 0, population: 0, wormholes: '0' };
         }
 
         if (!imagePath && system) {
             if (system._empty) {
-                imagePath = base + 'img/tiles/endless/void.png';
+                imagePath = base + 'tiles/sets/endless/void.png';
             } else {
                 imagePath = getSystemImagePath(system.name, base);
             }
@@ -263,11 +263,11 @@ registerGame('endless', {
     getImages: function(style) {
         if (style !== 'artistic') return null;
         var base = '../';
-        var voidTile = base + 'img/tiles/endless/void.png';
+        var voidTile = base + 'tiles/sets/endless/void.png';
         return {
             _perHex: true,
             space: voidTile,
-            spaceport: base + 'img/tiles/endless/space_port.png',
+            spaceport: base + 'tiles/sets/endless/space_port.png',
             homeworld: voidTile,
             republic: voidTile,
             alphas: voidTile,

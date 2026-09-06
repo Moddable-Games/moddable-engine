@@ -19,8 +19,8 @@
     {
       "path": "/api/tiles/index.json",
       "type": "json",
-      "description": "Tile gallery — 8 hex tile sets for strategy maps",
-      "count": 8
+      "description": "Tile gallery — 11 hex tile sets for strategy maps",
+      "count": 11
     },
     {
       "path": "/api/puzzles/index.json",

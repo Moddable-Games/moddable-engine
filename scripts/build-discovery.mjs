@@ -7,6 +7,8 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { withStableGeneratedDate } from './lib/stable-generated-date.mjs'
+import '../packages/hex-generators/index.js'
+import { getRegisteredGames, getGameConfig } from '../packages/hex-generators/src/game-registry.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -40,6 +42,14 @@ const pieceCount = pieceIndex.length
 const boardSvgCount = countFiles('boards/svgs', '.svg')
 
 const tileSets = countDirs('tiles/sets')
+const tileIndexJson = fs.readFileSync(resolve('tiles/tile-index.json'), 'utf-8')
+const tileSetIds = JSON.parse(tileIndexJson).map(set => set.id)
+
+// Which tile styles each hex generator can actually offer, asked of the
+// generators rather than transcribed into the docs by hand.
+const hexGames = getRegisteredGames().map(key => ({ key, config: getGameConfig(key) }))
+const hexStyles = Object.fromEntries(hexGames.map(({ key, config }) => [key, (config.styles || []).slice().sort()]))
+const allHexStyles = [...new Set(Object.values(hexStyles).flat())].sort()
 
 const puzzleData = readJSON('api/puzzles/index.json')
 const standardCount = puzzleData.standard.length
@@ -330,6 +340,10 @@ if (puzzleParsed.meta.count !== puzzleTotal) {
   outputs.push({ path: 'api/puzzles/index.json', content: JSON.stringify(puzzleParsed, null, 2) + '\n' })
 }
 
+// 6b. api/tiles/index.json — the published copy of the tile index. Two hand-kept
+// copies of the same list is how they drift, so the source is copied verbatim.
+outputs.push({ path: 'api/tiles/index.json', content: tileIndexJson })
+
 // 7. Patch HTML stat values
 const frontmatterOnlyCount = stats.playableVariants - 1
 const frontmatterPct = Math.floor((frontmatterOnlyCount / stats.playableVariants) * 100)
@@ -392,6 +406,20 @@ const htmlPatches = [
       [/(\d+) hex tile sets/g, `${stats.tiles} hex tile sets`],
       [/(\d+,?\d*) tactical puzzles/g, `${stats.puzzles.toLocaleString()} tactical puzzles`],
       [/(\d+) SVG sets/g, `${stats.pieces} SVG sets`],
+    ],
+  },
+  {
+    file: 'docs/hexmaps.html',
+    replacements: [
+      // Style column of the games table, one row per registered generator
+      ...hexGames.map(({ key }) => [
+        new RegExp(`(<tr><td><code>${key}</code></td><td>[^<]*</td><td>[^<]*</td><td>)[^<]*(</td></tr>)`, 'g'),
+        `$1${hexStyles[key].join(', ')}$2`,
+      ]),
+      // The style URL parameter accepts the union of what the generators offer
+      [/(<tr><td><code>style<\/code><\/td><td>)(?:<code>[a-z]+<\/code>(?: \| )?)+(<\/td>)/g,
+        `$1${allHexStyles.map(st => `<code>${st}</code>`).join(' | ')}$2`],
+      [/\d+ tile sets: [a-z0-9-]+(?:, [a-z0-9-]+)*\./g, `${stats.tiles} tile sets: ${tileSetIds.join(', ')}.`],
     ],
   },
   {

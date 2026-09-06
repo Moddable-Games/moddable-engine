@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "name": "Moddable Engine",
-  "description": "Universal board game engine with piece sets (117), board layouts (334), tile galleries (8), and chess puzzles (1,726). AI tools available via MCP.",
+  "description": "Universal board game engine with piece sets (117), board layouts (334), tile galleries (11), and chess puzzles (1,726). AI tools available via MCP.",
   "url": "https://tools.moddable.games/mcp",
   "transport": "sse",
   "homepage": "https://engine.moddable.games",

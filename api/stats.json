@@ -1,9 +1,9 @@
 {
-  "generated": "2026-09-01",
+  "generated": "2026-09-06",
   "pieces": 117,
   "boards": 334,
   "boardFamilies": 33,
-  "tiles": 8,
+  "tiles": 11,
   "puzzles": 1726,
   "puzzlesByType": {
     "standard": 1116,
@@ -47,8 +47,8 @@
     "shogi": 13,
     "xiangqi": 3
   },
-  "tests": 6527,
-  "testsPassing": 6521,
-  "testSuites": 190,
+  "tests": 6585,
+  "testsPassing": 6579,
+  "testSuites": 192,
   "snapshots": 334
 }
