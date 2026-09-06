@@ -3,7 +3,8 @@ import { warnUnknownConfigKeys } from '../../../core/index.js'
 // authoring docs share one source of truth, and kept separate from `defaults`,
 // which only lists the keys that carry a default value.
 export const CONFIG_KEYS = new Set([
-  'captureBackward', 'cols', 'directions', 'flyingKings', 'forcedCapture',
+  'captureBackward', 'captureDirections', 'cols', 'directions', 'flyingKings', 'forcedCapture',
+  'kingMoveLimit',
   'kingCapturePriority', 'kingLandsBehindCapture', 'loseOnSinglePiece', 'majorityPrefersKing',
   'manCapture', 'manMove',
   'maximalCapture', 'menCannotCaptureKings', 'piecesPerPlayer', 'playerCount',
@@ -89,6 +90,19 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
   const ORTHOGONAL_DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]]
   const DIAGONAL_DIRS = [[-1, -1], [-1, 1], [1, -1], [1, 1]]
 
+  // Frisian moves on the diagonals and captures on all eight, so the direction
+  // a piece may travel and the direction it may take on are two questions. Every
+  // other variant answers them the same way, which is why one table did.
+  function dirSetFor(which) {
+    if (which === 'orthogonal') return ORTHOGONAL_DIRS
+    if (which === 'all') return [...ORTHOGONAL_DIRS, ...DIAGONAL_DIRS]
+    return DIAGONAL_DIRS
+  }
+
+  function captureDirs() {
+    return dirSetFor(config.captureDirections || config.directions)
+  }
+
   function allDirs() {
     if (config.directions === 'orthogonal') return ORTHOGONAL_DIRS
     // An Alquerque board draws both, and which of them exist at a given point
@@ -128,10 +142,10 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
 
   function getCaptureDirs(piece, playerIndex) {
     if (piece.type === 'king') {
-      return allDirs()
+      return captureDirs()
     }
     if (config.manCapture === 'all' || config.captureBackward) {
-      return allDirs()
+      return captureDirs()
     }
     return forwardDirs(playerIndex)
   }
@@ -148,6 +162,45 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
       return config.flyingKings ? config.rows : 1
     }
     return 1
+  }
+
+  // What a capture sequence is worth. Counting pieces is the ordinary answer and
+  // the default; Frisian weighs them, and not linearly:
+  //
+  //   "A king is worth more than a man, but less than two men."
+  //   1 king = 1.5 men, 2 kings = 3.5, 3 kings = 5.5, i.e. 2n - 0.5
+  //
+  // so two men and a king (3.5) beats three men (3).
+  // Frisian's three-move king limit. "While a player still has at least one man,
+  // the same king may not make more than three consecutive non-capturing moves."
+  // The king is released by capturing, or by its owner moving anything else, and
+  // a player down to kings alone is not restricted at all.
+  //
+  // The counter is kept per seat as the square the king now stands on and how
+  // many quiet moves it has strung together, so it survives the king moving and
+  // dies the moment another piece does.
+  function applyKingMoveLimit(moves, slice, playerIndex) {
+    const limit = config.kingMoveLimit
+    if (!limit) return moves
+    const streak = (slice._kingStreak || [])[playerIndex]
+    if (!streak || streak.count < limit) return moves
+    const hasMan = slice.board.some(p => p && p.owner === playerIndex && p.type === 'man')
+    if (!hasMan) return moves
+    return moves.filter(m => m.from !== streak.at)
+  }
+
+  function captureValue(board) {
+    if (config.maximalCapture !== 'weighted') return (capture) => capture.captureCount
+    return (capture) => {
+      let kings = 0
+      let men = 0
+      for (const index of capture.captures || []) {
+        const piece = board[index]
+        if (piece && piece.type === 'king') kings++
+        else men++
+      }
+      return men + (kings > 0 ? 2 * kings - 0.5 : 0)
+    }
   }
 
   function findSimpleMoves(board, playerIndex) {
@@ -413,6 +466,20 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
       }
       board[move.to] = landingPiece
 
+      if (config.kingMoveLimit) {
+        const streaks = (slice._kingStreak || [null, null]).slice()
+        const quiet = !move.captures || move.captures.length === 0
+        if (quiet && landingPiece.type === 'king') {
+          const previous = streaks[playerIndex]
+          streaks[playerIndex] = previous && previous.at === move.from
+            ? { at: move.to, count: previous.count + 1 }
+            : { at: move.to, count: 1 }
+        } else {
+          streaks[playerIndex] = null
+        }
+        slice = { ...slice, _kingStreak: streaks }
+      }
+
       const furtherCaptures = findCaptures(board, playerIndex, move.to)
       if (move.captures && move.captures.length > 0 && furtherCaptures.length > 0 && landingPiece.type === piece.type) {
         return {
@@ -457,8 +524,9 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
 
       if (config.forcedCapture && captures.length > 0) {
         if (config.maximalCapture) {
-          const maxLen = Math.max(...captures.map(c => c.captureCount))
-          captures = captures.filter(c => c.captureCount >= maxLen)
+          const value = captureValue(slice.board)
+          const best = Math.max(...captures.map(value))
+          captures = captures.filter(c => value(c) >= best)
 
           if (config.majorityPrefersKing) {
             const withKing = captures.filter(c => {
@@ -471,7 +539,7 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
         return hooks.moveFilter(captures, slice, full)
       }
 
-      const simpleMoves = findSimpleMoves(slice.board, playerIndex)
+      const simpleMoves = applyKingMoveLimit(findSimpleMoves(slice.board, playerIndex), slice, playerIndex)
       return hooks.moveFilter([...captures, ...simpleMoves], slice, full)
     },
 

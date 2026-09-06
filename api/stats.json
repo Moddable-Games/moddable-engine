@@ -9,11 +9,11 @@
     "standard": 1116,
     "variants": 610
   },
-  "playableVariants": 210,
+  "playableVariants": 211,
   "playableFamilies": 10,
   "playableByFamily": {
     "chess": 140,
-    "draughts": 16,
+    "draughts": 17,
     "go": 10,
     "hex": 8,
     "landlords-game": 1,
@@ -37,7 +37,7 @@
   },
   "frontmatterOnlyByFamily": {
     "chess": 87,
-    "draughts": 16,
+    "draughts": 17,
     "go": 7,
     "hex": 8,
     "landlords-game": 1,
@@ -47,8 +47,8 @@
     "shogi": 14,
     "xiangqi": 4
   },
-  "tests": 6716,
-  "testsPassing": 6710,
-  "testSuites": 202,
+  "tests": 6733,
+  "testsPassing": 6727,
+  "testSuites": 203,
   "snapshots": 334
 }

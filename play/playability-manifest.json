@@ -1316,6 +1316,15 @@
   {
     "family": "draughts",
     "familyLabel": "Draughts",
+    "variant": "frisian",
+    "key": "frisian",
+    "label": "Frisian Draughts",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "draughts",
+    "familyLabel": "Draughts",
     "variant": "german",
     "key": "german",
     "label": "German Draughts",

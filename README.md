@@ -169,6 +169,7 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-06
+- Frisian Draughts plays. Movement on the diagonals and capture in all eight directions were one direction table asking one question; they are now two. Its majority rule weighs captures rather than counting them - a king is 1.5 men, two kings 3.5 - and the same king may not make a fourth consecutive quiet move while its owner still has a man
 - Xiang Fu plays. Three glyphs were missing from a piece set we wrote ourselves, so drawing them was the same job as the Banner and the Vao already in it: Champion 傑, Pupil 徒, Mahout 馭, Crossbow 弩. Half its pieces had been rendering as empty squares
 - The undrawable-piece warning no longer names pieces that are not on the board. A variant's vocabulary is merged over its family's, so Xiang Fu declares a Knight and inherits a Horse it never places
 - S-Chess gates. Its Hawk and Elephant sat in a `hand` the engine never read, because a hand was only ever a by-product of `drops` and this variant has none, so it played as ordinary chess. Gating rides along with the move that opens it: every move off a square still holding its original back-rank piece is offered plainly and once per piece in reserve
