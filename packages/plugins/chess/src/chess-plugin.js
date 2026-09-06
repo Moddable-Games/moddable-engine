@@ -6,6 +6,7 @@ import { randomBackRank } from './variants/chess960.js'
 // which only lists the keys that carry a default value.
 export const CONFIG_KEYS = new Set([
   'actions', 'advancement', 'afterMove', 'castling', 'checkThreshold', 'cols', 'demotionMap', 'doubleStep',
+  'gating', 'initialHands',
   'dropZone', 'drops', 'enPassant', 'hexPawnConfig', 'initState', 'moveApply', 'moveFilter', 'noCheck',
   'onTurnEnd', 'pawnCaptureDirections', 'pawnConfig', 'pawnMoveDirections', 'pawnStartRow',
   'pawnType', 'placementDistinctColor', 'placementPieces', 'placementZone', 'playerCount',
@@ -360,6 +361,33 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     }
     if (config.drops) {
       state.hands = [[], []]
+    }
+    // S-Chess holds its Hawk and Elephant in reserve from the first move rather
+    // than winning them by capture, so the hand is seeded rather than earned.
+    // `hand: true` was declared in frontmatter and read nowhere, because a hand
+    // was only ever a by-product of `drops`, which this variant does not use
+    // (engine#158).
+    if (config.initialHands) {
+      state.hands = [config.initialHands[0].slice(), config.initialHands[1].slice()]
+    }
+    // A gate opens on the square a back-rank piece vacates, once, the first time
+    // it leaves. Recorded as the squares still holding the piece that started on
+    // them; a square leaves the list when its piece moves, gated or not. An
+    // array rather than a Set because the slice has to stay serialisable.
+    if (config.gating) {
+      const nCols = topology ? topology.cols : 8
+      const nRows = topology ? topology.rows : 8
+      const pawnType = config.pawnType || 'pawn'
+      state._gateSquares = [0, 1].map(seat => {
+        const row = seat === 0 ? nRows - 1 : 0
+        const out = []
+        for (let c = 0; c < nCols; c++) {
+          const idx = row * nCols + c
+          const cell = state.board[idx]
+          if (cell && cell.owner === seat && cell.type !== pawnType) out.push(idx)
+        }
+        return out
+      })
     }
     // Seeded here because nothing else ever created it. The only code that
     // incremented `checkCount` sat inside searchMakeMove - the AI's make and
@@ -977,7 +1005,11 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       halfmoveClock = 0
     }
 
-    if (hands) {
+    // Capture-to-hand belongs to `drops`, not to the mere existence of a hand.
+    // S-Chess holds a reserve and never adds to it - "hand pieces are never lost
+    // from the hand except by gating" - and seeding one filled it with captured
+    // pawns until this asked the right question.
+    if (hands && config.drops) {
       const captured = move.captured != null ? getCell(slice.board, move.captured) : getCell(slice.board, move.to)
       if (captured && captured.owner !== playerIdx && captured.type !== royalTypeFor(captured.owner)) {
         hands[playerIdx].push(handTypeFor(captured))
@@ -1034,7 +1066,27 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
     const fullmoveNumber = playerIdx === 1 ? slice.fullmoveNumber + 1 : slice.fullmoveNumber
 
+    // The gated piece lands on the square the moving piece just left, and the
+    // gate on that square is spent whether it was used or not - a back-rank
+    // piece only ever leaves home for the first time once.
+    let gateSquares = slice._gateSquares
+    if (config.gating && gateSquares) {
+      const spent = move.castle ? [move.from, move.rookFrom] : [move.from]
+      const remaining = (gateSquares[playerIdx] || []).filter(sq => !spent.includes(sq))
+      if (remaining.length !== (gateSquares[playerIdx] || []).length) {
+        gateSquares = gateSquares.map((list, seat) => (seat === playerIdx ? remaining : list))
+      }
+      if (move.gate && hands) {
+        const idx = hands[playerIdx].indexOf(move.gate)
+        if (idx !== -1) {
+          hands[playerIdx].splice(idx, 1)
+          setCell(board, move.gateAt, { type: move.gate, owner: playerIdx })
+        }
+      }
+    }
+
     const newSlice = { board, halfmoveClock, fullmoveNumber }
+    if (config.gating && gateSquares) newSlice._gateSquares = gateSquares
     if (castlingRights !== null) newSlice.castlingRights = castlingRights
     if (config.enPassant) {
       newSlice.enPassantTarget = enPassantTarget
@@ -1251,10 +1303,12 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       }
     }
 
+    const gated = withGatingOptions(allMoves, slice, playerIdx)
+
     const hasBlockers = topology && topology.isBlocker
     const movesFiltered = hasBlockers
-      ? allMoves.filter(m => m.to === undefined || !topology.isBlocker(m.to))
-      : allMoves
+      ? gated.filter(m => m.to === undefined || !topology.isBlocker(m.to))
+      : gated
 
     let legal = config.noCheck
       ? movesFiltered
@@ -1281,6 +1335,33 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return legal
   }
 
+  // Gating is not a move of its own: it rides along with the move that opens the
+  // gate. So every move off a square that still holds its original back-rank
+  // piece is offered once plainly and once per piece in hand, and the player
+  // chooses. Castling opens two squares at once and the rules allow one of
+  // them, so it is offered for each.
+  function withGatingOptions(moves, slice, playerIdx) {
+    if (!config.gating || !slice._gateSquares || !slice.hands) return moves
+    const open = slice._gateSquares[playerIdx] || []
+    const hand = slice.hands[playerIdx] || []
+    if (!open.length || !hand.length) return moves
+
+    const out = []
+    for (const move of moves) {
+      out.push(move)
+      if (move.action) continue
+      const squares = move.castle
+        ? [move.from, move.rookFrom].filter(sq => open.includes(sq))
+        : (open.includes(move.from) ? [move.from] : [])
+      for (const at of squares) {
+        for (const type of [...new Set(hand)]) {
+          out.push({ ...move, gate: type, gateAt: at })
+        }
+      }
+    }
+    return out
+  }
+
   function filterLegalMoves(moves, slice, playerIdx) {
     return moves.filter(move => {
       if (move.action && actions[move.action] && actions[move.action].skipsCheckFilter) return true
@@ -1288,6 +1369,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       const fromPiece = board[move.from]
       const toPiece = board[move.to]
       let rookFrom, rookTo, capturedPiece, capturedPos
+      const gateAt = move.gate ? move.gateAt : null
       if (move.castle) {
         rookFrom = board[move.rookFrom]
         rookTo = board[move.rookTo]
@@ -1308,6 +1390,11 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       if (move.promotion) {
         board[move.to] = { type: move.promotion, owner: playerIdx }
       }
+      // The gated piece is on the board for this move, so it can block the
+      // check the vacated square would otherwise open. Leaving it out of the
+      // simulation would reject gates that are legal precisely because they
+      // fill the hole the departing piece left.
+      if (gateAt !== null) board[gateAt] = { type: move.gate, owner: playerIdx }
       const inCheck = isInCheck(board, playerIdx)
       board[move.from] = fromPiece
       board[move.to] = toPiece

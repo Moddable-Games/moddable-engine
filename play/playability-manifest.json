@@ -983,6 +983,15 @@
   {
     "family": "chess",
     "familyLabel": "Chess",
+    "variant": "s-chess",
+    "key": "s-chess",
+    "label": "S-Chess (Seirawan Chess)",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "familyLabel": "Chess",
     "variant": "senterej",
     "key": "senterej",
     "label": "Senterej",
