@@ -5,7 +5,7 @@ import { randomBackRank } from './variants/chess960.js'
 // authoring docs share one source of truth, and kept separate from `defaults`,
 // which only lists the keys that carry a default value.
 export const CONFIG_KEYS = new Set([
-  'actions', 'advancement', 'afterMove', 'castling', 'checkThreshold', 'cols', 'doubleStep',
+  'actions', 'advancement', 'afterMove', 'castling', 'checkThreshold', 'cols', 'demotionMap', 'doubleStep',
   'dropZone', 'drops', 'enPassant', 'hexPawnConfig', 'initState', 'moveApply', 'moveFilter', 'noCheck',
   'onTurnEnd', 'pawnCaptureDirections', 'pawnConfig', 'pawnMoveDirections', 'pawnStartRow',
   'pawnType', 'placementDistinctColor', 'placementPieces', 'placementZone', 'playerCount',
@@ -737,13 +737,34 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return -1
   }
 
+  // What a captured piece becomes on the way into hand.
+  //
+  // Reverting a promoted piece to a pawn was the only transformation the plugin
+  // knew, so a variant whose capture demotes along its own chain could not say
+  // so. Xiang Fu's Champion should arrive as a Pupil, which is not royal, and
+  // arrived as a Champion instead - a side could drop a third royal piece onto
+  // a board that started with two (engine#158). `demotionMap` is the same key
+  // the shogi plugin already reads for the same idea.
+  function handTypeFor(captured) {
+    const mapped = config.demotionMap && config.demotionMap[captured.type]
+    if (mapped) return mapped
+    return captured.wasPromoted ? (config.pawnType || 'pawn') : captured.type
+  }
+
   function canCastle(slice, playerIdx, kingFrom, kingDest, rookFrom, rookDest) {
     const board = slice.board
     if (!getCell(board, rookFrom)) return false
 
+    // A hole in the board is stored as an empty square, so the emptiness check
+    // below waved the king straight across one. Vierschach castled queenside
+    // onto a corner that is not part of its board (engine#158).
+    const onBoard = (sq) => !topology || !topology.isValid || topology.isValid(sq)
+    if (!onBoard(kingDest) || !onBoard(rookDest)) return false
+
     const minSq = Math.min(kingFrom, kingDest, rookFrom, rookDest)
     const maxSq = Math.max(kingFrom, kingDest, rookFrom, rookDest)
     for (let sq = minSq; sq <= maxSq; sq++) {
+      if (!onBoard(sq)) return false
       if (sq === kingFrom || sq === rookFrom) continue
       if (getCell(board, sq) !== null) return false
     }
@@ -959,8 +980,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     if (hands) {
       const captured = move.captured != null ? getCell(slice.board, move.captured) : getCell(slice.board, move.to)
       if (captured && captured.owner !== playerIdx && captured.type !== royalTypeFor(captured.owner)) {
-        const handType = captured.wasPromoted ? (config.pawnType || 'pawn') : captured.type
-        hands[playerIdx].push(handType)
+        hands[playerIdx].push(handTypeFor(captured))
       }
     }
 

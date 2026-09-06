@@ -30,6 +30,18 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
   warnUnknownConfigKeys('shogi', variantConfig, CONFIG_KEYS)
 
   let topology = null
+  let _cachedCells = null
+
+  // Every cell that is part of the board, which on a voided topology is not
+  // every index in the board array: a hole is stored as null and so reads as an
+  // empty square to anything that walks the array by index.
+  function playableCells(board) {
+    if (_cachedCells) return _cachedCells
+    _cachedCells = topology && topology.getAllCells
+      ? topology.getAllCells()
+      : board.map((_, i) => i)
+    return _cachedCells
+  }
 
   // Symbols match the setup SFEN/FEN used by the variant frontmatter in
   const DEFAULT_VOCABULARY = {
@@ -211,8 +223,13 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     const moves = []
     const uniqueTypes = [...new Set(hand)]
 
+    // Walked `board` by index, so a void was a legal drop square: four-player
+    // shogi offered 324 drops into the corners that are not part of its board
+    // over 150 plies, and left three pieces standing in them (engine#158).
+    const cells = playableCells(board)
+
     for (const type of uniqueTypes) {
-      for (let i = 0; i < board.length; i++) {
+      for (const i of cells) {
         if (board[i] !== null) continue
 
         const nifuType = config.nifuType || 'pawn'
@@ -337,6 +354,7 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
 
     init(pluginConfig, { request }) {
       topology = request('core.topology')
+      _cachedCells = null
       if (topology) {
         if (topology.rows) config.rows = topology.rows
         if (topology.cols) config.cols = topology.cols

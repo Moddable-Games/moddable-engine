@@ -169,6 +169,9 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-06
+- Two variants played on a board with holes in it and used the holes. Vierschach castled queenside onto a corner outside its own board, and four-player shogi dropped into them: 324 such moves in 150 plies, three pieces left standing there. Both were the same mistake made twice, because a void is stored as an empty square and neither the castling path check nor the drop generator asked the topology
+- Every variant in the corpus that declares `topology.voids` is now played and checked, discovered by shape rather than named, so a variant added tomorrow is covered without editing the test. Romanchenko's Chess, which prompted the sweep, turned out to be correct already
+- A captured Xiang Fu Champion returns as a Pupil. `demotionMap` is now read by the chess plugin, the key the shogi plugin already used for the same idea, so a side can no longer drop a third royal piece onto a board that starts with two
 - The realistic tile style is back for nukes, talisman and colony. The artwork existed all along in `moddable-hexmaps` as remapped Screaming Brain Studios CC0 tiles; it had never been copied across, so the style could only ever have requested files that were not there
 - Colony's seafarers layouts render their sea: half a Seafarers board was flat blue against illustrated land. Realistic now covers five of the seven layouts completely, leaving gold (2 hexes) and the deliberately face-down fog
 - Colony advertised a `kenney` style and served the artistic set under that name. There is no colony-kenney artwork anywhere; the style is now called what it is
