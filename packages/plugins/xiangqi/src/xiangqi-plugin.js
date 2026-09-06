@@ -6,7 +6,7 @@ import { fromConfig } from '../../../piece-behaviour/index.js'
 export const CONFIG_KEYS = new Set([
   'advancement', 'cannonJumpToMove', 'cols', 'flyingGeneralRule', 'hasRiver', 'palace',
   'passAllowed', 'pieceMoves', 'playerCount', 'promotionZone', 'river', 'rows', 'royalType',
-  'setup', 'turnLogic', 'winCondition',
+  'setup', 'turnLogic', 'vocabulary', 'winCondition',
 ])
 
 

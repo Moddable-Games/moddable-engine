@@ -1838,6 +1838,15 @@
   {
     "family": "xiangqi",
     "familyLabel": "Xiangqi",
+    "variant": "manchu-plus",
+    "key": "manchu-plus",
+    "label": "Manchu+",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "xiangqi",
+    "familyLabel": "Xiangqi",
     "variant": "minixiangqi",
     "key": "minixiangqi",
     "label": "Minixiangqi",
