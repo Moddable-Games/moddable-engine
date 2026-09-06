@@ -9,7 +9,7 @@ import { fileLabel } from '../../core/index.js'
  * and produces an SVG string.
  */
 
-import { produceLayout, buildCrossMap, pieceImageKey, symbolToPiece } from '../../schema/index.js'
+import { produceLayout, buildCrossMap, pieceImageKey, pieceImageKeys, symbolToPiece } from '../../schema/index.js'
 import { parseRankRuns, readPosition } from '../../core/index.js'
 import { renderGridLayout } from '../../topologies/grid/index.js'
 import { renderGraphLayout } from '../../topologies/graph/index.js'
@@ -110,30 +110,47 @@ function buildFenMapFromVocabulary(vocabulary) {
 
 export function attachPieceImages(resolved, gallery) {
   if (!resolved.pieces?.set || !gallery) return {}
-  validatePieceVocabulary(resolved, gallery)
   const topo = resolved.topology || {}
   const skipFenMap = topo.type === 'pit'
   const vocabulary = resolved.pieces?.vocabulary || resolved.vocabulary || resolved.plugins?.[Object.keys(resolved.plugins || {})[0]]?.vocabulary
   const fenOverrides = resolved.pieces.fenMap || buildFenMapFromVocabulary(vocabulary)
-  return buildPieceImages(resolved.pieces.set, gallery, fenOverrides, skipFenMap)
+  const built = buildPieceImages(resolved.pieces.set, gallery, fenOverrides, skipFenMap)
+  validatePieceVocabulary(resolved, gallery, built.images)
+  return built
 }
 
-export function validatePieceVocabulary(resolved, gallery) {
+/**
+ * Warn about pieces the board will not draw.
+ *
+ * This asked its own question and got its own answer. It looked only at
+ * `setDef.pieces`, so every set that inherits reported its whole base set as
+ * missing - `mce-fairy-complete extends mce-chess`, and Capablanca's Archbishop
+ * warns here while rendering perfectly - and it rebuilt the key as
+ * `w`/`b` + uppercase, so a four-player set keyed `rK` was reported as `bRK`.
+ * Forty of the corpus's warnings were wrong, which is how the eight real ones
+ * went unread (engine#168).
+ *
+ * It now asks the renderer's own resolver, against the images actually built,
+ * so a warning here means exactly what a reader will see: nothing on that
+ * square.
+ */
+export function validatePieceVocabulary(resolved, gallery, images) {
   if (!resolved.pieces?.set || !gallery) return
   const setDef = gallery.find(s => s.id === resolved.pieces.set)
   if (!setDef) {
     console.warn(`[render] Piece set '${resolved.pieces.set}' not found in gallery. Board will render without pieces.`)
     return
   }
-  const fenMap = resolved.pieces.fenMap || resolved.pieces.vocabulary || {}
-  const available = new Set(Object.keys(setDef.pieces || {}))
+  if (!images) return
   const vocabulary = resolved.vocabulary || resolved.plugins?.[Object.keys(resolved.plugins || {})[0]]?.vocabulary || {}
   const missing = []
   for (const [type, def] of Object.entries(vocabulary)) {
     for (const [owner, symbol] of Object.entries(def.symbols || {})) {
-      const mapped = fenMap[symbol]
-      const id = mapped || (symbol === symbol.toUpperCase() ? 'w' : 'b') + symbol.toUpperCase()
-      if (!available.has(id)) missing.push(`${type}(${owner}) '${symbol}' → ${id}`)
+      const ownerIdx = /^\d+$/.test(owner) ? parseInt(owner, 10) : owner
+      const candidates = pieceImageKeys({ type, owner: ownerIdx, symbol })
+      if (!candidates.some(key => images[key])) {
+        missing.push(`${type}(${owner}) '${symbol}'`)
+      }
     }
   }
   if (missing.length) {

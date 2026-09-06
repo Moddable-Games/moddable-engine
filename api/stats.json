@@ -47,8 +47,8 @@
     "shogi": 14,
     "xiangqi": 3
   },
-  "tests": 6648,
-  "testsPassing": 6642,
-  "testSuites": 199,
+  "tests": 6653,
+  "testsPassing": 6647,
+  "testSuites": 200,
   "snapshots": 334
 }
