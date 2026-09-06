@@ -4,7 +4,7 @@ import { fromConfig } from '../../../piece-behaviour/index.js'
 // authoring docs share one source of truth, and kept separate from `defaults`,
 // which only lists the keys that carry a default value.
 export const CONFIG_KEYS = new Set([
-  'advancement', 'afterMove', 'captureRule', 'cols', 'custodianCapture',
+  'advancement', 'afterMove', 'captureRule', 'cols',
   'dropCheckmateLimit', 'dropPawnFileLimit', 'drops', 'initialHands', 'moveFilter',
   'nifuLimit', 'nifuType', 'noDropLastRank', 'noDropSecondRank', 'pieceMoves',
   'pieceRotations', 'playerCount', 'promotionMap', 'promotionPieces', 'promotionZone',
@@ -31,6 +31,11 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
 
   let topology = null
   let _cachedCells = null
+
+  // A family that captures custodially does not also capture by moving onto a
+  // piece. Derived rather than declared twice: `captureRule` already says which
+  // it is, and a second key saying the same thing is a second key to get wrong.
+  const capturesByDisplacement = config.captureRule !== 'custodian'
 
   // Every cell that is part of the board, which on a voided topology is not
   // every index in the board array: a hole is stored as null and so reads as an
@@ -216,7 +221,15 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     const topo = topology || buildInternalTopology()
     const viewBoard = buildViewBoard(board, playerIndex)
     const rawMoves = primitive.genMoves(topo, pos, viewBoard)
-    return rawMoves.map(m => ({ from: m.from, to: m.to }))
+    // Custodial capture is not an addition to capture by displacement, it is
+    // instead of it: a Hasami Shogi piece slides through empty squares and may
+    // not land on an occupied one at all. The rule was wired into applyMove and
+    // not into move generation, so the variant took 12 pieces by displacement
+    // against 3 by sandwich and played as ordinary shogi (engine#160).
+    const moves = capturesByDisplacement
+      ? rawMoves
+      : rawMoves.filter(m => board[m.to] === null)
+    return moves.map(m => ({ from: m.from, to: m.to }))
   }
 
   function generateDropMoves(board, hand, playerIndex) {

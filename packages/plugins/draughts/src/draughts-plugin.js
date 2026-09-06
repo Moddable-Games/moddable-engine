@@ -7,7 +7,7 @@ export const CONFIG_KEYS = new Set([
   'kingCapturePriority', 'kingLandsBehindCapture', 'loseOnSinglePiece', 'majorityPrefersKing',
   'manCapture', 'manMove',
   'maximalCapture', 'menCannotCaptureKings', 'piecesPerPlayer', 'playerCount',
-  'promotionDuring', 'removeImmediately', 'rows', 'setup', 'turnLogic', 'winCondition',
+  'promotion', 'promotionDuring', 'removeImmediately', 'rows', 'setup', 'turnLogic', 'winCondition',
 ])
 
 export function createDraughtsPlugin(variantConfig = {}, context = {}) {
@@ -62,37 +62,59 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
   }
 
   function isPlayable(row, col) {
-    if (config.directions === 'orthogonal') return true
+    if (config.directions !== 'diagonal') return true
     return (row + col) % 2 === 1
   }
 
   function forwardDirs(playerIndex) {
+    const fwd = playerIndex === 0 ? -1 : 1
     if (config.directions === 'orthogonal') {
-      const fwd = playerIndex === 0 ? -1 : 1
       return [[fwd, 0], [0, -1], [0, 1]]
     }
-    const fwd = playerIndex === 0 ? -1 : 1
+    // Alquerque's lines run both ways at once, so forward is every direction
+    // that is not straight backwards.
+    if (config.directions === 'all') {
+      return [[fwd, 0], [0, -1], [0, 1], [fwd, -1], [fwd, 1]]
+    }
     return [[fwd, -1], [fwd, 1]]
   }
 
   function backwardDirs(playerIndex) {
-    if (config.directions === 'orthogonal') {
-      const bwd = playerIndex === 0 ? 1 : -1
-      return [[bwd, 0]]
-    }
     const bwd = playerIndex === 0 ? 1 : -1
+    if (config.directions === 'orthogonal') return [[bwd, 0]]
+    if (config.directions === 'all') return [[bwd, 0], [bwd, -1], [bwd, 1]]
     return [[bwd, -1], [bwd, 1]]
   }
 
+  const ORTHOGONAL_DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]]
+  const DIAGONAL_DIRS = [[-1, -1], [-1, 1], [1, -1], [1, 1]]
+
   function allDirs() {
-    if (config.directions === 'orthogonal') {
-      return [[-1, 0], [1, 0], [0, -1], [0, 1]]
-    }
-    return [[-1, -1], [-1, 1], [1, -1], [1, 1]]
+    if (config.directions === 'orthogonal') return ORTHOGONAL_DIRS
+    // An Alquerque board draws both, and which of them exist at a given point
+    // is the topology's answer, not this table's.
+    if (config.directions === 'all') return [...ORTHOGONAL_DIRS, ...DIAGONAL_DIRS]
+    return DIAGONAL_DIRS
   }
 
   function inBounds(r, c) {
     return r >= 0 && r < config.rows && c >= 0 && c < config.cols
+  }
+
+  // Whether the board draws a line in this direction from this square.
+  //
+  // Every ordinary draughts board draws all four diagonals at every square, so
+  // this is true everywhere and the plugin's own arithmetic was right by
+  // accident. An Alquerque board draws its diagonals corner to corner and
+  // midpoint to midpoint, which leaves half its points with four and half with
+  // none, and a piece may only move along a line that is drawn (engine#161).
+  //
+  // The topology is what knows, because the topology is what the board is
+  // drawn from - asking it is what keeps the played board and the drawn board
+  // the same board.
+  function directionAvailable(from, dr, dc) {
+    if (!topology || !topology.step) return true
+    return topology.step(from, [dr, dc]) !== null
   }
 
   function getMoveDirs(piece, playerIndex) {
@@ -138,6 +160,7 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
       const range = getMoveRange(piece)
 
       for (const [dr, dc] of dirs) {
+        if (!directionAvailable(i, dr, dc)) continue
         for (let dist = 1; dist <= range; dist++) {
           const nr = r + dr * dist
           const nc = c + dc * dist
@@ -179,6 +202,7 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
     const chains = []
 
     for (const [dr, dc] of dirs) {
+      if (!directionAvailable(pos, dr, dc)) continue
       let enemyPos = null
 
       for (let dist = 1; dist <= scanRange; dist++) {
@@ -255,6 +279,9 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
   }
 
   function isPromotionRank(row, playerIndex) {
+    // Alquerque has no kings at all: "There are no kings in Alquerque", and a
+    // man reaching the far row is just a man on the far row.
+    if (config.promotion === false) return false
     return playerIndex === 0 ? row === 0 : row === config.rows - 1
   }
 

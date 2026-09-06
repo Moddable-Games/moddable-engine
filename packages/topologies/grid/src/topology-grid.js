@@ -5,7 +5,7 @@ export const schema = {
 }
 
 export function createGridTopology(config) {
-  const { rows, cols, wrap = false, voids: voidList, blockers: blockerList } = config
+  const { rows, cols, wrap = false, voids: voidList, blockers: blockerList, diagonals: diagonalRule = 'full' } = config
 
   const _voids = voidList ? new Set(voidList.map(v => Array.isArray(v) ? v[0] * cols + v[1] : v)) : null
   const _blockers = blockerList ? new Set(blockerList.map(v => Array.isArray(v) ? v[0] * cols + v[1] : v)) : null
@@ -77,9 +77,26 @@ export function createGridTopology(config) {
   const ORTHOGONAL = [[-1, 0], [1, 0], [0, -1], [0, 1]]
   const DIAGONAL = [[-1, -1], [-1, 1], [1, -1], [1, 1]]
 
+  // Not every board draws a diagonal at every point, and a piece may only move
+  // along a line that is drawn. On an Alquerque board the diagonals run
+  // corner to corner and midpoint to midpoint, which leaves the points with an
+  // even coordinate sum carrying all four and the rest carrying none - the
+  // 8-neighbour/4-neighbour alternation that Alquerque and Fanorona are built
+  // on. `diagonals: 'full'` is every other grid board and is the default.
+  function diagonalExists(r, c) {
+    if (diagonalRule === 'none') return false
+    if (diagonalRule === 'alternating') return (r + c) % 2 === 0
+    return true
+  }
+
+  function isDiagonal(dr, dc) {
+    return dr !== 0 && dc !== 0
+  }
+
   function adjacentIn(dirs, r, c) {
     const result = []
     for (let i = 0; i < dirs.length; i++) {
+      if (isDiagonal(dirs[i][0], dirs[i][1]) && !diagonalExists(r, c)) continue
       let nr = r + dirs[i][0], nc = c + dirs[i][1]
       if (wrap) {
         const wrapped = wrapCoords(nr, nc)
@@ -156,6 +173,9 @@ export function createGridTopology(config) {
     const c = isIdx ? from % cols : from[1]
     const origin = toIndex(r, c)
     const result = []
+    // A ray runs along a line, so it goes nowhere at all from a point the board
+    // draws no such line through.
+    if (isDiagonal(dr, dc) && !diagonalExists(r, c)) return result
     const limit = maxSteps || Math.max(rows, cols)
     let nr = r + dr, nc = c + dc
     let steps = 0
@@ -251,7 +271,7 @@ export function createGridTopology(config) {
       mode = 'tiles',
       spacing = 20,
       starPoints = [],
-      diagonals = 'none',
+      diagonals = diagonalRule === 'full' ? 'none' : diagonalRule,
       riverAfterRow = null,
       riverHeight = 20,
       palaces = [],
@@ -356,10 +376,15 @@ export function createGridTopology(config) {
             }
           }
         } else if (diagonals === 'alternating') {
+          // One diagonal per square, not two. Drawing both in every other
+          // square gives every point exactly two diagonals; an Alquerque board
+          // alternates between points with four and points with none, which is
+          // what the corner-to-corner and midpoint-to-midpoint lines produce.
           for (let r = 0; r < rows - 1; r++) {
             for (let c = 0; c < cols - 1; c++) {
               if ((r + c) % 2 === 0) {
                 lines.push({ x1: c * spacing, y1: posY(r), x2: (c + 1) * spacing, y2: posY(r + 1) })
+              } else {
                 lines.push({ x1: (c + 1) * spacing, y1: posY(r), x2: c * spacing, y2: posY(r + 1) })
               }
             }
@@ -577,7 +602,9 @@ export function createGridTopology(config) {
 
   function step(from, direction) {
     const dr = direction[0], dc = direction[1]
-    let nr = ((from / cols) | 0) + dr, nc = (from % cols) + dc
+    const fr = (from / cols) | 0, fc = from % cols
+    if (isDiagonal(dr, dc) && !diagonalExists(fr, fc)) return null
+    let nr = fr + dr, nc = fc + dc
     if (wrap) {
       const wrapped = wrapCoords(nr, nc)
       nr = wrapped[0]
@@ -882,13 +909,19 @@ const OP_HANDLERS = {
 
   diagonals(op, geom, elements) {
     const { rows, cols, posX, posY } = geom
+    // The predicate is asked per direction, because a board can draw one
+    // diagonal of a square and not the other - which is how an Alquerque board
+    // gets points with four diagonals next to points with none.
     for (let r = 0; r < rows - 1; r++) {
       for (let c = 0; c < cols - 1; c++) {
-        if (!op.predicate(r, c)) continue
         const x1 = posX(c), y1 = posY(r)
         const x2 = posX(c + 1), y2 = posY(r + 1)
-        if (op.forward !== false) elements.push({ tag: 'line', attrs: { x1, y1, x2, y2, stroke: op.color, 'stroke-width': op.width } })
-        if (op.backward !== false) elements.push({ tag: 'line', attrs: { x1: x2, y1, x2: x1, y2, stroke: op.color, 'stroke-width': op.width } })
+        if (op.forward !== false && op.predicate(r, c, 'forward')) {
+          elements.push({ tag: 'line', attrs: { x1, y1, x2, y2, stroke: op.color, 'stroke-width': op.width } })
+        }
+        if (op.backward !== false && op.predicate(r, c, 'backward')) {
+          elements.push({ tag: 'line', attrs: { x1: x2, y1, x2: x1, y2, stroke: op.color, 'stroke-width': op.width } })
+        }
       }
     }
   },

@@ -271,7 +271,14 @@ function translateOp(decl, ctx) {
     case 'diagonals':
       return {
         op: 'diagonals',
-        predicate: decl.pattern === 'alternating' ? (r, c) => (r + c) % 2 === 0 : decl.predicate,
+        // Alternating means one diagonal per square, not both in every other
+        // square: the forward diagonal where the coordinate sum is even and the
+        // backward one where it is odd. That is what joins corner to corner and
+        // midpoint to midpoint, and it is what leaves an Alquerque point either
+        // fully diagonally connected or not at all.
+        predicate: decl.pattern === 'alternating'
+          ? (r, c, direction) => ((r + c) % 2 === 0) === (direction !== 'backward')
+          : decl.predicate,
         color: colors[decl.color] || decl.color,
         width: decl.width,
       }

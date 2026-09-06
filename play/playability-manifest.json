@@ -1244,6 +1244,15 @@
   {
     "family": "draughts",
     "familyLabel": "Draughts",
+    "variant": "alquerque",
+    "key": "alquerque",
+    "label": "Alquerque",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "draughts",
+    "familyLabel": "Draughts",
     "variant": "brazilian",
     "key": "brazilian",
     "label": "Brazilian Draughts",
@@ -1742,6 +1751,15 @@
     "variant": "gorogoro-plus",
     "key": "gorogoro-plus",
     "label": "Gorogoro+",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "shogi",
+    "familyLabel": "Shogi",
+    "variant": "hasami-shogi",
+    "key": "hasami-shogi",
+    "label": "Hasami Shogi",
     "group": "Other",
     "playable": true
   },

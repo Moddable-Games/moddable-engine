@@ -314,7 +314,7 @@ export function renderFromEngine(resolved, opts = {}) {
     if (opts.flipped && !effectiveRotations && resolved.pieces?.directional) {
       effectiveRotations = Object.fromEntries((resolved.players || ['white', 'black']).map(p => [p, 180]))
     }
-    parts.push(`<g pointer-events="none">${renderPiecesFromCells(displayPosition, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: effectiveRotations, getOwner, pieceDefs: opts.pieceDefs, colors, vocabulary: resolved.vocabulary || {} })}</g>`)
+    parts.push(`<g pointer-events="none">${renderPiecesFromCells(displayPosition, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: effectiveRotations, getOwner, pieceDefs: opts.pieceDefs, colors, vocabulary: resolved.vocabulary || {}, pieceScale: render.pieceScale })}</g>`)
   } else if (position && Object.keys(position).length > 0) {
     parts.push(`<g pointer-events="none"></g>`)
   }
@@ -411,6 +411,15 @@ function renderPiecesFromCells(position, cells, tileSize, opts) {
   const pieceImages = opts.pieceImages || {}
   const cellMap = new Map(cells.map(c => [c.id, c]))
   const parts = []
+  // An image piece is drawn one cell wide, which is right on a board of tiles
+  // and wrong on a board of points: a go stone fills its whole viewBox, so at
+  // full spacing the stones meet edge to edge and hide the lines they are
+  // standing on. On Alquerque the lines ARE the rules, so a board that covers
+  // them is not a board anyone can read (engine#161).
+  //
+  // Opt-in per board, so the 331 that look right keep looking exactly the same.
+  const scale = opts.pieceScale || 1
+  const drawSize = tileSize * scale
   for (const [alg, raw] of Object.entries(position)) {
     const cell = cellMap.get(alg)
     if (!cell) continue
@@ -424,7 +433,7 @@ function renderPiecesFromCells(position, cells, tileSize, opts) {
     const imageKey = pieceImageKey(piece, pieceImages)
 
     if (pieceImages[imageKey]) {
-      const x = pos.x - tileSize / 2, y = pos.y - tileSize / 2
+      const x = pos.x - drawSize / 2, y = pos.y - drawSize / 2
       const surfaceMap = opts.pieceSurfaceMap || {}
       const hasSurface = opts.pieceBorders || surfaceMap[imageKey]
       const rotations = opts.pieceRotations
@@ -438,22 +447,22 @@ function renderPiecesFromCells(position, cells, tileSize, opts) {
       if (hasSurface) {
         const surface = opts.pieceSurface?.owners?.[ownerForRot]
         const ownerColors = surface || { fill: opts.pieceBorders?.[ownerForRot] || '#888', stroke: 'rgba(0,0,0,0.3)' }
-        parts.push(renderSurfaceSVG('disc', pos.x, pos.y, tileSize, ownerColors, pieceImages[imageKey]))
+        parts.push(renderSurfaceSVG('disc', pos.x, pos.y, drawSize, ownerColors, pieceImages[imageKey]))
       } else if (rot) {
-        parts.push(`<g transform="rotate(${rot} ${pos.x} ${pos.y})"><image href="${pieceImages[imageKey]}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" pointer-events="none"/></g>`)
+        parts.push(`<g transform="rotate(${rot} ${pos.x} ${pos.y})"><image href="${pieceImages[imageKey]}" x="${x}" y="${y}" width="${drawSize}" height="${drawSize}" pointer-events="none"/></g>`)
       } else {
-        parts.push(`<image href="${pieceImages[imageKey]}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" pointer-events="none"/>`)
+        parts.push(`<image href="${pieceImages[imageKey]}" x="${x}" y="${y}" width="${drawSize}" height="${drawSize}" pointer-events="none"/>`)
       }
     } else if (piece.type === 'stone') {
       parts.push(drawStone(piece, pos.x, pos.y, tileSize * 0.42, opts.colors || {}))
     } else if (piece.type === 'man' || piece.type === 'king') {
       parts.push(drawDiscPiece(piece, pos.x, pos.y, tileSize * 0.38, opts.colors || {}))
     } else if (pieceImages[piece.type]) {
-      const x = pos.x - tileSize / 2, y = pos.y - tileSize / 2
-      parts.push(`<image href="${pieceImages[piece.type]}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" pointer-events="none"/>`)
+      const x = pos.x - drawSize / 2, y = pos.y - drawSize / 2
+      parts.push(`<image href="${pieceImages[piece.type]}" x="${x}" y="${y}" width="${drawSize}" height="${drawSize}" pointer-events="none"/>`)
     } else if (opts.pieceDefs?.[piece.type]) {
-      const x = pos.x - tileSize / 2, y = pos.y - tileSize / 2
-      parts.push(`<use href="#piece-${piece.type}" x="${x}" y="${y}" width="${tileSize}" height="${tileSize}"/>`)
+      const x = pos.x - drawSize / 2, y = pos.y - drawSize / 2
+      parts.push(`<use href="#piece-${piece.type}" x="${x}" y="${y}" width="${drawSize}" height="${drawSize}"/>`)
     }
   }
   return parts.join('')
