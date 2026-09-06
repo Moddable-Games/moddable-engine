@@ -11,6 +11,15 @@ export const CONFIG_KEYS = new Set([
 ])
 
 
+// b and w match the vocabulary the go hub declares in moddable-rules, so the
+// symbol a stone serialises to is the one the piece set resolves. cellStrings
+// maps owner index to the raw string the plugin stores on the board, so the
+// topology can round-trip string cells through FEN - and so a `setup` written
+// as a FEN parses straight into the board the plugin keeps.
+const VOCABULARY = {
+  stone: { symbols: { 0: 'b', 1: 'w' }, cellStrings: ['black', 'white'] },
+}
+
 export function createGoPlugin(variantConfig = {}, context = {}) {
   const { definition } = context
 
@@ -47,6 +56,28 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
 
   let topology = null
 
+  // Go was the one family that could not open from a position. `setup` was in
+  // CONFIG_KEYS and read nowhere, so every variant started from an empty board
+  // however its frontmatter opened, and Sunjang Baduk's sixteen pre-placed
+  // stones and Tibetan Go's twelve were declared and discarded (engine#162).
+  //
+  // The stones are written as an ordinary position string and parsed by the
+  // topology, the same path every other family uses, which is why the plugin
+  // needs no notion of what a handicap or an opening pattern is.
+  function openingBoard(pluginConfig, boardSize) {
+    const empty = new Array(boardSize).fill(null)
+    const setup = pluginConfig.setup || config.setup
+    if (!setup || !topology || !topology.parsePosition) return empty
+
+    const cells = topology.parsePosition(setup, VOCABULARY)
+    // A shorter position leaves the rest of the board empty rather than
+    // shrinking it: the board's size is the topology's business, not the FEN's.
+    for (let i = 0; i < Math.min(cells.length, boardSize); i++) {
+      if (cells[i]) empty[i] = cells[i]
+    }
+    return empty
+  }
+
   function defaultInit(pluginConfig, { request }) {
     topology = request('core.topology')
     let boardSize
@@ -64,7 +95,7 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
       : (pluginConfig.rows || Math.round(boardSize / cols))
 
     return {
-      board: new Array(boardSize).fill(null),
+      board: openingBoard(pluginConfig, boardSize),
       passes: 0,
       ko: null,
       captures: { 0: 0, 1: 0 },
@@ -375,13 +406,7 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
     // fails if any of them changes the slice it was given.
     pureApplyMove: true,
     pieceTypes: ['stone'],
-    vocabulary: {
-      // b and w match the vocabulary the go hub declares in moddable-rules, so
-      // the symbol a stone serialises to is the one the piece set resolves.
-      // cellStrings maps owner index to the raw string the plugin stores on the
-      // board, so the topology can round-trip string cells through FEN.
-      stone: { symbols: { 0: 'b', 1: 'w' }, cellStrings: ['black', 'white'] },
-    },
+    vocabulary: VOCABULARY,
     config,
 
     init(pluginConfig, capabilities) {
