@@ -143,11 +143,24 @@ export function validatePieceVocabulary(resolved, gallery, images) {
   }
   if (!images) return
   const vocabulary = resolved.vocabulary || resolved.plugins?.[Object.keys(resolved.plugins || {})[0]]?.vocabulary || {}
+  // A variant's vocabulary is merged over its family's, so it carries every type
+  // the family knows and not only the ones this board uses. Xiang Fu declares a
+  // Knight and inherits a Horse it never places, and warning about the Horse is
+  // warning about a piece no reader will ever look for. Where there is a setup,
+  // it says which symbols are actually on the board.
+  const setup = typeof resolved.setup === 'string' ? resolved.setup
+    : (typeof resolved.setup?.position === 'string' ? resolved.setup.position : null)
+  const inPlay = setup ? new Set(setup.split(' ')[0].replace(/[^A-Za-z]/g, '').split('')) : null
   const missing = []
   for (const [type, def] of Object.entries(vocabulary)) {
     for (const [owner, symbol] of Object.entries(def.symbols || {})) {
+      if (inPlay && !symbol.split('').some(ch => inPlay.has(ch))) continue
       const ownerIdx = /^\d+$/.test(owner) ? parseInt(owner, 10) : owner
-      const candidates = pieceImageKeys({ type, owner: ownerIdx, symbol })
+      // Resolved through `symbolToPiece` first, exactly as the draw path does,
+      // so the validator and the renderer agree on what a symbol is before they
+      // are asked whether it can be drawn.
+      const piece = symbolToPiece(String(symbol), vocabulary) || { type, owner: ownerIdx, symbol }
+      const candidates = pieceImageKeys(piece)
       if (!candidates.some(key => images[key])) {
         missing.push(`${type}(${owner}) '${symbol}'`)
       }

@@ -1251,6 +1251,15 @@
     "playable": true
   },
   {
+    "family": "chess",
+    "familyLabel": "Chess",
+    "variant": "xiang-fu",
+    "key": "xiang-fu",
+    "label": "Xiang Fu",
+    "group": "Other",
+    "playable": true
+  },
+  {
     "family": "draughts",
     "familyLabel": "Draughts",
     "variant": "alquerque",
