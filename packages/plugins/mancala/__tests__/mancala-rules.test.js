@@ -173,3 +173,86 @@ describe('a last seed in your own store earns another turn', () => {
     expect(game.getState().slice.board).toEqual([4, 4, 4, 4, 4, 0, 5, 5, 5, 4, 4, 4, 1, 0])
   })
 })
+
+// engine#163. Pallanguzhi relays from the pit AFTER the last seed rather than
+// the pit the last seed fell into, and its capture is measured from the empty
+// pit that ended the sow: skip it, take the one beyond, then check again from
+// there. Neither was expressible, so the variant was declared unsupported
+// rather than played with sungka's relay and kalah's capture.
+//
+// Circuit for either player with no stores is simply 0..13 and round again.
+const PALLANGUZHI = {
+  pitsPerSide: 7,
+  hasStores: false,
+  sowIntoOwnStore: false,
+  relay: 'next',
+  captureRule: 'skipOneBeyond',
+}
+
+describe('pallanguzhi', () => {
+  it('relays from the pit after the last seed, not the pit it landed in', () => {
+    // Two seeds from pit 0 land in 1 and 2. Pit 3 holds one seed, so the relay
+    // lifts pit 3 - not pit 2, which is where the last seed fell - and sows it
+    // into pit 4. Pit 5 is empty, so the sow stops there.
+    const { plugin, slice } = position(PALLANGUZHI, [2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    const after = plugin.applyMove({ action: 'sow', pit: 0 }, slice, turn(0))
+    expect(after.board).toEqual([0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+  })
+
+  it('stops when the pit after the last seed is empty', () => {
+    // One seed from pit 0 lands in pit 1. Pit 2 is empty, so there is no relay.
+    const { plugin, slice } = position(PALLANGUZHI, [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    const after = plugin.applyMove({ action: 'sow', pit: 0 }, slice, turn(0))
+    expect(after.board[1]).toBe(1)
+    expect(after.board[2]).toBe(0)
+  })
+
+  it('skips the empty pit and takes the one beyond it', () => {
+    // One seed from 0 lands in 1. Pit 2 is empty, so the sow ends; pit 3 holds
+    // five and is taken. Held rather than stored: this board has no stores.
+    const { plugin, slice } = position(PALLANGUZHI, [1, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    const after = plugin.applyMove({ action: 'sow', pit: 0 }, slice, turn(0))
+    expect(after.board[3]).toBe(0)
+    expect(after.held).toEqual([5, 0])
+  })
+
+  it('takes nothing when the pit beyond the empty one is empty too', () => {
+    const { plugin, slice } = position(PALLANGUZHI, [1, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    const after = plugin.applyMove({ action: 'sow', pit: 0 }, slice, turn(0))
+    expect(after.held).toEqual([0, 0])
+    expect(after.board[4]).toBe(4)
+  })
+
+  it('keeps taking while empty and seeded pits alternate', () => {
+    // After the sow ends at pit 1: 2 empty, 3 has three; 4 empty, 5 has two;
+    // 6 empty, 7 has one. All three are taken in the one turn.
+    const { plugin, slice } = position(PALLANGUZHI, [1, 0, 0, 3, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0])
+    const after = plugin.applyMove({ action: 'sow', pit: 0 }, slice, turn(0))
+    expect(after.held).toEqual([6, 0])
+    expect(after.board).toEqual([0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+  })
+
+  it('takes across the board, not only from its own side', () => {
+    // The sow ends at pit 8, on the opponent's side; pit 9 is empty and pit 10
+    // holds four, so they are taken.
+    const { plugin, slice } = position(PALLANGUZHI, [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 4, 0, 0, 0])
+    const after = plugin.applyMove({ action: 'sow', pit: 7 }, slice, turn(1))
+    expect(after.board[10]).toBe(0)
+    expect(after.held).toEqual([0, 4])
+  })
+
+  it('creates and destroys no seeds over a whole game', () => {
+    const game = createGameForFamily('mancala', { variant: 'pallanguzhi', rngSeed: 9 })
+    const total = (state) => state.board.reduce((a, b) => a + b, 0) + (state.held || [0, 0]).reduce((a, b) => a + b, 0)
+    const start = total(game.getState()?.slice || game.getState())
+    expect(start).toBe(168)
+    for (let i = 0; i < 400; i++) {
+      const moves = game.getLegalMoves()
+      if (!moves.length) break
+      const result = game.applyMove(moves[i % moves.length])
+      if (!result || !result.ok) break
+      expect(total(game.getState()?.slice || game.getState())).toBe(168)
+      if (result.winner !== undefined && result.winner !== null) break
+    }
+  })
+})

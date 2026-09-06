@@ -9,7 +9,7 @@
     "standard": 1116,
     "variants": 610
   },
-  "playableVariants": 206,
+  "playableVariants": 207,
   "playableFamilies": 10,
   "playableByFamily": {
     "chess": 138,
@@ -17,7 +17,7 @@
     "go": 10,
     "hex": 8,
     "landlords-game": 1,
-    "mancala": 6,
+    "mancala": 7,
     "morris": 7,
     "reversi": 3,
     "shogi": 14,
@@ -41,14 +41,14 @@
     "go": 7,
     "hex": 8,
     "landlords-game": 1,
-    "mancala": 6,
+    "mancala": 7,
     "morris": 7,
     "reversi": 3,
     "shogi": 14,
     "xiangqi": 3
   },
-  "tests": 6653,
-  "testsPassing": 6647,
+  "tests": 6669,
+  "testsPassing": 6663,
   "testSuites": 200,
   "snapshots": 334
 }

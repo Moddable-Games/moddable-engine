@@ -169,6 +169,7 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-06
+- Pallanguzhi plays. It relays from the pit *after* the last seed rather than the pit the last seed fell into, and its capture is measured from the empty pit that ended the sow: skip it, take the one beyond, then check again from there. Two parametric additions, `relay: next` and `captureRule: skipOneBeyond`, rather than a Pallanguzhi branch
 - The renderer's own warning about pieces it cannot draw was wrong forty times out of fifty-one. It checked only a set's own entries, so `mce-fairy-complete extends mce-chess` reported the whole base set as missing while Capablanca's Archbishop drew perfectly, and it rebuilt the key as `w`/`b` plus uppercase, so a four-player set keyed `rK` was reported as `bRK`. It now asks the renderer's own resolver against the images actually built. Five warnings remain and all five are real
 - Hasami Shogi plays its own game. `captureRule: custodian` was wired into applying a move and not into generating one, so the sandwich worked and moving straight onto an enemy piece worked too: twelve captures by displacement against three by sandwich, which is ordinary shogi with an unusual piece set
 - Alquerque plays. Its lines run corner to corner and midpoint to midpoint, so half its points carry all four diagonals and half carry none, and a piece may only move along a line that is drawn. The topology answers whether a line exists and the plugin asks; on every other draughts board the answer is always yes, which is why nothing else moved

@@ -14,11 +14,11 @@ export const CONFIG_KEYS = new Set([
 // circuit. The whole family is one loop plus a capture test, so the differences
 // between kalah, oware and toguz korgool are configuration rather than code.
 //
-// What is deliberately NOT modelled: bao la kiswahili (a four-row game with a
-// separate stocking phase and rules that do not fit this shape at all) and
-// pallanguzhi's skip-one relay capture. Both are declared unsupported by their
-// frontmatter rather than approximated, because a mancala variant played with
-// the wrong capture rule looks like it works and silently is not the game.
+// What is deliberately NOT modelled: bao la kiswahili, a four-row game with a
+// separate stocking phase and rules that do not fit this shape at all. It is
+// declared unsupported by its frontmatter rather than approximated, because a
+// mancala variant played with the wrong capture rule looks like it works and
+// silently is not the game.
 export function createMancalaPlugin(variantConfig = {}, context = {}) {
   const defaults = {
     pitsPerSide: 6,
@@ -27,10 +27,10 @@ export function createMancalaPlugin(variantConfig = {}, context = {}) {
     sowIntoOwnStore: true,     // kalah, sungka; false for toguz korgool
     skipOpponentStore: true,
     skipOriginOnWrap: false,   // oware and ayo skip the pit they lifted from
-    relay: 'none',             // 'none' | 'nonEmpty' (sungka, congkak)
+    relay: 'none',             // 'none' | 'nonEmpty' (sungka, congkak) | 'next' (pallanguzhi)
     bonusTurnOnStore: false,   // kalah, congkak
     // Capture
-    captureRule: 'none',       // 'oppositeOnEmptyOwn' | 'countInEnemy' | 'evenInEnemy'
+    captureRule: 'none',       // 'oppositeOnEmptyOwn' | 'countInEnemy' | 'evenInEnemy' | 'skipOneBeyond'
     captureCounts: [2, 3],     // for countInEnemy
     captureChainBackwards: false,
     grandSlamProhibited: false,
@@ -123,6 +123,17 @@ export function createMancalaPlugin(variantConfig = {}, context = {}) {
         landed = target
       }
 
+      // Pallanguzhi lifts the pit AFTER the last seed rather than the pit the
+      // last seed fell into, and keeps going while that pit has something in
+      // it. The sow ends when it is empty - and that empty pit is what the
+      // skip-one capture is measured from.
+      if (config.relay === 'next') {
+        const nextCell = circuit[(circuit.indexOf(landed) + 1) % circuit.length]
+        if (isStore(nextCell) || out[nextCell] === 0) break
+        origin = nextCell
+        continue
+      }
+
       if (config.relay !== 'nonEmpty') break
       // Relay: landing in an occupied pit lifts it and sows again. Landing in a
       // store, or in a pit that was empty before this seed, ends the turn.
@@ -173,6 +184,24 @@ export function createMancalaPlugin(variantConfig = {}, context = {}) {
         for (const cell of taken) { captured += out[cell]; out[cell] = 0 }
         if (store >= 0) out[store] += captured
       }
+    } else if (config.captureRule === 'skipOneBeyond') {
+      // Pallanguzhi. The sow stopped because the pit after the last seed was
+      // empty; skip that pit and take the one beyond it, on either side of the
+      // board. Then check again from there, so a run of alternating empty and
+      // seeded pits is taken in one turn.
+      const circuit = circuitFor(player)
+      let pos = circuit.indexOf(landed)
+      for (let guard = 0; pos >= 0 && guard < circuit.length; guard++) {
+        const gap = circuit[(pos + 1) % circuit.length]
+        const beyond = circuit[(pos + 2) % circuit.length]
+        if (isStore(gap) || isStore(beyond)) break
+        if (out[gap] !== 0) break
+        if (out[beyond] === 0) break
+        captured += out[beyond]
+        out[beyond] = 0
+        pos = (pos + 2) % circuit.length
+      }
+      if (store >= 0) out[store] += captured
     } else if (config.captureRule === 'evenInEnemy') {
       // toguz korgool: last seed makes an even count in an enemy pit.
       if (!ownsPit(landed, player) && out[landed] > 0 && out[landed] % 2 === 0) {

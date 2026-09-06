@@ -1595,6 +1595,15 @@
   {
     "family": "mancala",
     "familyLabel": "Mancala",
+    "variant": "pallanguzhi",
+    "key": "pallanguzhi",
+    "label": "Pallanguzhi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "mancala",
+    "familyLabel": "Mancala",
     "variant": "sungka",
     "key": "sungka",
     "label": "Sungka",

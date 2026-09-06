@@ -25,7 +25,6 @@ setRulesReader(
 // its entry, and nothing may be added without a decision.
 const UNSUPPORTED = new Set([
   'bao',          // four rows and a separate stocking phase; a different game shape
-  'pallanguzhi',  // skip-one relay capture, not expressible in the current config
 ])
 
 const CONFIGURED = readdirSync(join(RULES_ROOT, 'mancala', 'content', 'variants'))
