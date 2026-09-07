@@ -12,7 +12,7 @@ export const CONFIG_KEYS = new Set([
   'pawnType', 'placementDistinctColor', 'placementPieces', 'placementZone', 'playerCount',
   'promotionChoices', 'promotionRow',
   'faceoff', 'promotionZone', 'randomSetup', 'rookType', 'rows', 'royalType', 'setup',
-  'stalemateMeaning', 'torpedo', 'turnEffects', 'turnLogic', 'visibility', 'winCondition',
+  'stalemateMeaning', 'terrain', 'torpedo', 'turnEffects', 'turnLogic', 'visibility', 'winCondition',
 ])
 
 
@@ -1595,6 +1595,65 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     }
   }
 
+  // Terrain a piece cannot survive standing on.
+  //
+  // Congo's river is the middle rank. A piece that moves into it lives there
+  // for one turn; if its owner does not move it out again on their very next
+  // turn, it drowns. The Crocodile is at home in the water and never drowns.
+  //
+  // Declared entirely in frontmatter - which rows, and which piece types are
+  // immune - so the plugin carries no knowledge of rivers or crocodiles:
+  //
+  //     terrain:
+  //       drown:
+  //         rows: [3, 3]
+  //         immune: [crocodile]
+  //
+  // Wrapped at the boundary for the same reason the check counter is: applyMove
+  // has several return paths, and the watch list is written onto the new slice
+  // rather than the one handed in.
+  const drownSpec = config.terrain && config.terrain.drown
+  const drownImmune = new Set((drownSpec && drownSpec.immune) || [])
+
+  function inDrownRegion(pos) {
+    if (!drownSpec) return false
+    const nCols = topology ? topology.cols : 8
+    const r = Math.floor(pos / nCols)
+    const c = pos % nCols
+    if (drownSpec.rows && (r < drownSpec.rows[0] || r > drownSpec.rows[1])) return false
+    if (drownSpec.cols && (c < drownSpec.cols[0] || c > drownSpec.cols[1])) return false
+    return true
+  }
+
+  function applyMoveDrowning(inner, move, slice, full) {
+    const result = inner(move, slice, full)
+    const state = result && result.state ? result.state : result
+    if (!state || !state.board) return result
+
+    const mover = full.__players.currentIndex
+    const watched = (slice._drownWatch && slice._drownWatch[mover]) || []
+    const board = state.board.slice()
+
+    const stillThere = []
+    for (let pos = 0; pos < board.length; pos++) {
+      const piece = board[pos]
+      if (!piece || piece.owner !== mover) continue
+      if (drownImmune.has(piece.type)) continue
+      if (!inDrownRegion(pos)) continue
+      // Marked on this player's previous turn and still standing here: they had
+      // their one turn to get out.
+      if (watched.includes(pos)) board[pos] = null
+      else stillThere.push(pos)
+    }
+
+    const nextWatch = [
+      mover === 0 ? stillThere : ((slice._drownWatch && slice._drownWatch[0]) || []),
+      mover === 1 ? stillThere : ((slice._drownWatch && slice._drownWatch[1]) || []),
+    ]
+    const drowned = { ...state, board, _drownWatch: nextWatch }
+    return result && result.state ? { ...result, state: drowned } : drowned
+  }
+
   // Counting a check requires knowing what one is, so it stays here. Deciding
   // that N of them ends the game does not, and that half is `win.threshold`
   // in the shared registry.
@@ -1602,8 +1661,8 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   // Wrapped at the boundary rather than edited into applyMove, which has
   // several return paths, and left pure: the counter is written onto the new
   // slice, never onto the one handed in.
-  function applyMoveCountingChecks(move, slice, full) {
-    const result = applyMove(move, slice, full)
+  function applyMoveCountingChecks(inner, move, slice, full) {
+    const result = inner(move, slice, full)
     const state = result && result.state ? result.state : result
     if (!state || !slice.checkCount) return result
 
@@ -1635,7 +1694,13 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
     init,
     validateMove,
-    applyMove: config.checkThreshold ? applyMoveCountingChecks : applyMove,
+    // Boundary wrappers, composed. A variant can want more than one, and
+    // neither has to know the other exists.
+    applyMove: [
+      config.checkThreshold ? applyMoveCountingChecks : null,
+      drownSpec ? applyMoveDrowning : null,
+    ].filter(Boolean).reduce((inner, wrap) =>
+      (move, slice, full) => wrap(inner, move, slice, full), applyMove),
     getLegalMoves,
     checkWin,
     // Applied after every move, whether or not it ended anything: who now
