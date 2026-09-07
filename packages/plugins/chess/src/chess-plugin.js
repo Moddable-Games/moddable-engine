@@ -1,5 +1,5 @@
 import { warnUnknownConfigKeys } from '../../../core/index.js'
-import { rider, leaper, compose, divergent, confine, positional, fromConfig, OFFSETS } from '../../../piece-behaviour/index.js'
+import { rider, leaper, compose, divergent, confine, positional, reboundRider, fromConfig, OFFSETS } from '../../../piece-behaviour/index.js'
 import { randomBackRank } from './variants/chess960.js'
 // Every config key this plugin reads. Exported so the corpus guard and the
 // authoring docs share one source of truth, and kept separate from `defaults`,
@@ -208,6 +208,14 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
         }))
         .filter(c => c.primitive)
       return positional(cases)
+    }
+
+    if (spec.type === 'rebound') {
+      return reboundRider(spec.dirs, {
+        turn: spec.turn,
+        maxRebounds: spec.maxRebounds,
+        at: spec.at ? regionPredicate(spec.at, playerIdx) : null,
+      })
     }
 
     if (spec.confine) {

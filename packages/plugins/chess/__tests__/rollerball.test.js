@@ -95,6 +95,27 @@ describe('Rollerball: forward is clockwise (engine#170)', () => {
     expect(targets).not.toContain('f5')
   })
 
+  it('matches the published Rook diagram for g1, which needs the rebound', () => {
+    // From the rules page: the whole a-file, b1 to f1, and g2. The Rook sweeps
+    // rank 1 westward, reaches the corner at a1, turns, and carries on up the
+    // entire a-file. g2 is its one square backward.
+    const g = game()
+    only(g, [['g1', 'rook', 0], ['d6', 'king', 0], ['f7', 'king', 1]])
+    expect(movesFrom(g, 'g1')).toEqual(
+      ['a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'g2'].sort()
+    )
+  })
+
+  it('stops at an edge that is not a corner', () => {
+    // The same Rook sliding up the f-file reaches f7 on the top edge and stops:
+    // a rebound is allowed only on the four corners.
+    const g = game()
+    only(g, [['f2', 'rook', 0], ['a7', 'king', 0], ['g7', 'king', 1]])
+    const targets = movesFrom(g, 'f2')
+    expect(targets).not.toContain('e7')
+    expect(targets).not.toContain('g7')
+  })
+
   it('sends both players the same way round the ring', () => {
     const g = game()
     only(g, [['d2', 'king', 0], ['d6', 'king', 1], ['e7', 'pawn', 1], ['a1', 'pawn', 0]])

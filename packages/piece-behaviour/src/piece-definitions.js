@@ -140,6 +140,74 @@ export function compose(...primitives) {
 }
 
 /**
+ * A ray that turns instead of stopping when it runs out of board.
+ *
+ * Rollerball's Rook on g1 sweeps the whole of rank 1, reaches the corner at a1,
+ * turns, and carries on up the entire a-file. Every other primitive walks a
+ * fixed direction until a piece or an edge stops it; this one keeps going in a
+ * new direction, a declared number of times.
+ *
+ * `at` decides where a turn is allowed - Rollerball permits it only on the four
+ * corners of the board, so a slide that merely reaches an edge stops there. Like
+ * every other predicate here it is a plain function over a cell, so this knows
+ * nothing about corners, rings or racetracks.
+ *
+ * `turn` is a quarter turn of the direction vector: 'cw' takes north to east,
+ * east to south and so on, which is the way play runs around a ring.
+ */
+export function reboundRider(dirs, opts = {}) {
+  const { turn = 'cw', at = null, maxRebounds = 1 } = opts
+  const rotate = ([dr, dc]) => (turn === 'ccw' ? [-dc, dr] : [dc, -dr])
+  const dirList = Array.isArray(dirs) ? dirs : []
+
+  function walk(topology, from, board) {
+    const moves = []
+    for (const start of dirList) {
+      let cursor = from
+      let d = start
+      let rebounds = 0
+      let blocked = false
+      // Guarded rather than `while (true)`: a rebound that returned to where it
+      // started would otherwise circle the board for ever.
+      for (let leg = 0; leg <= maxRebounds && !blocked; leg++) {
+        const ray = (topology.rays(cursor, [d]) || [])[0] || []
+        for (const pos of ray) {
+          const occupant = board[pos]
+          if (occupant) {
+            if (occupant.enemy) moves.push({ from, to: pos, capture: true })
+            blocked = true
+            break
+          }
+          moves.push({ from, to: pos })
+        }
+        if (blocked || leg === maxRebounds) break
+        // A rebound follows travel. A piece already standing on a corner has
+        // not reached one, and letting a zero-length ray turn made a Rook on g1
+        // generate the whole of rank 1 twice - once sliding, once "rebounding"
+        // out of a direction it could not move in at all.
+        if (!ray.length) break
+        const end = ray[ray.length - 1]
+        if (at && !at(end)) break
+        cursor = end
+        d = rotate(d)
+      }
+    }
+    return moves
+  }
+
+  return {
+    type: 'rebound-rider',
+    dirs: dirList,
+    genMoves(topology, from, board) {
+      return walk(topology, from, board)
+    },
+    attacks(topology, from, target, board) {
+      return walk(topology, from, board).some(m => m.to === target)
+    },
+  }
+}
+
+/**
  * Move differently depending on where the piece is standing.
  *
  * Every primitive above answers "how does this piece move?" with one answer for
