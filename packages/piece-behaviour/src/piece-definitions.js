@@ -140,6 +140,45 @@ export function compose(...primitives) {
 }
 
 /**
+ * Move differently depending on where the piece is standing.
+ *
+ * Every primitive above answers "how does this piece move?" with one answer for
+ * the whole board. Some games do not work that way. Congo's Crocodile has a
+ * king step everywhere, plus a rook slide along its file TOWARD the river when
+ * it is outside the water and ALONG the river once it is in. Rollerball's board
+ * is a racetrack and forward means clockwise, so which way forward points
+ * depends on which side of the ring the piece is on.
+ *
+ * That is not a property of the piece and not a property of the seat. It is a
+ * property of the square the piece is standing on, which is the thing no
+ * primitive could express.
+ *
+ * `cases` are tried in order and the first whose `where` accepts the origin
+ * wins; a case with no `where` is the fallback. `where` is a plain predicate
+ * over a cell, so this knows nothing about grids, rivers or racetracks.
+ */
+export function positional(cases) {
+  const pick = (from) => {
+    for (const c of cases) {
+      if (!c.where || c.where(from)) return c.primitive
+    }
+    return null
+  }
+  return {
+    type: 'positional',
+    cases,
+    genMoves(topology, from, board) {
+      const primitive = pick(from)
+      return primitive ? primitive.genMoves(topology, from, board) : []
+    },
+    attacks(topology, from, target, board) {
+      const primitive = pick(from)
+      return primitive ? primitive.attacks(topology, from, target, board) : false
+    },
+  }
+}
+
+/**
  * Keep only the moves that land somewhere the piece is allowed to be.
  *
  * Congo's Lion moves as a king and may never leave its own 3x3 castle. Xiangqi's

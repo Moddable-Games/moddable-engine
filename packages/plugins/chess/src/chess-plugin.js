@@ -1,5 +1,5 @@
 import { warnUnknownConfigKeys } from '../../../core/index.js'
-import { rider, leaper, compose, divergent, confine, fromConfig, OFFSETS } from '../../../piece-behaviour/index.js'
+import { rider, leaper, compose, divergent, confine, positional, fromConfig, OFFSETS } from '../../../piece-behaviour/index.js'
 import { randomBackRank } from './variants/chess960.js'
 // Every config key this plugin reads. Exported so the corpus guard and the
 // authoring docs share one source of truth, and kept separate from `defaults`,
@@ -10,7 +10,7 @@ export const CONFIG_KEYS = new Set([
   'dropZone', 'drops', 'enPassant', 'hexPawnConfig', 'initState', 'moveApply', 'moveFilter', 'noCheck',
   'onTurnEnd', 'pawnCaptureDirections', 'pawnConfig', 'pawnMoveDirections', 'pawnStartRow',
   'pawnType', 'placementDistinctColor', 'placementPieces', 'placementZone', 'playerCount',
-  'promotionChoices', 'promotionRow',
+  'promotionChoices', 'promotionRow', 'regions',
   'faceoff', 'promotionZone', 'randomSetup', 'rookType', 'rows', 'royalType', 'setup',
   'stalemateMeaning', 'terrain', 'torpedo', 'turnEffects', 'turnLogic', 'visibility', 'winCondition',
 ])
@@ -149,12 +149,20 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return out
   }
 
-  // A region of the board a piece may not leave, declared per seat because the
-  // two seats' regions are not the same one: Congo's castles sit at opposite
-  // ends of the board. `rows` and `cols` are inclusive ranges; give a list of
-  // two ranges to vary by seat, or one range to apply to both.
-  function confinementFor(pConfig, playerIdx) {
-    const spec = pConfig && pConfig.confine
+  // Named regions of the board, declared once in frontmatter and referred to by
+  // name wherever a piece needs one:
+  //
+  //     regions:
+  //       castle: { rows: [[4, 6], [0, 2]], cols: [2, 4] }
+  //       river:  { rows: [3, 3] }
+  //
+  // `rows` and `cols` are inclusive ranges. Give a list of two ranges to vary by
+  // seat - Congo's two castles sit at opposite ends of the board, so one shared
+  // region would be wrong for both.
+  const namedRegions = config.regions || {}
+
+  function regionPredicate(ref, playerIdx) {
+    const spec = typeof ref === 'string' ? namedRegions[ref] : ref
     if (!spec) return null
     const perSeat = (v) => (Array.isArray(v) && Array.isArray(v[0]) ? v[playerIdx] : v)
     const rows = perSeat(spec.rows)
@@ -170,24 +178,59 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     }
   }
 
+  // Does this spec, at any depth, need to know which seat it is being built for?
+  function needsSeat(spec) {
+    if (!spec || typeof spec !== 'object') return false
+    if (spec.directional || spec.confine || spec.type === 'positional') return true
+    if (Array.isArray(spec.parts)) return spec.parts.some(needsSeat)
+    if (spec.divergent) return needsSeat(spec.divergent.move) || needsSeat(spec.divergent.capture)
+    return false
+  }
+
+  // One builder for a movement spec, so `confine` and `positional` work wherever
+  // a spec is accepted rather than only at the top of a piece. The Crocodile
+  // needs both nested inside a `compose`.
+  function buildSpec(spec, playerIdx) {
+    if (!spec || typeof spec !== 'object') return fromConfig(spec)
+
+    if (spec.type === 'positional' && Array.isArray(spec.cases)) {
+      const cases = spec.cases
+        .map(c => ({
+          where: c.in ? regionPredicate(c.in, playerIdx) : null,
+          primitive: buildSpec(c.move || c.spec, playerIdx),
+        }))
+        .filter(c => c.primitive)
+      return positional(cases)
+    }
+
+    if (spec.confine) {
+      const allows = regionPredicate(spec.confine, playerIdx)
+      const { confine: _ignored, ...rest } = spec
+      const inner = buildSpec(rest, playerIdx)
+      return allows && inner ? confine(inner, allows) : inner
+    }
+
+    if (spec.type === 'compose' && Array.isArray(spec.parts)) {
+      const parts = spec.parts
+        .map(p => (typeof p === 'string' ? buildPiece(p) : buildSpec(p, playerIdx)))
+        .filter(Boolean)
+      return compose(...parts)
+    }
+
+    return fromConfig(spec)
+  }
+
   function buildPieceForPlayer(name, playerIdx) {
     const pConfig = pieceConfigs[name]
-    const allows = confinementFor(pConfig, playerIdx)
-    const base = (!pConfig || !pConfig.directional || playerIdx === 0)
-      ? buildPiece(name)
-      : (() => {
-          const key = `${name}__p1`
-          if (builtPieces.has(key)) return builtPieces.get(key)
-          const flipped = fromConfig(flipSpec(pConfig))
-          builtPieces.set(key, flipped)
-          return flipped
-        })()
-    if (!allows || !base) return base
-    const key = `${name}__confined${playerIdx}`
+    if (!pConfig || pConfig.movement === 'pawn') return null
+    if (!needsSeat(pConfig)) return buildPiece(name)
+
+    const key = `${name}__p${playerIdx}`
     if (builtPieces.has(key)) return builtPieces.get(key)
-    const bounded = confine(base, allows)
-    builtPieces.set(key, bounded)
-    return bounded
+    const spec = pConfig.directional && playerIdx === 1 ? flipSpec(pConfig) : pConfig
+    const built = buildSpec(spec, playerIdx)
+    builtPieces.set(key, built)
+    return built
   }
 
   let topology = null
