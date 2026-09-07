@@ -183,8 +183,25 @@ export function targeted(primitive, allows) {
  */
 export function reboundRider(dirs, opts = {}) {
   const { turn = 'cw', at = null, maxRebounds = 1 } = opts
-  const rotate = ([dr, dc]) => (turn === 'ccw' ? [-dc, dr] : [dc, -dr])
   const dirList = Array.isArray(dirs) ? dirs : []
+
+  // 'cw' and 'ccw' are quarter turns of the direction vector: the Rook reaches
+  // a corner and carries on around the ring.
+  //
+  // 'reflect' is a bounce off a wall, which is a different question, because it
+  // has to know WHICH wall. A diagonal stopped by the hole in the middle of
+  // Rollerball's board is stopped by one of its two components: whichever of
+  // them cannot be taken on its own is the one that flips. A ray running up-left
+  // into the hole's bottom edge can still go left, so it is the upward half that
+  // reverses and the ray continues down-left.
+  function nextDirection(topology, at_, [dr, dc]) {
+    if (turn === 'ccw') return [-dc, dr]
+    if (turn !== 'reflect') return [dc, -dr]
+    const open = (d) => (((topology.rays(at_, [d]) || [])[0] || []).length > 0)
+    if (!open([dr, 0])) return [-dr, dc]
+    if (!open([0, dc])) return [dr, -dc]
+    return null
+  }
 
   function walk(topology, from, board) {
     const moves = []
@@ -214,8 +231,10 @@ export function reboundRider(dirs, opts = {}) {
         if (!ray.length) break
         const end = ray[ray.length - 1]
         if (at && !at(end)) break
+        const turned = nextDirection(topology, end, d)
+        if (!turned) break
         cursor = end
-        d = rotate(d)
+        d = turned
       }
     }
     return moves

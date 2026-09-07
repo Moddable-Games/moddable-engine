@@ -116,6 +116,23 @@ describe('Rollerball: forward is clockwise (engine#170)', () => {
     expect(targets).not.toContain('g7')
   })
 
+  it('matches the published Bishop diagram for f1', () => {
+    // From the rules page: e2, g2 and d1. The forward diagonal runs up-left to
+    // e2, meets the internal wall of the hole and reflects downward to d1. g2 is
+    // one square diagonally backward.
+    const g = game()
+    only(g, [['f1', 'bishop', 0], ['d6', 'king', 0], ['b6', 'king', 1]])
+    expect(movesFrom(g, 'f1')).toEqual(['d1', 'e2', 'g2'].sort())
+  })
+
+  it('matches the published Bishop diagram for e2', () => {
+    // From the rules page: a4, b3, c2, d1, f1 and f3. The down-left diagonal
+    // reaches d1 on the bottom edge, reflects up-left and runs c2, b3, a4.
+    const g = game()
+    only(g, [['e2', 'bishop', 0], ['d6', 'king', 0], ['b6', 'king', 1]])
+    expect(movesFrom(g, 'e2')).toEqual(['a4', 'b3', 'c2', 'd1', 'f1', 'f3'].sort())
+  })
+
   it('sends both players the same way round the ring', () => {
     const g = game()
     only(g, [['d2', 'king', 0], ['d6', 'king', 1], ['e7', 'pawn', 1], ['a1', 'pawn', 0]])
