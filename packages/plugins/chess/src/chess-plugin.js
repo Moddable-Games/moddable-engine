@@ -11,7 +11,7 @@ export const CONFIG_KEYS = new Set([
   'onTurnEnd', 'pawnCaptureDirections', 'pawnConfig', 'pawnMoveDirections', 'pawnStartRow',
   'pawnType', 'placementDistinctColor', 'placementPieces', 'placementZone', 'playerCount',
   'promotion', 'promotionChoices', 'promotionRow', 'regions',
-  'faceoff', 'promotionZone', 'randomSetup', 'rookType', 'rows', 'royalType', 'setup',
+  'faceoff', 'goal', 'promotionZone', 'randomSetup', 'rookType', 'rows', 'royalType', 'setup',
   'stalemateMeaning', 'terrain', 'torpedo', 'turnEffects', 'turnLogic', 'visibility', 'winCondition',
 ])
 
@@ -1587,9 +1587,77 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return 1 - playerIdx
   }
 
+  // Winning by reaching a square rather than by mating.
+  //
+  // Rollerball: "When the King reaches the starting square of the opposite
+  // King, but only if had turned clockwise." Declared rather than written as a
+  // JavaScript winCondition, which is how the faceoff rule used to hardcode
+  // `king` and a board eight files wide.
+  //
+  //     goal:
+  //       piece: king
+  //       in: kingGoal        # per seat: each side's target is the other's start
+  //       rotation: cw        # and it must have travelled the right way round
+  //
+  // "Turned clockwise" is the one rule on the page the source does not define.
+  // Read here as: the piece's net travel around the centre of the board is
+  // clockwise when it arrives - so the long way round counts and doubling back
+  // the short way does not. Every king move adds the angle it swept about the
+  // board's centre, and the sum has to be positive.
+  const goalRule = config.goal || null
+
+  function goalRegionFor(playerIdx) {
+    if (!goalRule) return null
+    return regionPredicate(goalRule.in, playerIdx)
+  }
+
+  // Screen-clockwise is increasing atan2(row - centreRow, col - centreCol),
+  // because rows increase downward: due north is -PI/2 and due east is 0.
+  function sweptAngle(fromPos, toPos) {
+    const cols = topology?.cols || config.cols || 8
+    const rows = topology?.rows || config.rows || 8
+    const cy = (rows - 1) / 2
+    const cx = (cols - 1) / 2
+    const angle = (pos) => Math.atan2(Math.floor(pos / cols) - cy, (pos % cols) - cx)
+    let delta = angle(toPos) - angle(fromPos)
+    while (delta > Math.PI) delta -= 2 * Math.PI
+    while (delta <= -Math.PI) delta += 2 * Math.PI
+    return delta
+  }
+
+  function applyMoveTrackingRotation(inner, move, slice, full) {
+    const result = inner(move, slice, full)
+    const state = result && result.state ? result.state : result
+    if (!state || !state.board) return result
+    const mover = full.__players.currentIndex
+    const piece = getCell(state.board, move.to)
+    if (!piece || piece.type !== goalRule.piece || piece.owner !== mover) return result
+    const swept = (slice._swept || [0, 0]).slice()
+    swept[mover] += sweptAngle(move.from, move.to)
+    const tracked = { ...state, _swept: swept }
+    return result && result.state ? { ...result, state: tracked } : tracked
+  }
+
+  function goalReached(slice, playerIdx) {
+    if (!goalRule) return null
+    const inGoal = goalRegionFor(playerIdx)
+    if (!inGoal) return null
+    for (const pos of allPositions()) {
+      const cell = getCell(slice.board, pos)
+      if (!cell || cell.owner !== playerIdx || cell.type !== goalRule.piece) continue
+      if (!inGoal(pos)) continue
+      if (goalRule.rotation === 'cw' && !((slice._swept || [0, 0])[playerIdx] > 0)) continue
+      if (goalRule.rotation === 'ccw' && !((slice._swept || [0, 0])[playerIdx] < 0)) continue
+      return playerIdx
+    }
+    return null
+  }
+
   function checkWinConditionOnly(slice, playerIdx) {
     const faceoff = faceoffLoser(slice.board, playerIdx)
     if (faceoff !== null) return faceoff
+    const goal = goalReached(slice, playerIdx)
+    if (goal !== null) return goal
     if (!config.winCondition) return null
     const result = config.winCondition(slice, { currentPlayer: playerIdx, config })
     if (result !== null && result !== undefined) return result
@@ -1604,6 +1672,9 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
     const faceoff = faceoffLoser(slice.board, playerIdx)
     if (faceoff !== null) return faceoff
+
+    const goal = goalReached(slice, playerIdx)
+    if (goal !== null) return goal
 
     if (config.winCondition) {
       const result = config.winCondition(slice, { currentPlayer: playerIdx, config })
@@ -1818,6 +1889,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     applyMove: [
       config.checkThreshold ? applyMoveCountingChecks : null,
       drownSpec ? applyMoveDrowning : null,
+      goalRule && goalRule.rotation ? applyMoveTrackingRotation : null,
     ].filter(Boolean).reduce((inner, wrap) =>
       (move, slice, full) => wrap(inner, move, slice, full), applyMove),
     getLegalMoves,
