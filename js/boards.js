@@ -1,5 +1,22 @@
+import { resolveRulesPageBase } from './play-shared.js'
+
 const base = document.querySelector('meta[name="base-path"]')?.content || ''
 const INDEX_PATH = `${base}/boards/board-index.json`
+
+// The rules for these boards live in the other project, and where they can be
+// read from depends on how this checkout is served. play-shared.js owns that
+// question for every page on the engine.
+let rulesPageBase = 'https://rules.moddable.games/'
+
+const rulesLinkFor = (b) => (b.rulesUrl
+  ? `<a href="${rulesPageBase}${b.rulesUrl}" class="board-card-link" title="Read the rules" target="_blank" rel="noopener">Rules</a>`
+  : '')
+
+// Only for boards the engine can actually start a game on. A diagram is not a
+// game, and a Play link on one lands the reader somewhere that cannot play.
+const playLinkFor = (b) => (b.playable
+  ? `<a href="${base}/play/?family=${encodeURIComponent(b.family)}&variant=${encodeURIComponent(b.variant)}" class="board-card-link" title="Play this variant">Play</a>`
+  : '')
 
 let BOARDS = []
 let state = { search: '', family: 'all', topology: 'all', size: '240' }
@@ -7,6 +24,7 @@ let state = { search: '', family: 'all', topology: 'all', size: '240' }
 async function init() {
   const res = await fetch(INDEX_PATH)
   BOARDS = await res.json()
+  rulesPageBase = await resolveRulesPageBase(BOARDS.map(b => b.rulesUrl))
   renderIntro()
   populateFilters()
   render()
@@ -76,6 +94,7 @@ function render() {
       <div class="board-card-actions">
         <button class="btn-icon" data-action="svg" title="Download SVG">SVG</button>
         <button class="btn-icon" data-action="png" title="Download PNG">PNG</button>
+        ${rulesLinkFor(b)}${playLinkFor(b)}
       </div>
     </div>`
   })

@@ -28,12 +28,13 @@ const stale = []
 import {
   ENGINE_ROOT, GAMES_DIR, SNAP_DIR, SVG_DIR,
   loadGallery, listFamilies, familyEngineFor, listVariantFiles,
-  embedPieceImages,
+  embedPieceImages, loadRulesUrls,
 } from './lib/board-corpus.mjs'
 
 mkdirSync(SVG_DIR, { recursive: true })
 
 const gallery = loadGallery()
+const rulesUrlFor = loadRulesUrls()
 const entries = []
 let embedded = 0
 
@@ -76,6 +77,12 @@ for (const family of listFamilies()) {
       variantTitle: meta.title || slug.replace(/-/g, ' '),
       topology: topoType,
       svg: `svgs/${snapFile}`,
+      // Where this variant's rules are written, and whether the engine can play
+      // it. Both come from the corpus rather than from a second list here: a
+      // gallery that offers a Play link to something unplayable is worse than
+      // one that offers none.
+      rulesUrl: rulesUrlFor(family, slug),
+      playable: meta.playable === true,
     })
   }
 }

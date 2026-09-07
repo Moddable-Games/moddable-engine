@@ -303,6 +303,23 @@
   background: rgba(100, 100, 200, 0.2);
   color: #fff;
 }
+/* Rules and Play sit beside the download buttons and read as the same control,
+   because they are the same kind of thing: something you do with this board. */
+.board-card-link {
+  font-size: 10px;
+  padding: 3px 8px;
+  background: rgba(100, 100, 200, 0.1);
+  border: 1px solid rgba(100, 100, 200, 0.3);
+  border-radius: 4px;
+  color: #aaa;
+  text-decoration: none;
+  font-weight: 500;
+  line-height: 1.6;
+}
+.board-card-link:hover {
+  background: rgba(100, 100, 200, 0.2);
+  color: #fff;
+}
 .gallery-empty {
   text-align: center;
   padding: 60px 20px;

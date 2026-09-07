@@ -226,3 +226,27 @@ export function embedPieceImages(svg, setDef) {
 
   return result
 }
+
+// Where a variant's rules page lives on rules.moddable.games.
+//
+// The engine must not derive this itself. It looks like `family/variants/slug/`
+// until you meet a single-variant game, whose only page is `family/index.html`,
+// or a game whose pages sit under `games/` rather than `variants/`. Twelve
+// links 404ed the last time this shape was guessed. moddable-rules resolves
+// every URL against the site it actually built and records the answer in
+// diagrams-manifest.json, which it tracks at its repo root; read that.
+export function loadRulesUrls() {
+  const manifestPath = resolve(GAMES_DIR, '..', 'diagrams-manifest.json')
+  if (!existsSync(manifestPath)) {
+    throw new Error(
+      `diagrams-manifest.json not found at ${manifestPath}.\n` +
+      `The board gallery reads rules URLs from moddable-rules rather than deriving them.\n` +
+      `Check out moddable-rules beside this repo, or point MODDABLE_RULES_DIR at its games/ directory.`
+    )
+  }
+  const byKey = new Map()
+  for (const entry of JSON.parse(readFileSync(manifestPath, 'utf8'))) {
+    if (entry.rulesUrl) byKey.set(`${entry.family}/${entry.variant}`, entry.rulesUrl)
+  }
+  return (family, variant) => byKey.get(`${family}/${variant}`) || ''
+}

@@ -169,6 +169,9 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-07
+- The board gallery offers a Rules link on every board and a Play link on the 220 the engine can start. A diagram is not a game, so a board that cannot be played is offered no Play link rather than one that lands nowhere
+- Those Rules URLs are read from moddable-rules rather than composed here. `family/variants/slug/` is right for most variants and wrong for every single-variant game, whose only page is `family/index.html`. moddable-rules resolves each URL against the site it actually built; the gallery reads that answer, and a test resolves all 332 against the built pages so a guessed shape cannot pass again
+- Where those pages can be read from depends on how the checkout is served - `dist/` locally, `_site/` assembled, the site root deployed - so `play-shared.js` probes for the root that answers instead of assuming one
 - The published board gallery was stale by an entire rename. `api/boards/index.json` was written by hand once and never again: it still listed the 153 `moddable-chess--*` ids deleted months ago, named a yalta board that does not render, and was missing every variant added since. It is generated from the gallery index now, so the published list cannot disagree with the files it names
 - That also corrected the published family count, 33 against a real 34, and a sentence in the docs that had said six families were fully playable since the time there were six. There are ten
 - Quang Trung plays. Its entry claimed only a missing win condition; none of its seven piece types was modelled and it played as ordinary Xiangqi on a 10x10 board. Six are declarations, and two needed the engine: a Chariot that captures by jumping the target rather than landing on it, and a General and Pawns confined to the middle files at all times

@@ -44,6 +44,34 @@ export const RULES_BASE = typeof location !== 'undefined' && location.hostname =
   ? 'https://rules.moddable.games/'
   : '../../moddable-rules/'
 
+// RULES_BASE names the moddable-rules repo root, because that is where its
+// manifests sit. Its readable *pages* are somewhere else: built into `dist/` in
+// a checkout, assembled into `_site/` for deploy, and at the site root once
+// published. A checkout can be served from any of those roots, so probe for the
+// one that answers instead of guessing - a wrong prefix 404s in silence.
+const RULES_PAGE_CANDIDATES = [
+  '../../moddable-rules/dist/',
+  '../../moddable-rules/_site/',
+  '../../moddable-rules/',
+]
+
+export async function resolveRulesPageBase(sampleUrls = []) {
+  if (RULES_BASE.startsWith('http')) return RULES_BASE
+  // Several samples, not one: a single entry naming a page that does not exist
+  // would otherwise decide the base for every link, and pick wrong.
+  const samples = sampleUrls.filter(Boolean).slice(0, 5)
+  for (const candidate of RULES_PAGE_CANDIDATES) {
+    for (const sample of samples) {
+      try {
+        if ((await fetch(candidate + sample, { method: 'HEAD' })).ok) return candidate
+      } catch { /* try the next sample */ }
+    }
+  }
+  // Nothing local answered - a checkout without the sibling repo beside it.
+  // Send readers to the published site rather than to a link that cannot load.
+  return 'https://rules.moddable.games/'
+}
+
 let _galleryIndex = null
 export async function loadGalleryIndex() {
   if (_galleryIndex) return _galleryIndex

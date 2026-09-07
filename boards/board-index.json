@@ -5,7 +5,9 @@
     "variant": "standard",
     "variantTitle": "Agon (Standard)",
     "topology": "hex",
-    "svg": "svgs/agon--standard.svg"
+    "svg": "svgs/agon--standard.svg",
+    "rulesUrl": "agon/index.html",
+    "playable": false
   },
   {
     "family": "asalto",
@@ -13,7 +15,9 @@
     "variant": "royal-garrison",
     "variantTitle": "Royal Garrison",
     "topology": "graph",
-    "svg": "svgs/asalto--royal-garrison.svg"
+    "svg": "svgs/asalto--royal-garrison.svg",
+    "rulesUrl": "asalto/variants/royal-garrison/index.html",
+    "playable": false
   },
   {
     "family": "asalto",
@@ -21,7 +25,9 @@
     "variant": "standard",
     "variantTitle": "Asalto (Standard)",
     "topology": "graph",
-    "svg": "svgs/asalto--standard.svg"
+    "svg": "svgs/asalto--standard.svg",
+    "rulesUrl": "asalto/variants/standard/index.html",
+    "playable": false
   },
   {
     "family": "backgammon",
@@ -29,7 +35,9 @@
     "variant": "acey-deucey",
     "variantTitle": "Acey-Deucey",
     "topology": "track",
-    "svg": "svgs/backgammon--acey-deucey.svg"
+    "svg": "svgs/backgammon--acey-deucey.svg",
+    "rulesUrl": "backgammon/variants/acey-deucey/index.html",
+    "playable": false
   },
   {
     "family": "backgammon",
@@ -37,7 +45,9 @@
     "variant": "chouette",
     "variantTitle": "Chouette",
     "topology": "track",
-    "svg": "svgs/backgammon--chouette.svg"
+    "svg": "svgs/backgammon--chouette.svg",
+    "rulesUrl": "backgammon/variants/chouette/index.html",
+    "playable": false
   },
   {
     "family": "backgammon",
@@ -45,7 +55,9 @@
     "variant": "fevga",
     "variantTitle": "Fevga",
     "topology": "track",
-    "svg": "svgs/backgammon--fevga.svg"
+    "svg": "svgs/backgammon--fevga.svg",
+    "rulesUrl": "backgammon/variants/fevga/index.html",
+    "playable": false
   },
   {
     "family": "backgammon",
@@ -53,7 +65,9 @@
     "variant": "hypergammon",
     "variantTitle": "Hypergammon",
     "topology": "track",
-    "svg": "svgs/backgammon--hypergammon.svg"
+    "svg": "svgs/backgammon--hypergammon.svg",
+    "rulesUrl": "backgammon/variants/hypergammon/index.html",
+    "playable": false
   },
   {
     "family": "backgammon",
@@ -61,7 +75,9 @@
     "variant": "nackgammon",
     "variantTitle": "Nackgammon",
     "topology": "track",
-    "svg": "svgs/backgammon--nackgammon.svg"
+    "svg": "svgs/backgammon--nackgammon.svg",
+    "rulesUrl": "backgammon/variants/nackgammon/index.html",
+    "playable": false
   },
   {
     "family": "backgammon",
@@ -69,7 +85,9 @@
     "variant": "nardi",
     "variantTitle": "Nardi",
     "topology": "track",
-    "svg": "svgs/backgammon--nardi.svg"
+    "svg": "svgs/backgammon--nardi.svg",
+    "rulesUrl": "backgammon/variants/nardi/index.html",
+    "playable": false
   },
   {
     "family": "backgammon",
@@ -77,7 +95,9 @@
     "variant": "plakoto",
     "variantTitle": "Plakoto",
     "topology": "track",
-    "svg": "svgs/backgammon--plakoto.svg"
+    "svg": "svgs/backgammon--plakoto.svg",
+    "rulesUrl": "backgammon/variants/plakoto/index.html",
+    "playable": false
   },
   {
     "family": "backgammon",
@@ -85,7 +105,9 @@
     "variant": "standard",
     "variantTitle": "Standard Backgammon",
     "topology": "track",
-    "svg": "svgs/backgammon--standard.svg"
+    "svg": "svgs/backgammon--standard.svg",
+    "rulesUrl": "backgammon/variants/standard/index.html",
+    "playable": false
   },
   {
     "family": "bavarian-32",
@@ -93,7 +115,9 @@
     "variant": "schafkopf",
     "variantTitle": "Schafkopf",
     "topology": "tableau",
-    "svg": "svgs/bavarian-32--schafkopf.svg"
+    "svg": "svgs/bavarian-32--schafkopf.svg",
+    "rulesUrl": "bavarian-32/games/schafkopf/index.html",
+    "playable": false
   },
   {
     "family": "bavarian-32",
@@ -101,7 +125,9 @@
     "variant": "skat",
     "variantTitle": "Skat",
     "topology": "tableau",
-    "svg": "svgs/bavarian-32--skat.svg"
+    "svg": "svgs/bavarian-32--skat.svg",
+    "rulesUrl": "bavarian-32/games/skat/index.html",
+    "playable": false
   },
   {
     "family": "chaupar",
@@ -109,7 +135,9 @@
     "variant": "standard",
     "variantTitle": "Chaupar (Standard)",
     "topology": "grid",
-    "svg": "svgs/chaupar--standard.svg"
+    "svg": "svgs/chaupar--standard.svg",
+    "rulesUrl": "chaupar/index.html",
+    "playable": false
   },
   {
     "family": "chess",
@@ -117,7 +145,9 @@
     "variant": "absorption",
     "variantTitle": "Absorption Chess",
     "topology": "grid",
-    "svg": "svgs/chess--absorption.svg"
+    "svg": "svgs/chess--absorption.svg",
+    "rulesUrl": "chess/variants/absorption/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -125,7 +155,9 @@
     "variant": "alice",
     "variantTitle": "Alice Chess",
     "topology": "grid",
-    "svg": "svgs/chess--alice.svg"
+    "svg": "svgs/chess--alice.svg",
+    "rulesUrl": "chess/variants/alice/index.html",
+    "playable": false
   },
   {
     "family": "chess",
@@ -133,7 +165,9 @@
     "variant": "almost-chess",
     "variantTitle": "Almost Chess",
     "topology": "grid",
-    "svg": "svgs/chess--almost-chess.svg"
+    "svg": "svgs/chess--almost-chess.svg",
+    "rulesUrl": "chess/variants/almost-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -141,7 +175,9 @@
     "variant": "amazon-chess",
     "variantTitle": "Amazon Chess",
     "topology": "grid",
-    "svg": "svgs/chess--amazon-chess.svg"
+    "svg": "svgs/chess--amazon-chess.svg",
+    "rulesUrl": "chess/variants/amazon-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -149,7 +185,9 @@
     "variant": "andernach",
     "variantTitle": "Andernach Chess",
     "topology": "grid",
-    "svg": "svgs/chess--andernach.svg"
+    "svg": "svgs/chess--andernach.svg",
+    "rulesUrl": "chess/variants/andernach/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -157,7 +195,9 @@
     "variant": "anti-king-chess-2",
     "variantTitle": "Anti-King Chess II",
     "topology": "grid",
-    "svg": "svgs/chess--anti-king-chess-2.svg"
+    "svg": "svgs/chess--anti-king-chess-2.svg",
+    "rulesUrl": "chess/variants/anti-king-chess-2/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -165,7 +205,9 @@
     "variant": "antichess",
     "variantTitle": "Antichess",
     "topology": "grid",
-    "svg": "svgs/chess--antichess.svg"
+    "svg": "svgs/chess--antichess.svg",
+    "rulesUrl": "chess/variants/antichess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -173,7 +215,9 @@
     "variant": "archchess",
     "variantTitle": "Archchess",
     "topology": "grid",
-    "svg": "svgs/chess--archchess.svg"
+    "svg": "svgs/chess--archchess.svg",
+    "rulesUrl": "chess/variants/archchess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -181,7 +225,9 @@
     "variant": "asean",
     "variantTitle": "ASEAN Chess",
     "topology": "grid",
-    "svg": "svgs/chess--asean.svg"
+    "svg": "svgs/chess--asean.svg",
+    "rulesUrl": "chess/variants/asean/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -189,7 +235,9 @@
     "variant": "atomic",
     "variantTitle": "Atomic Chess",
     "topology": "grid",
-    "svg": "svgs/chess--atomic.svg"
+    "svg": "svgs/chess--atomic.svg",
+    "rulesUrl": "chess/variants/atomic/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -197,7 +245,9 @@
     "variant": "avalanche",
     "variantTitle": "Avalanche Chess",
     "topology": "grid",
-    "svg": "svgs/chess--avalanche.svg"
+    "svg": "svgs/chess--avalanche.svg",
+    "rulesUrl": "chess/variants/avalanche/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -205,7 +255,9 @@
     "variant": "balbos-chess",
     "variantTitle": "Balbo's Chess",
     "topology": "grid",
-    "svg": "svgs/chess--balbos-chess.svg"
+    "svg": "svgs/chess--balbos-chess.svg",
+    "rulesUrl": "chess/variants/balbos-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -213,7 +265,9 @@
     "variant": "benedict",
     "variantTitle": "Benedict Chess",
     "topology": "grid",
-    "svg": "svgs/chess--benedict.svg"
+    "svg": "svgs/chess--benedict.svg",
+    "rulesUrl": "chess/variants/benedict/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -221,7 +275,9 @@
     "variant": "berolina-chess",
     "variantTitle": "Berolina Chess",
     "topology": "grid",
-    "svg": "svgs/chess--berolina-chess.svg"
+    "svg": "svgs/chess--berolina-chess.svg",
+    "rulesUrl": "chess/variants/berolina-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -229,7 +285,9 @@
     "variant": "berserk",
     "variantTitle": "Berserk Chess",
     "topology": "grid",
-    "svg": "svgs/chess--berserk.svg"
+    "svg": "svgs/chess--berserk.svg",
+    "rulesUrl": "chess/variants/berserk/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -237,7 +295,9 @@
     "variant": "birds-chess",
     "variantTitle": "Bird's Chess",
     "topology": "grid",
-    "svg": "svgs/chess--birds-chess.svg"
+    "svg": "svgs/chess--birds-chess.svg",
+    "rulesUrl": "chess/variants/birds-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -245,7 +305,9 @@
     "variant": "blind-chess",
     "variantTitle": "Blind Chess (Banqi)",
     "topology": "grid",
-    "svg": "svgs/chess--blind-chess.svg"
+    "svg": "svgs/chess--blind-chess.svg",
+    "rulesUrl": "chess/variants/blind-chess/index.html",
+    "playable": false
   },
   {
     "family": "chess",
@@ -253,7 +315,9 @@
     "variant": "breakthrough",
     "variantTitle": "Breakthrough",
     "topology": "grid",
-    "svg": "svgs/chess--breakthrough.svg"
+    "svg": "svgs/chess--breakthrough.svg",
+    "rulesUrl": "chess/variants/breakthrough/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -261,7 +325,9 @@
     "variant": "brusky",
     "variantTitle": "Brusky's Hexagonal Chess",
     "topology": "hex",
-    "svg": "svgs/chess--brusky.svg"
+    "svg": "svgs/chess--brusky.svg",
+    "rulesUrl": "chess/variants/brusky/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -269,7 +335,9 @@
     "variant": "byzantine-chess",
     "variantTitle": "Byzantine Chess",
     "topology": "grid",
-    "svg": "svgs/chess--byzantine-chess.svg"
+    "svg": "svgs/chess--byzantine-chess.svg",
+    "rulesUrl": "chess/variants/byzantine-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -277,7 +345,9 @@
     "variant": "capablanca",
     "variantTitle": "Capablanca Chess",
     "topology": "grid",
-    "svg": "svgs/chess--capablanca.svg"
+    "svg": "svgs/chess--capablanca.svg",
+    "rulesUrl": "chess/variants/capablanca/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -285,7 +355,9 @@
     "variant": "carrera",
     "variantTitle": "Carrera's Chess",
     "topology": "grid",
-    "svg": "svgs/chess--carrera.svg"
+    "svg": "svgs/chess--carrera.svg",
+    "rulesUrl": "chess/variants/carrera/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -293,7 +365,9 @@
     "variant": "centennial-chess",
     "variantTitle": "Centennial Chess",
     "topology": "grid",
-    "svg": "svgs/chess--centennial-chess.svg"
+    "svg": "svgs/chess--centennial-chess.svg",
+    "rulesUrl": "chess/variants/centennial-chess/index.html",
+    "playable": false
   },
   {
     "family": "chess",
@@ -301,7 +375,9 @@
     "variant": "chak",
     "variantTitle": "Chak",
     "topology": "grid",
-    "svg": "svgs/chess--chak.svg"
+    "svg": "svgs/chess--chak.svg",
+    "rulesUrl": "chess/variants/chak/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -309,7 +385,9 @@
     "variant": "chancellor-chess",
     "variantTitle": "Chancellor Chess",
     "topology": "grid",
-    "svg": "svgs/chess--chancellor-chess.svg"
+    "svg": "svgs/chess--chancellor-chess.svg",
+    "rulesUrl": "chess/variants/chancellor-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -317,7 +395,9 @@
     "variant": "chaturanga",
     "variantTitle": "Chaturanga",
     "topology": "grid",
-    "svg": "svgs/chess--chaturanga.svg"
+    "svg": "svgs/chess--chaturanga.svg",
+    "rulesUrl": "chess/variants/chaturanga/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -325,7 +405,9 @@
     "variant": "checkless",
     "variantTitle": "Checkless Chess",
     "topology": "grid",
-    "svg": "svgs/chess--checkless.svg"
+    "svg": "svgs/chess--checkless.svg",
+    "rulesUrl": "chess/variants/checkless/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -333,7 +415,9 @@
     "variant": "chennis",
     "variantTitle": "Chennis",
     "topology": "grid",
-    "svg": "svgs/chess--chennis.svg"
+    "svg": "svgs/chess--chennis.svg",
+    "rulesUrl": "chess/variants/chennis/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -341,7 +425,9 @@
     "variant": "chigorin",
     "variantTitle": "Chigorin",
     "topology": "grid",
-    "svg": "svgs/chess--chigorin.svg"
+    "svg": "svgs/chess--chigorin.svg",
+    "rulesUrl": "chess/variants/chigorin/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -349,7 +435,9 @@
     "variant": "circular-chess",
     "variantTitle": "Circular Chess",
     "topology": "grid",
-    "svg": "svgs/chess--circular-chess.svg"
+    "svg": "svgs/chess--circular-chess.svg",
+    "rulesUrl": "chess/variants/circular-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -357,7 +445,9 @@
     "variant": "citadel-chess",
     "variantTitle": "Citadel Chess",
     "topology": "grid",
-    "svg": "svgs/chess--citadel-chess.svg"
+    "svg": "svgs/chess--citadel-chess.svg",
+    "rulesUrl": "chess/variants/citadel-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -365,7 +455,9 @@
     "variant": "codrus",
     "variantTitle": "Codrus",
     "topology": "grid",
-    "svg": "svgs/chess--codrus.svg"
+    "svg": "svgs/chess--codrus.svg",
+    "rulesUrl": "chess/variants/codrus/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -373,7 +465,9 @@
     "variant": "congo",
     "variantTitle": "Congo",
     "topology": "grid",
-    "svg": "svgs/chess--congo.svg"
+    "svg": "svgs/chess--congo.svg",
+    "rulesUrl": "chess/variants/congo/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -381,7 +475,9 @@
     "variant": "courier",
     "variantTitle": "Courier Chess",
     "topology": "grid",
-    "svg": "svgs/chess--courier.svg"
+    "svg": "svgs/chess--courier.svg",
+    "rulesUrl": "chess/variants/courier/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -389,7 +485,9 @@
     "variant": "crazy-38s",
     "variantTitle": "Crazy 38's",
     "topology": "grid",
-    "svg": "svgs/chess--crazy-38s.svg"
+    "svg": "svgs/chess--crazy-38s.svg",
+    "rulesUrl": "chess/variants/crazy-38s/index.html",
+    "playable": false
   },
   {
     "family": "chess",
@@ -397,7 +495,9 @@
     "variant": "crazyhouse",
     "variantTitle": "Crazyhouse",
     "topology": "grid",
-    "svg": "svgs/chess--crazyhouse.svg"
+    "svg": "svgs/chess--crazyhouse.svg",
+    "rulesUrl": "chess/variants/crazyhouse/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -405,7 +505,9 @@
     "variant": "cylinder-chess",
     "variantTitle": "Cylinder Chess",
     "topology": "grid",
-    "svg": "svgs/chess--cylinder-chess.svg"
+    "svg": "svgs/chess--cylinder-chess.svg",
+    "rulesUrl": "chess/variants/cylinder-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -413,7 +515,9 @@
     "variant": "cylindrical-chess",
     "variantTitle": "Cylindrical Chess",
     "topology": "grid",
-    "svg": "svgs/chess--cylindrical-chess.svg"
+    "svg": "svgs/chess--cylindrical-chess.svg",
+    "rulesUrl": "chess/variants/cylindrical-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -421,7 +525,9 @@
     "variant": "dark-chess",
     "variantTitle": "Dark Chess",
     "topology": "grid",
-    "svg": "svgs/chess--dark-chess.svg"
+    "svg": "svgs/chess--dark-chess.svg",
+    "rulesUrl": "chess/variants/dark-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -429,7 +535,9 @@
     "variant": "de-vasa",
     "variantTitle": "De Vasa's Hexagonal Chess",
     "topology": "hex",
-    "svg": "svgs/chess--de-vasa.svg"
+    "svg": "svgs/chess--de-vasa.svg",
+    "rulesUrl": "chess/variants/de-vasa/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -437,7 +545,9 @@
     "variant": "delirious-bughouse",
     "variantTitle": "Delirious Bughouse",
     "topology": "grid",
-    "svg": "svgs/chess--delirious-bughouse.svg"
+    "svg": "svgs/chess--delirious-bughouse.svg",
+    "rulesUrl": "chess/variants/delirious-bughouse/index.html",
+    "playable": false
   },
   {
     "family": "chess",
@@ -445,7 +555,9 @@
     "variant": "diana",
     "variantTitle": "Diana Chess",
     "topology": "grid",
-    "svg": "svgs/chess--diana.svg"
+    "svg": "svgs/chess--diana.svg",
+    "rulesUrl": "chess/variants/diana/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -453,7 +565,9 @@
     "variant": "dice-chess",
     "variantTitle": "Dice Chess",
     "topology": "grid",
-    "svg": "svgs/chess--dice-chess.svg"
+    "svg": "svgs/chess--dice-chess.svg",
+    "rulesUrl": "chess/variants/dice-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -461,7 +575,9 @@
     "variant": "displacement-chess",
     "variantTitle": "Displacement Chess",
     "topology": "grid",
-    "svg": "svgs/chess--displacement-chess.svg"
+    "svg": "svgs/chess--displacement-chess.svg",
+    "rulesUrl": "chess/variants/displacement-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -469,7 +585,9 @@
     "variant": "djambi",
     "variantTitle": "Djambi",
     "topology": "grid",
-    "svg": "svgs/chess--djambi.svg"
+    "svg": "svgs/chess--djambi.svg",
+    "rulesUrl": "chess/variants/djambi/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -477,7 +595,9 @@
     "variant": "dragon-chess",
     "variantTitle": "Dragon Chess",
     "topology": "grid",
-    "svg": "svgs/chess--dragon-chess.svg"
+    "svg": "svgs/chess--dragon-chess.svg",
+    "rulesUrl": "chess/variants/dragon-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -485,7 +605,9 @@
     "variant": "duck-chess",
     "variantTitle": "Duck Chess",
     "topology": "grid",
-    "svg": "svgs/chess--duck-chess.svg"
+    "svg": "svgs/chess--duck-chess.svg",
+    "rulesUrl": "chess/variants/duck-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -493,7 +615,9 @@
     "variant": "einstein-chess",
     "variantTitle": "Einstein Chess",
     "topology": "grid",
-    "svg": "svgs/chess--einstein-chess.svg"
+    "svg": "svgs/chess--einstein-chess.svg",
+    "rulesUrl": "chess/variants/einstein-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -501,7 +625,9 @@
     "variant": "empire",
     "variantTitle": "Empire Chess",
     "topology": "grid",
-    "svg": "svgs/chess--empire.svg"
+    "svg": "svgs/chess--empire.svg",
+    "rulesUrl": "chess/variants/empire/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -509,7 +635,9 @@
     "variant": "endgame-chess",
     "variantTitle": "Endgame Chess",
     "topology": "grid",
-    "svg": "svgs/chess--endgame-chess.svg"
+    "svg": "svgs/chess--endgame-chess.svg",
+    "rulesUrl": "chess/variants/endgame-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -517,7 +645,9 @@
     "variant": "extinction",
     "variantTitle": "Extinction Chess",
     "topology": "grid",
-    "svg": "svgs/chess--extinction.svg"
+    "svg": "svgs/chess--extinction.svg",
+    "rulesUrl": "chess/variants/extinction/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -525,7 +655,9 @@
     "variant": "fanorona-chess",
     "variantTitle": "Fanorona Chess",
     "topology": "grid",
-    "svg": "svgs/chess--fanorona-chess.svg"
+    "svg": "svgs/chess--fanorona-chess.svg",
+    "rulesUrl": "chess/variants/fanorona-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -533,7 +665,9 @@
     "variant": "fischer-random",
     "variantTitle": "Fischer Random (Chess960)",
     "topology": "grid",
-    "svg": "svgs/chess--fischer-random.svg"
+    "svg": "svgs/chess--fischer-random.svg",
+    "rulesUrl": "chess/variants/fischer-random/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -541,7 +675,9 @@
     "variant": "five-check",
     "variantTitle": "Five-Check",
     "topology": "grid",
-    "svg": "svgs/chess--five-check.svg"
+    "svg": "svgs/chess--five-check.svg",
+    "rulesUrl": "chess/variants/five-check/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -549,7 +685,9 @@
     "variant": "flip-chess",
     "variantTitle": "Flip Chess",
     "topology": "grid",
-    "svg": "svgs/chess--flip-chess.svg"
+    "svg": "svgs/chess--flip-chess.svg",
+    "rulesUrl": "chess/variants/flip-chess/index.html",
+    "playable": false
   },
   {
     "family": "chess",
@@ -557,7 +695,9 @@
     "variant": "fog-of-war",
     "variantTitle": "Fog of War Chess",
     "topology": "grid",
-    "svg": "svgs/chess--fog-of-war.svg"
+    "svg": "svgs/chess--fog-of-war.svg",
+    "rulesUrl": "chess/variants/fog-of-war/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -565,7 +705,9 @@
     "variant": "four-handed-chess",
     "variantTitle": "Four-Handed Chess (Chaturaji)",
     "topology": "grid",
-    "svg": "svgs/chess--four-handed-chess.svg"
+    "svg": "svgs/chess--four-handed-chess.svg",
+    "rulesUrl": "chess/variants/four-handed-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -573,7 +715,9 @@
     "variant": "giveaway",
     "variantTitle": "Giveaway",
     "topology": "grid",
-    "svg": "svgs/chess--giveaway.svg"
+    "svg": "svgs/chess--giveaway.svg",
+    "rulesUrl": "chess/variants/giveaway/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -581,7 +725,9 @@
     "variant": "glinski",
     "variantTitle": "Glinski's Hexagonal Chess",
     "topology": "hex",
-    "svg": "svgs/chess--glinski.svg"
+    "svg": "svgs/chess--glinski.svg",
+    "rulesUrl": "chess/variants/glinski/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -589,7 +735,9 @@
     "variant": "grand",
     "variantTitle": "Grand Chess",
     "topology": "grid",
-    "svg": "svgs/chess--grand.svg"
+    "svg": "svgs/chess--grand.svg",
+    "rulesUrl": "chess/variants/grand/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -597,7 +745,9 @@
     "variant": "grande-acedrex",
     "variantTitle": "Grande Acedrex",
     "topology": "grid",
-    "svg": "svgs/chess--grande-acedrex.svg"
+    "svg": "svgs/chess--grande-acedrex.svg",
+    "rulesUrl": "chess/variants/grande-acedrex/index.html",
+    "playable": false
   },
   {
     "family": "chess",
@@ -605,7 +755,9 @@
     "variant": "grasshopper",
     "variantTitle": "Standard Grasshopper Chess",
     "topology": "grid",
-    "svg": "svgs/chess--grasshopper.svg"
+    "svg": "svgs/chess--grasshopper.svg",
+    "rulesUrl": "chess/variants/grasshopper/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -613,7 +765,9 @@
     "variant": "grid-chess",
     "variantTitle": "Grid Chess",
     "topology": "grid",
-    "svg": "svgs/chess--grid-chess.svg"
+    "svg": "svgs/chess--grid-chess.svg",
+    "rulesUrl": "chess/variants/grid-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -621,7 +775,9 @@
     "variant": "gustav-iii-chess",
     "variantTitle": "Gustav III's Chess",
     "topology": "grid",
-    "svg": "svgs/chess--gustav-iii-chess.svg"
+    "svg": "svgs/chess--gustav-iii-chess.svg",
+    "rulesUrl": "chess/variants/gustav-iii-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -629,7 +785,9 @@
     "variant": "gygax",
     "variantTitle": "Gygax Chess",
     "topology": "grid",
-    "svg": "svgs/chess--gygax.svg"
+    "svg": "svgs/chess--gygax.svg",
+    "rulesUrl": "chess/variants/gygax/index.html",
+    "playable": false
   },
   {
     "family": "chess",
@@ -637,7 +795,9 @@
     "variant": "half-chess",
     "variantTitle": "Half Chess",
     "topology": "grid",
-    "svg": "svgs/chess--half-chess.svg"
+    "svg": "svgs/chess--half-chess.svg",
+    "rulesUrl": "chess/variants/half-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -645,7 +805,9 @@
     "variant": "hexapawn",
     "variantTitle": "Hexapawn",
     "topology": "grid",
-    "svg": "svgs/chess--hexapawn.svg"
+    "svg": "svgs/chess--hexapawn.svg",
+    "rulesUrl": "chess/variants/hexapawn/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -653,7 +815,9 @@
     "variant": "hole-chess",
     "variantTitle": "Hole Chess",
     "topology": "grid",
-    "svg": "svgs/chess--hole-chess.svg"
+    "svg": "svgs/chess--hole-chess.svg",
+    "rulesUrl": "chess/variants/hole-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -661,7 +825,9 @@
     "variant": "hoppel-poppel",
     "variantTitle": "Hoppel-Poppel",
     "topology": "grid",
-    "svg": "svgs/chess--hoppel-poppel.svg"
+    "svg": "svgs/chess--hoppel-poppel.svg",
+    "rulesUrl": "chess/variants/hoppel-poppel/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -669,7 +835,9 @@
     "variant": "horde",
     "variantTitle": "Horde Chess",
     "topology": "grid",
-    "svg": "svgs/chess--horde.svg"
+    "svg": "svgs/chess--horde.svg",
+    "rulesUrl": "chess/variants/horde/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -677,7 +845,9 @@
     "variant": "hostage-chess",
     "variantTitle": "Hostage Chess",
     "topology": "grid",
-    "svg": "svgs/chess--hostage-chess.svg"
+    "svg": "svgs/chess--hostage-chess.svg",
+    "rulesUrl": "chess/variants/hostage-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -685,7 +855,9 @@
     "variant": "immunization-chess",
     "variantTitle": "Immunization Chess",
     "topology": "grid",
-    "svg": "svgs/chess--immunization-chess.svg"
+    "svg": "svgs/chess--immunization-chess.svg",
+    "rulesUrl": "chess/variants/immunization-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -693,7 +865,9 @@
     "variant": "janus",
     "variantTitle": "Janus Chess",
     "topology": "grid",
-    "svg": "svgs/chess--janus.svg"
+    "svg": "svgs/chess--janus.svg",
+    "rulesUrl": "chess/variants/janus/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -701,7 +875,9 @@
     "variant": "khans-chess",
     "variantTitle": "Khan's Chess",
     "topology": "grid",
-    "svg": "svgs/chess--khans-chess.svg"
+    "svg": "svgs/chess--khans-chess.svg",
+    "rulesUrl": "chess/variants/khans-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -709,7 +885,9 @@
     "variant": "king-of-the-hill",
     "variantTitle": "King of the Hill",
     "topology": "grid",
-    "svg": "svgs/chess--king-of-the-hill.svg"
+    "svg": "svgs/chess--king-of-the-hill.svg",
+    "rulesUrl": "chess/variants/king-of-the-hill/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -717,7 +895,9 @@
     "variant": "klein-bottle-chess",
     "variantTitle": "Klein Bottle Chess",
     "topology": "grid",
-    "svg": "svgs/chess--klein-bottle-chess.svg"
+    "svg": "svgs/chess--klein-bottle-chess.svg",
+    "rulesUrl": "chess/variants/klein-bottle-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -725,7 +905,9 @@
     "variant": "knightmate",
     "variantTitle": "Knightmate",
     "topology": "grid",
-    "svg": "svgs/chess--knightmate.svg"
+    "svg": "svgs/chess--knightmate.svg",
+    "rulesUrl": "chess/variants/knightmate/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -733,7 +915,9 @@
     "variant": "kriegspiel",
     "variantTitle": "Kriegspiel",
     "topology": "grid",
-    "svg": "svgs/chess--kriegspiel.svg"
+    "svg": "svgs/chess--kriegspiel.svg",
+    "rulesUrl": "chess/variants/kriegspiel/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -741,7 +925,9 @@
     "variant": "legan-chess",
     "variantTitle": "Legan Chess",
     "topology": "grid",
-    "svg": "svgs/chess--legan-chess.svg"
+    "svg": "svgs/chess--legan-chess.svg",
+    "rulesUrl": "chess/variants/legan-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -749,7 +935,9 @@
     "variant": "los-alamos",
     "variantTitle": "Los Alamos",
     "topology": "grid",
-    "svg": "svgs/chess--los-alamos.svg"
+    "svg": "svgs/chess--los-alamos.svg",
+    "rulesUrl": "chess/variants/los-alamos/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -757,7 +945,9 @@
     "variant": "los-alamos-vierschach",
     "variantTitle": "Los Alamos Vierschach",
     "topology": "grid",
-    "svg": "svgs/chess--los-alamos-vierschach.svg"
+    "svg": "svgs/chess--los-alamos-vierschach.svg",
+    "rulesUrl": "chess/variants/los-alamos-vierschach/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -765,7 +955,9 @@
     "variant": "madrasi",
     "variantTitle": "Madrasi Chess",
     "topology": "grid",
-    "svg": "svgs/chess--madrasi.svg"
+    "svg": "svgs/chess--madrasi.svg",
+    "rulesUrl": "chess/variants/madrasi/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -773,7 +965,9 @@
     "variant": "maharaja",
     "variantTitle": "Maharaja & Sepoys",
     "topology": "grid",
-    "svg": "svgs/chess--maharaja.svg"
+    "svg": "svgs/chess--maharaja.svg",
+    "rulesUrl": "chess/variants/maharaja/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -781,7 +975,9 @@
     "variant": "makpong",
     "variantTitle": "Makpong",
     "topology": "grid",
-    "svg": "svgs/chess--makpong.svg"
+    "svg": "svgs/chess--makpong.svg",
+    "rulesUrl": "chess/variants/makpong/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -789,7 +985,9 @@
     "variant": "makruk",
     "variantTitle": "Makruk",
     "topology": "grid",
-    "svg": "svgs/chess--makruk.svg"
+    "svg": "svgs/chess--makruk.svg",
+    "rulesUrl": "chess/variants/makruk/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -797,7 +995,9 @@
     "variant": "mansindam",
     "variantTitle": "Mansindam (Pantheon Tale)",
     "topology": "grid",
-    "svg": "svgs/chess--mansindam.svg"
+    "svg": "svgs/chess--mansindam.svg",
+    "rulesUrl": "chess/variants/mansindam/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -805,7 +1005,9 @@
     "variant": "marseillais",
     "variantTitle": "Marseillais Chess",
     "topology": "grid",
-    "svg": "svgs/chess--marseillais.svg"
+    "svg": "svgs/chess--marseillais.svg",
+    "rulesUrl": "chess/variants/marseillais/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -813,7 +1015,9 @@
     "variant": "mccooey",
     "variantTitle": "McCooey's Hexagonal Chess",
     "topology": "hex",
-    "svg": "svgs/chess--mccooey.svg"
+    "svg": "svgs/chess--mccooey.svg",
+    "rulesUrl": "chess/variants/mccooey/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -821,7 +1025,9 @@
     "variant": "medusa-chess",
     "variantTitle": "Medusa Chess",
     "topology": "grid",
-    "svg": "svgs/chess--medusa-chess.svg"
+    "svg": "svgs/chess--medusa-chess.svg",
+    "rulesUrl": "chess/variants/medusa-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -829,7 +1035,9 @@
     "variant": "metamachy",
     "variantTitle": "Metamachy",
     "topology": "grid",
-    "svg": "svgs/chess--metamachy.svg"
+    "svg": "svgs/chess--metamachy.svg",
+    "rulesUrl": "chess/variants/metamachy/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -837,7 +1045,9 @@
     "variant": "mini-hexchess",
     "variantTitle": "Mini Hexchess",
     "topology": "hex",
-    "svg": "svgs/chess--mini-hexchess.svg"
+    "svg": "svgs/chess--mini-hexchess.svg",
+    "rulesUrl": "chess/variants/mini-hexchess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -845,7 +1055,9 @@
     "variant": "minichess",
     "variantTitle": "Minichess",
     "topology": "grid",
-    "svg": "svgs/chess--minichess.svg"
+    "svg": "svgs/chess--minichess.svg",
+    "rulesUrl": "chess/variants/minichess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -853,7 +1065,9 @@
     "variant": "mobius-strip-chess",
     "variantTitle": "Möbius Strip Chess",
     "topology": "grid",
-    "svg": "svgs/chess--mobius-strip-chess.svg"
+    "svg": "svgs/chess--mobius-strip-chess.svg",
+    "rulesUrl": "chess/variants/mobius-strip-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -861,7 +1075,9 @@
     "variant": "monster-chess",
     "variantTitle": "Monster Chess",
     "topology": "grid",
-    "svg": "svgs/chess--monster-chess.svg"
+    "svg": "svgs/chess--monster-chess.svg",
+    "rulesUrl": "chess/variants/monster-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -869,7 +1085,9 @@
     "variant": "nightrider",
     "variantTitle": "Standard Nightrider Chess",
     "topology": "grid",
-    "svg": "svgs/chess--nightrider.svg"
+    "svg": "svgs/chess--nightrider.svg",
+    "rulesUrl": "chess/variants/nightrider/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -877,7 +1095,9 @@
     "variant": "no-castling",
     "variantTitle": "No Castling Chess",
     "topology": "grid",
-    "svg": "svgs/chess--no-castling.svg"
+    "svg": "svgs/chess--no-castling.svg",
+    "rulesUrl": "chess/variants/no-castling/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -885,7 +1105,9 @@
     "variant": "no-retreat",
     "variantTitle": "No Retreat",
     "topology": "grid",
-    "svg": "svgs/chess--no-retreat.svg"
+    "svg": "svgs/chess--no-retreat.svg",
+    "rulesUrl": "chess/variants/no-retreat/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -893,7 +1115,9 @@
     "variant": "oblong-chess",
     "variantTitle": "Oblong Chess",
     "topology": "grid",
-    "svg": "svgs/chess--oblong-chess.svg"
+    "svg": "svgs/chess--oblong-chess.svg",
+    "rulesUrl": "chess/variants/oblong-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -901,7 +1125,9 @@
     "variant": "omega-chess",
     "variantTitle": "Omega Chess",
     "topology": "grid",
-    "svg": "svgs/chess--omega-chess.svg"
+    "svg": "svgs/chess--omega-chess.svg",
+    "rulesUrl": "chess/variants/omega-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -909,7 +1135,9 @@
     "variant": "omnicide",
     "variantTitle": "Omnicide",
     "topology": "grid",
-    "svg": "svgs/chess--omnicide.svg"
+    "svg": "svgs/chess--omnicide.svg",
+    "rulesUrl": "chess/variants/omnicide/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -917,7 +1145,9 @@
     "variant": "orda-chess",
     "variantTitle": "Orda Chess",
     "topology": "grid",
-    "svg": "svgs/chess--orda-chess.svg"
+    "svg": "svgs/chess--orda-chess.svg",
+    "rulesUrl": "chess/variants/orda-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -925,7 +1155,9 @@
     "variant": "orda-mirror",
     "variantTitle": "Orda Mirror",
     "topology": "grid",
-    "svg": "svgs/chess--orda-mirror.svg"
+    "svg": "svgs/chess--orda-mirror.svg",
+    "rulesUrl": "chess/variants/orda-mirror/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -933,7 +1165,9 @@
     "variant": "ouk-chaktrang",
     "variantTitle": "Ouk Chaktrang (Cambodian Chess)",
     "topology": "grid",
-    "svg": "svgs/chess--ouk-chaktrang.svg"
+    "svg": "svgs/chess--ouk-chaktrang.svg",
+    "rulesUrl": "chess/variants/ouk-chaktrang/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -941,7 +1175,9 @@
     "variant": "patrol",
     "variantTitle": "Patrol Chess",
     "topology": "grid",
-    "svg": "svgs/chess--patrol.svg"
+    "svg": "svgs/chess--patrol.svg",
+    "rulesUrl": "chess/variants/patrol/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -949,7 +1185,9 @@
     "variant": "pawns-only",
     "variantTitle": "Pawns Only",
     "topology": "grid",
-    "svg": "svgs/chess--pawns-only.svg"
+    "svg": "svgs/chess--pawns-only.svg",
+    "rulesUrl": "chess/variants/pawns-only/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -957,7 +1195,9 @@
     "variant": "peasants-revolt",
     "variantTitle": "Peasants' Revolt",
     "topology": "grid",
-    "svg": "svgs/chess--peasants-revolt.svg"
+    "svg": "svgs/chess--peasants-revolt.svg",
+    "rulesUrl": "chess/variants/peasants-revolt/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -965,7 +1205,9 @@
     "variant": "petty",
     "variantTitle": "Petty Chess",
     "topology": "grid",
-    "svg": "svgs/chess--petty.svg"
+    "svg": "svgs/chess--petty.svg",
+    "rulesUrl": "chess/variants/petty/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -973,7 +1215,9 @@
     "variant": "placement-chess",
     "variantTitle": "Placement Chess",
     "topology": "grid",
-    "svg": "svgs/chess--placement-chess.svg"
+    "svg": "svgs/chess--placement-chess.svg",
+    "rulesUrl": "chess/variants/placement-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -981,7 +1225,9 @@
     "variant": "pocket-knight",
     "variantTitle": "Pocket Knight Chess",
     "topology": "grid",
-    "svg": "svgs/chess--pocket-knight.svg"
+    "svg": "svgs/chess--pocket-knight.svg",
+    "rulesUrl": "chess/variants/pocket-knight/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -989,7 +1235,9 @@
     "variant": "poison-chess",
     "variantTitle": "Poison Chess",
     "topology": "grid",
-    "svg": "svgs/chess--poison-chess.svg"
+    "svg": "svgs/chess--poison-chess.svg",
+    "rulesUrl": "chess/variants/poison-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -997,7 +1245,9 @@
     "variant": "progressive",
     "variantTitle": "Progressive",
     "topology": "grid",
-    "svg": "svgs/chess--progressive.svg"
+    "svg": "svgs/chess--progressive.svg",
+    "rulesUrl": "chess/variants/progressive/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1005,7 +1255,9 @@
     "variant": "progressive-italian",
     "variantTitle": "Progressive Italian",
     "topology": "grid",
-    "svg": "svgs/chess--progressive-italian.svg"
+    "svg": "svgs/chess--progressive-italian.svg",
+    "rulesUrl": "chess/variants/progressive-italian/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1013,7 +1265,9 @@
     "variant": "racing-kings",
     "variantTitle": "Racing Kings",
     "topology": "grid",
-    "svg": "svgs/chess--racing-kings.svg"
+    "svg": "svgs/chess--racing-kings.svg",
+    "rulesUrl": "chess/variants/racing-kings/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1021,7 +1275,9 @@
     "variant": "raumschach",
     "variantTitle": "Raumschach",
     "topology": "grid",
-    "svg": "svgs/chess--raumschach.svg"
+    "svg": "svgs/chess--raumschach.svg",
+    "rulesUrl": "chess/variants/raumschach/index.html",
+    "playable": false
   },
   {
     "family": "chess",
@@ -1029,7 +1285,9 @@
     "variant": "recruitment-chess",
     "variantTitle": "Recruitment Chess",
     "topology": "grid",
-    "svg": "svgs/chess--recruitment-chess.svg"
+    "svg": "svgs/chess--recruitment-chess.svg",
+    "rulesUrl": "chess/variants/recruitment-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1037,7 +1295,9 @@
     "variant": "rifle",
     "variantTitle": "Rifle Chess",
     "topology": "grid",
-    "svg": "svgs/chess--rifle.svg"
+    "svg": "svgs/chess--rifle.svg",
+    "rulesUrl": "chess/variants/rifle/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1045,7 +1305,9 @@
     "variant": "rollerball",
     "variantTitle": "Rollerball",
     "topology": "grid",
-    "svg": "svgs/chess--rollerball.svg"
+    "svg": "svgs/chess--rollerball.svg",
+    "rulesUrl": "chess/variants/rollerball/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1053,7 +1315,9 @@
     "variant": "romanchenkos-chess",
     "variantTitle": "Romanchenko's Chess",
     "topology": "grid",
-    "svg": "svgs/chess--romanchenkos-chess.svg"
+    "svg": "svgs/chess--romanchenkos-chess.svg",
+    "rulesUrl": "chess/variants/romanchenkos-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1061,7 +1325,9 @@
     "variant": "s-chess",
     "variantTitle": "S-Chess (Seirawan Chess)",
     "topology": "grid",
-    "svg": "svgs/chess--s-chess.svg"
+    "svg": "svgs/chess--s-chess.svg",
+    "rulesUrl": "chess/variants/s-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1069,7 +1335,9 @@
     "variant": "senterej",
     "variantTitle": "Senterej",
     "topology": "grid",
-    "svg": "svgs/chess--senterej.svg"
+    "svg": "svgs/chess--senterej.svg",
+    "rulesUrl": "chess/variants/senterej/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1077,7 +1345,9 @@
     "variant": "shafran",
     "variantTitle": "Shafran's Hexagonal Chess",
     "topology": "hex",
-    "svg": "svgs/chess--shafran.svg"
+    "svg": "svgs/chess--shafran.svg",
+    "rulesUrl": "chess/variants/shafran/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1085,7 +1355,9 @@
     "variant": "shako",
     "variantTitle": "Shako",
     "topology": "grid",
-    "svg": "svgs/chess--shako.svg"
+    "svg": "svgs/chess--shako.svg",
+    "rulesUrl": "chess/variants/shako/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1093,7 +1365,9 @@
     "variant": "shatar",
     "variantTitle": "Shatar",
     "topology": "grid",
-    "svg": "svgs/chess--shatar.svg"
+    "svg": "svgs/chess--shatar.svg",
+    "rulesUrl": "chess/variants/shatar/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1101,7 +1375,9 @@
     "variant": "shatranj",
     "variantTitle": "Shatranj",
     "topology": "grid",
-    "svg": "svgs/chess--shatranj.svg"
+    "svg": "svgs/chess--shatranj.svg",
+    "rulesUrl": "chess/variants/shatranj/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1109,7 +1385,9 @@
     "variant": "shatranj-kamil",
     "variantTitle": "Shatranj Kamil",
     "topology": "grid",
-    "svg": "svgs/chess--shatranj-kamil.svg"
+    "svg": "svgs/chess--shatranj-kamil.svg",
+    "rulesUrl": "chess/variants/shatranj-kamil/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1117,7 +1395,9 @@
     "variant": "shinobi",
     "variantTitle": "Shinobi Chess",
     "topology": "grid",
-    "svg": "svgs/chess--shinobi.svg"
+    "svg": "svgs/chess--shinobi.svg",
+    "rulesUrl": "chess/variants/shinobi/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1125,7 +1405,9 @@
     "variant": "shinobiplus",
     "variantTitle": "Shinobi+",
     "topology": "grid",
-    "svg": "svgs/chess--shinobiplus.svg"
+    "svg": "svgs/chess--shinobiplus.svg",
+    "rulesUrl": "chess/variants/shinobiplus/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1133,7 +1415,9 @@
     "variant": "shogun",
     "variantTitle": "Shogun Chess",
     "topology": "grid",
-    "svg": "svgs/chess--shogun.svg"
+    "svg": "svgs/chess--shogun.svg",
+    "rulesUrl": "chess/variants/shogun/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1141,7 +1425,9 @@
     "variant": "single-check",
     "variantTitle": "Single-Check",
     "topology": "grid",
-    "svg": "svgs/chess--single-check.svg"
+    "svg": "svgs/chess--single-check.svg",
+    "rulesUrl": "chess/variants/single-check/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1149,7 +1435,9 @@
     "variant": "sittuyin",
     "variantTitle": "Sittuyin",
     "topology": "grid",
-    "svg": "svgs/chess--sittuyin.svg"
+    "svg": "svgs/chess--sittuyin.svg",
+    "rulesUrl": "chess/variants/sittuyin/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1157,7 +1445,9 @@
     "variant": "spartan",
     "variantTitle": "Spartan Chess",
     "topology": "grid",
-    "svg": "svgs/chess--spartan.svg"
+    "svg": "svgs/chess--spartan.svg",
+    "rulesUrl": "chess/variants/spartan/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1165,7 +1455,9 @@
     "variant": "spherical-chess",
     "variantTitle": "Spherical Chess",
     "topology": "grid",
-    "svg": "svgs/chess--spherical-chess.svg"
+    "svg": "svgs/chess--spherical-chess.svg",
+    "rulesUrl": "chess/variants/spherical-chess/index.html",
+    "playable": false
   },
   {
     "family": "chess",
@@ -1173,7 +1465,9 @@
     "variant": "stalemate-wins",
     "variantTitle": "Stalemate Wins",
     "topology": "grid",
-    "svg": "svgs/chess--stalemate-wins.svg"
+    "svg": "svgs/chess--stalemate-wins.svg",
+    "rulesUrl": "chess/variants/stalemate-wins/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1181,7 +1475,9 @@
     "variant": "standard",
     "variantTitle": "Standard Chess",
     "topology": "grid",
-    "svg": "svgs/chess--standard.svg"
+    "svg": "svgs/chess--standard.svg",
+    "rulesUrl": "chess/variants/standard/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1189,7 +1485,9 @@
     "variant": "stupidhouse",
     "variantTitle": "Stupidhouse",
     "topology": "grid",
-    "svg": "svgs/chess--stupidhouse.svg"
+    "svg": "svgs/chess--stupidhouse.svg",
+    "rulesUrl": "chess/variants/stupidhouse/index.html",
+    "playable": false
   },
   {
     "family": "chess",
@@ -1197,7 +1495,9 @@
     "variant": "suicide-chess",
     "variantTitle": "Suicide Chess",
     "topology": "grid",
-    "svg": "svgs/chess--suicide-chess.svg"
+    "svg": "svgs/chess--suicide-chess.svg",
+    "rulesUrl": "chess/variants/suicide-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1205,7 +1505,9 @@
     "variant": "synochess",
     "variantTitle": "Synochess",
     "topology": "grid",
-    "svg": "svgs/chess--synochess.svg"
+    "svg": "svgs/chess--synochess.svg",
+    "rulesUrl": "chess/variants/synochess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1213,7 +1515,9 @@
     "variant": "tamerlane",
     "variantTitle": "Tamerlane Chess",
     "topology": "grid",
-    "svg": "svgs/chess--tamerlane.svg"
+    "svg": "svgs/chess--tamerlane.svg",
+    "rulesUrl": "chess/variants/tamerlane/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1221,7 +1525,9 @@
     "variant": "tandem-chess",
     "variantTitle": "Tandem Chess",
     "topology": "grid",
-    "svg": "svgs/chess--tandem-chess.svg"
+    "svg": "svgs/chess--tandem-chess.svg",
+    "rulesUrl": "chess/variants/tandem-chess/index.html",
+    "playable": false
   },
   {
     "family": "chess",
@@ -1229,7 +1535,9 @@
     "variant": "teleport-chess",
     "variantTitle": "Teleportation Chess",
     "topology": "grid",
-    "svg": "svgs/chess--teleport-chess.svg"
+    "svg": "svgs/chess--teleport-chess.svg",
+    "rulesUrl": "chess/variants/teleport-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1237,7 +1545,9 @@
     "variant": "three-check",
     "variantTitle": "Three-Check",
     "topology": "grid",
-    "svg": "svgs/chess--three-check.svg"
+    "svg": "svgs/chess--three-check.svg",
+    "rulesUrl": "chess/variants/three-check/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1245,7 +1555,9 @@
     "variant": "toroidal-byzantine",
     "variantTitle": "Toroidal Byzantine Chess",
     "topology": "grid",
-    "svg": "svgs/chess--toroidal-byzantine.svg"
+    "svg": "svgs/chess--toroidal-byzantine.svg",
+    "rulesUrl": "chess/variants/toroidal-byzantine/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1253,7 +1565,9 @@
     "variant": "toroidal-chess",
     "variantTitle": "Gadsden's Toroidal Chess",
     "topology": "grid",
-    "svg": "svgs/chess--toroidal-chess.svg"
+    "svg": "svgs/chess--toroidal-chess.svg",
+    "rulesUrl": "chess/variants/toroidal-chess/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1261,7 +1575,9 @@
     "variant": "torpedo",
     "variantTitle": "Torpedo Chess",
     "topology": "grid",
-    "svg": "svgs/chess--torpedo.svg"
+    "svg": "svgs/chess--torpedo.svg",
+    "rulesUrl": "chess/variants/torpedo/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1269,7 +1585,9 @@
     "variant": "turkish-great-chess-ii",
     "variantTitle": "Turkish Great Chess II (Atranj)",
     "topology": "grid",
-    "svg": "svgs/chess--turkish-great-chess-ii.svg"
+    "svg": "svgs/chess--turkish-great-chess-ii.svg",
+    "rulesUrl": "chess/variants/turkish-great-chess-ii/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1277,7 +1595,9 @@
     "variant": "turkish-great-chess-iii",
     "variantTitle": "Turkish Great Chess III",
     "topology": "grid",
-    "svg": "svgs/chess--turkish-great-chess-iii.svg"
+    "svg": "svgs/chess--turkish-great-chess-iii.svg",
+    "rulesUrl": "chess/variants/turkish-great-chess-iii/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1285,7 +1605,9 @@
     "variant": "turkish-great-chess-iv",
     "variantTitle": "Turkish Great Chess IV",
     "topology": "grid",
-    "svg": "svgs/chess--turkish-great-chess-iv.svg"
+    "svg": "svgs/chess--turkish-great-chess-iv.svg",
+    "rulesUrl": "chess/variants/turkish-great-chess-iv/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1293,7 +1615,9 @@
     "variant": "ultima",
     "variantTitle": "Ultima (Baroque Chess)",
     "topology": "grid",
-    "svg": "svgs/chess--ultima.svg"
+    "svg": "svgs/chess--ultima.svg",
+    "rulesUrl": "chess/variants/ultima/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1301,7 +1625,9 @@
     "variant": "upside-down",
     "variantTitle": "Upside-Down",
     "topology": "grid",
-    "svg": "svgs/chess--upside-down.svg"
+    "svg": "svgs/chess--upside-down.svg",
+    "rulesUrl": "chess/variants/upside-down/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1309,7 +1635,9 @@
     "variant": "vierschach",
     "variantTitle": "Vierschach",
     "topology": "grid",
-    "svg": "svgs/chess--vierschach.svg"
+    "svg": "svgs/chess--vierschach.svg",
+    "rulesUrl": "chess/variants/vierschach/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1317,7 +1645,9 @@
     "variant": "weak",
     "variantTitle": "Weak!",
     "topology": "grid",
-    "svg": "svgs/chess--weak.svg"
+    "svg": "svgs/chess--weak.svg",
+    "rulesUrl": "chess/variants/weak/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1325,7 +1655,9 @@
     "variant": "wildebeest",
     "variantTitle": "Standard Wildebeest Chess",
     "topology": "grid",
-    "svg": "svgs/chess--wildebeest.svg"
+    "svg": "svgs/chess--wildebeest.svg",
+    "rulesUrl": "chess/variants/wildebeest/index.html",
+    "playable": true
   },
   {
     "family": "chess",
@@ -1333,7 +1665,9 @@
     "variant": "xiang-fu",
     "variantTitle": "Xiang Fu",
     "topology": "grid",
-    "svg": "svgs/chess--xiang-fu.svg"
+    "svg": "svgs/chess--xiang-fu.svg",
+    "rulesUrl": "chess/variants/xiang-fu/index.html",
+    "playable": true
   },
   {
     "family": "dou-shou-qi",
@@ -1341,7 +1675,9 @@
     "variant": "standard",
     "variantTitle": "Dou Shou Qi (Standard)",
     "topology": "grid",
-    "svg": "svgs/dou-shou-qi--standard.svg"
+    "svg": "svgs/dou-shou-qi--standard.svg",
+    "rulesUrl": "dou-shou-qi/index.html",
+    "playable": false
   },
   {
     "family": "double-six-dominoes",
@@ -1349,7 +1685,9 @@
     "variant": "all-fives",
     "variantTitle": "All Fives",
     "topology": "tableau",
-    "svg": "svgs/double-six-dominoes--all-fives.svg"
+    "svg": "svgs/double-six-dominoes--all-fives.svg",
+    "rulesUrl": "double-six-dominoes/games/all-fives/index.html",
+    "playable": false
   },
   {
     "family": "double-six-dominoes",
@@ -1357,7 +1695,9 @@
     "variant": "block",
     "variantTitle": "Block Dominoes",
     "topology": "tableau",
-    "svg": "svgs/double-six-dominoes--block.svg"
+    "svg": "svgs/double-six-dominoes--block.svg",
+    "rulesUrl": "double-six-dominoes/games/block/index.html",
+    "playable": false
   },
   {
     "family": "double-six-dominoes",
@@ -1365,7 +1705,9 @@
     "variant": "chickenfoot",
     "variantTitle": "Chickenfoot",
     "topology": "tableau",
-    "svg": "svgs/double-six-dominoes--chickenfoot.svg"
+    "svg": "svgs/double-six-dominoes--chickenfoot.svg",
+    "rulesUrl": "double-six-dominoes/games/chickenfoot/index.html",
+    "playable": false
   },
   {
     "family": "double-six-dominoes",
@@ -1373,7 +1715,9 @@
     "variant": "mexican-train",
     "variantTitle": "Mexican Train",
     "topology": "tableau",
-    "svg": "svgs/double-six-dominoes--mexican-train.svg"
+    "svg": "svgs/double-six-dominoes--mexican-train.svg",
+    "rulesUrl": "double-six-dominoes/games/mexican-train/index.html",
+    "playable": false
   },
   {
     "family": "draughts",
@@ -1381,7 +1725,9 @@
     "variant": "alquerque",
     "variantTitle": "Alquerque",
     "topology": "grid",
-    "svg": "svgs/draughts--alquerque.svg"
+    "svg": "svgs/draughts--alquerque.svg",
+    "rulesUrl": "draughts/variants/alquerque/index.html",
+    "playable": true
   },
   {
     "family": "draughts",
@@ -1389,7 +1735,9 @@
     "variant": "bashni",
     "variantTitle": "Bashni",
     "topology": "grid",
-    "svg": "svgs/draughts--bashni.svg"
+    "svg": "svgs/draughts--bashni.svg",
+    "rulesUrl": "draughts/variants/bashni/index.html",
+    "playable": true
   },
   {
     "family": "draughts",
@@ -1397,7 +1745,9 @@
     "variant": "brazilian",
     "variantTitle": "Brazilian Draughts",
     "topology": "grid",
-    "svg": "svgs/draughts--brazilian.svg"
+    "svg": "svgs/draughts--brazilian.svg",
+    "rulesUrl": "draughts/variants/brazilian/index.html",
+    "playable": true
   },
   {
     "family": "draughts",
@@ -1405,7 +1755,9 @@
     "variant": "canadian",
     "variantTitle": "Canadian Draughts",
     "topology": "grid",
-    "svg": "svgs/draughts--canadian.svg"
+    "svg": "svgs/draughts--canadian.svg",
+    "rulesUrl": "draughts/variants/canadian/index.html",
+    "playable": true
   },
   {
     "family": "draughts",
@@ -1413,7 +1765,9 @@
     "variant": "czech",
     "variantTitle": "Czech Draughts",
     "topology": "grid",
-    "svg": "svgs/draughts--czech.svg"
+    "svg": "svgs/draughts--czech.svg",
+    "rulesUrl": "draughts/variants/czech/index.html",
+    "playable": true
   },
   {
     "family": "draughts",
@@ -1421,7 +1775,9 @@
     "variant": "dameo",
     "variantTitle": "Dameo",
     "topology": "grid",
-    "svg": "svgs/draughts--dameo.svg"
+    "svg": "svgs/draughts--dameo.svg",
+    "rulesUrl": "draughts/variants/dameo/index.html",
+    "playable": true
   },
   {
     "family": "draughts",
@@ -1429,7 +1785,9 @@
     "variant": "diagonal",
     "variantTitle": "Diagonal Draughts",
     "topology": "grid",
-    "svg": "svgs/draughts--diagonal.svg"
+    "svg": "svgs/draughts--diagonal.svg",
+    "rulesUrl": "draughts/variants/diagonal/index.html",
+    "playable": true
   },
   {
     "family": "draughts",
@@ -1437,7 +1795,9 @@
     "variant": "english",
     "variantTitle": "English Draughts",
     "topology": "grid",
-    "svg": "svgs/draughts--english.svg"
+    "svg": "svgs/draughts--english.svg",
+    "rulesUrl": "draughts/variants/english/index.html",
+    "playable": true
   },
   {
     "family": "draughts",
@@ -1445,7 +1805,9 @@
     "variant": "frisian",
     "variantTitle": "Frisian Draughts",
     "topology": "grid",
-    "svg": "svgs/draughts--frisian.svg"
+    "svg": "svgs/draughts--frisian.svg",
+    "rulesUrl": "draughts/variants/frisian/index.html",
+    "playable": true
   },
   {
     "family": "draughts",
@@ -1453,7 +1815,9 @@
     "variant": "german",
     "variantTitle": "German Draughts",
     "topology": "grid",
-    "svg": "svgs/draughts--german.svg"
+    "svg": "svgs/draughts--german.svg",
+    "rulesUrl": "draughts/variants/german/index.html",
+    "playable": true
   },
   {
     "family": "draughts",
@@ -1461,7 +1825,9 @@
     "variant": "ghanaian",
     "variantTitle": "Ghanaian Draughts",
     "topology": "grid",
-    "svg": "svgs/draughts--ghanaian.svg"
+    "svg": "svgs/draughts--ghanaian.svg",
+    "rulesUrl": "draughts/variants/ghanaian/index.html",
+    "playable": true
   },
   {
     "family": "draughts",
@@ -1469,7 +1835,9 @@
     "variant": "international",
     "variantTitle": "International Draughts",
     "topology": "grid",
-    "svg": "svgs/draughts--international.svg"
+    "svg": "svgs/draughts--international.svg",
+    "rulesUrl": "draughts/variants/international/index.html",
+    "playable": true
   },
   {
     "family": "draughts",
@@ -1477,7 +1845,9 @@
     "variant": "italian",
     "variantTitle": "Italian Draughts",
     "topology": "grid",
-    "svg": "svgs/draughts--italian.svg"
+    "svg": "svgs/draughts--italian.svg",
+    "rulesUrl": "draughts/variants/italian/index.html",
+    "playable": true
   },
   {
     "family": "draughts",
@@ -1485,7 +1855,9 @@
     "variant": "lasca",
     "variantTitle": "Lasca",
     "topology": "grid",
-    "svg": "svgs/draughts--lasca.svg"
+    "svg": "svgs/draughts--lasca.svg",
+    "rulesUrl": "draughts/variants/lasca/index.html",
+    "playable": true
   },
   {
     "family": "draughts",
@@ -1493,7 +1865,9 @@
     "variant": "pool",
     "variantTitle": "Pool Checkers",
     "topology": "grid",
-    "svg": "svgs/draughts--pool.svg"
+    "svg": "svgs/draughts--pool.svg",
+    "rulesUrl": "draughts/variants/pool/index.html",
+    "playable": true
   },
   {
     "family": "draughts",
@@ -1501,7 +1875,9 @@
     "variant": "russian",
     "variantTitle": "Russian Draughts",
     "topology": "grid",
-    "svg": "svgs/draughts--russian.svg"
+    "svg": "svgs/draughts--russian.svg",
+    "rulesUrl": "draughts/variants/russian/index.html",
+    "playable": true
   },
   {
     "family": "draughts",
@@ -1509,7 +1885,9 @@
     "variant": "spanish",
     "variantTitle": "Spanish Draughts",
     "topology": "grid",
-    "svg": "svgs/draughts--spanish.svg"
+    "svg": "svgs/draughts--spanish.svg",
+    "rulesUrl": "draughts/variants/spanish/index.html",
+    "playable": true
   },
   {
     "family": "draughts",
@@ -1517,7 +1895,9 @@
     "variant": "spantsiretti",
     "variantTitle": "Spantsiretti",
     "topology": "grid",
-    "svg": "svgs/draughts--spantsiretti.svg"
+    "svg": "svgs/draughts--spantsiretti.svg",
+    "rulesUrl": "draughts/variants/spantsiretti/index.html",
+    "playable": true
   },
   {
     "family": "draughts",
@@ -1525,7 +1905,9 @@
     "variant": "thai",
     "variantTitle": "Thai Draughts",
     "topology": "grid",
-    "svg": "svgs/draughts--thai.svg"
+    "svg": "svgs/draughts--thai.svg",
+    "rulesUrl": "draughts/variants/thai/index.html",
+    "playable": true
   },
   {
     "family": "draughts",
@@ -1533,7 +1915,9 @@
     "variant": "turkish-draughts",
     "variantTitle": "Turkish Draughts",
     "topology": "grid",
-    "svg": "svgs/draughts--turkish-draughts.svg"
+    "svg": "svgs/draughts--turkish-draughts.svg",
+    "rulesUrl": "draughts/variants/turkish-draughts/index.html",
+    "playable": true
   },
   {
     "family": "dungeon-chess",
@@ -1541,7 +1925,9 @@
     "variant": "compact",
     "variantTitle": "Dungeon Chess (Compact Skirmish (10×10))",
     "topology": "grid",
-    "svg": "svgs/dungeon-chess--compact.svg"
+    "svg": "svgs/dungeon-chess--compact.svg",
+    "rulesUrl": "dungeon-chess/index.html",
+    "playable": false
   },
   {
     "family": "dungeon-chess",
@@ -1549,7 +1935,9 @@
     "variant": "four-player",
     "variantTitle": "Dungeon Chess (Four Player (20×20))",
     "topology": "grid",
-    "svg": "svgs/dungeon-chess--four-player.svg"
+    "svg": "svgs/dungeon-chess--four-player.svg",
+    "rulesUrl": "dungeon-chess/index.html",
+    "playable": false
   },
   {
     "family": "dungeon-chess",
@@ -1557,7 +1945,9 @@
     "variant": "two-player",
     "variantTitle": "Dungeon Chess (Two Player (20×8))",
     "topology": "grid",
-    "svg": "svgs/dungeon-chess--two-player.svg"
+    "svg": "svgs/dungeon-chess--two-player.svg",
+    "rulesUrl": "dungeon-chess/index.html",
+    "playable": false
   },
   {
     "family": "econopoly",
@@ -1565,7 +1955,9 @@
     "variant": "standard",
     "variantTitle": "Econopoly (Standard)",
     "topology": "track",
-    "svg": "svgs/econopoly--standard.svg"
+    "svg": "svgs/econopoly--standard.svg",
+    "rulesUrl": "econopoly/index.html",
+    "playable": false
   },
   {
     "family": "fanorona",
@@ -1573,7 +1965,9 @@
     "variant": "standard",
     "variantTitle": "Fanorona (Standard)",
     "topology": "grid",
-    "svg": "svgs/fanorona--standard.svg"
+    "svg": "svgs/fanorona--standard.svg",
+    "rulesUrl": "fanorona/index.html",
+    "playable": false
   },
   {
     "family": "flower-48",
@@ -1581,7 +1975,9 @@
     "variant": "go-stop",
     "variantTitle": "Go-Stop",
     "topology": "tableau",
-    "svg": "svgs/flower-48--go-stop.svg"
+    "svg": "svgs/flower-48--go-stop.svg",
+    "rulesUrl": "flower-48/games/go-stop/index.html",
+    "playable": false
   },
   {
     "family": "flower-48",
@@ -1589,7 +1985,9 @@
     "variant": "hana-awase",
     "variantTitle": "Hana-Awase",
     "topology": "tableau",
-    "svg": "svgs/flower-48--hana-awase.svg"
+    "svg": "svgs/flower-48--hana-awase.svg",
+    "rulesUrl": "flower-48/games/hana-awase/index.html",
+    "playable": false
   },
   {
     "family": "flower-48",
@@ -1597,7 +1995,9 @@
     "variant": "koi-koi",
     "variantTitle": "Koi-Koi",
     "topology": "tableau",
-    "svg": "svgs/flower-48--koi-koi.svg"
+    "svg": "svgs/flower-48--koi-koi.svg",
+    "rulesUrl": "flower-48/games/koi-koi/index.html",
+    "playable": false
   },
   {
     "family": "flower-48",
@@ -1605,7 +2005,9 @@
     "variant": "oicho-kabu",
     "variantTitle": "Oicho-Kabu",
     "topology": "tableau",
-    "svg": "svgs/flower-48--oicho-kabu.svg"
+    "svg": "svgs/flower-48--oicho-kabu.svg",
+    "rulesUrl": "flower-48/games/oicho-kabu/index.html",
+    "playable": false
   },
   {
     "family": "go",
@@ -1613,7 +2015,9 @@
     "variant": "13x13",
     "variantTitle": "13×13 Go",
     "topology": "grid",
-    "svg": "svgs/go--13x13.svg"
+    "svg": "svgs/go--13x13.svg",
+    "rulesUrl": "go/variants/13x13/index.html",
+    "playable": true
   },
   {
     "family": "go",
@@ -1621,7 +2025,9 @@
     "variant": "9x9",
     "variantTitle": "9×9 Go",
     "topology": "grid",
-    "svg": "svgs/go--9x9.svg"
+    "svg": "svgs/go--9x9.svg",
+    "rulesUrl": "go/variants/9x9/index.html",
+    "playable": true
   },
   {
     "family": "go",
@@ -1629,7 +2035,9 @@
     "variant": "capture-go",
     "variantTitle": "Capture Go",
     "topology": "grid",
-    "svg": "svgs/go--capture-go.svg"
+    "svg": "svgs/go--capture-go.svg",
+    "rulesUrl": "go/variants/capture-go/index.html",
+    "playable": true
   },
   {
     "family": "go",
@@ -1637,7 +2045,9 @@
     "variant": "gomoku",
     "variantTitle": "Gomoku",
     "topology": "grid",
-    "svg": "svgs/go--gomoku.svg"
+    "svg": "svgs/go--gomoku.svg",
+    "rulesUrl": "go/variants/gomoku/index.html",
+    "playable": true
   },
   {
     "family": "go",
@@ -1645,7 +2055,9 @@
     "variant": "ninuki-renju",
     "variantTitle": "Ninuki-Renju",
     "topology": "grid",
-    "svg": "svgs/go--ninuki-renju.svg"
+    "svg": "svgs/go--ninuki-renju.svg",
+    "rulesUrl": "go/variants/ninuki-renju/index.html",
+    "playable": true
   },
   {
     "family": "go",
@@ -1653,7 +2065,9 @@
     "variant": "one-colour",
     "variantTitle": "One-Colour Go",
     "topology": "grid",
-    "svg": "svgs/go--one-colour.svg"
+    "svg": "svgs/go--one-colour.svg",
+    "rulesUrl": "go/variants/one-colour/index.html",
+    "playable": true
   },
   {
     "family": "go",
@@ -1661,7 +2075,9 @@
     "variant": "phantom-go",
     "variantTitle": "Phantom Go",
     "topology": "grid",
-    "svg": "svgs/go--phantom-go.svg"
+    "svg": "svgs/go--phantom-go.svg",
+    "rulesUrl": "go/variants/phantom-go/index.html",
+    "playable": false
   },
   {
     "family": "go",
@@ -1669,7 +2085,9 @@
     "variant": "rengo",
     "variantTitle": "Rengo",
     "topology": "grid",
-    "svg": "svgs/go--rengo.svg"
+    "svg": "svgs/go--rengo.svg",
+    "rulesUrl": "go/variants/rengo/index.html",
+    "playable": false
   },
   {
     "family": "go",
@@ -1677,7 +2095,9 @@
     "variant": "renju",
     "variantTitle": "Renju",
     "topology": "grid",
-    "svg": "svgs/go--renju.svg"
+    "svg": "svgs/go--renju.svg",
+    "rulesUrl": "go/variants/renju/index.html",
+    "playable": true
   },
   {
     "family": "go",
@@ -1685,7 +2105,9 @@
     "variant": "standard",
     "variantTitle": "Standard Go (19×19)",
     "topology": "grid",
-    "svg": "svgs/go--standard.svg"
+    "svg": "svgs/go--standard.svg",
+    "rulesUrl": "go/variants/standard/index.html",
+    "playable": true
   },
   {
     "family": "go",
@@ -1693,7 +2115,9 @@
     "variant": "stoical",
     "variantTitle": "Stoical Go",
     "topology": "grid",
-    "svg": "svgs/go--stoical.svg"
+    "svg": "svgs/go--stoical.svg",
+    "rulesUrl": "go/variants/stoical/index.html",
+    "playable": true
   },
   {
     "family": "go",
@@ -1701,7 +2125,9 @@
     "variant": "sunjang",
     "variantTitle": "Sunjang Baduk",
     "topology": "grid",
-    "svg": "svgs/go--sunjang.svg"
+    "svg": "svgs/go--sunjang.svg",
+    "rulesUrl": "go/variants/sunjang/index.html",
+    "playable": false
   },
   {
     "family": "go",
@@ -1709,7 +2135,9 @@
     "variant": "tibetan",
     "variantTitle": "Tibetan Go",
     "topology": "grid",
-    "svg": "svgs/go--tibetan.svg"
+    "svg": "svgs/go--tibetan.svg",
+    "rulesUrl": "go/variants/tibetan/index.html",
+    "playable": false
   },
   {
     "family": "go",
@@ -1717,7 +2145,9 @@
     "variant": "toroidal-go",
     "variantTitle": "Toroidal Go",
     "topology": "grid",
-    "svg": "svgs/go--toroidal-go.svg"
+    "svg": "svgs/go--toroidal-go.svg",
+    "rulesUrl": "go/variants/toroidal-go/index.html",
+    "playable": true
   },
   {
     "family": "halma",
@@ -1725,7 +2155,9 @@
     "variant": "standard-2p",
     "variantTitle": "Standard 2-Player Halma",
     "topology": "grid",
-    "svg": "svgs/halma--standard-2p.svg"
+    "svg": "svgs/halma--standard-2p.svg",
+    "rulesUrl": "halma/variants/standard-2p/index.html",
+    "playable": false
   },
   {
     "family": "halma",
@@ -1733,7 +2165,9 @@
     "variant": "standard-4p",
     "variantTitle": "Standard 4-Player Halma",
     "topology": "grid",
-    "svg": "svgs/halma--standard-4p.svg"
+    "svg": "svgs/halma--standard-4p.svg",
+    "rulesUrl": "halma/variants/standard-4p/index.html",
+    "playable": false
   },
   {
     "family": "hex",
@@ -1741,7 +2175,9 @@
     "variant": "13x13",
     "variantTitle": "Hex (13×13)",
     "topology": "hex",
-    "svg": "svgs/hex--13x13.svg"
+    "svg": "svgs/hex--13x13.svg",
+    "rulesUrl": "hex/variants/13x13/index.html",
+    "playable": true
   },
   {
     "family": "hex",
@@ -1749,7 +2185,9 @@
     "variant": "14x14",
     "variantTitle": "Hex (14×14)",
     "topology": "hex",
-    "svg": "svgs/hex--14x14.svg"
+    "svg": "svgs/hex--14x14.svg",
+    "rulesUrl": "hex/variants/14x14/index.html",
+    "playable": true
   },
   {
     "family": "hex",
@@ -1757,7 +2195,9 @@
     "variant": "19x19",
     "variantTitle": "Hex (19×19)",
     "topology": "hex",
-    "svg": "svgs/hex--19x19.svg"
+    "svg": "svgs/hex--19x19.svg",
+    "rulesUrl": "hex/variants/19x19/index.html",
+    "playable": true
   },
   {
     "family": "hex",
@@ -1765,7 +2205,9 @@
     "variant": "9x9",
     "variantTitle": "Hex (9×9)",
     "topology": "hex",
-    "svg": "svgs/hex--9x9.svg"
+    "svg": "svgs/hex--9x9.svg",
+    "rulesUrl": "hex/variants/9x9/index.html",
+    "playable": true
   },
   {
     "family": "hex",
@@ -1773,7 +2215,9 @@
     "variant": "standard",
     "variantTitle": "Hex (11×11)",
     "topology": "hex",
-    "svg": "svgs/hex--standard.svg"
+    "svg": "svgs/hex--standard.svg",
+    "rulesUrl": "hex/variants/standard/index.html",
+    "playable": true
   },
   {
     "family": "hex",
@@ -1781,7 +2225,9 @@
     "variant": "y-game",
     "variantTitle": "Y",
     "topology": "hex",
-    "svg": "svgs/hex--y-game.svg"
+    "svg": "svgs/hex--y-game.svg",
+    "rulesUrl": "hex/variants/y-game/index.html",
+    "playable": true
   },
   {
     "family": "hex",
@@ -1789,7 +2235,9 @@
     "variant": "y-large",
     "variantTitle": "Y (Large — 15)",
     "topology": "hex",
-    "svg": "svgs/hex--y-large.svg"
+    "svg": "svgs/hex--y-large.svg",
+    "rulesUrl": "hex/variants/y-large/index.html",
+    "playable": true
   },
   {
     "family": "hex",
@@ -1797,7 +2245,9 @@
     "variant": "y-small",
     "variantTitle": "Y (Small — 9)",
     "topology": "hex",
-    "svg": "svgs/hex--y-small.svg"
+    "svg": "svgs/hex--y-small.svg",
+    "rulesUrl": "hex/variants/y-small/index.html",
+    "playable": true
   },
   {
     "family": "landlords-game",
@@ -1805,7 +2255,9 @@
     "variant": "1904-original",
     "variantTitle": "1904 Original",
     "topology": "track",
-    "svg": "svgs/landlords-game--1904-original.svg"
+    "svg": "svgs/landlords-game--1904-original.svg",
+    "rulesUrl": "landlords-game/variants/1904-original/index.html",
+    "playable": true
   },
   {
     "family": "landlords-game",
@@ -1813,7 +2265,9 @@
     "variant": "1906-commercial",
     "variantTitle": "1906 Commercial Edition",
     "topology": "track",
-    "svg": "svgs/landlords-game--1906-commercial.svg"
+    "svg": "svgs/landlords-game--1906-commercial.svg",
+    "rulesUrl": "landlords-game/variants/1906-commercial/index.html",
+    "playable": false
   },
   {
     "family": "landlords-game",
@@ -1821,7 +2275,9 @@
     "variant": "monarch-of-the-world",
     "variantTitle": "Monarch of the World",
     "topology": "track",
-    "svg": "svgs/landlords-game--monarch-of-the-world.svg"
+    "svg": "svgs/landlords-game--monarch-of-the-world.svg",
+    "rulesUrl": "landlords-game/variants/monarch-of-the-world/index.html",
+    "playable": false
   },
   {
     "family": "landlords-game",
@@ -1829,7 +2285,9 @@
     "variant": "prosperity",
     "variantTitle": "Prosperity",
     "topology": "track",
-    "svg": "svgs/landlords-game--prosperity.svg"
+    "svg": "svgs/landlords-game--prosperity.svg",
+    "rulesUrl": "landlords-game/variants/prosperity/index.html",
+    "playable": false
   },
   {
     "family": "landlords-game",
@@ -1837,7 +2295,9 @@
     "variant": "single-tax",
     "variantTitle": "Single Tax",
     "topology": "track",
-    "svg": "svgs/landlords-game--single-tax.svg"
+    "svg": "svgs/landlords-game--single-tax.svg",
+    "rulesUrl": "landlords-game/variants/single-tax/index.html",
+    "playable": false
   },
   {
     "family": "lattaque",
@@ -1845,7 +2305,9 @@
     "variant": "aviation",
     "variantTitle": "Aviation",
     "topology": "grid",
-    "svg": "svgs/lattaque--aviation.svg"
+    "svg": "svgs/lattaque--aviation.svg",
+    "rulesUrl": "lattaque/variants/aviation/index.html",
+    "playable": false
   },
   {
     "family": "lattaque",
@@ -1853,7 +2315,9 @@
     "variant": "dover-patrol",
     "variantTitle": "Dover Patrol",
     "topology": "grid",
-    "svg": "svgs/lattaque--dover-patrol.svg"
+    "svg": "svgs/lattaque--dover-patrol.svg",
+    "rulesUrl": "lattaque/variants/dover-patrol/index.html",
+    "playable": false
   },
   {
     "family": "lattaque",
@@ -1861,7 +2325,9 @@
     "variant": "standard",
     "variantTitle": "L'Attaque (Standard)",
     "topology": "grid",
-    "svg": "svgs/lattaque--standard.svg"
+    "svg": "svgs/lattaque--standard.svg",
+    "rulesUrl": "lattaque/variants/standard/index.html",
+    "playable": false
   },
   {
     "family": "lattaque",
@@ -1869,7 +2335,9 @@
     "variant": "tri-tactics",
     "variantTitle": "Tri-Tactics",
     "topology": "grid",
-    "svg": "svgs/lattaque--tri-tactics.svg"
+    "svg": "svgs/lattaque--tri-tactics.svg",
+    "rulesUrl": "lattaque/variants/tri-tactics/index.html",
+    "playable": false
   },
   {
     "family": "mahjong",
@@ -1877,7 +2345,9 @@
     "variant": "american-classic",
     "variantTitle": "American Mahjong (Classic)",
     "topology": "tableau",
-    "svg": "svgs/mahjong--american-classic.svg"
+    "svg": "svgs/mahjong--american-classic.svg",
+    "rulesUrl": "mahjong/games/american-classic/index.html",
+    "playable": false
   },
   {
     "family": "mahjong",
@@ -1885,7 +2355,9 @@
     "variant": "hong-kong",
     "variantTitle": "Hong Kong Mahjong",
     "topology": "tableau",
-    "svg": "svgs/mahjong--hong-kong.svg"
+    "svg": "svgs/mahjong--hong-kong.svg",
+    "rulesUrl": "mahjong/games/hong-kong/index.html",
+    "playable": false
   },
   {
     "family": "mahjong",
@@ -1893,7 +2365,9 @@
     "variant": "riichi",
     "variantTitle": "Riichi Mahjong",
     "topology": "tableau",
-    "svg": "svgs/mahjong--riichi.svg"
+    "svg": "svgs/mahjong--riichi.svg",
+    "rulesUrl": "mahjong/games/riichi/index.html",
+    "playable": false
   },
   {
     "family": "mahjong",
@@ -1901,7 +2375,9 @@
     "variant": "taiwanese",
     "variantTitle": "Taiwanese 16-Tile Mahjong",
     "topology": "tableau",
-    "svg": "svgs/mahjong--taiwanese.svg"
+    "svg": "svgs/mahjong--taiwanese.svg",
+    "rulesUrl": "mahjong/games/taiwanese/index.html",
+    "playable": false
   },
   {
     "family": "mahjong",
@@ -1909,7 +2385,9 @@
     "variant": "zung-jung",
     "variantTitle": "Zung Jung",
     "topology": "tableau",
-    "svg": "svgs/mahjong--zung-jung.svg"
+    "svg": "svgs/mahjong--zung-jung.svg",
+    "rulesUrl": "mahjong/games/zung-jung/index.html",
+    "playable": false
   },
   {
     "family": "mancala",
@@ -1917,7 +2395,9 @@
     "variant": "ayo",
     "variantTitle": "Ayo",
     "topology": "pit",
-    "svg": "svgs/mancala--ayo.svg"
+    "svg": "svgs/mancala--ayo.svg",
+    "rulesUrl": "mancala/variants/ayo/index.html",
+    "playable": true
   },
   {
     "family": "mancala",
@@ -1925,7 +2405,9 @@
     "variant": "bao",
     "variantTitle": "Bao",
     "topology": "pit",
-    "svg": "svgs/mancala--bao.svg"
+    "svg": "svgs/mancala--bao.svg",
+    "rulesUrl": "mancala/variants/bao/index.html",
+    "playable": true
   },
   {
     "family": "mancala",
@@ -1933,7 +2415,9 @@
     "variant": "congkak",
     "variantTitle": "Congkak",
     "topology": "pit",
-    "svg": "svgs/mancala--congkak.svg"
+    "svg": "svgs/mancala--congkak.svg",
+    "rulesUrl": "mancala/variants/congkak/index.html",
+    "playable": true
   },
   {
     "family": "mancala",
@@ -1941,7 +2425,9 @@
     "variant": "kalah",
     "variantTitle": "Kalah",
     "topology": "pit",
-    "svg": "svgs/mancala--kalah.svg"
+    "svg": "svgs/mancala--kalah.svg",
+    "rulesUrl": "mancala/variants/kalah/index.html",
+    "playable": true
   },
   {
     "family": "mancala",
@@ -1949,7 +2435,9 @@
     "variant": "oware",
     "variantTitle": "Oware",
     "topology": "pit",
-    "svg": "svgs/mancala--oware.svg"
+    "svg": "svgs/mancala--oware.svg",
+    "rulesUrl": "mancala/variants/oware/index.html",
+    "playable": true
   },
   {
     "family": "mancala",
@@ -1957,7 +2445,9 @@
     "variant": "pallanguzhi",
     "variantTitle": "Pallanguzhi",
     "topology": "pit",
-    "svg": "svgs/mancala--pallanguzhi.svg"
+    "svg": "svgs/mancala--pallanguzhi.svg",
+    "rulesUrl": "mancala/variants/pallanguzhi/index.html",
+    "playable": true
   },
   {
     "family": "mancala",
@@ -1965,7 +2455,9 @@
     "variant": "sungka",
     "variantTitle": "Sungka",
     "topology": "pit",
-    "svg": "svgs/mancala--sungka.svg"
+    "svg": "svgs/mancala--sungka.svg",
+    "rulesUrl": "mancala/variants/sungka/index.html",
+    "playable": true
   },
   {
     "family": "mancala",
@@ -1973,7 +2465,9 @@
     "variant": "toguz-korgool",
     "variantTitle": "Toguz Korgool",
     "topology": "pit",
-    "svg": "svgs/mancala--toguz-korgool.svg"
+    "svg": "svgs/mancala--toguz-korgool.svg",
+    "rulesUrl": "mancala/variants/toguz-korgool/index.html",
+    "playable": true
   },
   {
     "family": "morris",
@@ -1981,7 +2475,9 @@
     "variant": "lasker-morris",
     "variantTitle": "Lasker Morris",
     "topology": "graph",
-    "svg": "svgs/morris--lasker-morris.svg"
+    "svg": "svgs/morris--lasker-morris.svg",
+    "rulesUrl": "morris/variants/lasker-morris/index.html",
+    "playable": true
   },
   {
     "family": "morris",
@@ -1989,7 +2485,9 @@
     "variant": "morabaraba",
     "variantTitle": "Morabaraba",
     "topology": "graph",
-    "svg": "svgs/morris--morabaraba.svg"
+    "svg": "svgs/morris--morabaraba.svg",
+    "rulesUrl": "morris/variants/morabaraba/index.html",
+    "playable": true
   },
   {
     "family": "morris",
@@ -1997,7 +2495,9 @@
     "variant": "nine-mens-morris",
     "variantTitle": "Nine Men's Morris",
     "topology": "graph",
-    "svg": "svgs/morris--nine-mens-morris.svg"
+    "svg": "svgs/morris--nine-mens-morris.svg",
+    "rulesUrl": "morris/variants/nine-mens-morris/index.html",
+    "playable": true
   },
   {
     "family": "morris",
@@ -2005,7 +2505,9 @@
     "variant": "shax",
     "variantTitle": "Shax",
     "topology": "graph",
-    "svg": "svgs/morris--shax.svg"
+    "svg": "svgs/morris--shax.svg",
+    "rulesUrl": "morris/variants/shax/index.html",
+    "playable": true
   },
   {
     "family": "morris",
@@ -2013,7 +2515,9 @@
     "variant": "six-mens-morris",
     "variantTitle": "Six Men's Morris",
     "topology": "graph",
-    "svg": "svgs/morris--six-mens-morris.svg"
+    "svg": "svgs/morris--six-mens-morris.svg",
+    "rulesUrl": "morris/variants/six-mens-morris/index.html",
+    "playable": true
   },
   {
     "family": "morris",
@@ -2021,7 +2525,9 @@
     "variant": "three-mens-morris",
     "variantTitle": "Three Men's Morris",
     "topology": "graph",
-    "svg": "svgs/morris--three-mens-morris.svg"
+    "svg": "svgs/morris--three-mens-morris.svg",
+    "rulesUrl": "morris/variants/three-mens-morris/index.html",
+    "playable": true
   },
   {
     "family": "morris",
@@ -2029,7 +2535,9 @@
     "variant": "twelve-mens-morris",
     "variantTitle": "Twelve Men's Morris",
     "topology": "graph",
-    "svg": "svgs/morris--twelve-mens-morris.svg"
+    "svg": "svgs/morris--twelve-mens-morris.svg",
+    "rulesUrl": "morris/variants/twelve-mens-morris/index.html",
+    "playable": true
   },
   {
     "family": "nukes",
@@ -2037,7 +2545,9 @@
     "variant": "asymmetric-powers",
     "variantTitle": "Nukes: Asymmetric Powers",
     "topology": "hex",
-    "svg": "svgs/nukes--asymmetric-powers.svg"
+    "svg": "svgs/nukes--asymmetric-powers.svg",
+    "rulesUrl": "nukes/variants/asymmetric-powers/index.html",
+    "playable": false
   },
   {
     "family": "nukes",
@@ -2045,7 +2555,9 @@
     "variant": "fallout",
     "variantTitle": "Nukes: Fallout",
     "topology": "hex",
-    "svg": "svgs/nukes--fallout.svg"
+    "svg": "svgs/nukes--fallout.svg",
+    "rulesUrl": "nukes/variants/fallout/index.html",
+    "playable": false
   },
   {
     "family": "nukes",
@@ -2053,7 +2565,9 @@
     "variant": "siege",
     "variantTitle": "Nukes: Siege",
     "topology": "hex",
-    "svg": "svgs/nukes--siege.svg"
+    "svg": "svgs/nukes--siege.svg",
+    "rulesUrl": "nukes/variants/siege/index.html",
+    "playable": false
   },
   {
     "family": "nukes",
@@ -2061,7 +2575,9 @@
     "variant": "standard",
     "variantTitle": "Nukes: Standard",
     "topology": "hex",
-    "svg": "svgs/nukes--standard.svg"
+    "svg": "svgs/nukes--standard.svg",
+    "rulesUrl": "nukes/variants/standard/index.html",
+    "playable": false
   },
   {
     "family": "nyout",
@@ -2069,7 +2585,9 @@
     "variant": "standard",
     "variantTitle": "Nyout (Standard)",
     "topology": "graph",
-    "svg": "svgs/nyout--standard.svg"
+    "svg": "svgs/nyout--standard.svg",
+    "rulesUrl": "nyout/index.html",
+    "playable": false
   },
   {
     "family": "pachisi",
@@ -2077,7 +2595,9 @@
     "variant": "seven-shell",
     "variantTitle": "Seven-Shell Pachisi",
     "topology": "grid",
-    "svg": "svgs/pachisi--seven-shell.svg"
+    "svg": "svgs/pachisi--seven-shell.svg",
+    "rulesUrl": "pachisi/variants/seven-shell/index.html",
+    "playable": false
   },
   {
     "family": "pachisi",
@@ -2085,7 +2605,9 @@
     "variant": "standard",
     "variantTitle": "Pachisi (Standard)",
     "topology": "grid",
-    "svg": "svgs/pachisi--standard.svg"
+    "svg": "svgs/pachisi--standard.svg",
+    "rulesUrl": "pachisi/variants/standard/index.html",
+    "playable": false
   },
   {
     "family": "pachisi",
@@ -2093,7 +2615,9 @@
     "variant": "two-player",
     "variantTitle": "2-Player Pachisi",
     "topology": "grid",
-    "svg": "svgs/pachisi--two-player.svg"
+    "svg": "svgs/pachisi--two-player.svg",
+    "rulesUrl": "pachisi/variants/two-player/index.html",
+    "playable": false
   },
   {
     "family": "reversi",
@@ -2101,7 +2625,9 @@
     "variant": "anti-reversi",
     "variantTitle": "Anti-Reversi",
     "topology": "grid",
-    "svg": "svgs/reversi--anti-reversi.svg"
+    "svg": "svgs/reversi--anti-reversi.svg",
+    "rulesUrl": "reversi/variants/anti-reversi/index.html",
+    "playable": true
   },
   {
     "family": "reversi",
@@ -2109,7 +2635,9 @@
     "variant": "six-by-six",
     "variantTitle": "Six-by-Six Reversi",
     "topology": "grid",
-    "svg": "svgs/reversi--six-by-six.svg"
+    "svg": "svgs/reversi--six-by-six.svg",
+    "rulesUrl": "reversi/variants/six-by-six/index.html",
+    "playable": true
   },
   {
     "family": "reversi",
@@ -2117,7 +2645,9 @@
     "variant": "standard",
     "variantTitle": "Standard Reversi",
     "topology": "grid",
-    "svg": "svgs/reversi--standard.svg"
+    "svg": "svgs/reversi--standard.svg",
+    "rulesUrl": "reversi/variants/standard/index.html",
+    "playable": true
   },
   {
     "family": "royal-ur",
@@ -2125,7 +2655,9 @@
     "variant": "standard",
     "variantTitle": "Royal Game of Ur (Standard)",
     "topology": "grid",
-    "svg": "svgs/royal-ur--standard.svg"
+    "svg": "svgs/royal-ur--standard.svg",
+    "rulesUrl": "royal-ur/index.html",
+    "playable": false
   },
   {
     "family": "senet",
@@ -2133,7 +2665,9 @@
     "variant": "standard",
     "variantTitle": "Senet (Kendall Reconstruction)",
     "topology": "grid",
-    "svg": "svgs/senet--standard.svg"
+    "svg": "svgs/senet--standard.svg",
+    "rulesUrl": "senet/index.html",
+    "playable": false
   },
   {
     "family": "shogi",
@@ -2141,7 +2675,9 @@
     "variant": "annan-shogi",
     "variantTitle": "Annan Shogi",
     "topology": "grid",
-    "svg": "svgs/shogi--annan-shogi.svg"
+    "svg": "svgs/shogi--annan-shogi.svg",
+    "rulesUrl": "shogi/variants/annan-shogi/index.html",
+    "playable": true
   },
   {
     "family": "shogi",
@@ -2149,7 +2685,9 @@
     "variant": "cannon-shogi",
     "variantTitle": "Cannon Shogi",
     "topology": "grid",
-    "svg": "svgs/shogi--cannon-shogi.svg"
+    "svg": "svgs/shogi--cannon-shogi.svg",
+    "rulesUrl": "shogi/variants/cannon-shogi/index.html",
+    "playable": true
   },
   {
     "family": "shogi",
@@ -2157,7 +2695,9 @@
     "variant": "chu-shogi",
     "variantTitle": "Chu Shogi",
     "topology": "grid",
-    "svg": "svgs/shogi--chu-shogi.svg"
+    "svg": "svgs/shogi--chu-shogi.svg",
+    "rulesUrl": "shogi/variants/chu-shogi/index.html",
+    "playable": true
   },
   {
     "family": "shogi",
@@ -2165,7 +2705,9 @@
     "variant": "dai-shogi",
     "variantTitle": "Dai Shogi",
     "topology": "grid",
-    "svg": "svgs/shogi--dai-shogi.svg"
+    "svg": "svgs/shogi--dai-shogi.svg",
+    "rulesUrl": "shogi/variants/dai-shogi/index.html",
+    "playable": true
   },
   {
     "family": "shogi",
@@ -2173,7 +2715,9 @@
     "variant": "dobutsu",
     "variantTitle": "Dobutsu Shogi",
     "topology": "grid",
-    "svg": "svgs/shogi--dobutsu.svg"
+    "svg": "svgs/shogi--dobutsu.svg",
+    "rulesUrl": "shogi/variants/dobutsu/index.html",
+    "playable": true
   },
   {
     "family": "shogi",
@@ -2181,7 +2725,9 @@
     "variant": "four-player-shogi",
     "variantTitle": "Four Player Shogi",
     "topology": "grid",
-    "svg": "svgs/shogi--four-player-shogi.svg"
+    "svg": "svgs/shogi--four-player-shogi.svg",
+    "rulesUrl": "shogi/variants/four-player-shogi/index.html",
+    "playable": true
   },
   {
     "family": "shogi",
@@ -2189,7 +2735,9 @@
     "variant": "gorogoro-plus",
     "variantTitle": "Gorogoro+",
     "topology": "grid",
-    "svg": "svgs/shogi--gorogoro-plus.svg"
+    "svg": "svgs/shogi--gorogoro-plus.svg",
+    "rulesUrl": "shogi/variants/gorogoro-plus/index.html",
+    "playable": true
   },
   {
     "family": "shogi",
@@ -2197,7 +2745,9 @@
     "variant": "hasami-shogi",
     "variantTitle": "Hasami Shogi",
     "topology": "grid",
-    "svg": "svgs/shogi--hasami-shogi.svg"
+    "svg": "svgs/shogi--hasami-shogi.svg",
+    "rulesUrl": "shogi/variants/hasami-shogi/index.html",
+    "playable": true
   },
   {
     "family": "shogi",
@@ -2205,7 +2755,9 @@
     "variant": "heian-shogi",
     "variantTitle": "Heian Shogi",
     "topology": "grid",
-    "svg": "svgs/shogi--heian-shogi.svg"
+    "svg": "svgs/shogi--heian-shogi.svg",
+    "rulesUrl": "shogi/variants/heian-shogi/index.html",
+    "playable": true
   },
   {
     "family": "shogi",
@@ -2213,7 +2765,9 @@
     "variant": "hex-shogi-91",
     "variantTitle": "Hex Shogi 91",
     "topology": "hex",
-    "svg": "svgs/shogi--hex-shogi-91.svg"
+    "svg": "svgs/shogi--hex-shogi-91.svg",
+    "rulesUrl": "shogi/variants/hex-shogi-91/index.html",
+    "playable": false
   },
   {
     "family": "shogi",
@@ -2221,7 +2775,9 @@
     "variant": "judkins-shogi",
     "variantTitle": "Judkins' Shogi",
     "topology": "grid",
-    "svg": "svgs/shogi--judkins-shogi.svg"
+    "svg": "svgs/shogi--judkins-shogi.svg",
+    "rulesUrl": "shogi/variants/judkins-shogi/index.html",
+    "playable": true
   },
   {
     "family": "shogi",
@@ -2229,7 +2785,9 @@
     "variant": "kyoto-shogi",
     "variantTitle": "Kyoto Shogi",
     "topology": "grid",
-    "svg": "svgs/shogi--kyoto-shogi.svg"
+    "svg": "svgs/shogi--kyoto-shogi.svg",
+    "rulesUrl": "shogi/variants/kyoto-shogi/index.html",
+    "playable": true
   },
   {
     "family": "shogi",
@@ -2237,7 +2795,9 @@
     "variant": "maka-dai-dai-shogi",
     "variantTitle": "Maka-Dai-Dai Shogi",
     "topology": "grid",
-    "svg": "svgs/shogi--maka-dai-dai-shogi.svg"
+    "svg": "svgs/shogi--maka-dai-dai-shogi.svg",
+    "rulesUrl": "shogi/variants/maka-dai-dai-shogi/index.html",
+    "playable": false
   },
   {
     "family": "shogi",
@@ -2245,7 +2805,9 @@
     "variant": "minishogi",
     "variantTitle": "Minishogi",
     "topology": "grid",
-    "svg": "svgs/shogi--minishogi.svg"
+    "svg": "svgs/shogi--minishogi.svg",
+    "rulesUrl": "shogi/variants/minishogi/index.html",
+    "playable": true
   },
   {
     "family": "shogi",
@@ -2253,7 +2815,9 @@
     "variant": "mortal-shogi",
     "variantTitle": "Mortal Shogi",
     "topology": "grid",
-    "svg": "svgs/shogi--mortal-shogi.svg"
+    "svg": "svgs/shogi--mortal-shogi.svg",
+    "rulesUrl": "shogi/variants/mortal-shogi/index.html",
+    "playable": false
   },
   {
     "family": "shogi",
@@ -2261,7 +2825,9 @@
     "variant": "sankaku-shogi",
     "variantTitle": "Sankaku Shogi",
     "topology": "triangular",
-    "svg": "svgs/shogi--sankaku-shogi.svg"
+    "svg": "svgs/shogi--sankaku-shogi.svg",
+    "rulesUrl": "shogi/variants/sankaku-shogi/index.html",
+    "playable": false
   },
   {
     "family": "shogi",
@@ -2269,7 +2835,9 @@
     "variant": "sho-shogi",
     "variantTitle": "Sho Shogi",
     "topology": "grid",
-    "svg": "svgs/shogi--sho-shogi.svg"
+    "svg": "svgs/shogi--sho-shogi.svg",
+    "rulesUrl": "shogi/variants/sho-shogi/index.html",
+    "playable": true
   },
   {
     "family": "shogi",
@@ -2277,7 +2845,9 @@
     "variant": "standard",
     "variantTitle": "Standard Shogi",
     "topology": "grid",
-    "svg": "svgs/shogi--standard.svg"
+    "svg": "svgs/shogi--standard.svg",
+    "rulesUrl": "shogi/variants/standard/index.html",
+    "playable": true
   },
   {
     "family": "shogi",
@@ -2285,7 +2855,9 @@
     "variant": "tai-shogi",
     "variantTitle": "Tai Shogi",
     "topology": "grid",
-    "svg": "svgs/shogi--tai-shogi.svg"
+    "svg": "svgs/shogi--tai-shogi.svg",
+    "rulesUrl": "shogi/variants/tai-shogi/index.html",
+    "playable": false
   },
   {
     "family": "shogi",
@@ -2293,7 +2865,9 @@
     "variant": "taikyoku-shogi",
     "variantTitle": "Taikyoku Shogi",
     "topology": "grid",
-    "svg": "svgs/shogi--taikyoku-shogi.svg"
+    "svg": "svgs/shogi--taikyoku-shogi.svg",
+    "rulesUrl": "shogi/variants/taikyoku-shogi/index.html",
+    "playable": false
   },
   {
     "family": "shogi",
@@ -2301,7 +2875,9 @@
     "variant": "tenjiku-shogi",
     "variantTitle": "Tenjiku Shogi",
     "topology": "grid",
-    "svg": "svgs/shogi--tenjiku-shogi.svg"
+    "svg": "svgs/shogi--tenjiku-shogi.svg",
+    "rulesUrl": "shogi/variants/tenjiku-shogi/index.html",
+    "playable": false
   },
   {
     "family": "shogi",
@@ -2309,7 +2885,9 @@
     "variant": "tori-shogi",
     "variantTitle": "Tori Shogi",
     "topology": "grid",
-    "svg": "svgs/shogi--tori-shogi.svg"
+    "svg": "svgs/shogi--tori-shogi.svg",
+    "rulesUrl": "shogi/variants/tori-shogi/index.html",
+    "playable": true
   },
   {
     "family": "shogi",
@@ -2317,7 +2895,9 @@
     "variant": "wa-shogi",
     "variantTitle": "Wa Shogi",
     "topology": "grid",
-    "svg": "svgs/shogi--wa-shogi.svg"
+    "svg": "svgs/shogi--wa-shogi.svg",
+    "rulesUrl": "shogi/variants/wa-shogi/index.html",
+    "playable": false
   },
   {
     "family": "shogi",
@@ -2325,7 +2905,9 @@
     "variant": "yari-shogi",
     "variantTitle": "Yari Shogi",
     "topology": "grid",
-    "svg": "svgs/shogi--yari-shogi.svg"
+    "svg": "svgs/shogi--yari-shogi.svg",
+    "rulesUrl": "shogi/variants/yari-shogi/index.html",
+    "playable": true
   },
   {
     "family": "standard-52",
@@ -2333,7 +2915,9 @@
     "variant": "big2",
     "variantTitle": "Big 2",
     "topology": "tableau",
-    "svg": "svgs/standard-52--big2.svg"
+    "svg": "svgs/standard-52--big2.svg",
+    "rulesUrl": "standard-52/games/big2/index.html",
+    "playable": false
   },
   {
     "family": "standard-52",
@@ -2341,7 +2925,9 @@
     "variant": "blackjack",
     "variantTitle": "Blackjack (Twenty-One)",
     "topology": "tableau",
-    "svg": "svgs/standard-52--blackjack.svg"
+    "svg": "svgs/standard-52--blackjack.svg",
+    "rulesUrl": "standard-52/games/blackjack/index.html",
+    "playable": false
   },
   {
     "family": "standard-52",
@@ -2349,7 +2935,9 @@
     "variant": "bridge",
     "variantTitle": "Rubber Bridge",
     "topology": "tableau",
-    "svg": "svgs/standard-52--bridge.svg"
+    "svg": "svgs/standard-52--bridge.svg",
+    "rulesUrl": "standard-52/games/bridge/index.html",
+    "playable": false
   },
   {
     "family": "standard-52",
@@ -2357,7 +2945,9 @@
     "variant": "canasta",
     "variantTitle": "Canasta (Classic)",
     "topology": "tableau",
-    "svg": "svgs/standard-52--canasta.svg"
+    "svg": "svgs/standard-52--canasta.svg",
+    "rulesUrl": "standard-52/games/canasta/index.html",
+    "playable": false
   },
   {
     "family": "standard-52",
@@ -2365,7 +2955,9 @@
     "variant": "crazy-eights",
     "variantTitle": "Crazy Eights",
     "topology": "tableau",
-    "svg": "svgs/standard-52--crazy-eights.svg"
+    "svg": "svgs/standard-52--crazy-eights.svg",
+    "rulesUrl": "standard-52/games/crazy-eights/index.html",
+    "playable": false
   },
   {
     "family": "standard-52",
@@ -2373,7 +2965,9 @@
     "variant": "cribbage",
     "variantTitle": "Cribbage",
     "topology": "tableau",
-    "svg": "svgs/standard-52--cribbage.svg"
+    "svg": "svgs/standard-52--cribbage.svg",
+    "rulesUrl": "standard-52/games/cribbage/index.html",
+    "playable": false
   },
   {
     "family": "standard-52",
@@ -2381,7 +2975,9 @@
     "variant": "cribbage-four-player",
     "variantTitle": "4-Player Cribbage (Partnership)",
     "topology": "tableau",
-    "svg": "svgs/standard-52--cribbage-four-player.svg"
+    "svg": "svgs/standard-52--cribbage-four-player.svg",
+    "rulesUrl": "",
+    "playable": false
   },
   {
     "family": "standard-52",
@@ -2389,7 +2985,9 @@
     "variant": "cribbage-three-player",
     "variantTitle": "3-Player Cribbage",
     "topology": "tableau",
-    "svg": "svgs/standard-52--cribbage-three-player.svg"
+    "svg": "svgs/standard-52--cribbage-three-player.svg",
+    "rulesUrl": "",
+    "playable": false
   },
   {
     "family": "standard-52",
@@ -2397,7 +2995,9 @@
     "variant": "euchre",
     "variantTitle": "Euchre",
     "topology": "tableau",
-    "svg": "svgs/standard-52--euchre.svg"
+    "svg": "svgs/standard-52--euchre.svg",
+    "rulesUrl": "standard-52/games/euchre/index.html",
+    "playable": false
   },
   {
     "family": "standard-52",
@@ -2405,7 +3005,9 @@
     "variant": "freecell",
     "variantTitle": "FreeCell",
     "topology": "tableau",
-    "svg": "svgs/standard-52--freecell.svg"
+    "svg": "svgs/standard-52--freecell.svg",
+    "rulesUrl": "standard-52/games/freecell/index.html",
+    "playable": false
   },
   {
     "family": "standard-52",
@@ -2413,7 +3015,9 @@
     "variant": "gin-rummy",
     "variantTitle": "Gin Rummy",
     "topology": "tableau",
-    "svg": "svgs/standard-52--gin-rummy.svg"
+    "svg": "svgs/standard-52--gin-rummy.svg",
+    "rulesUrl": "standard-52/games/gin-rummy/index.html",
+    "playable": false
   },
   {
     "family": "standard-52",
@@ -2421,7 +3025,9 @@
     "variant": "hearts",
     "variantTitle": "Hearts",
     "topology": "tableau",
-    "svg": "svgs/standard-52--hearts.svg"
+    "svg": "svgs/standard-52--hearts.svg",
+    "rulesUrl": "standard-52/games/hearts/index.html",
+    "playable": false
   },
   {
     "family": "standard-52",
@@ -2429,7 +3035,9 @@
     "variant": "klondike",
     "variantTitle": "Klondike Solitaire",
     "topology": "tableau",
-    "svg": "svgs/standard-52--klondike.svg"
+    "svg": "svgs/standard-52--klondike.svg",
+    "rulesUrl": "standard-52/games/klondike/index.html",
+    "playable": false
   },
   {
     "family": "standard-52",
@@ -2437,7 +3045,9 @@
     "variant": "poker",
     "variantTitle": "Texas Hold'em Poker",
     "topology": "tableau",
-    "svg": "svgs/standard-52--poker.svg"
+    "svg": "svgs/standard-52--poker.svg",
+    "rulesUrl": "standard-52/games/poker/index.html",
+    "playable": false
   },
   {
     "family": "standard-52",
@@ -2445,7 +3055,9 @@
     "variant": "president",
     "variantTitle": "President",
     "topology": "tableau",
-    "svg": "svgs/standard-52--president.svg"
+    "svg": "svgs/standard-52--president.svg",
+    "rulesUrl": "standard-52/games/president/index.html",
+    "playable": false
   },
   {
     "family": "standard-52",
@@ -2453,7 +3065,9 @@
     "variant": "rummy",
     "variantTitle": "Rummy",
     "topology": "tableau",
-    "svg": "svgs/standard-52--rummy.svg"
+    "svg": "svgs/standard-52--rummy.svg",
+    "rulesUrl": "standard-52/games/rummy/index.html",
+    "playable": false
   },
   {
     "family": "standard-52",
@@ -2461,7 +3075,9 @@
     "variant": "spades",
     "variantTitle": "Spades",
     "topology": "tableau",
-    "svg": "svgs/standard-52--spades.svg"
+    "svg": "svgs/standard-52--spades.svg",
+    "rulesUrl": "standard-52/games/spades/index.html",
+    "playable": false
   },
   {
     "family": "standard-52",
@@ -2469,7 +3085,9 @@
     "variant": "spider-solitaire",
     "variantTitle": "Spider Solitaire",
     "topology": "tableau",
-    "svg": "svgs/standard-52--spider-solitaire.svg"
+    "svg": "svgs/standard-52--spider-solitaire.svg",
+    "rulesUrl": "standard-52/games/spider-solitaire/index.html",
+    "playable": false
   },
   {
     "family": "standard-52",
@@ -2477,7 +3095,9 @@
     "variant": "war",
     "variantTitle": "War",
     "topology": "tableau",
-    "svg": "svgs/standard-52--war.svg"
+    "svg": "svgs/standard-52--war.svg",
+    "rulesUrl": "standard-52/games/war/index.html",
+    "playable": false
   },
   {
     "family": "standard-52",
@@ -2485,7 +3105,9 @@
     "variant": "whist",
     "variantTitle": "Whist",
     "topology": "tableau",
-    "svg": "svgs/standard-52--whist.svg"
+    "svg": "svgs/standard-52--whist.svg",
+    "rulesUrl": "standard-52/games/whist/index.html",
+    "playable": false
   },
   {
     "family": "standard-dice",
@@ -2493,7 +3115,9 @@
     "variant": "bunco",
     "variantTitle": "Bunco",
     "topology": "tableau",
-    "svg": "svgs/standard-dice--bunco.svg"
+    "svg": "svgs/standard-dice--bunco.svg",
+    "rulesUrl": "standard-dice/games/bunco/index.html",
+    "playable": false
   },
   {
     "family": "standard-dice",
@@ -2501,7 +3125,9 @@
     "variant": "craps",
     "variantTitle": "Craps",
     "topology": "tableau",
-    "svg": "svgs/standard-dice--craps.svg"
+    "svg": "svgs/standard-dice--craps.svg",
+    "rulesUrl": "standard-dice/games/craps/index.html",
+    "playable": false
   },
   {
     "family": "standard-dice",
@@ -2509,7 +3135,9 @@
     "variant": "farkle",
     "variantTitle": "Farkle",
     "topology": "tableau",
-    "svg": "svgs/standard-dice--farkle.svg"
+    "svg": "svgs/standard-dice--farkle.svg",
+    "rulesUrl": "standard-dice/games/farkle/index.html",
+    "playable": false
   },
   {
     "family": "standard-dice",
@@ -2517,7 +3145,9 @@
     "variant": "liars-dice",
     "variantTitle": "Liar's Dice",
     "topology": "tableau",
-    "svg": "svgs/standard-dice--liars-dice.svg"
+    "svg": "svgs/standard-dice--liars-dice.svg",
+    "rulesUrl": "standard-dice/games/liars-dice/index.html",
+    "playable": false
   },
   {
     "family": "standard-dice",
@@ -2525,7 +3155,9 @@
     "variant": "yahtzee",
     "variantTitle": "Yahtzee",
     "topology": "tableau",
-    "svg": "svgs/standard-dice--yahtzee.svg"
+    "svg": "svgs/standard-dice--yahtzee.svg",
+    "rulesUrl": "standard-dice/games/yahtzee/index.html",
+    "playable": false
   },
   {
     "family": "stern-halma",
@@ -2533,7 +3165,9 @@
     "variant": "standard-2p",
     "variantTitle": "Standard 2-Player Stern-Halma",
     "topology": "graph",
-    "svg": "svgs/stern-halma--standard-2p.svg"
+    "svg": "svgs/stern-halma--standard-2p.svg",
+    "rulesUrl": "stern-halma/variants/standard-2p/index.html",
+    "playable": false
   },
   {
     "family": "stern-halma",
@@ -2541,7 +3175,9 @@
     "variant": "standard-3p",
     "variantTitle": "Standard 3-Player Stern-Halma",
     "topology": "graph",
-    "svg": "svgs/stern-halma--standard-3p.svg"
+    "svg": "svgs/stern-halma--standard-3p.svg",
+    "rulesUrl": "stern-halma/variants/standard-3p/index.html",
+    "playable": false
   },
   {
     "family": "stern-halma",
@@ -2549,7 +3185,9 @@
     "variant": "standard-4p",
     "variantTitle": "Standard 4-Player Stern-Halma",
     "topology": "graph",
-    "svg": "svgs/stern-halma--standard-4p.svg"
+    "svg": "svgs/stern-halma--standard-4p.svg",
+    "rulesUrl": "stern-halma/variants/standard-4p/index.html",
+    "playable": false
   },
   {
     "family": "stern-halma",
@@ -2557,7 +3195,9 @@
     "variant": "standard-6p",
     "variantTitle": "Standard 6-Player Stern-Halma",
     "topology": "graph",
-    "svg": "svgs/stern-halma--standard-6p.svg"
+    "svg": "svgs/stern-halma--standard-6p.svg",
+    "rulesUrl": "stern-halma/variants/standard-6p/index.html",
+    "playable": false
   },
   {
     "family": "stern-halma",
@@ -2565,7 +3205,9 @@
     "variant": "super-chinese-checkers",
     "variantTitle": "Super Chinese Checkers",
     "topology": "graph",
-    "svg": "svgs/stern-halma--super-chinese-checkers.svg"
+    "svg": "svgs/stern-halma--super-chinese-checkers.svg",
+    "rulesUrl": "stern-halma/variants/super-chinese-checkers/index.html",
+    "playable": false
   },
   {
     "family": "surakarta",
@@ -2573,7 +3215,9 @@
     "variant": "standard",
     "variantTitle": "Surakarta (Standard)",
     "topology": "grid",
-    "svg": "svgs/surakarta--standard.svg"
+    "svg": "svgs/surakarta--standard.svg",
+    "rulesUrl": "surakarta/index.html",
+    "playable": false
   },
   {
     "family": "tafl",
@@ -2581,7 +3225,9 @@
     "variant": "brandubh",
     "variantTitle": "Brandubh",
     "topology": "grid",
-    "svg": "svgs/tafl--brandubh.svg"
+    "svg": "svgs/tafl--brandubh.svg",
+    "rulesUrl": "tafl/variants/brandubh/index.html",
+    "playable": false
   },
   {
     "family": "tafl",
@@ -2589,7 +3235,9 @@
     "variant": "hnefatafl",
     "variantTitle": "Hnefatafl",
     "topology": "grid",
-    "svg": "svgs/tafl--hnefatafl.svg"
+    "svg": "svgs/tafl--hnefatafl.svg",
+    "rulesUrl": "tafl/variants/hnefatafl/index.html",
+    "playable": false
   },
   {
     "family": "tafl",
@@ -2597,7 +3245,9 @@
     "variant": "standard",
     "variantTitle": "Tablut",
     "topology": "grid",
-    "svg": "svgs/tafl--standard.svg"
+    "svg": "svgs/tafl--standard.svg",
+    "rulesUrl": "tafl/variants/standard/index.html",
+    "playable": false
   },
   {
     "family": "tafl",
@@ -2605,7 +3255,9 @@
     "variant": "tawlbwrdd",
     "variantTitle": "Tawlbwrdd",
     "topology": "grid",
-    "svg": "svgs/tafl--tawlbwrdd.svg"
+    "svg": "svgs/tafl--tawlbwrdd.svg",
+    "rulesUrl": "tafl/variants/tawlbwrdd/index.html",
+    "playable": false
   },
   {
     "family": "xiangqi",
@@ -2613,7 +3265,9 @@
     "variant": "janggi",
     "variantTitle": "Janggi",
     "topology": "grid",
-    "svg": "svgs/xiangqi--janggi.svg"
+    "svg": "svgs/xiangqi--janggi.svg",
+    "rulesUrl": "xiangqi/variants/janggi/index.html",
+    "playable": true
   },
   {
     "family": "xiangqi",
@@ -2621,7 +3275,9 @@
     "variant": "jieqi",
     "variantTitle": "Jieqi",
     "topology": "grid",
-    "svg": "svgs/xiangqi--jieqi.svg"
+    "svg": "svgs/xiangqi--jieqi.svg",
+    "rulesUrl": "xiangqi/variants/jieqi/index.html",
+    "playable": false
   },
   {
     "family": "xiangqi",
@@ -2629,7 +3285,9 @@
     "variant": "manchu-plus",
     "variantTitle": "Manchu+",
     "topology": "grid",
-    "svg": "svgs/xiangqi--manchu-plus.svg"
+    "svg": "svgs/xiangqi--manchu-plus.svg",
+    "rulesUrl": "xiangqi/variants/manchu-plus/index.html",
+    "playable": true
   },
   {
     "family": "xiangqi",
@@ -2637,7 +3295,9 @@
     "variant": "minixiangqi",
     "variantTitle": "Minixiangqi",
     "topology": "grid",
-    "svg": "svgs/xiangqi--minixiangqi.svg"
+    "svg": "svgs/xiangqi--minixiangqi.svg",
+    "rulesUrl": "xiangqi/variants/minixiangqi/index.html",
+    "playable": true
   },
   {
     "family": "xiangqi",
@@ -2645,7 +3305,9 @@
     "variant": "quang-trung",
     "variantTitle": "Quang Trung Chess",
     "topology": "grid",
-    "svg": "svgs/xiangqi--quang-trung.svg"
+    "svg": "svgs/xiangqi--quang-trung.svg",
+    "rulesUrl": "xiangqi/variants/quang-trung/index.html",
+    "playable": true
   },
   {
     "family": "xiangqi",
@@ -2653,7 +3315,9 @@
     "variant": "standard",
     "variantTitle": "Standard Xiangqi",
     "topology": "grid",
-    "svg": "svgs/xiangqi--standard.svg"
+    "svg": "svgs/xiangqi--standard.svg",
+    "rulesUrl": "xiangqi/variants/standard/index.html",
+    "playable": true
   },
   {
     "family": "xiangqi",
@@ -2661,7 +3325,9 @@
     "variant": "xiangqi-42",
     "variantTitle": "Xiangqi 42",
     "topology": "grid",
-    "svg": "svgs/xiangqi--xiangqi-42.svg"
+    "svg": "svgs/xiangqi--xiangqi-42.svg",
+    "rulesUrl": "xiangqi/variants/xiangqi-42/index.html",
+    "playable": true
   },
   {
     "family": "xiangqi",
@@ -2669,6 +3335,8 @@
     "variant": "yang-qi",
     "variantTitle": "Yáng Qí",
     "topology": "grid",
-    "svg": "svgs/xiangqi--yang-qi.svg"
+    "svg": "svgs/xiangqi--yang-qi.svg",
+    "rulesUrl": "xiangqi/variants/yang-qi/index.html",
+    "playable": false
   }
 ]
