@@ -133,6 +133,28 @@ describe('Rollerball: forward is clockwise (engine#170)', () => {
     expect(movesFrom(g, 'e2')).toEqual(['a4', 'b3', 'c2', 'd1', 'f1', 'f3'].sort())
   })
 
+  it('promotes a pawn that reaches the opposing pawns\' starting squares', () => {
+    // "When reaching the starting square of opposite Pawns it promotes to
+    // either a Rook or a Bishop." White's pawns start on c1 and c2, Black's on
+    // e6 and e7, so White promotes on e6 and e7.
+    const g = game()
+    // d6 is in the north zone, where forward is east - so it steps onto e6.
+    only(g, [['d6', 'pawn', 0], ['a4', 'king', 0], ['a1', 'king', 1]])
+    const promos = g.getLegalMoves().filter(m => m.from === at('d', 6) && m.promotion)
+    expect(promos.length).toBeGreaterThan(0)
+    expect([...new Set(promos.map(m => m.promotion))].sort()).toEqual(['bishop', 'rook'])
+    // The pawn's three forward offsets from d6 point at e5, e6 and e7. e5 is
+    // inside the hole, and e6 and e7 are both starting squares of Black's pawns,
+    // so every move it has is a promotion.
+    expect([...new Set(promos.map(m => alg(m.to)))].sort()).toEqual(['e6', 'e7'])
+  })
+
+  it('does not promote elsewhere on the board', () => {
+    const g = game()
+    only(g, [['c1', 'pawn', 0], ['a4', 'king', 0], ['a1', 'king', 1]])
+    expect(g.getLegalMoves().filter(m => m.from === at('c', 1) && m.promotion)).toEqual([])
+  })
+
   it('sends both players the same way round the ring', () => {
     const g = game()
     only(g, [['d2', 'king', 0], ['d6', 'king', 1], ['e7', 'pawn', 1], ['a1', 'pawn', 0]])
