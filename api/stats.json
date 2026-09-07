@@ -9,7 +9,7 @@
     "standard": 1116,
     "variants": 610
   },
-  "playableVariants": 217,
+  "playableVariants": 218,
   "playableFamilies": 10,
   "playableByFamily": {
     "chess": 141,
@@ -20,7 +20,7 @@
     "mancala": 8,
     "morris": 7,
     "reversi": 3,
-    "shogi": 15,
+    "shogi": 16,
     "xiangqi": 4
   },
   "variantPluginsByFamily": {
@@ -44,11 +44,11 @@
     "mancala": 8,
     "morris": 7,
     "reversi": 3,
-    "shogi": 15,
+    "shogi": 16,
     "xiangqi": 4
   },
-  "tests": 6831,
-  "testsPassing": 6825,
-  "testSuites": 208,
+  "tests": 6849,
+  "testsPassing": 6843,
+  "testSuites": 209,
   "snapshots": 334
 }

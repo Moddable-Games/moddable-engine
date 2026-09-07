@@ -169,6 +169,8 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-07
+- Kyoto Shogi plays. It has no promotion zone at all: every piece but the King flips to its other face after every move, so the flip is applied rather than offered. A piece in hand is two moves rather than one, because a captured piece may be dropped with either side up
+- Its setup string and its own piece table disagreed about where the King stands, and the string also wrote a Tokin as a Lance. The sources give T-S-K-G-P, which is the table
 - Annan Shogi plays. Each piece borrows the move of the friendly piece directly behind it, so a Pawn with a Rook behind it attacks along the whole rank and file - and gets its own single step back the moment the Rook leaves. The borrow reads one square and stops, because it is not transitive
 - The "capture the enabler behind the checker" escape its entry warned about needs no special handling: legality is tested by simulating the move, and after the capture the checker is no longer borrowing anything
 - An empty list in a Create page rule was dropped as meaningless. Where the default has entries, empty is a real and different value, and Annan was silently given back the drop restriction it declares it does not have

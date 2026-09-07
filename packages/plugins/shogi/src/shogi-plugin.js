@@ -4,7 +4,7 @@ import { fromConfig } from '../../../piece-behaviour/index.js'
 // authoring docs share one source of truth, and kept separate from `defaults`,
 // which only lists the keys that carry a default value.
 export const CONFIG_KEYS = new Set([
-  'advancement', 'afterMove', 'borrowFromBehind', 'captureRule', 'cols',
+  'advancement', 'afterMove', 'borrowFromBehind', 'captureRule', 'cols', 'flipMap',
   'dropCheckmateLimit', 'dropPawnFileLimit', 'drops', 'initialHands', 'moveFilter',
   'nifuLimit', 'nifuType', 'noDropLastRank', 'noDropSecondRank', 'pieceMoves',
   'pieceRotations', 'playerCount', 'promotionMap', 'promotionPieces', 'promotionZone',
@@ -262,7 +262,13 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     // over 150 plies, and left three pieces standing in them (engine#158).
     const cells = playableCells(board)
 
-    for (const type of uniqueTypes) {
+    // "A captured piece may be dropped with either side facing up", so a piece
+    // in hand is two moves rather than one.
+    const faces = config.flipMap
+      ? [...new Set(uniqueTypes.flatMap(t => (config.flipMap[t] ? [t, config.flipMap[t]] : [t])))]
+      : uniqueTypes
+
+    for (const type of faces) {
       for (const i of cells) {
         if (board[i] !== null) continue
 
@@ -437,7 +443,14 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
 
       if (move.action === 'drop') {
         board[move.to] = { type: move.type, owner: playerIndex }
-        const idx = hands[playerIndex].indexOf(move.type)
+        // The hand holds one face and the drop may show the other, so the piece
+        // being spent is the one under either name. Looking only for the face
+        // dropped left the counterpart in hand and put a second copy of it on
+        // the board.
+        let idx = hands[playerIndex].indexOf(move.type)
+        if (idx === -1 && config.flipMap && config.flipMap[move.type]) {
+          idx = hands[playerIndex].indexOf(config.flipMap[move.type])
+        }
         if (idx !== -1) hands[playerIndex].splice(idx, 1)
         let droppedSlice = { ...slice, board, hands }
         if (config.afterMove) {
@@ -466,6 +479,13 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
       if (move.promote) {
         const promoted = getPromotedType(piece.type)
         if (promoted) newType = promoted
+      }
+      // Kyoto Shogi has no promotion zone: "every time a piece makes a move it
+      // alternately promotes and reverts". The flip is a property of having
+      // moved, not of where the piece started or landed, so it is applied here
+      // rather than offered as a choice.
+      if (config.flipMap && config.flipMap[newType]) {
+        newType = config.flipMap[newType]
       }
 
       board[move.to] = { type: newType, owner: playerIndex }
