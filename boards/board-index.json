@@ -302,16 +302,6 @@
   {
     "family": "chess",
     "familyTitle": "Chess — Official Rulebook",
-    "variant": "blind-chess",
-    "variantTitle": "Blind Chess (Banqi)",
-    "topology": "grid",
-    "svg": "svgs/chess--blind-chess.svg",
-    "rulesUrl": "chess/variants/blind-chess/index.html",
-    "playable": false
-  },
-  {
-    "family": "chess",
-    "familyTitle": "Chess — Official Rulebook",
     "variant": "breakthrough",
     "variantTitle": "Breakthrough",
     "topology": "grid",
@@ -3257,6 +3247,16 @@
     "topology": "grid",
     "svg": "svgs/tafl--tawlbwrdd.svg",
     "rulesUrl": "tafl/variants/tawlbwrdd/index.html",
+    "playable": false
+  },
+  {
+    "family": "xiangqi",
+    "familyTitle": "Xiangqi — Official Rulebook",
+    "variant": "banqi",
+    "variantTitle": "Banqi (Half Chess)",
+    "topology": "grid",
+    "svg": "svgs/xiangqi--banqi.svg",
+    "rulesUrl": "xiangqi/variants/banqi/index.html",
     "playable": false
   },
   {

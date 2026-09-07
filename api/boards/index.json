@@ -155,11 +155,6 @@
       "url": "/boards/svgs/chess--birds-chess.svg"
     },
     {
-      "id": "chess--blind-chess",
-      "file": "chess--blind-chess.svg",
-      "url": "/boards/svgs/chess--blind-chess.svg"
-    },
-    {
       "id": "chess--breakthrough",
       "file": "chess--breakthrough.svg",
       "url": "/boards/svgs/chess--breakthrough.svg"
@@ -1633,6 +1628,11 @@
       "id": "tafl--tawlbwrdd",
       "file": "tafl--tawlbwrdd.svg",
       "url": "/boards/svgs/tafl--tawlbwrdd.svg"
+    },
+    {
+      "id": "xiangqi--banqi",
+      "file": "xiangqi--banqi.svg",
+      "url": "/boards/svgs/xiangqi--banqi.svg"
     },
     {
       "id": "xiangqi--janggi",
