@@ -116,8 +116,21 @@ test.describe('every playable family answers a click', () => {
         return null
       }, point)
 
-      const atRest = await shapeCentres()
-      const restKeys = new Set(atRest.map(s => `${s.x.toFixed(1)},${s.y.toFixed(1)}`))
+      // Counted per centre, not merely present. Asking "is this centre new?"
+      // works on a board that draws nothing on an empty square and fails on
+      // every board that draws a marker at every point: Alquerque already has
+      // two shapes centred on the empty middle point, so the indicator that
+      // appears there is at a centre the board has always had, and no
+      // indicator was ever detectable. A count says one more shape is at that
+      // centre than there was, which is the thing actually being asked.
+      const centreKey = (s) => `${s.x.toFixed(1)},${s.y.toFixed(1)}`
+      const tally = (shapes) => {
+        const counts = new Map()
+        for (const s of shapes) counts.set(centreKey(s), (counts.get(centreKey(s)) || 0) + 1)
+        return counts
+      }
+
+      const restCounts = tally(await shapeCentres())
       let played = false
 
       for (const from of ids) {
@@ -126,7 +139,11 @@ test.describe('every playable family answers a click', () => {
         if (((await historyText()) || '').trim() !== startLog) { played = true; break }
 
         const now = await shapeCentres()
-        const appeared = now.filter(s => !restKeys.has(`${s.x.toFixed(1)},${s.y.toFixed(1)}`))
+        const nowCounts = tally(now)
+        const grown = new Set(
+          [...nowCounts].filter(([key, n]) => n > (restCounts.get(key) || 0)).map(([key]) => key)
+        )
+        const appeared = now.filter(s => grown.has(centreKey(s)))
         for (const point of appeared.slice(0, 4)) {
           const target = await cellUnder(point)
           if (!target || target === from) continue

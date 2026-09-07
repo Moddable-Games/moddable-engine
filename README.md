@@ -169,6 +169,7 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-07
+- The e2e sweep that requires every playable family to answer a click could not see a move indicator on an intersection board. It identified one as a shape centre that did not exist when the board was at rest, which is true of a square only while nothing is drawn on it: Alquerque draws a marker at every point, so the indicator on its empty middle landed on a centre the board always had. It counts shapes per centre now, and Alquerque plays in the browser as it always did
 - The board gallery offers a Rules link on every board and a Play link on the 220 the engine can start. A diagram is not a game, so a board that cannot be played is offered no Play link rather than one that lands nowhere
 - Those Rules URLs are read from moddable-rules rather than composed here. `family/variants/slug/` is right for most variants and wrong for every single-variant game, whose only page is `family/index.html`. moddable-rules resolves each URL against the site it actually built; the gallery reads that answer, and a test resolves all 332 against the built pages so a guessed shape cannot pass again
 - Where those pages can be read from depends on how the checkout is served - `dist/` locally, `_site/` assembled, the site root deployed - so `play-shared.js` probes for the root that answers instead of assuming one
