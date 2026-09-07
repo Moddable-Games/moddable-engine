@@ -168,6 +168,11 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Changelog
 
+#### 2026-09-07
+- Dameo, Bashni and Lasca play, and the draughts family is complete at 20 of 20. Dameo adds the phalanx: a straight unbroken line of men slides forward as one, which on the board is the rearmost man relocating past the head
+- Bashni and Lasca take nothing off the board. A captured piece goes to the bottom of the column that took it, only the top of a captured column is taken, and the rest is uncovered and handed to whoever is now on top. A square holds an ordered column, and everything that reads ownership, move type or promotion still reads its top
+- A column of seven rendered as a single man. The live board now carries its depths and marks any square holding more than one piece, because a surface that cannot show what is buried is not a surface anyone can play on
+
 #### 2026-09-06
 - Ultima plays. Its premise is that every piece has its own way of taking and none of them is "move onto it", and the engine gave all seven the queen's slide and ordinary displacement capture - so the movement was right and the game was not. Withdrawal, coordination, leaping, pinching, immobilisation and the Chameleon's mimicry are all in, and the King is taken outright rather than mated
 - Bao plays, and the mancala family is now entirely configuration. It is the one variant that is not two players sharing a ring: each has a private sixteen-pit circuit, inner row and outer, and a sow never leaves the sower's half. The capture is the only thing that crosses

@@ -1280,6 +1280,15 @@
   {
     "family": "draughts",
     "familyLabel": "Draughts",
+    "variant": "bashni",
+    "key": "bashni",
+    "label": "Bashni",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "draughts",
+    "familyLabel": "Draughts",
     "variant": "brazilian",
     "key": "brazilian",
     "label": "Brazilian Draughts",
@@ -1301,6 +1310,15 @@
     "variant": "czech",
     "key": "czech",
     "label": "Czech Draughts",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "draughts",
+    "familyLabel": "Draughts",
+    "variant": "dameo",
+    "key": "dameo",
+    "label": "Dameo",
     "group": "Other",
     "playable": true
   },
@@ -1364,6 +1382,15 @@
     "variant": "italian",
     "key": "italian",
     "label": "Italian Draughts",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "draughts",
+    "familyLabel": "Draughts",
+    "variant": "lasca",
+    "key": "lasca",
+    "label": "Lasca",
     "group": "Other",
     "playable": true
   },

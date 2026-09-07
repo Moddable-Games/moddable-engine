@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-06",
+  "generated": "2026-09-07",
   "pieces": 117,
   "boards": 334,
   "boardFamilies": 33,
@@ -9,11 +9,11 @@
     "standard": 1116,
     "variants": 610
   },
-  "playableVariants": 213,
+  "playableVariants": 216,
   "playableFamilies": 10,
   "playableByFamily": {
     "chess": 141,
-    "draughts": 17,
+    "draughts": 20,
     "go": 10,
     "hex": 8,
     "landlords-game": 1,
@@ -37,7 +37,7 @@
   },
   "frontmatterOnlyByFamily": {
     "chess": 87,
-    "draughts": 17,
+    "draughts": 20,
     "go": 7,
     "hex": 8,
     "landlords-game": 1,
@@ -47,8 +47,8 @@
     "shogi": 14,
     "xiangqi": 4
   },
-  "tests": 6767,
-  "testsPassing": 6761,
-  "testSuites": 205,
+  "tests": 6814,
+  "testsPassing": 6808,
+  "testSuites": 207,
   "snapshots": 334
 }

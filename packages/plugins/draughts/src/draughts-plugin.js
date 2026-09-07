@@ -4,7 +4,7 @@ import { warnUnknownConfigKeys } from '../../../core/index.js'
 // which only lists the keys that carry a default value.
 export const CONFIG_KEYS = new Set([
   'captureBackward', 'captureDirections', 'cols', 'directions', 'flyingKings', 'forcedCapture',
-  'kingMoveLimit',
+  'columns', 'kingMoveLimit', 'phalanx',
   'kingCapturePriority', 'kingLandsBehindCapture', 'loseOnSinglePiece', 'majorityPrefersKing',
   'manCapture', 'manMove',
   'maximalCapture', 'menCannotCaptureKings', 'piecesPerPlayer', 'playerCount',
@@ -72,10 +72,11 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
     if (config.directions === 'orthogonal') {
       return [[fwd, 0], [0, -1], [0, 1]]
     }
-    // Alquerque's lines run both ways at once, so forward is every direction
-    // that is not straight backwards.
+    // On a board with all eight directions, forward is the three that go
+    // forward. Dameo's men move "one square forward - straight ahead or
+    // diagonally forward. Never sideways, never backwards."
     if (config.directions === 'all') {
-      return [[fwd, 0], [0, -1], [0, 1], [fwd, -1], [fwd, 1]]
+      return [[fwd, 0], [fwd, -1], [fwd, 1]]
     }
     return [[fwd, -1], [fwd, 1]]
   }
@@ -222,6 +223,53 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
           if (board[target] !== null) break
           moves.push({ from: i, to: target })
         }
+      }
+    }
+    return moves
+  }
+
+  // Dameo's phalanx: "A straight unbroken line of men of the same colour may
+  // slide one square forward along the axis it occupies, provided the square in
+  // front of the head of the line is vacant." On the board that reads as the
+  // rearmost man relocating to the empty square just beyond the head, which is
+  // one piece moving and so needs nothing new from applyMove.
+  //
+  // Only the three forward axes: a line lying across the board has no forward
+  // along itself to slide.
+  function findPhalanxMoves(board, playerIndex) {
+    if (!config.phalanx) return []
+    const moves = []
+    for (const [dr, dc] of forwardDirs(playerIndex)) {
+      for (let i = 0; i < board.length; i++) {
+        const piece = board[i]
+        if (!piece || piece.owner !== playerIndex || piece.type !== 'man') continue
+        const [r, c] = rowCol(i)
+
+        // Only the rear of a run starts one, or the same line would be offered
+        // once per man in it.
+        const br = r - dr
+        const bc = c - dc
+        if (inBounds(br, bc)) {
+          const behind = board[cellIndex(br, bc)]
+          if (behind && behind.owner === playerIndex && behind.type === 'man') continue
+        }
+
+        let length = 0
+        let hr = r
+        let hc = c
+        while (inBounds(hr, hc)) {
+          const cell = board[cellIndex(hr, hc)]
+          if (!cell || cell.owner !== playerIndex || cell.type !== 'man') break
+          length++
+          hr += dr
+          hc += dc
+        }
+
+        // A run of one is an ordinary move and is generated as one.
+        if (length < 2) continue
+        if (!inBounds(hr, hc)) continue
+        if (board[cellIndex(hr, hc)]) continue
+        moves.push({ from: i, to: cellIndex(hr, hc), phalanx: true })
       }
     }
     return moves
@@ -453,16 +501,35 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
       const piece = board[move.from]
       board[move.from] = null
 
-      if (move.captures && move.captures.length > 0) {
+      // Bashni and Lasca take nothing off the board. A captured piece goes to
+      // the bottom of the column that took it, and only the TOP piece of a
+      // captured column is taken - what it was standing on stays where it is,
+      // now commanded by whoever has been uncovered. So a capture never reduces
+      // the pieces in play; it moves one from the top of one column to the
+      // bottom of another, and may hand the rest to the other player.
+      let carried = piece
+      if (config.columns && move.captures && move.captures.length > 0) {
+        const prisoners = [...(piece.under || [])]
+        for (const cap of move.captures) {
+          const column = board[cap]
+          if (!column) continue
+          prisoners.push({ type: column.type, owner: column.owner })
+          const beneath = column.under || []
+          board[cap] = beneath.length
+            ? { type: beneath[0].type, owner: beneath[0].owner, under: beneath.slice(1) }
+            : null
+        }
+        carried = { ...piece, under: prisoners }
+      } else if (move.captures && move.captures.length > 0) {
         for (const cap of move.captures) {
           board[cap] = null
         }
       }
 
-      let landingPiece = piece
+      let landingPiece = carried
       const [landingRow] = rowCol(move.to)
       if (piece.type === 'man' && isPromotionRank(landingRow, playerIndex)) {
-        landingPiece = { ...piece, type: 'king' }
+        landingPiece = { ...carried, type: 'king' }
       }
       board[move.to] = landingPiece
 
@@ -540,7 +607,8 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
       }
 
       const simpleMoves = applyKingMoveLimit(findSimpleMoves(slice.board, playerIndex), slice, playerIndex)
-      return hooks.moveFilter([...captures, ...simpleMoves], slice, full)
+      const phalanxMoves = findPhalanxMoves(slice.board, playerIndex)
+      return hooks.moveFilter([...captures, ...simpleMoves, ...phalanxMoves], slice, full)
     },
 
     checkWin(slice, full) {

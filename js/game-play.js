@@ -432,6 +432,13 @@ export function createPlaySession(options = {}) {
     }
     const setup = boardToSetup(visibleSlice, resolvedBoard.topology)
     const rendered = { ...resolvedBoard, setup }
+    // Bashni and Lasca bury captured pieces beneath the piece that took them, so
+    // a square can hold a column seven deep and the position string carries only
+    // its top - which is who commands it, and not how much is under him. Passed
+    // alongside, the way a pit board's seed counts are, because it is a property
+    // of the live game rather than of the opening position.
+    const depths = columnDepths(visibleSlice, resolvedBoard.topology)
+    if (depths) rendered.render = { ...(rendered.render || {}), _columnDepths: depths }
     if (currentPieceSet !== 'auto') {
       rendered.pieces = { ...rendered.pieces, set: currentPieceSet }
     }
@@ -916,6 +923,27 @@ export function createPlaySession(options = {}) {
     return 0
   }
 
+
+  // How many pieces stand on each square, where that can be more than one.
+  // Null for every board that cannot stack, so nothing else changes.
+  function columnDepths(slice, topo) {
+    const board = slice?.board
+    const cols = topo?.cols
+    const rows = topo?.rows
+    if (!Array.isArray(board) || !cols || !rows) return null
+    let any = false
+    const depths = {}
+    for (let i = 0; i < board.length; i++) {
+      const cell = board[i]
+      const buried = cell && Array.isArray(cell.under) ? cell.under.length : 0
+      if (buried <= 0) continue
+      const file = 'abcdefghijklmnopqrstuvwxyz'[i % cols]
+      const rank = rows - Math.trunc(i / cols)
+      depths[`${file}${rank}`] = buried + 1
+      any = true
+    }
+    return any ? depths : null
+  }
 
   function boardToSetup(slice, topo) {
     return serialiseBoard(slice, topo, (pluginFor() || {}).vocabulary || {}, { players: playerNames() })

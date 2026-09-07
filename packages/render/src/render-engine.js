@@ -344,7 +344,7 @@ export function renderFromEngine(resolved, opts = {}) {
     if (opts.flipped && !effectiveRotations && resolved.pieces?.directional) {
       effectiveRotations = Object.fromEntries((resolved.players || ['white', 'black']).map(p => [p, 180]))
     }
-    parts.push(`<g pointer-events="none">${renderPiecesFromCells(displayPosition, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: effectiveRotations, getOwner, pieceDefs: opts.pieceDefs, colors, vocabulary: resolved.vocabulary || {}, pieceScale: render.pieceScale })}</g>`)
+    parts.push(`<g pointer-events="none">${renderPiecesFromCells(displayPosition, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: effectiveRotations, getOwner, pieceDefs: opts.pieceDefs, colors, vocabulary: resolved.vocabulary || {}, pieceScale: render.pieceScale, columnDepths: render._columnDepths, cols: topo.cols, flipped: opts.flipped, rows: topo.rows })}</g>`)
   } else if (position && Object.keys(position).length > 0) {
     parts.push(`<g pointer-events="none"></g>`)
   }
@@ -450,6 +450,13 @@ function renderPiecesFromCells(position, cells, tileSize, opts) {
   // Opt-in per board, so the 331 that look right keep looking exactly the same.
   const scale = opts.pieceScale || 1
   const drawSize = tileSize * scale
+
+  // A column of buried pieces reads as one piece unless it says how deep it is.
+  // Bashni takes nothing off the board, so a square can hold seven and the
+  // player has to be able to see it.
+  // Keyed by the same square id the position is keyed by, so there is no second
+  // convention to keep in step with the first.
+  const depths = opts.columnDepths || null
   for (const [alg, raw] of Object.entries(position)) {
     const cell = cellMap.get(alg)
     if (!cell) continue
@@ -494,7 +501,17 @@ function renderPiecesFromCells(position, cells, tileSize, opts) {
       const x = pos.x - drawSize / 2, y = pos.y - drawSize / 2
       parts.push(`<use href="#piece-${piece.type}" x="${x}" y="${y}" width="${drawSize}" height="${drawSize}"/>`)
     }
+
+    const depth = depths ? (depths[alg] || 0) : 0
+    if (depth > 1) {
+      const bx = pos.x + drawSize * 0.34
+      const by = pos.y + drawSize * 0.34
+      const r = Math.max(6, drawSize * 0.19)
+      parts.push(`<circle cx="${bx}" cy="${by}" r="${r}" fill="#1a1a1a" fill-opacity="0.82"/>`)
+      parts.push(`<text x="${bx}" y="${by + r * 0.36}" text-anchor="middle" font-size="${r * 1.25}" font-family="sans-serif" fill="#fff">${depth}</text>`)
+    }
   }
+
   return parts.join('')
 }
 
