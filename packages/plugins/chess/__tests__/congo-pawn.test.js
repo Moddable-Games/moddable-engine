@@ -58,6 +58,31 @@ describe("Congo's pawn moves and captures in three directions (engine#171)", () 
     expect(movesFrom(g, 'd2')).not.toContain('d4')
   })
 
+  it('retreats one or two squares once it has crossed the river', () => {
+    // "Across the river a pawn may also move one or two squares straight back,
+    // without the right to capture or jump." d6 is on the far bank for White.
+    const g = game()
+    only(g, [['d6', 'pawn', 0], ['d1', 'lion', 0], ['c7', 'lion', 1]])
+    const targets = movesFrom(g, 'd6')
+    expect(targets).toContain('d5')  // one back
+    expect(targets).toContain('d4')  // two back - the river, where it may drown
+  })
+
+  it('has no retreat on its own side of the river', () => {
+    const g = game()
+    only(g, [['d2', 'pawn', 0], ['d1', 'lion', 0], ['c7', 'lion', 1]])
+    const targets = movesFrom(g, 'd2')
+    expect(targets).not.toContain('d1')
+  })
+
+  it('may not capture backward, nor jump a piece to retreat two', () => {
+    const g = game()
+    only(g, [['d6', 'pawn', 0], ['d5', 'zebra', 1], ['d1', 'lion', 0], ['c7', 'lion', 1]])
+    const targets = movesFrom(g, 'd6')
+    expect(targets).not.toContain('d5')  // an enemy behind it is not taken
+    expect(targets).not.toContain('d4')  // and is not jumped
+  })
+
   it('does not move or capture backward or sideways', () => {
     const g = game()
     only(g, [['d3', 'pawn', 0], ['d1', 'lion', 0], ['c7', 'lion', 1]])

@@ -146,6 +146,12 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     if (Array.isArray(out.dirs)) out.dirs = out.dirs.map(([dr, dc]) => [-dr, dc])
     if (out.divergent) out.divergent = { move: flipSpec(out.divergent.move), capture: flipSpec(out.divergent.capture) }
     if (out.type === 'compose' && Array.isArray(out.parts)) out.parts = out.parts.map(p => flipSpec(p))
+    // A positional piece keeps its movement inside its cases, so the flip has
+    // to reach in there too. The regions themselves are not flipped: they are
+    // declared per seat where they differ.
+    if (Array.isArray(out.cases)) {
+      out.cases = out.cases.map(c => ({ ...c, move: flipSpec(c.move || c.spec) }))
+    }
     return out
   }
 
