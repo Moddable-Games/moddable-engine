@@ -140,6 +140,32 @@ export function compose(...primitives) {
 }
 
 /**
+ * Keep only the captures, and only of the pieces this one is allowed to take.
+ *
+ * Congo's Lions capture each other at range: "if there is a vertical or
+ * diagonal line with no pieces between the two lions, the lion may jump to the
+ * other lion and capture it". A rider already stops at the first piece it
+ * meets, so the line-of-sight is free; what is needed is that it may take that
+ * piece only when it is the other Lion, and may not simply move along the line.
+ *
+ * `allows` is a predicate over the victim, so this says nothing about Lions.
+ */
+export function targeted(primitive, allows) {
+  return {
+    type: 'targeted',
+    inner: primitive,
+    genMoves(topology, from, board) {
+      return primitive.genMoves(topology, from, board)
+        .filter(m => m.capture && allows(board[m.to]))
+    },
+    attacks(topology, from, target, board) {
+      if (!allows(board[target])) return false
+      return primitive.attacks(topology, from, target, board)
+    },
+  }
+}
+
+/**
  * A ray that turns instead of stopping when it runs out of board.
  *
  * Rollerball's Rook on g1 sweeps the whole of rank 1, reaches the corner at a1,

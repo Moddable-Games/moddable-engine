@@ -1,5 +1,5 @@
 import { warnUnknownConfigKeys } from '../../../core/index.js'
-import { rider, leaper, compose, divergent, confine, positional, reboundRider, fromConfig, OFFSETS } from '../../../piece-behaviour/index.js'
+import { rider, leaper, compose, divergent, confine, positional, reboundRider, targeted, fromConfig, OFFSETS } from '../../../piece-behaviour/index.js'
 import { randomBackRank } from './variants/chess960.js'
 // Every config key this plugin reads. Exported so the corpus guard and the
 // authoring docs share one source of truth, and kept separate from `defaults`,
@@ -216,6 +216,16 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
         maxRebounds: spec.maxRebounds,
         at: spec.at ? regionPredicate(spec.at, playerIdx) : null,
       })
+    }
+
+    // `captureOnly` with `targetType` is a capture at range that may take only
+    // one kind of piece - Congo's Lion sees the other Lion down an open line.
+    if (spec.captureOnly) {
+      const wanted = spec.targetType
+      const { captureOnly: _c, targetType: _t, ...rest } = spec
+      const inner = buildSpec(rest, playerIdx)
+      if (!inner) return inner
+      return targeted(inner, (victim) => Boolean(victim) && (!wanted || victim.type === wanted))
     }
 
     if (spec.confine) {
