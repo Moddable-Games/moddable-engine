@@ -6,7 +6,7 @@ import { fromConfig } from '../../../piece-behaviour/index.js'
 export const CONFIG_KEYS = new Set([
   'advancement', 'cannonJumpToMove', 'cols', 'flyingGeneralRule', 'hasRiver', 'palace',
   'passAllowed', 'pieceMoves', 'playerCount', 'promotionZone', 'river', 'rows', 'royalType',
-  'setup', 'turnLogic', 'vocabulary', 'winCondition',
+  'bikjangDraw', 'palaceDiagonals', 'setup', 'turnLogic', 'vocabulary', 'winCondition',
 ])
 
 
@@ -177,9 +177,14 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
     const rawMoves = primitive.genMoves(topo, pos, viewBoard)
 
     const constraint = getConstraint(piece.type)
-    if (!constraint) return rawMoves.map(m => ({ from: m.from, to: m.to }))
+    const drawn = rawMoves.filter(m => {
+      const [fr, fc] = rowCol(m.from)
+      const [tr, tc] = rowCol(m.to)
+      return diagonalStepAllowed(fr, fc, tr, tc)
+    })
+    if (!constraint) return drawn.map(m => ({ from: m.from, to: m.to }))
 
-    return rawMoves
+    return drawn
       .filter(m => {
         const [tr, tc] = rowCol(m.to)
         if (constraint === 'palace') return inPalace(tr, tc, playerIndex)
@@ -189,6 +194,48 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
       .map(m => ({ from: m.from, to: m.to }))
   }
 
+  // Janggi draws an X in each palace and a piece may only move diagonally along
+  // a line that is drawn - so the diagonals run between the palace's centre and
+  // its four corners, and nowhere else. A step from a palace edge-midpoint to a
+  // corner is diagonal, inside the palace, and not on any line.
+  //
+  // The same question Alquerque asked of the grid: what a board draws is what a
+  // piece may walk.
+  function palaceCentre(playerIndex) {
+    const [lo, hi] = palace.rows[playerIndex]
+    return [Math.round((lo + hi) / 2), Math.round((palace.cols[0] + palace.cols[1]) / 2)]
+  }
+
+  function isPalaceCorner(r, c, playerIndex) {
+    const [lo, hi] = palace.rows[playerIndex]
+    return (r === lo || r === hi) && (c === palace.cols[0] || c === palace.cols[1])
+  }
+
+  function onPalaceDiagonal(fr, fc, tr, tc) {
+    for (const seat of [0, 1]) {
+      const [cr, cc] = palaceCentre(seat)
+      const fromCentre = fr === cr && fc === cc
+      const toCentre = tr === cr && tc === cc
+      if (fromCentre && isPalaceCorner(tr, tc, seat)) return true
+      if (toCentre && isPalaceCorner(fr, fc, seat)) return true
+      // A Chariot runs the whole diagonal, corner through centre to the corner
+      // opposite. Checking only the endpoints against the centre rejected the
+      // one move on the palace X that is longer than a step.
+      if (isPalaceCorner(fr, fc, seat) && isPalaceCorner(tr, tc, seat)
+        && fr !== tr && fc !== tc) return true
+    }
+    return false
+  }
+
+  function diagonalStepAllowed(fr, fc, tr, tc) {
+    if (!config.palaceDiagonals) return true
+    // Only a true diagonal is a diagonal. A Horse's (2,1) and an Elephant's
+    // (3,2) change both row and column and are not moves along a diagonal line,
+    // so testing "both changed" took the Elephant's whole move set away.
+    if (Math.abs(fr - tr) !== Math.abs(fc - tc)) return true
+    return onPalaceDiagonal(fr, fc, tr, tc)
+  }
+
   const royalType = config.royalType || 'general'
 
   function findGeneral(board, playerIndex) {
@@ -196,6 +243,22 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
       if (board[i] && board[i].owner === playerIndex && board[i].type === royalType) return i
     }
     return -1
+  }
+
+  // Whether the two Generals stand on the same file with nothing between them.
+  // In Xiangqi that position is illegal; in Janggi it is bikjang, and the player
+  // to move may end the game as a draw by passing rather than breaking it.
+  function generalsFacing(board) {
+    const g0 = findGeneral(board, 0)
+    const g1 = findGeneral(board, 1)
+    if (g0 === -1 || g1 === -1) return false
+    const [r0, c0] = rowCol(g0)
+    const [r1, c1] = rowCol(g1)
+    if (c0 !== c1) return false
+    for (let r = Math.min(r0, r1) + 1; r < Math.max(r0, r1); r++) {
+      if (board[cellIndex(r, c0)] !== null) return false
+    }
+    return true
   }
 
   function violatesFlyingGeneral(board) {
@@ -305,7 +368,10 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
     },
 
     applyMove(move, slice, full) {
-      if (move.action === 'pass') return slice
+      // Passing while the Generals face is bikjang: the game ends there, drawn.
+      if (move.action === 'pass') {
+        return config.bikjangDraw ? { ...slice, _bikjang: generalsFacing(slice.board) } : slice
+      }
       const board = [...slice.board]
       board[move.to] = board[move.from]
       board[move.from] = null
@@ -327,18 +393,29 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
         allMoves.push({ action: 'pass' })
       }
 
+      // In bikjang the player to move has exactly two choices: break it, or
+      // pass and end the game drawn. A move that leaves the Generals facing is
+      // neither, so it is not on offer.
+      const inBikjang = config.bikjangDraw && generalsFacing(slice.board)
+
       return allMoves.filter(m => {
         if (m.action === 'pass') return true
         const testBoard = [...slice.board]
         testBoard[m.to] = testBoard[m.from]
         testBoard[m.from] = null
-        return !isInCheck(testBoard, playerIndex)
+        if (isInCheck(testBoard, playerIndex)) return false
+        if (inBikjang && generalsFacing(testBoard)) return false
+        return true
       })
     },
 
     checkWin(slice, full) {
       const playerIndex = full.__players.currentIndex
       const opponent = 1 - playerIndex
+
+      // Bikjang. A pass offered while the Generals face each other on an open
+      // file ends the game immediately, drawn.
+      if (config.bikjangDraw && slice._bikjang) return 'draw'
 
       if (findGeneral(slice.board, opponent) === -1) {
         return playerIndex

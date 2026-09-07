@@ -169,6 +169,9 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-07
+- Janggi plays. Its palaces are drawn with an X and a piece may only move diagonally where a line is drawn - the same question Alquerque asked of the grid, asked of a 3x3 region. Its Elephant turns the other way from Xiangqi's: one step orthogonally, then two diagonally outward, blocked by anything on either square it passes over
+- Bikjang: two Generals facing on an open file leaves the player to move exactly two choices, break it or pass, and passing ends the game drawn. Moves that leave them facing are not offered
+- `bent` had no `orthogonal` direction family, so `first: orthogonal` fell through to the default and turned the wrong way in silence
 - Kyoto Shogi plays. It has no promotion zone at all: every piece but the King flips to its other face after every move, so the flip is applied rather than offered. A piece in hand is two moves rather than one, because a captured piece may be dropped with either side up
 - Its setup string and its own piece table disagreed about where the King stands, and the string also wrote a Tokin as a Lance. The sources give T-S-K-G-P, which is the table
 - Annan Shogi plays. Each piece borrows the move of the friendly piece directly behind it, so a Pawn with a Rook behind it attacks along the whole rank and file - and gets its own single step back the moment the Rook leaves. The borrow reads one square and stops, because it is not transitive

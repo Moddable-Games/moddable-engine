@@ -166,8 +166,33 @@ export function divergent(movePrimitive, capturePrimitive) {
 // slide "outward" along the component directions of that first leg.
 // This is the Aanca / Gryphon / Eagle family (metamachy Eagle, grande-acedrex Griffion).
 export function bent(opts = {}) {
-  const { first = 'diagonal', firstSteps = 1, minSecondLeg = 0 } = opts
-  const firstDirs = typeof first === 'string' ? (OFFSETS[first] || OFFSETS.bishop) : first
+  const { first = 'diagonal', firstSteps = 1, minSecondLeg = 0, second = null, secondSteps = null } = opts
+  // `diagonal` and `orthogonal` are what frontmatter says; `bishop` and `rook`
+  // are what the offset table calls them. Without the aliases `first:
+  // orthogonal` fell through to the default and turned the wrong way in
+  // silence.
+  const FAMILY = { diagonal: 'bishop', orthogonal: 'rook' }
+  const firstDirs = typeof first === 'string'
+    ? (OFFSETS[FAMILY[first] || first] || OFFSETS.bishop)
+    : first
+
+  // Which way the move turns after its first leg.
+  //
+  // The xiangqi cannon and elephant start diagonally and continue orthogonally,
+  // which is what this did and still does by default. Janggi's elephant is the
+  // other way round - one orthogonal step, then two diagonal steps outward -
+  // so `second: 'diagonal'` turns the corner the other way, and the outward
+  // diagonals are the two that keep going away from where the piece started.
+  function continuations(dr, dc) {
+    if (second !== 'diagonal') {
+      const out = []
+      if (dr !== 0) out.push([dr, 0])
+      if (dc !== 0) out.push([0, dc])
+      return out
+    }
+    if (dr !== 0 && dc !== 0) return [[dr, dc]]
+    return dr !== 0 ? [[dr, -1], [dr, 1]] : [[-1, dc], [1, dc]]
+  }
 
   function legs(topology, from, board) {
     const out = []
@@ -177,10 +202,7 @@ export function bent(opts = {}) {
       const kneePos = knee[firstSteps - 1]
       // the knee square itself is a legal destination, and blocks if occupied
       const blocked = !!board[kneePos]
-      const continues = []
-      if (dr !== 0) continues.push([dr, 0])
-      if (dc !== 0) continues.push([0, dc])
-      out.push({ kneePos, blocked, continues })
+      out.push({ kneePos, blocked, continues: continuations(dr, dc) })
     }
     return out
   }
@@ -197,20 +219,26 @@ export function bent(opts = {}) {
         if (at) {
           // the knee is occupied: it blocks the whole ray. It is a capture
           // target only when the second leg has no minimum.
-          if (at.enemy && minSecondLeg === 0) moves.push({ from, to: kneePos, capture: true })
+          if (at.enemy && minSecondLeg === 0 && !secondSteps) moves.push({ from, to: kneePos, capture: true })
           continue
         }
-        if (minSecondLeg === 0) moves.push({ from, to: kneePos })
+        // With an exact second leg the knee is a square passed over, never a
+        // square landed on: a Janggi Elephant does not stop after one step.
+        if (minSecondLeg === 0 && !secondSteps) moves.push({ from, to: kneePos })
         if (blocked) continue
-        for (const ray of topology.rays(kneePos, continues)) {
+        for (const ray of topology.rays(kneePos, continues, secondSteps || undefined)) {
           for (let i = 0; i < ray.length; i++) {
             const pos = ray[i]
             const occ = board[pos]
+            const landing = secondSteps ? i + 1 === secondSteps : i + 1 >= minSecondLeg
             if (occ) {
-              if (occ.enemy && i + 1 >= minSecondLeg) moves.push({ from, to: pos, capture: true })
+              // A piece short of the landing square blocks the path rather than
+              // offering itself: Janggi's elephant is stopped by anything on
+              // either of the two squares it passes over.
+              if (occ.enemy && landing) moves.push({ from, to: pos, capture: true })
               break
             }
-            if (i + 1 >= minSecondLeg) moves.push({ from, to: pos })
+            if (landing) moves.push({ from, to: pos })
           }
         }
       }
@@ -328,7 +356,7 @@ function buildPrimitive(spec, resolve) {
   if (spec.type === 'rider') return rider(spec.dirs, { maxSteps: spec.maxSteps, minSteps: spec.minSteps })
   if (spec.type === 'hopper') return hopper(spec.dirs, { captureSlide: spec.captureSlide, moveSlide: spec.moveSlide })
   if (spec.type === 'locust') return locust(resolveLeapOffsets(spec.dirs || spec.offsets))
-  if (spec.type === 'bent') return bent({ first: spec.first, firstSteps: spec.firstSteps, minSecondLeg: spec.minSecondLeg })
+  if (spec.type === 'bent') return bent({ first: spec.first, firstSteps: spec.firstSteps, minSecondLeg: spec.minSecondLeg, second: spec.second, secondSteps: spec.secondSteps })
   if (spec.type === 'compose' && Array.isArray(spec.parts)) {
     const parts = spec.parts.map(p => typeof p === 'string' && resolve ? resolve(p) : buildPrimitive(p, resolve)).filter(Boolean)
     return compose(...parts)
