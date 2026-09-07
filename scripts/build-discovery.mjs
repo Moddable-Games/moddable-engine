@@ -176,8 +176,12 @@ console.log(`  Topologies: ${JSON.stringify(stats.topoCounts)}`)
 const outputs = []
 
 // 1. api/stats.json
+// From the gallery index rather than the published copy of it: the published
+// copy is generated further down this same script, so reading it here would
+// have counted last run's families.
 const boardFamilies = [...new Set(
-  readJSON('api/boards/index.json').boards.map(b => (b.id || '').split('--')[0])
+  (readJSON('boards/board-index.json').boards || readJSON('boards/board-index.json'))
+    .map(b => (b.svg || '').replace(/^svgs\//, '').split('--')[0])
 )].filter(Boolean).length
 stats.boardFamilies = boardFamilies
 
@@ -340,6 +344,26 @@ if (puzzleParsed.meta.count !== puzzleTotal) {
   outputs.push({ path: 'api/puzzles/index.json', content: JSON.stringify(puzzleParsed, null, 2) + '\n' })
 }
 
+// 6a. api/boards/index.json — the published board gallery.
+//
+// Written by hand once and never again: it still carried the pre-rename
+// `moddable-chess--*` ids months after those 153 files were deleted, listed a
+// yalta board that does not render, and was missing every variant added since.
+// Generated from boards/board-index.json, which is itself generated from the
+// snapshots, so the published list cannot disagree with the files it names.
+const boardIndex = readJSON('boards/board-index.json')
+const boardEntries = (boardIndex.boards || boardIndex).map(b => {
+  const id = b.svg.replace(/^svgs\//, '').replace(/\.svg$/, '')
+  return { id, file: `${id}.svg`, url: `/boards/svgs/${id}.svg` }
+})
+outputs.push({
+  path: 'api/boards/index.json',
+  content: withStableGeneratedDate(
+    JSON.stringify({ meta: { count: boardEntries.length, generated: new Date().toISOString().slice(0, 10) }, boards: boardEntries }, null, 2) + '\n',
+    resolve('api/boards/index.json')
+  ),
+})
+
 // 6b. api/tiles/index.json — the published copy of the tile index. Two hand-kept
 // copies of the same list is how they drift, so the source is copied verbatim.
 outputs.push({ path: 'api/tiles/index.json', content: tileIndexJson })
@@ -432,6 +456,10 @@ const htmlPatches = [
   {
     file: 'docs/index.html',
     replacements: [
+      // The playable families were written out by hand and said six, from a
+      // time when there were six. Derived like every other count on the page.
+      [/\b(Six|Seven|Eight|Nine|Ten|Eleven|Twelve|\d+) families \([^)]*\) are fully playable/g,
+        `${stats.playableFamilies} families (${playableFamilies.map(f => (f === 'landlords-game' ? "the Landlord's Game" : f)).join(', ')}) are fully playable`],
       [/<strong>\d+ game variants<\/strong>/g, `<strong>${stats.boards} game variants</strong>`],
       [/<strong>\d+ families<\/strong>/g, `<strong>${stats.boardFamilies} families</strong>`],
       [/<strong>\d+ topology types<\/strong>/g, `<strong>${stats.uniqueTopologies} topology types</strong>`],

@@ -169,6 +169,8 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-07
+- The published board gallery was stale by an entire rename. `api/boards/index.json` was written by hand once and never again: it still listed the 153 `moddable-chess--*` ids deleted months ago, named a yalta board that does not render, and was missing every variant added since. It is generated from the gallery index now, so the published list cannot disagree with the files it names
+- That also corrected the published family count, 33 against a real 34, and a sentence in the docs that had said six families were fully playable since the time there were six. There are ten
 - Quang Trung plays. Its entry claimed only a missing win condition; none of its seven piece types was modelled and it played as ordinary Xiangqi on a 10x10 board. Six are declarations, and two needed the engine: a Chariot that captures by jumping the target rather than landing on it, and a General and Pawns confined to the middle files at all times
 - A locust capture takes the piece it jumped, which is not the square it landed on. The xiangqi plugin dropped that from the move and never removed the victim, so any piece capturing this way would have moved and left its target standing
 - Janggi plays. Its palaces are drawn with an X and a piece may only move diagonally where a line is drawn - the same question Alquerque asked of the grid, asked of a 3x3 region. Its Elephant turns the other way from Xiangqi's: one step orthogonally, then two diagonally outward, blocked by anything on either square it passes over
