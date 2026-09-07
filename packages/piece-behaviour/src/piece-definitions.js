@@ -139,6 +139,35 @@ export function compose(...primitives) {
   }
 }
 
+/**
+ * Keep only the moves that land somewhere the piece is allowed to be.
+ *
+ * Congo's Lion moves as a king and may never leave its own 3x3 castle. Xiangqi's
+ * General and Advisor may never leave the palace. Quang Trung's General and
+ * Pawns are held to the middle files. Three games, one idea, and until now the
+ * only implementation lived inside the xiangqi plugin, where the chess plugin
+ * could not reach it and where it knew about palaces specifically.
+ *
+ * `allows` is a plain predicate over a cell, so this stays a question about
+ * movement rather than about grids: whoever builds the piece decides what the
+ * region is and how a cell is tested against it.
+ */
+export function confine(primitive, allows) {
+  return {
+    type: 'confined',
+    inner: primitive,
+    genMoves(topology, from, board) {
+      return primitive.genMoves(topology, from, board).filter(m => allows(m.to))
+    },
+    attacks(topology, from, target, board) {
+      // A piece that cannot legally reach a square does not attack it, which is
+      // what keeps a confined royal from giving check across the board.
+      if (!allows(target)) return false
+      return primitive.attacks(topology, from, target, board)
+    },
+  }
+}
+
 export function divergent(movePrimitive, capturePrimitive) {
   return {
     type: 'divergent',

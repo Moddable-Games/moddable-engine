@@ -1,5 +1,5 @@
 import { warnUnknownConfigKeys } from '../../../core/index.js'
-import { rider, leaper, compose, divergent, fromConfig, OFFSETS } from '../../../piece-behaviour/index.js'
+import { rider, leaper, compose, divergent, confine, fromConfig, OFFSETS } from '../../../piece-behaviour/index.js'
 import { randomBackRank } from './variants/chess960.js'
 // Every config key this plugin reads. Exported so the corpus guard and the
 // authoring docs share one source of truth, and kept separate from `defaults`,
@@ -149,14 +149,45 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return out
   }
 
+  // A region of the board a piece may not leave, declared per seat because the
+  // two seats' regions are not the same one: Congo's castles sit at opposite
+  // ends of the board. `rows` and `cols` are inclusive ranges; give a list of
+  // two ranges to vary by seat, or one range to apply to both.
+  function confinementFor(pConfig, playerIdx) {
+    const spec = pConfig && pConfig.confine
+    if (!spec) return null
+    const perSeat = (v) => (Array.isArray(v) && Array.isArray(v[0]) ? v[playerIdx] : v)
+    const rows = perSeat(spec.rows)
+    const cols = perSeat(spec.cols)
+    if (!rows && !cols) return null
+    return (pos) => {
+      const nCols = topology ? topology.cols : 8
+      const r = Math.floor(pos / nCols)
+      const c = pos % nCols
+      if (rows && (r < rows[0] || r > rows[1])) return false
+      if (cols && (c < cols[0] || c > cols[1])) return false
+      return true
+    }
+  }
+
   function buildPieceForPlayer(name, playerIdx) {
     const pConfig = pieceConfigs[name]
-    if (!pConfig || !pConfig.directional || playerIdx === 0) return buildPiece(name)
-    const key = `${name}__p1`
+    const allows = confinementFor(pConfig, playerIdx)
+    const base = (!pConfig || !pConfig.directional || playerIdx === 0)
+      ? buildPiece(name)
+      : (() => {
+          const key = `${name}__p1`
+          if (builtPieces.has(key)) return builtPieces.get(key)
+          const flipped = fromConfig(flipSpec(pConfig))
+          builtPieces.set(key, flipped)
+          return flipped
+        })()
+    if (!allows || !base) return base
+    const key = `${name}__confined${playerIdx}`
     if (builtPieces.has(key)) return builtPieces.get(key)
-    const flipped = fromConfig(flipSpec(pConfig))
-    builtPieces.set(key, flipped)
-    return flipped
+    const bounded = confine(base, allows)
+    builtPieces.set(key, bounded)
+    return bounded
   }
 
   let topology = null
