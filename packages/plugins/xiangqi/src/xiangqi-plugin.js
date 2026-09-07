@@ -6,7 +6,7 @@ import { fromConfig } from '../../../piece-behaviour/index.js'
 export const CONFIG_KEYS = new Set([
   'advancement', 'cannonJumpToMove', 'cols', 'flyingGeneralRule', 'hasRiver', 'palace',
   'passAllowed', 'pieceMoves', 'playerCount', 'promotionZone', 'river', 'rows', 'royalType',
-  'bikjangDraw', 'palaceDiagonals', 'setup', 'turnLogic', 'vocabulary', 'winCondition',
+  'bikjangDraw', 'firstMoveRows', 'palaceDiagonals', 'pawnAdvanceWin', 'setup', 'turnLogic', 'vocabulary', 'winCondition',
 ])
 
 
@@ -161,6 +161,21 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
     return moves
   }
 
+  // Quang Trung's Pawn moves and captures one square diagonally forward, and on
+  // its first move only may advance two squares straight. "First move" is read
+  // from the rank it starts on, the way a chess pawn's double step is.
+  function firstMoveExtras(board, pos, piece, playerIndex) {
+    const spec = PIECE_MOVES[piece.type]
+    if (!spec || !spec.firstMove || !config.firstMoveRows) return []
+    const [r] = rowCol(pos)
+    if (r !== config.firstMoveRows[playerIndex]) return []
+    const primitive = fromConfig(spec.firstMove)
+    if (!primitive) return []
+    const topo = topology || buildInternalTopology()
+    return primitive.genMoves(topo, pos, buildViewBoard(board, playerIndex))
+      .filter(m => !board[m.to])
+  }
+
   function generatePieceMoves(board, pos, piece, playerIndex) {
     if (piece.type === 'soldier' && !PIECE_MOVES[piece.type]) {
       return generateSoldierMoves(board, pos, playerIndex)
@@ -174,7 +189,10 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
 
     const topo = topology || buildInternalTopology()
     const viewBoard = buildViewBoard(board, playerIndex)
-    const rawMoves = primitive.genMoves(topo, pos, viewBoard)
+    const rawMoves = [
+      ...primitive.genMoves(topo, pos, viewBoard),
+      ...firstMoveExtras(board, pos, piece, playerIndex),
+    ]
 
     const constraint = getConstraint(piece.type)
     const drawn = rawMoves.filter(m => {
@@ -182,16 +200,23 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
       const [tr, tc] = rowCol(m.to)
       return diagonalStepAllowed(fr, fc, tr, tc)
     })
-    if (!constraint) return drawn.map(m => ({ from: m.from, to: m.to }))
+    // A locust capture takes the piece it jumped, which is not the square it
+    // landed on, so the move has to carry it. Dropping it moved the piece and
+    // left the victim standing.
+    const carry = (m) => (m.captured !== undefined ? { from: m.from, to: m.to, captured: m.captured } : { from: m.from, to: m.to })
+    if (!constraint) return drawn.map(carry)
 
     return drawn
       .filter(m => {
         const [tr, tc] = rowCol(m.to)
         if (constraint === 'palace') return inPalace(tr, tc, playerIndex)
         if (constraint === 'own-side' && config.hasRiver) return !acrossRiver(tr, playerIndex)
+        // Quang Trung confines its General and Pawns to the middle files at all
+        // times, which is a property of the board rather than of the piece.
+        if (constraint && constraint.cols) return tc >= constraint.cols[0] && tc <= constraint.cols[1]
         return true
       })
-      .map(m => ({ from: m.from, to: m.to }))
+      .map(carry)
   }
 
   // Janggi draws an X in each palace and a piece may only move diagonally along
@@ -375,6 +400,7 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
       const board = [...slice.board]
       board[move.to] = board[move.from]
       board[move.from] = null
+      if (move.captured !== undefined && move.captured !== null) board[move.captured] = null
       return { ...slice, board }
     },
 
@@ -416,6 +442,24 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
       // Bikjang. A pass offered while the Generals face each other on an open
       // file ends the game immediately, drawn.
       if (config.bikjangDraw && slice._bikjang) return 'draw'
+
+      // "A Pawn reaches the opponent's last rank in such a position that it
+      // cannot be immediately captured on the opponent's next move. This
+      // automatically wins the game."
+      if (config.pawnAdvanceWin) {
+        for (const seat of [0, 1]) {
+          const lastRank = seat === 0 ? 0 : config.rows - 1
+          const foe = 1 - seat
+          for (let c = 0; c < config.cols; c++) {
+            const idx = cellIndex(lastRank, c)
+            const cell = slice.board[idx]
+            if (!cell || cell.owner !== seat || cell.type !== config.pawnAdvanceWin) continue
+            const capturable = slice.board.some((other, i) =>
+              other && other.owner === foe && canAttack(slice.board, i, idx, other, foe))
+            if (!capturable) return seat
+          }
+        }
+      }
 
       if (findGeneral(slice.board, opponent) === -1) {
         return playerIndex

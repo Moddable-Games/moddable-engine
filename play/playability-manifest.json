@@ -1955,6 +1955,15 @@
   {
     "family": "xiangqi",
     "familyLabel": "Xiangqi",
+    "variant": "quang-trung",
+    "key": "quang-trung",
+    "label": "Quang Trung Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "xiangqi",
+    "familyLabel": "Xiangqi",
     "variant": "standard",
     "key": "standard",
     "label": "Standard Xiangqi",
