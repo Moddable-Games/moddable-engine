@@ -169,6 +169,9 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-07
+- Annan Shogi plays. Each piece borrows the move of the friendly piece directly behind it, so a Pawn with a Rook behind it attacks along the whole rank and file - and gets its own single step back the moment the Rook leaves. The borrow reads one square and stops, because it is not transitive
+- The "capture the enabler behind the checker" escape its entry warned about needs no special handling: legality is tested by simulating the move, and after the capture the checker is no longer borrowing anything
+- An empty list in a Create page rule was dropped as meaningless. Where the default has entries, empty is a real and different value, and Annan was silently given back the drop restriction it declares it does not have
 - Dameo, Bashni and Lasca play, and the draughts family is complete at 20 of 20. Dameo adds the phalanx: a straight unbroken line of men slides forward as one, which on the board is the rearmost man relocating past the head
 - Bashni and Lasca take nothing off the board. A captured piece goes to the bottom of the column that took it, only the top of a captured column is taken, and the rest is uncovered and handed to whoever is now on top. A square holds an ordered column, and everything that reads ownership, move type or promotion still reads its top
 - A column of seven rendered as a single man. The live board now carries its depths and marks any square holding more than one piece, because a surface that cannot show what is buried is not a surface anyone can play on

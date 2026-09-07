@@ -4,7 +4,7 @@ import { fromConfig } from '../../../piece-behaviour/index.js'
 // authoring docs share one source of truth, and kept separate from `defaults`,
 // which only lists the keys that carry a default value.
 export const CONFIG_KEYS = new Set([
-  'advancement', 'afterMove', 'captureRule', 'cols',
+  'advancement', 'afterMove', 'borrowFromBehind', 'captureRule', 'cols',
   'dropCheckmateLimit', 'dropPawnFileLimit', 'drops', 'initialHands', 'moveFilter',
   'nifuLimit', 'nifuType', 'noDropLastRank', 'noDropSecondRank', 'pieceMoves',
   'pieceRotations', 'playerCount', 'promotionMap', 'promotionPieces', 'promotionZone',
@@ -215,8 +215,29 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     return type
   }
 
+  // Annan Shogi: "each piece borrows the movement of the friendly piece
+  // immediately behind it", behind meaning one rank toward that player's own
+  // home. The borrow is not transitive - a piece borrows the rear piece's OWN
+  // move, never the move the rear piece is itself borrowing - so this reads one
+  // square and stops.
+  //
+  // Nothing caches it, because it is a property of the position rather than of
+  // the piece: moving the rear piece away restores the front piece's own move
+  // on the very next ply.
+  function effectiveType(board, pos, piece, playerIndex) {
+    if (!config.borrowFromBehind) return piece.type
+    const [dr, dc] = advancementFor(playerIndex)
+    const [r, c] = rowCol(pos)
+    const br = r - dr
+    const bc = c - dc
+    if (!inBounds(br, bc)) return piece.type
+    const behind = board[cellIndex(br, bc)]
+    if (!behind || behind.owner !== piece.owner) return piece.type
+    return behind.type
+  }
+
   function generatePieceMoves(board, pos, piece, playerIndex) {
-    const primitive = buildPieceForPlayer(piece.type, playerIndex)
+    const primitive = buildPieceForPlayer(effectiveType(board, pos, piece, playerIndex), playerIndex)
     if (!primitive) return []
     const topo = topology || buildInternalTopology()
     const viewBoard = buildViewBoard(board, playerIndex)

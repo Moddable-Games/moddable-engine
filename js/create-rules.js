@@ -154,8 +154,12 @@ export function toPluginConfig(family, values) {
 
     if (field.type === 'list') {
       const arr = Array.isArray(value) ? value : parseList(value)
+      // An empty list is only meaningless where the default is empty too, and
+      // `arraysEqual` already drops that. Where the default has entries, empty
+      // is a real and different value: Annan Shogi says no rank is closed to a
+      // drop, against a default of pawn and lance, and dropping it silently
+      // gave the variant back the restriction it declares it does not have.
       if (arraysEqual(arr, field.default)) continue
-      if (!arr.length) continue
       config[field.key] = arr
     } else if (field.type === 'text') {
       if (value === field.default || value === '') continue

@@ -1784,6 +1784,15 @@
   {
     "family": "shogi",
     "familyLabel": "Shogi",
+    "variant": "annan-shogi",
+    "key": "annan-shogi",
+    "label": "Annan Shogi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "cannon-shogi",
     "key": "cannon-shogi",
     "label": "Cannon Shogi",
