@@ -158,12 +158,19 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   //
   // `rows` and `cols` are inclusive ranges. Give a list of two ranges to vary by
   // seat - Congo's two castles sit at opposite ends of the board, so one shared
-  // region would be wrong for both.
+  // region would be wrong for both. A region that is not a rectangle lists its
+  // squares instead, as `cells: [[row, col], ...]`: Rollerball's four zones are
+  // wedges of a ring and no pair of ranges describes one.
   const namedRegions = config.regions || {}
 
   function regionPredicate(ref, playerIdx) {
     const spec = typeof ref === 'string' ? namedRegions[ref] : ref
     if (!spec) return null
+    if (spec.cells) {
+      const nCols = () => (topology ? topology.cols : 8)
+      const keys = new Set(spec.cells.map(([r, c]) => `${r},${c}`))
+      return (pos) => keys.has(`${Math.floor(pos / nCols())},${pos % nCols()}`)
+    }
     const perSeat = (v) => (Array.isArray(v) && Array.isArray(v[0]) ? v[playerIdx] : v)
     const rows = perSeat(spec.rows)
     const cols = perSeat(spec.cols)
