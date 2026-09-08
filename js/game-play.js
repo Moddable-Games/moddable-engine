@@ -404,6 +404,66 @@ export function createPlaySession(options = {}) {
     if (embed) embed.post('status', { text, gameOver, family, variant })
   }
 
+
+  // The status line under the board. The old board renderer had one and the
+  // interactive session never wired it up, so a player could see a piece and
+  // have no way to learn what it was called, let alone what it does.
+  //
+  // Everything here is read from the live position and the plugin's own
+  // vocabulary. Nothing is written down anywhere: a piece's name is its type,
+  // and what it can do is what the engine says it can do.
+  const INFO_IDLE = 'Hover over a cell'
+
+  function humanise(type) {
+    return String(type || '').replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+  }
+
+  function describeCell(key, label, state = {}) {
+    const slice = game.getState().slice
+    const piece = Array.isArray(slice.board) ? slice.board[key] : slice.board?.[key]
+    const parts = [label]
+
+    if (piece && piece.type) {
+      const names = playerNames()
+      const owner = names[piece.owner] !== undefined ? capitalize(String(names[piece.owner])) : null
+      parts.push(owner ? `${owner} ${humanise(piece.type)}` : humanise(piece.type))
+      const depth = piece.under ? piece.under.length : 0
+      if (depth) parts.push(`carrying ${depth}`)
+    } else {
+      parts.push('empty')
+    }
+
+    // If something is selected, say what this square is TO it. The board
+    // already draws the markers; this says which is which.
+    const { selected, legalMoves = [] } = state
+    if (selected !== null && selected !== undefined && selected !== key) {
+      const move = legalMoves.find(m => m.to === key && m.from === selected)
+      if (move) {
+        const cellAt = (i) => (Array.isArray(slice.board) ? slice.board[i] : slice.board?.[i])
+        if (move.captured !== undefined && move.captured !== move.to) {
+          // A locust capture takes a piece it jumped, not the square it lands
+          // on, so the victim has to be named - it is somewhere else.
+          const victim = cellAt(move.captured)
+          parts.push(victim && victim.type
+            ? `capture ${humanise(victim.type)} on ${cells.toId(move.captured)}`
+            : 'capture')
+        } else if (cellAt(move.to)) {
+          parts.push('capture')
+        } else {
+          parts.push('move here')
+        }
+        if (move.promotion) parts.push(`promote to ${humanise(move.promotion)}`)
+        if (move.castle) parts.push('castling')
+      }
+    }
+    return parts.join(' · ')
+  }
+
+  function setInfo(text) {
+    const el = document.getElementById('info-text')
+    if (el) el.textContent = text
+  }
+
   function summarise() {
     const state = game.getState()
     return {
@@ -539,6 +599,8 @@ export function createPlaySession(options = {}) {
         if (scoring) toggleDead(key)
         else ctrl.handleClick(key)
       },
+      onCellHover: (key, label) => setInfo(describeCell(key, label, state)),
+      onCellOut: () => setInfo(INFO_IDLE),
     })
 
     renderHand(slice, state)

@@ -2,7 +2,7 @@ const SVG_NS = 'http://www.w3.org/2000/svg'
 
 const DEFAULT_HOVER_FILL = 'rgba(100, 180, 255, 0.15)'
 
-export function bindBoardInteraction(container, cells, { onCellClick, hover = true, hoverColor }) {
+export function bindBoardInteraction(container, cells, { onCellClick, onCellHover, onCellOut, hover = true, hoverColor }) {
   let hoverEl = null
 
   function findCellFromEvent(e) {
@@ -40,6 +40,12 @@ export function bindBoardInteraction(container, cells, { onCellClick, hover = tr
       el.setAttribute('class', 'board-cell-hover')
       cell.parentNode.insertBefore(el, cell.nextSibling)
       hoverEl = el
+      if (onCellHover) {
+        const key = cells.toIndex(cell.getAttribute('data-sq'))
+        if (key !== -1 && key !== null && key !== undefined) {
+          onCellHover(key, cell.getAttribute('data-sq'))
+        }
+      }
     }
 
     container.onmouseout = (e) => {
@@ -48,6 +54,7 @@ export function bindBoardInteraction(container, cells, { onCellClick, hover = tr
       if (related && container.contains(related)) return
       hoverEl.remove()
       hoverEl = null
+      if (onCellOut) onCellOut()
     }
   }
 
@@ -56,5 +63,6 @@ export function bindBoardInteraction(container, cells, { onCellClick, hover = tr
     container.onmouseover = null
     container.onmouseout = null
     if (hoverEl) { hoverEl.remove(); hoverEl = null }
+    if (onCellOut) onCellOut()
   }
 }
