@@ -24,7 +24,10 @@ export function createGame(definition, opts = {}) {
     registry.register(plugin)
   }
 
-  const playerSystem = createPlayerSystem({ players: definition.players.names })
+  const playerSystem = createPlayerSystem({
+    players: definition.players.names,
+    startIndex: definition.players.startIndex || 0,
+  })
   const store = createStore({})
 
   const pluginConfigs = {}

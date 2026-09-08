@@ -102,3 +102,22 @@ describe("Tibetan Go's ko rule forbids every point just cleared (engine#162)", (
     expect(plugin.config.koRule).toBeUndefined()
   })
 })
+
+// Which seat opens was written into the player system rather than declared, so
+// a game whose second seat moves first could not say so. Tibetan Go is one.
+describe('a variant can name the seat that opens (engine#162)', () => {
+  it('starts Tibetan Go with White, as its source says', async () => {
+    await import('../index.js')
+    await import('../../../play/test-helpers/setup-rules-reader.js')
+    const { createGameForFamily } = await import('../../../play/src/play.js')
+    expect(createGameForFamily('go', { variant: 'tibetan' }).currentPlayer()).toBe('white')
+  })
+
+  it('leaves every game that says nothing starting with its first seat', async () => {
+    await import('../index.js')
+    await import('../../../play/test-helpers/setup-rules-reader.js')
+    const { createGameForFamily } = await import('../../../play/src/play.js')
+    expect(createGameForFamily('go', { variant: '9x9' }).currentPlayer()).toBe('black')
+    expect(createGameForFamily('go', { variant: 'sunjang' }).currentPlayer()).toBe('black')
+  })
+})

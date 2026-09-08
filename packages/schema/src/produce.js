@@ -43,7 +43,19 @@ function buildTopologyConfig(topo) {
 }
 
 function buildPlayersConfig(engine, meta) {
-  if (engine.players) return { names: engine.players }
+  // `firstPlayer` names the seat that opens, by name or by index. Almost every
+  // game opens with its first seat and so said nothing; a game whose second
+  // seat moves first had no way to say so.
+  const startIndex = (names) => {
+    const first = engine.firstPlayer
+    if (first === undefined || first === null) return 0
+    if (typeof first === 'number') return first
+    const at = names.indexOf(first)
+    return at >= 0 ? at : 0
+  }
+  if (engine.players) {
+    return { names: engine.players, startIndex: startIndex(engine.players) }
+  }
 
   const raw = meta.players
   if (!raw) return { names: ['player1', 'player2'] }

@@ -1,10 +1,13 @@
 export function createPlayerSystem(config) {
-  const { players } = config
+  // Which seat opens. Nearly every game starts with the first seat, and the
+  // index was written in rather than declared - so a game whose second seat
+  // moves first could not say so.
+  const { players, startIndex = 0 } = config
   const sliceName = '__players'
 
   function initState() {
     return {
-      currentIndex: 0,
+      currentIndex: startIndex,
       passCount: 0,
       turnActions: 0,
       eliminated: [],
