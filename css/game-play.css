@@ -1,35 +1,93 @@
+/* The play surface is a table, not a dashboard.
+ *
+ * The board holds the middle and never moves. Everything else sits at the edge:
+ * settings you touch once before play, and reference you consult and put down.
+ *
+ * The bug this replaces: all three columns shared one grid row, the row grew to
+ * the tallest rail, and the board - centred in that row - sat 1,200px down a
+ * 2,473px page. The board is now the only thing that owns its height, and each
+ * rail scrolls inside the viewport rather than stretching the page. */
 .game-play {
   display: grid;
-  grid-template-columns: 200px 1fr 200px;
+  grid-template-columns: 220px minmax(0, 1fr) 264px;
   gap: 0;
   width: 100%;
   padding: 0;
-  padding-top: 80px;
-  min-height: 500px;
+  /* The site header is fixed, so the stage starts below it and takes the rest
+     of the viewport. Removing the old padding-top put the first control and the
+     top of the board underneath the header. */
+  --play-header: 71px;
+  margin-top: var(--play-header);
+  height: calc(100vh - var(--play-header));
+  height: calc(100dvh - var(--play-header));
+  min-height: 520px;
+  overflow: hidden;
+  /* A row for the board and rails, and a row for the line under the board. */
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.game-play > .game-play-sidebar,
+.game-play > .game-play-board {
+  grid-row: 1;
+}
+
+.game-play > .game-play-hint {
+  grid-row: 2;
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 8px 16px 12px;
+  max-width: none;
 }
 
 .game-play-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px;
+  gap: 14px;
+  padding: 20px 16px 40px;
+  /* Its own scroll container. min-height:0 is what lets a grid child shrink
+     below its content and scroll instead of pushing the row taller. */
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
 }
 
 .game-play-sidebar--left {
   padding-left: 20px;
+  border-right: 1px solid var(--border-subtle, rgba(106, 140, 255, 0.12));
 }
 
+.game-play-sidebar--right {
+  padding-right: 20px;
+  border-left: 1px solid var(--border-subtle, rgba(106, 140, 255, 0.12));
+}
+
+/* Type scale. Everything used to be 11px uppercase, so a section heading, a
+   field label and a paragraph of rules all carried the same weight and none of
+   them ranked. Four steps, and labels are sentence case: shouting every label
+   equally is what flattened the hierarchy. */
 .game-play-sidebar .control-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
 .game-play-sidebar .control-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-muted, #8a8580);
+  font-family: var(--font-body, system-ui), sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-muted, #5f6b7a);
+}
+
+.game-play-rail-heading {
+  font-family: var(--font-display, system-ui), sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--text-secondary, #9aa3b4);
+  margin: 6px 0 2px;
 }
 
 .game-play-sidebar select {
@@ -39,88 +97,46 @@
   padding: 6px 8px;
   border-radius: 4px;
   font-size: 13px;
-}
-
-.game-play-flags {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  align-items: center;
-  margin-top: 4px;
-}
-
-.game-play-flags .control-label {
   width: 100%;
 }
 
-.flag-toggle {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  color: var(--text, #f0ede8);
-  cursor: pointer;
+.game-play-sidebar select:focus-visible,
+.game-play-sidebar button:focus-visible {
+  outline: 2px solid var(--cosmic-glow, #6fb5ff);
+  outline-offset: 2px;
 }
 
-.flag-toggle input[type="checkbox"] {
-  accent-color: var(--accent, #5b8af0);
-}
-
-.game-play-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 8px;
-}
-
-.game-play-actions .btn {
-  padding: 6px 12px;
-  font-size: 12px;
-  border-radius: 4px;
-  border: 1px solid var(--border, #2a2d4a);
-  background: var(--surface-2, #141830);
-  color: var(--text, #f0ede8);
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.game-play-actions .btn:hover {
-  background: var(--surface-3, #1e2245);
-}
-
-.game-play-sidebar--right {
-  padding-right: 20px;
-  position: sticky;
-  top: 100px;
-  align-self: start;
-}
-
+/* The stage. The board centres in the space that is left after the status line,
+   and is bounded by that space rather than by a share of the viewport - so it
+   fills a tall window and shrinks in a short one without ever needing scroll. */
 .game-play-board {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
+  min-height: 0;
+  min-width: 0;
+  padding: 16px 20px 8px;
+  overflow: hidden;
 }
 
 .game-play-board svg {
   max-width: 100%;
-  max-height: 80vh;
+  max-height: 100%;
+  width: auto;
   height: auto;
+  flex: 0 1 auto;
 }
 
 .game-play-board:fullscreen {
-  background: var(--bg, #0a0d2a);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: var(--bg-deep, #060818);
   padding: 24px;
 }
 
 .game-play-board:fullscreen svg {
   max-height: 95vh;
   max-width: 95vw;
-  width: auto;
-  height: auto;
 }
 
 .game-play-status {
@@ -313,21 +329,60 @@
   }
 }
 
+/* Narrow screens have no room for three columns, so the table becomes a
+   column: the board first, because it is what you came for, then the controls
+   under it. The fixed-height stage is dropped here - with one column it
+   squeezed the board to nothing - and the page scrolls the ordinary way. */
 @media (max-width: 768px) {
   .game-play {
     grid-template-columns: 1fr;
-    padding-top: 80px;
+    grid-template-rows: none;
+    margin-top: var(--play-header);
+    height: auto;
+    min-height: 0;
+    overflow: visible;
   }
 
+  .game-play > .game-play-sidebar,
+  .game-play > .game-play-board {
+    grid-row: auto;
+  }
+
+  .game-play-board {
+    order: 1;
+    padding: 12px;
+  }
+
+  .game-play > .game-play-hint {
+    order: 2;
+    grid-column: 1;
+    padding: 4px 12px 10px;
+  }
+
+  .game-play-sidebar--right { order: 3; }
+  .game-play-sidebar--left { order: 4; }
+
   .game-play-sidebar {
+    min-height: 0;
+    overflow: visible;
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 10px 12px;
+    border: 0;
+    border-top: 1px solid var(--border-subtle, rgba(106, 140, 255, 0.12));
+  }
+
+  .game-play-board svg {
+    max-height: 62vh;
   }
 
   .game-play-sidebar .control-group {
     flex: 1;
-    min-width: 120px;
+    min-width: 140px;
+  }
+
+  .game-play-fold {
+    flex-basis: 100%;
   }
 }
 
@@ -391,4 +446,238 @@ body.embed-mode .game-play-board svg {
 .game-play-seats .seat-name {
   display: inline-block;
   min-width: 58px;
+}
+
+/* An entry: the piece's name, and one board per way it moves. */
+.game-play-legend {
+  margin-top: 14px;
+}
+
+.game-play-legend-open {
+  width: 100%;
+}
+
+.legend-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+}
+
+.legend-name {
+  font-family: var(--font-display, system-ui), sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary, #e8eaed);
+}
+
+.legend-boards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.legend-board {
+  position: relative;
+  width: 132px;
+  max-width: 100%;
+}
+
+.legend-board svg {
+  display: block;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.legend-region {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-muted, #5f6b7a);
+  text-align: center;
+}
+
+.legend-note {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted, #5f6b7a);
+  max-width: 34ch;
+  text-wrap: pretty;
+}
+
+/* The dots have to read on a pale wood square and a dark one, at the size a
+   legend board actually gets. */
+.legend-target {
+  fill: #2f7fd4;
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 1.25;
+}
+
+/* The line under the board: what you are pointing at, and what it would do.
+   Its height is reserved so the board does not shift as the text changes. */
+.game-play-hint {
+  margin: 10px 0 0;
+  min-height: 20px;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  line-height: 20px;
+  letter-spacing: 0.01em;
+  color: var(--text-secondary, #9aa3b4);
+  text-align: center;
+  max-width: 60ch;
+}
+
+/* Piece moves, as a thing you pick up: the full width of the page, then gone.
+   No card frames around the entries - the boards are already the richest thing
+   on screen and a border on each would be noise around noise. */
+.legend-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(3, 5, 14, 0.82);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 5vh 4vw;
+  overflow-y: auto;
+}
+
+/* A class selector beats the browser rule for [hidden], so the overlay stayed
+   laid out over the whole page while hidden and swallowed every click on the
+   board. It has to opt out explicitly. */
+.legend-overlay[hidden] {
+  display: none;
+}
+
+.legend-panel {
+  width: min(1180px, 100%);
+  background: var(--bg-section, #0a0d2a);
+  border: 1px solid var(--border-subtle, rgba(106, 140, 255, 0.12));
+  border-radius: 6px;
+  padding: 24px 28px 32px;
+}
+
+.legend-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border-subtle, rgba(106, 140, 255, 0.12));
+}
+
+.legend-title {
+  font-family: var(--font-display, system-ui), sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary, #e8eaed);
+}
+
+.legend-subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-muted, #5f6b7a);
+  max-width: 56ch;
+}
+
+.legend-close {
+  flex: none;
+  background: transparent;
+  border: 1px solid var(--border, #2a2d4a);
+  color: var(--text-secondary, #9aa3b4);
+  border-radius: 4px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.legend-close:hover { color: var(--text-primary, #e8eaed); }
+
+.legend-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 28px 24px;
+  padding-top: 24px;
+  align-items: start;
+}
+
+/* A piece that moves differently in different places needs room for all of its
+   boards side by side. Wrapping them inside one column left a hole in the grid
+   and made the Crocodile look like three separate pieces. */
+.legend-row--multi {
+  grid-column: span 2;
+}
+
+.legend-row--multi.legend-row--three {
+  grid-column: span 3;
+}
+
+body.legend-open { overflow: hidden; }
+
+/* Settings you touch once, folded away so the rail does not grow past the
+   viewport and push the board out of it. */
+.game-play-fold {
+  border-top: 1px solid var(--border-subtle, rgba(106, 140, 255, 0.12));
+  padding-top: 12px;
+}
+
+.game-play-fold > summary {
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-display, system-ui), sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary, #9aa3b4);
+  padding: 2px 0;
+}
+
+.game-play-fold > summary::-webkit-details-marker { display: none; }
+
+.game-play-fold > summary::after {
+  content: '+';
+  float: right;
+  color: var(--text-muted, #5f6b7a);
+  font-weight: 400;
+}
+
+.game-play-fold[open] > summary::after { content: '–'; }
+
+.game-play-fold > summary:hover { color: var(--text-primary, #e8eaed); }
+
+.game-play-fold .control-group { margin-top: 12px; }
+
+/* The flags row ran its two checkboxes together with no space between them. */
+.game-play-sidebar .game-play-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  align-items: center;
+}
+
+.game-play-sidebar .game-play-flags label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary, #9aa3b4);
+}
+
+/* Buttons in the rails are apparatus, not the point of the page: the board is
+   the only thing allowed to be loud. */
+.game-play-sidebar .btn,
+.game-play-sidebar button.btn-icon {
+  background: transparent;
+  border: 1px solid var(--border, #2a2d4a);
+  color: var(--text-secondary, #9aa3b4);
+  font-size: 13px;
+  border-radius: 4px;
+  padding: 6px 12px;
+}
+
+.game-play-sidebar .btn:hover {
+  color: var(--text-primary, #e8eaed);
+  border-color: var(--border-glow, rgba(111, 181, 255, 0.25));
 }

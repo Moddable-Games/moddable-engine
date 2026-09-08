@@ -3,6 +3,18 @@ const { test, expect } = require('@playwright/test')
 const BASE = process.env.BASE_URL || 'http://localhost:80/MODDABLE/moddable-engine'
 const PLAY_URL = BASE + '/play/?family=chess'
 
+
+// Theme, pieces, piece colours and animation live behind an "Appearance"
+// disclosure: they are set once, and left open they made the rail taller than
+// the viewport and pushed the board off the screen. Reaching them is now a
+// deliberate act, so a test that changes one performs it.
+async function openAppearance(page) {
+  const fold = page.locator('.game-play-fold')
+  if (await fold.count() === 0) return
+  const open = await fold.first().evaluate(el => el.open)
+  if (!open) await fold.first().locator('summary').click()
+}
+
 test.describe('game-play surface — browser assertions', () => {
   test.beforeEach(async ({ page }) => {
     page.on('console', msg => { if (msg.type() === 'error') console.log('[BROWSER ERROR]', msg.text()) })
@@ -34,6 +46,7 @@ test.describe('game-play surface — browser assertions', () => {
 
     const classicFill = await page.locator('svg rect[data-sq]').first().getAttribute('fill')
 
+    await openAppearance(page)
     const themeSelect = page.locator('select').filter({ has: page.locator('option[value="neon"]') })
     await themeSelect.selectOption('neon')
     await page.waitForTimeout(300)
@@ -47,6 +60,7 @@ test.describe('game-play surface — browser assertions', () => {
     await page.goto(PLAY_URL, { waitUntil: 'networkidle' })
     await page.waitForSelector('.game-play-sidebar--left select', { timeout: 15000 })
 
+    await openAppearance(page)
     const piecesLabel = page.locator('.control-group', { has: page.locator('.control-label', { hasText: 'Pieces' }) })
     const piecesSelect = piecesLabel.locator('select')
 
@@ -92,6 +106,7 @@ test.describe('game-play surface — browser assertions', () => {
     await variantSelect.selectOption('sittuyin')
     await page.waitForTimeout(500)
 
+    await openAppearance(page)
     const piecesLabel = page.locator('.control-group', { has: page.locator('.control-label', { hasText: 'Pieces' }) })
     const piecesSelect = piecesLabel.locator('select')
     const sittuyinCount = await piecesSelect.locator('option').count()
@@ -233,6 +248,7 @@ test.describe('game-play surface — browser assertions', () => {
 
     const circlesBefore = await page.locator('svg g[pointer-events="none"] circle').count()
 
+    await openAppearance(page)
     const styleSelect = page.locator('.control-group', { has: page.locator('.control-label', { hasText: 'Piece Colours' }) }).locator('select')
     await styleSelect.selectOption('navy')
     await page.waitForTimeout(300)
@@ -306,6 +322,7 @@ test.describe('game-play surface — browser assertions', () => {
     await page.goto(PLAY_URL + '&opponent=human', { waitUntil: 'networkidle' })
     await page.waitForSelector('svg rect[data-sq]', { timeout: 15000 })
 
+    await openAppearance(page)
     const speedSelect = page.locator('.control-group', { has: page.locator('.control-label', { hasText: 'Speed' }) }).locator('select')
     await speedSelect.selectOption('instant')
     await page.waitForTimeout(100)

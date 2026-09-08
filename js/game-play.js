@@ -16,6 +16,7 @@ import { paintHighlight, paintIndicator, paintFog, paintEffect, createOverlay } 
 import { bindBoardInteraction } from './play-interaction.js'
 import { renderHandPanel } from './play-hand.js'
 import { renderRulesPanel } from './play-rules.js'
+import { buildLegend } from './play-legend.js'
 import { moveToSAN } from '../packages/plugins/chess/index.js'
 import { getDraft, resolveDraftId, listDrafts, WORKING_ID } from './create-drafts.js'
 import { buildResolvedFromState } from './create-state.js'
@@ -149,6 +150,7 @@ export function createPlaySession(options = {}) {
     container,
     handContainer = null,
     capturedContainer = null,
+    legendContainer = null,
     opponent = 'ai',
     difficulty = 'medium',
     theme = 'classic',
@@ -361,6 +363,9 @@ export function createPlaySession(options = {}) {
 
     if (embed) embed.post('ready', { family, variant, state: summarise() })
     draw()
+    // After the first draw: the legend reads the board's own cells to learn
+    // which squares exist, and there are none until something has been drawn.
+    renderLegend()
     if (capturedContainer) capturedContainer.innerHTML = ''
     return session
   }
@@ -459,9 +464,272 @@ export function createPlaySession(options = {}) {
     return parts.join(' · ')
   }
 
+  // The line under the board. The board studio's own info bar exists on this
+  // page but its canvas is collapsed in play mode, so writing there put the
+  // text in an element zero pixels tall - present to a test that reads
+  // textContent, invisible to a person. The stage carries its own.
+  function stageInfoEl() {
+    if (!container || !container.parentElement) return null
+    let el = container.parentElement.querySelector('.game-play-hint')
+    if (!el) {
+      el = document.createElement('p')
+      el.className = 'game-play-hint'
+      el.textContent = INFO_IDLE
+      container.parentElement.appendChild(el)
+    }
+    return el
+  }
+
   function setInfo(text) {
-    const el = document.getElementById('info-text')
+    const el = stageInfoEl()
     if (el) el.textContent = text
+    const legacy = document.getElementById('info-text')
+    if (legacy) legacy.textContent = text
+  }
+
+
+  // The legend: every piece a player will meet, and what it can actually do.
+  //
+  // Rendered once a game rather than every draw, because it does not depend on
+  // the position - and it goes through the same renderer the board does, so it
+  // is right for a hex or graph board without knowing that either exists.
+
+  // The piece reference, as something you pick up and put down.
+  //
+  // It lived in the right rail, where eight pieces at three boards each made a
+  // column two thousand pixels tall and pushed the board off the screen. The
+  // same content across the width of the page is one screenful.
+  let legendEls = null
+
+  function variantLabel() {
+    const meta = session?.variantMeta || variantMeta
+    return (meta && meta.title) || humaniseLabel(variant)
+  }
+
+  function humaniseLabel(v) {
+    return String(v || '').replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+  }
+
+  function legendOverlay() {
+    if (legendEls) return legendEls
+    const root = document.createElement('div')
+    root.className = 'legend-overlay'
+    root.hidden = true
+    root.setAttribute('role', 'dialog')
+    root.setAttribute('aria-modal', 'true')
+    root.setAttribute('aria-label', 'Piece moves')
+
+    const panel = document.createElement('div')
+    panel.className = 'legend-panel'
+
+    const head = document.createElement('div')
+    head.className = 'legend-head'
+    const title = document.createElement('h2')
+    title.className = 'legend-title'
+    title.textContent = 'Piece moves'
+    const subtitle = document.createElement('p')
+    subtitle.className = 'legend-subtitle'
+    const close = document.createElement('button')
+    close.type = 'button'
+    close.className = 'legend-close'
+    close.setAttribute('aria-label', 'Close piece moves')
+    close.textContent = 'Close'
+    close.addEventListener('click', () => showLegend(false))
+    const heads = document.createElement('div')
+    heads.appendChild(title)
+    heads.appendChild(subtitle)
+    head.appendChild(heads)
+    head.appendChild(close)
+
+    const grid = document.createElement('div')
+    grid.className = 'legend-grid'
+
+    panel.appendChild(head)
+    panel.appendChild(grid)
+    root.appendChild(panel)
+    root.addEventListener('click', (e) => { if (e.target === root) showLegend(false) })
+    document.body.appendChild(root)
+    legendEls = { root, panel, grid, subtitle, close }
+    return legendEls
+  }
+
+  function showLegend(open) {
+    const els = legendOverlay()
+    els.root.hidden = !open
+    document.body.classList.toggle('legend-open', open)
+    if (open) els.close.focus()
+  }
+
+  function onLegendKey(e) {
+    if (e.key === 'Escape' && legendEls && !legendEls.root.hidden) showLegend(false)
+  }
+  document.addEventListener('keydown', onLegendKey)
+
+  function renderLegend() {
+    if (!legendContainer || !resolvedBoard) return
+    legendContainer.innerHTML = ''
+    const overlay = legendOverlay()
+    overlay.grid.innerHTML = ''
+    const plugin = pluginFor()
+    const topo = resolvedBoard.topology || {}
+    const rows = topo.rows
+    const cols = topo.cols
+    if (!plugin || !rows || !cols || !cells || cells.mode !== 'grid') return
+
+    // Which cells exist: a board with voids has holes in it, and standing a
+    // piece in one would generate nothing and look broken.
+    const playable = new Set()
+    for (const el of container.querySelectorAll('[data-sq]')) {
+      const i = cells.toIndex(el.getAttribute('data-sq'))
+      if (i !== -1 && i !== null && i !== undefined) playable.add(i)
+    }
+
+    const slice = game.getState().slice
+    const seat = 0
+    const entries = buildLegend({
+      plugin, slice, rows, cols, playableCells: playable, seat,
+      probe: (synthetic) => plugin.getLegalMoves(synthetic, { __players: { currentIndex: seat } }),
+    })
+    if (!entries.length) return
+
+    // A button in the rail, and the boards themselves in an overlay. Eight
+    // pieces of Congo at three boards each is a column two thousand pixels
+    // long; the same content laid out across the page is one screen.
+    const open = document.createElement('button')
+    open.type = 'button'
+    open.className = 'btn btn-outline game-play-legend-open'
+    open.textContent = 'Piece moves'
+    open.addEventListener('click', () => showLegend(true))
+    legendContainer.appendChild(open)
+    overlay.subtitle.textContent =
+      `${variantLabel()} · what each piece can do, from the position shown`
+
+    const gallery = getGalleryIndex() || []
+    const pending = []
+    for (const entry of entries) {
+      const row = document.createElement('div')
+      row.className = 'legend-row'
+      if (entry.boards.length > 1) row.classList.add('legend-row--multi')
+      if (entry.boards.length > 2) row.classList.add('legend-row--three')
+      const name = document.createElement('span')
+      name.className = 'legend-name'
+      name.textContent = entry.label
+      row.appendChild(name)
+
+      const boards = document.createElement('div')
+      boards.className = 'legend-boards'
+      for (const b of entry.boards) {
+        const cell = document.createElement('div')
+        cell.className = 'legend-board'
+        const synthetic = { ...slice, board: b.board }
+        const rendered = { ...resolvedBoard, setup: boardToSetup(synthetic, resolvedBoard.topology) }
+        if (currentPieceSet !== 'auto') rendered.pieces = { ...rendered.pieces, set: currentPieceSet }
+        const theme = BOARD_THEMES[currentTheme] || BOARD_THEMES.classic
+        rendered.surface = {
+          ...(rendered.surface || {}),
+          colors: { ...(rendered.surface?.colors || {}), 'cell-light': theme.light, 'cell-dark': theme.dark },
+        }
+        const pieceResult = attachPieceImages(rendered, gallery)
+        const svg = renderFromEngine(rendered, {
+          pieceImages: pieceResult.images || {},
+          pieceSurfaceMap: pieceResult.surfaceMap || {},
+          pieceSurface: pieceResult.surface || null,
+        })
+        if (!svg) continue
+        cell.innerHTML = svg
+        const svgEl = cell.querySelector('svg')
+        if (svgEl) {
+          svgEl.setAttribute('width', '100%')
+          svgEl.removeAttribute('height')
+          // getBBox needs the node laid out, so the dots go on once the whole
+          // panel is in the document.
+          pending.push([svgEl, b.targets])
+        }
+        if (b.region) {
+          const tag = document.createElement('span')
+          tag.className = 'legend-region'
+          tag.textContent = b.region.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()
+          cell.appendChild(tag)
+        }
+        boards.appendChild(cell)
+      }
+      row.appendChild(boards)
+      if (entry.boards.length > 1) {
+        const note = document.createElement('span')
+        note.className = 'legend-note'
+        note.textContent = 'moves differently depending on where it stands'
+        row.appendChild(note)
+      }
+      overlay.grid.appendChild(row)
+    }
+    for (const [svgEl, targets] of pending) {
+      markTargets(svgEl, targets)
+      makeInert(svgEl)
+    }
+  }
+
+  // A legend board is a picture, not a board. It is rendered by the same
+  // renderer as the real one and therefore arrives carrying the same `data-sq`
+  // and `pointer-events` attributes - which put eight more e2 squares and
+  // several dozen more pieces inside #game-play-root, and broke every selector
+  // and piece count that addresses the live board. The attributes are stripped
+  // once the dots have been placed, since that is all they were needed for.
+  function makeInert(svgEl) {
+    for (const el of svgEl.querySelectorAll('[data-sq]')) el.removeAttribute('data-sq')
+    for (const el of svgEl.querySelectorAll('[pointer-events]')) el.removeAttribute('pointer-events')
+    svgEl.setAttribute('focusable', 'false')
+  }
+
+  // A dot on every square the piece can reach.
+  //
+  // Read from the SVG's own geometry rather than from getBBox, because the
+  // legend is built while its overlay is still hidden and a display:none
+  // subtree has no layout - every box came back zero and every dot was skipped.
+  // The renderer writes real coordinates onto the cells, so they are there to
+  // be read whether or not anything has been laid out.
+  function cellCentre(el) {
+    const num = (name) => Number(el.getAttribute(name))
+    if (el.tagName === 'rect') {
+      const w = num('width')
+      const h = num('height')
+      if (!w || !h) return null
+      return { x: num('x') + w / 2, y: num('y') + h / 2, size: Math.min(w, h) }
+    }
+    if (el.tagName === 'circle') {
+      const r = num('r')
+      if (!r) return null
+      return { x: num('cx'), y: num('cy'), size: r * 2 }
+    }
+    const points = (el.getAttribute('points') || '').trim().split(/[\s,]+/).map(Number)
+    if (points.length >= 6) {
+      let sx = 0, sy = 0, n = 0
+      let minX = Infinity, maxX = -Infinity
+      for (let i = 0; i + 1 < points.length; i += 2) {
+        sx += points[i]; sy += points[i + 1]; n += 1
+        if (points[i] < minX) minX = points[i]
+        if (points[i] > maxX) maxX = points[i]
+      }
+      if (n) return { x: sx / n, y: sy / n, size: maxX - minX }
+    }
+    return null
+  }
+
+  function markTargets(svgEl, targets) {
+    const NS = 'http://www.w3.org/2000/svg'
+    for (const target of targets) {
+      const id = cells.toId(target)
+      const el = svgEl.querySelector(`[data-sq="${id}"]`)
+      if (!el) continue
+      const centre = cellCentre(el)
+      if (!centre) continue
+      const dot = document.createElementNS(NS, 'circle')
+      dot.setAttribute('cx', centre.x)
+      dot.setAttribute('cy', centre.y)
+      dot.setAttribute('r', Math.max(3, centre.size * 0.22))
+      dot.setAttribute('class', 'legend-target')
+      dot.setAttribute('pointer-events', 'none')
+      svgEl.appendChild(dot)
+    }
   }
 
   function summarise() {
@@ -602,6 +870,10 @@ export function createPlaySession(options = {}) {
       onCellHover: (key, label) => setInfo(describeCell(key, label, state)),
       onCellOut: () => setInfo(INFO_IDLE),
     })
+
+    // Created with the board so its height is reserved from the start and the
+    // board does not shift the first time anyone points at a square.
+    stageInfoEl()
 
     renderHand(slice, state)
   }
@@ -1278,12 +1550,22 @@ export async function initGamePlay(container, defaults = {}) {
   }
   const difficultySelect = buildSelect(leftSidebar, 'Difficulty', difficultyOptionsFor(family), params.difficulty || 'medium')
   const seatSelect = buildSelect(leftSidebar, 'Play as', seatOptionsForFamily(family), params.color || '0')
-  const themeSelect = buildSelect(leftSidebar, 'Theme', Object.entries(BOARD_THEMES).map(([k, v]) => ({ value: k, label: v.label })), params.theme || 'classic')
+  // Appearance is set once and then left alone, so it folds away. These five
+  // selects were half the reason the rail ran to 2,473px and pushed the board
+  // off the screen.
+  const displayFold = document.createElement('details')
+  displayFold.className = 'game-play-fold'
+  const displaySummary = document.createElement('summary')
+  displaySummary.textContent = 'Appearance'
+  displayFold.appendChild(displaySummary)
+  leftSidebar.appendChild(displayFold)
 
-  const pieceSetSelect = buildSelect(leftSidebar, 'Pieces', [{ value: 'auto', label: 'Auto (from rules)' }], params.pieces || 'auto')
-  const pieceStyleSelect = buildSelect(leftSidebar, 'Piece Colours', Object.entries(PIECE_STYLES).map(([k, v]) => ({ value: k, label: v.label })), params.pieceStyle || 'auto')
-  const animStyleSelect = buildSelect(leftSidebar, 'Animation', ANIM_THEME.styles.map(s => ({ value: s, label: s[0].toUpperCase() + s.slice(1) })), params.animStyle || ANIM_THEME.defaultStyle)
-  const animSpeedSelect = buildSelect(leftSidebar, 'Speed', Object.keys(ANIM_THEME.speeds).map(s => ({ value: s, label: s[0].toUpperCase() + s.slice(1) })), params.animSpeed || ANIM_THEME.defaultSpeed)
+  const themeSelect = buildSelect(displayFold, 'Theme', Object.entries(BOARD_THEMES).map(([k, v]) => ({ value: k, label: v.label })), params.theme || 'classic')
+
+  const pieceSetSelect = buildSelect(displayFold, 'Pieces', [{ value: 'auto', label: 'Auto (from rules)' }], params.pieces || 'auto')
+  const pieceStyleSelect = buildSelect(displayFold, 'Piece Colours', Object.entries(PIECE_STYLES).map(([k, v]) => ({ value: k, label: v.label })), params.pieceStyle || 'auto')
+  const animStyleSelect = buildSelect(displayFold, 'Animation', ANIM_THEME.styles.map(s => ({ value: s, label: s[0].toUpperCase() + s.slice(1) })), params.animStyle || ANIM_THEME.defaultStyle)
+  const animSpeedSelect = buildSelect(displayFold, 'Speed', Object.keys(ANIM_THEME.speeds).map(s => ({ value: s, label: s[0].toUpperCase() + s.slice(1) })), params.animSpeed || ANIM_THEME.defaultSpeed)
 
   function rebuildVariantSelect(f) {
     const vs = variantsForFamily(f)
@@ -1367,6 +1649,10 @@ export async function initGamePlay(container, defaults = {}) {
   rulesEl.className = 'game-play-rules'
   rightSidebar.appendChild(rulesEl)
 
+  const legendEl = document.createElement('div')
+  legendEl.className = 'game-play-legend'
+  rightSidebar.appendChild(legendEl)
+
   let session = null
 
   const bridge = createEmbedBridge({
@@ -1400,6 +1686,7 @@ export async function initGamePlay(container, defaults = {}) {
     difficulty: difficultySelect.value,
     seat: seatSelect.value,
     theme: themeSelect.value,
+    legendContainer: legendEl,
     embed: params.embed ? bridge : null,
     flipped: !!params.flipped,
     onStatus: updateStatus,
