@@ -6,8 +6,8 @@ import { createGoPlayoutPolicy, createGoExpansionPolicy } from './playout-policy
 // which only lists the keys that carry a default value.
 export const CONFIG_KEYS = new Set([
   'allowPass', 'autoScore', 'boardSize', 'captureTarget', 'captures', 'cols', 'evaluate',
-  'handicap', 'komi', 'playerColours', 'rows', 'scoring', 'setup', 'suicideAllowed',
-  'superko', 'turnLogic', 'winCondition',
+  'handicap', 'koRule', 'komi', 'playerColours', 'positionBonus', 'prisoners', 'rows',
+  'scoring', 'setup', 'suicideAllowed', 'superko', 'turnLogic', 'winCondition',
 ])
 
 
@@ -118,7 +118,7 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
     const coord = move.coord
     if (coord < 0 || coord >= slice.board.length) return false
     if (slice.board[coord] !== null) return false
-    if (coord === slice.ko) return false
+    if (Array.isArray(slice.ko) ? slice.ko.includes(coord) : coord === slice.ko) return false
 
     if (!config.suicideAllowed) {
       if (wouldBeSuicide(coord, slice, full)) return false
@@ -281,6 +281,10 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
     return scoreGame(slice, {
       getNeighbours: (pos) => neighboursOf(pos, slice),
       method: opts.method || config.scoring || slice.scoring,
+      prisoners: config.prisoners,
+      positionBonus: config.positionBonus,
+      cols: topology ? topology.cols : (config.cols || slice.cols),
+      rows: topology ? topology.rows : (config.rows || slice.rows),
       komi: opts.komi !== undefined ? opts.komi : (slice.komi !== undefined ? slice.komi : config.komi),
       deadStones: opts.deadStones || slice.deadStones || [],
       captures: slice.captures,
@@ -378,7 +382,15 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
     return n
   }
 
+  // Which points the opponent may not answer on.
+  //
+  // The ordinary rule forbids one: recapturing the single stone just taken
+  // would repeat the position. Tibetan Go forbids every point the opponent has
+  // just cleared, which is a broader rule and a different one - it makes
+  // snapback illegal and suicide useless as a ko threat, neither of which
+  // follows from the ordinary rule.
   function determineKo(captured, playedCoord, board) {
+    if (config.koRule === 'any-removed') return captured.length ? [...captured] : null
     if (captured.length !== 1) return null
     return captured[0]
   }
