@@ -246,8 +246,36 @@ export function reboundRider(dirs, opts = {}) {
     genMoves(topology, from, board) {
       return walk(topology, from, board)
     },
+    // Asking "does this ray reach `target`" is not the same question as "what
+    // moves does it have", and must not be answered by filtering the latter.
+    // `walk` reports a capture only where the board it is given marks a piece
+    // as `enemy`, and the attack path is given the raw board, where nothing is
+    // marked. Deriving attacks from moves therefore reported that a rebounding
+    // Rook attacked no occupied square at all - so it never attacked a king,
+    // and Rollerball's kings could be walked into danger and taken off.
     attacks(topology, from, target, board) {
-      return walk(topology, from, board).some(m => m.to === target)
+      for (const start of dirList) {
+        let cursor = from
+        let d = start
+        for (let leg = 0; leg <= maxRebounds; leg++) {
+          const ray = (topology.rays(cursor, [d]) || [])[0] || []
+          let blocked = false
+          for (const pos of ray) {
+            // The target square is reached whether or not it is occupied: an
+            // occupied square is exactly the one being asked about.
+            if (pos === target) return true
+            if (board[pos]) { blocked = true; break }
+          }
+          if (blocked || leg === maxRebounds || !ray.length) break
+          const end = ray[ray.length - 1]
+          if (at && !at(end)) break
+          const turned = nextDirection(topology, end, d)
+          if (!turned) break
+          cursor = end
+          d = turned
+        }
+      }
+      return false
     },
   }
 }

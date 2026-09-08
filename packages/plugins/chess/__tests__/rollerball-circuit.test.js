@@ -54,7 +54,7 @@ describe('Rollerball: winning by completing the circuit (engine#170)', () => {
 
   it('wins when the King reaches d6 having gone the long way round', () => {
     const g = game()
-    only(g, [['d2', 'king', 0], ['g4', 'king', 1], ['g6', 'rook', 1]])
+    only(g, [['d2', 'king', 0], ['g4', 'king', 1]])
     // Clockwise from the south zone is westward, then up the west side, then
     // east along the top: d2 -> c2 -> b2 -> a3 -> a4 -> a5 -> b6 -> c6 -> d6.
     const result = walk(g, ['c2', 'b2', 'a3', 'a4', 'a5', 'b6', 'c6', 'd6'])
@@ -63,7 +63,11 @@ describe('Rollerball: winning by completing the circuit (engine#170)', () => {
 
   it('does not win by taking the short way round anticlockwise', () => {
     const g = game()
-    only(g, [['d2', 'king', 0], ['a4', 'king', 1], ['a6', 'rook', 1]])
+    // Kings only. A Black rook anywhere on the ring covers most of a rank or
+    // file, and with check now enforced it would make the King's path illegal
+    // rather than merely unrewarding - which is a different thing from the one
+    // being tested.
+    only(g, [['d2', 'king', 0], ['a4', 'king', 1]])
     // Anticlockwise: d2 -> e2 -> f2 -> g3 -> g4 -> g5 -> f6 -> e6 -> d6.
     const result = walk(g, ['e2', 'f2', 'g3', 'g4', 'g5', 'f6', 'e6', 'd6'])
     expect(result).toBeNull()
