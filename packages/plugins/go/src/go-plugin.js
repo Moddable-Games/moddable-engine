@@ -39,6 +39,19 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
 
   const playerColours = config.playerColours || ['black', 'white']
 
+  // A seat is not a side. Pair play seats four people and gives them two
+  // colours, partners alternating, so "the other seat's colour" is wrong twice
+  // over: with four seats `1 - index` runs off the end of the list, and the
+  // seat opposite you is your partner half the time.
+  //
+  // The board already stores a stone as its colour rather than as whose turn
+  // placed it, so the side is the colour and the only thing that had to change
+  // is asking which colour is not mine.
+  const sides = [...new Set(playerColours)]
+  function opponentColourOf(colour) {
+    return sides.find(c => c !== colour) || sides[0]
+  }
+
   const hooks = {
     init: defaultInit,
     validateMove: defaultValidateMove,
@@ -148,7 +161,7 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
     const board = [...slice.board]
     const playerIndex = full && full.__players ? full.__players.currentIndex : 0
     const currentColour = playerColours[playerIndex]
-    const opponentColour = playerColours[1 - playerIndex]
+    const opponentColour = opponentColourOf(playerColours[playerIndex])
     board[coord] = currentColour
     const captured = config.captures === false
       ? []
@@ -171,7 +184,7 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
     const board = [...slice.board]
     const playerIndex = full.__players.currentIndex
     const currentColour = playerColours[playerIndex]
-    const opponentColour = playerColours[1 - playerIndex]
+    const opponentColour = opponentColourOf(playerColours[playerIndex])
 
     board[move.coord] = currentColour
 
@@ -302,7 +315,7 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
     const board = [...slice.board]
     const playerIndex = full.__players.currentIndex
     const currentColour = playerColours[playerIndex]
-    const opponentColour = playerColours[1 - playerIndex]
+    const opponentColour = opponentColourOf(playerColours[playerIndex])
 
     board[coord] = currentColour
 

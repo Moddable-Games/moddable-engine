@@ -2077,7 +2077,7 @@
     "topology": "grid",
     "svg": "svgs/go--rengo.svg",
     "rulesUrl": "go/variants/rengo/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "go",

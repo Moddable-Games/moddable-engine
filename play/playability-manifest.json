@@ -1505,6 +1505,15 @@
   {
     "family": "go",
     "familyLabel": "Go",
+    "variant": "rengo",
+    "key": "rengo",
+    "label": "Rengo",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "go",
+    "familyLabel": "Go",
     "variant": "renju",
     "key": "renju",
     "label": "Renju",

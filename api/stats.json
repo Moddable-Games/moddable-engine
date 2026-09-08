@@ -9,12 +9,12 @@
     "standard": 1116,
     "variants": 610
   },
-  "playableVariants": 220,
+  "playableVariants": 221,
   "playableFamilies": 10,
   "playableByFamily": {
     "chess": 141,
     "draughts": 20,
-    "go": 10,
+    "go": 11,
     "hex": 8,
     "landlords-game": 1,
     "mancala": 8,
@@ -38,7 +38,7 @@
   "frontmatterOnlyByFamily": {
     "chess": 87,
     "draughts": 20,
-    "go": 7,
+    "go": 8,
     "hex": 8,
     "landlords-game": 1,
     "mancala": 8,

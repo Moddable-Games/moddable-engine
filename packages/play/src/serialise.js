@@ -127,7 +127,16 @@ export function boardToSetup(slice, topo = {}, vocabulary = {}, opts = {}) {
   const rows = topo.rows || Math.round(board.length / cols)
   const players = opts.players || []
 
-  if (players.length > 2) {
+  // The four-player format exists to write down four OWNERS. Seating four
+  // people is not the same thing: pair play seats four and gives them two
+  // colours, and a Go stone records the colour rather than who placed it. Such
+  // a board has nothing extra to encode, and writing it in the wider format
+  // produced a position the renderer read back wrong.
+  const ownersInPlay = new Set()
+  for (const cell of Array.isArray(board) ? board : Object.values(board)) {
+    if (cell && typeof cell === 'object' && cell.owner !== undefined) ownersInPlay.add(cell.owner)
+  }
+  if (players.length > 2 && ownersInPlay.size > 2) {
     return boardToFen4(board, rows, cols, vocabulary, players)
   }
 
@@ -160,6 +169,15 @@ function boardToFen4(board, rows, cols, vocabulary, players) {
       const cell = board[r * cols + c]
       if (!cell) { empty++; continue }
       if (empty > 0) { tokens.push(String(empty)); empty = 0 }
+      // Not every family stores a piece as an object. Go holds a stone as its
+      // colour, and this path is taken whenever a game seats more than two -
+      // which pair play does, with four seats and two colours. `cellToSymbol`
+      // already knows how each family writes a cell down; this branch had its
+      // own copy of that knowledge and it only covered piece objects, so the
+      // first stone placed in a four-seat Go game threw on `cell.type[0]`.
+      const shared = cellToSymbol(cell, vocabulary)
+      if (shared) { tokens.push(shared); continue }
+      if (typeof cell !== 'object') { empty++; continue }
       const entry = vocabulary[cell.type]
       const ownerSym = entry?.symbols?.[String(cell.owner)]
       if (ownerSym) {
