@@ -30,16 +30,43 @@ function filesVisibleTo(set) {
   return seen
 }
 
+// A virtual set draws from other sets, naming them in `sources` and each entry
+// saying which one it came from. The survey did not know that, so every entry
+// in every virtual set counted as naming a file that does not exist - which is
+// most of what the baseline below was made of. It asks where the file actually
+// is now.
+function sourceFiles(set, sourceName) {
+  const rel = set.sources && set.sources[sourceName]
+  if (!rel) return null
+  const dir = resolve(ROOT, 'pieces/sets', set.id, rel)
+  if (!existsSync(dir)) return null
+  return new Set(readdirSync(dir))
+}
+
 function survey() {
   const caseMismatch = []
   const absent = []
   for (const set of gallery) {
     const disk = filesVisibleTo(set)
-    if (disk.size === 0) continue
+    const sourceCache = new Map()
+    if (disk.size === 0 && !set.sources) continue
     const lower = new Map([...disk].map(f => [f.toLowerCase(), f]))
     for (const [key, entry] of Object.entries(set.pieces || {})) {
       const file = typeof entry === 'string' ? entry : entry?.file
       if (typeof file !== 'string' || !file.endsWith('.svg')) continue
+      const from = entry && typeof entry === 'object' ? entry.source : null
+      if (from) {
+        if (!sourceCache.has(from)) sourceCache.set(from, sourceFiles(set, from))
+        const files = sourceCache.get(from)
+        if (files) {
+          if (files.has(file)) continue
+          const alt = new Map([...files].map(f => [f.toLowerCase(), f]))
+          const where = `${set.id}/${key} -> ${from}:${file}`
+          if (alt.has(file.toLowerCase())) caseMismatch.push(`${where} (on disk: ${alt.get(file.toLowerCase())})`)
+          else absent.push(where)
+          continue
+        }
+      }
       if (disk.has(file)) continue
       const where = `${set.id}/${key} -> ${file}`
       if (lower.has(file.toLowerCase())) caseMismatch.push(`${where} (on disk: ${lower.get(file.toLowerCase())})`)
@@ -49,9 +76,11 @@ function survey() {
   return { caseMismatch, absent }
 }
 
-// Pre-existing, in mce-fairy-complete (15), mce-jungle (16) and mce-tafl (1).
-// Verified identical on origin/main before any of 2026-09-01's work.
-const ABSENT_BASELINE = 32
+// Was 32, of which 31 were never broken: the survey did not understand that a
+// virtual set names its artwork in another set's directory, so every entry in
+// mce-fairy-complete and mce-jungle counted as missing. One real entry remains,
+// mce-fairy-complete's `duck`, which names a duck.svg nothing has.
+const ABSENT_BASELINE = 1
 
 describe('declared piece files resolve', () => {
   const { caseMismatch, absent } = survey()
@@ -74,6 +103,6 @@ describe('declared piece files resolve', () => {
     if (absent.length < ABSENT_BASELINE) {
       console.log(`ratchet: absent entries fell to ${absent.length}; lower ABSENT_BASELINE to match`)
     }
-    expect(ABSENT_BASELINE).toBe(32)
+    expect(ABSENT_BASELINE).toBe(1)
   })
 })

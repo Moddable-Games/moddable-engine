@@ -1,0 +1,111 @@
+{
+  "id": "mce-congo",
+  "name": "MCE Congo",
+  "family": "chess",
+  "author": "Moddable Games (composite)",
+  "license": "CC-BY-4.0",
+  "source": "https://github.com/twitter/twemoji",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "playable": true,
+  "recolorable": false,
+  "virtual": true,
+  "extends": "mce-fairy-complete",
+  "sources": {
+    "twemoji": "../twemoji/"
+  },
+  "surface": {
+    "type": "disc",
+    "owners": {
+      "white": {
+        "fill": "#f4e4c1",
+        "stroke": "#8a6a3a"
+      },
+      "black": {
+        "fill": "#8a6338",
+        "stroke": "#3d2a15"
+      }
+    }
+  },
+  "pieces": {
+    "wL": {
+      "source": "twemoji",
+      "file": "lion.svg",
+      "surface": "disc"
+    },
+    "bL": {
+      "source": "twemoji",
+      "file": "lion.svg",
+      "surface": "disc"
+    },
+    "wG": {
+      "source": "twemoji",
+      "file": "giraffe.svg",
+      "surface": "disc"
+    },
+    "bG": {
+      "source": "twemoji",
+      "file": "giraffe.svg",
+      "surface": "disc"
+    },
+    "wM": {
+      "source": "twemoji",
+      "file": "monkey.svg",
+      "surface": "disc"
+    },
+    "bM": {
+      "source": "twemoji",
+      "file": "monkey.svg",
+      "surface": "disc"
+    },
+    "wE": {
+      "source": "twemoji",
+      "file": "elephant.svg",
+      "surface": "disc"
+    },
+    "bE": {
+      "source": "twemoji",
+      "file": "elephant.svg",
+      "surface": "disc"
+    },
+    "wC": {
+      "source": "twemoji",
+      "file": "croc.svg",
+      "surface": "disc"
+    },
+    "bC": {
+      "source": "twemoji",
+      "file": "croc.svg",
+      "surface": "disc"
+    },
+    "wZ": {
+      "source": "twemoji",
+      "file": "zebra.svg",
+      "surface": "disc"
+    },
+    "bZ": {
+      "source": "twemoji",
+      "file": "zebra.svg",
+      "surface": "disc"
+    },
+    "wP": {
+      "source": "twemoji",
+      "file": "chess-pawn.svg",
+      "surface": "disc"
+    },
+    "bP": {
+      "source": "twemoji",
+      "file": "chess-pawn.svg",
+      "surface": "disc"
+    },
+    "wS": {
+      "source": "twemoji",
+      "file": "crown.svg",
+      "surface": "disc"
+    },
+    "bS": {
+      "source": "twemoji",
+      "file": "crown.svg",
+      "surface": "disc"
+    }
+  }
+}
