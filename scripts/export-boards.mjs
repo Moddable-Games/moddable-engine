@@ -94,6 +94,25 @@ for (const { family, familyEngine, slug, path: variantPath, meta, engine: varian
 
     const pieceSetId = resolved.pieces?.set
     const setDef = pieceSetId ? gallery.find(s => s.id === pieceSetId) : null
+
+    // A board with pieces in its setup and none in its picture is not a
+    // diagram, it is a mistake that looks like one - and writing it out is how
+    // Congo lost its seven animals twice, silently, to a sync run against an
+    // engine checkout where its piece set did not yet exist. The renderer will
+    // happily draw an empty board; nothing downstream can tell that apart from
+    // a board that is meant to be empty. This can.
+    const setupHasPieces = typeof resolved.setup === 'string' &&
+      /[a-zA-Z]/.test(resolved.setup.replace(/\[[^\]]*\]/g, 'X'))
+    // Checked on the raw SVG, where a piece is an <image>; the `#piece-` symbol
+    // references only exist after embedPieceImages has run.
+    if (setupHasPieces && !/<image\s/.test(rawSvg)) {
+      const named = pieceSetId ? `"${pieceSetId}"` : 'its piece set'
+      const known = pieceSetId && !setDef ? ' - which is not in pieces/gallery-index.json' : ''
+      console.error(`✗ ${family}/${slug}: setup declares pieces and none were drawn. Could not resolve ${named}${known}.`)
+      errors++
+      continue
+    }
+
     const svg = embedPieceImages(rawSvg, setDef)
 
     const diagramDir = resolve(GAMES_DIR, family, 'diagrams', 'svg')
