@@ -2757,7 +2757,7 @@
     "topology": "hex",
     "svg": "svgs/shogi--hex-shogi-91.svg",
     "rulesUrl": "shogi/variants/hex-shogi-91/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "shogi",

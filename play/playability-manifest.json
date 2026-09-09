@@ -1874,6 +1874,15 @@
   {
     "family": "shogi",
     "familyLabel": "Shogi",
+    "variant": "hex-shogi-91",
+    "key": "hex-shogi-91",
+    "label": "Hex Shogi 91",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "judkins-shogi",
     "key": "judkins-shogi",
     "label": "Judkins' Shogi",

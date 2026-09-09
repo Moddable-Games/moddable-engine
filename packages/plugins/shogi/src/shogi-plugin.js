@@ -40,11 +40,16 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
   // Every cell that is part of the board, which on a voided topology is not
   // every index in the board array: a hole is stored as null and so reads as an
   // empty square to anything that walks the array by index.
+  // A cell key is an integer index on a grid and whatever the topology calls a
+  // cell elsewhere - the hex provider hands back axial strings like "-5,5" and
+  // stores its board as a map rather than an array. Everything that walks the
+  // board goes through here, because `for (let i = 0; i < board.length; i++)`
+  // on a map runs zero times and reports no legal moves rather than an error.
   function playableCells(board) {
     if (_cachedCells) return _cachedCells
     _cachedCells = topology && topology.getAllCells
       ? topology.getAllCells()
-      : board.map((_, i) => i)
+      : (Array.isArray(board) ? board.map((_, i) => i) : Object.keys(board))
     return _cachedCells
   }
 
@@ -109,7 +114,15 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
   // Cache of built primitives keyed by "type__playerIndex"
   const builtPieces = new Map()
 
-  function rotateOffset([dr, dc], advVec) {
+  function rotateOffset(offset, advVec) {
+    // An axial hex vector is {q, r} rather than [dr, dc]. The only turn a seat
+    // needs on a hex board is a half turn, and that negates both components
+    // exactly as it does on a grid - so the hex case is the same arithmetic in
+    // a different shape, not a different rule.
+    if (offset && !Array.isArray(offset) && typeof offset === 'object') {
+      return (advVec[0] === 1 && advVec[1] === 0) ? { q: -offset.q, r: -offset.r } : offset
+    }
+    const [dr, dc] = offset
     if (advVec[0] === -1 && advVec[1] === 0) return [dr, dc]
     if (advVec[0] === 1 && advVec[1] === 0) return [-dr, -dc]
     if (advVec[0] === 0 && advVec[1] === 1) return [dc, -dr]
@@ -215,11 +228,24 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
   }
 
   // Creates a board view with .friendly/.enemy properties for piece-behaviour primitives
+  // A board is an array on a grid and a map elsewhere, and both get copied
+  // before a move is tried on them.
+  function cloneBoard(board) {
+    if (Array.isArray(board)) return board.map(c => (c ? { ...c } : null))
+    const out = {}
+    for (const key of Object.keys(board)) out[key] = board[key] ? { ...board[key] } : null
+    return out
+  }
+
+  const flagged = (cell, playerIndex) => (cell
+    ? { friendly: cell.owner === playerIndex, enemy: cell.owner !== playerIndex, ...cell }
+    : null)
+
   function buildViewBoard(board, playerIndex) {
-    return board.map(cell => {
-      if (cell === null) return null
-      return { friendly: cell.owner === playerIndex, enemy: cell.owner !== playerIndex, ...cell }
-    })
+    if (Array.isArray(board)) return board.map(cell => flagged(cell, playerIndex))
+    const view = {}
+    for (const key of playableCells(board)) view[key] = flagged(board[key] || null, playerIndex)
+    return view
   }
 
   const promotionMap = config.promotionMap || null
@@ -337,7 +363,7 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     const NEIGHBOURS = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]]
 
     const doomed = new Set()
-    for (let i = 0; i < board.length; i++) {
+    for (const i of playableCells(board)) {
       const demon = board[i]
       if (!demon || demon.type !== burner) continue
       for (const offset of NEIGHBOURS) {
@@ -387,7 +413,7 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
         if (config.dropPawnFileLimit && type === nifuType) {
           const [, col] = rowCol(i)
           let count = 0
-          for (let idx = 0; idx < board.length; idx++) {
+          for (const idx of playableCells(board)) {
             const cell = board[idx]
             if (!cell || cell.owner !== playerIndex || cell.type !== nifuType) continue
             const [, cellCol] = rowCol(idx)
@@ -466,7 +492,7 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
   }
 
   function findKing(board, playerIndex) {
-    for (let i = 0; i < board.length; i++) {
+    for (const i of playableCells(board)) {
       if (board[i] && board[i].owner === playerIndex && board[i].type === royalType) return i
     }
     return -1
@@ -483,7 +509,7 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
   function isInCheck(board, playerIndex) {
     const kingPos = findKing(board, playerIndex)
     if (kingPos === -1) return true
-    for (let i = 0; i < board.length; i++) {
+    for (const i of playableCells(board)) {
       if (!board[i] || board[i].owner === playerIndex) continue
       if (canAttack(board, i, kingPos, board[i], board[i].owner)) return true
     }
@@ -513,7 +539,7 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
       const board = setup ? parseSetup(setup) : buildDefaultBoard()
 
       // Validate: every board cell type must have a movement definition
-      for (let i = 0; i < board.length; i++) {
+      for (const i of playableCells(board)) {
         if (board[i] && !PIECE_MOVES[board[i].type]) {
           throw new Error(`Unmapped piece type "${board[i].type}" at cell ${i}. Declare its movement in pieceMoves or remove it from setup.`)
         }
@@ -548,7 +574,7 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
 
     applyMove(move, slice, full) {
       const playerIndex = full.__players.currentIndex
-      const board = slice.board.map(c => c ? { ...c } : null)
+      const board = cloneBoard(slice.board)
       const hands = slice.hands.map(h => h.slice())
 
       if (move.action === 'drop') {
@@ -641,7 +667,7 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
       const playerIndex = full.__players.currentIndex
       const allMoves = []
 
-      for (let i = 0; i < slice.board.length; i++) {
+      for (const i of playableCells(slice.board)) {
         const piece = slice.board[i]
         if (!piece || piece.owner !== playerIndex) continue
         const pieceMoves = generatePieceMoves(slice.board, i, piece, playerIndex)
@@ -691,7 +717,7 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
       if (isRoyalless()) return generated
 
       return generated.filter(m => {
-        const testBoard = slice.board.map(c => c ? { ...c } : null)
+        const testBoard = cloneBoard(slice.board)
         if (m.action === 'drop') {
           testBoard[m.to] = { type: m.type, owner: playerIndex }
         } else {
@@ -806,6 +832,11 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
 
     const board = topology.parsePosition(plain, VOCABULARY)
     if (promotedAt.size === 0) return board
+
+    // Counting in reading order is only meaningful for a FEN, which is a
+    // sequence. A topology whose setup names its cells - hex writes
+    // "-5,5:L,-4,5:N" - has no reading order and no `+` markers either.
+    if (!Array.isArray(board)) return board
 
     let seen = 0
     for (let i = 0; i < board.length; i++) {
