@@ -1928,6 +1928,15 @@
   {
     "family": "shogi",
     "familyLabel": "Shogi",
+    "variant": "wa-shogi",
+    "key": "wa-shogi",
+    "label": "Wa Shogi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "yari-shogi",
     "key": "yari-shogi",
     "label": "Yari Shogi",

@@ -1,5 +1,6 @@
 import { warnUnknownConfigKeys } from '../../../core/index.js'
 import { fromConfig } from '../../../piece-behaviour/index.js'
+import { betzaToSpec } from '../../../piece-behaviour/src/betza.js'
 // Every config key this plugin reads. Exported so the corpus guard and the
 // authoring docs share one source of truth, and kept separate from `defaults`,
 // which only lists the keys that carry a default value.
@@ -131,14 +132,32 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     return Array.isArray(raw) ? raw : [raw || -1, 0]
   }
 
+  // A piece may declare its movement in the Betza notation its source prints,
+  // rather than as offsets. The large variants publish 36, 50 and 207 piece
+  // types that way, and transcribing those into offset tables by hand is
+  // copying with a chance to err per piece.
+  function resolveMoveSpec(pConfig, type) {
+    if (!pConfig || !pConfig.betza) return pConfig
+    try {
+      return betzaToSpec(pConfig.betza)
+    } catch (err) {
+      throw new Error(`Piece "${type}": ${err.message}`)
+    }
+  }
+
   function buildPieceForPlayer(type, playerIndex) {
     const key = `${type}__${playerIndex}`
     if (builtPieces.has(key)) return builtPieces.get(key)
-    const pConfig = PIECE_MOVES[type]
+    const pConfig = resolveMoveSpec(PIECE_MOVES[type], type)
     if (!pConfig) return null
     const advVec = advancementFor(playerIndex)
-    const needsRotate = pConfig.directional && !(advVec[0] === -1 && advVec[1] === 0)
-    const spec = needsRotate ? rotateSpec(pConfig, advVec) : pConfig
+    const forwardIsUp = advVec[0] === -1 && advVec[1] === 0
+    // Each leg is judged on its own flag. A Betza string compiles to a list of
+    // legs of which only some face a direction - `FAvWvD` is a symmetric ferz
+    // and alfil beside a vertical wazir and dabbaba - and rotating the
+    // symmetric ones would map them onto themselves for no reason.
+    const orient = (spec) => (!forwardIsUp && spec && spec.directional) ? rotateSpec(spec, advVec) : spec
+    const spec = Array.isArray(pConfig) ? pConfig.map(orient) : orient(pConfig)
     const primitive = fromConfig(spec)
     builtPieces.set(key, primitive)
     return primitive
