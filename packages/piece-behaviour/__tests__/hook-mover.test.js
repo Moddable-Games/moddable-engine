@@ -65,3 +65,44 @@ test('a fixed corner still means a fixed corner', () => {
   expect(dest.has(at(0, 0))).toBe(false)              // no route with one corner
   expect(reach(empty()).has(at(0, 0))).toBe(true)
 })
+
+// The Capricorn is the hook mover's diagonal twin: "It can move any number of
+// free squares in one of the four diagonal directions, then any number of free
+// squares in a perpendicular direction." Maka-Dai-Dai and Tai both have one,
+// and both also have a hook mover, so the two turns are the same rule applied
+// to different families.
+describe('the Capricorn turns within the diagonals', () => {
+  const capricorn = () => bent({ first: 'diagonal', firstSteps: 'any', second: 'perpendicular', minSecondLeg: 0 })
+  const reachCap = (board) => new Set(capricorn().genMoves(topo, CENTRE, board).map(m => m.to))
+  const colourOf = (i) => (Math.floor(i / N) + (i % N)) % 2
+
+  test('reaches far more than a bishop', () => {
+    const bishop = new Set()
+    for (let k = 1; k < N; k++) {
+      for (const [dr, dc] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+        const r = 4 + dr * k, c = 4 + dc * k
+        if (r >= 0 && r < N && c >= 0 && c < N) bishop.add(at(r, c))
+      }
+    }
+    expect(reachCap(empty()).size).toBeGreaterThan(bishop.size)
+  })
+
+  test('stays on its own colour, because two diagonal moves cannot leave it', () => {
+    // This is the check that a perpendicular turn was taken rather than an
+    // orthogonal one: decomposing a diagonal into its components - which is
+    // what the xiangqi elephant does - would put it on the other colour.
+    const home = colourOf(CENTRE)
+    expect([...reachCap(empty())].every(i => colourOf(i) === home)).toBe(true)
+  })
+
+  test('a decomposing turn still leaves the diagonal, which is the difference', () => {
+    // The same shape with the default continuation turns onto one of the
+    // diagonal's orthogonal components - what the xiangqi elephant and cannon
+    // do - and that lands on the other colour. It is the one observable that
+    // separates the two turns.
+    const decomposing = bent({ first: 'diagonal', firstSteps: 'any', minSecondLeg: 0 })
+    const dest = new Set(decomposing.genMoves(topo, CENTRE, empty()).map(m => m.to))
+    const home = colourOf(CENTRE)
+    expect([...dest].some(i => colourOf(i) !== home)).toBe(true)
+  })
+})

@@ -393,6 +393,15 @@ export function bent(opts = {}) {
   // so `second: 'diagonal'` turns the corner the other way, and the outward
   // diagonals are the two that keep going away from where the piece started.
   function continuations(dr, dc) {
+    // A quarter turn within the same family, which is what "then any number of
+    // free squares in a perpendicular direction" means. The hook mover does it
+    // on the orthogonals and the Capricorn on the diagonals - both appear in
+    // Maka-Dai-Dai and Tai - and a diagonal's perpendiculars are the other two
+    // diagonals, not its orthogonal components.
+    if (second === 'perpendicular') {
+      return (dr !== 0 && dc !== 0) ? [[dr, -dc], [-dr, dc]]
+        : (dr === 0 ? [[-1, 0], [1, 0]] : [[0, -1], [0, 1]])
+    }
     if (second !== 'diagonal') {
       // A diagonal first leg turns onto one of its own components, which is
       // what the xiangqi elephant and cannon do. An orthogonal one has no
