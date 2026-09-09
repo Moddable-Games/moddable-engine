@@ -94,10 +94,16 @@ const JUMPERS = new Set(['N', 'D', 'A'])
 const SLIDERS = new Set(['R', 'B', 'Q'])
 
 const TERM = /^([fblrvs]*)([WFKRBQNDA])(\d*)/
+// `R(>=2)` is a rook that must travel at least two squares; `R(2<=n<=3)` bounds
+// it at both ends. Tenjiku's heavenly tetrarch is written this way.
+const RANGED = /^([fblrvs]*)([WFKRBQNDA])\((?:>=(\d+)|(\d+)<=n<=(\d+))\)/
 // `[a3K]` is up to three steps; `[aK]` is the two-step default.
 // `f[avF]` - modifiers before the bracket steer the first leg, those inside
 // steer the continuation, and the atom after `a` is shared by both.
-const CHAIN = /^([fblrs]*)\[a([fblrvs]*)(\d*)([WFKRBQNDA])\]/
+const CHAIN = /^([fblrs]*)\[([fblrvsm]*)([WFKRBQNDA])?a([fblrvsm]*)(\d*)([WFKRBQNDA])\]/
+const SHOOT = /^c?x([fblrvs]*)([WFKRBQNDA])/
+// `cpp` - capture-only, hopping with no limit on how many pieces.
+const RANGE = /^cpp([fblrvs]*)([WFKRBQNDA])/
 
 function expandModifiers(raw) {
   const out = []
@@ -129,31 +135,99 @@ export function betzaToSpec(notation) {
     // dabbaba then a king step, `D[aK]` a dabbaba OR twice as a king. Chu
     // Shogi's Lion is `NAD[aK]`: a jump to any square two away, or two King
     // steps that may each capture.
+    // `cpp` is a range jump: it slides, may pass over pieces, and only to
+    // capture. Which pieces it may pass over is a property of the game rather
+    // than of the notation, so the rank table is attached by the plugin.
+    const range = RANGE.exec(rest)
+    if (range) {
+      const [whole, rawMods, atom] = range
+      rest = rest.slice(whole.length)
+      const mods = expandModifiers(rawMods)
+      specs.push({
+        type: 'rangeCapture',
+        dirs: directionsFor(atom, mods),
+        ...(mods.length ? { directional: true } : {}),
+      })
+      continue
+    }
+
+    // `x` is shooting: a capture of an adjacent piece with no move at all.
+    const shot = SHOOT.exec(rest)
+    if (shot) {
+      const [whole, rawMods, atom] = shot
+      rest = rest.slice(whole.length)
+      const mods = expandModifiers(rawMods)
+      specs.push({
+        type: 'shoot',
+        dirs: directionsFor(atom, mods),
+        ...(mods.length ? { directional: true } : {}),
+      })
+      continue
+    }
+
     const chain = CHAIN.exec(rest)
     if (chain) {
-      const [whole, leadMods, rawMods, count, atom] = chain
+      const [whole, leadMods, firstMods, firstAtom, contMods, count, atom] = chain
       rest = rest.slice(whole.length)
+
+      // The atom before `a` is the first leg and the one after it the
+      // continuation; `[aK]` names only the continuation and the two are the
+      // same step. Where they differ this cannot express it, so it says so
+      // rather than picking one.
+      if (firstAtom && firstAtom !== atom) {
+        throw new Error(
+          `Betza: "${whole}" in "${source}" - a chain whose legs are different atoms is not modelled`
+        )
+      }
+
       // `v` means something different inside a continuation leg. The source
       // defines it there as "restricted to a single line ... interpreted
       // relative to the piece's current position on its path", so `f[avF]` is
       // two squares along one forward diagonal rather than a leg that may turn.
       // Read as plain "vertical" it would give a soaring eagle a move no
       // source describes.
-      const sameLine = rawMods.includes('v')
+      const sameLine = contMods.includes('v')
+
+      // `m` is move-only. The reading guide gives `mKa3K` as "up to three king
+      // steps that must stop on first capture", so the walk passes through
+      // empty squares and takes nothing on the way.
+      const quiet = firstMods.includes('m') || contMods.includes('m')
+
       // Directions come from the first leg. With `sameLine` the continuation
       // follows whichever of them the piece took, so one set serves both.
-      const mods = expandModifiers(leadMods + rawMods.replace(/v/g, ''))
+      const mods = expandModifiers(leadMods + (firstMods + contMods).replace(/[vm]/g, ''))
+
       if (JUMPERS.has(atom) || SLIDERS.has(atom)) {
         throw new Error(
-          `Betza: "[a${atom}]" in "${source}" - chaining is modelled for stepping atoms only. ` +
+          `Betza: "${whole}" in "${source}" - chaining is modelled for stepping atoms only. ` +
           `A chained jump or slide needs a leg shape this does not have.`
         )
       }
+
       specs.push({
         type: 'area',
         dirs: directionsFor(atom, mods),
         steps: count ? Number(count) : 2,
         ...(sameLine ? { sameLine: true } : {}),
+        ...(quiet ? { quiet: true } : {}),
+        ...(mods.length ? { directional: true } : {}),
+      })
+      continue
+    }
+
+    const ranged = RANGED.exec(rest)
+    if (ranged) {
+      const [whole, rawMods, atom, atLeast, lo, hi] = ranged
+      rest = rest.slice(whole.length)
+      if (!SLIDERS.has(atom)) {
+        throw new Error(`Betza: "${whole}" in "${source}" - a step range on a non-sliding atom is not modelled`)
+      }
+      const mods = expandModifiers(rawMods)
+      specs.push({
+        type: 'rider',
+        dirs: directionsFor(atom, mods),
+        minSteps: Number(atLeast || lo),
+        ...(hi ? { maxSteps: Number(hi) } : {}),
         ...(mods.length ? { directional: true } : {}),
       })
       continue

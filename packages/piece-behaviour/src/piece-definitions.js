@@ -499,13 +499,16 @@ export function bent(opts = {}) {
  * `from` and `to`, so `via` costs them nothing.
  */
 export function areaMove(dirs, opts = {}) {
-  const { steps = 2, sameLine = false } = opts
+  const { steps = 2, sameLine = false, quiet = false } = opts
 
-  // Two legs are what a Lion has, and what `via` can carry. Three - Tenjiku's
-  // vice general and fire demon are `[mKa3K]` - would need a route rather than
-  // a single intermediate square, so it says so instead of quietly doing two.
-  if (steps > 2) {
-    throw new Error(`areaMove: ${steps} steps is not modelled; a move carries one intermediate square`)
+  // `quiet` is Betza's `m` on the chained leg. The corpus's reading guide is
+  // explicit that `mKa3K` is "up to three king steps that must stop on first
+  // capture", so nothing is taken along the way and the squares passed over
+  // must be empty. That needs no `via` - there is no second victim to record -
+  // which is why a quiet walk may be any number of legs while a capturing one
+  // may be two.
+  if (steps > 2 && !quiet) {
+    throw new Error(`areaMove: ${steps} capturing steps is not modelled; a move carries one intermediate square`)
   }
 
   // One step in each direction, resolved offset by offset so that an offset
@@ -523,12 +526,46 @@ export function areaMove(dirs, opts = {}) {
     return out
   }
 
+  // Up to `steps` single steps through empty squares, stopping the moment it
+  // takes something. A breadth-first walk rather than nested loops, because the
+  // number of legs is a parameter here.
+  function quietWalk(topology, from, board) {
+    const out = new Map()
+    let frontier = [{ pos: from, dir: null }]
+    const visited = new Set([from])
+
+    for (let leg = 0; leg < steps && frontier.length; leg++) {
+      const next = []
+      for (const { pos, dir } of frontier) {
+        for (const step of neighbours(topology, pos)) {
+          if (sameLine && dir !== null && step.dir !== dir) continue
+          const cell = board[step.pos]
+          if (cell && cell.friendly) continue
+          if (cell) {
+            // An enemy ends the walk on the square it stands on.
+            out.set(step.pos, { from, to: step.pos, capture: true })
+            continue
+          }
+          if (visited.has(step.pos)) continue
+          visited.add(step.pos)
+          out.set(step.pos, { from, to: step.pos })
+          next.push({ pos: step.pos, dir: step.dir })
+        }
+      }
+      frontier = next
+    }
+    out.delete(from)
+    return [...out.values()]
+  }
+
   return {
     type: 'area',
     dirs,
     steps,
 
     genMoves(topology, from, board) {
+      if (quiet) return quietWalk(topology, from, board)
+
       // Keyed by destination and by what was taken on the way, because two
       // routes to the same square are the same move unless one of them eats
       // something the other does not.
@@ -565,6 +602,8 @@ export function areaMove(dirs, opts = {}) {
     },
 
     attacks(topology, from, target, board) {
+      if (quiet) return quietWalk(topology, from, board).some(m => m.to === target)
+
       // The attack path is handed the raw board, with no friendly/enemy flags
       // on its cells - the same trap that let Rollerball's kings be captured.
       // The attacker is whoever stands on `from`, so ownership is read from
@@ -583,6 +622,110 @@ export function areaMove(dirs, opts = {}) {
         for (const step of neighbours(topology, mid)) {
           if (sameLine && step.dir !== dir) continue
           if (step.pos === target) return true
+        }
+      }
+      return false
+    },
+  }
+}
+
+/**
+ * Capture without moving.
+ *
+ * Betza's `x`: the corpus's reading guide gives it as "shooting: `xK` captures
+ * an adjacent enemy without moving". Tenjiku's fire demon has it on top of
+ * everything else it does.
+ *
+ * It needs no shape of its own - a move that ends where it began and takes a
+ * piece somewhere else is what `via` already carries, and is the same thing a
+ * Lion does when it steps onto an adjacent enemy and steps back. The difference
+ * is only that this piece never leaves its square, so a friendly or empty
+ * neighbour offers it nothing.
+ */
+export function shoot(dirs) {
+  function neighbours(topology, from) {
+    const resolved = resolveLeapOffsets(dirs)
+    if (!Array.isArray(resolved)) return topology.leapTargets(from, resolved)
+    const out = []
+    for (const offset of resolved) {
+      const target = topology.leapTargets(from, [offset])[0]
+      if (target !== undefined) out.push(target)
+    }
+    return out
+  }
+
+  return {
+    type: 'shoot',
+    dirs,
+
+    genMoves(topology, from, board) {
+      const moves = []
+      for (const pos of neighbours(topology, from)) {
+        const cell = board[pos]
+        if (cell && cell.enemy) moves.push({ from, to: from, via: pos, capture: true })
+      }
+      return moves
+    },
+
+    attacks(topology, from, target, board) {
+      return neighbours(topology, from).includes(target)
+    },
+  }
+}
+
+/**
+ * A slide that may jump pieces beneath it, but only to capture.
+ *
+ * Betza's `cpp`: `c` capture-only, `pp` hopping with no limit on how many. In
+ * Tenjiku these are the four generals, and the source is precise about the
+ * limit: they "may jump over any number of pieces (including zero), friend or
+ * foe, along a diagonal or orthogonal, but only when making a capture ...
+ * However, they may only jump over other pieces of lower rank".
+ *
+ * Rank is a property of the game, not of the geometry, so it arrives as a map
+ * from piece type to a number where 1 is highest. A type the map does not name
+ * is beneath everything, which is what makes an ordinary pawn jumpable and the
+ * king - explicitly rank 1 - jumpable by nobody.
+ *
+ * The piece keeps its ordinary sliding move separately: `RcppR` is a rook that
+ * ALSO has this. Nothing here generates a quiet move.
+ */
+export function rangeCapture(dirs, opts = {}) {
+  const { ranks = {} } = opts
+  const rankOf = (type) => (type in ranks ? ranks[type] : Infinity)
+
+  return {
+    type: 'rangeCapture',
+    dirs,
+    ranks,
+
+    genMoves(topology, from, board) {
+      const mover = board[from]
+      const mine = rankOf(mover && mover.type)
+      const moves = []
+
+      for (const ray of topology.rays(from, dirs)) {
+        for (const pos of ray) {
+          const cell = board[pos]
+          if (!cell) continue                     // empty squares are passed over
+          if (cell.enemy) moves.push({ from, to: pos, capture: true })
+          // Whether the ray continues past this piece is the whole rule: only
+          // something of lower rank can be jumped, friend or foe alike.
+          if (!(rankOf(cell.type) > mine)) break
+        }
+      }
+      return moves
+    },
+
+    attacks(topology, from, target, board) {
+      const mover = board[from]
+      const mine = rankOf(mover && mover.type)
+      for (const ray of topology.rays(from, dirs)) {
+        for (const pos of ray) {
+          if (pos === target) return true
+          const cell = board[pos]
+          if (!cell) continue
+          if (!(rankOf(cell.type) > mine)) break
         }
       }
       return false
@@ -695,7 +838,9 @@ function buildPrimitive(spec, resolve) {
   if (spec.type === 'leaper') return leaper(spec.offsets || spec.dirs, { lame: spec.lame })
   if (spec.type === 'rider') return rider(spec.dirs, { maxSteps: spec.maxSteps, minSteps: spec.minSteps })
   if (spec.type === 'hopper') return hopper(spec.dirs, { captureSlide: spec.captureSlide, moveSlide: spec.moveSlide })
-  if (spec.type === 'area') return areaMove(spec.dirs || spec.offsets, { steps: spec.steps, sameLine: spec.sameLine })
+  if (spec.type === 'rangeCapture') return rangeCapture(spec.dirs || spec.offsets, { ranks: spec.ranks })
+  if (spec.type === 'shoot') return shoot(spec.dirs || spec.offsets)
+  if (spec.type === 'area') return areaMove(spec.dirs || spec.offsets, { steps: spec.steps, sameLine: spec.sameLine, quiet: spec.quiet })
   if (spec.type === 'locust') return locust(resolveLeapOffsets(spec.dirs || spec.offsets))
   if (spec.type === 'bent') return bent({ first: spec.first, firstSteps: spec.firstSteps, minSecondLeg: spec.minSecondLeg, second: spec.second, secondSteps: spec.secondSteps })
   if (spec.type === 'compose' && Array.isArray(spec.parts)) {

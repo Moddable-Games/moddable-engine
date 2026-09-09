@@ -6,7 +6,7 @@ import { fromConfig, betzaToSpec } from '../../../piece-behaviour/index.js'
 export const CONFIG_KEYS = new Set([
   'advancement', 'afterMove', 'borrowFromBehind', 'captureRule', 'cols', 'flipMap',
   'dropCheckmateLimit', 'dropPawnFileLimit', 'drops', 'initialHands', 'moveFilter',
-  'demotionMap', 'nifuLimit', 'nifuType', 'noDropLastRank', 'noDropSecondRank', 'pieceMoves',
+  'burn', 'demotionMap', 'nifuLimit', 'pieceRanks', 'nifuType', 'noDropLastRank', 'noDropSecondRank', 'pieceMoves',
   'pieceRotations', 'playerCount', 'promotionMap', 'promotionPieces', 'promotionZone',
   'rows', 'royalType', 'setup', 'turnLogic', 'winCondition',
 ])
@@ -137,11 +137,22 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
   // copying with a chance to err per piece.
   function resolveMoveSpec(pConfig, type) {
     if (!pConfig || !pConfig.betza) return pConfig
+    let spec
     try {
-      return betzaToSpec(pConfig.betza)
+      spec = betzaToSpec(pConfig.betza)
     } catch (err) {
       throw new Error(`Piece "${type}": ${err.message}`)
     }
+    // Which pieces a range jumper may pass over is a property of the game, not
+    // of the notation: Tenjiku's generals "may only jump over other pieces of
+    // lower rank". The notation cannot know the ranking, so the variant's table
+    // is attached here.
+    if (config.pieceRanks) {
+      for (const leg of Array.isArray(spec) ? spec : [spec]) {
+        if (leg.type === 'rangeCapture') leg.ranks = config.pieceRanks
+      }
+    }
+    return spec
   }
 
   function buildPieceForPlayer(type, playerIndex) {
@@ -305,6 +316,51 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     // second piece to take. Dropping it here is how a Lion's double capture
     // would silently become a single one.
     return moves.map(m => (m.via === undefined ? { from: m.from, to: m.to } : { from: m.from, to: m.to, via: m.via }))
+  }
+
+// Tenjiku's fire demon: "Wherever the fire demon stops, all adjacent opposing
+  // pieces except fire demons are removed from the board, in addition to any
+  // piece on the square it lands on", and "Any piece stopping next to an
+  // opposing fire demon is removed from the board (after making its capture)".
+  //
+  // Those read as two rules and are one. Sweeping every demon on the board
+  // after every move covers both: a demon that moved is now beside its victims,
+  // and a piece that moved beside a demon is now beside it too. Nothing needs
+  // remembering between turns, which is what the variant meant by "burning is
+  // positional, not a status effect". It also gets promotion for free - a water
+  // buffalo that promotes into a demon burns on arrival, because by the time
+  // this runs it is a demon standing where it stopped.
+  function applyBurn(board, hands) {
+    const burner = config.burn && config.burn.type
+    if (!burner) return
+    const topo = topology || buildInternalTopology()
+    const NEIGHBOURS = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]]
+
+    const doomed = new Set()
+    for (let i = 0; i < board.length; i++) {
+      const demon = board[i]
+      if (!demon || demon.type !== burner) continue
+      for (const offset of NEIGHBOURS) {
+        const pos = topo.leapTargets(i, [offset])[0]
+        if (pos === undefined) continue
+        const victim = board[pos]
+        if (!victim || victim.owner === demon.owner) continue
+        if (victim.type === burner) continue          // demons do not burn each other
+        doomed.add(pos)
+      }
+    }
+
+    for (const pos of doomed) {
+      const victim = board[pos]
+      board[pos] = null
+      // Burned pieces leave the board. Where a variant banks captures they go
+      // to the player whose demon did it, which in a game with no drops is
+      // bookkeeping rather than material.
+      if (config.drops !== false) {
+        const demoted = getDemotedType(victim.type)
+        if (demoted !== null && demoted !== royalType) hands[1 - victim.owner].push(demoted)
+      }
+    }
   }
 
   function generateDropMoves(board, hand, playerIndex) {
@@ -567,6 +623,8 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
       if (config.captureRule === 'custodian') {
         applyCustodianCapture(board, move.to, playerIndex)
       }
+
+      applyBurn(board, hands)
 
       let newSlice = { ...slice, board, hands }
       if (config.afterMove) {

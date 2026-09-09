@@ -88,8 +88,42 @@ describe('betza chains a second leg', () => {
   })
 })
 
+describe('betza reads the legs Tenjiku needs', () => {
+  test('cpp is a range jump kept apart from the ordinary slide', () => {
+    // "may jump over any number of pieces ... but only when making a capture".
+    // RcppR is a rook that ALSO has this, so it must be two legs.
+    const [slide, jump] = betzaToSpec('RcppR')
+    expect(slide).toMatchObject({ type: 'rider' })
+    expect(jump).toMatchObject({ type: 'rangeCapture' })
+    expect(jump.dirs).toEqual(slide.dirs)
+  })
+
+  test('m on a chained leg makes the walk quiet, which lets it run further', () => {
+    // "mKa3K is up to three king steps that must stop on first capture" - so
+    // nothing is taken on the way, and no intermediate square need be recorded.
+    expect(betzaToSpec('[mKa3K]')).toMatchObject({ type: 'area', steps: 3, quiet: true })
+  })
+
+  test('x captures without moving', () => {
+    expect(betzaToSpec('xK')).toMatchObject({ type: 'shoot' })
+    expect(betzaToSpec('xK').dirs).toHaveLength(8)
+  })
+
+  test('a chain whose legs are different atoms is refused, not guessed', () => {
+    expect(() => betzaToSpec('[WaF]')).toThrow(/different atoms/)
+  })
+
+  test('a step range bounds a slide at one end or both', () => {
+    // Tenjiku's heavenly tetrarch is B(>=2)fbR(>=2)rlR(2<=n<=3)cxK: it cannot
+    // move to an adjacent square at all.
+    expect(betzaToSpec('B(>=2)')).toMatchObject({ type: 'rider', minSteps: 2 })
+    expect(betzaToSpec('R(2<=n<=3)')).toMatchObject({ type: 'rider', minSteps: 2, maxSteps: 3 })
+    expect(betzaToSpec('B(>=2)fbR(>=2)rlR(2<=n<=3)cxK')).toHaveLength(4)
+  })
+})
+
 describe('betza refuses what it cannot read', () => {
-  test.each(['pR', 'xK', 'mK', 'RaK', 'Z', '[aR]', '[mKa3K]'])('%s throws by name', (notation) => {
+  test.each(['pR', 'mK', 'RaK', 'Z', '[aR]', 'K(>=2)'])('%s throws by name', (notation) => {
     expect(() => betzaToSpec(notation)).toThrow(/Betza:/)
   })
 
