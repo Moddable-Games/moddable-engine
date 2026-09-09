@@ -1374,7 +1374,11 @@ export function createPlaySession(options = {}) {
     pass: () => ctrl.performAction('pass'),
     resign: () => ctrl.performAction('resign'),
     undo: () => ctrl.undo(),
-    actions: () => ctrl.getAvailableActions(),
+    // The session object exists from the moment it is built; the controller
+    // arrives when start() runs. Anything that reads the session in between -
+    // renderActions does, on every load - was throwing here and having the
+    // error swallowed by the page's own error handler.
+    actions: () => (ctrl ? ctrl.getAvailableActions() : []),
     setTheme(next) {
       if (BOARD_THEMES[next]) { currentTheme = next; draw() }
     },
