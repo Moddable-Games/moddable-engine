@@ -301,7 +301,10 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     const moves = capturesByDisplacement
       ? rawMoves
       : rawMoves.filter(m => board[m.to] === null)
-    return moves.map(m => ({ from: m.from, to: m.to }))
+    // `via` is the square an area move steps through, where there may be a
+    // second piece to take. Dropping it here is how a Lion's double capture
+    // would silently become a single one.
+    return moves.map(m => (m.via === undefined ? { from: m.from, to: m.to } : { from: m.from, to: m.to, via: m.via }))
   }
 
   function generateDropMoves(board, hand, playerIndex) {
@@ -515,9 +518,24 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
       }
 
       const piece = board[move.from]
-      const captured = board[move.to]
+      // Igui and jitto end where they began, so the cell at `to` holds the
+      // mover itself. Reading that as the victim would demote a Lion into its
+      // own hand and leave the board a piece short.
+      const captured = move.to === move.from ? null : board[move.to]
 
       board[move.from] = null
+
+      // An area move may have taken a piece on the square it stepped through,
+      // which is a second capture and not the same one seen again: igui is a
+      // capture at `via` with `to` back at the origin.
+      if (move.via !== undefined && move.via !== move.to) {
+        const passed = board[move.via]
+        if (passed && passed.owner !== playerIndex) {
+          board[move.via] = null
+          const demoted = getDemotedType(passed.type)
+          if (demoted !== null && demoted !== royalType) hands[playerIndex].push(demoted)
+        }
+      }
 
       if (captured) {
         const demoted = getDemotedType(captured.type)
@@ -619,10 +637,18 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
         if (m.action === 'drop') {
           testBoard[m.to] = { type: m.type, owner: playerIndex }
         } else {
-          testBoard[m.to] = testBoard[m.from]
+          const mover = testBoard[m.from]
           testBoard[m.from] = null
+          // The piece an area move takes on the way is gone in the position
+          // this is judging. Leaving it standing would test a board applyMove
+          // never produces: a Lion's second capture would not count towards
+          // getting out of check, and a piece it removed would still seem to
+          // give it.
+          if (m.via !== undefined && m.via !== m.to) testBoard[m.via] = null
+          testBoard[m.to] = mover
           if (m.promote) {
-            testBoard[m.to] = { ...testBoard[m.to], type: getPromotedType(testBoard[m.to].type) || testBoard[m.to].type }
+            const target = typeof m.promote === 'string' ? m.promote : getPromotedType(mover.type)
+            if (target) testBoard[m.to] = { ...testBoard[m.to], type: target }
           }
         }
         if (isInCheck(testBoard, playerIndex)) return false

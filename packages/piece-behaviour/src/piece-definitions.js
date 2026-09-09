@@ -459,6 +459,108 @@ export function bent(opts = {}) {
   }
 }
 
+/**
+ * A move made of up to N single steps, which may capture on each of them.
+ *
+ * Betza writes it `[aK]` - "an xxxK move possibly followed by a yyyK move, not
+ * necessarily in the same direction". Chu Shogi's Lion is `NAD[aK]`: a jump to
+ * any square two away, OR up to two King steps.
+ *
+ * The second step may land back where the piece began, and that is not a
+ * degenerate case, it is two named moves:
+ *
+ *   igui  - step onto an adjacent enemy, take it, and return. The piece
+ *           captures without moving.
+ *   jitto - step onto an adjacent empty square and return, changing nothing.
+ *           A pass, and only available when some adjacent square is empty.
+ *
+ * A move carries `via`, the square stepped through, so the plugin applying it
+ * knows there may be a second piece to take. Every existing consumer reads only
+ * `from` and `to`, so `via` costs them nothing.
+ */
+export function areaMove(dirs, opts = {}) {
+  const { steps = 2 } = opts
+
+  // Two legs are what a Lion has, and what `via` can carry. Three - Tenjiku's
+  // vice general and fire demon are `[mKa3K]` - would need a route rather than
+  // a single intermediate square, so it says so instead of quietly doing two.
+  if (steps > 2) {
+    throw new Error(`areaMove: ${steps} steps is not modelled; a move carries one intermediate square`)
+  }
+
+  // One step in each direction, resolved offset by offset so that an offset
+  // leaving the board does not shift the rest along.
+  function neighbours(topology, from) {
+    const resolved = resolveLeapOffsets(dirs)
+    if (!Array.isArray(resolved)) return topology.leapTargets(from, resolved)
+    const out = []
+    for (const offset of resolved) {
+      const target = topology.leapTargets(from, [offset])[0]
+      if (target !== undefined) out.push(target)
+    }
+    return out
+  }
+
+  return {
+    type: 'area',
+    dirs,
+    steps,
+
+    genMoves(topology, from, board) {
+      // Keyed by destination and by what was taken on the way, because two
+      // routes to the same square are the same move unless one of them eats
+      // something the other does not.
+      const seen = new Map()
+      const add = (to, via, tookVia) => {
+        const key = `${to}|${tookVia ? via : ''}`
+        if (seen.has(key)) return
+        seen.set(key, via === null ? { from, to } : { from, to, via })
+      }
+
+      for (const mid of neighbours(topology, from)) {
+        const midCell = board[mid]
+        if (midCell && midCell.friendly) continue
+
+        // Stopping after one step is a move in its own right.
+        add(mid, null, false)
+        if (steps < 2) continue
+
+        for (const dest of neighbours(topology, mid)) {
+          if (dest === from) { add(from, mid, Boolean(midCell)); continue }
+          const destCell = board[dest]
+          if (destCell && destCell.friendly) continue
+          add(dest, mid, Boolean(midCell))
+        }
+      }
+
+      return [...seen.values()]
+    },
+
+    attacks(topology, from, target, board) {
+      // The attack path is handed the raw board, with no friendly/enemy flags
+      // on its cells - the same trap that let Rollerball's kings be captured.
+      // The attacker is whoever stands on `from`, so ownership is read from
+      // there rather than assumed.
+      const owner = board[from] ? board[from].owner : undefined
+      const blocked = (pos) => {
+        const cell = board[pos]
+        return Boolean(cell) && cell.owner === owner
+      }
+
+      for (const mid of neighbours(topology, from)) {
+        if (mid === target) return true
+        if (steps < 2) continue
+        // A piece it cannot step onto is a piece it cannot step past.
+        if (blocked(mid)) continue
+        for (const dest of neighbours(topology, mid)) {
+          if (dest === target) return true
+        }
+      }
+      return false
+    },
+  }
+}
+
 export function locust(dirs) {
   return {
     type: 'locust',
@@ -564,6 +666,7 @@ function buildPrimitive(spec, resolve) {
   if (spec.type === 'leaper') return leaper(spec.offsets || spec.dirs, { lame: spec.lame })
   if (spec.type === 'rider') return rider(spec.dirs, { maxSteps: spec.maxSteps, minSteps: spec.minSteps })
   if (spec.type === 'hopper') return hopper(spec.dirs, { captureSlide: spec.captureSlide, moveSlide: spec.moveSlide })
+  if (spec.type === 'area') return areaMove(spec.dirs || spec.offsets, { steps: spec.steps })
   if (spec.type === 'locust') return locust(resolveLeapOffsets(spec.dirs || spec.offsets))
   if (spec.type === 'bent') return bent({ first: spec.first, firstSteps: spec.firstSteps, minSecondLeg: spec.minSecondLeg, second: spec.second, secondSteps: spec.secondSteps })
   if (spec.type === 'compose' && Array.isArray(spec.parts)) {

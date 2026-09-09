@@ -94,6 +94,8 @@ const JUMPERS = new Set(['N', 'D', 'A'])
 const SLIDERS = new Set(['R', 'B', 'Q'])
 
 const TERM = /^([fblrvs]*)([WFKRBQNDA])(\d*)/
+// `[a3K]` is up to three steps; `[aK]` is the two-step default.
+const CHAIN = /^\[a([fblrvs]*)(\d*)([WFKRBQNDA])\]/
 
 function expandModifiers(raw) {
   const out = []
@@ -119,12 +121,38 @@ export function betzaToSpec(notation) {
   let rest = source
 
   while (rest.length) {
+    // `[aK]` is the chaining operator: the source defines `xxxaK` as "an xxxK
+    // move possibly followed by a yyyK move, not necessarily in the same
+    // direction", and the brackets say what is being chained - `DaK` is a
+    // dabbaba then a king step, `D[aK]` a dabbaba OR twice as a king. Chu
+    // Shogi's Lion is `NAD[aK]`: a jump to any square two away, or two King
+    // steps that may each capture.
+    const chain = CHAIN.exec(rest)
+    if (chain) {
+      const [whole, rawMods, count, atom] = chain
+      rest = rest.slice(whole.length)
+      const mods = expandModifiers(rawMods)
+      if (JUMPERS.has(atom) || SLIDERS.has(atom)) {
+        throw new Error(
+          `Betza: "[a${atom}]" in "${source}" - chaining is modelled for stepping atoms only. ` +
+          `A chained jump or slide needs a leg shape this does not have.`
+        )
+      }
+      specs.push({
+        type: 'area',
+        dirs: directionsFor(atom, mods),
+        steps: count ? Number(count) : 2,
+        ...(mods.length ? { directional: true } : {}),
+      })
+      continue
+    }
+
     const match = TERM.exec(rest)
     if (!match) {
       throw new Error(
         `Betza: cannot read "${rest}" in "${source}". ` +
         `This parser covers modifiers f b l r v s over atoms W F K R B Q N D A with an optional step count. ` +
-        `Chaining (a), grouping ([]), hopping (p), shooting (x) and move/capture split (m/c) are not modelled - ` +
+        `Chaining is read as [aK] and [a3K]; bare \`a\` outside brackets, hopping (p), shooting (x) and move/capture split (m/c) are not modelled - ` +
         `declare that piece with an explicit pieceMoves entry instead.`
       )
     }

@@ -59,8 +59,37 @@ describe('betza modifiers', () => {
   })
 })
 
+describe('betza chains a second leg', () => {
+  test('[aK] is a two-step area move', () => {
+    expect(betzaToSpec('[aK]')).toMatchObject({ type: 'area', steps: 2 })
+    expect(betzaToSpec('[aK]').dirs).toHaveLength(8)
+  })
+
+  test('the brackets say what is chained', () => {
+    // The source is explicit: "DaK would denote a dabbaba move followed by a
+    // king move, but D[aK] would denote a piece that can move as a dabbaba, or
+    // twice as a king". Only the second form is modelled.
+    const [jump, area] = betzaToSpec('D[aK]')
+    expect(jump).toMatchObject({ type: 'leaper' })
+    expect(area).toMatchObject({ type: 'area' })
+    expect(() => betzaToSpec('DaK')).toThrow(/Betza:/)
+  })
+
+  test('the Lion is a jump and an area move, not one or the other', () => {
+    // NAD[aK]. The jump reaches every square two away bypassing whatever is
+    // between; the area move takes two steps and may capture on each.
+    const legs = betzaToSpec('NAD[aK]')
+    expect(legs.filter(l => l.type === 'leaper')).toHaveLength(3)
+    expect(legs.filter(l => l.type === 'area')).toHaveLength(1)
+  })
+
+  test('a step count sets the number of legs', () => {
+    expect(betzaToSpec('[a3K]')).toMatchObject({ steps: 3 })
+  })
+})
+
 describe('betza refuses what it cannot read', () => {
-  test.each(['pR', 'xK', 'mK', 'RaK', 'B[aK]', 'Z'])('%s throws by name', (notation) => {
+  test.each(['pR', 'xK', 'mK', 'RaK', 'Z', '[aR]', '[mKa3K]'])('%s throws by name', (notation) => {
     expect(() => betzaToSpec(notation)).toThrow(/Betza:/)
   })
 
