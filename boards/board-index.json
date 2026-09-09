@@ -2867,7 +2867,7 @@
     "topology": "grid",
     "svg": "svgs/shogi--tenjiku-shogi.svg",
     "rulesUrl": "shogi/variants/tenjiku-shogi/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "shogi",
