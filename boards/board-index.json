@@ -2807,7 +2807,7 @@
     "topology": "grid",
     "svg": "svgs/shogi--mortal-shogi.svg",
     "rulesUrl": "shogi/variants/mortal-shogi/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "shogi",
@@ -2887,7 +2887,7 @@
     "topology": "grid",
     "svg": "svgs/shogi--wa-shogi.svg",
     "rulesUrl": "shogi/variants/wa-shogi/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "shogi",

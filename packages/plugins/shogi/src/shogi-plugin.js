@@ -1,6 +1,5 @@
 import { warnUnknownConfigKeys } from '../../../core/index.js'
-import { fromConfig } from '../../../piece-behaviour/index.js'
-import { betzaToSpec } from '../../../piece-behaviour/src/betza.js'
+import { fromConfig, betzaToSpec } from '../../../piece-behaviour/index.js'
 // Every config key this plugin reads. Exported so the corpus guard and the
 // authoring docs share one source of truth, and kept separate from `defaults`,
 // which only lists the keys that carry a default value.
