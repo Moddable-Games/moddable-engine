@@ -1901,6 +1901,15 @@
   {
     "family": "shogi",
     "familyLabel": "Shogi",
+    "variant": "mortal-shogi",
+    "key": "mortal-shogi",
+    "label": "Mortal Shogi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "sho-shogi",
     "key": "sho-shogi",
     "label": "Sho Shogi",

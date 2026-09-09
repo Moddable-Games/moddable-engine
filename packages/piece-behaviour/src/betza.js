@@ -20,7 +20,6 @@
 // Forward is row -1, matching the offset convention in every pieceMoves block
 // in the corpus; seat rotation is the plugin's job, not this file's.
 const ORTH = { f: [-1, 0], b: [1, 0], l: [0, -1], r: [0, 1] }
-const DIAG = { f: [[-1, -1], [-1, 1]], b: [[1, -1], [1, 1]], l: [[-1, -1], [1, -1]], r: [[-1, 1], [1, 1]] }
 
 const KNIGHT = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]]
 const DABBABA = [[-2, 0], [2, 0], [0, -2], [0, 2]]
@@ -37,6 +36,14 @@ const ALFIL = [[-2, -2], [-2, 2], [2, -2], [2, 2]]
 // knight with all eight jumps. On a symmetric offset like a ferz's (-1,-1)
 // neither component is longer, so it belongs to the forward half and the left
 // half both, which is exactly what Betza's `fF` and `lF` mean.
+//
+// This is narrower than strict Betza, where one modifier on an oblique atom
+// gives four directions and a doubled one narrows to two. The corpus's sources
+// use the narrow reading: Wikipedia writes Wa Shogi's heavenly horse `fbN` and
+// describes it as "one square forward plus one square diagonally forward; or,
+// one square backward plus one square diagonally backward" - four jumps, not
+// eight. Tenjiku spells its shogi knight `ffN`, which lands on the same two
+// squares under either reading, so nothing in the corpus needs the wide one.
 const HALF = {
   f: ([dr, dc]) => dr < 0 && Math.abs(dr) >= Math.abs(dc),
   b: ([dr, dc]) => dr > 0 && Math.abs(dr) >= Math.abs(dc),

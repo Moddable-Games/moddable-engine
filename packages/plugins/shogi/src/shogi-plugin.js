@@ -7,7 +7,7 @@ import { betzaToSpec } from '../../../piece-behaviour/src/betza.js'
 export const CONFIG_KEYS = new Set([
   'advancement', 'afterMove', 'borrowFromBehind', 'captureRule', 'cols', 'flipMap',
   'dropCheckmateLimit', 'dropPawnFileLimit', 'drops', 'initialHands', 'moveFilter',
-  'nifuLimit', 'nifuType', 'noDropLastRank', 'noDropSecondRank', 'pieceMoves',
+  'demotionMap', 'nifuLimit', 'nifuType', 'noDropLastRank', 'noDropSecondRank', 'pieceMoves',
   'pieceRotations', 'playerCount', 'promotionMap', 'promotionPieces', 'promotionZone',
   'rows', 'royalType', 'setup', 'turnLogic', 'winCondition',
 ])
@@ -213,23 +213,56 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
   }
 
   const promotionMap = config.promotionMap || null
-  const demotionMap = promotionMap
-    ? Object.fromEntries(Object.entries(promotionMap).map(([k, v]) => [v, k]))
-    : null
 
-  function getPromotedType(type) {
+  // Two different things are called demotion. Ordinary Shogi's is the inverse
+  // of promotion - a captured dragon king is a rook again in hand - and is
+  // derived rather than declared. Mortal Shogi's is a ranking of its own, a
+  // ladder every captured piece descends by one rung whether it was promoted or
+  // not, ending in a rung that leaves the game. A variant that declares
+  // `demotionMap` means the second kind; anything else gets the first.
+  const capturedescends = Boolean(config.demotionMap)
+  const demotionMap = config.demotionMap ||
+    (promotionMap ? Object.fromEntries(Object.entries(promotionMap).map(([k, v]) => [v, k])) : null)
+
+  // Mortal Shogi's pawn "is removed from the game permanently", which the
+  // corpus writes as a rung mapping to nothing.
+  const REMOVED = new Set(['', null, 'none', 'removed'])
+
+  /**
+   * What a piece may promote into. Ordinarily one type; in Mortal Shogi a pawn
+   * "promotes to Knight, Lance, Silver General, or Gold General", so the mover
+   * chooses. Always returns a list so the callers need not know which.
+   */
+  function getPromotionChoices(type) {
     if (promotionMap) {
-      return promotionMap[type] || null
+      const target = promotionMap[type]
+      if (!target) return []
+      return Array.isArray(target) ? target.filter(Boolean) : [target]
     }
-    if (type.startsWith('promoted_')) return null
-    if (type === royalType || type === 'gold') return null
+    if (type.startsWith('promoted_')) return []
+    if (type === royalType || type === 'gold') return []
     const promoted = `promoted_${type}`
-    if (!PIECE_MOVES[promoted]) return null
-    return promoted
+    if (!PIECE_MOVES[promoted]) return []
+    return [promoted]
   }
 
+  function getPromotedType(type) {
+    return getPromotionChoices(type)[0] || null
+  }
+
+  /**
+   * What a captured piece becomes on its way into hand. Returns null when it
+   * leaves the game rather than entering a hand at all.
+   */
   function getDemotedType(type) {
-    if (demotionMap && demotionMap[type]) return demotionMap[type]
+    if (demotionMap && Object.prototype.hasOwnProperty.call(demotionMap, type)) {
+      const next = demotionMap[type]
+      return REMOVED.has(next) ? null : next
+    }
+    // A declared ladder is the whole story: a type it does not name descends no
+    // further, rather than falling back to the promoted_ convention that
+    // belongs to the other kind of demotion.
+    if (capturedescends) return type
     if (type.startsWith('promoted_')) return type.slice(9)
     return type
   }
@@ -489,14 +522,19 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
 
       if (captured) {
         const demoted = getDemotedType(captured.type)
-        if (demoted !== royalType) {
+        if (demoted !== null && demoted !== royalType) {
           hands[playerIndex].push(demoted)
         }
       }
 
       let newType = piece.type
       if (move.promote) {
-        const promoted = getPromotedType(piece.type)
+        // A move may name which promotion it meant, for the variants that offer
+        // more than one. Anything it names must be one this piece is actually
+        // offered, or a hand-written move could promote a pawn into a king.
+        const choices = getPromotionChoices(piece.type)
+        const asked = typeof move.promote === 'string' ? move.promote : null
+        const promoted = asked && choices.includes(asked) ? asked : choices[0]
         if (promoted) newType = promoted
       }
       // Kyoto Shogi has no promotion zone: "every time a piece makes a move it
@@ -537,10 +575,16 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
           const [fromRow, fromCol] = rowCol(m.from)
           const [toRow, toCol] = rowCol(m.to)
           const canPromote = isInPromotionZone(toRow, toCol, playerIndex) || isInPromotionZone(fromRow, fromCol, playerIndex)
-          const promotedType = getPromotedType(piece.type)
+          const choices = getPromotionChoices(piece.type)
 
-          if (canPromote && promotedType) {
-            allMoves.push({ ...m, promote: true })
+          if (canPromote && choices.length) {
+            // One move per target a piece may become. Mortal Shogi's pawn
+            // "promotes to Knight, Lance, Silver General, or Gold General", and
+            // offering only the first would quietly make three of those
+            // unreachable. A single-target promotion keeps `promote: true` so
+            // nothing that reads existing moves has to change.
+            if (choices.length === 1) allMoves.push({ ...m, promote: true })
+            else for (const target of choices) allMoves.push({ ...m, promote: target })
             const advVec = advancementFor(playerIndex)
             const isVertical = advVec[0] !== 0
             const lastRank = isVertical ? (advVec[0] === -1 ? 0 : config.rows - 1) : (advVec[1] === -1 ? 0 : config.cols - 1)
