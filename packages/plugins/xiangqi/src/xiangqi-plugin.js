@@ -85,13 +85,36 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
 
   const builtPieces = new Map()
 
-  function buildPieceForType(type) {
-    if (builtPieces.has(type)) return builtPieces.get(type)
+  // A declared piece that faces forward has to face the other way for the other
+  // seat. The soldier generator was directional from the start and declared
+  // pieces were not, so a variant could describe a piece that advances - and
+  // both armies advanced the same way up the board.
+  //
+  // Same shape as the chess plugin's: the variant says `directional: true` and
+  // the row component of every offset is mirrored for seat 1.
+  function flipSpec(spec) {
+    if (!spec || typeof spec !== 'object') return spec
+    const out = { ...spec }
+    if (Array.isArray(out.offsets)) out.offsets = out.offsets.map(([dr, dc]) => [-dr, dc])
+    if (Array.isArray(out.dirs)) out.dirs = out.dirs.map(([dr, dc]) => [-dr, dc])
+    if (out.divergent) {
+      out.divergent = { move: flipSpec(out.divergent.move), capture: flipSpec(out.divergent.capture) }
+    }
+    if (out.firstMove) out.firstMove = flipSpec(out.firstMove)
+    if (out.type === 'compose' && Array.isArray(out.parts)) out.parts = out.parts.map(flipSpec)
+    return out
+  }
+
+  function buildPieceForType(type, playerIndex = 0) {
     const spec = PIECE_MOVES[type]
-    if (!spec) { builtPieces.set(type, null); return null }
-    const { constraint, ...pureSpec } = spec
+    if (!spec) return null
+    const seatMatters = spec.directional === true
+    const key = seatMatters ? `${type}__p${playerIndex}` : type
+    if (builtPieces.has(key)) return builtPieces.get(key)
+    const oriented = seatMatters && playerIndex === 1 ? flipSpec(spec) : spec
+    const { constraint, directional, firstMove, ...pureSpec } = oriented
     const primitive = fromConfig(pureSpec)
-    builtPieces.set(type, primitive)
+    builtPieces.set(key, primitive)
     return primitive
   }
 
@@ -169,7 +192,10 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
     if (!spec || !spec.firstMove || !config.firstMoveRows) return []
     const [r] = rowCol(pos)
     if (r !== config.firstMoveRows[playerIndex]) return []
-    const primitive = fromConfig(spec.firstMove)
+    const oriented = spec.directional === true && playerIndex === 1
+      ? flipSpec(spec.firstMove)
+      : spec.firstMove
+    const primitive = fromConfig(oriented)
     if (!primitive) return []
     const topo = topology || buildInternalTopology()
     return primitive.genMoves(topo, pos, buildViewBoard(board, playerIndex))
@@ -181,7 +207,7 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
       return generateSoldierMoves(board, pos, playerIndex)
     }
 
-    const primitive = buildPieceForType(piece.type)
+    const primitive = buildPieceForType(piece.type, playerIndex)
     if (!primitive) {
       if (piece.type === 'soldier') return generateSoldierMoves(board, pos, playerIndex)
       return []
@@ -309,7 +335,7 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
       return generateSoldierMoves(board, from, playerIndex).some(m => m.to === target)
     }
 
-    const primitive = buildPieceForType(piece.type)
+    const primitive = buildPieceForType(piece.type, playerIndex)
     if (!primitive) {
       if (piece.type === 'soldier') {
         return generateSoldierMoves(board, from, playerIndex).some(m => m.to === target)

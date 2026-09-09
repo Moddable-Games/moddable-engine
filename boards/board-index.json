@@ -3337,6 +3337,6 @@
     "topology": "grid",
     "svg": "svgs/xiangqi--yang-qi.svg",
     "rulesUrl": "xiangqi/variants/yang-qi/index.html",
-    "playable": false
+    "playable": true
   }
 ]

@@ -1987,5 +1987,14 @@
     "label": "Xiangqi 42",
     "group": "Other",
     "playable": true
+  },
+  {
+    "family": "xiangqi",
+    "familyLabel": "Xiangqi",
+    "variant": "yang-qi",
+    "key": "yang-qi",
+    "label": "Yáng Qí",
+    "group": "Other",
+    "playable": true
   }
 ]
