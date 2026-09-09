@@ -219,3 +219,32 @@ describe('chu-shogi declares the Lion this way', () => {
     expect(moves.some(m => m.to === centre)).toBe(true)       // jitto
   })
 })
+
+// engine#174 names undo alongside the move shape, so it is asserted rather
+// than assumed. Undo restores a snapshot rather than reversing a move, which
+// is why a two-leg move needs nothing special from it - but that is a claim
+// about the code, and this is the check.
+describe('a two-leg move survives undo', () => {
+  it('puts both captured pieces back', async () => {
+    await import('../../../play/test-helpers/setup-rules-reader.js')
+    const { createGameForFamily } = await import('../../../play/src/play.js')
+
+    const game = await createGameForFamily('shogi', { variant: 'chu-shogi' })
+    const before = JSON.stringify(game.getState().slice.board)
+
+    // Play on until a move carrying `via` appears, then take it.
+    let played = null
+    for (let ply = 0; ply < 40 && !played; ply++) {
+      const moves = game.getLegalMoves()
+      if (!moves.length) break
+      const area = moves.find(m => m.via !== undefined)
+      if (area) { game.applyMove(area); played = area; break }
+      game.applyMove(moves[ply % moves.length])
+    }
+    expect(played).not.toBeNull()
+
+    // Unwind everything and the opening position must be back, piece for piece.
+    while (game.undo()) { /* to the start */ }
+    expect(JSON.stringify(game.getState().slice.board)).toBe(before)
+  })
+})

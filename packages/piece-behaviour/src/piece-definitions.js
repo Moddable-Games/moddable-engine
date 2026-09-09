@@ -394,24 +394,44 @@ export function bent(opts = {}) {
   // diagonals are the two that keep going away from where the piece started.
   function continuations(dr, dc) {
     if (second !== 'diagonal') {
-      const out = []
-      if (dr !== 0) out.push([dr, 0])
-      if (dc !== 0) out.push([0, dc])
-      return out
+      // A diagonal first leg turns onto one of its own components, which is
+      // what the xiangqi elephant and cannon do. An orthogonal one has no
+      // components to fall back on - decomposing [0,1] gives [0,1] again, and
+      // the piece would carry straight on - so it turns square, which is what
+      // a hook mover means by turning ninety degrees.
+      if (dr === 0) return [[-1, 0], [1, 0]]
+      if (dc === 0) return [[0, -1], [0, 1]]
+      return [[dr, 0], [0, dc]]
     }
     if (dr !== 0 && dc !== 0) return [[dr, dc]]
     return dr !== 0 ? [[dr, -1], [dr, 1]] : [[-1, dc], [1, dc]]
   }
 
+  // `firstSteps: 'any'` is a hook mover: it "runs orthogonally then turns
+  // ninety degrees and continues", so the corner may be any square along the
+  // first ray rather than a fixed distance from the start. Maka-Dai-Dai, Tai
+  // and Taikyoku all have them, and a fixed knee cannot express one.
+  const anyFirst = firstSteps === 'any'
+
   function legs(topology, from, board) {
     const out = []
     for (const [dr, dc] of firstDirs) {
+      const continues = continuations(dr, dc)
+      if (anyFirst) {
+        // Every square it could stop on is a corner it could turn at, and the
+        // run ends at the first piece in the way.
+        for (const pos of topology.rays(from, [[dr, dc]])[0] || []) {
+          out.push({ kneePos: pos, blocked: !!board[pos], continues })
+          if (board[pos]) break
+        }
+        continue
+      }
       const knee = topology.rays(from, [[dr, dc]], firstSteps)[0]
       if (!knee || knee.length < firstSteps) continue
       const kneePos = knee[firstSteps - 1]
       // the knee square itself is a legal destination, and blocks if occupied
       const blocked = !!board[kneePos]
-      out.push({ kneePos, blocked, continues: continuations(dr, dc) })
+      out.push({ kneePos, blocked, continues })
     }
     return out
   }
