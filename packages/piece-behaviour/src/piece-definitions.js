@@ -479,7 +479,7 @@ export function bent(opts = {}) {
  * `from` and `to`, so `via` costs them nothing.
  */
 export function areaMove(dirs, opts = {}) {
-  const { steps = 2 } = opts
+  const { steps = 2, sameLine = false } = opts
 
   // Two legs are what a Lion has, and what `via` can carry. Three - Tenjiku's
   // vice general and fire demon are `[mKa3K]` - would need a route rather than
@@ -489,14 +489,16 @@ export function areaMove(dirs, opts = {}) {
   }
 
   // One step in each direction, resolved offset by offset so that an offset
-  // leaving the board does not shift the rest along.
+  // leaving the board does not shift the rest along, and so each step knows
+  // which way it went - `sameLine` needs the second leg to match the first.
   function neighbours(topology, from) {
     const resolved = resolveLeapOffsets(dirs)
-    if (!Array.isArray(resolved)) return topology.leapTargets(from, resolved)
+    const offsets = Array.isArray(resolved) ? resolved : null
+    if (!offsets) return topology.leapTargets(from, resolved).map(pos => ({ pos, dir: null }))
     const out = []
-    for (const offset of resolved) {
-      const target = topology.leapTargets(from, [offset])[0]
-      if (target !== undefined) out.push(target)
+    for (let i = 0; i < offsets.length; i++) {
+      const target = topology.leapTargets(from, [offsets[i]])[0]
+      if (target !== undefined) out.push({ pos: target, dir: i })
     }
     return out
   }
@@ -517,7 +519,7 @@ export function areaMove(dirs, opts = {}) {
         seen.set(key, via === null ? { from, to } : { from, to, via })
       }
 
-      for (const mid of neighbours(topology, from)) {
+      for (const { pos: mid, dir } of neighbours(topology, from)) {
         const midCell = board[mid]
         if (midCell && midCell.friendly) continue
 
@@ -525,7 +527,13 @@ export function areaMove(dirs, opts = {}) {
         add(mid, null, false)
         if (steps < 2) continue
 
-        for (const dest of neighbours(topology, mid)) {
+        for (const step of neighbours(topology, mid)) {
+          // `v` on a continuation leg means the same line, read relative to
+          // where the piece now stands - not "vertical". A soaring eagle's
+          // f[avF] runs two squares along one forward diagonal; it does not
+          // turn the corner the way a Lion does.
+          if (sameLine && step.dir !== dir) continue
+          const dest = step.pos
           if (dest === from) { add(from, mid, Boolean(midCell)); continue }
           const destCell = board[dest]
           if (destCell && destCell.friendly) continue
@@ -547,13 +555,14 @@ export function areaMove(dirs, opts = {}) {
         return Boolean(cell) && cell.owner === owner
       }
 
-      for (const mid of neighbours(topology, from)) {
+      for (const { pos: mid, dir } of neighbours(topology, from)) {
         if (mid === target) return true
         if (steps < 2) continue
         // A piece it cannot step onto is a piece it cannot step past.
         if (blocked(mid)) continue
-        for (const dest of neighbours(topology, mid)) {
-          if (dest === target) return true
+        for (const step of neighbours(topology, mid)) {
+          if (sameLine && step.dir !== dir) continue
+          if (step.pos === target) return true
         }
       }
       return false
@@ -666,7 +675,7 @@ function buildPrimitive(spec, resolve) {
   if (spec.type === 'leaper') return leaper(spec.offsets || spec.dirs, { lame: spec.lame })
   if (spec.type === 'rider') return rider(spec.dirs, { maxSteps: spec.maxSteps, minSteps: spec.minSteps })
   if (spec.type === 'hopper') return hopper(spec.dirs, { captureSlide: spec.captureSlide, moveSlide: spec.moveSlide })
-  if (spec.type === 'area') return areaMove(spec.dirs || spec.offsets, { steps: spec.steps })
+  if (spec.type === 'area') return areaMove(spec.dirs || spec.offsets, { steps: spec.steps, sameLine: spec.sameLine })
   if (spec.type === 'locust') return locust(resolveLeapOffsets(spec.dirs || spec.offsets))
   if (spec.type === 'bent') return bent({ first: spec.first, firstSteps: spec.firstSteps, minSecondLeg: spec.minSecondLeg, second: spec.second, secondSteps: spec.secondSteps })
   if (spec.type === 'compose' && Array.isArray(spec.parts)) {

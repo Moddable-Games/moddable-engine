@@ -95,7 +95,9 @@ const SLIDERS = new Set(['R', 'B', 'Q'])
 
 const TERM = /^([fblrvs]*)([WFKRBQNDA])(\d*)/
 // `[a3K]` is up to three steps; `[aK]` is the two-step default.
-const CHAIN = /^\[a([fblrvs]*)(\d*)([WFKRBQNDA])\]/
+// `f[avF]` - modifiers before the bracket steer the first leg, those inside
+// steer the continuation, and the atom after `a` is shared by both.
+const CHAIN = /^([fblrs]*)\[a([fblrvs]*)(\d*)([WFKRBQNDA])\]/
 
 function expandModifiers(raw) {
   const out = []
@@ -129,9 +131,18 @@ export function betzaToSpec(notation) {
     // steps that may each capture.
     const chain = CHAIN.exec(rest)
     if (chain) {
-      const [whole, rawMods, count, atom] = chain
+      const [whole, leadMods, rawMods, count, atom] = chain
       rest = rest.slice(whole.length)
-      const mods = expandModifiers(rawMods)
+      // `v` means something different inside a continuation leg. The source
+      // defines it there as "restricted to a single line ... interpreted
+      // relative to the piece's current position on its path", so `f[avF]` is
+      // two squares along one forward diagonal rather than a leg that may turn.
+      // Read as plain "vertical" it would give a soaring eagle a move no
+      // source describes.
+      const sameLine = rawMods.includes('v')
+      // Directions come from the first leg. With `sameLine` the continuation
+      // follows whichever of them the piece took, so one set serves both.
+      const mods = expandModifiers(leadMods + rawMods.replace(/v/g, ''))
       if (JUMPERS.has(atom) || SLIDERS.has(atom)) {
         throw new Error(
           `Betza: "[a${atom}]" in "${source}" - chaining is modelled for stepping atoms only. ` +
@@ -142,6 +153,7 @@ export function betzaToSpec(notation) {
         type: 'area',
         dirs: directionsFor(atom, mods),
         steps: count ? Number(count) : 2,
+        ...(sameLine ? { sameLine: true } : {}),
         ...(mods.length ? { directional: true } : {}),
       })
       continue
