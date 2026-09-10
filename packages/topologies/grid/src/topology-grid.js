@@ -5,7 +5,18 @@ export const schema = {
 }
 
 export function createGridTopology(config) {
-  const { rows, cols, wrap = false, voids: voidList, blockers: blockerList, diagonals: diagonalRule = 'full' } = config
+  const { rows, cols, wrap = false, voids: voidList, blockers: blockerList, diagonals: diagonalRule = 'full', layers = 1 } = config
+
+  // A stack of boards is ONE board with a layer coordinate, not N boards.
+  // `topology.grid` already takes an explicit cell list, the variants that need
+  // this draw a single physical board, and one cell space keeps the move
+  // notation and the AI's state key unchanged. Cell `i` is on layer
+  // `i / (rows * cols)`, and every neighbour relation stays inside its own
+  // plane - a piece never slides from one board to another. Crossing layers is
+  // a rule, which is how Alice Chess describes it: you move on your board, then
+  // the piece "transfers" to the matching square on the other (engine#159).
+  const plane = rows * cols
+  const layerOf = (i) => (i / plane) | 0
 
   const _voids = voidList ? new Set(voidList.map(v => Array.isArray(v) ? v[0] * cols + v[1] : v)) : null
   const _blockers = blockerList ? new Set(blockerList.map(v => Array.isArray(v) ? v[0] * cols + v[1] : v)) : null
@@ -169,9 +180,11 @@ export function createGridTopology(config) {
     // `toRC` allocates a pair for every call, and a slider asks for one ray per
     // direction per piece per node of the search.
     const isIdx = typeof from === 'number'
-    const r = isIdx ? (from / cols) | 0 : from[0]
-    const c = isIdx ? from % cols : from[1]
-    const origin = toIndex(r, c)
+    const base = isIdx ? layerOf(from) * plane : 0
+    const local = isIdx ? from - base : 0
+    const r = isIdx ? (local / cols) | 0 : from[0]
+    const c = isIdx ? local % cols : from[1]
+    const origin = base + toIndex(r, c)
     const result = []
     // A ray runs along a line, so it goes nowhere at all from a point the board
     // draws no such line through.
@@ -182,9 +195,9 @@ export function createGridTopology(config) {
     while (steps < limit) {
       if (wrap) [nr, nc] = wrapCoords(nr, nc)
       if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) break
-      const idx = toIndex(nr, nc)
+      const idx = base + toIndex(nr, nc)
       if (idx === origin) break
-      if (isVoid(idx)) break
+      if (isVoid(idx - base)) break
       result.push(idx)
       nr += dr
       nc += dc
@@ -207,7 +220,9 @@ export function createGridTopology(config) {
 
   function leapTargets(from, offsets) {
     const resolved = typeof offsets === 'string' ? getDirections(offsets) : offsets
-    const r = (from / cols) | 0, c = from % cols
+    const base = layerOf(from) * plane
+    const local = from - base
+    const r = (local / cols) | 0, c = local % cols
     const targets = []
     for (let i = 0; i < resolved.length; i++) {
       let nr = r + resolved[i][0], nc = c + resolved[i][1]
@@ -216,7 +231,7 @@ export function createGridTopology(config) {
         nr = wrapped[0]
         nc = wrapped[1]
       }
-      if (onBoard(nr, nc)) targets.push(toIndex(nr, nc))
+      if (onBoard(nr, nc)) targets.push(base + toIndex(nr, nc))
     }
     return targets
   }
@@ -590,14 +605,14 @@ export function createGridTopology(config) {
 
   function getAllCells() {
     const result = []
-    for (let i = 0; i < rows * cols; i++) {
-      if (!isVoid(i)) result.push(i)
+    for (let i = 0; i < layers * plane; i++) {
+      if (!isVoid(i % plane)) result.push(i)
     }
     return result
   }
 
   function getCellCount() {
-    return _voids ? rows * cols - _voids.size : rows * cols
+    return (_voids ? plane - _voids.size : plane) * layers
   }
 
   function step(from, direction) {
