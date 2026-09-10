@@ -168,6 +168,12 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Changelog
 
+#### 2026-09-10
+- Shogi is complete but for the one variant needing a triangular topology. Taikyoku (36x36, 209 piece types), Tai (25x25, 93) and Maka-Dai-Dai (19x19, 50) all play, and every code in all three was verified against the published array position by position before any movement was attached
+- Alice Chess plays on two boards. A multi-board game is one board with a layer coordinate: every ray stays inside its own plane, and crossing is a rule rather than geometry
+- Four places turned a cell index into a row without subtracting its plane, and each broke differently. `step` was the last, and pawns are the only pieces that use it - so the symptom was "pawns cannot move on the second board, everything else is fine"
+- 230 playable variants
+
 #### 2026-09-07
 - The Xiangqi piece set gained a face-down disc: a blank back, which is what Banqi is played with. Its 32 pieces had been rendering as 32 copies of one black chess piece, because a `?` in the setup is not a token any schema knows and every one of them fell through to a fallback glyph
 - Congo's board gained its river, and Blind Chess left the chess gallery for Xiangqi as Banqi, on a board the right way round
