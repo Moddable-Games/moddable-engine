@@ -172,6 +172,12 @@
   opacity: 0.85;
 }
 
+/* The history scrolls, and it is scrolled to the bottom after every move so the
+   latest is in view. That left the topmost visible entry sliced through the
+   middle of its letters, which does not read as "there is more above" - it
+   reads as broken text, and it sits between the two rows of buttons where it is
+   the first thing the eye lands on. Snapping to whole entries means the cut
+   never falls inside a line, and a visible scrollbar says the rest is there. */
 .game-play-history {
   font-size: 11px;
   color: var(--text-muted, #8a8580);
@@ -180,9 +186,27 @@
   max-height: 160px;
   overflow-y: auto;
   word-wrap: break-word;
+  scroll-snap-type: y proximity;
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-muted, #8a8580) transparent;
+}
+
+.game-play-history::-webkit-scrollbar {
+  width: 6px;
+}
+
+.game-play-history::-webkit-scrollbar-thumb {
+  background: var(--text-muted, #8a8580);
+  border-radius: 3px;
+  opacity: 0.5;
+}
+
+.game-play-history::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .game-play-history .move-pair {
+  scroll-snap-align: start;
   /* `nowrap` suits "1. e4 e5" and hides a landlords turn, which reads
      "roll 4+3: 24 to 31 NO TRESPASSING to 11 JAIL". Those ran off the right
      edge of a box with no horizontal scrollbar, so most of the game was
