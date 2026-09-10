@@ -189,6 +189,20 @@
   scroll-snap-type: y proximity;
   scrollbar-width: thin;
   scrollbar-color: var(--text-muted, #8a8580) transparent;
+  /* Entries wrap to different heights - a landlords turn runs to three lines
+     where "1. e4 e5" runs to one - so no fixed height divides them evenly and
+     the top of the box will always cut one somewhere. Fading the first and last
+     few pixels makes that cut read as "there is more this way" instead of as
+     broken letters, which is what it looked like sitting between the two rows
+     of buttons. */
+  --edge-fade: 10px;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--edge-fade),
+    #000 calc(100% - var(--edge-fade)),
+    transparent 100%
+  );
 }
 
 .game-play-history::-webkit-scrollbar {
