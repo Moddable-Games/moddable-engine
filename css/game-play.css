@@ -799,3 +799,37 @@ body.legend-open { overflow: hidden; }
 .game-play-draft-link:empty {
   display: none;
 }
+
+/* One rhythm down the rail.
+   Padding on each block cannot give one: two blocks side by side ADD their
+   paddings, so the space between the two rows of buttons came out twice the
+   space either side of a divider, and every pair of neighbours produced its own
+   figure. There were three or four different gaps down a column that should
+   have had one.
+   So the rail owns the spacing - a single flex gap - and the blocks own none of
+   it. A block that draws a divider takes the same measure again as padding
+   above its content, which puts the same air on both sides of the rule. */
+.game-play-sidebar--right {
+  --rail-gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rail-gap);
+}
+
+.game-play-sidebar--right > * {
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.game-play-sidebar--right > .game-play-rules,
+.game-play-sidebar--right > .game-play-controls,
+.game-play-sidebar--right > .game-play-captured {
+  padding-top: var(--rail-gap);
+}
+
+/* A label belongs to the list under it, so it sits close to what it names. */
+.game-play-sidebar--right > .game-play-history-label {
+  margin-bottom: calc(var(--rail-gap) * -1 + 4px);
+}
