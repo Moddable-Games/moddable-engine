@@ -76,10 +76,29 @@ export function createCellAddressing({ rows, cols, idStyle, flipped = false, lay
     return container.querySelector(`[data-sq="${id}"]`)
   }
 
+  // getBBox reports a cell's own coordinates, which ignore any transform on an
+  // ancestor. Every board of a multi-board render sits in a translated group,
+  // so board B's squares report board A's positions and anything drawn from
+  // them - selection, legal-move dots, fog - lands on the wrong board.
+  function layerOffset(el) {
+    let node = el
+    while (node && node.getAttribute) {
+      const t = node.getAttribute('transform')
+      if (t) {
+        const m = /translate\(\s*(-?[\d.]+)[ ,]+(-?[\d.]+)/.exec(t)
+        if (m) return { dx: Number(m[1]), dy: Number(m[2]) }
+      }
+      node = node.parentNode
+    }
+    return { dx: 0, dy: 0 }
+  }
+
   function bbox(logicalIdx, container) {
     const el = find(logicalIdx, container)
     if (!el || !el.getBBox) return null
-    return el.getBBox()
+    const b = el.getBBox()
+    const { dx, dy } = layerOffset(el)
+    return (dx || dy) ? { x: b.x + dx, y: b.y + dy, width: b.width, height: b.height } : b
   }
 
   function centre(logicalIdx, container) {

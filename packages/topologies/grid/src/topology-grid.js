@@ -634,7 +634,14 @@ export function createGridTopology(config) {
 
   function step(from, direction) {
     const dr = direction[0], dc = direction[1]
-    const fr = (from / cols) | 0, fc = from % cols
+    // Pawns are the only pieces that move by `step` rather than by rays or
+    // leaps, so this was the one path still reading a raw index as a row. On
+    // the second board of Alice Chess that put every pawn on rank nine and off
+    // the edge, and pawns there could not move or be selected while every other
+    // piece was fine.
+    const base = layerOf(from) * plane
+    const local = from - base
+    const fr = (local / cols) | 0, fc = local % cols
     if (isDiagonal(dr, dc) && !diagonalExists(fr, fc)) return null
     let nr = fr + dr, nc = fc + dc
     if (wrap) {
@@ -643,7 +650,7 @@ export function createGridTopology(config) {
       nc = wrapped[1]
     }
     if (!onBoard(nr, nc)) return null
-    return toIndex(nr, nc)
+    return base + toIndex(nr, nc)
   }
 
   function renderLayout(config = {}) {

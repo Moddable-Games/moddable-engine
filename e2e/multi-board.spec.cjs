@@ -49,3 +49,37 @@ test('alice loads by url and keeps both boards through a move', async ({ page })
   expect(await pieceAt('e4')).toBe('empty')
   expect(await pieceAt('e4-2')).toBe('piece')
 })
+
+// Reported from the play page: after the first move the highlights appeared on
+// the other board. The overlay had been placed inside a layer's group, so
+// everything it drew inherited that board's translate - and getBBox reports a
+// cell's own coordinates, which ignore the transform, so board B's squares gave
+// board A's positions.
+test('the selection marker lands on the square that was clicked', async ({ page }) => {
+  await page.goto(`${BASE}/play/?family=chess&variant=alice`, { waitUntil: 'networkidle' })
+  await page.waitForSelector('[data-sq]', { timeout: 15000 })
+  await page.locator('[data-sq="e2"]').first().click()
+  await page.waitForTimeout(300)
+  await page.locator('[data-sq="e4"]').first().click()
+  await page.waitForTimeout(1200)
+  await page.locator('[data-sq="d2"]').first().click()
+  await page.waitForTimeout(500)
+
+  const result = await page.evaluate(() => {
+    const root = document.querySelector('#game-play-root')
+    const cell = root.querySelector('[data-sq="d2"]')
+    const cb = cell.getBoundingClientRect()
+    const marks = [...root.querySelectorAll('rect')].filter(r => {
+      const f = (r.getAttribute('fill') || '').toLowerCase()
+      return f && f !== 'none' && !r.hasAttribute('data-sq')
+    })
+    const near = marks.filter(m => {
+      const b = m.getBoundingClientRect()
+      return Math.abs((b.left+b.width/2)-(cb.left+cb.width/2)) < cb.width &&
+             Math.abs((b.top+b.height/2)-(cb.top+cb.height/2)) < cb.height
+    })
+    return { markers: marks.length, nearClicked: near.length }
+  })
+  console.log('MARKERS', JSON.stringify(result))
+  expect(result.nearClicked).toBeGreaterThan(0)
+})

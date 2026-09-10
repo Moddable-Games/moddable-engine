@@ -866,7 +866,12 @@ export function createPlaySession(options = {}) {
       // Chess showed both boards until the first click and one of them after.
       const allGroups = svgEl.querySelectorAll('g[pointer-events="none"]')
       const piecesGroup = allGroups.length > 0 ? allGroups[allGroups.length - 1] : null
-      if (piecesGroup && piecesGroup.parentNode) piecesGroup.parentNode.insertBefore(overlay, piecesGroup)
+      // The overlay holds highlights for every board, so it belongs to the svg
+      // root: put it inside a layer's group and everything it draws inherits
+      // that board's translate and lands there. Positions come from
+      // cells.bbox, which adds the offset itself.
+      const rootPieces = piecesGroup && piecesGroup.parentNode === svgEl ? piecesGroup : null
+      if (rootPieces) svgEl.insertBefore(overlay, rootPieces)
       else svgEl.appendChild(overlay)
     }
 

@@ -96,3 +96,27 @@ describe('a move is refused when the far square is taken', () => {
     }
   })
 })
+
+// Reported from the play page: pawns could not move or be selected once they
+// were on the second board, and every other piece was fine. Pawns are the only
+// pieces that move by `topology.step`, which was the one path still reading a
+// raw index as a row - on the second board that put every pawn on rank nine and
+// off the edge.
+describe('a pawn on the second board', () => {
+  test('has moves like any other piece', async () => {
+    const game = await createGameForFamily('chess', { variant: 'alice' })
+    game.applyMove(game.getLegalMoves().find(m => m.to !== undefined))
+    game.applyMove(game.getLegalMoves()[0])
+
+    const board = game.getState().slice.board
+    const pawnsOnB = board
+      .map((c, i) => (c && i >= PLANE && c.type === 'pawn' && c.owner === 0) ? i : null)
+      .filter(v => v !== null)
+    expect(pawnsOnB.length).toBeGreaterThan(0)
+
+    const theirMoves = game.getLegalMoves().filter(m => pawnsOnB.includes(m.from))
+    expect(theirMoves.length).toBeGreaterThan(0)
+    // And it advances within its own board rather than stepping off it.
+    for (const m of theirMoves) expect(m.to).toBeGreaterThanOrEqual(PLANE)
+  })
+})
