@@ -647,7 +647,9 @@ export function createGridTopology(config) {
   }
 
   function renderLayout(config = {}) {
-    return renderGridLayout(rows, cols, config)
+    // A layered board draws one grid per layer, and the topology is the only
+    // thing that knows how many there are.
+    return renderGridLayout(rows, cols, layers > 1 ? { ...config, layers } : config)
   }
 
   return {
@@ -740,6 +742,43 @@ export function clusterCells(cells) {
 }
 
 export function renderGridLayout(rows, cols, config = {}) {
+  // Alice Chess is two boards and a piece may stand on the same square of each,
+  // so one grid cannot show the position: they are drawn side by side. Each
+  // layer is the same grid shifted right, and its cells carry the layer in
+  // their id so a click lands on the board that was clicked.
+  const layerCount = config.layers || 1
+  if (layerCount > 1) {
+    const single = { ...config }
+    delete single.layers
+    const first = renderGridLayout(rows, cols, single)
+    const gap = (first.geom ? first.geom.tileSize : 56)
+    const step = first.width + gap
+    const merged = { ...first, elements: [...first.elements], cells: [...first.cells],
+      labels: [...(first.labels || [])], width: first.width }
+    for (let layer = 1; layer < layerCount; layer++) {
+      const dx = step * layer
+      const part = renderGridLayout(rows, cols, single)
+      const shift = (el) => {
+        const a = { ...el.attrs }
+        if (a.x !== undefined) a.x = Number(a.x) + dx
+        if (a.cx !== undefined) a.cx = Number(a.cx) + dx
+        if (a.x1 !== undefined) a.x1 = Number(a.x1) + dx
+        if (a.x2 !== undefined) a.x2 = Number(a.x2) + dx
+        if (a.points) a.points = String(a.points).split(' ').map(pt => {
+          const [px, py] = pt.split(',')
+          return py === undefined ? pt : `${Number(px) + dx},${py}`
+        }).join(' ')
+        if (a['data-sq']) a['data-sq'] = `${a['data-sq']}-${layer + 1}`
+        return { ...el, attrs: a }
+      }
+      merged.elements.push(...part.elements.map(shift))
+      merged.labels.push(...(part.labels || []).map(shift))
+      merged.cells.push(...part.cells.map(c => ({ ...c, id: `${c.id}-${layer + 1}`, x: c.x + dx })))
+      merged.width = first.width + dx
+    }
+    return merged
+  }
+
   const norm = config.ops ? config : normalizeLegacyConfig(rows, cols, config)
   const {
     tileSize = 56,

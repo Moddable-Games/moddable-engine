@@ -12,7 +12,7 @@ import { fileLabel, fileIndex, intersectionLabel, intersectionIndex, splitCellId
  * Cell addressing for grid-based topologies (chess, go, draughts, etc.)
  * Converts between integer board indices and algebraic notation (e.g. "a1", "e4").
  */
-export function createCellAddressing({ rows, cols, idStyle, flipped = false }) {
+export function createCellAddressing({ rows, cols, idStyle, flipped = false, layers = 1 }) {
   if (!rows || !cols) {
     throw new Error(
       `createCellAddressing requires rows and cols for grid mode. ` +
@@ -23,6 +23,12 @@ export function createCellAddressing({ rows, cols, idStyle, flipped = false }) {
 
   const toFile = idStyle === 'go' ? intersectionLabel : fileLabel
   const fromFile = idStyle === 'go' ? intersectionIndex : fileIndex
+
+  // A layered board draws one grid per layer side by side, and each carries the
+  // layer in its id: `a8` on the first board, `a8-2` on the second. Without it
+  // both boards would answer to the same id and a click on either would land on
+  // the first.
+  const plane = rows * cols
 
   function visualIndex(logicalIdx) {
     if (!flipped) return logicalIdx
@@ -39,23 +45,29 @@ export function createCellAddressing({ rows, cols, idStyle, flipped = false }) {
   }
 
   function toId(logicalIdx) {
-    const vi = visualIndex(logicalIdx)
+    const layer = layers > 1 ? Math.floor(logicalIdx / plane) : 0
+    const withinPlane = layers > 1 ? logicalIdx % plane : logicalIdx
+    const vi = visualIndex(withinPlane)
     const r = Math.floor(vi / cols)
     const c = vi % cols
     if (c < 0 || c >= cols || r < 0 || r >= rows) return null
-    return `${toFile(c)}${rows - r}`
+    const base = `${toFile(c)}${rows - r}`
+    return layer > 0 ? `${base}-${layer + 1}` : base
   }
 
   function toIndex(id) {
     if (id == null || String(id).length < 2) return -1
-    const parts = splitCellId(id)
+    const suffix = /^(.*)-(\d+)$/.exec(String(id))
+    const layer = suffix ? Number(suffix[2]) - 1 : 0
+    const parts = splitCellId(suffix ? suffix[1] : id)
     if (!parts) return -1
     const c = fromFile(parts.file)
     if (c < 0 || c >= cols) return -1
     const r = rows - parts.rank
     if (r < 0 || r >= rows) return -1
+    if (layer < 0 || layer >= layers) return -1
     const vi = r * cols + c
-    return logicalFromVisual(vi)
+    return layer * plane + logicalFromVisual(vi)
   }
 
   function find(logicalIdx, container) {

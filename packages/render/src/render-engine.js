@@ -290,8 +290,13 @@ export function renderFromEngine(resolved, opts = {}) {
   const renderFn = RENDER_FN[result.type]
   if (!renderFn) return null
 
+  // A layered board draws one grid per layer side by side. Only the topology
+  // declaration knows how many, and without it the second board is simply
+  // absent - which is what left Alice Chess playing a game half of which could
+  // not be seen.
   const layout = result.type === 'grid'
-    ? renderFn(topo.rows || 8, topo.cols || 8, result.config)
+    ? renderFn(topo.rows || 8, topo.cols || 8,
+        topo.layers > 1 ? { ...result.config, layers: topo.layers } : result.config)
     : renderFn(result.config)
   if (!layout) return null
 
@@ -775,7 +780,17 @@ function renderMultiBoards(resolved, layers, opts) {
 
     const innerStart = layerSvg.indexOf('>') + 1
     const innerEnd = layerSvg.lastIndexOf('</svg>')
-    const innerContent = layerSvg.slice(innerStart, innerEnd)
+    let innerContent = layerSvg.slice(innerStart, innerEnd)
+
+    // Each board is rendered on its own and knows nothing of the others, so
+    // every one of them called its top-left square `a8`. Two boards answering
+    // to one id is a board you cannot click: Alice Chess drew both and every
+    // square on the second belonged, as far as the page was concerned, to the
+    // first. The layer goes into the id itself - `a8` and `a8-2` - which is
+    // what js/play-cells.js reads back.
+    if (i > 0) {
+      innerContent = innerContent.replace(/data-sq="([^"]+)"/g, `data-sq="$1-${i + 1}"`)
+    }
 
     parts.push(`<g transform="translate(${ox},${oy})" data-layer="${i}">`)
     parts.push(innerContent)

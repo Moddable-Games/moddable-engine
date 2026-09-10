@@ -237,6 +237,9 @@ export function createPlaySession(options = {}) {
         rows: topo.rows,
         cols: topo.cols,
         idStyle: resolvedBoard.render?.idStyle || 'algebraic',
+        // A layered board draws one grid per layer and its cell ids carry the
+        // layer, so the addressing has to know how many there are.
+        layers: topo.layers || 1,
       })
     } else if (topo.type === 'grid' && !topo.rows && !topo.cols) {
       // Irregular grids (cells-only, e.g. crazy-38s) — use direct addressing
