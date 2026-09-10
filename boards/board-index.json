@@ -2857,7 +2857,7 @@
     "topology": "grid",
     "svg": "svgs/shogi--taikyoku-shogi.svg",
     "rulesUrl": "shogi/variants/taikyoku-shogi/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "shogi",

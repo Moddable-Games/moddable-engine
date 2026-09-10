@@ -1955,6 +1955,15 @@
   {
     "family": "shogi",
     "familyLabel": "Shogi",
+    "variant": "taikyoku-shogi",
+    "key": "taikyoku-shogi",
+    "label": "Taikyoku Shogi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "tenjiku-shogi",
     "key": "tenjiku-shogi",
     "label": "Tenjiku Shogi",
