@@ -37,6 +37,19 @@ const KNOWN_INERT = {
   // until promoted, which is what makes their promotions (Buddhist Spirit and
   // Teaching King) the strongest pieces in the game.
   'maka-dai-dai-shogi': ['dark_spirit'],
+
+  // Tai's opening is gridlocked by design: 177 pieces a side fill seven solid
+  // ranks, so every back-rank piece is walled in by its own. Each of these was
+  // checked and has one of its own pieces on the square it would move to. The
+  // source says a game "may be played over several long sessions and require
+  // each player to make over a thousand moves"; a 60-ply random playout does
+  // not open the position.
+  'tai-shogi': [
+    'lance', 'white_tiger', 'whale', 'flying_dragon', 'long_nosed_goblin', 'dove',
+    'rook', 'dark_spirit', 'turtle_snake', 'reverse_chariot', 'poison_snake',
+    'free_dream_eater', 'bishop', 'blind_bear', 'silver_hare', 'old_monkey',
+    'capricorn', 'left_chariot',
+  ],
 }
 
 let rulesAvailable = true

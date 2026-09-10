@@ -2847,7 +2847,7 @@
     "topology": "grid",
     "svg": "svgs/shogi--tai-shogi.svg",
     "rulesUrl": "shogi/variants/tai-shogi/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "shogi",

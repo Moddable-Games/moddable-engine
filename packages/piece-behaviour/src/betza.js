@@ -106,7 +106,9 @@ const SHOOT = /^c?x([fblrvs]*)([WFKRBQNDA])/
 // Maka-Dai-Dai's hook mover and Capricorn, "any number of free squares in one
 // of the four orthogonal directions, then any number of free squares in a
 // perpendicular direction".
-const HOOK = /^([RB])ma\1/
+// Written both ways in the sources: `BmaB` for the Capricorn, `mBaB` inside
+// the long-nosed goblin's `WmBaB`.
+const HOOK = /^(?:m([RB])a\1|([RB])ma\2)/
 // `[fl]` `[fr]` `[bl]` `[br]` name one diagonal each, and stack: the left
 // chariot's `[fl][br]B` is a bishop on two opposite diagonals only.
 const CORNER = /^((?:\[(?:fl|fr|bl|br)\])+)([WFKRBQNDA])/
@@ -154,9 +156,11 @@ export function betzaToSpec(notation) {
     const hook = HOOK.exec(rest)
     if (hook) {
       rest = rest.slice(hook[0].length)
+      // The atom the hook runs on: R for the orthogonals, B for the diagonals.
+      const lineAtom = hook[1] || hook[2]
       specs.push({
         type: 'bent',
-        first: hook[1] === 'R' ? 'orthogonal' : 'diagonal',
+        first: lineAtom === 'R' ? 'orthogonal' : 'diagonal',
         firstSteps: 'any',
         second: 'perpendicular',
         minSecondLeg: 0,

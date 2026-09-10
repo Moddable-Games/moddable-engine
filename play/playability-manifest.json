@@ -1946,6 +1946,15 @@
   {
     "family": "shogi",
     "familyLabel": "Shogi",
+    "variant": "tai-shogi",
+    "key": "tai-shogi",
+    "label": "Tai Shogi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "tenjiku-shogi",
     "key": "tenjiku-shogi",
     "label": "Tenjiku Shogi",
