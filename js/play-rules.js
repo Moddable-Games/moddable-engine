@@ -27,7 +27,10 @@ export function renderRulesPanel(el, { board, win, special, rule, description, f
   else if (description) parts.push(`<p class="rules-desc">${description}</p>`)
   if (link) {
     parts.push(
-      `<p class="rules-desc"><a class="rules-link" href="${link}" target="_blank" rel="noopener">Full rules for this variant</a></p>`
+      // A link that reads as a sentence in a rail full of buttons does not look
+      // like something you can press. It is the one thing here that leaves the
+      // page, so it should look like the action it is.
+      `<a class="btn rules-link-btn" href="${link}" target="_blank" rel="noopener">Full rules</a>`
     )
   }
   el.innerHTML = parts.join('')

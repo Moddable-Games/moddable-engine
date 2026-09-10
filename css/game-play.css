@@ -172,37 +172,46 @@
   opacity: 0.85;
 }
 
-/* The history scrolls, and it is scrolled to the bottom after every move so the
-   latest is in view. That left the topmost visible entry sliced through the
-   middle of its letters, which does not read as "there is more above" - it
-   reads as broken text, and it sits between the two rows of buttons where it is
-   the first thing the eye lands on. Snapping to whole entries means the cut
-   never falls inside a line, and a visible scrollbar says the rest is there. */
+/* The move list sits between two rows of buttons in the right rail. It was an
+   unlabelled block of muted text that reserved height whether or not it had
+   anything in it, so an early game showed a black gap where the moves should
+   be, and a long one cut its top line through the middle of the letters. A fade
+   over those edges made it worse: it took the little text there was and made it
+   fainter.
+
+   What it needed was to say what it is, to be readable, and to take only the
+   room it uses. */
 .game-play-history {
-  font-size: 11px;
-  color: var(--text-muted, #8a8580);
-  line-height: 1.6;
-  padding: 8px 0;
-  max-height: 160px;
+  font-size: 12px;
+  color: var(--text-primary, #d8d4cf);
+  line-height: 1.65;
+  padding: 2px 0 8px;
+  max-height: 168px;
   overflow-y: auto;
   word-wrap: break-word;
   scroll-snap-type: y proximity;
   scrollbar-width: thin;
   scrollbar-color: var(--text-muted, #8a8580) transparent;
-  /* Entries wrap to different heights - a landlords turn runs to three lines
-     where "1. e4 e5" runs to one - so no fixed height divides them evenly and
-     the top of the box will always cut one somewhere. Fading the first and last
-     few pixels makes that cut read as "there is more this way" instead of as
-     broken letters, which is what it looked like sitting between the two rows
-     of buttons. */
-  --edge-fade: 10px;
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    #000 var(--edge-fade),
-    #000 calc(100% - var(--edge-fade)),
-    transparent 100%
-  );
+}
+
+.game-play-history:empty {
+  display: none;
+}
+
+.game-play-history-label {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted, #8a8580);
+  padding-top: 10px;
+}
+
+/* Muted text at reduced opacity on a near-black rail is not quiet, it is
+   invisible - the space under "Moves" read as the same black gap it replaced. */
+.game-play-history-empty {
+  font-size: 12px;
+  color: var(--text-secondary, #b8b4ae);
+  padding: 2px 0 8px;
 }
 
 .game-play-history::-webkit-scrollbar {
@@ -212,7 +221,6 @@
 .game-play-history::-webkit-scrollbar-thumb {
   background: var(--text-muted, #8a8580);
   border-radius: 3px;
-  opacity: 0.5;
 }
 
 .game-play-history::-webkit-scrollbar-track {
@@ -718,4 +726,76 @@ body.legend-open { overflow: hidden; }
 .game-play-sidebar .btn:hover {
   color: var(--text-primary, #e8eaed);
   border-color: var(--border-glow, rgba(111, 181, 255, 0.25));
+}
+
+/* The one control in this rail that leaves the page. It read as a sentence -
+   "Full rules for this variant" - among a column of buttons, so it did not look
+   like something you could press. Same shape as its neighbours now. */
+.rules-link-btn {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border, #2a2d4a);
+  background: var(--surface-2, #141830);
+  color: var(--text, #f0ede8);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.rules-link-btn:hover {
+  background: var(--surface-3, #1e2245);
+}
+
+/* "Full rules" and "Piece moves" are one pair, "Copy FEN" and "Edit in Create"
+   another, and each sat on its own line down a narrow rail - four rows where
+   two would do, and the stack was what made the rail feel long and empty. */
+.game-play-export,
+.game-play-links,
+.game-play-legend-open:only-child {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: stretch;
+  padding: 8px 0;
+}
+
+/* One of each pair is a <button> and the other an <a>, and the anchor sits in a
+   wrapper div - so they picked up different padding and the anchor did not fill
+   its half. Anything that acts as a button in these two rows is given the same
+   box, and the wrapper is made to disappear into the row. */
+.game-play-export .game-play-draft-link {
+  display: contents;
+}
+
+.game-play-export .btn,
+.game-play-export .game-play-draft-link .btn,
+.game-play-links .btn,
+.game-play-links .rules-link-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  margin-top: 0;
+  /* The same box for both halves: same padding, same height, same font. */
+  padding: 6px 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  border-radius: 4px;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The rail stacks blocks that only some families fill: a hand for the drop
+   games, seats for the ones that track money. Empty, they still carried their
+   padding and borders, which is most of the black gap that made this rail look
+   like it had lost something. `.game-play-captured` already did this; the other
+   two did not. */
+.game-play-hand:empty,
+.game-play-seats:empty,
+.game-play-actions:empty,
+.game-play-draft-link:empty {
+  display: none;
 }

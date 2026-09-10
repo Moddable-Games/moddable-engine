@@ -16,6 +16,22 @@ import { paintHighlight, paintIndicator, paintFog, paintEffect, createOverlay } 
 import { bindBoardInteraction } from './play-interaction.js'
 import { renderHandPanel } from './play-hand.js'
 import { renderRulesPanel } from './play-rules.js'
+
+// "Full rules" explains the variant and "Piece moves" explains its pieces: one
+// pair, and each had its own row down a narrow rail. They are built in
+// different places at different moments - the rules panel owns one, the legend
+// the other - so whoever finishes last calls this, and it does nothing twice.
+function pairSidebarLinks() {
+  // Found rather than passed: the two are created in different closures and
+  // neither can see the other's variables.
+  const open = document.querySelector('.game-play-legend-open')
+  const rulesBtn = document.querySelector('.rules-link-btn')
+  if (!rulesBtn || !open) return
+  const legendContainer = open.parentNode
+  if (!legendContainer) return
+  legendContainer.classList.add('game-play-links')
+  if (rulesBtn.parentNode !== legendContainer) legendContainer.insertBefore(rulesBtn, open)
+}
 import { buildLegend } from './play-legend.js'
 import { moveToSAN } from '../packages/plugins/chess/index.js'
 import { getDraft, resolveDraftId, listDrafts, WORKING_ID } from './create-drafts.js'
@@ -604,6 +620,8 @@ export function createPlaySession(options = {}) {
     open.textContent = 'Piece moves'
     open.addEventListener('click', () => showLegend(true))
     legendContainer.appendChild(open)
+    legendContainer.classList.add('game-play-links')
+    pairSidebarLinks()
     overlay.subtitle.textContent =
       `${variantLabel()} · what each piece can do, from the position shown`
 
@@ -1323,7 +1341,13 @@ export function createPlaySession(options = {}) {
     // so SAN disambiguated against three opponents at once and produced
     // "M9d9" and "Maa4" - a log nobody can read. Plain coordinates below say
     // what happened.
-    if (family === 'chess' && playerNames().length <= 2) {
+    // SAN names a square as a file and a rank, which cannot say WHICH board a
+    // move was played on. On a layered game it wrote every move as though both
+    // boards were one, and the log came out blank. The plain from-to form uses
+    // the cell ids, which carry the layer - and Alice's own frontmatter asks
+    // for `alice-algebraic` rather than SAN.
+    const layered = (resolvedBoard?.topology?.layers || 1) > 1
+    if (family === 'chess' && !layered && playerNames().length <= 2) {
       const board = boardSnapshot || game.getState().slice?.board
       const topo = resolvedBoard?.topology
       const legal = boardSnapshot?._legalMoves || null
@@ -1627,6 +1651,18 @@ export async function initGamePlay(container, defaults = {}) {
   seatsEl.className = 'game-play-seats'
   rightSidebar.appendChild(seatsEl)
 
+  // The move list needs to say what it is. Unlabelled, an early game showed a
+  // block of muted text in a rail full of buttons and read as a gap.
+  const historyLabel = document.createElement('div')
+  historyLabel.className = 'game-play-history-label'
+  historyLabel.textContent = 'Moves'
+  rightSidebar.appendChild(historyLabel)
+
+  const historyEmpty = document.createElement('div')
+  historyEmpty.className = 'game-play-history-empty'
+  historyEmpty.textContent = 'No moves yet'
+  rightSidebar.appendChild(historyEmpty)
+
   const historyEl = document.createElement('div')
   historyEl.className = 'game-play-history'
   rightSidebar.appendChild(historyEl)
@@ -1656,11 +1692,14 @@ export async function initGamePlay(container, defaults = {}) {
     if (session) navigator.clipboard.writeText(session.fen).then(() => { fenBtn.textContent = 'Copied'; setTimeout(() => { fenBtn.textContent = 'Copy FEN' }, 1500) })
   })
   exportEl.appendChild(fenBtn)
-  rightSidebar.appendChild(exportEl)
 
+  // "Copy FEN" and "Edit in Create" are a pair and each had its own row down a
+  // narrow rail. Two rows where one does, and the stack is what made the rail
+  // feel long and empty.
   const draftLinkEl = document.createElement('div')
   draftLinkEl.className = 'game-play-draft-link'
-  rightSidebar.appendChild(draftLinkEl)
+  exportEl.appendChild(draftLinkEl)
+  rightSidebar.appendChild(exportEl)
 
   const rulesEl = document.createElement('div')
   rulesEl.className = 'game-play-rules'
@@ -1712,6 +1751,11 @@ export async function initGamePlay(container, defaults = {}) {
   function updateRules() {
     const meta = session?.variantMeta
     renderRulesPanel(rulesEl, { ...(meta || {}), family: config.family, variant: config.variant })
+    // "Full rules" and "Piece moves" are a pair: one explains the variant, the
+    // other explains its pieces. The rules panel owns the first and the legend
+    // owns the second, so they are put in a row here, once both exist - doing
+    // it when the legend is built ran before this had rendered anything.
+    pairSidebarLinks()
   }
 
   // The other half of the round-trip. Without it a draft could be played but
@@ -1721,7 +1765,10 @@ export async function initGamePlay(container, defaults = {}) {
     draftLinkEl.innerHTML = ''
     const link = document.createElement('a')
     link.className = 'btn btn-outline'
-    link.textContent = 'Edit in Create'
+    // "Edit in Create" wrapped to two lines beside "Copy FEN" and made an
+    // uneven, silly-looking pair. This says the same thing in the space there
+    // is, and names what you are editing rather than where you land.
+    link.textContent = 'Edit Variant'
 
     if (config.draftId) {
       const record = getDraft(config.draftId)
@@ -1761,7 +1808,11 @@ export async function initGamePlay(container, defaults = {}) {
   function renderHistory() {
     if (!session) { historyEl.innerHTML = ''; return }
     const moves = session.history
-    if (moves.length === 0) { historyEl.innerHTML = ''; return }
+    if (moves.length === 0) {
+      historyEl.innerHTML = ''
+      historyEmpty.hidden = false
+      return
+    }
     // A round is one move per seat, not always two. Djambi has four armies, and
     // pairing its log two at a time numbered every half-round as a full one and
     // put two different players' moves under the same number.
@@ -1781,6 +1832,9 @@ export async function initGamePlay(container, defaults = {}) {
       rounds.push(`<span class="move-pair">${num}. ${inRound.join(' ')}</span>`)
     }
     historyEl.innerHTML = rounds.join(' ')
+    // One of the two is shown, never both and never neither.
+    historyEmpty.hidden = rounds.length > 0
+    historyLabel.hidden = false
     // The newest move is the one worth seeing. This box scrolls, and it never
     // scrolled, so a long game showed only its opening and looked finished
     // after six rounds when it had played forty.
