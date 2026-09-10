@@ -157,7 +157,7 @@
     "topology": "grid",
     "svg": "svgs/chess--alice.svg",
     "rulesUrl": "chess/variants/alice/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "chess",

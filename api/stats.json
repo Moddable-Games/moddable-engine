@@ -9,10 +9,10 @@
     "standard": 1116,
     "variants": 610
   },
-  "playableVariants": 229,
+  "playableVariants": 230,
   "playableFamilies": 10,
   "playableByFamily": {
-    "chess": 141,
+    "chess": 142,
     "draughts": 20,
     "go": 11,
     "hex": 8,
@@ -36,7 +36,7 @@
     "xiangqi": 0
   },
   "frontmatterOnlyByFamily": {
-    "chess": 87,
+    "chess": 88,
     "draughts": 20,
     "go": 8,
     "hex": 8,

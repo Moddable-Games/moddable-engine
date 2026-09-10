@@ -127,7 +127,10 @@ function playedPosition(family, key, moveCount, topo) {
     plugin,
     played,
     slice,
-    setup: boardToSetup(slice, { rows, cols }, plugin.vocabulary,
+    // A layered board is written one plane at a time, and rebuilding the
+    // topology from rows and cols alone dropped the layer count - so Alice's
+    // second board was serialised into the first and its pieces vanished.
+    setup: boardToSetup(slice, { rows, cols, ...(topo?.layers ? { layers: topo.layers } : {}) }, plugin.vocabulary,
                     { players: game.raw.playerSystem.getAll() }),
   }
 }

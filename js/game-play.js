@@ -859,9 +859,14 @@ export function createPlaySession(options = {}) {
         }
       }
 
+      // On a multi-board render each board sits in its own <g data-layer>, so
+      // the pieces group is a grandchild of the svg rather than a child of it.
+      // Inserting relative to the svg then threw "Child to insert before is not
+      // a child of this node", which aborted the draw half-finished: Alice
+      // Chess showed both boards until the first click and one of them after.
       const allGroups = svgEl.querySelectorAll('g[pointer-events="none"]')
       const piecesGroup = allGroups.length > 0 ? allGroups[allGroups.length - 1] : null
-      if (piecesGroup) svgEl.insertBefore(overlay, piecesGroup)
+      if (piecesGroup && piecesGroup.parentNode) piecesGroup.parentNode.insertBefore(overlay, piecesGroup)
       else svgEl.appendChild(overlay)
     }
 

@@ -102,6 +102,20 @@ export function boardToSetup(slice, topo = {}, vocabulary = {}, opts = {}) {
     return pitBoardToSetup(board, slice, topo)
   }
 
+  // A layered board is written one plane at a time, because that is what the
+  // renderer draws and what the corpus already writes - Alice Chess gives its
+  // two boards as two FENs. Serialising all 128 cells into one string produced
+  // a position no grid could lay out, and the multi-board renderer, which only
+  // fires on an array, never ran: the game played on two boards and the page
+  // drew one.
+  if (topo.layers > 1 && Array.isArray(board) && topo.rows && topo.cols) {
+    const plane = topo.rows * topo.cols
+    const planeTopo = { ...topo, layers: 1 }
+    return Array.from({ length: topo.layers }, (_, layer) =>
+      boardToSetup({ ...slice, board: board.slice(layer * plane, (layer + 1) * plane) },
+        planeTopo, vocabulary, opts))
+  }
+
   // A track game keeps its players on the track, not in cells: landlords holds
   // forty nulls in `board` from start to finish and its tokens in `positions`.
   // Serialising the board gave an empty string, so the renderer was handed a

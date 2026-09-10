@@ -11,6 +11,15 @@
   {
     "family": "chess",
     "familyLabel": "Chess",
+    "variant": "alice",
+    "key": "alice",
+    "label": "Alice Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "familyLabel": "Chess",
     "variant": "almost-chess",
     "key": "almost-chess",
     "label": "Almost Chess",
