@@ -11,7 +11,7 @@ export const CONFIG_KEYS = new Set([
   'onTurnEnd', 'pawnCaptureDirections', 'pawnConfig', 'pawnMoveDirections', 'pawnStartRow',
   'pawnType', 'placementDistinctColor', 'placementPieces', 'placementZone', 'playerCount',
   'promotion', 'promotionChoices', 'promotionRow', 'regions',
-  'faceoff', 'goal', 'promotionZone', 'randomSetup', 'rookType', 'rows', 'royalType', 'setup',
+  'faceoff', 'goal', 'promotionZone', 'randomSetup', 'rookType', 'rows', 'royalType', 'setup', 'transfer',
   'stalemateMeaning', 'terrain', 'torpedo', 'turnEffects', 'turnLogic', 'visibility', 'winCondition',
 ])
 
@@ -484,7 +484,13 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const setupInput = typeof rawSetup === 'function' ? rawSetup(rng) : rawSetup
 
     let board
-    if (Array.isArray(setupInput)) {
+    // An array of STRINGS is a position written one plane at a time - Alice
+    // Chess gives its two boards as two FENs - and the topology lays them end
+    // to end. An array of cells is a board that has already been built, which
+    // is what a generated setup returns.
+    if (Array.isArray(setupInput) && setupInput.every(x => typeof x === 'string')) {
+      board = topology.parsePosition(setupInput, vocabulary)
+    } else if (Array.isArray(setupInput)) {
       board = setupInput
     } else if (typeof setupInput === 'object') {
       board = setupInput
@@ -1456,9 +1462,14 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const gated = withGatingOptions(allMoves, slice, playerIdx)
 
     const hasBlockers = topology && topology.isBlocker
-    const movesFiltered = hasBlockers
+    let movesFiltered = hasBlockers
       ? gated.filter(m => m.to === undefined || !topology.isBlocker(m.to))
       : gated
+
+    // "the move is legal only if that square is vacant" - checked before the
+    // king-safety filter, because a move that cannot be made should not be
+    // simulated at all.
+    if (transferSpec) movesFiltered = movesFiltered.filter(m => transferAllows(m, slice.board))
 
     let legal = config.noCheck
       ? movesFiltered
@@ -1815,6 +1826,46 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return true
   }
 
+// Alice Chess: "a piece transfers to the matching square on the other board
+  // after every move, and the move is legal only if that square is vacant."
+  //
+  // The geometry does none of this - the topology keeps every ray inside its
+  // own plane, so a piece can only ever move on the board it stands on. The
+  // crossing is a rule, and it is two rules: a move whose counterpart square is
+  // occupied is not legal, and a move that is played ends on the counterpart
+  // rather than where it landed.
+  const transferSpec = config.transfer || null
+  const transferPlane = transferSpec
+    ? (topology && topology.rows ? topology.rows : config.rows || 8) * (topology && topology.cols ? topology.cols : config.cols || 8)
+    : 0
+
+  // Where a cell's twin sits on the next board round, so this works for two
+  // layers and for more.
+  function twinOf(cell, board) {
+    const layers = Math.round(board.length / transferPlane) || 1
+    return (cell + transferPlane) % (transferPlane * layers)
+  }
+
+  function transferAllows(move, board) {
+    if (!transferSpec || move.to === undefined) return true
+    return board[twinOf(move.to, board)] === null
+  }
+
+  function applyMoveTransferring(inner, move, slice, full) {
+    const result = inner(move, slice, full)
+    const state = result && result.state ? result.state : result
+    if (!state || !state.board || move.to === undefined) return result
+
+    const board = state.board
+    const landed = board[move.to]
+    if (!landed) return result
+    const twin = twinOf(move.to, board)
+    if (board[twin] !== null) return result      // should not happen: filtered above
+    board[twin] = landed
+    board[move.to] = null
+    return result
+  }
+
   function applyMoveDrowning(inner, move, slice, full) {
     const result = inner(move, slice, full)
     const state = result && result.state ? result.state : result
@@ -1889,6 +1940,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     applyMove: [
       config.checkThreshold ? applyMoveCountingChecks : null,
       drownSpec ? applyMoveDrowning : null,
+      transferSpec ? applyMoveTransferring : null,
       goalRule && goalRule.rotation ? applyMoveTrackingRotation : null,
     ].filter(Boolean).reduce((inner, wrap) =>
       (move, slice, full) => wrap(inner, move, slice, full), applyMove),

@@ -192,3 +192,30 @@ describe('topology-grid', () => {
     })
   })
 })
+
+// engine#160 / reported from the play page. A file past the twenty-sixth needs
+// two letters. js/play-cells.js kept its own 26-character alphabet and read one
+// character back, so on Taikyoku Shogi - 36 files wide - every column past `z`
+// produced the id "undefined11", and hovering "aa11" reported an empty square
+// while the board plainly drew a piece there. The labelling belongs to
+// packages/core and is asked for rather than repeated.
+describe('files past the twenty-sixth', () => {
+  it('labels and reads back every column of a 36-wide board', async () => {
+    const { createCellAddressing } = await import('../../../../js/play-cells.js')
+    const cells = createCellAddressing({ rows: 36, cols: 36 })
+    for (let i = 0; i < 36 * 36; i += 37) {
+      const id = cells.toId(i)
+      expect(id).not.toMatch(/undefined/)
+      expect(cells.toIndex(id)).toBe(i)
+    }
+  })
+
+  it('still reads an ordinary board the way it always did', async () => {
+    const { createCellAddressing } = await import('../../../../js/play-cells.js')
+    const cells = createCellAddressing({ rows: 8, cols: 8 })
+    expect(cells.toId(0)).toBe('a8')
+    expect(cells.toId(63)).toBe('h1')
+    expect(cells.toIndex('e4')).toBe(cells.toIndex(cells.toId(cells.toIndex('e4'))))
+    expect(cells.toId(cells.toIndex('e4'))).toBe('e4')
+  })
+})

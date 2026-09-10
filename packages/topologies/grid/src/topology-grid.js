@@ -508,8 +508,25 @@ export function createGridTopology(config) {
   }
 
   function parsePosition(notation, vocabulary) {
+    // A layered board is described one plane at a time - Alice Chess writes its
+    // two boards as two FENs - so each is parsed into its own plane and laid
+    // end to end. One FEN on a layered board fills the first plane and leaves
+    // the rest empty, which is what a variant that starts everything on one
+    // board wants.
+    if (Array.isArray(notation)) {
+      const all = new Array(layers * plane).fill(null)
+      if (notation.length > layers) {
+        throw new Error(`Setup has ${notation.length} planes but the topology declares ${layers} layers.`)
+      }
+      notation.forEach((text, layer) => {
+        const one = parsePosition(text, vocabulary)
+        for (let i = 0; i < plane; i++) all[layer * plane + i] = one[i]
+      })
+      return all
+    }
+
     const symbolMap = buildSymbolMap(vocabulary)
-    const cells = new Array(rows * cols).fill(null)
+    const cells = new Array(layers > 1 ? layers * plane : rows * cols).fill(null)
     const rowStrings = notation.split(' ')[0].split('/')
     const isCommaSeparated = rowStrings.some(r => r.includes(','))
 

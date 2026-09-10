@@ -1,5 +1,12 @@
-const STANDARD_ALPHA = 'abcdefghijklmnopqrstuvwxyz'
-const GO_ALPHA = 'abcdefghjklmnopqrst'
+import { fileLabel, fileIndex, intersectionLabel, intersectionIndex, splitCellId } from '../packages/core/index.js'
+
+// A file past the twenty-sixth needs two letters, and this file used to index a
+// 26-character string and read one character back. On Taikyoku Shogi, 36 files
+// wide, every column past `z` produced the id "undefined11" and the lookup for
+// "aa11" read the file as `a` and the rank as NaN - so the board drew pieces on
+// squares the page said were empty and would not let anyone select. The
+// labelling lives in packages/core, which counts in bijective base-26 in both
+// directions; this now asks it rather than keeping a second opinion.
 
 /**
  * Cell addressing for grid-based topologies (chess, go, draughts, etc.)
@@ -14,7 +21,8 @@ export function createCellAddressing({ rows, cols, idStyle, flipped = false }) {
     )
   }
 
-  const alpha = idStyle === 'go' ? GO_ALPHA : STANDARD_ALPHA
+  const toFile = idStyle === 'go' ? intersectionLabel : fileLabel
+  const fromFile = idStyle === 'go' ? intersectionIndex : fileIndex
 
   function visualIndex(logicalIdx) {
     if (!flipped) return logicalIdx
@@ -35,14 +43,16 @@ export function createCellAddressing({ rows, cols, idStyle, flipped = false }) {
     const r = Math.floor(vi / cols)
     const c = vi % cols
     if (c < 0 || c >= cols || r < 0 || r >= rows) return null
-    return `${alpha[c]}${rows - r}`
+    return `${toFile(c)}${rows - r}`
   }
 
   function toIndex(id) {
-    if (id == null || id.length < 2) return -1
-    const c = alpha.indexOf(id[0])
-    if (c < 0) return -1
-    const r = rows - parseInt(id.slice(1), 10)
+    if (id == null || String(id).length < 2) return -1
+    const parts = splitCellId(id)
+    if (!parts) return -1
+    const c = fromFile(parts.file)
+    if (c < 0 || c >= cols) return -1
+    const r = rows - parts.rank
     if (r < 0 || r >= rows) return -1
     const vi = r * cols + c
     return logicalFromVisual(vi)
