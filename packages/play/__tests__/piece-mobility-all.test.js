@@ -28,6 +28,15 @@ const KNOWN_INERT = {
   // "You MUST move the weakest piece type that has a legal move." A Rook only
   // moves once nothing weaker can, which a bounded random playout rarely reaches.
   weak: ['rook'],
+
+  // The dark spirit steps one square orthogonally RIGHT and one square
+  // diagonally BACKWARD-LEFT, and nothing else. It starts on the back rank, so
+  // the backward diagonal is off the board and the only square it has is
+  // occupied by its own gold general until that gold moves. Two squares is the
+  // whole piece: it is one of the pair - with the deva - that is nearly frozen
+  // until promoted, which is what makes their promotions (Buddhist Spirit and
+  // Teaching King) the strongest pieces in the game.
+  'maka-dai-dai-shogi': ['dark_spirit'],
 }
 
 let rulesAvailable = true

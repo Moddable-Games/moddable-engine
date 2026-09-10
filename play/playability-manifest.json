@@ -1901,6 +1901,15 @@
   {
     "family": "shogi",
     "familyLabel": "Shogi",
+    "variant": "maka-dai-dai-shogi",
+    "key": "maka-dai-dai-shogi",
+    "label": "Maka-Dai-Dai Shogi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "minishogi",
     "key": "minishogi",
     "label": "Minishogi",

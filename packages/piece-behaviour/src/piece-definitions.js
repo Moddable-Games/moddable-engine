@@ -515,9 +515,16 @@ export function areaMove(dirs, opts = {}) {
   // capture", so nothing is taken along the way and the squares passed over
   // must be empty. That needs no `via` - there is no second victim to record -
   // which is why a quiet walk may be any number of legs while a capturing one
-  // may be two.
-  if (steps > 2 && !quiet) {
-    throw new Error(`areaMove: ${steps} capturing steps is not modelled; a move carries one intermediate square`)
+  // may be two - unless it runs in a straight line, where the squares it passes
+  // are implied by where it started and stopped and `via` can carry the list.
+  // Maka-Dai-Dai's lion dog "can make a three-step lion move along any ONE of
+  // the eight orthogonal or diagonal directions". A three-leg move that could
+  // TURN would need the whole route recorded, and that is not modelled.
+  if (steps > 2 && !quiet && !sameLine) {
+    throw new Error(
+      `areaMove: ${steps} capturing steps that may change direction is not modelled; ` +
+      `a straight run records its route, a turning one would need more than a route`
+    )
   }
 
   // One step in each direction, resolved offset by offset so that an offset
@@ -533,6 +540,40 @@ export function areaMove(dirs, opts = {}) {
       if (target !== undefined) out.push({ pos: target, dir: i })
     }
     return out
+  }
+
+  // A run of up to `steps` steps along one direction, taking whatever it passes.
+  // It may stop on any of them and may come back the way it went, which is the
+  // lion dog's igui and its retreat to the first square. The squares it ate are
+  // listed in `via`.
+  function straightRun(topology, from, board) {
+    const out = new Map()
+    const add = (to, route) => {
+      const eaten = route.filter(p => board[p])
+      const key = `${to}|${eaten.join(',')}`
+      if (!out.has(key)) out.set(key, eaten.length ? { from, to, via: eaten } : { from, to })
+    }
+
+    for (const start of neighbours(topology, from)) {
+      let cursor = from
+      const route = []
+      for (let leg = 0; leg < steps; leg++) {
+        const next = neighbours(topology, cursor).find(n => n.dir === start.dir)
+        if (!next) break
+        const cell = board[next.pos]
+        if (cell && cell.friendly) break
+        add(next.pos, route.slice())
+        route.push(next.pos)
+        cursor = next.pos
+      }
+      // "capture a piece on the first and second square, and then retreat to
+      // the first square", and plain igui off the first.
+      for (let taken = 1; taken <= Math.min(2, route.length); taken++) {
+        add(from, route.slice(0, taken))
+      }
+    }
+    out.delete(`${from}|`)
+    return [...out.values()]
   }
 
   // Up to `steps` single steps through empty squares, stopping the moment it
@@ -574,6 +615,7 @@ export function areaMove(dirs, opts = {}) {
 
     genMoves(topology, from, board) {
       if (quiet) return quietWalk(topology, from, board)
+      if (sameLine && steps > 2) return straightRun(topology, from, board)
 
       // Keyed by destination and by what was taken on the way, because two
       // routes to the same square are the same move unless one of them eats
@@ -742,6 +784,38 @@ export function rangeCapture(dirs, opts = {}) {
   }
 }
 
+/**
+ * Betza's `U`, the universal leaper: "a piece which can jump to any square on
+ * the board except the one that it is on."
+ *
+ * Maka-Dai-Dai's Emperor, which "can jump to any empty square on the board".
+ * It asks the topology which squares exist rather than computing them, so it
+ * works on any board including one with holes in it.
+ */
+export function universalLeaper(opts = {}) {
+  const { quiet = false } = opts
+  return {
+    type: 'universal',
+    quiet,
+    genMoves(topology, from, board) {
+      const cells = topology.getAllCells ? topology.getAllCells() : board.map((_, i) => i)
+      const moves = []
+      for (const pos of cells) {
+        if (pos === from) continue
+        const cell = board[pos]
+        if (cell && cell.friendly) continue
+        // The Emperor "can jump to any EMPTY square", so it does not capture.
+        if (cell && quiet) continue
+        moves.push(cell ? { from, to: pos, capture: true } : { from, to: pos })
+      }
+      return moves
+    },
+    attacks(topology, from, target, board) {
+      return !quiet && target !== from
+    },
+  }
+}
+
 export function locust(dirs) {
   return {
     type: 'locust',
@@ -847,6 +921,7 @@ function buildPrimitive(spec, resolve) {
   if (spec.type === 'leaper') return leaper(spec.offsets || spec.dirs, { lame: spec.lame })
   if (spec.type === 'rider') return rider(spec.dirs, { maxSteps: spec.maxSteps, minSteps: spec.minSteps })
   if (spec.type === 'hopper') return hopper(spec.dirs, { captureSlide: spec.captureSlide, moveSlide: spec.moveSlide })
+  if (spec.type === 'universal') return universalLeaper({ quiet: spec.quiet })
   if (spec.type === 'rangeCapture') return rangeCapture(spec.dirs || spec.offsets, { ranks: spec.ranks })
   if (spec.type === 'shoot') return shoot(spec.dirs || spec.offsets)
   if (spec.type === 'area') return areaMove(spec.dirs || spec.offsets, { steps: spec.steps, sameLine: spec.sameLine, quiet: spec.quiet })

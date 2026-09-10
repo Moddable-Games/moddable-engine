@@ -2787,7 +2787,7 @@
     "topology": "grid",
     "svg": "svgs/shogi--maka-dai-dai-shogi.svg",
     "rulesUrl": "shogi/variants/maka-dai-dai-shogi/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "shogi",

@@ -102,6 +102,15 @@ const RANGED = /^([fblrvs]*)([WFKRBQNDA])\((?:>=(\d+)|(\d+)<=n<=(\d+))\)/
 // steer the continuation, and the atom after `a` is shared by both.
 const CHAIN = /^([fblrs]*)\[([fblrvsm]*)([WFKRBQNDA])?a([fblrvsm]*)(\d*)([WFKRBQNDA])\]/
 const SHOOT = /^c?x([fblrvs]*)([WFKRBQNDA])/
+// `RmaR` and `BmaB`: move as a rook (or bishop), then again perpendicular.
+// Maka-Dai-Dai's hook mover and Capricorn, "any number of free squares in one
+// of the four orthogonal directions, then any number of free squares in a
+// perpendicular direction".
+const HOOK = /^([RB])ma\1/
+// `[fl]` `[fr]` `[bl]` `[br]` name one diagonal each, and stack: the left
+// chariot's `[fl][br]B` is a bishop on two opposite diagonals only.
+const CORNER = /^((?:\[(?:fl|fr|bl|br)\])+)([WFKRBQNDA])/
+const CORNERS = { fl: [-1, -1], fr: [-1, 1], bl: [1, -1], br: [1, 1] }
 // `cpp` - capture-only, hopping with no limit on how many pieces.
 const RANGE = /^cpp([fblrvs]*)([WFKRBQNDA])/
 
@@ -135,6 +144,40 @@ export function betzaToSpec(notation) {
     // dabbaba then a king step, `D[aK]` a dabbaba OR twice as a king. Chu
     // Shogi's Lion is `NAD[aK]`: a jump to any square two away, or two King
     // steps that may each capture.
+    // `U` is the universal leaper - any square on the board.
+    if (rest[0] === 'U') {
+      rest = rest.slice(1)
+      specs.push({ type: 'universal' })
+      continue
+    }
+
+    const hook = HOOK.exec(rest)
+    if (hook) {
+      rest = rest.slice(hook[0].length)
+      specs.push({
+        type: 'bent',
+        first: hook[1] === 'R' ? 'orthogonal' : 'diagonal',
+        firstSteps: 'any',
+        second: 'perpendicular',
+        minSecondLeg: 0,
+      })
+      continue
+    }
+
+    const corner = CORNER.exec(rest)
+    if (corner) {
+      rest = rest.slice(corner[0].length)
+      const picked = (corner[1].match(/fl|fr|bl|br/g) || []).map(k => CORNERS[k])
+      const atom = corner[2]
+      if (!'FBQ'.includes(atom)) {
+        throw new Error(`Betza: "${corner[0]}" in "${source}" - a named corner applies to a diagonal atom`)
+      }
+      specs.push(SLIDERS.has(atom)
+        ? { type: 'rider', dirs: picked, directional: true }
+        : { type: 'leaper', offsets: picked, directional: true })
+      continue
+    }
+
     // `cpp` is a range jump: it slides, may pass over pieces, and only to
     // capture. Which pieces it may pass over is a property of the game rather
     // than of the notation, so the rank table is attached by the plugin.
