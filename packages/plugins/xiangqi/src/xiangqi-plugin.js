@@ -6,7 +6,7 @@ import { fromConfig } from '../../../piece-behaviour/index.js'
 export const CONFIG_KEYS = new Set([
   'advancement', 'cannonJumpToMove', 'cols', 'flyingGeneralRule', 'hasRiver', 'palace',
   'passAllowed', 'pieceMoves', 'playerCount', 'promotionZone', 'river', 'rows', 'royalType',
-  'bikjangDraw', 'covered', 'firstMoveRows', 'palaceDiagonals', 'pawnAdvanceWin', 'setup', 'turnLogic', 'vocabulary', 'winCondition',
+  'bikjangDraw', 'capture', 'covered', 'firstMoveRows', 'royal', 'palaceDiagonals', 'pawnAdvanceWin', 'setup', 'turnLogic', 'vocabulary', 'winCondition',
 ])
 
 
@@ -150,8 +150,17 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
   //
   // Storing it the other way round is what the first cut did, and `toFen`
   // published the entire hidden army in the opening position.
+  // A cell is face down when its type says so, and nowhere else. It carried a
+  // `covered: true` flag beside the type at first, and a board loaded from a
+  // FEN had the type without the flag - so every rule written against the flag
+  // silently stopped applying to a loaded position, and a face-down piece
+  // could be captured.
+  function isCovered(piece) {
+    return !!piece && piece.type === COVERED_TYPE
+  }
+
   function effectiveType(piece) {
-    return piece.covered && piece.homeType ? piece.homeType : piece.type
+    return isCovered(piece) && piece.homeType ? piece.homeType : piece.type
   }
 
   // A revealed Advisor or Elephant is freed from the palace and the river -
@@ -159,8 +168,25 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
   // been turned face up. A COVERED piece on an Advisor square is a "fake
   // Advisor" and is confined like one.
   function constraintFor(piece) {
-    if (!piece.covered && UNCONSTRAINED_WHEN_REVEALED.has(piece.type)) return null
+    if (!isCovered(piece) && UNCONSTRAINED_WHEN_REVEALED.has(piece.type)) return null
     return getConstraint(effectiveType(piece))
+  }
+
+  // Banqi covers everything, and a face-down piece there has no COLOUR either:
+  // all 32 pieces are shuffled onto the board and the first flip of the game
+  // decides who commands which side. So a covered cell is owned by nobody
+  // (owner -1, the same convention Duck Chess uses for its blocker) and the
+  // truth it carries is a type AND a colour.
+  const OWNERLESS = -1
+  const coveredIsOwnerless = !!(coveredSpec && coveredSpec.ownerless)
+  const flipIsAMove = !!(coveredSpec && coveredSpec.flip)
+  const coveredCapturable = !coveredSpec || coveredSpec.capturable !== false
+
+  // Which seat commands which colour. Null until the first flip settles it;
+  // after that `colourSeat[colour]` is the seat that owns pieces of it.
+  function seatOfColour(slice, colour) {
+    const map = slice.colourSeat
+    return map ? map[colour] : OWNERLESS
   }
 
   function shuffled(list, rng) {
@@ -176,7 +202,38 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
   // down; `covered.homeSetup` says what normally stands on each square. Both
   // are consumed - a setup that declared one and not the other would be the
   // silent-wrong-game case all over again.
+  // Banqi's deal: a declared pool of pieces per colour, shuffled across every
+  // covered square. There is no home array because there are no home squares -
+  // nothing about the board tells you what stands on it.
+  function dealFromPool(board, rng) {
+    const squares = []
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] && board[i].type === COVERED_TYPE) squares.push(i)
+    }
+    const bag = []
+    for (const colour of [0, 1]) {
+      for (const [type, count] of Object.entries(coveredSpec.pool)) {
+        for (let n = 0; n < count; n++) bag.push({ type, colour })
+      }
+    }
+    if (bag.length !== squares.length) {
+      throw new Error(
+        `covered.pool deals ${bag.length} pieces but the setup has ${squares.length} face-down squares.`)
+    }
+    const dealt = [...board]
+    shuffled(bag, rng).forEach((piece, n) => {
+      dealt[squares[n]] = {
+        type: COVERED_TYPE,
+        trueType: piece.type,
+        trueColour: piece.colour,
+        owner: OWNERLESS,
+      }
+    })
+    return dealt
+  }
+
   function dealCovered(board, rng) {
+    if (coveredSpec.pool) return dealFromPool(board, rng)
     const home = boardFromSetup(coveredSpec.homeSetup)
     const byOwner = new Map()
     for (let i = 0; i < board.length; i++) {
@@ -192,10 +249,43 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
     for (const [owner, cells] of byOwner) {
       const pool = shuffled(cells.map(i => home[i].type), rng)
       cells.forEach((cellIdx, n) => {
-        dealt[cellIdx] = { type: COVERED_TYPE, trueType: pool[n], homeType: home[cellIdx].type, covered: true, owner }
+        dealt[cellIdx] = { type: COVERED_TYPE, trueType: pool[n], homeType: home[cellIdx].type, owner }
       })
     }
     return dealt
+  }
+
+  // Capture decided by comparing the two pieces rather than by asking how the
+  // attacker moves. Banqi ranks its pieces and lets a piece take an equal or
+  // lower one; Dou Shou Qi (#157) ranks eight animals the same way, which is
+  // why this is declared rather than written into either.
+  //
+  // The order alone is never the whole rule - Banqi's Soldier takes the
+  // General and the General may not take the Soldier - so the exceptions are
+  // declared beside it and are checked first.
+  const captureSpec = config.capture || null
+  const rankOf = new Map()
+  if (captureSpec && Array.isArray(captureSpec.order)) {
+    captureSpec.order.forEach((type, i) => rankOf.set(type, captureSpec.order.length - i))
+  }
+  const unranked = new Set((captureSpec && captureSpec.unranked) || [])
+  const pairKey = (a, v) => `${a}>${v}`
+  const allowPairs = new Set(((captureSpec && captureSpec.allow) || []).map(([a, v]) => pairKey(a, v)))
+  const denyPairs = new Set(((captureSpec && captureSpec.deny) || []).map(([a, v]) => pairKey(a, v)))
+
+  function captureAllowed(attacker, victim) {
+    if (!captureSpec || captureSpec.by !== 'rank') return true
+    const a = attacker.type
+    const v = victim.type
+    if (denyPairs.has(pairKey(a, v))) return false
+    if (allowPairs.has(pairKey(a, v))) return true
+    // An unranked attacker takes anything; an unranked VICTIM can be taken by
+    // anything, since it sits outside the order in both directions.
+    if (unranked.has(a) || unranked.has(v)) return true
+    const ar = rankOf.get(a)
+    const vr = rankOf.get(v)
+    if (ar === undefined || vr === undefined) return true
+    return ar >= vr
   }
 
   function buildViewBoard(board, playerIndex) {
@@ -309,9 +399,21 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
     // landed on, so the move has to carry it. Dropping it moved the piece and
     // left the victim standing.
     const carry = (m) => (m.captured !== undefined ? { from: m.from, to: m.to, captured: m.captured } : { from: m.from, to: m.to })
-    if (!constraint) return drawn.map(carry)
 
-    return drawn
+    // Whether a face-down piece can be taken is a rule the variant states, not
+    // one to assume either way. Jieqi: "a covered piece may be captured by an
+    // opponent's piece in the normal way." Banqi: "a face-down piece cannot be
+    // captured or moved. It can only be flipped."
+    const takeable = drawn.filter(m => {
+      const victim = board[m.to]
+      if (!victim) return true
+      if (isCovered(victim)) return coveredCapturable
+      return captureAllowed(piece, victim)
+    })
+
+    if (!constraint) return takeable.map(carry)
+
+    return takeable
       .filter(m => {
         const [tr, tc] = rowCol(m.to)
         if (constraint === 'palace') return inPalace(tr, tc, playerIndex)
@@ -479,7 +581,7 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
       const board = slice.board.map(cell => {
         if (!cell || cell.trueType === undefined) return cell
         changed = true
-        const { trueType, ...seen } = cell
+        const { trueType, trueColour, ...seen } = cell
         return seen
       })
       return changed ? { ...slice, board } : slice
@@ -496,7 +598,11 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
       if (coveredSpec) board = dealCovered(board, request('core.rng'))
 
       for (let i = 0; i < board.length; i++) {
-        const cellType = board[i] ? effectiveType(board[i]) : null
+        // A piece that is face down with no home square does not move at all -
+        // in Banqi it can only be turned over - so there is no movement to
+        // declare for it and nothing to check.
+        const immobileWhileCovered = isCovered(board[i]) && !board[i].homeType
+        const cellType = board[i] && !immobileWhileCovered ? effectiveType(board[i]) : null
         if (cellType && cellType !== 'soldier' && !PIECE_MOVES[cellType]) {
           throw new Error(`Unmapped piece type "${cellType}" at cell ${i}. Declare its movement in pieceMoves or remove it from setup.`)
         }
@@ -516,6 +622,7 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
     validateMove(move, slice, full) {
       if (config.passAllowed && move.action === 'pass') return true
       const legal = this.getLegalMoves(slice, full)
+      if (move.action === 'flip') return legal.some(m => m.action === 'flip' && m.to === move.to)
       return legal.some(m => m.from === move.from && m.to === move.to)
     },
 
@@ -524,11 +631,32 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
       if (move.action === 'pass') {
         return config.bikjangDraw ? { ...slice, _bikjang: generalsFacing(slice.board) } : slice
       }
+      // Turning a piece over. The first flip of the game also decides the
+      // colours: whoever makes it commands the colour that comes up, and the
+      // opponent commands the other. Until then no seat owns anything.
+      if (move.action === 'flip') {
+        const cell = slice.board[move.to]
+        if (!isCovered(cell)) return slice
+        if (cell.trueType === undefined) {
+          throw new Error(
+            `Cell ${move.to} is face down but carries no identity. A FEN records what a seat can see, `
+            + 'so it cannot restore the hidden deal - resume from a full snapshot instead.')
+        }
+        const flipper = full.__players.currentIndex
+        const colourSeat = slice.colourSeat
+          || (coveredSpec.colourFromFirstFlip
+            ? (cell.trueColour === 0 ? [flipper, 1 - flipper] : [1 - flipper, flipper])
+            : [0, 1])
+        const board = [...slice.board]
+        board[move.to] = { type: cell.trueType, owner: colourSeat[cell.trueColour] }
+        return { ...slice, board, colourSeat }
+      }
+
       const board = [...slice.board]
       const moving = board[move.from]
       // Making the move is what turns it face up: it travelled as the square's
       // piece and lands as itself.
-      board[move.to] = moving && moving.covered ? { type: moving.trueType, owner: moving.owner } : moving
+      board[move.to] = isCovered(moving) ? { type: moving.trueType, owner: moving.owner } : moving
       board[move.from] = null
       if (move.captured !== undefined && move.captured !== null) board[move.captured] = null
       return { ...slice, board }
@@ -537,6 +665,15 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
     getLegalMoves(slice, full) {
       const playerIndex = full.__players.currentIndex
       const allMoves = []
+
+      // Turning a piece over is a move, and before the first flip it is the
+      // only one there is - nobody owns anything yet.
+      if (flipIsAMove) {
+        for (let i = 0; i < slice.board.length; i++) {
+          const cell = slice.board[i]
+          if (isCovered(cell)) allMoves.push({ action: 'flip', to: i })
+        }
+      }
 
       for (let i = 0; i < slice.board.length; i++) {
         const piece = slice.board[i]
@@ -555,7 +692,10 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
       const inBikjang = config.bikjangDraw && generalsFacing(slice.board)
 
       return allMoves.filter(m => {
-        if (m.action === 'pass') return true
+        if (m.action === 'pass' || m.action === 'flip') return true
+        // Nothing is royal in Banqi: losing the General loses a piece, not the
+        // game, so there is no check to move out of or into.
+        if (config.royal === false) return true
         const testBoard = [...slice.board]
         testBoard[m.to] = testBoard[m.from]
         testBoard[m.from] = null
@@ -589,6 +729,15 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
             if (!capturable) return seat
           }
         }
+      }
+
+      // "A player who has no legal move loses." Banqi has no royal piece, so
+      // this is the whole win condition rather than a stalemate rule beside
+      // one - and it is checked against the player about to move, which after
+      // a move and before the turn advances is the opponent.
+      if (config.winCondition === 'no-moves') {
+        const oppFull = { __players: { currentIndex: opponent } }
+        return this.getLegalMoves(slice, oppFull).length === 0 ? playerIndex : null
       }
 
       if (findGeneral(slice.board, opponent) === -1) {

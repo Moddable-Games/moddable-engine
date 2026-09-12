@@ -81,6 +81,14 @@ const moveModel = {
       }
     }
 
+    // A legal move that names a cell and no origin is an action ON that cell
+    // rather than a move of a piece FROM it - turning a face-down piece over in
+    // Banqi, where the opening position offers nothing else. It commits on the
+    // click, because there is nothing to select first. Asked by shape, so a
+    // later game with its own single-cell action needs no change here.
+    const direct = moves.filter(m => m.from === undefined && m.to !== undefined && sameCell(m.to, pos))
+    if (direct.length === 1) return { type: 'move', move: direct[0] }
+
     const owner = getOwnerAt(pos)
     if (owner !== null && owner === playerIndex && moves.some(m => sameCell(m.from, pos))) {
       return { type: 'select', pos }

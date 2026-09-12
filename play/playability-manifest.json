@@ -1514,6 +1514,15 @@
   {
     "family": "go",
     "familyLabel": "Go",
+    "variant": "phantom-go",
+    "key": "phantom-go",
+    "label": "Phantom Go",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "go",
+    "familyLabel": "Go",
     "variant": "rengo",
     "key": "rengo",
     "label": "Rengo",
@@ -2003,6 +2012,15 @@
     "variant": "yari-shogi",
     "key": "yari-shogi",
     "label": "Yari Shogi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "xiangqi",
+    "familyLabel": "Xiangqi",
+    "variant": "banqi",
+    "key": "banqi",
+    "label": "Banqi (Half Chess)",
     "group": "Other",
     "playable": true
   },

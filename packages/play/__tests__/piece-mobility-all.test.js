@@ -105,6 +105,15 @@ function inertTypes(slug, family = 'chess') {
       for (const move of moves) {
         const piece = board[move.from]
         if (piece && piece.type) moved.add(piece.type)
+        // Not every legal action moves a piece from somewhere. Banqi's only
+        // opening action is to turn a face-down piece over, which has a target
+        // and no origin - and a piece that can be flipped is being exercised,
+        // not stuck. Asked by shape rather than by naming the variant, so a
+        // later game with its own no-origin action is covered too.
+        if (move.from === undefined && move.to !== undefined) {
+          const target = board[move.to]
+          if (target && target.type) moved.add(target.type)
+        }
       }
       game.applyMove(moves[(ply * 17 + seed * 7) % moves.length])
     }

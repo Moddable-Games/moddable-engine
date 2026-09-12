@@ -33,14 +33,14 @@ describe('the deal', () => {
     const pieces = board.filter(Boolean)
     expect(pieces).toHaveLength(32)
     expect(pieces.filter(c => c.type === 'general')).toHaveLength(2)
-    expect(pieces.filter(c => c.covered)).toHaveLength(30)
-    expect(pieces.filter(c => c.type === 'general' && c.covered)).toEqual([])
+    expect(pieces.filter(c => c.type === 'covered')).toHaveLength(30)
+    expect(pieces.filter(c => c.type === 'general' && c.trueType !== undefined)).toEqual([])
   })
 
   it('deals each side exactly the pieces it should own, no more and no fewer', () => {
     const board = slice(game(7)).board
     for (const owner of [0, 1]) {
-      const dealt = board.filter(c => c && c.covered && c.owner === owner).map(c => c.trueType).sort()
+      const dealt = board.filter(c => c && c.type === 'covered' && c.owner === owner).map(c => c.trueType).sort()
       const expected = ['advisor', 'advisor', 'cannon', 'cannon', 'chariot', 'chariot',
         'elephant', 'elephant', 'horse', 'horse',
         'soldier', 'soldier', 'soldier', 'soldier', 'soldier'].sort()
@@ -52,13 +52,13 @@ describe('the deal', () => {
     const board = slice(game(7)).board
     const home = homeTypes()
     board.forEach((cell, i) => {
-      if (cell && cell.covered) expect(cell.homeType).toBe(home[i])
+      if (cell && cell.type === 'covered') expect(cell.homeType).toBe(home[i])
     })
   })
 
   it('actually shuffles: most pieces are not what their square says', () => {
     const board = slice(game(7)).board
-    const covered = board.filter(c => c && c.covered)
+    const covered = board.filter(c => c && c.type === 'covered')
     const misplaced = covered.filter(c => c.trueType !== c.homeType)
     expect(misplaced.length).toBeGreaterThan(0)
   })
@@ -117,10 +117,10 @@ describe('moving turns a piece face up', () => {
     const before = slice(g).board
     const move = g.getLegalMoves()[0]
     const truth = before[move.from].trueType
-    expect(before[move.from].covered).toBe(true)
+    expect(before[move.from].type).toBe('covered')
     g.applyMove(move)
     const after = slice(g).board
-    expect(after[move.to].covered).toBeFalsy()
+    expect(after[move.to].type).not.toBe('covered')
     expect(after[move.to].type).toBe(truth)
     expect(after[move.from]).toBeNull()
   })
@@ -145,8 +145,7 @@ describe('what a seat may see', () => {
     for (const seat of [0, 1]) {
       const seen = g.viewForSeat(seat).xiangqi.board
       seen.forEach((cell, i) => {
-        if (!cell || !cell.covered) return
-        expect(cell.type).toBe('covered')
+        if (!cell || cell.type !== 'covered') return
         expect(cell.trueType).toBeUndefined()
         expect(truth[i].trueType).toBeDefined()
       })
@@ -157,19 +156,19 @@ describe('what a seat may see', () => {
     const g = game(3)
     const seen = g.viewForSeat(0).xiangqi.board
     expect(seen.filter(Boolean)).toHaveLength(32)
-    expect(seen.filter(c => c && c.covered).every(c => c.homeType)).toBe(true)
+    expect(seen.filter(c => c && c.type === 'covered').every(c => c.homeType)).toBe(true)
   })
 
   it('the hidden army does not survive serialisation', () => {
     const g = game(3)
     const wire = JSON.stringify(g.viewForSeat(0))
     const truth = slice(g).board
-    const hiddenSoldiers = truth.filter(c => c && c.covered && c.trueType === 'soldier').length
+    const hiddenSoldiers = truth.filter(c => c && c.type === 'covered' && c.trueType === 'soldier').length
     expect(hiddenSoldiers).toBeGreaterThan(0)
     // 'soldier' may legitimately appear as a homeType, so count instead: the
     // view must contain no more soldier mentions than there are soldier HOME
     // squares, which is the public information.
-    const homeSoldiers = truth.filter(c => c && c.covered && c.homeType === 'soldier').length
+    const homeSoldiers = truth.filter(c => c && c.type === 'covered' && c.homeType === 'soldier').length
     const mentions = (wire.match(/"soldier"/g) || []).length
     expect(mentions).toBe(homeSoldiers)
   })
@@ -212,6 +211,6 @@ describe('ordinary Xiangqi is untouched', () => {
   it('declares no secret and covers nothing', () => {
     const g = createGameForVariant('xiangqi', 'standard')
     expect(g.hasHiddenState()).toBe(false)
-    expect(slice(g).board.filter(c => c && c.covered)).toEqual([])
+    expect(slice(g).board.filter(c => c && c.type === 'covered')).toEqual([])
   })
 })

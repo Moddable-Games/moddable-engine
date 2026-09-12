@@ -2067,7 +2067,7 @@
     "topology": "grid",
     "svg": "svgs/go--phantom-go.svg",
     "rulesUrl": "go/variants/phantom-go/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "go",
@@ -3257,7 +3257,7 @@
     "topology": "grid",
     "svg": "svgs/xiangqi--banqi.svg",
     "rulesUrl": "xiangqi/variants/banqi/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "xiangqi",

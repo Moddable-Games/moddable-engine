@@ -6,7 +6,7 @@ import { createGoPlayoutPolicy, createGoExpansionPolicy } from './playout-policy
 // which only lists the keys that carry a default value.
 export const CONFIG_KEYS = new Set([
   'allowPass', 'autoScore', 'boardSize', 'captureTarget', 'captures', 'cols', 'evaluate',
-  'handicap', 'koRule', 'komi', 'playerColours', 'positionBonus', 'prisoners', 'rows',
+  'handicap', 'hidden', 'koRule', 'komi', 'playerColours', 'positionBonus', 'prisoners', 'rows',
   'scoring', 'setup', 'suicideAllowed', 'superko', 'turnLogic', 'winCondition',
 ])
 
@@ -211,6 +211,19 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
       previousStates,
       lastPlaced: move.coord,
       lastCaptureBy: captureCount > 0 ? playerIndex : null,
+    }
+
+    // "When a capture occurs, the referee announces that a player has captured
+    // the following stones, and points out exactly which stones were captured
+    // to both players." Both, so the announcement is addressed to everyone -
+    // it is the one thing a phantom player learns for certain about the board.
+    if (hiddenSpec && captureCount > 0 && hiddenSpec.announce !== false) {
+      newSlice.announcements = announce(slice, {
+        kind: 'capture',
+        by: playerIndex,
+        stones: [...captured],
+        seats: 'all',
+      })
     }
 
     hooks.afterMove(move, newSlice, full)
@@ -423,6 +436,35 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
     return key
   }
 
+  // Phantom Go: the players sit back to back and see only their own stones. A
+  // referee keeps the master board, rules on legality without saying why, and
+  // announces captures to both. engine#155.
+  //
+  // Unlike fog-of-war chess there is nothing to draw where an opponent's stone
+  // stands: an empty point and a hidden stone are indistinguishable, which is
+  // the game. So the projection nulls the point rather than marking it, and
+  // there is no `hidden` list to leak a count from.
+  const hiddenSpec = config.hidden || null
+
+  function projectForSeat(slice, seat) {
+    if (!Array.isArray(slice.board)) return slice
+    const mine = playerColours[seat]
+    const board = slice.board.map(cell => (cell === null || cell === mine ? cell : null))
+    // The announcement log is the referee speaking. Each entry says who may
+    // hear it, and a seat is handed only its own.
+    const announcements = Array.isArray(slice.announcements)
+      ? slice.announcements.filter(a => a.seats === 'all' || (Array.isArray(a.seats) && a.seats.includes(seat)))
+      : slice.announcements
+    return { ...slice, board, announcements }
+  }
+
+  // What the referee says, appended to the slice rather than emitted, because
+  // a player who reconnects mid-game has to be able to hear it again.
+  function announce(slice, entry) {
+    const log = Array.isArray(slice.announcements) ? slice.announcements : []
+    return [...log, entry]
+  }
+
   return {
     sliceName: 'go',
     // `applyMove` returns a new slice and does not touch the one it is handed,
@@ -466,6 +508,11 @@ export function createGoPlugin(variantConfig = {}, context = {}) {
     markDead(slice, deadStones) {
       return { ...slice, deadStones }
     },
+
+    // Declared only by a variant that hides something; the registry reads the
+    // presence of this function as "this slice holds a secret", and ordinary
+    // Go holds none.
+    projectForSeat: hiddenSpec ? projectForSeat : undefined,
   }
 }
 

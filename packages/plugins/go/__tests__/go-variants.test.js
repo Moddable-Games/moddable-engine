@@ -20,7 +20,7 @@ describe('go variants', () => {
       const keys = listVariants('go').map(v => v.key).sort()
       expect(keys).toEqual([
         '13x13', '9x9', 'capture-go', 'gomoku', 'ninuki-renju',
-        'one-colour', 'rengo', 'renju', 'standard', 'stoical', 'toroidal-go',
+        'one-colour', 'phantom-go', 'rengo', 'renju', 'standard', 'stoical', 'toroidal-go',
       ])
     })
 
