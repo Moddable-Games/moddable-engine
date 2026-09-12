@@ -21,6 +21,13 @@ export function createRegistry() {
       const pluginConfig = config[plugin.sliceName] || {}
       const initialState = plugin.init(pluginConfig, { provide, request })
       store.set(plugin.sliceName, initialState, plugin.sliceName)
+      // A plugin whose slice holds something one seat knows and another does
+      // not says so here, and says how a seat sees it. The registry asks every
+      // plugin the same question and knows nothing about which games have
+      // secrets. engine#155.
+      if (typeof plugin.projectForSeat === 'function') {
+        store.declareSecret(plugin.sliceName, (slice, seat) => plugin.projectForSeat(slice, seat), plugin.sliceName)
+      }
     }
   }
 

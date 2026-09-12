@@ -203,6 +203,22 @@ export function createGameForFamily(family, opts = {}) {
       return game.topology
     },
 
+    // What a seat MAY SEE, as opposed to what is true.
+    //
+    // `getVisibility` above annotates: it is handed the whole state and returns
+    // advice about what to draw, which is why the caller ends up holding the
+    // opponent's position and being trusted not to look at it. That is a
+    // rendering rule in one process and a leak the moment a seat is a remote
+    // client. This withholds instead, and is the only shape meant to cross a
+    // boundary. engine#155.
+    viewForSeat(seat) {
+      return game.store.viewFor(seat)
+    },
+
+    hasHiddenState() {
+      return game.store.hasSecrets()
+    },
+
     get raw() {
       return game
     },

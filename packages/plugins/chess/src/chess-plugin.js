@@ -1735,6 +1735,32 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return config.visibility(slice, viewerIndex, { topology, generateMovesForPiece, allPositions, getCell })
   }
 
+  // The same knowledge, withheld instead of annotated. engine#155.
+  //
+  // `getVisibility` returns a map of what a viewer knows and leaves the caller
+  // holding the whole board - which is fine in one process and is a leak the
+  // moment a seat is a remote client, because the answer travels with the
+  // question. `projectForSeat` returns the board that seat may actually have:
+  // a square it cannot see is `null` here whether or not something stands on
+  // it, so nothing about the hidden half survives the projection.
+  //
+  // `hidden` lists the squares the seat cannot see. That is not a leak - the
+  // player can see where the fog is - and without it a renderer cannot tell an
+  // empty square from an obscured one.
+  function projectForSeat(slice, seat) {
+    if (!config.visibility) return slice
+    const knowledge = getVisibility(slice, null, seat)
+    if (!knowledge) return slice
+    const board = Array.isArray(slice.board) ? slice.board.slice() : slice.board
+    const hidden = []
+    for (const [pos, known] of knowledge) {
+      if (known === 'known') continue
+      hidden.push(pos)
+      if (Array.isArray(board)) board[pos] = null
+    }
+    return { ...slice, board, hidden }
+  }
+
   function positionKey(slice, playerIndex) {
     const board = slice.board
     const size = Array.isArray(board) ? board.length : 64
@@ -1958,6 +1984,10 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       : undefined,
     checkWinConditionOnly,
     getVisibility,
+    // Declared only by a variant that actually hides something: the registry
+    // treats the presence of this function as "this slice holds a secret", and
+    // 140 chess variants hide nothing at all.
+    projectForSeat: config.visibility ? projectForSeat : undefined,
     positionKey,
     isInCheck,
     searchMakeMove,

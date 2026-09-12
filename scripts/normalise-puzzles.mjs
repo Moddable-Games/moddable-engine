@@ -18,6 +18,8 @@
  *   position     the FEN the solver faces (setupMove ? engine(fen, setupMove) : fen)
  *   turn         'white' | 'black', the side to move in `position`
  *   variantSlug  the canonical key from play/playability-manifest.json
+ *   family       the family that slug belongs to - a slug alone is not unique,
+ *                since `standard`, `9x9` and `13x13` are each used by several
  *
  * Run with --check to verify the file on disk is up to date (exits non-zero
  * with a diff summary if it is stale). The date stamped into meta.normalised
@@ -45,7 +47,8 @@ const DATE = (DATE_ARG ? DATE_ARG.slice('--date='.length) : process.env.PUZZLE_D
 
 const PUZZLE_FILE = 'api/puzzles/index.json'
 const MANIFEST_FILE = 'play/playability-manifest.json'
-const FAMILY = 'chess'
+// Legacy records predate the `family` field and are all chess.
+const DEFAULT_FAMILY = 'chess'
 // Records in standard[] carry no `variant` — they are plain chess by definition.
 const STANDARD_VARIANT = 'standard'
 
@@ -67,24 +70,49 @@ function kebab(value) {
   return value.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
 }
 
+// kebab() splits lowercase-to-uppercase only, so a trailing ordinal stays glued
+// to the word before it ("antiKingChess2" -> "anti-king-chess2") while the
+// manifest separates it ("anti-king-chess-2"). This adds the digit-separated
+// form as a further candidate rather than changing kebab(), so every slug that
+// already resolves keeps resolving through exactly the same branch.
+function kebabOrdinal(value) {
+  return kebab(value).replace(/([a-z])(\d)/g, '$1-$2')
+}
+
 function slugCandidates(variant) {
   const stripped = variant.replace(/Chess$/, '')
-  return [...new Set([variant, kebab(variant), stripped, kebab(stripped)])].filter(Boolean)
+  return [...new Set([
+    variant,
+    kebab(variant),
+    kebabOrdinal(variant),
+    stripped,
+    kebab(stripped),
+    kebabOrdinal(stripped)
+  ])].filter(Boolean)
 }
 
 function buildSlugResolver(manifest) {
-  const keys = new Set(manifest.filter(entry => entry.family === FAMILY).map(entry => entry.key))
+  // Keys are only unique within a family: "standard" exists in nearly all of
+  // them. Resolving against a flattened set would silently map a shogi record
+  // onto the chess entry of the same name.
+  const keysByFamily = new Map()
+  for (const entry of manifest) {
+    if (!keysByFamily.has(entry.family)) keysByFamily.set(entry.family, new Set())
+    keysByFamily.get(entry.family).add(entry.key)
+  }
   const mappings = new Map()
   const unresolved = new Map()
 
-  function resolveSlug(variant) {
-    if (mappings.has(variant)) return mappings.get(variant)
+  function resolveSlug(variant, family = DEFAULT_FAMILY) {
+    const cacheKey = `${family}/${variant}`
+    if (mappings.has(cacheKey)) return mappings.get(cacheKey)
+    const keys = keysByFamily.get(family) || new Set()
     const match = slugCandidates(variant).find(candidate => keys.has(candidate))
     if (!match) {
-      unresolved.set(variant, (unresolved.get(variant) || 0) + 1)
+      unresolved.set(cacheKey, (unresolved.get(cacheKey) || 0) + 1)
       return null
     }
-    mappings.set(variant, match)
+    mappings.set(cacheKey, match)
     return match
   }
 
@@ -103,9 +131,9 @@ function turnOf(fen) {
  * removes the captured pawn, rights are revoked and the clocks advance without
  * this script knowing a single chess rule.
  */
-function positionFor(record, slug) {
+function positionFor(record, slug, family = DEFAULT_FAMILY) {
   if (!record.setupMove) return record.fen
-  return fenAfterMove(FAMILY, slug, record.fen, record.setupMove)
+  return fenAfterMove(family, slug, record.fen, record.setupMove)
 }
 
 // --- Normalisation ----------------------------------------------------------
@@ -118,12 +146,13 @@ function normalise(data) {
 
   function normaliseRecord(record, defaultVariant) {
     const variant = record.variant || defaultVariant
-    const slug = resolveSlug(variant)
+    const family = record.family || DEFAULT_FAMILY
+    const slug = resolveSlug(variant, family)
     if (!slug) return { ...record }
 
     let position
     try {
-      position = positionFor(record, slug)
+      position = positionFor(record, slug, family)
     } catch (error) {
       // A setup move the engine will not play means the record's own data is
       // inconsistent. Surface it rather than silently writing `fen` as the
@@ -135,7 +164,13 @@ function normalise(data) {
     if (record.setupMove) stats.setupApplied++
     if (position !== record.fen) stats.positionDiffers++
 
-    return { ...record, position, turn: turnOf(position), variantSlug: slug }
+    // `family` is written out, not merely defaulted in here. A slug alone does
+    // not identify a variant - `standard`, `9x9` and `13x13` are each used by
+    // more than one family - so a consumer holding only the record cannot tell
+    // which engine to load. It used to work because every consumer assumed
+    // chess, which stopped being true when the generator reached xiangqi,
+    // shogi and draughts.
+    return { ...record, family, position, turn: turnOf(position), variantSlug: slug }
   }
 
   const normalised = {

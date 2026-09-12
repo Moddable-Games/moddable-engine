@@ -27,7 +27,7 @@ import { readFileSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import '../test-helpers/setup-rules-reader.js'
-import '../../plugins/chess/index.js'
+import '../../plugins/index.js'
 import { createGameForVariant, loadFen, findLegalMove } from '../src/fen.js'
 
 /**
@@ -67,11 +67,46 @@ const SOLVABLE_VARIANTS_FLOOR = 610   // of 610 variant puzzles after quarantine
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..', '..', '..')
-const FAMILY = 'chess'
-
 const pool = JSON.parse(readFileSync(join(ROOT, 'api', 'puzzles', 'index.json'), 'utf8'))
 const manifest = JSON.parse(readFileSync(join(ROOT, 'play', 'playability-manifest.json'), 'utf8'))
-const manifestKeys = new Set(manifest.filter(entry => entry.family === FAMILY).map(entry => entry.key))
+
+// This suite used to hold `const FAMILY = 'chess'` and hand it to both the
+// manifest lookup and `createGameForVariant`. That was true of the corpus when
+// it was written and stopped being true when the generator started producing
+// xiangqi, shogi and draughts puzzles: thirteen perfectly good slugs were
+// reported as absent from the manifest because the lookup only searched chess's
+// rows, and twenty-three records were reported as "engine cannot instantiate
+// the variant" because the engine was asked for a CHESS variant called janggi.
+//
+// The manifest is the thing that knows, so ask it. A slug resolves by the key
+// chess puzzles use or by the variant name the other families use; where one
+// name is used by more than one family - `standard`, `9x9`, `13x13` - the
+// record has to say which, and `familyOf` refuses to guess.
+const familiesByName = new Map()
+function indexName(name, family) {
+  if (!familiesByName.has(name)) familiesByName.set(name, new Set())
+  familiesByName.get(name).add(family)
+}
+for (const entry of manifest) {
+  indexName(entry.key, entry.family)
+  indexName(entry.variant, entry.family)
+}
+
+const variantByKey = new Map(manifest.map(entry => [entry.key, entry.variant]))
+
+function familyOf(record) {
+  if (record.family) return record.family
+  const candidates = familiesByName.get(record.variantSlug)
+  if (candidates && candidates.size === 1) return [...candidates][0]
+  return null
+}
+
+function knownToManifest(record) {
+  const family = familyOf(record)
+  if (!family) return false
+  const candidates = familiesByName.get(record.variantSlug)
+  return Boolean(candidates && candidates.has(family))
+}
 
 const BUCKETS = [
   ['standard', pool.standard],
@@ -86,15 +121,22 @@ const LINE_ONLY_CAUSE = 'line-illegal'
 const games = new Map()
 const uninstantiable = new Map()
 
-function gameFor(slug) {
-  if (games.has(slug)) return games.get(slug)
+function gameFor(record) {
+  const family = familyOf(record)
+  const slug = variantByKey.get(record.variantSlug) || record.variantSlug
+  const cacheKey = `${family}/${slug}`
+  if (games.has(cacheKey)) return games.get(cacheKey)
   let game = null
-  try {
-    game = createGameForVariant(FAMILY, slug)
-  } catch (error) {
-    uninstantiable.set(slug, error.message)
+  if (!family) {
+    uninstantiable.set(cacheKey, `no family: "${record.variantSlug}" is used by more than one family and the record does not say which`)
+  } else {
+    try {
+      game = createGameForVariant(family, slug)
+    } catch (error) {
+      uninstantiable.set(cacheKey, error.message)
+    }
   }
-  games.set(slug, game)
+  games.set(cacheKey, game)
   return game
 }
 
@@ -104,9 +146,10 @@ function gameFor(slug) {
  * Returns { firstMove, line } where each is 'ok' | 'skipped-variant' | a cause.
  */
 function analyse(record, bucket) {
-  const game = gameFor(record.variantSlug)
+  const game = gameFor(record)
   if (!game) {
-    return { firstMove: 'skipped-variant', line: 'skipped-variant', reason: uninstantiable.get(record.variantSlug) }
+    const cacheKey = `${familyOf(record)}/${variantByKey.get(record.variantSlug) || record.variantSlug}`
+    return { firstMove: 'skipped-variant', line: 'skipped-variant', reason: uninstantiable.get(cacheKey) }
   }
 
   try {
@@ -190,7 +233,7 @@ describe('puzzle pool schema (v2)', () => {
       })
 
       it('every variantSlug is a key in play/playability-manifest.json', () => {
-        const unknown = [...new Set(records.map(r => r.variantSlug).filter(slug => !manifestKeys.has(slug)))]
+        const unknown = [...new Set(records.filter(r => !knownToManifest(r)).map(r => r.variantSlug))]
         expect(unknown).toEqual([])
       })
     })
@@ -201,7 +244,15 @@ describe('puzzle pool legality', () => {
   // Without a moddable-rules checkout the engine cannot build a single variant
   // and every legality check below would skip its way to green.
   it('the engine can instantiate plain chess', () => {
-    expect(gameFor('standard')).not.toBeNull()
+    expect(gameFor({ family: 'chess', variantSlug: 'standard' })).not.toBeNull()
+  })
+
+  it('every record says which family it belongs to', () => {
+    // A slug alone is not an identity: `standard`, `9x9` and `13x13` are each
+    // used by several families. Records without one used to resolve by
+    // accident, because every consumer assumed chess.
+    const homeless = [...BUCKETS].flatMap(([, records]) => records.filter(r => !familyOf(r)).map(r => r.id))
+    expect(homeless).toEqual([])
   })
 
   for (const [bucket, records] of BUCKETS) {

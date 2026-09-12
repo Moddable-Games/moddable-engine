@@ -1,13 +1,13 @@
 {
-  "generated": "2026-09-10",
+  "generated": "2026-09-12",
   "pieces": 118,
   "boards": 334,
   "boardFamilies": 34,
   "tiles": 11,
-  "puzzles": 1726,
+  "puzzles": 1951,
   "puzzlesByType": {
     "standard": 1116,
-    "variants": 610
+    "variants": 835
   },
   "playableVariants": 230,
   "playableFamilies": 10,
@@ -24,7 +24,7 @@
     "xiangqi": 7
   },
   "variantPluginsByFamily": {
-    "chess": 54,
+    "chess": 55,
     "draughts": 0,
     "go": 3,
     "hex": 0,
@@ -36,7 +36,7 @@
     "xiangqi": 0
   },
   "frontmatterOnlyByFamily": {
-    "chess": 88,
+    "chess": 87,
     "draughts": 20,
     "go": 8,
     "hex": 8,
