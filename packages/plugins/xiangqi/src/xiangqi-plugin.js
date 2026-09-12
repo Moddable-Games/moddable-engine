@@ -6,7 +6,7 @@ import { fromConfig } from '../../../piece-behaviour/index.js'
 export const CONFIG_KEYS = new Set([
   'advancement', 'cannonJumpToMove', 'cols', 'flyingGeneralRule', 'hasRiver', 'palace',
   'passAllowed', 'pieceMoves', 'playerCount', 'promotionZone', 'river', 'rows', 'royalType',
-  'bikjangDraw', 'firstMoveRows', 'palaceDiagonals', 'pawnAdvanceWin', 'setup', 'turnLogic', 'vocabulary', 'winCondition',
+  'bikjangDraw', 'covered', 'firstMoveRows', 'palaceDiagonals', 'pawnAdvanceWin', 'setup', 'turnLogic', 'vocabulary', 'winCondition',
 ])
 
 
@@ -123,6 +123,81 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
     return spec ? spec.constraint || null : null
   }
 
+  // Jieqi and its relatives: a piece stands face down, and what it moves as is
+  // not what it is.
+  //
+  // Every non-royal piece is shuffled across the squares those pieces normally
+  // occupy, so the piece on a Chariot's home square is usually not a Chariot.
+  // Until it moves it must move AS a Chariot - "a Jieqi piece should do the
+  // first move as the original piece in which it is located"
+  // (pychess.org/variants/jieqi) - and making that move turns it face up, after
+  // which it moves as itself for the rest of the game.
+  //
+  // So a covered cell carries two types: `homeType`, which the square dictates
+  // and both players can read off the board, and `type`, which is the truth and
+  // which NEITHER player knows. The variant declares the arrangement rather
+  // than the plugin assuming a Xiangqi array.
+  const coveredSpec = config.covered || null
+  const COVERED_TYPE = coveredSpec ? (coveredSpec.type || 'covered') : null
+  const UNCONSTRAINED_WHEN_REVEALED = new Set(
+    (coveredSpec && coveredSpec.unconstrainedWhenRevealed) || [])
+
+  // A covered cell's `type` is the COVERED type, not the truth. That is
+  // deliberate and it is the whole safety property: every generic consumer -
+  // the FEN writer, the renderer, the piece counter - reads `type`, and each
+  // of them must see a face-down piece. The truth lives in `trueType`, which
+  // only this plugin and the store's projection know about.
+  //
+  // Storing it the other way round is what the first cut did, and `toFen`
+  // published the entire hidden army in the opening position.
+  function effectiveType(piece) {
+    return piece.covered && piece.homeType ? piece.homeType : piece.type
+  }
+
+  // A revealed Advisor or Elephant is freed from the palace and the river -
+  // the one rule relaxation the variant makes, and only for a piece that has
+  // been turned face up. A COVERED piece on an Advisor square is a "fake
+  // Advisor" and is confined like one.
+  function constraintFor(piece) {
+    if (!piece.covered && UNCONSTRAINED_WHEN_REVEALED.has(piece.type)) return null
+    return getConstraint(effectiveType(piece))
+  }
+
+  function shuffled(list, rng) {
+    const out = [...list]
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = rng ? rng.nextInt(0, i) : i
+      const swap = out[i]; out[i] = out[j]; out[j] = swap
+    }
+    return out
+  }
+
+  // Deal the true identities. The declared `setup` says WHICH squares are face
+  // down; `covered.homeSetup` says what normally stands on each square. Both
+  // are consumed - a setup that declared one and not the other would be the
+  // silent-wrong-game case all over again.
+  function dealCovered(board, rng) {
+    const home = boardFromSetup(coveredSpec.homeSetup)
+    const byOwner = new Map()
+    for (let i = 0; i < board.length; i++) {
+      const cell = board[i]
+      if (!cell || cell.type !== COVERED_TYPE) continue
+      if (!home[i]) {
+        throw new Error(`Cell ${i} is face down but covered.homeSetup puts nothing there - the two setups disagree.`)
+      }
+      if (!byOwner.has(cell.owner)) byOwner.set(cell.owner, [])
+      byOwner.get(cell.owner).push(i)
+    }
+    const dealt = [...board]
+    for (const [owner, cells] of byOwner) {
+      const pool = shuffled(cells.map(i => home[i].type), rng)
+      cells.forEach((cellIdx, n) => {
+        dealt[cellIdx] = { type: COVERED_TYPE, trueType: pool[n], homeType: home[cellIdx].type, covered: true, owner }
+      })
+    }
+    return dealt
+  }
+
   function buildViewBoard(board, playerIndex) {
     return board.map(cell => {
       if (cell === null) return null
@@ -203,13 +278,17 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
   }
 
   function generatePieceMoves(board, pos, piece, playerIndex) {
-    if (piece.type === 'soldier' && !PIECE_MOVES[piece.type]) {
+    // What it moves as, which for a face-down piece is not what it is.
+    const effType = effectiveType(piece)
+    const asPiece = effType === piece.type ? piece : { ...piece, type: effType }
+
+    if (effType === 'soldier' && !PIECE_MOVES[effType]) {
       return generateSoldierMoves(board, pos, playerIndex)
     }
 
-    const primitive = buildPieceForType(piece.type, playerIndex)
+    const primitive = buildPieceForType(effType, playerIndex)
     if (!primitive) {
-      if (piece.type === 'soldier') return generateSoldierMoves(board, pos, playerIndex)
+      if (effType === 'soldier') return generateSoldierMoves(board, pos, playerIndex)
       return []
     }
 
@@ -217,10 +296,10 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
     const viewBoard = buildViewBoard(board, playerIndex)
     const rawMoves = [
       ...primitive.genMoves(topo, pos, viewBoard),
-      ...firstMoveExtras(board, pos, piece, playerIndex),
+      ...firstMoveExtras(board, pos, asPiece, playerIndex),
     ]
 
-    const constraint = getConstraint(piece.type)
+    const constraint = constraintFor(piece)
     const drawn = rawMoves.filter(m => {
       const [fr, fc] = rowCol(m.from)
       const [tr, tc] = rowCol(m.to)
@@ -386,6 +465,26 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
     config,
     rules: ['constraint.region', 'capture.screen-jump', 'constraint.facing', 'check', 'checkmate'],
 
+    // What a seat may see. A face-down piece's true identity is known to
+    // NEITHER player - that is the variant, not a per-seat asymmetry - so the
+    // projection drops `trueType` for every seat, leaving the covered `type`
+    // and the `homeType` both players can read off the square. engine#155.
+    //
+    // Declared only when the variant actually covers something; the registry
+    // reads the presence of this function as "this slice holds a secret", and
+    // ordinary Xiangqi holds none.
+    projectForSeat: coveredSpec ? (slice, seat) => {
+      if (!Array.isArray(slice.board)) return slice
+      let changed = false
+      const board = slice.board.map(cell => {
+        if (!cell || cell.trueType === undefined) return cell
+        changed = true
+        const { trueType, ...seen } = cell
+        return seen
+      })
+      return changed ? { ...slice, board } : slice
+    } : undefined,
+
     init(pluginConfig, { request }) {
       topology = request('core.topology')
       if (topology) {
@@ -393,18 +492,20 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
         if (topology.cols) config.cols = topology.cols
       }
       const setup = pluginConfig.setup || config.setup || null
-      const board = boardFromSetup(setup)
+      let board = boardFromSetup(setup)
+      if (coveredSpec) board = dealCovered(board, request('core.rng'))
 
       for (let i = 0; i < board.length; i++) {
-        if (board[i] && board[i].type !== 'soldier' && !PIECE_MOVES[board[i].type]) {
-          throw new Error(`Unmapped piece type "${board[i].type}" at cell ${i}. Declare its movement in pieceMoves or remove it from setup.`)
+        const cellType = board[i] ? effectiveType(board[i]) : null
+        if (cellType && cellType !== 'soldier' && !PIECE_MOVES[cellType]) {
+          throw new Error(`Unmapped piece type "${cellType}" at cell ${i}. Declare its movement in pieceMoves or remove it from setup.`)
         }
       }
 
       for (const [type, def] of Object.entries(VOCABULARY)) {
         const owners = def.symbols ? Object.keys(def.symbols) : []
         const hasPlayerOwner = owners.some(o => o === '0' || o === '1')
-        if (hasPlayerOwner && type !== 'soldier' && !PIECE_MOVES[type]) {
+        if (hasPlayerOwner && type !== 'soldier' && type !== COVERED_TYPE && !PIECE_MOVES[type]) {
           throw new Error(`Vocabulary declares "${type}" but no matching entry in pieceMoves. Declare its movement or remove it from vocabulary.`)
         }
       }
@@ -424,7 +525,10 @@ export function createXiangqiPlugin(variantConfig = {}, context = {}) {
         return config.bikjangDraw ? { ...slice, _bikjang: generalsFacing(slice.board) } : slice
       }
       const board = [...slice.board]
-      board[move.to] = board[move.from]
+      const moving = board[move.from]
+      // Making the move is what turns it face up: it travelled as the square's
+      // piece and lands as itself.
+      board[move.to] = moving && moving.covered ? { type: moving.trueType, owner: moving.owner } : moving
       board[move.from] = null
       if (move.captured !== undefined && move.captured !== null) board[move.captured] = null
       return { ...slice, board }

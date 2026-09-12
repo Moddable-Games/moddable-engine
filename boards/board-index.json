@@ -3277,7 +3277,7 @@
     "topology": "grid",
     "svg": "svgs/xiangqi--jieqi.svg",
     "rulesUrl": "xiangqi/variants/jieqi/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "xiangqi",

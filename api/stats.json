@@ -9,7 +9,7 @@
     "standard": 1116,
     "variants": 835
   },
-  "playableVariants": 230,
+  "playableVariants": 231,
   "playableFamilies": 10,
   "playableByFamily": {
     "chess": 142,
@@ -21,7 +21,7 @@
     "morris": 7,
     "reversi": 3,
     "shogi": 23,
-    "xiangqi": 7
+    "xiangqi": 8
   },
   "variantPluginsByFamily": {
     "chess": 55,
@@ -45,7 +45,7 @@
     "morris": 7,
     "reversi": 3,
     "shogi": 23,
-    "xiangqi": 7
+    "xiangqi": 8
   },
   "tests": 6887,
   "testsPassing": 6881,
