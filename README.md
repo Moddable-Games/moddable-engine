@@ -168,6 +168,10 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Changelog
 
+#### 2026-09-12
+- A slice can declare that it holds something one seat knows and another does not, and say how a seat sees it. The boundary is the read: `get` and `getAll` still return the truth, because the move pipeline hands full state to every plugin, and `viewFor(seat)` is the only shape meant to cross a boundary. The alternative shape - a slice carrying public and private halves for each consumer to pick from - serialises the opponent's hand into every response and relies on the reader not looking, which is a leak that ships by default
+- Asking for a view without saying whose it is now throws. A view with no viewer is the full state, so the mistake that matters fails loudly rather than returning everything
+
 #### 2026-09-10
 - Shogi is complete but for the one variant needing a triangular topology. Taikyoku (36x36, 209 piece types), Tai (25x25, 93) and Maka-Dai-Dai (19x19, 50) all play, and every code in all three was verified against the published array position by position before any movement was attached
 - Alice Chess plays on two boards. A multi-board game is one board with a layer coordinate: every ray stays inside its own plane, and crossing is a rule rather than geometry
