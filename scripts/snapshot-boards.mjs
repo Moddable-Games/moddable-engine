@@ -30,6 +30,7 @@ const doDiff = has('--diff')
 
 let count = 0, captured = 0, skipped = 0, errors = 0
 const nullRenders = []
+const standIns = []
 let identical = 0, different = 0, missing = 0
 
 for (const { family, familyEngine, slug, meta, engine: variantEngine } of walkCorpus({ familyFilter })) {
@@ -64,11 +65,18 @@ for (const { family, familyEngine, slug, meta, engine: variantEngine } of walkCo
     }
 
     const pieceResult = attachPieceImages(resolved, gallery)
+    const drawnAsOther = new Set()
     const svg = renderFromEngine(resolved, {
       pieceImages: pieceResult.images || {},
       pieceSurfaceMap: pieceResult.surfaceMap || {},
       pieceSurface: pieceResult.surface || null,
+      onStandIn: (cell, symbol, key) => drawnAsOther.add(`${typeof symbol === 'object' ? symbol.symbol ?? symbol.type : symbol} as ${key}`),
     })
+    // A piece with no artwork of its own is drawn with the set's fallback key,
+    // which in a set of many pieces is another piece. The board looks complete
+    // and the snapshot matches, so nothing else notices (Taikyoku's mountain
+    // eagles drew as a gote Silver General).
+    if (drawnAsOther.size) standIns.push(`${family}/${slug}: ${[...drawnAsOther].sort().join(', ')}`)
     // A variant whose render returns null is invisible to every guard: the
     // render tests skip anything returning null and the playability tests skip
     // anything not marked playable, so a variant that is both is checked by
@@ -106,6 +114,11 @@ for (const { family, familyEngine, slug, meta, engine: variantEngine } of walkCo
 if (nullRenders.length) {
   console.log(`\nRendered null (checked by no other guard): ${nullRenders.length}`)
   for (const n of nullRenders) console.log(`  - ${n}`)
+}
+
+if (standIns.length) {
+  console.log(`\nDrawn with another piece's artwork: ${standIns.length}`)
+  for (const n of standIns) console.log(`  ~ ${n}`)
 }
 
 if (!doCapture && !doDiff) {

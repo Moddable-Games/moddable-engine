@@ -168,6 +168,10 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Changelog
 
+#### 2026-09-13
+- Taikyoku's left and right Mountain Eagles have their own pieces (左嶽 and 右嶽). They became two pieces when the article gave them mirror-opposite moves, and the set still drew only the old single eagle. All four fell back to a gote Silver General, so sente's pair faced the wrong way on the board, the gallery and the rulebook diagram
+- Nothing had caught it, because every check asked whether a piece resolves to an image and it did: to someone else's. The renderer now reports any piece drawn with the set's fallback artwork where the set has a piece of its own for everything else, and the snapshot run fails on one. Across all 334 boards it found these four and nothing more
+
 #### 2026-09-12
 - Banqi plays. All 32 pieces face down on half a Xiangqi board, and a face-down piece has no colour either: the first flip of the game decides who commands which side. Turning a piece over is a move, and in the opening position it is the only move there is
 - Its capture compares the two pieces rather than asking how the attacker moves - a piece takes an equal or lower rank, the Soldier takes the General and the General may not take the Soldier, and the unranked Cannon takes anything but only over a screen. Declared as a rank order with its exceptions beside it, so Dou Shou Qi's eight animals can use the same thing

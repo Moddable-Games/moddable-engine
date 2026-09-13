@@ -9,7 +9,7 @@ import { fileLabel } from '../../core/index.js'
  * and produces an SVG string.
  */
 
-import { produceLayout, buildCrossMap, pieceImageKey, pieceImageKeys, symbolToPiece } from '../../schema/index.js'
+import { produceLayout, buildCrossMap, pieceImageKey, pieceImageKeys, symbolToPiece, drawsAsStandIn } from '../../schema/index.js'
 import { parseRankRuns, readPosition } from '../../core/index.js'
 import { renderGridLayout } from '../../topologies/grid/index.js'
 import { renderGraphLayout } from '../../topologies/graph/index.js'
@@ -161,7 +161,7 @@ export function validatePieceVocabulary(resolved, gallery, images) {
       // are asked whether it can be drawn.
       const piece = symbolToPiece(String(symbol), vocabulary) || { type, owner: ownerIdx, symbol }
       const candidates = pieceImageKeys(piece)
-      if (!candidates.some(key => images[key])) {
+      if (!candidates.some(key => images[key]) || drawsAsStandIn(piece, images)) {
         missing.push(`${type}(${owner}) '${symbol}'`)
       }
     }
@@ -349,7 +349,7 @@ export function renderFromEngine(resolved, opts = {}) {
     if (opts.flipped && !effectiveRotations && resolved.pieces?.directional) {
       effectiveRotations = Object.fromEntries((resolved.players || ['white', 'black']).map(p => [p, 180]))
     }
-    parts.push(`<g pointer-events="none">${renderPiecesFromCells(displayPosition, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: effectiveRotations, getOwner, pieceDefs: opts.pieceDefs, colors, vocabulary: resolved.vocabulary || {}, pieceScale: render.pieceScale, columnDepths: render._columnDepths, cols: topo.cols, flipped: opts.flipped, rows: topo.rows })}</g>`)
+    parts.push(`<g pointer-events="none">${renderPiecesFromCells(displayPosition, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: effectiveRotations, getOwner, pieceDefs: opts.pieceDefs, colors, vocabulary: resolved.vocabulary || {}, pieceScale: render.pieceScale, columnDepths: render._columnDepths, cols: topo.cols, flipped: opts.flipped, rows: topo.rows, onStandIn: opts.onStandIn })}</g>`)
   } else if (position && Object.keys(position).length > 0) {
     parts.push(`<g pointer-events="none"></g>`)
   }
@@ -473,6 +473,9 @@ function renderPiecesFromCells(position, cells, tileSize, opts) {
     // the colour letter.
     const piece = typeof raw === 'object' ? raw : symbolToPiece(String(raw), opts.vocabulary || {})
     const imageKey = pieceImageKey(piece, pieceImages)
+    // Drawn all the same, so a board is never missing a piece, but said out
+    // loud: a piece wearing another piece's artwork looks like a correct board.
+    if (opts.onStandIn && drawsAsStandIn(piece, pieceImages)) opts.onStandIn(alg, raw, imageKey)
 
     if (pieceImages[imageKey]) {
       const x = pos.x - drawSize / 2, y = pos.y - drawSize / 2

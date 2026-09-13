@@ -60,6 +60,16 @@ describe('committed board snapshots match what the renderer produces', () => {
     expect(named.sort()).toEqual(['chess/yalta-chess', 'xiangqi/san-kwo-ki'])
     expect(named.length).toBeLessThanOrEqual(NULL_RENDER_CEILING)
   })
+
+  // A piece the set has no artwork for still resolves: the last key tried is
+  // the colour-and-stone key, which a set of many pieces also carries, as some
+  // other piece. Taikyoku's four mountain eagles shipped drawn as a gote
+  // Silver General, so sente's pair faced the wrong way, and the snapshot
+  // matched and the vocabulary check passed because an image was found.
+  it('no piece is drawn with another piece\'s artwork', () => {
+    const named = report.match(/^ {2}~ (.+)$/gm)?.map(l => l.replace('  ~ ', '')) || []
+    expect(named).toEqual([])
+  })
 })
 
 // Byte-comparison catches any change, including the intended ones, and says

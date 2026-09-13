@@ -53,6 +53,26 @@ export function pieceImageKey(piece, images) {
   return keys.find(k => images[k]) ?? keys[0] ?? null
 }
 
+// Keys a single-piece set carries. Anything beyond these means the set draws
+// more than one kind of piece.
+const SINGLE_PIECE_KEYS = new Set(['wS', 'bS', 'S', 's', 'display'])
+
+// Whether this piece would be drawn with the colour-and-stone key only because
+// nothing more specific exists. For a stone set that is the right artwork. For
+// a set of many pieces it is somebody else's artwork: Taikyoku's mountain
+// eagles had none of their own and drew as a gote Silver General, facing the
+// wrong way for sente, while every check that asked "does this resolve to an
+// image" said yes.
+export function drawsAsStandIn(piece, images) {
+  if (!piece || !images) return false
+  const keys = pieceImageKeys(piece)
+  const chosen = keys.find(k => images[k])
+  if (!chosen || chosen !== keys[keys.length - 1]) return false
+  const type = typeof piece === 'string' ? piece : piece.type
+  if (KEYED_BY_INITIAL[type] === 'S') return false
+  return Object.keys(images).some(key => !SINGLE_PIECE_KEYS.has(key))
+}
+
 // The inverse of `cellToSymbol`: given a board symbol and the vocabulary that
 // produced it, recover the type and the owner. Without the owner a symbol is
 // only half a piece, which is why the two topologies that skipped this step
