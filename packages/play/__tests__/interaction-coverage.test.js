@@ -76,7 +76,7 @@ describe('a click on a legal move produces that move', () => {
 })
 
 describe('a capture from afar is clicked on its victim', () => {
-  // Dragonchess's Dragon takes a piece on the board below without moving, so
+  // Gygax Chess's Dragon takes a piece on the board below without moving, so
   // its move lands on its own square. Matched against `to`, the only cell that
   // made it was the Dragon itself, and every victim offered the same choice.
   const model = interactionModelFor('chess')

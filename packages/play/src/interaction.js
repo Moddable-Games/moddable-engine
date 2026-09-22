@@ -28,7 +28,7 @@ function sameCell(a, b) {
 }
 
 // The cell a player clicks to make a move. Almost always where the piece
-// lands; a capture from afar lands nowhere - Dragonchess's Dragon takes a piece
+// lands; a capture from afar lands nowhere - Gygax Chess's Dragon takes a piece
 // on the board below and stays where it is - so its move is its victim's cell.
 // Asked by shape, so the next piece that captures without moving needs nothing.
 export function clickCellOf(move) {

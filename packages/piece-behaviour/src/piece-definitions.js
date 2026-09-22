@@ -82,7 +82,7 @@ export function rider(dirs, opts = {}) {
 //   'orthogonal' one unit step along the longer axis. The Xiangqi Horse (2,1)
 //                is blocked at (1,0).
 //   'plane'      a leap that also changes level, blocked where it would stand
-//                had it moved on its own level first. Dragonchess's Elemental
+//                had it moved on its own level first. Gygax Chess's Elemental
 //                rises by "one cell orthogonally and then one cell up. The
 //                intermediate cell MUST be empty."
 //   'layer'      the same leap blocked where it would stand had it changed
@@ -155,7 +155,7 @@ export function leaper(offsets, opts = {}) {
 /**
  * A quiet move to any empty cell of a region, wherever the piece stands.
  *
- * Dragonchess's Sylph, once it has dived to the middle board, "may move to
+ * Gygax Chess's Sylph, once it has dived to the middle board, "may move to
  * the cell directly above it OR any empty one of the six home cells that any
  * friendly Sylph occupied at the start of the game". The destinations are fixed
  * cells rather than offsets from the piece, so no leap describes them.

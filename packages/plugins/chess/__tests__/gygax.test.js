@@ -1,7 +1,7 @@
 import '../../../play/test-helpers/setup-rules-reader.js'
 import { createGameForFamily } from '../../../play/src/play.js'
 
-// engine#159. Gygax's Dragonchess: three stacked 12x8 boards, sky, ground and
+// engine#159. Gygax Chess: three stacked 12x8 boards, sky, ground and
 // underworld, with pieces that cross between them as ordinary moves.
 //
 // Every destination list below is transcribed from the movement diagrams on
@@ -22,7 +22,7 @@ const name = (i) => {
 }
 const sorted = (list) => [...list].sort()
 
-describe('gygax (Dragonchess)', () => {
+describe('gygax chess', () => {
   let game
   beforeEach(async () => { game = await createGameForFamily('chess', { variant: 'gygax', rngSeed: 1 }) })
   const board = () => game.getState().slice.board

@@ -826,7 +826,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   }
 
   // A piece is frozen while an enemy of a named type stands at a declared
-  // offset from it. Dragonchess's Basilisk freezes whatever enemy stands on
+  // offset from it. Gygax Chess's Basilisk freezes whatever enemy stands on
   // the cell directly above it:
   //
   //     freeze:
