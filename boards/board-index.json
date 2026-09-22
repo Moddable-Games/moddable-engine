@@ -1517,7 +1517,7 @@
     "topology": "grid",
     "svg": "svgs/chess--tandem-chess.svg",
     "rulesUrl": "chess/variants/tandem-chess/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "chess",

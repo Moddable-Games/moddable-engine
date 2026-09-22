@@ -5,7 +5,7 @@ export const schema = {
 }
 
 export function createGridTopology(config) {
-  const { rows, cols, wrap = false, voids: voidList, blockers: blockerList, diagonals: diagonalRule = 'full', layers = 1, layerAdjacency = 'none' } = config
+  const { rows, cols, wrap = false, voids: voidList, blockers: blockerList, diagonals: diagonalRule = 'full', layers = 1, layerAdjacency = 'none', layerSeats = null } = config
 
   // A stack of boards is ONE board with a layer coordinate, not N boards.
   // `topology.grid` already takes an explicit cell list, the variants that need
@@ -29,6 +29,13 @@ export function createGridTopology(config) {
   //
   // A direction with a non-zero `dl` goes nowhere on a board whose planes do
   // not connect, so an Alice position can never be reached by a 3D move.
+  //
+  // `layerSeats` says who sits at each board when the boards are played by
+  // different seats. Tandem Chess is two games of chess in one: board A is
+  // seats 0 and 1, board B seats 2 and 3, and each board is still written as
+  // an ordinary FEN, so its White and Black become that board's seats:
+  //
+  //     layerSeats: [[0, 1], [2, 3]]
   const plane = rows * cols
   const layerOf = (i) => (i / plane) | 0
   const stacked = layerAdjacency === 'stacked' && layers > 1
@@ -666,7 +673,14 @@ export function createGridTopology(config) {
       }
       notation.forEach((text, layer) => {
         const one = parsePosition(text, vocabulary)
-        for (let i = 0; i < plane; i++) all[layer * plane + i] = one[i]
+        const seats = layerSeats ? layerSeats[layer] : null
+        for (let i = 0; i < plane; i++) {
+          const cell = one[i]
+          // Each board's two sides belong to that board's own seats.
+          all[layer * plane + i] = cell && seats && typeof cell.owner === 'number' && seats[cell.owner] !== undefined
+            ? { ...cell, owner: seats[cell.owner] }
+            : cell
+        }
       })
       return all
     }
@@ -817,6 +831,7 @@ export function createGridTopology(config) {
     cols,
     layers,
     layerAdjacency,
+    layerSeats,
     // Whether two rays from one cell can reach the same cell. Only across a
     // pole: every direction into it comes out at the same square.
     raysMayMeet: spherical,

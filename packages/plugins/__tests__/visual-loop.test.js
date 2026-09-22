@@ -129,8 +129,11 @@ function playedPosition(family, key, moveCount, topo) {
     slice,
     // A layered board is written one plane at a time, and rebuilding the
     // topology from rows and cols alone dropped the layer count - so Alice's
-    // second board was serialised into the first and its pieces vanished.
-    setup: boardToSetup(slice, { rows, cols, ...(topo?.layers ? { layers: topo.layers } : {}) }, plugin.vocabulary,
+    // second board was serialised into the first and its pieces vanished. It
+    // dropped `layerSeats` the same way, so Tandem's second board, whose seats
+    // are 2 and 3, had no letters and drew empty. The topology goes through
+    // whole.
+    setup: boardToSetup(slice, { ...(topo || {}), rows, cols }, plugin.vocabulary,
                     { players: game.raw.playerSystem.getAll() }),
   }
 }

@@ -111,8 +111,14 @@ export function boardToSetup(slice, topo = {}, vocabulary = {}, opts = {}) {
   if (topo.layers > 1 && Array.isArray(board) && topo.rows && topo.cols) {
     const plane = topo.rows * topo.cols
     const planeTopo = { ...topo, layers: 1 }
+    // A board played by its own seats (`layerSeats`) is written as the ordinary
+    // FEN it was read from: its seats become White and Black again.
+    const seatsOf = (layer) => (Array.isArray(topo.layerSeats) ? topo.layerSeats[layer] : null)
+    const asBoardSides = (cells, seats) => (seats
+      ? cells.map(cell => (cell && seats.includes(cell.owner) ? { ...cell, owner: seats.indexOf(cell.owner) } : cell))
+      : cells)
     return Array.from({ length: topo.layers }, (_, layer) =>
-      boardToSetup({ ...slice, board: board.slice(layer * plane, (layer + 1) * plane) },
+      boardToSetup({ ...slice, board: asBoardSides(board.slice(layer * plane, (layer + 1) * plane), seatsOf(layer)) },
         planeTopo, vocabulary, opts))
   }
 

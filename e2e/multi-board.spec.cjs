@@ -140,3 +140,33 @@ test('gygax: the Mage rises from the ground to the sky', async ({ page }) => {
   expect(await occupied(page, 'f1')).toBe('piece')
   expect(errors).toEqual([])
 })
+
+// Tandem Chess: two boards in one game with four seats, played in the
+// turn-based order the source gives - White A, then Black A, White B, White A,
+// Black B repeating. The page has to hand the turn to the right board.
+test('tandem: the turn passes between the boards in the published order', async ({ page }) => {
+  const errors = []
+  page.on('pageerror', e => errors.push(e.message))
+  await page.goto(`${BASE}/play/?family=chess&variant=tandem-chess&opponent=human`, { waitUntil: 'networkidle' })
+  await page.waitForSelector('[data-sq]', { timeout: 15000 })
+  const boards = () => page.evaluate(() => document.querySelectorAll('#game-play-root g[data-layer]').length)
+  expect(await boards()).toBe(2)
+
+  const play = async (from, to) => {
+    await page.locator(`[data-sq="${from}"]`).first().click()
+    await page.waitForTimeout(250)
+    await page.locator(`[data-sq="${to}"]`).first().click()
+    await page.waitForTimeout(500)
+  }
+  await play('e2', 'e4')        // White A
+  await play('e7', 'e5')        // Black A
+  await play('d2-2', 'd4-2')    // White B
+  await play('g1', 'f3')        // White A again
+  await play('d7-2', 'd5-2')    // Black B
+
+  for (const [id, want] of [['e4', 'piece'], ['e5', 'piece'], ['d4-2', 'piece'], ['f3', 'piece'], ['d5-2', 'piece'], ['e2', 'empty'], ['d2-2', 'empty']]) {
+    expect([id, await occupied(page, id)]).toEqual([id, want])
+  }
+  expect(await boards()).toBe(2)
+  expect(errors).toEqual([])
+})

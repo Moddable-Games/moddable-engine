@@ -2,8 +2,28 @@ export function createPlayerSystem(config) {
   // Which seat opens. Nearly every game starts with the first seat, and the
   // index was written in rather than declared - so a game whose second seat
   // moves first could not say so.
-  const { players, startIndex = 0 } = config
+  const { players, startIndex = 0, turnOrder = null } = config
   const sliceName = '__players'
+
+  // A declared order, for a game whose seats do not simply take turns round
+  // the table. Tandem Chess plays two boards in one game, and the turn-based
+  // form its source gives - "South begins by moving a white piece. North
+  // replies by moving a black piece followed by a white piece" - opens with
+  // one seat and then repeats a cycle of four that keeps each board
+  // alternating:
+  //
+  //     turnOrder: { opening: [0], cycle: [1, 2, 0, 3] }
+  //
+  // A seat that has been eliminated is skipped, so when one board finishes the
+  // other carries on between its own two seats.
+  const orderAt = turnOrder
+    ? (step) => {
+        const opening = turnOrder.opening || []
+        if (step < opening.length) return opening[step]
+        const cycle = turnOrder.cycle || []
+        return cycle[(step - opening.length) % cycle.length]
+      }
+    : null
 
   function initState() {
     return {
@@ -19,6 +39,8 @@ export function createPlayerSystem(config) {
       // place in the rotation. Djambi's centre cell grants this.
       interleavedIndex: null,
       lastNormalIndex: 0,
+      // How far through a declared `turnOrder` the game has got.
+      orderStep: 0,
     }
   }
 
@@ -47,6 +69,13 @@ export function createPlayerSystem(config) {
   // rotation runs among everyone else and the interleaved seat is inserted
   // between its steps, which means remembering where the rotation had got to.
   function nextIndex(s) {
+    if (orderAt) {
+      let step = (s.orderStep || 0) + 1
+      // A full lap of the cycle with nobody left to move ends the search.
+      const limit = step + (turnOrder.opening || []).length + (turnOrder.cycle || []).length
+      while (s.eliminated.includes(orderAt(step)) && step < limit) step++
+      return { currentIndex: orderAt(step), orderStep: step, lastNormalIndex: s.currentIndex }
+    }
     const interleaved = s.interleavedIndex
     if (interleaved === null || interleaved === undefined) {
       return { currentIndex: nextActiveIndex(s.currentIndex, s.eliminated), lastNormalIndex: s.currentIndex }
@@ -120,12 +149,15 @@ export function createPlayerSystem(config) {
     return s.eliminated.includes(playerIndex)
   }
 
+  // One seat, or several at once: a board of Tandem Chess finishing takes both
+  // of its seats out of the turn order together.
   function eliminate(playerIndex, store) {
     const s = store.get(sliceName)
-    if (s.eliminated.includes(playerIndex)) return
+    const seats = (Array.isArray(playerIndex) ? playerIndex : [playerIndex]).filter(i => !s.eliminated.includes(i))
+    if (!seats.length) return
     store.set(sliceName, {
       ...s,
-      eliminated: [...s.eliminated, playerIndex],
+      eliminated: [...s.eliminated, ...seats],
     })
   }
 

@@ -113,6 +113,8 @@ export function normaliseOutcome(outcome, playerNames = []) {
       return winner || 'resign'
     }
     if (outcome.winner !== undefined) return normaliseOutcome(outcome.winner, playerNames)
+    // A team wins together: Tandem Chess's partners, one on each board.
+    if (Array.isArray(outcome.team)) return outcome.team.map(seat => playerNames[seat] || String(seat)).join(' & ')
   }
   return String(outcome)
 }

@@ -54,7 +54,9 @@ function buildPlayersConfig(engine, meta) {
     return at >= 0 ? at : 0
   }
   if (engine.players) {
-    return { names: engine.players, startIndex: startIndex(engine.players) }
+    const out = { names: engine.players, startIndex: startIndex(engine.players) }
+    if (engine.turnOrder) out.turnOrder = engine.turnOrder
+    return out
   }
 
   const raw = meta.players

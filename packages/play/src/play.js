@@ -234,7 +234,7 @@ export function setRulesReader(readFn, listFn) {
   }
 }
 
-export const STRUCTURAL_KEYS = new Set(['topology', 'players', 'firstPlayer', 'meta', 'surface', 'render', 'components', 'plugins', 'pieces'])
+export const STRUCTURAL_KEYS = new Set(['topology', 'players', 'firstPlayer', 'turnOrder', 'meta', 'surface', 'render', 'components', 'plugins', 'pieces'])
 
 export function resolveFromDisk(family, variant) {
   if (!_readFile) return null
@@ -266,7 +266,7 @@ function resolveMeta(family, variant) {
         title: resolved.meta?.label || variant,
         slug: variant,
         parent: family,
-        engine: { players, firstPlayer: resolved.firstPlayer, plugins: { [family]: pluginConfig } },
+        engine: { players, firstPlayer: resolved.firstPlayer, turnOrder: resolved.turnOrder, plugins: { [family]: pluginConfig } },
       }
       if (topo.type) def.engine.topology = { ...topo }
       return def
@@ -295,7 +295,7 @@ function resolveMeta(family, variant) {
       title: resolved.meta?.label || variant,
       slug: variant,
       parent: family,
-      engine: { players, firstPlayer: resolved.firstPlayer, plugins: { [family]: pluginConfig } },
+      engine: { players, firstPlayer: resolved.firstPlayer, turnOrder: resolved.turnOrder, plugins: { [family]: pluginConfig } },
     }
     if (topo.type) def.engine.topology = { ...topo }
     if (resolved.render) def.engine.render = resolved.render

@@ -27,6 +27,7 @@ export function createGame(definition, opts = {}) {
   const playerSystem = createPlayerSystem({
     players: definition.players.names,
     startIndex: definition.players.startIndex || 0,
+    turnOrder: definition.players.turnOrder || null,
   })
   const store = createStore({})
 

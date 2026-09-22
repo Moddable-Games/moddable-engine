@@ -154,7 +154,13 @@ function buildDefinitionFromResolved(family, variant, resolved, registryCfg) {
     }
   }
 
-  const def = { title: resolved.meta?.label || variant, slug: variant, parent: family, engine: { players, plugins: { [family]: pluginConfig } } }
+  // Who opens and in what order seats move are the game's, not the plugin's,
+  // and were dropped here: the page opened every game with the first seat and
+  // rotated round the table whatever the variant said.
+  const engine = { players, plugins: { [family]: pluginConfig } }
+  if (resolved.firstPlayer !== undefined) engine.firstPlayer = resolved.firstPlayer
+  if (resolved.turnOrder !== undefined) engine.turnOrder = resolved.turnOrder
+  const def = { title: resolved.meta?.label || variant, slug: variant, parent: family, engine }
   if (topology) def.engine.topology = topology
   return def
 }
@@ -399,7 +405,9 @@ export function createPlaySession(options = {}) {
       enterScoringPhase()
       return
     }
+    // A partnership is two names and wins together.
     const text = result === 'draw' ? 'Draw'
+      : Array.isArray(outcome?.team) ? `${result.split(' & ').map(capitalize).join(' & ')} win!`
       : `${capitalize(result)} wins!`
     report(text, true)
   }

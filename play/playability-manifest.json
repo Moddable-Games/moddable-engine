@@ -1181,6 +1181,15 @@
   {
     "family": "chess",
     "familyLabel": "Chess",
+    "variant": "tandem-chess",
+    "key": "tandem-chess",
+    "label": "Tandem Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "familyLabel": "Chess",
     "variant": "teleport-chess",
     "key": "teleportChess",
     "label": "Teleportation Chess",
