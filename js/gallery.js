@@ -138,7 +138,7 @@ function renderBySet(opts) {
       <h2 class="set-title">${set.name}${set.virtual ? ' <span class="badge badge--virtual">virtual</span>' : ''}</h2>
       <div class="set-meta-row">
         <span class="set-family-badge">${set.family}</span>
-        <span class="set-author">${set.author}</span>
+        <span class="set-author">${creditFor(set)}</span>
         <span class="set-license-badge">${set.license}</span>
         <span class="set-count">${getPieceCount(set)} pieces</span>
         ${set.playable ? '<span class="badge badge--playable">playable</span>' : ''}
@@ -386,3 +386,13 @@ function capitalise(str) {
 }
 
 init()
+
+// A set's author, linked to where the artwork came from. Some sets are used on
+// the condition that they are credited, and a name with no way to find the
+// original is half a credit.
+function creditFor(set) {
+  const href = set.source || set.authorUrl
+  if (!set.author) return ''
+  if (!href || !/^https?:/.test(href)) return set.author
+  return `<a href="${href}" target="_blank" rel="noopener">${set.author}</a>`
+}

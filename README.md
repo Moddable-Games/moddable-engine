@@ -176,6 +176,8 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 - A pawn on Alice's second board reached the last rank and stayed a pawn: promotion and start ranks were built for the first plane only. They are that rank on every plane now, and a named region can add `layers` to say which planes it covers
 - Gygax's setup was upside down against its source, with Gold on rank 8, and its level labels ran the opposite way to its boards, so the sky was captioned Subterranean. Raumschach's Queen was missing the triagonal move both sources give it, and its pawn's upward capture was transcribed as a triagonal. Each fixed against chessvariants.com, with the pawn rules and the Spherical Chess pole rules recorded as disputes where the published versions disagree
 - The three tandem variants move out of #159 into #179: their two boards are the easy part, and what they need is two turn orders side by side and a hand shared across games
+- Gygax Chess draws every piece as itself, with Richard Ryley's fifteen piece icons (boardgamegeek.com/filepage/229556), split into pieces and credited to him. The board shows them in Gold and Scarlet, as the sides are named, and `ryley-gygax` holds all fifteen in White, Black, Gold and Scarlet so a four-player version (#181) needs no new artwork. The traced outlines had transparent interiors, so a light piece showed the board through it; each piece now has a fill underneath
+- The piece gallery links each set's author to where the artwork came from, since some sets are used on condition of credit
 - 236 playable variants
 
 #### 2026-09-13
