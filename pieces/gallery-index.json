@@ -2182,7 +2182,6 @@
     "playable": true,
     "recolorable": false,
     "virtual": true,
-    "extends": "mce-fairy-complete",
     "sources": {
       "twemoji": "../twemoji/"
     },
