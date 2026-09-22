@@ -1154,6 +1154,15 @@
   {
     "family": "chess",
     "familyLabel": "Chess",
+    "variant": "stupidhouse",
+    "key": "stupidhouse",
+    "label": "Stupidhouse",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "familyLabel": "Chess",
     "variant": "suicide-chess",
     "key": "suicideChess",
     "label": "Suicide Chess",

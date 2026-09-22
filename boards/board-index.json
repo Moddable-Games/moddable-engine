@@ -1477,7 +1477,7 @@
     "topology": "grid",
     "svg": "svgs/chess--stupidhouse.svg",
     "rulesUrl": "chess/variants/stupidhouse/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "chess",

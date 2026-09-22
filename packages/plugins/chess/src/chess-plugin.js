@@ -7,7 +7,7 @@ import { randomBackRank } from './variants/chess960.js'
 export const CONFIG_KEYS = new Set([
   'actions', 'advancement', 'afterMove', 'capturesTo', 'castling', 'checkThreshold', 'cols', 'demotionMap', 'doubleStep',
   'gating', 'initialHands',
-  'dropMayNotCheck', 'dropRegion', 'dropZone', 'drops', 'enPassant', 'hexPawnConfig', 'initState', 'moveApply', 'moveFilter', 'noCheck',
+  'dropMayNotCheck', 'dropRegion', 'dropZone', 'drops', 'dropsCompulsory', 'dropsFor', 'enPassant', 'hexPawnConfig', 'initState', 'moveApply', 'moveFilter', 'noCheck',
   'onTurnEnd', 'pawnCaptureDirections', 'pawnConfig', 'pawnMoveDirections', 'pawnStartRow',
   'pawnType', 'placementDistinctColor', 'placementPieces', 'placementZone', 'playerCount',
   'promotion', 'promotionChoices', 'promotionRegion', 'promotionRow', 'regions',
@@ -833,6 +833,20 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return withPromotions(moves, piece.type, playerIdx)
   }
 
+  // Who a dropped piece belongs to. Normally the player dropping it; in
+  // Stupidhouse partners share a colour, so the piece a partner captured is
+  // the enemy's colour, and "he gives the piece to his partner, that must place
+  // the piece on the board" - as the opponent's piece (`dropsFor: opponent`).
+  function dropOwner(playerIdx, cell) {
+    if (config.dropsFor !== 'opponent') return playerIdx
+    if (boardsHaveSeats()) {
+      const seats = topology.layerSeats[planeOf(cell)] || []
+      const other = seats.find(seat => seat !== playerIdx)
+      if (other !== undefined) return other
+    }
+    return seatCount() === 2 ? 1 - playerIdx : playerIdx
+  }
+
   // A drop is a move like any other: it may not leave the dropper's own King in
   // check. Drops skip the general check filter, which simulates a piece moving
   // from somewhere, and nothing checked them instead - so a player in check
@@ -843,7 +857,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   function dropIsLegal(board, move, playerIdx) {
     if (config.noCheck) return true
     const placed = board.slice ? board.slice() : { ...board }
-    placed[move.to] = { type: move.type, owner: playerIdx }
+    placed[move.to] = { type: move.type, owner: dropOwner(playerIdx, move.to) }
     if (isInCheck(placed, playerIdx)) return false
     if (config.dropMayNotCheck) {
       // Only the Kings on the board it lands on can be checked by it.
@@ -1222,7 +1236,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
         return moves.filter(m => dropIsLegal(slice.board, m, playerIdx))
       },
       apply(move, { board, hands, playerIdx }) {
-        board[move.to] = { type: move.type, owner: playerIdx }
+        board[move.to] = { type: move.type, owner: dropOwner(playerIdx, move.to) }
         const idx = hands[playerIdx].indexOf(move.type)
         if (idx !== -1) hands[playerIdx].splice(idx, 1)
         return { board, hands, halfmoveClock: 0 }
@@ -1609,6 +1623,13 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     let legal = config.noCheck
       ? movesFiltered
       : filterLegalMoves(movesFiltered, slice, playerIdx)
+
+    // Stupidhouse: a received piece "must" be placed "instead of making a
+    // normal move". Where no square will take it, the player moves as usual.
+    if (config.dropsCompulsory) {
+      const drops = legal.filter(m => m.action === 'drop')
+      if (drops.length) legal = drops
+    }
 
     if (config.moveFilter) {
       legal = config.moveFilter(legal, slice, {
