@@ -171,6 +171,49 @@ export function validatePieceVocabulary(resolved, gallery, images) {
   }
 }
 
+// Pieces drawn with artwork that shows a different piece.
+//
+// `drawsAsStandIn` catches a piece that falls back to a set's default key. It
+// cannot catch a piece whose own letter resolves to a real image of something
+// else: Gygax Chess's Dragon is `R`, and in a chess set `R` is a Rook. The
+// board looked complete, every check passed, and all fifteen of its pieces
+// were drawn as other pieces (engine#180).
+//
+// A set says what each of its images shows with `depicts`, a map from the
+// letter to the piece type. Only a set that says so can be checked, so the
+// question is asked of the set, never guessed from the artwork's file name.
+export function depictionMismatches(resolved, gallery, images) {
+  if (!resolved.pieces?.set || !gallery || !images) return []
+  const depicts = setDepicts(resolved.pieces.set, gallery)
+  if (!depicts) return []
+  const vocabulary = resolved.vocabulary || resolved.plugins?.[Object.keys(resolved.plugins || {})[0]]?.vocabulary || {}
+  const out = []
+  for (const [type, def] of Object.entries(vocabulary)) {
+    for (const [owner, symbol] of Object.entries(def.symbols || {})) {
+      const piece = symbolToPiece(String(symbol), vocabulary) || { type, owner: Number(owner), symbol }
+      const key = pieceImageKey(piece, images)
+      if (!key || !images[key]) continue
+      const shows = depicts[depictedLetter(key)]
+      if (shows && shows !== piece.type) out.push(`${symbol} as ${key} (${shows})`)
+    }
+  }
+  return out
+}
+
+// A set that extends another inherits what the other's images show.
+function setDepicts(id, gallery, seen = new Set()) {
+  const set = gallery.find(s => s.id === id)
+  if (!set || seen.has(id)) return null
+  seen.add(id)
+  const base = set.extends ? setDepicts(set.extends, gallery, seen) : null
+  return set.depicts || base ? { ...(base || {}), ...(set.depicts || {}) } : null
+}
+
+// `wR`, `bR` and a four-seat `gR` all show the piece `R`.
+function depictedLetter(key) {
+  return /^[a-z][A-Z]/.test(key) ? key.slice(1) : key
+}
+
 // --- Main render function ---
 
 export function renderFromEngine(resolved, opts = {}) {

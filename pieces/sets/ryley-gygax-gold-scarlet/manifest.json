@@ -40,5 +40,22 @@
     "bB": "bB.svg",
     "bE": "bE.svg",
     "bD": "bD.svg"
+  },
+  "depicts": {
+    "K": "king",
+    "M": "mage",
+    "P": "paladin",
+    "C": "cleric",
+    "H": "hero",
+    "T": "thief",
+    "O": "oliphant",
+    "U": "unicorn",
+    "W": "warrior",
+    "R": "dragon",
+    "G": "griffon",
+    "S": "sylph",
+    "B": "basilisk",
+    "E": "elemental",
+    "D": "dwarf"
   }
 }

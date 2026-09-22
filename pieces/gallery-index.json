@@ -2161,6 +2161,14 @@
       "wS": "wS.svg",
       "wW": "wW.svg",
       "wY": "wY.svg"
+    },
+    "depicts": {
+      "K": "king",
+      "Q": "queen",
+      "R": "rook",
+      "B": "bishop",
+      "N": "knight",
+      "P": "pawn"
     }
   },
   {
@@ -5641,6 +5649,23 @@
       "sB": "sB.svg",
       "sE": "sE.svg",
       "sD": "sD.svg"
+    },
+    "depicts": {
+      "K": "king",
+      "M": "mage",
+      "P": "paladin",
+      "C": "cleric",
+      "H": "hero",
+      "T": "thief",
+      "O": "oliphant",
+      "U": "unicorn",
+      "W": "warrior",
+      "R": "dragon",
+      "G": "griffon",
+      "S": "sylph",
+      "B": "basilisk",
+      "E": "elemental",
+      "D": "dwarf"
     }
   },
   {
@@ -5685,6 +5710,23 @@
       "bB": "bB.svg",
       "bE": "bE.svg",
       "bD": "bD.svg"
+    },
+    "depicts": {
+      "K": "king",
+      "M": "mage",
+      "P": "paladin",
+      "C": "cleric",
+      "H": "hero",
+      "T": "thief",
+      "O": "oliphant",
+      "U": "unicorn",
+      "W": "warrior",
+      "R": "dragon",
+      "G": "griffon",
+      "S": "sylph",
+      "B": "basilisk",
+      "E": "elemental",
+      "D": "dwarf"
     }
   }
 ]

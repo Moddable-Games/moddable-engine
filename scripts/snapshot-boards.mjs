@@ -17,7 +17,7 @@ import { readFileSync, writeFileSync, existsSync } from 'fs'
 import { resolve } from 'path'
 import { resolveSurface } from '../packages/schema/src/surfaces.js'
 import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolver.js'
-import { renderFromEngine, attachPieceImages } from '../packages/render/src/render-engine.js'
+import { renderFromEngine, attachPieceImages, depictionMismatches } from '../packages/render/src/render-engine.js'
 import {
   ENGINE_ROOT, SNAP_DIR,
   TYPE_NORMALIZE, loadGallery, parseArgs, walkCorpus,
@@ -76,6 +76,9 @@ for (const { family, familyEngine, slug, meta, engine: variantEngine } of walkCo
     // which in a set of many pieces is another piece. The board looks complete
     // and the snapshot matches, so nothing else notices (Taikyoku's mountain
     // eagles drew as a gote Silver General).
+    // A letter that resolves to a real image of a different piece, which the
+    // stand-in check cannot see because nothing fell back (engine#180).
+    for (const m of depictionMismatches(resolved, gallery, pieceResult.images || {})) drawnAsOther.add(m)
     if (drawnAsOther.size) standIns.push(`${family}/${slug}: ${[...drawnAsOther].sort().join(', ')}`)
     // A variant whose render returns null is invisible to every guard: the
     // render tests skip anything returning null and the playability tests skip
