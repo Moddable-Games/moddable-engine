@@ -178,6 +178,7 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 - The three tandem variants move out of #159 into #179: their two boards are the easy part, and what they need is two turn orders side by side and a hand shared across games
 - Gygax Chess draws every piece as itself, with Richard Ryley's fifteen piece icons (boardgamegeek.com/filepage/229556), split into pieces and credited to him. The board shows them in Gold and Scarlet, as the sides are named, and `ryley-gygax` holds all fifteen in White, Black, Gold and Scarlet so a four-player version (#181) needs no new artwork. The traced outlines had transparent interiors, so a light piece showed the board through it; each piece now has a fill underneath
 - The piece gallery links each set's author to where the artwork came from, since some sets are used on condition of credit
+- The piece gallery showed empty tiles for every piece MCE Congo inherits. Congo extends MCE Fairy Complete, which extends MCE Chess and draws from four other sets; the gallery followed one level, read each inherited file from the wrong folder, and listed Congo's own Zebra twice. It follows the whole chain now, and a set's own pieces replace the ones it inherits
 - 236 playable variants
 
 #### 2026-09-13

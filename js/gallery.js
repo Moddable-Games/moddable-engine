@@ -8,37 +8,33 @@ let SETS = []
 
 let SETS_MAP = {}
 
-function resolvePieceFiles(set) {
-  const files = []
-  const pieces = set.pieces || {}
-  const sourceId = set.virtual && set.baseSet ? set.baseSet : set.id
+// Every piece a set can draw, following `extends` all the way down.
+//
+// This followed one level and read an inherited piece's file from the parent's
+// own folder, ignoring where the parent said it lived. MCE Congo extends MCE
+// Fairy Complete, which extends MCE Chess and draws its pieces from four other
+// sets, so every piece Congo inherited showed as an empty tile - and a piece
+// Congo replaced (its Zebra) was listed twice, once as the empty inherited one.
+// A set's own pieces now replace what it inherits, key by key.
+function resolvePieceFiles(set, seen = new Set()) {
+  if (!set || seen.has(set.id)) return []
+  seen.add(set.id)
+  const byKey = new Map()
+  for (const inherited of resolvePieceFiles(SETS_MAP[set.extends], seen)) byKey.set(inherited.key, inherited)
 
-  if (set.extends && SETS_MAP[set.extends]) {
-    const base = SETS_MAP[set.extends]
-    for (const [key, val] of Object.entries(base.pieces || {})) {
-      const file = typeof val === 'string' ? val : val.file
-      files.push({ key, file, setId: base.id })
-    }
-  }
-
-  for (const [key, val] of Object.entries(pieces)) {
+  const ownFolder = set.virtual && set.baseSet ? set.baseSet : set.id
+  for (const [key, val] of Object.entries(set.pieces || {})) {
     if (typeof val === 'string') {
-      files.push({ key, file: val, setId: sourceId })
-    } else if (val.source && val.file) {
-      files.push({ key, file: val.file, setId: val.source, surface: val.surface || null })
+      byKey.set(key, { key, file: val, setId: ownFolder })
+    } else if (val && val.file) {
+      byKey.set(key, { key, file: val.file, setId: val.source || ownFolder, surface: val.surface || null })
     }
   }
-
-  files.sort((a, b) => a.key.localeCompare(b.key))
-  return files
+  return [...byKey.values()].sort((x, y) => x.key.localeCompare(y.key))
 }
 
 function getPieceCount(set) {
-  let count = set.pieces ? Object.keys(set.pieces).length : 0
-  if (set.extends && SETS_MAP[set.extends]) {
-    count += Object.keys(SETS_MAP[set.extends].pieces || {}).length
-  }
-  return count
+  return (set._svgFiles || resolvePieceFiles(set)).length
 }
 
 async function init() {
