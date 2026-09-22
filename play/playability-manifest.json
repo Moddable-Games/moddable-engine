@@ -335,6 +335,15 @@
   {
     "family": "chess",
     "familyLabel": "Chess",
+    "variant": "delirious-bughouse",
+    "key": "delirious-bughouse",
+    "label": "Delirious Bughouse",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "familyLabel": "Chess",
     "variant": "diana",
     "key": "diana",
     "label": "Diana Chess",

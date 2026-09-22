@@ -537,7 +537,7 @@
     "topology": "grid",
     "svg": "svgs/chess--delirious-bughouse.svg",
     "rulesUrl": "chess/variants/delirious-bughouse/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "chess",

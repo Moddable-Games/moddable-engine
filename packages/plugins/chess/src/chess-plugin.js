@@ -9,8 +9,8 @@ export const CONFIG_KEYS = new Set([
   'gating', 'initialHands',
   'dropMayNotCheck', 'dropRegion', 'dropZone', 'drops', 'dropsCompulsory', 'dropsFor', 'enPassant', 'hexPawnConfig', 'initState', 'moveApply', 'moveFilter', 'noCheck',
   'onTurnEnd', 'pawnCaptureDirections', 'pawnConfig', 'pawnMoveDirections', 'pawnStartRow',
-  'pawnType', 'placementDistinctColor', 'placementPieces', 'placementZone', 'playerCount',
-  'promotion', 'promotionChoices', 'promotionRegion', 'promotionRow', 'regions',
+  'pawnDropRanks', 'pawnType', 'placementDistinctColor', 'placementPieces', 'placementZone', 'playerCount',
+  'promotion', 'promotionChoices', 'promotionRegion', 'promotionsKept', 'promotionRow', 'regions',
   'faceoff', 'freeze', 'goal', 'matchEnds', 'promotionZone', 'randomSetup', 'rookType', 'rows', 'royalType', 'setup', 'transfer',
   'stalemateMeaning', 'teams', 'terrain', 'torpedo', 'turnEffects', 'turnLogic', 'visibility', 'winCondition',
 ])
@@ -1062,7 +1062,20 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   function handTypeFor(captured) {
     const mapped = config.demotionMap && config.demotionMap[captured.type]
     if (mapped) return mapped
+    // Delirious Bughouse: "Captured promoted pawns do not return to pawn."
+    if (config.promotionsKept) return captured.type
     return captured.wasPromoted ? (config.pawnType || 'pawn') : captured.type
+  }
+
+  // Which rank a cell is on, counted from a seat's own edge of its own board:
+  // 1 is that seat's back rank.
+  function rankFromOwnEdge(pos, seat) {
+    const plane = topology.rows * topology.cols
+    const row = Math.floor((pos % plane) / topology.cols)
+    const advDir = config.advancement || { 0: -1, 1: 1 }
+    const advancement = typeof advDir === 'function' ? advDir(seat) : advDir[seat]
+    const dr = Array.isArray(advancement) ? advancement[0] : advancement
+    return dr === -1 ? topology.rows - row : row + 1
   }
 
   function canCastle(slice, playerIdx, kingFrom, kingDest, rookFrom, rookDest) {
@@ -1230,6 +1243,12 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
             if (region && !region(pos)) continue
             if (getCell(slice.board, pos) !== null) continue
             if (type === (config.pawnType || 'pawn') && promoRows.has(pos)) continue
+            // Delirious Bughouse: "Pawns may be placed only from the Second to
+            // the Sixth lines", counted from the player's own side.
+            if (type === (config.pawnType || 'pawn') && config.pawnDropRanks) {
+              const rank = rankFromOwnEdge(pos, playerIdx)
+              if (rank < config.pawnDropRanks[0] || rank > config.pawnDropRanks[1]) continue
+            }
             moves.push({ action: 'drop', type, to: pos })
           }
         }
@@ -1314,6 +1333,11 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       const captured = move.captured != null ? getCell(slice.board, move.captured) : getCell(slice.board, move.to)
       if (captured && captured.owner !== playerIdx && captured.type !== royalTypeFor(captured.owner)) {
         hands[handReceiving(playerIdx)].push(handTypeFor(captured))
+        // "Promoted Pawns are returned to the player that promoted the pawn,
+        // to be inserted again" - so a promotion adds a piece to the game.
+        if (config.promotionsKept && captured.wasPromoted && hands[captured.owner]) {
+          hands[captured.owner].push(config.pawnType || 'pawn')
+        }
       }
     }
 
