@@ -74,3 +74,26 @@ describe('a click on a legal move produces that move', () => {
     expect([family, result.type]).toEqual([family, expect.stringMatching(/^(move|select|choice|arm-drop)$/)])
   })
 })
+
+describe('a capture from afar is clicked on its victim', () => {
+  // Dragonchess's Dragon takes a piece on the board below without moving, so
+  // its move lands on its own square. Matched against `to`, the only cell that
+  // made it was the Dragon itself, and every victim offered the same choice.
+  const model = interactionModelFor('chess')
+  const moves = [
+    { from: 41, to: 41, capture: true, captured: 137 },
+    { from: 41, to: 41, capture: true, captured: 149 },
+    { from: 41, to: 53 },
+  ]
+  const ctx = { selected: 41, chainAnchor: null, dropType: null, moves, playerIndex: 0, getOwnerAt: () => 0 }
+
+  it('commits the capture of the piece clicked', () => {
+    expect(model.handleClick(149, ctx)).toEqual({ type: 'move', move: moves[1] })
+    expect(model.handleClick(53, ctx)).toEqual({ type: 'move', move: moves[2] })
+  })
+
+  it('says the victim is where the click goes', async () => {
+    const { clickCellOf } = await import('../src/interaction.js')
+    expect(moves.map(clickCellOf)).toEqual([137, 149, 53])
+  })
+})

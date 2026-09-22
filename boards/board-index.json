@@ -777,7 +777,7 @@
     "topology": "grid",
     "svg": "svgs/chess--gygax.svg",
     "rulesUrl": "chess/variants/gygax/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "chess",
@@ -1267,7 +1267,7 @@
     "topology": "grid",
     "svg": "svgs/chess--raumschach.svg",
     "rulesUrl": "chess/variants/raumschach/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "chess",
@@ -1447,7 +1447,7 @@
     "topology": "grid",
     "svg": "svgs/chess--spherical-chess.svg",
     "rulesUrl": "chess/variants/spherical-chess/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "chess",

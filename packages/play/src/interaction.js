@@ -27,6 +27,18 @@ function sameCell(a, b) {
   return a !== null && a !== undefined && String(a) === String(b)
 }
 
+// The cell a player clicks to make a move. Almost always where the piece
+// lands; a capture from afar lands nowhere - Dragonchess's Dragon takes a piece
+// on the board below and stays where it is - so its move is its victim's cell.
+// Asked by shape, so the next piece that captures without moving needs nothing.
+export function clickCellOf(move) {
+  if (!move) return undefined
+  if (move.from !== undefined && move.to === move.from && move.captured !== undefined && move.captured !== null) {
+    return move.captured
+  }
+  return move.to !== undefined ? move.to : move.coord
+}
+
 function isBoardMove(move) {
   return move && move.from !== undefined && move.to !== undefined
 }
@@ -67,7 +79,7 @@ const moveModel = {
     const { selected, moves, getOwnerAt, playerIndex } = ctx
 
     if (selected !== null && selected !== undefined) {
-      const candidates = moves.filter(m => sameCell(m.from, selected) && sameCell(m.to, pos))
+      const candidates = moves.filter(m => sameCell(m.from, selected) && sameCell(clickCellOf(m), pos))
       if (candidates.length > 1) {
         const choiceKey = disambiguatingKey(candidates)
         if (choiceKey) {

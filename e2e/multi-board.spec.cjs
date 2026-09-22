@@ -83,3 +83,60 @@ test('the selection marker lands on the square that was clicked', async ({ page 
   console.log('MARKERS', JSON.stringify(result))
   expect(result.nearClicked).toBeGreaterThan(0)
 })
+
+// A stacked board is one volume: a piece moves between levels as an ordinary
+// move, so the page has to offer a target on another board and carry the piece
+// there. Level A is the first board drawn, so Bc2 is `c2-2` and Cc2 is `c2-3`.
+async function occupied(page, id) {
+  return page.evaluate((sel) => {
+    const cell = document.querySelector(`#game-play-root [data-sq="${sel}"]`)
+    if (!cell) return 'no-cell'
+    const box = cell.getBoundingClientRect()
+    const imgs = [...document.querySelectorAll('#game-play-root image, #game-play-root use')]
+    return imgs.some(im => {
+      const b = im.getBoundingClientRect()
+      return Math.abs((b.left + b.width / 2) - (box.left + box.width / 2)) < box.width / 2 &&
+             Math.abs((b.top + b.height / 2) - (box.top + box.height / 2)) < box.height / 2
+    }) ? 'piece' : 'empty'
+  }, id)
+}
+
+test('raumschach: a pawn steps up a level', async ({ page }) => {
+  const errors = []
+  page.on('pageerror', e => errors.push(e.message))
+  await page.goto(`${BASE}/play/?family=chess&variant=raumschach`, { waitUntil: 'networkidle' })
+  await page.waitForSelector('[data-sq]', { timeout: 15000 })
+  const boards = () => page.evaluate(() => document.querySelectorAll('#game-play-root g[data-layer]').length)
+  expect(await boards()).toBe(5)
+
+  expect(await occupied(page, 'c2-2')).toBe('piece')
+  expect(await occupied(page, 'c2-3')).toBe('empty')
+  await page.locator('[data-sq="c2-2"]').first().click()
+  await page.waitForTimeout(400)
+  await page.locator('[data-sq="c2-3"]').first().click()
+  await page.waitForTimeout(800)
+  expect(await occupied(page, 'c2-2')).toBe('empty')
+  expect(await occupied(page, 'c2-3')).toBe('piece')
+  expect(await boards()).toBe(5)
+  expect(errors).toEqual([])
+})
+
+test('gygax: the Mage rises from the ground to the sky', async ({ page }) => {
+  const errors = []
+  page.on('pageerror', e => errors.push(e.message))
+  await page.goto(`${BASE}/play/?family=chess&variant=gygax`, { waitUntil: 'networkidle' })
+  await page.waitForSelector('[data-sq]', { timeout: 15000 })
+  const boards = () => page.evaluate(() => document.querySelectorAll('#game-play-root g[data-layer]').length)
+  expect(await boards()).toBe(3)
+
+  // The sky is drawn first, so the Mage on the ground's f1 is `f1-2`.
+  expect(await occupied(page, 'f1-2')).toBe('piece')
+  expect(await occupied(page, 'f1')).toBe('empty')
+  await page.locator('[data-sq="f1-2"]').first().click()
+  await page.waitForTimeout(400)
+  await page.locator('[data-sq="f1"]').first().click()
+  await page.waitForTimeout(800)
+  expect(await occupied(page, 'f1-2')).toBe('empty')
+  expect(await occupied(page, 'f1')).toBe('piece')
+  expect(errors).toEqual([])
+})

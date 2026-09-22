@@ -524,6 +524,15 @@
   {
     "family": "chess",
     "familyLabel": "Chess",
+    "variant": "gygax",
+    "key": "gygax",
+    "label": "Gygax Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "familyLabel": "Chess",
     "variant": "half-chess",
     "key": "half-chess",
     "label": "Half Chess",
@@ -956,6 +965,15 @@
   {
     "family": "chess",
     "familyLabel": "Chess",
+    "variant": "raumschach",
+    "key": "raumschach",
+    "label": "Raumschach",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "familyLabel": "Chess",
     "variant": "recruitment-chess",
     "key": "recruitmentChess",
     "label": "Recruitment Chess",
@@ -1103,6 +1121,15 @@
     "variant": "spartan",
     "key": "spartan",
     "label": "Spartan Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "chess",
+    "familyLabel": "Chess",
+    "variant": "spherical-chess",
+    "key": "spherical-chess",
+    "label": "Spherical Chess",
     "group": "Other",
     "playable": true
   },

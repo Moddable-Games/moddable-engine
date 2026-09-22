@@ -15,6 +15,18 @@ function resolveLeapOffsets(input) {
   return input
 }
 
+// A named leap is geometry, so the board it is made on has the first say. A
+// Knight in a volume leaps every signed ordering of (0, 1, 2) - 24 cells, not
+// 8 - and only the topology knows how many axes it has. A board that names no
+// such set leaves the name to the table above, unchanged.
+function leapOffsetsOn(topology, input) {
+  if (typeof input === 'string' && topology.getDirections) {
+    const own = topology.getDirections(input)
+    if (own && own.length) return own
+  }
+  return resolveLeapOffsets(input)
+}
+
 export function rider(dirs, opts = {}) {
   const { maxSteps, minSteps = 1 } = opts
   return {
@@ -25,15 +37,27 @@ export function rider(dirs, opts = {}) {
     genMoves(topology, from, board) {
       const rays = topology.rays(from, dirs, maxSteps)
       const moves = []
+      // On a sphere two directions can meet at one cell - every step a King
+      // takes over a pole lands on the same square - and a move is where the
+      // piece ends up, not the way it went. The board says whether its rays
+      // can meet, so a flat board pays nothing for it.
+      const seen = topology.raysMayMeet ? new Set() : null
+      const add = (move) => {
+        if (seen) {
+          if (seen.has(move.to)) return
+          seen.add(move.to)
+        }
+        moves.push(move)
+      }
       for (const ray of rays) {
         for (let i = 0; i < ray.length; i++) {
           const pos = ray[i]
           const occupant = board[pos]
           if (occupant) {
-            if (occupant.enemy && i + 1 >= minSteps) moves.push({ from, to: pos, capture: true })
+            if (occupant.enemy && i + 1 >= minSteps) add({ from, to: pos, capture: true })
             break
           }
-          if (i + 1 >= minSteps) moves.push({ from, to: pos })
+          if (i + 1 >= minSteps) add({ from, to: pos })
         }
       }
       return moves
@@ -57,7 +81,16 @@ export function rider(dirs, opts = {}) {
 //                blocked at (1,1).
 //   'orthogonal' one unit step along the longer axis. The Xiangqi Horse (2,1)
 //                is blocked at (1,0).
-function lameBlockOffset(mode, dr, dc) {
+//   'plane'      a leap that also changes level, blocked where it would stand
+//                had it moved on its own level first. Dragonchess's Elemental
+//                rises by "one cell orthogonally and then one cell up. The
+//                intermediate cell MUST be empty."
+//   'layer'      the same leap blocked where it would stand had it changed
+//                level first: the Elemental's return, "one cell down and then
+//                one cell orthogonally".
+function lameBlockOffset(mode, dr, dc, dl = 0) {
+  if (mode === 'plane') return dl ? [dr, dc, 0] : null
+  if (mode === 'layer') return dl ? [0, 0, dl] : null
   if (mode === 'half') {
     if (dr % 2 !== 0 || dc % 2 !== 0) return null
     return [dr / 2, dc / 2]
@@ -76,10 +109,11 @@ export function leaper(offsets, opts = {}) {
     const resolved = resolveLeapOffsets(offsets)
     if (!Array.isArray(resolved)) return topology.leapTargets(from, resolved)
     const out = []
-    for (const [dr, dc] of resolved) {
-      const target = topology.leapTargets(from, [[dr, dc]])[0]
+    for (const offset of resolved) {
+      const [dr, dc, dl] = offset
+      const target = topology.leapTargets(from, [offset])[0]
       if (target === undefined) continue
-      const blockOffset = lameBlockOffset(lame, dr, dc)
+      const blockOffset = lameBlockOffset(lame, dr, dc, dl)
       if (blockOffset) {
         const blocker = topology.leapTargets(from, [blockOffset])[0]
         if (blocker !== undefined && board[blocker]) continue
@@ -96,7 +130,7 @@ export function leaper(offsets, opts = {}) {
     genMoves(topology, from, board) {
       const targets = lame
         ? lameTargets(topology, from, board)
-        : topology.leapTargets(from, resolveLeapOffsets(offsets))
+        : topology.leapTargets(from, leapOffsetsOn(topology, offsets))
       const moves = []
       for (const pos of targets) {
         const occupant = board[pos]
@@ -112,8 +146,35 @@ export function leaper(offsets, opts = {}) {
     attacks(topology, from, target, board) {
       const targets = lame
         ? lameTargets(topology, from, board || [])
-        : topology.leapTargets(from, resolveLeapOffsets(offsets))
+        : topology.leapTargets(from, leapOffsetsOn(topology, offsets))
       return targets.includes(target)
+    },
+  }
+}
+
+/**
+ * A quiet move to any empty cell of a region, wherever the piece stands.
+ *
+ * Dragonchess's Sylph, once it has dived to the middle board, "may move to
+ * the cell directly above it OR any empty one of the six home cells that any
+ * friendly Sylph occupied at the start of the game". The destinations are fixed
+ * cells rather than offsets from the piece, so no leap describes them.
+ *
+ * `allows` is a predicate over a cell, as it is for `confine`, so this knows
+ * nothing about home squares. It never captures, and so attacks nothing.
+ */
+export function warp(allows) {
+  return {
+    type: 'warp',
+    genMoves(topology, from, board) {
+      const moves = []
+      for (const cell of topology.getAllCells()) {
+        if (cell !== from && !board[cell] && allows(cell)) moves.push({ from, to: cell })
+      }
+      return moves
+    },
+    attacks() {
+      return false
     },
   }
 }

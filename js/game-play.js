@@ -2,7 +2,7 @@ import {
   createGameForFamily, STRUCTURAL_KEYS, createGameController,
   listVariants, getVariantConfig,
   parseUrlFlags, deriveCompatibleFlags, familySupportsFlag, serializeVariantKey,
-  createAI, interactionModelFor,
+  createAI, interactionModelFor, clickCellOf,
   createEmbedBridge, parseEmbedParams, normaliseOutcome,
   defaultSeatFor, boardToSetup as serialiseBoard, findFamilyPlugin,
 } from '../packages/play/index.js'
@@ -461,10 +461,14 @@ export function createPlaySession(options = {}) {
     // already draws the markers; this says which is which.
     const { selected, legalMoves = [] } = state
     if (selected !== null && selected !== undefined && selected !== key) {
-      const move = legalMoves.find(m => m.to === key && m.from === selected)
+      const move = legalMoves.find(m => clickCellOf(m) === key && m.from === selected)
       if (move) {
         const cellAt = (i) => (Array.isArray(slice.board) ? slice.board[i] : slice.board?.[i])
-        if (move.captured !== undefined && move.captured !== move.to) {
+        if (move.to === move.from) {
+          // A capture from afar: the piece stays where it is.
+          const victim = cellAt(move.captured)
+          parts.push(victim && victim.type ? `capture ${humanise(victim.type)} from afar` : 'capture from afar')
+        } else if (move.captured !== undefined && move.captured !== move.to) {
           // A locust capture takes a piece it jumped, not the square it lands
           // on, so the victim has to be named - it is somewhere else.
           const victim = cellAt(move.captured)
@@ -851,7 +855,7 @@ export function createPlaySession(options = {}) {
       const board = slice.board || []
       const seenTargets = new Set()
       for (const m of legalMoves) {
-        const target = m.to !== undefined ? m.to : m.coord
+        const target = clickCellOf(m)
         if (target === undefined || target === null) continue
         // For grid mode, validate numeric bounds; for direct mode, accept any non-null key
         if (typeof target === 'number' && (target < 0 || target >= board.length)) continue

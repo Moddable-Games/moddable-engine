@@ -1,5 +1,5 @@
 import { warnUnknownConfigKeys } from '../../../core/index.js'
-import { rider, leaper, compose, divergent, confine, positional, reboundRider, targeted, fromConfig, OFFSETS } from '../../../piece-behaviour/index.js'
+import { rider, leaper, compose, divergent, confine, positional, reboundRider, targeted, warp, fromConfig, OFFSETS } from '../../../piece-behaviour/index.js'
 import { randomBackRank } from './variants/chess960.js'
 // Every config key this plugin reads. Exported so the corpus guard and the
 // authoring docs share one source of truth, and kept separate from `defaults`,
@@ -10,8 +10,8 @@ export const CONFIG_KEYS = new Set([
   'dropZone', 'drops', 'enPassant', 'hexPawnConfig', 'initState', 'moveApply', 'moveFilter', 'noCheck',
   'onTurnEnd', 'pawnCaptureDirections', 'pawnConfig', 'pawnMoveDirections', 'pawnStartRow',
   'pawnType', 'placementDistinctColor', 'placementPieces', 'placementZone', 'playerCount',
-  'promotion', 'promotionChoices', 'promotionRow', 'regions',
-  'faceoff', 'goal', 'promotionZone', 'randomSetup', 'rookType', 'rows', 'royalType', 'setup', 'transfer',
+  'promotion', 'promotionChoices', 'promotionRegion', 'promotionRow', 'regions',
+  'faceoff', 'freeze', 'goal', 'promotionZone', 'randomSetup', 'rookType', 'rows', 'royalType', 'setup', 'transfer',
   'stalemateMeaning', 'terrain', 'torpedo', 'turnEffects', 'turnLogic', 'visibility', 'winCondition',
 ])
 
@@ -142,8 +142,11 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   function flipSpec(spec) {
     if (!spec || typeof spec !== 'object') return spec
     const out = { ...spec }
-    if (Array.isArray(out.offsets)) out.offsets = out.offsets.map(([dr, dc]) => [-dr, dc])
-    if (Array.isArray(out.dirs)) out.dirs = out.dirs.map(([dr, dc]) => [-dr, dc])
+    // Only the row turns round. A level is up or down for both players, so a
+    // third component passes through untouched - dropping it put Scarlet's
+    // Sylph on its own board when it should have dived to the one below.
+    if (Array.isArray(out.offsets)) out.offsets = out.offsets.map(([dr, dc, ...level]) => [-dr, dc, ...level])
+    if (Array.isArray(out.dirs)) out.dirs = out.dirs.map(([dr, dc, ...level]) => [-dr, dc, ...level])
     if (out.divergent) out.divergent = { move: flipSpec(out.divergent.move), capture: flipSpec(out.divergent.capture) }
     if (out.type === 'compose' && Array.isArray(out.parts)) out.parts = out.parts.map(p => flipSpec(p))
     // A positional piece keeps its movement inside its cases, so the flip has
@@ -169,29 +172,43 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   // wedges of a ring and no pair of ranges describes one.
   const namedRegions = config.regions || {}
 
+  //
+  // On a board of several planes a region is the same rows and columns on every
+  // plane unless it names `layers` too, as a range like `rows` does. Raumschach
+  // promotes a White pawn on the far rank of levels A and B only.
   function regionPredicate(ref, playerIdx) {
     const spec = typeof ref === 'string' ? namedRegions[ref] : ref
     if (!spec) return null
+    const perSeat = (v) => (Array.isArray(v) && Array.isArray(v[0]) ? v[playerIdx] : v)
+    const layers = perSeat(spec.layers)
+    // Row, column and plane of a cell. Reading a row as `pos / cols` puts
+    // every cell above the first plane past the last row.
+    const locate = (pos) => {
+      const nCols = topology ? topology.cols : 8
+      const plane = topology && topology.rows ? topology.rows * nCols : Infinity
+      const local = pos % plane
+      return [Math.floor(local / nCols), local % nCols, Math.floor(pos / plane)]
+    }
+    const inLayers = (l) => !layers || (l >= layers[0] && l <= layers[1])
     if (spec.cells) {
-      const nCols = () => (topology ? topology.cols : 8)
       // A list of [row, col] pairs, or a list of two such lists to vary by seat.
       const perSeatCells = Array.isArray(spec.cells[0]) && Array.isArray(spec.cells[0][0])
         ? spec.cells[playerIdx] || []
         : spec.cells
       const keys = new Set(perSeatCells.map(([r, c]) => `${r},${c}`))
-      return (pos) => keys.has(`${Math.floor(pos / nCols())},${pos % nCols()}`)
+      return (pos) => {
+        const [r, c, l] = locate(pos)
+        return inLayers(l) && keys.has(`${r},${c}`)
+      }
     }
-    const perSeat = (v) => (Array.isArray(v) && Array.isArray(v[0]) ? v[playerIdx] : v)
     const rows = perSeat(spec.rows)
     const cols = perSeat(spec.cols)
-    if (!rows && !cols) return null
+    if (!rows && !cols && !layers) return null
     return (pos) => {
-      const nCols = topology ? topology.cols : 8
-      const r = Math.floor(pos / nCols)
-      const c = pos % nCols
+      const [r, c, l] = locate(pos)
       if (rows && (r < rows[0] || r > rows[1])) return false
       if (cols && (c < cols[0] || c > cols[1])) return false
-      return true
+      return inLayers(l)
     }
   }
 
@@ -218,6 +235,13 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
         }))
         .filter(c => c.primitive)
       return positional(cases)
+    }
+
+    // A quiet move to any empty cell of a named region, from wherever the
+    // piece stands.
+    if (spec.type === 'warp') {
+      const allows = regionPredicate(spec.to, playerIdx)
+      return allows ? warp(allows) : null
     }
 
     if (spec.type === 'rebound') {
@@ -366,7 +390,9 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     for (let idx = 0; idx < board.length; idx++) {
       const cell = board[idx]
       if (!cell || cell.type !== pawnType) continue
-      const row = Math.floor(idx / cols)
+      // The row within its plane: the same rank on two planes is one rank.
+      const plane = topology && topology.rows ? topology.rows * cols : Infinity
+      const row = Math.floor((idx % plane) / cols)
       const counts = rowCounts[cell.owner]
       if (!counts) continue
       counts.set(row, (counts.get(row) || 0) + 1)
@@ -411,18 +437,31 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       const promoRows = zone
         ? zone.map(r => (dr === 1 || dc === 1 ? rows - 1 - r : r))
         : [config.promotionRow ? config.promotionRow[player] : defaultPromo]
+      // A start or promotion rank is that rank on every plane. Built for the
+      // first plane only, a pawn on Alice's second board reached the last rank
+      // and stayed a pawn.
+      const planes = topo.layers || 1
+      const onEveryPlane = (set, index) => {
+        for (let l = 0; l < planes; l++) set.add(l * rows * cols + index)
+      }
       if (isVertical) {
-        for (let c = 0; c < cols; c++) startCells[player].add(topo.toIndex(startRow, c))
+        for (let c = 0; c < cols; c++) onEveryPlane(startCells[player], topo.toIndex(startRow, c))
         for (const pr of promoRows) {
           if (pr < 0 || pr >= rows) continue
-          for (let c = 0; c < cols; c++) promotionCells[player].add(topo.toIndex(pr, c))
+          for (let c = 0; c < cols; c++) onEveryPlane(promotionCells[player], topo.toIndex(pr, c))
         }
       } else {
-        for (let r = 0; r < rows; r++) startCells[player].add(topo.toIndex(r, startRow))
+        for (let r = 0; r < rows; r++) onEveryPlane(startCells[player], topo.toIndex(r, startRow))
         for (const pc of promoRows) {
           if (pc < 0 || pc >= cols) continue
-          for (let r = 0; r < rows; r++) promotionCells[player].add(topo.toIndex(r, pc))
+          for (let r = 0; r < rows; r++) onEveryPlane(promotionCells[player], topo.toIndex(r, pc))
         }
+      }
+      // A variant whose pawns promote somewhere a rank cannot describe names
+      // the region instead, and the region replaces the rank.
+      if (config.promotionRegion) {
+        const inRegion = regionPredicate(config.promotionRegion, player)
+        promotionCells[player] = new Set(allPositions().filter(inRegion))
       }
       if (isVertical) {
         captureDirections[player] = [[dr, -1], [dr, 1]]
@@ -591,8 +630,12 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       setCell(board, move.rookTo, getCell(board, move.rookFrom))
       setCell(board, move.rookFrom, null)
     } else if (move.captured !== undefined && move.captured !== null) {
-      setCell(board, move.to, getCell(board, move.from))
-      setCell(board, move.from, null)
+      // A capture from afar leaves the capturer where it stands: `to` is its
+      // own square. Moving it there and then clearing its origin deleted it.
+      if (move.to !== move.from) {
+        setCell(board, move.to, getCell(board, move.from))
+        setCell(board, move.from, null)
+      }
       setCell(board, move.captured, null)
     } else {
       setCell(board, move.to, getCell(board, move.from))
@@ -622,8 +665,10 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     } else if (move.captured !== undefined && move.captured !== null) {
       undo.capturedPiece = state.board[move.captured]
       undo.capturedPos = move.captured
-      state.board[move.to] = state.board[move.from]
-      state.board[move.from] = null
+      if (move.to !== move.from) {
+        state.board[move.to] = state.board[move.from]
+        state.board[move.from] = null
+      }
       state.board[move.captured] = null
     } else {
       state.board[move.to] = state.board[move.from]
@@ -756,6 +801,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     if (!piece) return []
     const pConfig = pieceConfigs[piece.type]
     if (!pConfig) return []
+    if (isFrozen(slice.board, from)) return []
 
     if (pConfig.movement === 'pawn') {
       return generatePawnMoves(from, slice, playerIdx)
@@ -765,7 +811,44 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     if (!primitive) return []
 
     if (!viewBoard) viewBoard = buildViewBoard(slice.board, playerIdx)
-    return withPromotions(primitive.genMoves(topology, from, viewBoard), piece.type, playerIdx)
+    const moves = primitive.genMoves(topology, from, viewBoard)
+    // A piece that captures without moving says which cell it took as `via`.
+    // Everywhere else in this plugin the taken cell is `captured`, which is
+    // what the appliers and the undo already honour.
+    for (let i = 0; i < moves.length; i++) {
+      const m = moves[i]
+      if (m.via !== undefined && m.to === m.from) {
+        const { via, ...rest } = m
+        moves[i] = { ...rest, captured: via }
+      }
+    }
+    return withPromotions(moves, piece.type, playerIdx)
+  }
+
+  // A piece is frozen while an enemy of a named type stands at a declared
+  // offset from it. Dragonchess's Basilisk freezes whatever enemy stands on
+  // the cell directly above it:
+  //
+  //     freeze:
+  //       - by: basilisk
+  //         at: [0, 0, 1]      # the frozen piece's offset TO the freezer
+  //
+  // A frozen piece neither moves nor attacks, so it gives no check either. The
+  // freeze reads the board as it stands, so it takes hold the moment either
+  // piece arrives and lifts the moment the freezer leaves or is taken.
+  const freezeRules = Array.isArray(config.freeze) ? config.freeze : []
+
+  function isFrozen(board, pos) {
+    if (!freezeRules.length || !topology) return false
+    const piece = getCell(board, pos)
+    if (!piece) return false
+    for (const rule of freezeRules) {
+      for (const at of topology.leapTargets(pos, [rule.at])) {
+        const other = getCell(board, at)
+        if (other && other.type === rule.by && other.owner !== piece.owner) return true
+      }
+    }
+    return false
   }
 
   function generatePawnMoves(from, slice, playerIdx) {
@@ -973,6 +1056,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   function pieceAttacks(from, target, piece, board) {
     const pConfig = pieceConfigs[piece.type]
     if (!pConfig) return false
+    if (isFrozen(board, from)) return false
 
     if (pConfig.movement === 'pawn') {
       return pawnAttacks(from, target, piece.owner)
@@ -1183,8 +1267,12 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
         castlingRights[playerIdx] = { king: false, queen: false }
       }
     } else if (move.captured !== undefined && move.captured !== null) {
-      setCell(board, move.to, getCell(board, move.from))
-      setCell(board, move.from, null)
+      // A capture from afar leaves the capturer where it stands: `to` is its
+      // own square. Moving it there and then clearing its origin deleted it.
+      if (move.to !== move.from) {
+        setCell(board, move.to, getCell(board, move.from))
+        setCell(board, move.from, null)
+      }
       setCell(board, move.captured, null)
     } else {
       setCell(board, move.to, getCell(board, move.from))
@@ -1541,8 +1629,10 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       } else if (move.captured !== undefined && move.captured !== null) {
         capturedPiece = board[move.captured]
         capturedPos = move.captured
-        board[move.to] = board[move.from]
-        board[move.from] = null
+        if (move.to !== move.from) {
+          board[move.to] = board[move.from]
+          board[move.from] = null
+        }
         board[move.captured] = null
       } else {
         board[move.to] = board[move.from]

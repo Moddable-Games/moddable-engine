@@ -120,3 +120,20 @@ describe('a pawn on the second board', () => {
     for (const m of theirMoves) expect(m.to).toBeGreaterThanOrEqual(PLANE)
   })
 })
+
+describe('alice promotion', () => {
+  test('a pawn reaching the last rank on the second board promotes', async () => {
+    // The promotion rank was built for the first plane only, so a White pawn
+    // walking up board B to h8 arrived as a pawn and stayed one.
+    const game = await createGameForFamily('chess', { variant: 'alice', rngSeed: 1 })
+    const cells = new Array(128).fill(null)
+    cells[60] = { type: 'king', owner: 0 }          // A e1
+    cells[0] = { type: 'king', owner: 1 }           // A a8
+    cells[PLANE + 15] = { type: 'pawn', owner: 0 }  // B h7
+    const state = game.getState()
+    game.loadState({ slice: { ...state.slice, board: cells, castlingRights: null }, players: { currentIndex: 0 } })
+    const push = game.getLegalMoves().filter(m => m.from === PLANE + 15 && m.to === PLANE + 7)
+    expect(push.length).toBeGreaterThan(1)
+    expect(push.every(m => m.promotion)).toBe(true)
+  })
+})

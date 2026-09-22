@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-12",
+  "generated": "2026-09-22",
   "pieces": 118,
   "boards": 334,
   "boardFamilies": 34,
@@ -9,10 +9,10 @@
     "standard": 1116,
     "variants": 835
   },
-  "playableVariants": 233,
+  "playableVariants": 236,
   "playableFamilies": 10,
   "playableByFamily": {
-    "chess": 142,
+    "chess": 145,
     "draughts": 20,
     "go": 12,
     "hex": 8,
@@ -36,7 +36,7 @@
     "xiangqi": 0
   },
   "frontmatterOnlyByFamily": {
-    "chess": 87,
+    "chess": 90,
     "draughts": 20,
     "go": 9,
     "hex": 8,

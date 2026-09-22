@@ -29,6 +29,7 @@ export {
   listInteractionModels,
   interactionModelFor,
   availableActions,
+  clickCellOf,
 } from './src/interaction.js'
 
 export {

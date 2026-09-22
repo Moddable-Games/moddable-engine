@@ -5,7 +5,7 @@ export const schema = {
 }
 
 export function createGridTopology(config) {
-  const { rows, cols, wrap = false, voids: voidList, blockers: blockerList, diagonals: diagonalRule = 'full', layers = 1 } = config
+  const { rows, cols, wrap = false, voids: voidList, blockers: blockerList, diagonals: diagonalRule = 'full', layers = 1, layerAdjacency = 'none' } = config
 
   // A stack of boards is ONE board with a layer coordinate, not N boards.
   // `topology.grid` already takes an explicit cell list, the variants that need
@@ -15,8 +15,35 @@ export function createGridTopology(config) {
   // plane - a piece never slides from one board to another. Crossing layers is
   // a rule, which is how Alice Chess describes it: you move on your board, then
   // the piece "transfers" to the matching square on the other (engine#159).
+  //
+  // That guarantee belongs to the variant, not to the grid, because a stack of
+  // boards can be either of two things. Alice's boards never touch; in
+  // Raumschach the stack IS the board, and a Rook slides straight up it as
+  // ordinary geometry. `layerAdjacency` says which:
+  //
+  //   none      each plane is its own board. A direction is [dr, dc] and a
+  //             move never leaves the plane it started on (Alice)
+  //   stacked   the planes are one volume. A direction may carry a third
+  //             component, [dr, dc, dl], and `dl` moves between planes
+  //             (Raumschach, Gygax)
+  //
+  // A direction with a non-zero `dl` goes nowhere on a board whose planes do
+  // not connect, so an Alice position can never be reached by a 3D move.
   const plane = rows * cols
   const layerOf = (i) => (i / plane) | 0
+  const stacked = layerAdjacency === 'stacked' && layers > 1
+  if (layerAdjacency !== 'none' && layerAdjacency !== 'stacked') {
+    throw new Error(`Unknown layerAdjacency "${layerAdjacency}". Expected "none" or "stacked".`)
+  }
+
+  // Which plane a move lands on, or -1 when it leaves the stack. A move that
+  // changes plane on a board whose planes do not connect leaves it too.
+  function targetLayer(fromLayer, dl) {
+    if (!dl) return fromLayer
+    if (!stacked) return -1
+    const nl = fromLayer + dl
+    return nl >= 0 && nl < layers ? nl : -1
+  }
 
   const _voids = voidList ? new Set(voidList.map(v => Array.isArray(v) ? v[0] * cols + v[1] : v)) : null
   const _blockers = blockerList ? new Set(blockerList.map(v => Array.isArray(v) ? v[0] * cols + v[1] : v)) : null
@@ -54,12 +81,60 @@ export function createGridTopology(config) {
     if (wrapC && (wc < 0 || wc >= cols)) {
       wc = ((wc % cols) + cols) % cols
     }
-    if (wrapR && (wr < 0 || wr >= rows)) {
+    if (spherical && (wr < 0 || wr >= rows)) {
+      // A pole is a reflection, not a wrap: one step past the end rank is the
+      // end rank again, half way round. See `poleStep`.
+      wr = wr < 0 ? -1 - wr : 2 * rows - 1 - wr
+      wc = (wc + half) % cols
+    } else if (wrapR && (wr < 0 || wr >= rows)) {
       wr = ((wr % rows) + rows) % rows
       if (wrap === 'mobius' || wrap === 'klein-bottle') wc = cols - 1 - wc
-      if (wrap === 'spherical') wc = (wc + Math.floor(cols / 2)) % cols
     }
     return [wr, wc]
+  }
+
+  // Spherical Chess treats the files as meridians meeting at two poles, and a
+  // pole is a different join from any wrap. "When a Rook passes over the pole,
+  // it naturally goes to a space in the same rank that is four spaces away"
+  // (chessvariants.com/boardrules.dir/spherical.html) - the same rank, not the
+  // far edge, and heading back the way it came: Ra3-a2-a1-e1-e2-e3.
+  //
+  // So crossing a pole changes the DIRECTION of travel as well as the cell,
+  // which no coordinate map can express - `ray` advances by a fixed step. This
+  // is the one step every walker on a spherical board takes. A diagonal crosses
+  // the same way, "directly through the pole in a vertical direction and then
+  // completely reverses direction": Bg3-f2-e1-a1-b2-c3.
+  const spherical = wrap === 'spherical'
+  const half = cols >> 1
+
+  function poleStep(r, c, dr, dc) {
+    const nr = r + dr
+    if (nr >= 0 && nr < rows) return [nr, ((c + dc) % cols + cols) % cols, dr, dc]
+    return [r, (c + half) % cols, -dr, -dc]
+  }
+
+  // A leap on a sphere is a walk: its rank steps first, crossing a pole if it
+  // meets one, then its file steps. Crossing turns the walker round, so the
+  // file steps after it run the other way. Yapsan's Knight "moves radially
+  // across the pole when making a radial move; its move is then completed by a
+  // circumpolar move", and has eight moves from every square.
+  //
+  // A single step is the walker's own step, so a King's diagonal over a pole
+  // lands where a Bishop's first step does.
+  function poleLeap(r, c, dr, dc) {
+    if (Math.abs(dr) <= 1 && Math.abs(dc) <= 1) {
+      const [nr, nc] = poleStep(r, c, dr, dc)
+      return [nr, nc]
+    }
+    let cr = r, cc = c, sr = Math.sign(dr), turned = false
+    for (let i = 0; i < Math.abs(dr); i++) {
+      const [nr, nc, ndr] = poleStep(cr, cc, sr, 0)
+      if (ndr !== sr) turned = !turned
+      cr = nr; cc = nc; sr = ndr
+    }
+    const fileDir = Math.sign(dc) * (turned ? -1 : 1)
+    for (let i = 0; i < Math.abs(dc); i++) [cr, cc] = poleStep(cr, cc, 0, fileDir)
+    return [cr, cc]
   }
 
   function isVoid(index) {
@@ -176,31 +251,49 @@ export function createGridTopology(config) {
     return parseInt(str, 10)
   }
 
-  function ray(from, dr, dc, maxSteps) {
+  function ray(from, dr, dc, maxSteps, dl = 0) {
     // `toRC` allocates a pair for every call, and a slider asks for one ray per
     // direction per piece per node of the search.
     const isIdx = typeof from === 'number'
-    const base = isIdx ? layerOf(from) * plane : 0
-    const local = isIdx ? from - base : 0
+    const fromLayer = isIdx ? layerOf(from) : 0
+    const local = isIdx ? from - fromLayer * plane : 0
     const r = isIdx ? (local / cols) | 0 : from[0]
     const c = isIdx ? local % cols : from[1]
-    const origin = base + toIndex(r, c)
+    const origin = fromLayer * plane + toIndex(r, c)
     const result = []
     // A ray runs along a line, so it goes nowhere at all from a point the board
     // draws no such line through.
     if (isDiagonal(dr, dc) && !diagonalExists(r, c)) return result
-    const limit = maxSteps || Math.max(rows, cols)
-    let nr = r + dr, nc = c + dc
+    if (dl && !stacked) return result
+    // A line on a joined board can be longer than any side: a great circle
+    // through a file of an 8x8 sphere holds 16 cells, and a line across a
+    // twisted seam comes back mirrored. It runs until it returns to where it
+    // started, so the cap only has to be large enough never to cut one short.
+    const limit = maxSteps || (wrap ? rows * cols : Math.max(rows, cols, stacked ? layers : 0))
+    if (spherical) {
+      let cr = r, cc = c, sr = dr, sc = dc
+      for (let steps = 0; steps < limit; steps++) {
+        [cr, cc, sr, sc] = poleStep(cr, cc, sr, sc)
+        const idx = fromLayer * plane + toIndex(cr, cc)
+        if (idx === origin) break
+        if (isVoid(idx - fromLayer * plane)) break
+        result.push(idx)
+      }
+      return result
+    }
+    let nr = r + dr, nc = c + dc, nl = fromLayer + dl
     let steps = 0
     while (steps < limit) {
       if (wrap) [nr, nc] = wrapCoords(nr, nc)
       if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) break
-      const idx = base + toIndex(nr, nc)
+      if (nl < 0 || nl >= layers) break
+      const idx = nl * plane + toIndex(nr, nc)
       if (idx === origin) break
-      if (isVoid(idx - base)) break
+      if (isVoid(idx - nl * plane)) break
       result.push(idx)
       nr += dr
       nc += dc
+      nl += dl
       steps++
     }
     return result
@@ -215,23 +308,33 @@ export function createGridTopology(config) {
 
   function rays(from, directions, maxSteps) {
     const resolved = typeof directions === 'string' ? getDirections(directions) : directions
-    return resolved.map(([dr, dc]) => ray(from, dr, dc, maxSteps))
+    return resolved.map(([dr, dc, dl]) => ray(from, dr, dc, maxSteps, dl))
   }
 
   function leapTargets(from, offsets) {
     const resolved = typeof offsets === 'string' ? getDirections(offsets) : offsets
-    const base = layerOf(from) * plane
-    const local = from - base
+    const fromLayer = layerOf(from)
+    const local = from - fromLayer * plane
     const r = (local / cols) | 0, c = local % cols
     const targets = []
     for (let i = 0; i < resolved.length; i++) {
+      const nl = targetLayer(fromLayer, resolved[i][2])
+      if (nl < 0) continue
+      if (spherical) {
+        const [lr, lc] = poleLeap(r, c, resolved[i][0], resolved[i][1])
+        const idx = nl * plane + toIndex(lr, lc)
+        // Two offsets can meet at one cell across a pole; a target is a cell,
+        // and the origin is not one.
+        if (idx !== from && !isVoid(idx - nl * plane) && !targets.includes(idx)) targets.push(idx)
+        continue
+      }
       let nr = r + resolved[i][0], nc = c + resolved[i][1]
       if (wrap) {
         const wrapped = wrapCoords(nr, nc)
         nr = wrapped[0]
         nc = wrapped[1]
       }
-      if (onBoard(nr, nc)) targets.push(base + toIndex(nr, nc))
+      if (onBoard(nr, nc)) targets.push(nl * plane + toIndex(nr, nc))
     }
     return targets
   }
@@ -269,10 +372,53 @@ export function createGridTopology(config) {
     return pairs
   }
 
-  const DIRECTIONS = {
+  // On a stacked board the named directions mean what they mean in a volume:
+  // orthogonal crosses a face of the cell (6), diagonal an edge (12),
+  // triagonal a corner (8), and all is every neighbour (26). A 2D Rook, Bishop,
+  // Queen and King asked for 'orthogonal', 'diagonal' and 'all' already, so on a
+  // stacked board they are the 3D pieces with no declaration of their own.
+  //
+  // The Knight's leap is the one named offset set that changes with the number
+  // of axes: every signed ordering of (1, 2) in two dimensions, of (0, 1, 2) in
+  // three. Only a stacked board declares it; a flat one leaves it to the
+  // piece's own table, which is the same eight offsets in the order the rest of
+  // the engine was built against.
+  const DIRECTIONS = stacked ? volumeDirections() : {
     orthogonal: [[-1, 0], [1, 0], [0, -1], [0, 1]],
     diagonal: [[-1, -1], [-1, 1], [1, -1], [1, 1]],
     all: [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, -1], [1, 1]],
+  }
+
+  function volumeDirections() {
+    const byAxes = { 1: [], 2: [], 3: [] }
+    for (const dr of [-1, 0, 1]) {
+      for (const dc of [-1, 0, 1]) {
+        for (const dl of [-1, 0, 1]) {
+          const moved = (dr !== 0) + (dc !== 0) + (dl !== 0)
+          if (moved) byAxes[moved].push([dr, dc, dl])
+        }
+      }
+    }
+    const knight = []
+    const seen = new Set()
+    for (const [a, b, c] of [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]]) {
+      for (const sa of a ? [-1, 1] : [1]) {
+        for (const sb of b ? [-1, 1] : [1]) {
+          for (const sc of c ? [-1, 1] : [1]) {
+            const offset = [a * sa, b * sb, c * sc]
+            const key = offset.join(',')
+            if (!seen.has(key)) { seen.add(key); knight.push(offset) }
+          }
+        }
+      }
+    }
+    return {
+      orthogonal: byAxes[1],
+      diagonal: byAxes[2],
+      triagonal: byAxes[3],
+      all: [...byAxes[1], ...byAxes[2], ...byAxes[3]],
+      knight,
+    }
   }
 
   function getDirections(category) {
@@ -634,15 +780,22 @@ export function createGridTopology(config) {
 
   function step(from, direction) {
     const dr = direction[0], dc = direction[1]
+    const fromLayer = layerOf(from)
+    const nl = targetLayer(fromLayer, direction[2])
+    if (nl < 0) return null
     // Pawns are the only pieces that move by `step` rather than by rays or
     // leaps, so this was the one path still reading a raw index as a row. On
     // the second board of Alice Chess that put every pawn on rank nine and off
     // the edge, and pawns there could not move or be selected while every other
     // piece was fine.
-    const base = layerOf(from) * plane
-    const local = from - base
+    const local = from - fromLayer * plane
     const fr = (local / cols) | 0, fc = local % cols
     if (isDiagonal(dr, dc) && !diagonalExists(fr, fc)) return null
+    if (spherical) {
+      const [lr, lc] = poleLeap(fr, fc, dr, dc)
+      const idx = nl * plane + toIndex(lr, lc)
+      return isVoid(idx - nl * plane) ? null : idx
+    }
     let nr = fr + dr, nc = fc + dc
     if (wrap) {
       const wrapped = wrapCoords(nr, nc)
@@ -650,7 +803,7 @@ export function createGridTopology(config) {
       nc = wrapped[1]
     }
     if (!onBoard(nr, nc)) return null
-    return base + toIndex(nr, nc)
+    return nl * plane + toIndex(nr, nc)
   }
 
   function renderLayout(config = {}) {
@@ -662,6 +815,11 @@ export function createGridTopology(config) {
   return {
     rows,
     cols,
+    layers,
+    layerAdjacency,
+    // Whether two rays from one cell can reach the same cell. Only across a
+    // pole: every direction into it comes out at the same square.
+    raysMayMeet: spherical,
     size: rows * cols,
     wrap,
     toIndex,
