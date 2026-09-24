@@ -62,12 +62,37 @@ export function createSimulator(plugin, opts = {}) {
     plugin.searchUnmakeMove(state, move, undo)
   }
 
-  function checkTerminal(state, playerIndex) {
-    const full = getFullState(state, playerIndex)
-    const winner = plugin.checkWin(state, full)
+  // Whether the game is won, asked the way the game asks it: the move pipeline
+  // calls checkWin before the turn passes, so `currentIndex` is the player who
+  // just moved, and a plugin answers from that side - draughts asks whether the
+  // mover's opponent has a move left. Asked from the side about to move, the
+  // question was about the wrong player: a draughts position won by leaving the
+  // opponent no move read as a draw, and the search walked past it.
+  //
+  // `scoring` means the game ends by counting the board. The evaluator counts
+  // it where there is one; otherwise it is scored as a draw, not as a win for
+  // seat 0, which is what reading a seat number out of the word gave.
+  function winnerAfter(state, mover) {
+    if (!plugin.checkWin || mover === undefined || mover === null) return null
+    const result = plugin.checkWin(state, getFullState(state, mover))
+    if (result === null || result === undefined) return null
+    if (result === 'scoring') {
+      if (!evaluate) return 'draw'
+      const score = evaluate(state, mover)
+      if (!Number.isFinite(score) || score === 0) return 'draw'
+      return score > 0 ? mover : nextPlayer(mover, false)
+    }
+    return result
+  }
+
+  // `mover` is who made the move that reached `state`; without it, the player
+  // before `playerIndex` in turn order.
+  function checkTerminal(state, playerIndex, mover = (playerIndex + playerCount - 1) % playerCount) {
+    const winner = winnerAfter(state, mover)
 
     if (winner !== null && winner !== undefined) {
-      return { over: true, winner, score: scoreFromWinner(winner, playerIndex) }
+      const winnerIndex = winner === 'draw' ? null : parseWinnerIndex(winner)
+      return { over: true, winner, winnerIndex, score: scoreFromWinner(winner, playerIndex) }
     }
 
     const moves = getLegalMoves(state, playerIndex)
@@ -185,13 +210,22 @@ export function createSimulator(plugin, opts = {}) {
     ? (state, playerIndex) => plugin.isInCheck(state.board, playerIndex)
     : null
 
+  // A plugin with a cheap win test of its own (chess) is asked that; any other
+  // is asked its checkWin from the mover's side. Only chess had the former, so
+  // minimax saw a win in chess and nowhere else.
   const checkWinConditionOnly = plugin.checkWinConditionOnly
     ? (state, playerIndex) => {
         const result = plugin.checkWinConditionOnly(state, playerIndex)
         if (result === null || result === undefined) return null
         return { over: true, score: scoreFromWinner(result, playerIndex) }
       }
-    : null
+    : plugin.checkWin
+      ? (state, mover) => {
+          const result = winnerAfter(state, mover)
+          if (result === null || result === undefined) return null
+          return { over: true, score: scoreFromWinner(result, mover) }
+        }
+      : null
 
   return {
     getLegalMoves,

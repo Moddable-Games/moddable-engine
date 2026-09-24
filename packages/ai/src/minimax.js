@@ -13,12 +13,16 @@ function historyIndex(move) {
   return (from << 6) | to
 }
 
+// `nodes` is each level's budget when the search runs `deterministic`: the
+// same position, seed and budget give the same move on any machine, where a
+// time budget gives whatever that machine had time for. A puzzle's measured
+// difficulty (engine#178) is only a measurement if it can be taken again.
 const DIFFICULTIES = {
-  beginner: { timeMs: 200, maxDepth: 2, topN: 5, spread: 0.5 },
-  easy: { timeMs: 400, maxDepth: 3, topN: 4, spread: 1.0 },
-  medium: { timeMs: 800, maxDepth: 5, topN: 3, spread: 1.0 },
-  hard: { timeMs: 1500, maxDepth: 7, topN: 2, spread: 0 },
-  expert: { timeMs: 3000, maxDepth: 50, topN: 1, spread: 0 },
+  beginner: { timeMs: 200, maxDepth: 2, topN: 5, spread: 0.5, nodes: 2000 },
+  easy: { timeMs: 400, maxDepth: 3, topN: 4, spread: 1.0, nodes: 8000 },
+  medium: { timeMs: 800, maxDepth: 5, topN: 3, spread: 1.0, nodes: 30000 },
+  hard: { timeMs: 1500, maxDepth: 7, topN: 2, spread: 0, nodes: 100000 },
+  expert: { timeMs: 3000, maxDepth: 50, topN: 1, spread: 0, nodes: 300000 },
 }
 
 export function createMinimax(simulator, opts = {}) {
@@ -29,6 +33,9 @@ export function createMinimax(simulator, opts = {}) {
   const topN = opts.topN !== undefined ? opts.topN : config.topN || 1
   const spread = opts.spread !== undefined ? opts.spread : config.spread || 0
   const boardSizeLimit = opts.boardSizeLimit !== undefined ? opts.boardSizeLimit : true
+  const deterministic = !!opts.deterministic
+  const nodeBudget = opts.nodes || config.nodes || 30000
+  const random = opts.random || Math.random
 
   const orderMoves = opts.orderMoves || null
   const isCapture = opts.isCapture || defaultIsCapture
@@ -38,6 +45,12 @@ export function createMinimax(simulator, opts = {}) {
   let ttGeneration = 0
   let deadline = 0
   let nodesSearched = 0
+
+  // Whether the search has spent its budget: wall-clock time in play, nodes
+  // when deterministic.
+  function outOfBudget() {
+    return deterministic ? nodesSearched >= nodeBudget : Date.now() >= deadline
+  }
 
   const killers = new Array(64).fill(null).map(() => [null, null])
   const history = new Int32Array(4096)
@@ -52,7 +65,7 @@ export function createMinimax(simulator, opts = {}) {
     const key = simulator.positionKey(state, playerIndex)
     const entries = openingBook[key]
     if (!entries || entries.length === 0) return null
-    const notation = entries[Math.floor(Math.random() * entries.length)]
+    const notation = entries[Math.floor(random() * entries.length)]
     const cols = simulator.cols || 8
     const rows = simulator.rows || 8
     const from = algebraicToIndex(notation.slice(0, 2), rows, cols)
@@ -92,7 +105,7 @@ export function createMinimax(simulator, opts = {}) {
     let bestResults = moves.map(m => ({ move: m, score: -Infinity }))
 
     for (let depth = 1; depth <= effectiveMaxDepth; depth++) {
-      if (Date.now() >= deadline) break
+      if (outOfBudget()) break
 
       const depthResults = []
       let aborted = false
@@ -100,7 +113,7 @@ export function createMinimax(simulator, opts = {}) {
       const beta = Infinity
 
       for (const move of orderedMoves(moves, bestResults)) {
-        if (Date.now() >= deadline) { aborted = true; break }
+        if (outOfBudget()) { aborted = true; break }
 
         let score
         if (useMakeUnmake) {
@@ -130,14 +143,17 @@ export function createMinimax(simulator, opts = {}) {
 
   function negamax(state, currentPlayer, maximizingPlayer, depth, alpha, beta, ply) {
     nodesSearched++
-    if (Date.now() >= deadline) return 0
+    if (outOfBudget()) return 0
 
     if (simulator.checkWinConditionOnly) {
       const prevPlayer = (currentPlayer + simulator.playerCount - 1) % simulator.playerCount
       const win = simulator.checkWinConditionOnly(state, prevPlayer)
       if (win) {
-        const winnerIsMe = win.score > 0
-        return winnerIsMe ? -100000 : 100000
+        // Scored from the player to move: the mover winning is their loss. A
+        // drawn end is worth nothing to either side, where it was scored as the
+        // player to move having won.
+        if (win.score === 0) return 0
+        return win.score > 0 ? -100000 : 100000
       }
     }
 
@@ -175,7 +191,7 @@ export function createMinimax(simulator, opts = {}) {
 
     if (simulator.hasMakeUnmake) {
       for (const move of ordered) {
-        if (Date.now() >= deadline) break
+        if (outOfBudget()) break
         const undo = simulator.makeMove(state, move, currentPlayer)
         const nextPlayer = simulator.nextPlayer(currentPlayer, false)
         const score = -negamax(state, nextPlayer, maximizingPlayer, depth - 1, -beta, -alpha, ply + 1)
@@ -197,7 +213,7 @@ export function createMinimax(simulator, opts = {}) {
       }
     } else {
       for (const move of ordered) {
-        if (Date.now() >= deadline) break
+        if (outOfBudget()) break
         const { state: newState, continueTurn } = simulator.applyMove(state, move, currentPlayer)
         const nextPlayer = simulator.nextPlayer(currentPlayer, continueTurn)
         const score = -negamax(newState, nextPlayer, maximizingPlayer, depth - 1, -beta, -alpha, ply + 1)
@@ -229,7 +245,7 @@ export function createMinimax(simulator, opts = {}) {
     if (standPat >= beta) return standPat
     if (standPat > alpha) alpha = standPat
     if (maxQuiesce <= 0) return standPat
-    if (Date.now() >= deadline) return standPat
+    if (outOfBudget()) return standPat
     if (standPat + 1000 < alpha) return standPat
 
     const moves = simulator.getLegalMoves(state, currentPlayer)
@@ -243,7 +259,7 @@ export function createMinimax(simulator, opts = {}) {
 
     if (simulator.hasMakeUnmake) {
       for (const move of captures) {
-        if (Date.now() >= deadline) break
+        if (outOfBudget()) break
         const undo = simulator.makeMove(state, move, currentPlayer)
         const nextPlayer = simulator.nextPlayer(currentPlayer, false)
         const score = -quiesce(state, nextPlayer, maximizingPlayer, -beta, -alpha, maxQuiesce - 1)
@@ -253,7 +269,7 @@ export function createMinimax(simulator, opts = {}) {
       }
     } else {
       for (const move of captures) {
-        if (Date.now() >= deadline) break
+        if (outOfBudget()) break
         const { state: newState, continueTurn } = simulator.applyMove(state, move, currentPlayer)
         const nextPlayer = simulator.nextPlayer(currentPlayer, continueTurn)
         const score = -quiesce(newState, nextPlayer, maximizingPlayer, -beta, -alpha, maxQuiesce - 1)
@@ -315,10 +331,10 @@ export function createMinimax(simulator, opts = {}) {
     })
 
     const totalWeight = weights.reduce((a, b) => a + b, 0)
-    let random = Math.random() * totalWeight
+    let remaining = random() * totalWeight
     for (let i = 0; i < pool.length; i++) {
-      random -= weights[i]
-      if (random <= 0) return pool[i].move
+      remaining -= weights[i]
+      if (remaining <= 0) return pool[i].move
     }
     return pool[pool.length - 1].move
   }

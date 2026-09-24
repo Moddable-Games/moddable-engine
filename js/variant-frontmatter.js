@@ -51,7 +51,8 @@ export async function resolveVariantBoard(family, variantConfig, variantKey, slu
 // the create page's template path can be tested without a fetch.
 export function annotateVariant(resolved, familyMd, variantMd) {
   const familyFm = parseFrontmatter(familyMd || '').meta || {}
-  const variantFm = variantMd ? (parseFrontmatter(variantMd).meta || {}) : {}
+  const variantParsed = variantMd ? parseFrontmatter(variantMd) : { meta: {}, body: '' }
+  const variantFm = variantParsed.meta || {}
 
   resolved._variantMeta = {
     board: variantFm.board || familyFm.board || '',
@@ -63,6 +64,7 @@ export function annotateVariant(resolved, familyMd, variantMd) {
   // the like - for the create page, which carries it through to its export.
   const { engine: _engine, ...fileMeta } = variantFm
   resolved._variantFrontmatter = fileMeta
+  resolved._variantBody = variantParsed.body
   // The surface as written. The resolved one is the palette built from it, and
   // written back out it would be a hundred colours where the file had a name.
   // A variant that only overrides colours sits on its family's surface, and a

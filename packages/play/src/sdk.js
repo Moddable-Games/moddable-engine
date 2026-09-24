@@ -97,6 +97,14 @@ export function createAI(family, variant, opts = {}) {
     pickMove(sliceState, playerIndex) {
       return engine.search(sliceState, playerIndex)
     },
+    // Forget what earlier searches learned, so the next is searched as if first.
+    clear() {
+      engine.clearTT?.()
+    },
+    // What the last search cost, where the engine counts it.
+    stats() {
+      return engine.getStats ? engine.getStats() : null
+    },
   }
 }
 

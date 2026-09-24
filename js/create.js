@@ -1,9 +1,9 @@
 import { renderFromEngine, attachPieceImages, pieceIdToFenChar } from '../packages/render/index.js'
-import { parseFrontmatter, serializeFrontmatter } from '../packages/schema/index.js'
+import { parseFrontmatter } from '../packages/schema/index.js'
 import { getPlayableFamilies, getFamilyLabel, loadPlayabilityManifest, getPlayableVariants } from './play-shared.js'
 import { resolveVariantBoard } from './variant-frontmatter.js'
 import { defaultState, buildResolvedFromState, buildSetup, parseSetup, stateFromResolved, resolveImported, isGrid,
-  frontmatterFromState, pieceSpecsFromState, stateFromTemplate, slugify, overrideLook, setGridLayout, setTopologyType, emptyExtra,
+  frontmatterFromState, exportText, pieceSpecsFromState, familyOf, extendsOf, inlineExtends, stateFromTemplate, slugify, overrideLook, setGridLayout, setTopologyType, emptyExtra,
   setHexShape, paintCell, restoreAllCells,
   placementKey, setupText, setupFormOf } from './create-state.js'
 import { FAMILY_RULES, defaultRuleValues, buildRulesPanel, toPluginConfig } from './create-rules.js'
@@ -87,7 +87,7 @@ const CONTROL_BINDINGS = {
   'labels-select': v => { state.render.labels = v !== 'false' },
 }
 
-const META_BINDINGS = { 'meta-title': 'title', 'meta-slug': 'slug', 'meta-win': 'win', 'meta-special': 'special' }
+const META_BINDINGS = { 'meta-title': 'title', 'meta-slug': 'slug', 'meta-win': 'win', 'meta-special': 'special', 'meta-author': 'author' }
 
 function writeStateIntoControls() {
   restoring = true
@@ -95,6 +95,7 @@ function writeStateIntoControls() {
   $('meta-slug').value = state.slug || ''
   $('meta-win').value = state.win || ''
   $('meta-special').value = state.special || ''
+  $('meta-author').value = state.author || ''
   $('family-select').value = state.family
   // A field the variant leaves to its family shows the value it will have.
   const resolved = buildResolvedFromState(state)
@@ -910,12 +911,20 @@ async function loadTemplate() {
 
 // --- export ---
 
-function importYaml(text) {
+async function importYaml(text) {
   try {
-    const parsed = parseFrontmatter(text)
+    let parsed = parseFrontmatter(text)
     if (!parsed?.meta?.engine) {
       setStatus('No engine block found in the imported file')
       return false
+    }
+    // A file that extends another variant is completed from it, so what is
+    // loaded - and exported - stands on its own.
+    const parent = extendsOf(parsed)
+    if (parent) {
+      const family = familyOf(parsed)
+      const resolved = await resolveVariantBoard(family, {}, parent, parent)
+      parsed = inlineExtends(parsed, resolved.plugins?.[family])
     }
     const next = resolveImported(parsed)
     applyState(next)
@@ -930,7 +939,7 @@ function importYaml(text) {
 }
 
 function exportYaml() {
-  const yaml = serializeFrontmatter(frontmatterFromState(state))
+  const yaml = exportText(state)
 
   const blob = new Blob([yaml], { type: 'text/yaml' })
   const url = URL.createObjectURL(blob)

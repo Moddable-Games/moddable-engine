@@ -352,10 +352,13 @@ game.applyMove(moves[0])</code></pre>
 const res = await fetch('https://engine.moddable.games/api/puzzles/index.json')
 const data = await res.json()
 
-// data.standard = [{ id, fen, position, turn, variantSlug, solution, rating, themes, setupMove? }]
-// data.variants = [{ id, variant, variantSlug, fen, position, turn, solution, rating, setupMove? }]
-// data.meta = { count: 1876, standard: 1118, variants: 758, schemaVersion: 2 }
+// data.standard = [{ id, family, fen, position, turn, variantSlug, solution, rating, themes, license, setupMove? }]
+// data.variants = [{ id, family, variant, variantSlug, fen, position, turn, solution, rating, license, setupMove? }]
+// data.meta = { count, standard, variants, schemaVersion: 2, licenses }
 //
+// license: the record's own licence. CC0 records alone:
+//   data.standard.filter(p => p.license === 'CC0-1.0')
+// meta.licenses gives the basis for each source's licence.
 // position: the FEN the solver faces (after setupMove is applied through the engine).
 // fen: provenance — the source position before the opponent's move.
 // setupMove: if present, the move that was applied to fen to produce position.

@@ -13,14 +13,20 @@ export function createMCTS(simulator, opts = {}) {
   const timeMs = opts.timeMs || config.timeMs || null
   const explorationConstant = opts.exploration || config.exploration || 1.41
   const maxRolloutDepth = opts.maxRolloutDepth || 100
+  // Deterministic: the iteration count alone bounds the search, and the seeded
+  // `random` makes every choice, so a run can be taken again (engine#178).
+  const deterministic = !!opts.deterministic
+  const random = opts.random || Math.random
 
   const evaluate = opts.evaluate || null
   const rolloutPolicy = opts.rolloutPolicy || null
   const expansionPolicy = opts.expansionPolicy || null
 
+  let lastIterations = 0
+
   function search(state, playerIndex) {
     const root = createNode(null, null, state, playerIndex)
-    const deadline = timeMs ? Date.now() + timeMs : null
+    const deadline = timeMs && !deterministic ? Date.now() + timeMs : null
     let completed = 0
 
     for (let i = 0; i < iterations; i++) {
@@ -37,12 +43,16 @@ export function createMCTS(simulator, opts = {}) {
         node = expand(node)
       }
 
+      // Who moved into this node: its parent's player to move. The root was
+      // reached by nobody's move in this search.
+      const mover = node.parent ? node.parent.playerIndex : null
       const score = evaluate
-        ? evaluatedRollout(node.state, node.playerIndex, playerIndex)
-        : randomRollout(node.state, node.playerIndex, playerIndex)
+        ? evaluatedRollout(node.state, node.playerIndex, playerIndex, mover)
+        : randomRollout(node.state, node.playerIndex, playerIndex, mover)
 
       backpropagate(node, score, playerIndex)
     }
+    lastIterations = completed
 
     if (root.children.length === 0) {
       return root.untriedMoves.length > 0 ? root.untriedMoves[0] : null
@@ -96,7 +106,7 @@ export function createMCTS(simulator, opts = {}) {
     if (expansionPolicy && node.untriedMoves.length > 1) {
       idx = weightedExpansionPick(node.untriedMoves, node.state, node.playerIndex)
     } else {
-      idx = Math.floor(Math.random() * node.untriedMoves.length)
+      idx = Math.floor(random() * node.untriedMoves.length)
     }
     const move = node.untriedMoves.splice(idx, 1)[0]
     const { state: newState, continueTurn } = simulator.applyMove(node.state, move, node.playerIndex)
@@ -110,8 +120,8 @@ export function createMCTS(simulator, opts = {}) {
     const weights = expansionPolicy(state, playerIndex, moves)
     let total = 0
     for (let i = 0; i < weights.length; i++) total += weights[i]
-    if (total <= 0) return Math.floor(Math.random() * moves.length)
-    let r = Math.random() * total
+    if (total <= 0) return Math.floor(random() * moves.length)
+    let r = random() * total
     for (let i = 0; i < weights.length; i++) {
       r -= weights[i]
       if (r <= 0) return i
@@ -119,27 +129,36 @@ export function createMCTS(simulator, opts = {}) {
     return moves.length - 1
   }
 
-  function randomRollout(state, currentPlayer, rootPlayer) {
+  // A terminal position's value to the root player. The simulator reads the
+  // winner's seat, names included: parsing a seat number out of "black" found
+  // none and gave every named winner's game to seat 0.
+  function terminalValue(terminal, rootPlayer) {
+    if (terminal.winner === 'draw' || terminal.winnerIndex === null) return 0.5
+    const winnerIdx = terminal.winnerIndex ?? parseWinnerIndex(terminal.winner)
+    return winnerIdx === rootPlayer ? 1 : 0
+  }
+
+  function randomRollout(state, currentPlayer, rootPlayer, firstMover) {
     let current = simulator.cloneState(state)
     let player = currentPlayer
+    let mover = firstMover
     let depth = 0
 
     while (depth < maxRolloutDepth) {
-      const terminal = simulator.checkTerminal(current, player)
-      if (terminal.over) {
-        if (terminal.winner === 'draw') return 0.5
-        const winnerIdx = parseWinnerIndex(terminal.winner)
-        return winnerIdx === rootPlayer ? 1 : 0
-      }
+      const terminal = mover === null || mover === undefined
+        ? simulator.checkTerminal(current, player)
+        : simulator.checkTerminal(current, player, mover)
+      if (terminal.over) return terminalValue(terminal, rootPlayer)
 
       const moves = simulator.getLegalMoves(current, player)
       if (moves.length === 0) return 0.5
 
       const selectedMove = rolloutPolicy
         ? rolloutPolicy(current, player, moves)
-        : moves[Math.floor(Math.random() * moves.length)]
+        : moves[Math.floor(random() * moves.length)]
       const { state: newState, continueTurn } = simulator.applyMove(current, selectedMove, player)
       current = newState
+      mover = player
       player = simulator.nextPlayer(player, continueTurn)
       depth++
     }
@@ -160,13 +179,11 @@ export function createMCTS(simulator, opts = {}) {
     return Math.max(0, Math.min(1, (score + 1) / 2))
   }
 
-  function evaluatedRollout(state, currentPlayer, rootPlayer) {
-    const terminal = simulator.checkTerminal(state, currentPlayer)
-    if (terminal.over) {
-      if (terminal.winner === 'draw') return 0.5
-      const winnerIdx = parseWinnerIndex(terminal.winner)
-      return winnerIdx === rootPlayer ? 1 : 0
-    }
+  function evaluatedRollout(state, currentPlayer, rootPlayer, mover) {
+    const terminal = mover === null || mover === undefined
+      ? simulator.checkTerminal(state, currentPlayer)
+      : simulator.checkTerminal(state, currentPlayer, mover)
+    if (terminal.over) return terminalValue(terminal, rootPlayer)
 
     return truncatedValue(state, rootPlayer)
   }
@@ -201,7 +218,11 @@ export function createMCTS(simulator, opts = {}) {
     return 0
   }
 
-  return { search }
+  function getStats() {
+    return { iterations: lastIterations }
+  }
+
+  return { search, getStats }
 }
 
 export { DIFFICULTIES as MCTS_DIFFICULTIES }

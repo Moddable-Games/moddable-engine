@@ -7,7 +7,7 @@ import { readPosition, writePosition } from '../packages/core/index.js'
 // create writes state, play reads the same state, and "Edit in Create" reads it
 // back without either side re-deriving the other's shape.
 
-import { resolveSurface, cascadeResolve } from '../packages/schema/index.js'
+import { resolveSurface, cascadeResolve, serializeFrontmatter } from '../packages/schema/index.js'
 import { toPluginConfig, defaultRuleValues, fitsField } from './create-rules.js'
 import { defaultPlayers, toPlayerConfig, playersFromResolved } from './create-players.js'
 import { applyEdits, clone } from './create-carry.js'
@@ -23,6 +23,9 @@ export function defaultState(family = 'chess') {
     family,
     title: 'Custom Variant',
     slug: '',
+    author: '',
+    // The loaded file's page text, carried to the export unchanged.
+    body: null,
     win: '',
     special: '',
     topology: { type: 'grid', rows: 8, cols: 8, radius: 5, sideLength: 12, structure: 'concentric-rings', rings: 3, positions: 24, pitCols: 6 },
@@ -531,8 +534,16 @@ function declaredSurface(surface) {
 
 // The whole frontmatter an export writes: the metadata block, whatever other
 // top-level keys the loaded file carried, and the engine block.
+//
+// A board built here is its author's, not a published rule and not a Moddable
+// original, so it says `published: false` and names whoever made it. The rules
+// repo's attribution check accepts exactly that as making no claim, so the file
+// does not fail the moment it is contributed. A loaded variant keeps what its
+// own file says.
 export function frontmatterFromState(state) {
   const meta = { ...clone(state.meta || {}) }
+  if (!state.source && meta.published === undefined) meta.published = false
+  if (state.author) meta.author = state.author
   const title = state.title || 'Custom Variant'
   meta.title = title
   meta.slug = state.slug || slugify(title)
@@ -545,7 +556,24 @@ export function frontmatterFromState(state) {
   const engine = variantEngineFromState(state)
   if (engine.surface !== undefined) engine.surface = declaredSurface(engine.surface)
   meta.engine = engine
-  return meta
+
+  // In the order the loaded file had them, so a file opened and saved again
+  // differs only where it was changed.
+  const ordered = {}
+  for (const key of state.metaOrder || []) if (key in meta) ordered[key] = meta[key]
+  for (const key of Object.keys(meta)) if (!(key in ordered)) ordered[key] = meta[key]
+  return ordered
+}
+
+// The file an export writes: frontmatter, then the page. A loaded variant's page
+// goes out as it came in; a new board gets an Attribution section naming its
+// author.
+export function exportText(state) {
+  const head = serializeFrontmatter(frontmatterFromState(state))
+  if (typeof state.body === 'string' && state.body.trim()) return `${head}\n${state.body.replace(/^\n/, '')}`
+  const title = state.title || 'Custom Variant'
+  const credit = state.author ? `Created by ${state.author}` : 'Created'
+  return `${head}\n\n## ${title}\n\n${state.special || ''}\n\n### Attribution\n\n${credit} with the Moddable Games board editor.\n`
 }
 
 export function slugify(s) {
@@ -572,6 +600,10 @@ export function stateFromResolved(resolved, family, opts = {}) {
   state.win = opts.win || resolved.meta?.win || ''
   state.special = opts.special || resolved.meta?.special || ''
   if (opts.meta) state.meta = clone(opts.meta)
+  if (opts.metaOrder) state.metaOrder = [...opts.metaOrder]
+  if (typeof opts.body === 'string') state.body = opts.body
+  // The author field is the page's own; the rest of the metadata is carried.
+  if (state.meta.author) { state.author = String(state.meta.author); delete state.meta.author }
 
   const extra = emptyExtra()
   readTopology(state, source.topology || resolved.topology || {}, extra)
@@ -758,11 +790,37 @@ export function stateFromTemplate(resolved, family, slug) {
     special: variantMeta.special || '',
     meta: fileMeta,
     surface: resolved._declaredSurface,
+    body: resolved._variantBody,
+    metaOrder: [...Object.keys(resolved._variantFrontmatter || {}), 'engine'],
   })
 }
 
 // Frontmatter keys the metadata block owns, or that are the engine block itself.
 const OWNED_META_KEYS = new Set(['engine', 'title', 'slug', 'win', 'special'])
+
+// The family a file's engine block is for.
+export function familyOf(parsed) {
+  const meta = parsed?.meta || {}
+  return Object.keys(meta.engine?.plugins || {})[0] || meta.parent || 'chess'
+}
+
+// The parent a file's plugin block `extends`, if it names one.
+export function extendsOf(parsed) {
+  return parsed?.meta?.engine?.plugins?.[familyOf(parsed)]?.extends || null
+}
+
+// `extends` is how the rules repo shares a plugin block between its own files.
+// A file made here stands alone, so the parent's block is written into it and
+// the reference dropped, the same merge play does (the file's own keys win).
+export function inlineExtends(parsed, parentPlugin) {
+  const family = familyOf(parsed)
+  const out = clone(parsed)
+  const own = out.meta.engine.plugins[family]
+  const { extends: _parent, ...rest } = own
+  out.meta.engine.plugins[family] = { ...clone(parentPlugin || {}), ...rest }
+  delete out.meta.engine.plugins[family].extends
+  return out
+}
 
 export function resolveImported(parsed) {
   const meta = parsed.meta || {}
@@ -770,7 +828,7 @@ export function resolveImported(parsed) {
   const surfaceRef = engine.surface || 'wood-classic'
   const surface = resolveSurface(typeof surfaceRef === 'string' ? surfaceRef : 'wood-classic')
 
-  const family = Object.keys(engine.plugins || {})[0] || meta.parent || 'chess'
+  const family = familyOf(parsed)
 
   const variantEngine = { ...engine }
   const { resolved } = cascadeResolve({
@@ -791,6 +849,8 @@ export function resolveImported(parsed) {
     special: meta.special || '',
     meta: carriedMeta,
     source: engine,
+    body: parsed.body,
+    metaOrder: Object.keys(meta),
   })
 }
 
