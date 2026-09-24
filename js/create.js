@@ -450,6 +450,7 @@ function applySetupInput(text) {
     rows: state.topology.rows,
     cols: state.topology.cols,
     layers: state.topology.layers,
+    topology: { ...(state.extra?.topology || {}), ...state.topology },
   })
   if (next === null && isGrid(state)) { input.classList.add('is-invalid'); return false }
   pieceHistory.push({ replaceAll: { ...state.placement } })

@@ -16,6 +16,7 @@ import { createTrackTopology } from '../../topologies/track/index.js'
 import { createPitTopology } from '../../topologies/pit/index.js'
 import { createGraphTopology } from '../../topologies/graph/index.js'
 import { createTableauTopology } from '../../topologies/tableau/index.js'
+import { createTrisectionTopology } from '../../topologies/trisection/index.js'
 import { createGoPlugin } from '../../plugins/go/index.js'
 import { createReversiPlugin } from '../../plugins/reversi/index.js'
 import { createDraughtsPlugin } from '../../plugins/draughts/index.js'
@@ -42,6 +43,7 @@ const TOPOLOGIES = {
   pit: (config) => createPitTopology(config),
   graph: (config) => createGraphTopology(config),
   tableau: (config) => createTableauTopology(config),
+  'hexagonal-trisection': (config) => createTrisectionTopology(config),
 }
 
 const PLUGIN_FACTORIES = {

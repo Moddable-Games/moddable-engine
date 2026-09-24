@@ -12,6 +12,7 @@ import { toPluginConfig, defaultRuleValues, fitsField } from './create-rules.js'
 import { defaultPlayers, toPlayerConfig, playersFromResolved } from './create-players.js'
 import { applyEdits, clone } from './create-carry.js'
 import { createTopology } from '../packages/play/index.js'
+import { readTrisectionSymbols, trisectionSize } from '../packages/topologies/trisection/index.js'
 
 // 2: the loaded variant is carried whole as `source` (create-carry.js), in
 // place of the render, vocabulary and piece keys version 1 carried one by one.
@@ -113,7 +114,12 @@ export function placementKey(row, col, layer = 0) {
 // Returns a placement map, or null if the setup does not fit the board.
 // Applied whole or rejected whole: a partially applied setup leaves the box
 // showing a string the board is not displaying.
-export function parseSetup(setup, { type, rows, cols, layers = 1 }) {
+export function parseSetup(setup, { type, rows, cols, layers = 1, topology = {} }) {
+  // A trisected board is also written a block of ranks per seat, which reads
+  // onto its cells the way a FEN reads onto a grid's.
+  if (type === 'hexagonal-trisection') {
+    return typeof setup === 'string' ? readTrisectionSymbols(setup, trisectionSize({ ...topology, type })) : null
+  }
   if (type !== 'grid') return typeof setup === 'string' ? parseCellList(setup) : null
 
   // A layered board's setup is one position per board, written in the setup
@@ -620,7 +626,7 @@ export function stateFromResolved(resolved, family, opts = {}) {
   const setup = source.setup ?? resolved.setup
   const readable = (typeof setup === 'string' && setup) || (Array.isArray(setup) && setup.length)
   const parsed = readable
-    ? parseSetup(setup, { type: state.topology.type, rows: state.topology.rows, cols: state.topology.cols, layers: state.topology.layers })
+    ? parseSetup(setup, { type: state.topology.type, rows: state.topology.rows, cols: state.topology.cols, layers: state.topology.layers, topology: { ...extra.topology, ...state.topology } })
     : null
   if (parsed && Object.keys(parsed).length) {
     state.placement = parsed

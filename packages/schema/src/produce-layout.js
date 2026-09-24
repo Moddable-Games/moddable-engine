@@ -14,6 +14,7 @@ import { resolveSurface } from './surfaces.js'
 import { triangularPointOps } from './produce-layout-triangular-points.js'
 import { perimeterOps } from './produce-layout-perimeter.js'
 import { produceStarLayout } from './produce-layout-star.js'
+import { produceTrisectionLayout } from './produce-layout-trisection.js'
 
 export function produceLayout(engine) {
   if (!engine || !engine.topology) return null
@@ -30,6 +31,7 @@ export function produceLayout(engine) {
     case 'pit': return producePitLayout(topo, colors, render)
     case 'graph': return produceGraphLayout(topo, colors, render)
     case 'tableau': return produceTableauLayout(topo, colors, render, engine)
+    case 'hexagonal-trisection': return produceTrisectionLayout(topo, colors, render)
     default: return null
   }
 }

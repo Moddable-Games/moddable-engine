@@ -4,15 +4,15 @@
   "boards": 334,
   "boardFamilies": 34,
   "tiles": 11,
-  "puzzles": 1951,
+  "puzzles": 1812,
   "puzzlesByType": {
     "standard": 1116,
-    "variants": 835
+    "variants": 696
   },
-  "playableVariants": 239,
+  "playableVariants": 240,
   "playableFamilies": 10,
   "playableByFamily": {
-    "chess": 148,
+    "chess": 149,
     "draughts": 20,
     "go": 12,
     "hex": 8,
@@ -36,7 +36,7 @@
     "xiangqi": 0
   },
   "frontmatterOnlyByFamily": {
-    "chess": 95,
+    "chess": 96,
     "draughts": 20,
     "go": 9,
     "hex": 8,

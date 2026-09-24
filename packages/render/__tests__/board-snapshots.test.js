@@ -15,7 +15,7 @@ const SNAP_DIR = join(ROOT, 'snapshots')
 // A comparison that finds no snapshots passes. So does one that compares three
 // of three hundred. Both floors are assertions, not decoration.
 const SNAPSHOT_FLOOR = 320
-const NULL_RENDER_CEILING = 2
+const NULL_RENDER_CEILING = 1
 
 let report = ''
 beforeAll(() => {
@@ -52,12 +52,14 @@ describe('committed board snapshots match what the renderer produces', () => {
 
   // The gap #144 fell into: the render tests skip anything returning null and
   // the playability tests skip anything not marked playable, so a variant that
-  // is both is checked by nothing. Counting them is what closes it. Both of
-  // these are the hexagonal-trisection boards waiting on engine#26; the
-  // ceiling only shrinks.
-  it('no more variants render null than the two waiting on a renderer', () => {
+  // is both is checked by nothing. Counting them is what closes it. The one
+  // left is San-kwo-k'i: engine#26 gave the trisected hexagon a renderer, and
+  // Yalta draws on it, but a board of points is drawn only once its size is
+  // declared, and the sources do not give San-kwo-k'i's. The ceiling only
+  // shrinks.
+  it('no more variants render null than the one waiting on its board', () => {
     const named = report.match(/^ {2}- (.+)$/gm)?.map(l => l.replace('  - ', '')) || []
-    expect(named.sort()).toEqual(['chess/yalta-chess', 'xiangqi/san-kwo-ki'])
+    expect(named.sort()).toEqual(['xiangqi/san-kwo-ki'])
     expect(named.length).toBeLessThanOrEqual(NULL_RENDER_CEILING)
   })
 

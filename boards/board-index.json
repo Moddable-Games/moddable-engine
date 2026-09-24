@@ -1660,6 +1660,16 @@
     "playable": true
   },
   {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "yalta-chess",
+    "variantTitle": "Yalta Chess",
+    "topology": "hexagonal-trisection",
+    "svg": "svgs/chess--yalta-chess.svg",
+    "rulesUrl": "chess/variants/yalta-chess/index.html",
+    "playable": true
+  },
+  {
     "family": "dou-shou-qi",
     "familyTitle": "Dou Shou Qi (斗兽棋 / Jungle)",
     "variant": "standard",

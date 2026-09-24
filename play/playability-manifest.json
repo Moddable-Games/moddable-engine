@@ -1332,6 +1332,15 @@
     "playable": true
   },
   {
+    "family": "chess",
+    "familyLabel": "Chess",
+    "variant": "yalta-chess",
+    "key": "yalta-chess",
+    "label": "Yalta Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
     "family": "draughts",
     "familyLabel": "Draughts",
     "variant": "alquerque",
