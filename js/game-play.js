@@ -1410,7 +1410,9 @@ export function createPlaySession(options = {}) {
     },
     flip() {
       flipped = !flipped
-      cells.setFlipped(flipped)
+      // A board drawn as rings is flipped by turning the drawing round, so its
+      // squares keep their ids and the addressing must not mirror them.
+      cells.setFlipped(flipped && resolvedBoard?.render?.mode !== 'annular')
       if (ctrl) ctrl.setFlipped(flipped)
     },
     markDead: toggleDead,

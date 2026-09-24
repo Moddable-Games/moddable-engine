@@ -11,7 +11,7 @@ import { fileLabel } from '../../core/index.js'
 
 import { produceLayout, buildCrossMap, pieceImageKey, pieceImageKeys, symbolToPiece, drawsAsStandIn } from '../../schema/index.js'
 import { parseRankRuns, readPosition } from '../../core/index.js'
-import { renderGridLayout } from '../../topologies/grid/index.js'
+import { renderGridLayout, renderAnnularLayout } from '../../topologies/grid/index.js'
 import { renderGraphLayout } from '../../topologies/graph/index.js'
 import { renderPitLayout } from '../../topologies/pit/index.js'
 import { renderTrackLayout } from '../../topologies/track/index.js'
@@ -26,7 +26,7 @@ import { OWNER_PREFIXES, getOwnerFromPrefix } from './recolour.js'
 // its own terms. Parsing their setup as a FEN here finds nothing, correctly.
 const DRAWS_OWN_PIECES = new Set(['hex', 'pit', 'track', 'hexagonal-trisection'])
 
-const RENDER_FN = { grid: renderGridLayout, graph: renderGraphLayout, pit: renderPitLayout, track: renderTrackLayout, hex: renderHexLayout, tableau: renderTableauLayout, 'hexagonal-trisection': renderTrisectionLayout }
+const RENDER_FN = { grid: renderGridLayout, graph: renderGraphLayout, pit: renderPitLayout, track: renderTrackLayout, hex: renderHexLayout, tableau: renderTableauLayout, 'hexagonal-trisection': renderTrisectionLayout, annular: renderAnnularLayout }
 
 // --- Piece image resolution ---
 
@@ -370,8 +370,17 @@ export function renderFromEngine(resolved, opts = {}) {
   }
 
   // Produce layout
-  const result = produceLayout(resolved)
+  let result = produceLayout(resolved)
   if (!result) return null
+  // A board drawn as rings is flipped by turning it round, which the ring
+  // layout does itself so its labels and pieces stay upright. Mirroring its
+  // ids, as a flat grid's are, would put the outer ring inside.
+  const annular = result.type === 'annular'
+  if (annular && opts.flipped) {
+    render.rotation = (render.rotation || 0) + 180
+    result = produceLayout(resolved)
+  }
+  const flipped = opts.flipped && !annular
 
   const renderFn = RENDER_FN[result.type]
   if (!renderFn) return null
@@ -413,7 +422,7 @@ export function renderFromEngine(resolved, opts = {}) {
     parts.push(collectDefs(position, opts.pieceDefs))
   }
 
-  const flipNonGrid = opts.flipped && topo.type !== 'grid'
+  const flipNonGrid = flipped && topo.type !== 'grid'
   if (flipNonGrid) parts.push(`<g transform="rotate(180 ${W / 2} ${H / 2})">`)
 
   parts.push(elementsToFragment(layout.elements))
@@ -428,14 +437,14 @@ export function renderFromEngine(resolved, opts = {}) {
     const tileSize = render.cellSize || 40
     const colors = surface.colors || {}
     const posAlpha = (resolved.render || {}).positionAlphabet || null
-    const displayPosition = opts.flipped
+    const displayPosition = flipped
       ? flipPosition(position, topo.rows || 8, topo.cols || 8, posAlpha)
       : position
-    let effectiveRotations = opts.flipped ? flipRotations(resolved.pieceRotations) : resolved.pieceRotations
-    if (opts.flipped && !effectiveRotations && resolved.pieces?.directional) {
+    let effectiveRotations = flipped ? flipRotations(resolved.pieceRotations) : resolved.pieceRotations
+    if (flipped && !effectiveRotations && resolved.pieces?.directional) {
       effectiveRotations = Object.fromEntries((resolved.players || ['white', 'black']).map(p => [p, 180]))
     }
-    parts.push(`<g pointer-events="none">${renderPiecesFromCells(displayPosition, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: effectiveRotations, getOwner, pieceDefs: opts.pieceDefs, colors, vocabulary: resolved.vocabulary || {}, pieceScale: render.pieceScale, columnDepths: render._columnDepths, cols: topo.cols, flipped: opts.flipped, rows: topo.rows, onStandIn: opts.onStandIn })}</g>`)
+    parts.push(`<g pointer-events="none">${renderPiecesFromCells(displayPosition, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: effectiveRotations, getOwner, pieceDefs: opts.pieceDefs, colors, vocabulary: resolved.vocabulary || {}, pieceScale: render.pieceScale, columnDepths: render._columnDepths, cols: topo.cols, flipped, rows: topo.rows, onStandIn: opts.onStandIn })}</g>`)
   } else if (position && Object.keys(position).length > 0) {
     parts.push(`<g pointer-events="none"></g>`)
   }
