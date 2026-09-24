@@ -4,10 +4,10 @@ import { fromConfig, betzaToSpec } from '../../../piece-behaviour/index.js'
 // authoring docs share one source of truth, and kept separate from `defaults`,
 // which only lists the keys that carry a default value.
 export const CONFIG_KEYS = new Set([
-  'advancement', 'afterMove', 'borrowFromBehind', 'captureRule', 'cols', 'flipMap',
+  'advancement', 'afterMove', 'borrowFromBehind', 'captureImmunity', 'captureRule', 'cols', 'flipMap',
   'dropCheckmateLimit', 'dropPawnFileLimit', 'drops', 'initialHands', 'moveFilter',
   'burn', 'demotionMap', 'nifuLimit', 'pieceRanks', 'nifuType', 'noDropLastRank', 'noDropSecondRank', 'pieceMoves',
-  'pieceRotations', 'playerCount', 'promotionMap', 'promotionPieces', 'promotionZone',
+  'noCheck', 'pieceRotations', 'playerCount', 'promoteOnCapture', 'promotionMap', 'promotionPieces', 'promotionZone',
   'rows', 'royalType', 'setup', 'turnLogic', 'winCondition',
 ])
 
@@ -341,7 +341,49 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     // `via` is the square an area move steps through, where there may be a
     // second piece to take. Dropping it here is how a Lion's double capture
     // would silently become a single one.
-    return moves.map(m => (m.via === undefined ? { from: m.from, to: m.to } : { from: m.from, to: m.to, via: m.via }))
+    return moves
+      .map(m => (m.via === undefined ? { from: m.from, to: m.to } : { from: m.from, to: m.to, via: m.via }))
+      .filter(m => !barredByImmunity(board, m, piece))
+  }
+
+  // Captures a variant forbids by who is taking what. Sankaku Shogi has two,
+  // one absolute and one conditional:
+  //
+  //     captureImmunity:
+  //       - { by: soldier, target: chariot }                  # "Cannot capture the Chariot"
+  //       - { by: emperor, target: emperor, when: defended }  # "may not capture an opponent
+  //                                                           #  Emperor which is defended"
+  //
+  // Defended means a piece of the target's side could take back on that
+  // square once the capture is made (engine#173).
+  const immunities = Array.isArray(config.captureImmunity) ? config.captureImmunity : []
+
+  function barredByImmunity(board, move, mover) {
+    if (!immunities.length) return false
+    const victims = []
+    if (move.to !== move.from && board[move.to] && board[move.to].owner !== mover.owner) victims.push(board[move.to])
+    if (move.via !== undefined && move.via !== move.to && board[move.via]) victims.push(board[move.via])
+    for (const victim of victims) {
+      for (const rule of immunities) {
+        if (rule.by !== mover.type || rule.target !== victim.type) continue
+        if (rule.when !== 'defended') return true
+        if (isDefendedAfter(board, move, mover, victim.owner)) return true
+      }
+    }
+    return false
+  }
+
+  function isDefendedAfter(board, move, mover, side) {
+    const after = cloneBoard(board)
+    after[move.from] = null
+    if (move.via !== undefined && move.via !== move.to) after[move.via] = null
+    after[move.to] = mover
+    for (const i of playableCells(after)) {
+      const piece = after[i]
+      if (!piece || piece.owner !== side) continue
+      if (canAttack(after, i, move.to, piece, side)) return true
+    }
+    return false
   }
 
 // Tenjiku's fire demon: "Wherever the fire demon stops, all adjacent opposing
@@ -644,6 +686,14 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
         newType = config.flipMap[newType]
       }
 
+      // Sankaku Shogi's Soldier and Cavalry "mandatorily promote to General
+      // upon performing any capture" - wherever it happens, so this is a
+      // property of the move rather than of a zone.
+      const tookSomething = !!captured || (move.via !== undefined && move.via !== move.to && slice.board[move.via] && slice.board[move.via].owner !== playerIndex)
+      if (tookSomething && config.promoteOnCapture && config.promoteOnCapture[newType]) {
+        newType = config.promoteOnCapture[newType]
+      }
+
       board[move.to] = { type: newType, owner: playerIndex }
 
       if (config.captureRule === 'custodian') {
@@ -713,8 +763,11 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
         : allMoves
 
       // With no royal piece there is no check to legalise against, so the
-      // generated list is already the legal list.
-      if (isRoyalless()) return generated
+      // generated list is already the legal list. Nor is there where the game
+      // is won by taking the royal rather than by mate - Sankaku Shogi "is won
+      // by capturing the opponent Emperor" - and leaving it en prise is a
+      // legal, losing move (`noCheck`).
+      if (isRoyalless() || config.noCheck) return generated
 
       return generated.filter(m => {
         const testBoard = cloneBoard(slice.board)
@@ -789,6 +842,7 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
 
       const opponent = 1 - playerIndex
       if (findKing(slice.board, opponent) === -1) return playerIndex
+      if (config.noCheck) return null
 
       if (isInCheck(slice.board, opponent)) {
         const oppFull = { __players: { currentIndex: opponent } }

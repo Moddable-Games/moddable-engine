@@ -13,6 +13,7 @@ import { defaultPlayers, toPlayerConfig, playersFromResolved } from './create-pl
 import { applyEdits, clone } from './create-carry.js'
 import { createTopology } from '../packages/play/index.js'
 import { readTrisectionSymbols, trisectionSize } from '../packages/topologies/trisection/index.js'
+import { readTriangularSymbols } from '../packages/topologies/triangular/index.js'
 
 // 2: the loaded variant is carried whole as `source` (create-carry.js), in
 // place of the render, vocabulary and piece keys version 1 carried one by one.
@@ -119,6 +120,10 @@ export function parseSetup(setup, { type, rows, cols, layers = 1, topology = {} 
   // onto its cells the way a FEN reads onto a grid's.
   if (type === 'hexagonal-trisection') {
     return typeof setup === 'string' ? readTrisectionSymbols(setup, trisectionSize({ ...topology, type })) : null
+  }
+  // A board of triangles is written rank by rank, as a FEN is.
+  if (type === 'triangular') {
+    return typeof setup === 'string' ? readTriangularSymbols(setup, Array.isArray(topology.shape) ? topology.shape.length : null) : null
   }
   if (type !== 'grid') return typeof setup === 'string' ? parseCellList(setup) : null
 

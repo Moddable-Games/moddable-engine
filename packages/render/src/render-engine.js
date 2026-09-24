@@ -18,15 +18,16 @@ import { renderTrackLayout } from '../../topologies/track/index.js'
 import { renderHexLayout } from '../../topologies/hex/index.js'
 import { renderTableauLayout } from './render-tableau.js'
 import { createTrisectionTopology, trisectionSize, renderTrisectionLayout } from '../../topologies/trisection/index.js'
+import { createTriangularTopology, renderTriangularLayout } from '../../topologies/triangular/index.js'
 import { elementsToFragment, elementToSvg } from './serialize-layout.js'
 import { renderSurfaceSVG } from './piece-surface.js'
 import { OWNER_PREFIXES, getOwnerFromPrefix } from './recolour.js'
 
 // Boards whose renderer places the pieces itself, from a position it reads in
 // its own terms. Parsing their setup as a FEN here finds nothing, correctly.
-const DRAWS_OWN_PIECES = new Set(['hex', 'pit', 'track', 'hexagonal-trisection'])
+const DRAWS_OWN_PIECES = new Set(['hex', 'pit', 'track', 'hexagonal-trisection', 'triangular'])
 
-const RENDER_FN = { grid: renderGridLayout, graph: renderGraphLayout, pit: renderPitLayout, track: renderTrackLayout, hex: renderHexLayout, tableau: renderTableauLayout, 'hexagonal-trisection': renderTrisectionLayout, annular: renderAnnularLayout }
+const RENDER_FN = { grid: renderGridLayout, graph: renderGraphLayout, pit: renderPitLayout, track: renderTrackLayout, hex: renderHexLayout, tableau: renderTableauLayout, 'hexagonal-trisection': renderTrisectionLayout, triangular: renderTriangularLayout, annular: renderAnnularLayout }
 
 // --- Piece image resolution ---
 
@@ -358,10 +359,18 @@ export function renderFromEngine(resolved, opts = {}) {
   // kept on each piece because a many-seat set is keyed by it: `gK` is the
   // green King.
   if (topo.type === 'hexagonal-trisection' && resolved.setup && typeof resolved.setup === 'string' && trisectionSize(topo)) {
-    const vocabulary = trisectionVocabulary(resolved)
+    const vocabulary = ownVocabulary(resolved)
     const position = createTrisectionTopology(topo).parsePosition(resolved.setup, vocabulary)
     for (const piece of Object.values(position)) piece.symbol = vocabulary[piece.type]?.symbols?.[piece.owner]
     render._position = position
+  }
+  if (topo.type === 'triangular' && Array.isArray(topo.shape) && resolved.setup && typeof resolved.setup === 'string') {
+    const vocabulary = ownVocabulary(resolved)
+    try {
+      const position = createTriangularTopology(topo).parsePosition(resolved.setup, vocabulary)
+      for (const piece of Object.values(position)) piece.symbol = vocabulary[piece.type]?.symbols?.[piece.owner]
+      render._position = position
+    } catch { /* a shape the topology refuses renders as nothing, below */ }
   }
 
   if (topo.type === 'track' && resolved.content?.data) {
@@ -459,10 +468,11 @@ export function renderFromEngine(resolved, opts = {}) {
   return parts.join('\n')
 }
 
-// The vocabulary a position was written in. A variant's own block wins over
-// the family's, which is where a board with more seats than the family
-// declares its symbols.
-function trisectionVocabulary(resolved) {
+// The vocabulary a board that draws its own pieces was written in. A
+// variant's own block wins over the family's, which is where a board with
+// more seats than the family, or pieces the family does not have, declares
+// its symbols.
+function ownVocabulary(resolved) {
   const family = resolved.plugins ? Object.values(resolved.plugins)[0] : null
   return { ...(resolved.vocabulary || {}), ...(family?.vocabulary || {}) }
 }

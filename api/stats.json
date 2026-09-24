@@ -1,7 +1,7 @@
 {
   "generated": "2026-09-24",
   "pieces": 120,
-  "boards": 334,
+  "boards": 335,
   "boardFamilies": 34,
   "tiles": 11,
   "puzzles": 1812,
@@ -9,7 +9,7 @@
     "standard": 1116,
     "variants": 696
   },
-  "playableVariants": 240,
+  "playableVariants": 241,
   "playableFamilies": 10,
   "playableByFamily": {
     "chess": 149,
@@ -20,7 +20,7 @@
     "mancala": 8,
     "morris": 7,
     "reversi": 3,
-    "shogi": 23,
+    "shogi": 24,
     "xiangqi": 9
   },
   "variantPluginsByFamily": {
@@ -44,7 +44,7 @@
     "mancala": 8,
     "morris": 7,
     "reversi": 3,
-    "shogi": 23,
+    "shogi": 24,
     "xiangqi": 9
   },
   "tests": 6887,

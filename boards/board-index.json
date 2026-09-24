@@ -2827,7 +2827,7 @@
     "topology": "triangular",
     "svg": "svgs/shogi--sankaku-shogi.svg",
     "rulesUrl": "shogi/variants/sankaku-shogi/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "shogi",

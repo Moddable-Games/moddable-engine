@@ -16,6 +16,7 @@ import { perimeterOps } from './produce-layout-perimeter.js'
 import { produceStarLayout } from './produce-layout-star.js'
 import { produceTrisectionLayout } from './produce-layout-trisection.js'
 import { produceAnnularLayout } from './produce-layout-annular.js'
+import { produceTriangularLayout } from './produce-layout-triangular.js'
 
 export function produceLayout(engine) {
   if (!engine || !engine.topology) return null
@@ -33,6 +34,7 @@ export function produceLayout(engine) {
     case 'graph': return produceGraphLayout(topo, colors, render)
     case 'tableau': return produceTableauLayout(topo, colors, render, engine)
     case 'hexagonal-trisection': return produceTrisectionLayout(topo, colors, render)
+    case 'triangular': return produceTriangularLayout(topo, colors, render)
     default: return null
   }
 }

@@ -2009,6 +2009,15 @@
   {
     "family": "shogi",
     "familyLabel": "Shogi",
+    "variant": "sankaku-shogi",
+    "key": "sankaku-shogi",
+    "label": "Sankaku Shogi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "sho-shogi",
     "key": "sho-shogi",
     "label": "Sho Shogi",

@@ -31,11 +31,20 @@ function leapOffsetsOn(topology, input) {
 
 export function rider(dirs, opts = {}) {
   const { maxSteps, minSteps = 1 } = opts
+  // A rider that may drive over a piece in its path, taking it and carrying
+  // on. Sankaku Shogi's Chariot "can also 'run down' an opponent Soldier,
+  // capturing it and continuing its slide whether to a vacant or
+  // enemy-occupied cell" (engine#173). `types` names what may be run down and
+  // `max` how many in one slide; the victim is the move's `via`, which the
+  // plugins already treat as a square taken on the way.
+  const runDown = opts.runDown ? { max: 1, ...opts.runDown } : null
+  const runsOver = (occupant, isEnemy) => runDown && isEnemy && runDown.types.includes(occupant.type)
   return {
     type: 'rider',
     dirs,
     maxSteps,
     minSteps,
+    runDown,
     genMoves(topology, from, board) {
       const rays = topology.rays(from, dirs, maxSteps)
       const moves = []
@@ -46,31 +55,46 @@ export function rider(dirs, opts = {}) {
       const seen = topology.raysMayMeet ? new Set() : null
       const add = (move) => {
         if (seen) {
-          if (seen.has(move.to)) return
-          seen.add(move.to)
+          const id = move.via === undefined ? move.to : `${move.to}|${move.via}`
+          if (seen.has(id)) return
+          seen.add(id)
         }
         moves.push(move)
       }
       for (const ray of rays) {
+        let via
+        let ranOver = 0
         for (let i = 0; i < ray.length; i++) {
           const pos = ray[i]
           const occupant = board[pos]
+          const past = via === undefined ? {} : { via }
           if (occupant) {
-            if (occupant.enemy && i + 1 >= minSteps) add({ from, to: pos, capture: true })
+            if (occupant.enemy && i + 1 >= minSteps) add({ from, to: pos, capture: true, ...past })
+            if (via === undefined && ranOver < runDown?.max && runsOver(occupant, occupant.enemy)) {
+              via = pos
+              ranOver++
+              continue
+            }
             break
           }
-          if (i + 1 >= minSteps) add({ from, to: pos })
+          if (i + 1 >= minSteps) add(via === undefined ? { from, to: pos } : { from, to: pos, capture: true, via })
         }
       }
       return moves
     },
     attacks(topology, from, target, board) {
       const rays = topology.rays(from, dirs, maxSteps)
+      const mover = board[from]
       for (const ray of rays) {
+        let ranOver = 0
         for (let i = 0; i < ray.length; i++) {
           const pos = ray[i]
           if (pos === target) return i + 1 >= minSteps
-          if (board[pos]) break
+          const occupant = board[pos]
+          if (!occupant) continue
+          const isEnemy = occupant.enemy !== undefined ? occupant.enemy : (mover && occupant.owner !== mover.owner)
+          if (ranOver < (runDown?.max || 0) && runsOver(occupant, isEnemy)) { ranOver++; continue }
+          break
         }
       }
       return false
@@ -103,7 +127,7 @@ function lameBlockOffset(mode, dr, dc, dl = 0) {
 }
 
 export function leaper(offsets, opts = {}) {
-  const { lame = null } = opts
+  const { lame = null, relay = false } = opts
 
   // A lame leaper is blocked by an occupied square on the way, so it must be
   // resolved offset by offset rather than through a single leapTargets call.
@@ -125,31 +149,67 @@ export function leaper(offsets, opts = {}) {
     return out
   }
 
+  // Sankaku Shogi's Cavalry: "If this cell is occupied by a friendly piece,
+  // it performs an addition leap in any direction without returning to its
+  // starting cell. It is permitted only this one additional leap, and this
+  // second leap must be to vacant or enemy-occupied cells." The friendly piece
+  // stays where it is; the leaper only passes through its square.
+  function targetsOf(topology, from, board) {
+    return lame ? lameTargets(topology, from, board) : topology.leapTargets(from, leapOffsetsOn(topology, offsets))
+  }
+
+  function reach(topology, from, board, isFriendly) {
+    const out = []
+    // Only the relaying leaper de-duplicates. A board whose offsets can land
+    // on one square twice - a four-ring torus - has always listed that move
+    // twice, and puzzles were proved against those counts.
+    const seen = new Set()
+    for (const pos of targetsOf(topology, from, board)) {
+      if (!board[pos] || !isFriendly(board[pos])) {
+        if (!relay) { out.push(pos); continue }
+        if (!seen.has(pos)) { seen.add(pos); out.push(pos) }
+        continue
+      }
+      if (!relay) continue
+      for (const onward of targetsOf(topology, pos, board)) {
+        if (onward === from || onward === pos || seen.has(onward)) continue
+        if (board[onward] && isFriendly(board[onward])) continue
+        seen.add(onward)
+        out.push(onward)
+      }
+    }
+    return out
+  }
+
   return {
     type: 'leaper',
     offsets,
     lame,
+    relay,
     genMoves(topology, from, board) {
-      const targets = lame
-        ? lameTargets(topology, from, board)
-        : topology.leapTargets(from, leapOffsetsOn(topology, offsets))
       const moves = []
-      for (const pos of targets) {
+      for (const pos of reach(topology, from, board, (cell) => cell.friendly)) {
         const occupant = board[pos]
-        if (occupant && occupant.friendly) continue
-        if (occupant && occupant.enemy) {
-          moves.push({ from, to: pos, capture: true })
-        } else {
-          moves.push({ from, to: pos })
-        }
+        moves.push(occupant && occupant.enemy ? { from, to: pos, capture: true } : { from, to: pos })
       }
       return moves
     },
+    // A square is attacked whoever stands on it - a leaper defends its own
+    // pieces - so this does not ask what is on the target. It does ask what
+    // the first leap lands on, since only a friendly piece there relays.
     attacks(topology, from, target, board) {
-      const targets = lame
-        ? lameTargets(topology, from, board || [])
-        : topology.leapTargets(from, leapOffsetsOn(topology, offsets))
-      return targets.includes(target)
+      const first = targetsOf(topology, from, board || [])
+      if (first.includes(target)) return true
+      if (!relay || !board) return false
+      const mover = board[from]
+      const friendly = (cell) => (cell.friendly !== undefined ? cell.friendly : !!mover && cell.owner === mover.owner)
+      for (const pos of first) {
+        if (!board[pos] || !friendly(board[pos])) continue
+        for (const onward of targetsOf(topology, pos, board)) {
+          if (onward === target && onward !== from) return true
+        }
+      }
+      return false
     },
   }
 }
@@ -418,7 +478,10 @@ export function divergent(movePrimitive, capturePrimitive) {
     capture: capturePrimitive,
     genMoves(topology, from, board) {
       const moves = []
-      const mMoves = movePrimitive.genMoves(topology, from, board)
+      // A piece may capture a way it cannot move at all, and then there is no
+      // move half: Sankaku's Soldier takes on the second cell along and never
+      // goes there otherwise.
+      const mMoves = movePrimitive ? movePrimitive.genMoves(topology, from, board) : []
       for (const m of mMoves) {
         if (!m.capture) moves.push(m)
       }
@@ -975,7 +1038,7 @@ export function fromConfig(config, resolve) {
   }
   if (config.divergent) {
     return divergent(
-      buildPrimitive(config.divergent.move, resolve),
+      config.divergent.move ? buildPrimitive(config.divergent.move, resolve) : null,
       buildPrimitive(config.divergent.capture, resolve)
     )
   }
@@ -987,8 +1050,16 @@ export function fromConfig(config, resolve) {
 
 function buildPrimitive(spec, resolve) {
   if (typeof spec === 'string' && resolve) return resolve(spec)
-  if (spec.type === 'leaper') return leaper(spec.offsets || spec.dirs, { lame: spec.lame })
-  if (spec.type === 'rider') return rider(spec.dirs, { maxSteps: spec.maxSteps, minSteps: spec.minSteps })
+  // A divergent part inside a list: a piece that steps one way and also
+  // captures another is a compound of the two.
+  if (spec && spec.divergent) {
+    return divergent(
+      spec.divergent.move ? buildPrimitive(spec.divergent.move, resolve) : null,
+      buildPrimitive(spec.divergent.capture, resolve)
+    )
+  }
+  if (spec.type === 'leaper') return leaper(spec.offsets || spec.dirs, { lame: spec.lame, relay: spec.relay })
+  if (spec.type === 'rider') return rider(spec.dirs, { maxSteps: spec.maxSteps, minSteps: spec.minSteps, runDown: spec.runDown })
   if (spec.type === 'hopper') return hopper(spec.dirs, { captureSlide: spec.captureSlide, moveSlide: spec.moveSlide })
   if (spec.type === 'universal') return universalLeaper({ quiet: spec.quiet })
   if (spec.type === 'rangeCapture') return rangeCapture(spec.dirs || spec.offsets, { ranks: spec.ranks })

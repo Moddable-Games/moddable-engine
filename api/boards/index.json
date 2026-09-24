@@ -1,6 +1,6 @@
 {
   "meta": {
-    "count": 334,
+    "count": 335,
     "generated": "2026-09-24"
   },
   "boards": [
@@ -833,6 +833,11 @@
       "id": "chess--xiang-fu",
       "file": "chess--xiang-fu.svg",
       "url": "/boards/svgs/chess--xiang-fu.svg"
+    },
+    {
+      "id": "chess--yalta-chess",
+      "file": "chess--yalta-chess.svg",
+      "url": "/boards/svgs/chess--yalta-chess.svg"
     },
     {
       "id": "dou-shou-qi--standard",
