@@ -72,10 +72,14 @@ for (const family of FAMILIES) {
         const config = getVariantConfig(family, variantKey)
         if (!config) return
 
-        const allKeys = Object.keys(config)
-        const unknown = allKeys.filter(k =>
-          !acceptedKeys.has(k) && !PLAY_LAYER_KEYS.has(k)
-        )
+        // The same judgement the plugins make of themselves, with the play
+        // layer's own keys on top. This filtered against a copy of its own and
+        // ran over an empty registry, so it passed without looking: the
+        // registry was only populated where the plugins' composition root had
+        // been loaded, and this file never loaded it. Now that building a game
+        // always does, it looks, and `evaluate` - read by the AI layer and
+        // listed in core's PLATFORM_KEYS - was missing from the copy.
+        const unknown = unknownConfigKeys(config, acceptedKeys).filter(k => !PLAY_LAYER_KEYS.has(k))
 
         expect(unknown).toEqual([])
       })
