@@ -109,14 +109,41 @@ function buildFenMapFromVocabulary(vocabulary) {
 }
 
 export function attachPieceImages(resolved, gallery) {
-  if (!resolved.pieces?.set || !gallery) return {}
+  const art = resolved.pieces?.art
+  if ((!resolved.pieces?.set && !art) || !gallery) return {}
   const topo = resolved.topology || {}
   const skipFenMap = topo.type === 'pit'
   const vocabulary = resolved.pieces?.vocabulary || resolved.vocabulary || resolved.plugins?.[Object.keys(resolved.plugins || {})[0]]?.vocabulary
   const fenOverrides = resolved.pieces.fenMap || buildFenMapFromVocabulary(vocabulary)
-  const built = buildPieceImages(resolved.pieces.set, gallery, fenOverrides, skipFenMap)
+  const built = resolved.pieces.set
+    ? buildPieceImages(resolved.pieces.set, gallery, fenOverrides, skipFenMap)
+    : { images: {}, surfaceMap: {}, surface: null }
+  if (art) Object.assign(built.images, pieceArt(art, gallery))
   validatePieceVocabulary(resolved, gallery, built.images)
   return built
+}
+
+// `pieces.art` draws a board symbol with any image in the gallery, named
+// `set/piece`: a dragon from an emoji set standing on a chessboard. A variant's
+// set supplies its artwork by the set's own keys, and a set keyed by what its
+// images show - `dragon`, `castle` - has no key a board symbol could reach.
+export function pieceArt(art, gallery) {
+  const images = {}
+  for (const [symbol, ref] of Object.entries(art || {})) {
+    const at = String(ref).indexOf('/')
+    if (at < 0) continue
+    const setId = String(ref).slice(0, at)
+    const pieceId = String(ref).slice(at + 1)
+    const setDef = gallery.find(s => s.id === setId)
+    if (!setDef) continue
+    const own = setDef.pieces?.[pieceId]
+    const base = !own && setDef.extends ? gallery.find(s => s.id === setDef.extends) : null
+    const path = own
+      ? resolvePieceEntry(pieceId, own, setDef.id, setDef.baseSet || null)
+      : base?.pieces?.[pieceId] ? resolvePieceEntry(pieceId, base.pieces[pieceId], base.id) : null
+    if (path) images[symbol] = path
+  }
+  return images
 }
 
 /**
@@ -659,22 +686,11 @@ function parseSfenToPosition(fen, rows, cols) {
     seatPrefix(symbol) + (promoted ? '+' : '') + symbol.toUpperCase())
 }
 
+// Four-player boards write comma-separated tokens (`3,yR,yN`), which
+// `readPosition` reads like any other rank. The token is the artwork key.
 function parseFen4(fen4, rows, cols) {
-  const position = {}
-  const ranks = fen4.split('/')
-  for (let r = 0; r < ranks.length && r < rows; r++) {
-    let c = 0
-    const cells = ranks[r].split(',')
-    for (const cell of cells) {
-      const trimmed = cell.trim()
-      if (/^\d+$/.test(trimmed)) { c += parseInt(trimmed, 10) }
-      else { position[`${fileLabel(c)}${rows - r}`] = trimmed; c++ }
-    }
-  }
-  return position
+  return positionFromRanks(fen4, rows, cols, null, (symbol) => symbol)
 }
-
-
 
 function parseGraphSetup(setup, vocabulary = {}) {
   const position = {}

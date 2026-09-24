@@ -1,6 +1,7 @@
-import { defaultState, buildResolvedFromState, stateFromResolved, resolveImported } from '../create-state.js'
-import { parseFrontmatter } from '../../packages/schema/index.js'
-import { FAMILY_RULES, toPluginConfig, defaultRuleValues } from '../create-rules.js'
+import { defaultState, buildResolvedFromState, stateFromResolved, resolveImported, stateFromTemplate, frontmatterFromState } from '../create-state.js'
+import { parseFrontmatter, serializeFrontmatter } from '../../packages/schema/index.js'
+import { resolveVariantSync } from '../../packages/play/src/resolve-frontmatter.js'
+import { annotateVariant } from '../variant-frontmatter.js'
 import { readdirSync, readFileSync, existsSync } from 'fs'
 import { join } from 'path'
 
@@ -11,32 +12,7 @@ const RULES_ROOT = process.env.MODDABLE_RULES_DIR || join(process.cwd(), '..', '
 // round-trip it exists to prove was never run on hex, mancala, morris or
 // landlords-game.
 const MANIFEST = JSON.parse(readFileSync(join(process.cwd(), 'play', 'playability-manifest.json'), 'utf8'))
-const PLAYABLE_FAMILIES = [...new Set(MANIFEST.filter(e => e.playable).map(e => e.family))]
 
-// Keys the rules table declares for each family — these MUST round-trip.
-const MODELED_KEYS = {}
-for (const [family, fields] of Object.entries(FAMILY_RULES)) {
-  MODELED_KEYS[family] = new Set(fields.map(f => f.key))
-}
-
-function findPlayableVariants() {
-  const variants = []
-  if (!existsSync(RULES_ROOT)) return variants
-  for (const family of readdirSync(RULES_ROOT)) {
-    const variantsDir = join(RULES_ROOT, family, 'content', 'variants')
-    if (!existsSync(variantsDir)) continue
-    for (const file of readdirSync(variantsDir).filter(f => f.endsWith('.md'))) {
-      const text = readFileSync(join(variantsDir, file), 'utf8')
-      if (!text.includes('playable: true')) continue
-      const parsed = parseFrontmatter(text)
-      if (!parsed.meta?.engine) continue
-      variants.push({ family, file, parsed, text })
-    }
-  }
-  return variants
-}
-
-const allVariants = findPlayableVariants()
 
 describe('import YAML round-trip — synthetic', () => {
   test('a chess variant survives export → import → export', () => {
@@ -129,117 +105,73 @@ engine:
   })
 })
 
-describe('corpus round-trip — all playable variants from moddable-rules', () => {
-  if (!allVariants.length) {
-    test.skip('moddable-rules not found at expected path', () => {})
-    return
+// engine#118: "anything playable should be buildable". The measure is the one
+// the issue names: a variant loaded into the create page and exported again
+// must be the same game. Not "the topology survived" - the engine block play
+// consumes, compared whole, from the original file and from the exported one.
+//
+// Three paths, because each once lost something the others kept:
+//   import    a file read from disk (the Import button)
+//   template  a variant resolved against its family (the template picker, and
+//             "Edit in Create" from the play page)
+//   draft     that template played without being exported ("Try in Play")
+//
+// and two more that prove the page can *build* each variant, not only carry it:
+// the same states with the carried source removed, so that everything the file
+// says has to come from the page's own controls and its other settings.
+//
+// This replaced a structural check that passed while 195 of 239 variants lost
+// something on export: turn orders, pawn configurations, layered boards, and
+// family defaults the form disagreed with.
+describe('corpus round-trip: an exported variant is the same game', () => {
+  const MANIFEST_PLAYABLE = MANIFEST.filter(e => e.playable)
+  const read = (family, slug) => readFileSync(slug === 'rulebook'
+    ? join(RULES_ROOT, family, 'content', 'rulebook.md')
+    : join(RULES_ROOT, family, 'content', 'variants', `${slug}.md`), 'utf8')
+
+  const STRUCTURAL = new Set(['topology', 'players', 'firstPlayer', 'turnOrder', 'meta', 'surface', 'render', 'components', 'plugins', 'pieces'])
+  // What play consumes: the plugin block with the engine's top-level rule keys
+  // folded in over it (`resolveMeta`), and the rest of the block beside it.
+  function consumed(resolved, family) {
+    const plugin = { ...(resolved.plugins?.[family] || {}) }
+    for (const [key, value] of Object.entries(resolved)) {
+      if (!STRUCTURAL.has(key) && !key.startsWith('_') && value !== undefined) plugin[key] = value
+    }
+    const colors = resolved.surface?.colors || {}
+    return JSON.parse(JSON.stringify({
+      surface: Object.keys(colors).sort().map(k => `${k}=${colors[k]}`),
+      topology: resolved.topology,
+      players: resolved.players,
+      firstPlayer: resolved.firstPlayer,
+      turnOrder: resolved.turnOrder,
+      render: resolved.render,
+      pieces: resolved.pieces,
+      plugin,
+    }))
   }
 
-  // Collect failures for summary reporting
-  const lostStructure = []
-  const lostModeledKeys = []
-  const lostUnmodeledKeys = []
+  const entries = MANIFEST_PLAYABLE.filter(e => existsSync(join(RULES_ROOT, e.family, 'content', 'variants', `${e.slug || e.variant}.md`)))
 
-  for (const { family, file, parsed } of allVariants) {
-    const slug = file.replace('.md', '')
-    const engine = parsed.meta.engine
-    const pluginFamily = Object.keys(engine.plugins || {})[0] || family
-    if (!PLAYABLE_FAMILIES.includes(pluginFamily)) continue
+  test('every playable variant is in the corpus', () => {
+    expect(entries.length).toBe(MANIFEST_PLAYABLE.length)
+  })
 
-    test(`${family}/${slug} structural round-trip`, () => {
-      const state = resolveImported(parsed)
-      const resolved = buildResolvedFromState(state)
-      const failures = []
+  for (const entry of entries) {
+    const family = entry.family
+    const slug = entry.slug || entry.variant
+    test(`${family}/${slug}`, () => {
+      const original = consumed(resolveVariantSync(family, slug, read), family)
+      const replayed = (text) => consumed(resolveVariantSync(family, slug, (f, s) => (f === family && s === slug ? text : read(f, s))), family)
+      const template = () => stateFromTemplate(annotateVariant(resolveVariantSync(family, slug, read), read(family, 'rulebook'), read(family, slug)), family, slug)
 
-      // Topology structure must survive
-      const origTopo = engine.topology || {}
-      if (origTopo.type && resolved.topology.type !== origTopo.type) {
-        failures.push(`topology.type: ${origTopo.type} → ${resolved.topology.type}`)
-      }
-      if (origTopo.rows && resolved.topology.rows !== origTopo.rows) {
-        failures.push(`topology.rows: ${origTopo.rows} → ${resolved.topology.rows}`)
-      }
-      if (origTopo.cols && resolved.topology.cols !== origTopo.cols) {
-        failures.push(`topology.cols: ${origTopo.cols} → ${resolved.topology.cols}`)
-      }
+      const imported = resolveImported(parseFrontmatter(read(family, slug)))
+      expect(replayed(serializeFrontmatter(frontmatterFromState(imported)))).toEqual(original)
+      expect(replayed(serializeFrontmatter(frontmatterFromState(template())))).toEqual(original)
+      expect(consumed(buildResolvedFromState(template()), family)).toEqual(original)
 
-      // Voids must survive
-      if (Array.isArray(origTopo.voids) && origTopo.voids.length) {
-        if (!Array.isArray(resolved.topology.voids)) {
-          failures.push(`topology.voids lost (${origTopo.voids.length} cells)`)
-        } else if (resolved.topology.voids.length !== origTopo.voids.length) {
-          failures.push(`topology.voids count: ${origTopo.voids.length} → ${resolved.topology.voids.length}`)
-        }
-      }
-
-      // Setup must survive (if it's a single-char FEN string the parser handles).
-      // Multi-char FEN4 (comma-separated piece codes for 4-player games) is not
-      // yet parseable by the create page's setup parser.
-      const origSetup = engine.setup
-      const isMultiCharFen = typeof origSetup === 'string' && origSetup.includes(',')
-      if (typeof origSetup === 'string' && origSetup.includes('/') && !isMultiCharFen) {
-        if (!resolved.setup) {
-          failures.push(`setup lost`)
-        } else if (resolved.setup !== origSetup) {
-          failures.push(`setup changed`)
-        }
-      }
-
-      // Modeled plugin keys must survive (keys in FAMILY_RULES)
-      const origPlugin = (engine.plugins || {})[pluginFamily] || {}
-      const resolvedPlugin = resolved.plugins?.[pluginFamily] || {}
-      const modeled = MODELED_KEYS[pluginFamily] || new Set()
-
-      for (const key of Object.keys(origPlugin)) {
-        if (!modeled.has(key)) continue
-        if (key === 'vocabulary' || key === 'pieces' || key === 'pieceMoves') continue
-        const origVal = origPlugin[key]
-        const resolvedVal = resolvedPlugin[key]
-        if (resolvedVal === undefined && origVal !== undefined) {
-          // Check if it's just because it matches the default
-          const defaults = defaultRuleValues(pluginFamily)
-          if (JSON.stringify(origVal) === JSON.stringify(defaults[key])) continue
-          failures.push(`modeled plugin.${key} lost`)
-          lostModeledKeys.push(`${family}/${slug}: ${key}`)
-        }
-      }
-
-      if (failures.length) {
-        lostStructure.push({ variant: `${family}/${slug}`, failures })
-      }
-
-      expect(failures).toEqual([])
+      const built = (state) => { state.source = null; return state }
+      expect(replayed(serializeFrontmatter(frontmatterFromState(built(resolveImported(parseFrontmatter(read(family, slug)))))))).toEqual(original)
+      expect(consumed(buildResolvedFromState(built(template())), family)).toEqual(original)
     })
   }
-
-  // After all tests, log a summary of unmodeled key losses for tracking
-  afterAll(() => {
-    const unmodeledCounts = {}
-    for (const { family, file, parsed } of allVariants) {
-      const engine = parsed.meta.engine
-      const pluginFamily = Object.keys(engine.plugins || {})[0] || family
-      if (!PLAYABLE_FAMILIES.includes(pluginFamily)) continue
-      const origPlugin = (engine.plugins || {})[pluginFamily] || {}
-      const modeled = MODELED_KEYS[pluginFamily] || new Set()
-      for (const key of Object.keys(origPlugin)) {
-        if (modeled.has(key)) continue
-        if (['vocabulary', 'pieces', 'pieceMoves', 'hooks', 'extends'].includes(key)) continue
-        unmodeledCounts[key] = (unmodeledCounts[key] || 0) + 1
-      }
-    }
-    if (Object.keys(unmodeledCounts).length) {
-      const sorted = Object.entries(unmodeledCounts).sort((a, b) => b[1] - a[1])
-      console.log('\n--- Unmodeled plugin keys (expected losses, not failures) ---')
-      for (const [key, count] of sorted) {
-        console.log(`  ${key}: ${count} variant${count > 1 ? 's' : ''}`)
-      }
-    }
-    if (lostStructure.length) {
-      console.log(`\n--- Structural round-trip failures: ${lostStructure.length} ---`)
-      for (const { variant, failures } of lostStructure.slice(0, 10)) {
-        console.log(`  ${variant}: ${failures.join(', ')}`)
-      }
-      if (lostStructure.length > 10) console.log(`  ... and ${lostStructure.length - 10} more`)
-    }
-  })
 })

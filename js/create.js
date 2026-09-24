@@ -2,17 +2,26 @@ import { renderFromEngine, attachPieceImages, pieceIdToFenChar } from '../packag
 import { parseFrontmatter, serializeFrontmatter } from '../packages/schema/index.js'
 import { getPlayableFamilies, getFamilyLabel, loadPlayabilityManifest, getPlayableVariants } from './play-shared.js'
 import { resolveVariantBoard } from './variant-frontmatter.js'
-import { defaultState, buildResolvedFromState, buildSetup, parseSetup, stateFromResolved, resolveImported, isGrid } from './create-state.js'
+import { defaultState, buildResolvedFromState, buildSetup, parseSetup, stateFromResolved, resolveImported, isGrid,
+  frontmatterFromState, pieceSpecsFromState, stateFromTemplate, slugify, overrideLook, setGridLayout, setTopologyType, emptyExtra,
+  setHexShape, paintCell, restoreAllCells,
+  placementKey, setupText, setupFormOf } from './create-state.js'
 import { FAMILY_RULES, defaultRuleValues, buildRulesPanel, toPluginConfig } from './create-rules.js'
-import { movesForSpec, boardFromPlacement, paintDots } from './create-preview.js'
+import { movesForSpec, boardFromPlacement, paintDots, previewTopology, centreCell, cellForKey } from './create-preview.js'
 import { defaultPlayers, buildPlayersPanel, resizePlayers, MAX_PLAYERS } from './create-players.js'
 import { exportSvgFile, exportPngFile } from './svg-export.js'
 import * as drafts from './create-drafts.js'
+import { buildExtrasPanel } from './create-extras.js'
+import { artUrl, buildArtworkPicker } from './create-artwork.js'
+import { getConfigKeys } from '../packages/play/index.js'
+import { splitCellId, fileIndex, intersectionIndex } from '../packages/core/index.js'
 
 let galleryIndex = null
 let state = defaultState('chess')
 let activePiece = null
 let activePieceSrc = null
+// The cell brush in use: 'void', 'blocker' or 'tint', or null when placing pieces.
+let activeBrush = null
 let pieceHistory = []
 let lastGrid = null
 let currentDraftId = null
@@ -36,41 +45,49 @@ function getSpecForFenChar(fenChar) {
   for (const cp of state.customPieces) {
     if (cp.symbolW === fenChar || cp.symbolB === fenChar) return cp.spec
   }
-  for (const [type, def] of Object.entries(state.inheritedVocabulary || {})) {
-    if (!Object.values(def?.symbols || {}).includes(fenChar)) continue
-    const carried = state.inheritedPieces || {}
-    return carried.pieces?.[type] || carried.pieceMoves?.[type] || null
-  }
-  return null
+  return pieceSpecsFromState(state)[fenChar] || null
 }
+
 
 const $ = id => document.getElementById(id)
 const val = id => $(id)?.value
-const num = (id, fallback) => parseInt($(id)?.value, 10) || fallback
 
 // --- state <-> DOM ---
 
-function readControlsIntoState() {
-  state.family = val('family-select') || 'chess'
-  state.title = val('meta-title') || 'Custom Variant'
-  state.slug = val('meta-slug') || ''
-  state.win = val('meta-win') || ''
-  state.special = val('meta-special') || ''
-  state.topology.type = val('topo-type') || 'grid'
-  state.topology.rows = num('grid-rows', 8)
-  state.topology.cols = num('grid-cols', 8)
-  state.topology.layout = val('grid-layout') || 'cells'
-  state.topology.radius = num('hex-radius', 5)
-  state.topology.structure = val('graph-structure') || 'concentric-rings'
-  state.topology.rings = num('graph-rings', 3)
-  state.topology.positions = num('track-positions', 24)
-  state.topology.pitCols = num('pit-cols', 6)
-  state.render.surface = val('surface-select') || 'wood-classic'
-  state.render.cellColor = val('cellcolor-select') || 'checkered'
-  state.render.labels = val('labels-select') !== 'false'
-  state.render.starPoints = !!$('star-points')?.checked
-  state.pieceSet = val('pieceset-select') || ''
+// Each control writes its own field and nothing else. They used to be read
+// back all at once on every change, which wrote every control's displayed
+// value into the state: a loaded variant's `{ base, colors }` surface became a
+// bare name, and every field it left to its family was declared, the moment
+// anything at all was touched.
+const CONTROL_BINDINGS = {
+  'grid-rows': v => { state.topology.rows = parseInt(v, 10) || 8 },
+  'grid-cols': v => { state.topology.cols = parseInt(v, 10) || 8 },
+  'grid-layout': v => { overrideLook(state); setGridLayout(state, v) },
+  'grid-layers': v => {
+    const layers = Math.max(1, parseInt(v, 10) || 1)
+    state.topology.layers = layers > 1 ? layers : undefined
+    for (const key of Object.keys(state.placement)) {
+      if (Number(key.split(',')[2] || 0) >= layers) delete state.placement[key]
+    }
+  },
+  'grid-wrap': v => { if (v) state.topology.wrap = v; else delete state.topology.wrap },
+  'hex-shape': v => { setHexShape(state, v) },
+  'hex-radius': v => { state.topology.radius = parseInt(v, 10) || 5; delete state.topology.grid },
+  'hex-rows': v => { state.topology.rows = parseInt(v, 10) || 11; delete state.topology.grid },
+  'hex-cols': v => { state.topology.cols = parseInt(v, 10) || 11; delete state.topology.grid },
+  'hex-side': v => { state.topology.sideLength = parseInt(v, 10) || 12; delete state.topology.grid },
+  'hex-orientation': v => { if (v) state.topology.orientation = v; else delete state.topology.orientation },
+  'pit-rows': v => { const rows = parseInt(v, 10) || 2; if (rows === 2 && state.topology.pitRows === undefined) return; state.topology.pitRows = rows },
+  'graph-structure': v => { state.topology.structure = v },
+  'graph-rings': v => { state.topology.rings = parseInt(v, 10) || 3 },
+  'track-positions': v => { state.topology.positions = parseInt(v, 10) || 24 },
+  'pit-cols': v => { state.topology.pitCols = parseInt(v, 10) || 6 },
+  'surface-select': v => { overrideLook(state); state.render.surface = v },
+  'cellcolor-select': v => { overrideLook(state); state.render.cellColor = v },
+  'labels-select': v => { state.render.labels = v !== 'false' },
 }
+
+const META_BINDINGS = { 'meta-title': 'title', 'meta-slug': 'slug', 'meta-win': 'win', 'meta-special': 'special' }
 
 function writeStateIntoControls() {
   restoring = true
@@ -79,24 +96,49 @@ function writeStateIntoControls() {
   $('meta-win').value = state.win || ''
   $('meta-special').value = state.special || ''
   $('family-select').value = state.family
+  // A field the variant leaves to its family shows the value it will have.
+  const resolved = buildResolvedFromState(state)
   $('topo-type').value = state.topology.type
-  $('grid-rows').value = state.topology.rows
-  $('grid-cols').value = state.topology.cols
-  $('grid-layout').value = state.topology.layout || 'cells'
-  $('hex-radius').value = state.topology.radius
+  $('grid-rows').value = state.topology.rows ?? resolved.topology?.rows ?? 8
+  $('grid-cols').value = state.topology.cols ?? resolved.topology?.cols ?? 8
+  setSelect('grid-layout', state.topology.layout || 'cells')
+  $('grid-layers').value = state.topology.layers || 1
+  $('hex-radius').value = state.topology.radius ?? resolved.topology?.radius ?? 5
+  setSelect('grid-wrap', state.topology.wrap === undefined || state.topology.wrap === false ? '' : state.topology.wrap)
+  setSelect('hex-shape', state.topology.shape === 'hexagonal' ? '' : (state.topology.shape || ''))
+  $('hex-rows').value = state.topology.rows ?? 11
+  $('hex-cols').value = state.topology.cols ?? 11
+  $('hex-side').value = state.topology.sideLength ?? 12
+  setSelect('hex-orientation', state.topology.orientation === 'pointy' ? '' : (state.topology.orientation || ''))
+  $('pit-rows').value = state.topology.pitRows ?? 2
   $('graph-structure').value = state.topology.structure
   $('graph-rings').value = state.topology.rings
   $('track-positions').value = state.topology.positions
   $('pit-cols').value = state.topology.pitCols
-  $('surface-select').value = state.render.surface
-  $('cellcolor-select').value = state.render.cellColor
-  $('labels-select').value = state.render.labels ? 'true' : 'false'
+  const surface = state.render.surface
+  setSelect('surface-select', typeof surface === 'string' ? surface : surface?.base || resolved.surface?.name || 'wood-classic')
+  setSelect('cellcolor-select', state.render.cellColor ?? resolved.render?.cellColor ?? 'checkered')
+  $('labels-select').value = (state.render.labels ?? resolved.render?.labels) === false ? 'false' : 'true'
   $('star-points').checked = !!state.render.starPoints
   if ([...$('pieceset-select').options].some(o => o.value === state.pieceSet)) {
     $('pieceset-select').value = state.pieceSet
   }
   lastGrid = { rows: state.topology.rows, cols: state.topology.cols }
   restoring = false
+}
+
+// A select shows a value it has no option for by adding one, so a loaded
+// variant's own setting is visible rather than shown as the first option.
+function setSelect(id, value) {
+  const sel = $(id)
+  if (!sel) return
+  if (value !== undefined && value !== null && ![...sel.options].some(o => o.value === String(value))) {
+    const o = document.createElement('option')
+    o.value = String(value)
+    o.textContent = String(value)
+    sel.appendChild(o)
+  }
+  sel.value = String(value)
 }
 
 // --- drafts ---
@@ -192,6 +234,7 @@ function applyState(next) {
   buildPiecePicker()
   renderPlayers()
   renderRules()
+  renderExtras()
   renderCustomPiecesList()
   render()
   updateInfoText()
@@ -215,12 +258,20 @@ function setStatus(text) {
 
 // --- board rendering ---
 
+// A drawn cell's id as the placement map keys it. A grid cell is drawn `a8`,
+// or `a8-2` on the second board of a layered one, and its file may run past
+// `z`; an intersection board's files skip `i`. Reading the file as one letter
+// from `a` put a click on Taikyoku's 27th file on the first.
 function sqToPlacementKey(sq) {
   if (!isGrid(state)) return sq
-  if (/^\d+,\d+$/.test(sq)) return sq
-  const col = sq.charCodeAt(0) - 97
-  const row = state.topology.rows - parseInt(sq.slice(1), 10)
-  return `${row},${col}`
+  if (/^\d+,\d+(,\d+)?$/.test(sq)) return sq
+  const [, id, layerText] = /^(.*?)(?:-(\d+))?$/.exec(String(sq))
+  const cell = splitCellId(id)
+  if (!cell) return sq
+  const idStyle = buildResolvedFromState(state).render?.idStyle
+  const col = idStyle === 'intersection' ? intersectionIndex(cell.file) : fileIndex(cell.file)
+  const row = state.topology.rows - cell.rank
+  return placementKey(row, col, layerText ? Number(layerText) - 1 : 0)
 }
 
 function reanchorPlacement(oldRows, oldCols, rows, cols) {
@@ -229,11 +280,11 @@ function reanchorPlacement(oldRows, oldCols, rows, cols) {
   const next = {}
   let dropped = 0
   for (const [key, piece] of Object.entries(state.placement)) {
-    const [r, c] = key.split(',').map(Number)
+    const [r, c, layer] = key.split(',').map(Number)
     const fromBottom = oldRows - 1 - r
     const nr = rows - 1 - fromBottom
     if (nr < 0 || nr >= rows || c >= cols) { dropped++; continue }
-    next[`${nr},${c}`] = piece
+    next[placementKey(nr, c, layer || 0)] = piece
   }
   state.placement = next
   return dropped
@@ -271,20 +322,25 @@ function clearHoverHighlights() {
   $('board-svg').querySelectorAll('.piece-ghost, .hover-move-dot').forEach(el => el.remove())
 }
 
+// The board's own topology, as a game would build it, for the previews.
+function currentTopology() {
+  const resolved = buildResolvedFromState(state)
+  return { topology: previewTopology(resolved.topology), idStyle: resolved.render?.idStyle }
+}
+
 function showHoverMoves(key) {
-  if (!isGrid(state)) return
   const fenChar = state.placement[key]
   if (!fenChar) return
   const spec = getSpecForFenChar(fenChar)
   if (!spec) return
-  const { rows, cols } = state.topology
-  const [r, c] = key.split(',').map(Number)
+  const { topology, idStyle } = currentTopology()
+  if (!topology) return
   const moverIsUpper = fenChar === fenChar.toUpperCase()
-  const board = boardFromPlacement(state.placement, rows, cols, moverIsUpper)
-  const moves = movesForSpec(spec, { rows, cols, from: r * cols + c, board })
+  const board = boardFromPlacement(topology, state.placement, moverIsUpper)
+  const moves = movesForSpec(spec, { topology, from: cellForKey(topology, key), board })
   if (!moves) return
   paintDots($('board-svg'), moves, {
-    rows, cols,
+    topology, idStyle,
     className: 'hover-move-dot',
     fill: m => (m.capture ? 'rgba(244, 67, 54, 0.5)' : 'rgba(76, 175, 80, 0.5)'),
   })
@@ -309,6 +365,12 @@ function bindBoard() {
 
   container.addEventListener('click', (e) => {
     const hit = keyFor(e.target)
+    if (hit && activeBrush) {
+      const brush = activeBrush === 'tint' ? { fill: val('brush-tint-color') || '#6b8fb8', opacity: 0.5 } : activeBrush
+      pieceHistory.push({ cells: structuredClone({ topology: state.topology, tints: state.render.tints, placement: state.placement }) })
+      if (paintCell(state, hit.key, brush)) { render(); updateInfoText() }
+      return
+    }
     if (!hit || !activePiece) return
     pieceHistory.push({ sq: hit.key, prev: state.placement[hit.key] || null })
     if (activePiece === '__erase' || state.placement[hit.key] === activePiece) delete state.placement[hit.key]
@@ -362,7 +424,8 @@ function updateCursors() {
   container.querySelectorAll('.board-cell').forEach(cell => {
     const sq = cell.dataset.sq
     if (!sq) return
-    if (activePiece === '__erase') cell.style.cursor = state.placement[sqToPlacementKey(sq)] ? 'pointer' : 'default'
+    if (activeBrush) cell.style.cursor = 'crosshair'
+    else if (activePiece === '__erase') cell.style.cursor = state.placement[sqToPlacementKey(sq)] ? 'pointer' : 'default'
     else if (activePiece) cell.style.cursor = 'copy'
     else cell.style.cursor = 'default'
   })
@@ -374,19 +437,29 @@ function syncSetupInput() {
   const input = $('setup-input')
   if (!input || document.activeElement === input) return
   input.classList.remove('is-invalid')
-  input.value = Object.keys(state.placement).length ? buildSetup(state) : ''
+  input.value = setupText(Object.keys(state.placement).length ? buildSetup(state) : state.rawSetup)
 }
 
+// A setup the board can place is read onto it. One it cannot - a pit board's
+// seed counts - is kept as written, where the board has no cells to place on.
 function applySetupInput(text) {
   const input = $('setup-input')
   const next = parseSetup(text, {
     type: state.topology.type,
     rows: state.topology.rows,
     cols: state.topology.cols,
+    layers: state.topology.layers,
   })
-  if (next === null) { input.classList.add('is-invalid'); return false }
+  if (next === null && isGrid(state)) { input.classList.add('is-invalid'); return false }
   pieceHistory.push({ replaceAll: { ...state.placement } })
-  state.placement = next
+  if (next === null) {
+    state.placement = {}
+    state.rawSetup = text.trim()
+  } else {
+    state.placement = next
+    delete state.rawSetup
+    state.setupForm = { ...setupFormOf(text.includes('|') ? text.split('|').map(t => t.trim()) : text), array: (state.topology.layers || 1) > 1 }
+  }
   input.classList.remove('is-invalid')
   render()
   updateInfoText()
@@ -397,7 +470,9 @@ function updateInfoText() {
   const count = Object.keys(state.placement).length
   const el = $('info-text')
   const prefix = count > 0 ? `${count} piece${count !== 1 ? 's' : ''} placed · ` : ''
-  if (activePiece && activePiece !== '__erase') {
+  if (activeBrush) {
+    el.textContent = prefix + `Painting cells: ${activeBrush}. Click a cell again to clear it.`
+  } else if (activePiece && activePiece !== '__erase') {
     const imgTag = activePieceSrc ? `<img class="info-piece" src="${activePieceSrc}" width="18" height="18">` : ''
     el.innerHTML = prefix + `Placing: ${imgTag}<span class="info-strong">${escapeHtml(activePiece)}</span>`
   } else if (activePiece === '__erase') {
@@ -446,7 +521,19 @@ function paletteEntries(setDef) {
   return out
 }
 
+function selectBrush(brush) {
+  activeBrush = activeBrush === brush ? null : brush
+  activePiece = null
+  activePieceSrc = null
+  for (const btn of document.querySelectorAll('.brush-btn')) btn.classList.toggle('active', btn.dataset.brush === activeBrush)
+  buildPiecePicker()
+  updateInfoText()
+  updateCursors()
+}
+
 function selectPiece(sym, src) {
+  activeBrush = null
+  for (const btn of document.querySelectorAll('.brush-btn')) btn.classList.remove('active')
   activePiece = activePiece === sym ? null : sym
   activePieceSrc = activePiece ? (src || null) : null
   buildPiecePicker()
@@ -457,23 +544,19 @@ function selectPiece(sym, src) {
 function buildPiecePicker() {
   const setId = state.pieceSet
   const picker = $('piece-picker')
-  $('piece-palette').style.display = ''
-  if (!setId) {
-    activePiece = null
-    picker.innerHTML = '<div class="piece-hint">Choose a piece set above to start placing pieces.</div>'
-    $('active-piece-label').textContent = ''
-    return
-  }
-
-  const setDef = galleryIndex?.find(s => s.id === setId)
-  if (!setDef || !setDef.pieces) { picker.innerHTML = ''; return }
-
   picker.innerHTML = ''
-  const entries = paletteEntries(setDef)
-  if (!entries.length) {
-    picker.innerHTML = '<div class="piece-hint">This set names its pieces in a way the editor cannot yet map to board symbols, so there is nothing to place from it. Pick another set, or define a piece by hand below. Tracked in engine#118.</div>'
-    $('active-piece-label').textContent = ''
+  const setDef = setId ? galleryIndex?.find(s => s.id === setId) : null
+  const entries = setDef?.pieces ? paletteEntries(setDef) : []
+
+  // A piece defined below carries its own symbols and artwork, so it can be
+  // placed whether or not a set is chosen; the hint only covers the case where
+  // there is nothing at all to place.
+  if (!entries.length && !state.customPieces.length) {
     activePiece = null
+    picker.innerHTML = setId
+      ? '<div class="piece-hint">This set names its pieces by what they show, not by board symbols. Define a piece below and choose its artwork from this set.</div>'
+      : '<div class="piece-hint">Choose a piece set above, or define a piece below, to start placing pieces.</div>'
+    $('active-piece-label').textContent = ''
     return
   }
 
@@ -515,12 +598,22 @@ function buildPiecePicker() {
     const row = document.createElement('div')
     row.className = 'piece-group'
     for (const cp of state.customPieces) {
-      for (const [sym, label] of [[cp.symbolW, cp.name + ' (W)'], [cp.symbolB, cp.name + ' (b)']]) {
+      for (const [sym, label, ref] of [[cp.symbolW, cp.name + ' (W)', cp.artW], [cp.symbolB, cp.name + ' (b)', cp.artB]]) {
         const btn = document.createElement('button')
         btn.className = 'piece-btn' + (activePiece === sym ? ' active' : '')
         btn.title = label
-        btn.textContent = sym
-        btn.addEventListener('click', () => selectPiece(sym, null))
+        const url = artUrl(galleryIndex, ref)
+        if (url) {
+          const img = document.createElement('img')
+          img.src = url
+          img.alt = label
+          img.width = 36
+          img.height = 36
+          btn.appendChild(img)
+        } else {
+          btn.textContent = sym
+        }
+        btn.addEventListener('click', () => selectPiece(sym, url))
         row.appendChild(btn)
       }
     }
@@ -540,7 +633,14 @@ function buildPiecePicker() {
 
 // --- piece definer ---
 
+// The artwork chosen in the piece form, per side, before the piece is saved.
+let pieceArtDraft = { artW: null, artB: null }
+let pickingArtFor = null
+
 function buildPieceSpec() {
+  // Betza, where given, says the whole movement.
+  const betza = val('def-betza')?.trim()
+  if (betza) return { betza }
   const shape = val('def-shape')
   const dirs = val('def-dirs')
   const maxSteps = parseInt(val('def-maxsteps'), 10) || undefined
@@ -563,29 +663,94 @@ function buildPieceSpec() {
 }
 
 function previewMoves() {
-  if (!isGrid(state)) { setStatus('Move preview is grid only (engine#62)'); return }
-  const { rows, cols } = state.topology
-  const from = Math.floor(rows / 2) * cols + Math.floor(cols / 2)
-  const board = new Array(rows * cols).fill(null)
+  const { topology, idStyle } = currentTopology()
+  if (!topology) { setStatus('This board has no geometry to preview on'); return }
+  const from = centreCell(topology)
+  const board = boardFromPlacement(topology, {}, true)
   board[from] = { friendly: true, owner: 0, type: 'preview' }
-  const moves = movesForSpec(buildPieceSpec(), { rows, cols, from, board })
+  const moves = movesForSpec(buildPieceSpec(), { topology, from, board })
   const container = $('board-svg')
   container.querySelectorAll('.move-preview-dot').forEach(el => el.remove())
-  if (!moves) { setStatus('That shape does not build'); return }
-  paintDots(container, moves, { rows, cols, className: 'move-preview-dot', fill: 'rgba(76, 175, 80, 0.6)', radiusFactor: 0.2 })
-  paintDots(container, [from], { rows, cols, className: 'move-preview-dot', fill: 'rgba(33, 150, 243, 0.6)', radiusFactor: 0.25 })
-  setStatus(`${moves.length} reachable cell${moves.length === 1 ? '' : 's'}`)
+  if (!moves) { setStatus('That movement does not build'); return }
+  paintDots(container, moves, { topology, idStyle, className: 'move-preview-dot', fill: 'rgba(76, 175, 80, 0.6)', radiusFactor: 0.2 })
+  paintDots(container, [from], { topology, idStyle, className: 'move-preview-dot', fill: 'rgba(33, 150, 243, 0.6)', radiusFactor: 0.25 })
+  setStatus(`${moves.length} reachable cell${moves.length === 1 ? '' : 's'} from the centre`)
 }
 
+// Saving a piece under a name it already has replaces it: that is how a piece
+// is edited.
 function addCustomPiece() {
   const name = val('def-name').trim()
   const symbolW = val('def-symbol-w').trim()
   const symbolB = val('def-symbol-b').trim()
-  if (!name || !symbolW || !symbolB) { setStatus('A custom piece needs a name and both symbols'); return }
-  state.customPieces.push({ name, symbolW, symbolB, spec: buildPieceSpec() })
+  if (!name || !symbolW || !symbolB) { setStatus('A piece needs a name and a symbol for each side'); return }
+  if (symbolW === symbolB) { setStatus('The two sides need different symbols'); return }
+  const spec = buildPieceSpec()
+  if (!movesForSpec(spec, { topology: previewTopology({ type: 'grid', rows: 8, cols: 8 }), from: 27, board: new Array(64).fill(null) })) {
+    setStatus('That movement does not build. Check the Betza notation.')
+    return
+  }
+  const piece = { name, symbolW, symbolB, spec }
+  if (pieceArtDraft.artW) piece.artW = pieceArtDraft.artW
+  if (pieceArtDraft.artB) piece.artB = pieceArtDraft.artB
+  const at = state.customPieces.findIndex(p => p.name === name)
+  if (at >= 0) state.customPieces[at] = piece
+  else state.customPieces.push(piece)
   renderCustomPiecesList()
   buildPiecePicker()
-  scheduleAutosave()
+  render()
+  setStatus(`${name} saved: place it as ${symbolW} or ${symbolB}`)
+}
+
+// A saved piece back in the form, to change and save again.
+function editCustomPiece(piece) {
+  $('def-name').value = piece.name
+  $('def-symbol-w').value = piece.symbolW
+  $('def-symbol-b').value = piece.symbolB
+  $('def-betza').value = piece.spec?.betza || ''
+  if (!piece.spec?.betza && piece.spec) {
+    if (piece.spec.type) $('def-shape').value = piece.spec.type
+    const dirs = piece.spec.dirs || piece.spec.offsets
+    if (typeof dirs === 'string') $('def-dirs').value = dirs
+    $('def-maxsteps').value = piece.spec.maxSteps || ''
+    $('def-directional').checked = !!piece.spec.directional
+    $('def-lame').checked = !!piece.spec.lame
+  }
+  pieceArtDraft = { artW: piece.artW || null, artB: piece.artB || null }
+  showArtDraft()
+}
+
+function showArtDraft() {
+  for (const [side, id, label] of [['artW', 'def-art-w', 'W'], ['artB', 'def-art-b', 'b']]) {
+    const btn = $(id)
+    if (!btn) continue
+    const url = artUrl(galleryIndex, pieceArtDraft[side])
+    btn.innerHTML = ''
+    if (url) {
+      const img = document.createElement('img')
+      img.src = url
+      img.alt = pieceArtDraft[side]
+      btn.appendChild(img)
+    } else {
+      btn.textContent = label
+    }
+    btn.classList.toggle('active', pickingArtFor === side)
+  }
+}
+
+function openArtPicker(side) {
+  const picker = $('artwork-picker')
+  if (pickingArtFor === side) { pickingArtFor = null; picker.hidden = true; showArtDraft(); return }
+  pickingArtFor = side
+  picker.hidden = false
+  const current = pieceArtDraft[side] || pieceArtDraft.artW || pieceArtDraft.artB
+  buildArtworkPicker(picker, galleryIndex, (ref) => {
+    pieceArtDraft[side] = ref
+    // One image for both sides is the usual start; the second side can differ.
+    if (side === 'artW' && !pieceArtDraft.artB) pieceArtDraft.artB = ref
+    showArtDraft()
+  }, { initialSet: current ? current.split('/')[0] : state.pieceSet || undefined })
+  showArtDraft()
 }
 
 function renderCustomPiecesList() {
@@ -595,7 +760,12 @@ function renderCustomPiecesList() {
   state.customPieces.forEach((p, i) => {
     const row = document.createElement('div')
     row.className = 'custom-piece-row'
-    row.innerHTML = `<span class="custom-piece-name">${escapeHtml(p.name)} (${escapeHtml(p.symbolW)}/${escapeHtml(p.symbolB)})</span>`
+    const name = document.createElement('button')
+    name.className = 'custom-piece-name'
+    name.textContent = `${p.name} (${p.symbolW}/${p.symbolB})`
+    name.title = 'Edit this piece'
+    name.addEventListener('click', () => editCustomPiece(p))
+    row.appendChild(name)
     const del = document.createElement('button')
     del.className = 'draft-action draft-action--danger'
     del.textContent = 'x'
@@ -624,6 +794,7 @@ function renderPlayers() {
       state.players.names[index] = value
     } else if (field === 'direction') {
       state.players.advancement[index] = value
+      if (state.players.declared) state.players.declared.advancement = true
     }
     render()
     updateInfoText()
@@ -637,12 +808,52 @@ function renderRules() {
   if (heading) heading.textContent = `${getFamilyLabel(state.family)} rules`
   buildRulesPanel(panel, state.family, state.rules, (key, value) => {
     state.rules[key] = value
+    // Set by hand, so written whatever its value.
+    state.rulesDeclared = [...new Set([...(state.rulesDeclared || []), key])]
+    render()
+    updateInfoText()
+  })
+}
+
+// --- other settings ---
+
+function renderExtras() {
+  const panel = $('extras-panel')
+  if (!panel) return
+  buildExtrasPanel(panel, {
+    extra: state.extra,
+    family: state.family,
+    familyLabel: getFamilyLabel(state.family),
+    configKeys: getConfigKeys(state.family),
+    controlledKeys: [...(FAMILY_RULES[state.family] || []).map(f => f.key), 'playerCount', 'advancement'],
+  }, (block, key, value) => {
+    state.extra = state.extra || emptyExtra()
+    state.extra[block] = { ...(state.extra[block] || {}) }
+    if (value === undefined) delete state.extra[block][key]
+    else state.extra[block][key] = value
+    renderExtras()
     render()
     updateInfoText()
   })
 }
 
 // --- templates ---
+
+// The families a board can be built for: every one the manifest calls playable.
+// This was a six-name literal, the fault the play page's picker had until it
+// read the manifest too, and a hex or mancala template loaded into a select
+// that could not show its family.
+function populateFamilies() {
+  const sel = $('family-select')
+  if (!sel) return
+  sel.innerHTML = ''
+  for (const f of getPlayableFamilies()) {
+    const o = document.createElement('option')
+    o.value = f
+    o.textContent = getFamilyLabel(f)
+    sel.appendChild(o)
+  }
+}
 
 function populateTemplateFamilies() {
   const sel = $('template-family')
@@ -685,13 +896,7 @@ async function loadTemplate() {
   setStatus(`Loading ${slug}…`)
   try {
     const resolved = await resolveVariantBoard(templateFamily, {}, slug, slug)
-    const variantMeta = resolved._variantMeta || {}
-    const next = stateFromResolved(resolved, templateFamily, {
-      title: resolved.meta?.label || slug,
-      slug,
-      win: variantMeta.win || '',
-      special: variantMeta.special || '',
-    })
+    const next = stateFromTemplate(resolved, templateFamily, slug)
     applyState(next)
     currentDraftId = null
     syncDraftName()
@@ -725,26 +930,7 @@ function importYaml(text) {
 }
 
 function exportYaml() {
-  const resolved = buildResolvedFromState(state)
-  const title = state.title || 'Custom Variant'
-  const slug = state.slug || slugify(title)
-
-  const meta = { title, slug }
-  if (state.win) meta.win = state.win
-  if (state.special) meta.special = state.special
-
-  const engine = { topology: resolved.topology }
-  engine.surface = state.render.surface || 'wood-classic'
-  if (resolved.render && Object.keys(resolved.render).length) engine.render = resolved.render
-  if (resolved.pieces) engine.pieces = resolved.pieces
-  if (Object.keys(state.placement || {}).length) engine.setup = buildSetup(state)
-  if (resolved.vocabulary && Object.keys(resolved.vocabulary).length) engine.vocabulary = resolved.vocabulary
-  if (Array.isArray(resolved.players) && resolved.players.length) engine.players = resolved.players
-  const pluginConfig = resolved.plugins?.[state.family] || {}
-  if (Object.keys(pluginConfig).length) engine.plugins = { [state.family]: pluginConfig }
-
-  meta.engine = engine
-  const yaml = serializeFrontmatter(meta)
+  const yaml = serializeFrontmatter(frontmatterFromState(state))
 
   const blob = new Blob([yaml], { type: 'text/yaml' })
   const url = URL.createObjectURL(blob)
@@ -755,44 +941,55 @@ function exportYaml() {
   URL.revokeObjectURL(url)
 }
 
-function slugify(s) {
-  return String(s || 'custom-variant').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'custom-variant'
-}
-
 // --- topology visibility ---
 
 function showTopoOpts() {
   const type = state.topology.type
-  $('grid-opts').style.display = type === 'grid' ? '' : 'none'
-  $('hex-opts').style.display = type === 'hex' ? '' : 'none'
-  $('graph-opts').style.display = type === 'graph' ? '' : 'none'
-  $('track-opts').style.display = type === 'track' ? '' : 'none'
-  $('pit-opts').style.display = type === 'pit' ? '' : 'none'
+  $('grid-opts').hidden = type !== 'grid'
+  $('hex-opts').hidden = type !== 'hex'
+  $('graph-opts').hidden = type !== 'graph'
+  $('track-opts').hidden = type !== 'track'
+  $('pit-opts').hidden = type !== 'pit'
+  const shape = state.topology.shape
+  $('hex-radius').hidden = shape === 'rhombus' || shape === 'triangular'
+  $('hex-rhombus-size').hidden = shape !== 'rhombus'
+  $('hex-side').hidden = shape !== 'triangular'
+  $('hex-size-label').textContent = shape === 'rhombus' ? 'Rows × Cols' : shape === 'triangular' ? 'Side' : 'Radius'
+  $('cell-brush').hidden = type !== 'grid' && type !== 'hex'
+  for (const btn of document.querySelectorAll('.brush-btn')) btn.hidden = type === 'hex' && btn.dataset.brush !== 'void'
+  $('brush-tint-color').hidden = type === 'hex'
   const intersections = type === 'grid' && state.topology.layout === 'intersections'
-  $('cellcolor-group').style.display = type === 'grid' && !intersections ? '' : 'none'
-  $('starpoints-group').style.display = intersections ? '' : 'none'
+  $('cellcolor-group').hidden = type !== 'grid' || intersections
+  $('starpoints-group').hidden = !intersections
 }
 
 function undo() {
   const last = pieceHistory.pop()
   if (!last) return
-  if (last.replaceAll) state.placement = last.replaceAll
+  if (last.cells) {
+    state.topology = last.cells.topology
+    state.placement = last.cells.placement
+    if (last.cells.tints) state.render.tints = last.cells.tints
+    else delete state.render.tints
+  } else if (last.replaceAll) state.placement = last.replaceAll
   else if (last.prev) state.placement[last.sq] = last.prev
   else delete state.placement[last.sq]
   render()
   updateInfoText()
 }
 
+// Every topology is playable (engine#62), so every draft can be tried. What a
+// draft needs is a family that plays it.
 function updateTryInPlayState() {
   const btn = $('try-play-btn')
   if (!btn) return
-  const grid = isGrid(state)
-  btn.disabled = !grid
-  btn.title = grid ? '' : 'Only grid boards can be played (engine#62)'
+  const playable = getPlayableFamilies().includes(state.family)
+  btn.disabled = !playable
+  btn.title = playable ? 'Play this board as it stands' : `No ${getFamilyLabel(state.family)} variant is playable yet`
 }
 
 function tryInPlay() {
-  if (!isGrid(state)) return
+  if ($('try-play-btn')?.disabled) return
   clearTimeout(autosaveTimer)
   const snapshot = structuredClone(state)
   const name = $('draft-name')?.value?.trim() || drafts.defaultName(snapshot)
@@ -807,7 +1004,6 @@ function tryInPlay() {
 // --- init ---
 
 function onControlChange() {
-  readControlsIntoState()
   showTopoOpts()
   render()
   updateInfoText()
@@ -818,6 +1014,7 @@ async function init() {
   await Promise.all([loadGallery(), loadPlayabilityManifest()])
   bindBoard()
   populatePieceSets()
+  populateFamilies()
   populateTemplateFamilies()
 
   const params = new URLSearchParams(location.search)
@@ -847,6 +1044,7 @@ async function init() {
     buildPiecePicker()
     renderPlayers()
     renderRules()
+    renderExtras()
     render()
     updateInfoText()
     updateTryInPlayState()
@@ -857,40 +1055,49 @@ async function init() {
   $('family-select').addEventListener('change', () => {
     state.family = val('family-select')
     state.rules = defaultRuleValues(state.family)
+    state.rulesDeclared = []
     state.players = defaultPlayers(state.family)
+    // Another family's plugin reads none of this one's settings.
+    state.extra = { ...state.extra, plugin: {} }
     renderPlayers()
     renderRules()
+    renderExtras()
     onControlChange()
   })
 
   $('topo-type').addEventListener('change', () => {
-    state.placement = {}
     pieceHistory = []
-    state.render.inherited = null
-    state.render.surfaceColors = null
-    state.pieceVocabulary = null
-    state.inheritedVocabulary = null
-    state.inheritedPieces = null
     const type = val('topo-type')
-    const surfaceSelect = $('surface-select')
-    if (type === 'pit') surfaceSelect.value = 'earth'
-    else if (type === 'graph') surfaceSelect.value = 'parchment'
-    else if (type === 'hex' || type === 'track') surfaceSelect.value = 'wood-classic'
+    setTopologyType(state, type)
+    if (type === 'pit') state.render.surface = 'earth'
+    else if (type === 'graph') state.render.surface = 'parchment'
+    else state.render.surface = 'wood-classic'
+    writeStateIntoControls()
+    renderExtras()
     onControlChange()
   })
 
-  for (const id of ['grid-layout', 'star-points', 'hex-radius', 'graph-structure', 'graph-rings',
-    'track-positions', 'pit-cols', 'surface-select', 'cellcolor-select', 'labels-select']) {
-    $(id)?.addEventListener('change', onControlChange)
+  for (const [id, apply] of Object.entries(CONTROL_BINDINGS)) {
+    $(id)?.addEventListener('change', () => {
+      apply(val(id))
+      renderExtras()
+      onControlChange()
+    })
   }
+  $('star-points')?.addEventListener('change', () => {
+    state.render.starPoints = !!$('star-points').checked
+    onControlChange()
+  })
 
+  // Resizing keeps each piece at the same distance from the first player's edge.
   for (const id of ['grid-rows', 'grid-cols']) {
     $(id)?.addEventListener('change', () => {
-      const rows = num('grid-rows', 8)
-      const cols = num('grid-cols', 8)
+      const rows = state.topology.rows
+      const cols = state.topology.cols
       const dropped = lastGrid ? reanchorPlacement(lastGrid.rows, lastGrid.cols, rows, cols) : 0
       lastGrid = { rows, cols }
-      onControlChange()
+      render()
+      updateInfoText()
       if (dropped) setStatus(`${dropped} piece${dropped !== 1 ? 's' : ''} did not fit the new board and ${dropped !== 1 ? 'were' : 'was'} removed`)
     })
   }
@@ -901,19 +1108,9 @@ async function init() {
     render()
   })
 
-  // Choosing a surface or a cell style is an explicit override, so the loaded
-  // variant's own drawing program stops applying at that point.
-  for (const id of ['surface-select', 'cellcolor-select', 'grid-layout']) {
-    $(id)?.addEventListener('change', () => {
-      state.render.inherited = null
-      state.render.surfaceColors = null
-      onControlChange()
-    })
-  }
-
-  for (const id of ['meta-title', 'meta-slug', 'meta-win', 'meta-special']) {
+  for (const [id, field] of Object.entries(META_BINDINGS)) {
     $(id)?.addEventListener('input', () => {
-      readControlsIntoState()
+      state[field] = val(id) || (field === 'title' ? 'Custom Variant' : '')
       if (id === 'meta-title' && !$('meta-slug').value) {
         $('meta-slug').placeholder = slugify(state.title) || 'slug (auto from title)'
       }
@@ -959,17 +1156,34 @@ async function init() {
 
   $('def-preview-btn')?.addEventListener('click', previewMoves)
   $('def-add-btn')?.addEventListener('click', addCustomPiece)
+  $('def-art-w')?.addEventListener('click', () => openArtPicker('artW'))
+  $('def-art-b')?.addEventListener('click', () => openArtPicker('artB'))
+  $('def-art-clear')?.addEventListener('click', () => {
+    pieceArtDraft = { artW: null, artB: null }
+    pickingArtFor = null
+    $('artwork-picker').hidden = true
+    showArtDraft()
+  })
 
   const setupInput = $('setup-input')
   setupInput?.addEventListener('change', () => applySetupInput(setupInput.value))
   setupInput?.addEventListener('blur', syncSetupInput)
 
   $('setup-copy-btn')?.addEventListener('click', () => {
-    const value = Object.keys(state.placement).length ? buildSetup(state) : ''
+    const value = setupText(Object.keys(state.placement).length ? buildSetup(state) : state.rawSetup)
     if (value && navigator.clipboard) navigator.clipboard.writeText(value)
   })
 
   $('try-play-btn')?.addEventListener('click', tryInPlay)
+  for (const btn of document.querySelectorAll('.brush-btn')) {
+    btn.addEventListener('click', () => selectBrush(btn.dataset.brush))
+  }
+  $('restore-cells-btn')?.addEventListener('click', () => {
+    pieceHistory.push({ cells: structuredClone({ topology: state.topology, tints: state.render.tints, placement: state.placement }) })
+    restoreAllCells(state)
+    render()
+    updateInfoText()
+  })
   $('clear-pieces-btn').addEventListener('click', () => {
     state.placement = {}
     pieceHistory = []

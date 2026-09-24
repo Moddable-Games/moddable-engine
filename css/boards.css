@@ -985,7 +985,18 @@
   padding: 2px 0;
 }
 
-.custom-piece-name { flex: 1; }
+.custom-piece-name {
+  flex: 1;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.custom-piece-name:hover { color: var(--cosmic-glow); }
 
 .info-status {
   font-size: 11px;
@@ -1034,3 +1045,85 @@
 .player-row .def-input { flex: 1; }
 
 .def-select--short { width: auto; min-width: 84px; }
+
+/* `.control-group select` is full width, which left a player's name 26px wide
+   beside its direction. */
+.control-group .player-row select.def-select--short { width: auto; flex: 0 0 96px; }
+.control-group .player-row input.def-input { min-width: 0; }
+
+/* Create page: spacing that used to be inline */
+
+.btn-small { margin-top: 6px; font-size: 11px; }
+.control-row--spaced { margin-top: 6px; }
+.control-label--spaced { margin-top: 8px; }
+.control-group--spaced { margin-top: 16px; }
+.meta-group .def-input + .def-input { margin-top: 4px; }
+
+/* Create page: other settings */
+
+.extras-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.extras-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.extras-heading {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: help;
+}
+
+.extras-row,
+.extras-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.control-group textarea.extras-text {
+  min-height: 0;
+  flex: 1;
+  min-width: 0;
+  width: auto;
+  font-size: 11px;
+  line-height: 1.4;
+  resize: vertical;
+  white-space: pre;
+}
+
+.extras-text.is-invalid {
+  border-color: #f44;
+}
+
+.extras-add .def-select { width: 100%; }
+.extras-add-btn { font-size: 11px; padding: 4px 10px; }
+.extras-warning { width: 100%; color: var(--accent-amber); }
+
+/* Create page: cell brush */
+
+.cell-brush .piece-group { align-items: center; }
+.brush-btn { width: auto; padding: 0 8px; font-size: 11px; }
+.control-group input.brush-color { width: 32px; height: 28px; padding: 0 2px; }
+
+/* Create page: piece artwork */
+
+.def-art-btn { width: 40px; padding: 2px; }
+.def-art-btn img { width: 32px; height: 32px; }
+.artwork-picker { display: flex; flex-direction: column; gap: 6px; }
+.artwork-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.artwork-btn img { width: 32px; height: 32px; }

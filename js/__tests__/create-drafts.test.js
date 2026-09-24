@@ -22,7 +22,7 @@ globalThis.localStorage = {
 }
 
 const drafts = await import('../create-drafts.js')
-const { defaultState, buildResolvedFromState, stateFromResolved, buildSetup, parseSetup } = await import('../create-state.js')
+const { defaultState, buildResolvedFromState, stateFromResolved, buildSetup, parseSetup, setGridLayout } = await import('../create-state.js')
 const { FAMILY_RULES, toPluginConfig, defaultRuleValues } = await import('../create-rules.js')
 const { defaultPlayers, toPlayerConfig } = await import('../create-players.js')
 
@@ -128,12 +128,15 @@ describe('state round-trips through the engine block', () => {
 describe('a grid is not necessarily a chessboard', () => {
   test('intersections reach the topology, and suppress the checker fill', () => {
     const state = defaultState('go')
-    state.topology = { ...state.topology, rows: 19, cols: 19, layout: 'intersections' }
+    state.topology = { ...state.topology, rows: 19, cols: 19 }
+    setGridLayout(state, 'intersections')
     state.render.starPoints = true
     const resolved = buildResolvedFromState(state)
     expect(resolved.topology.layout).toBe('intersections')
     expect(resolved.render.cellColor).toBe('none')
     expect(resolved.render.decorations).toEqual([{ type: 'markers', auto: 'star-points', size: 3 }])
+    setGridLayout(state, 'cells')
+    expect(buildResolvedFromState(state).render.cellColor).toBe('checkered')
   })
 
   test('a cell grid keeps its cell colouring and declares no layout', () => {

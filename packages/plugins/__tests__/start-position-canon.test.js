@@ -12,6 +12,12 @@ import { createGame } from '../../play/src/sdk.js'
 // VARIANT_FLOOR guard below caught - the it.each was running over an empty
 // list, which is a pass that proves nothing.
 import '../../play/src/bootstrap-plugins.js'
+// And the rules reader, without which every variant here was built from its
+// family's default definition rather than its own frontmatter. The test
+// compared that default with the rules file and passed wherever they happened
+// to agree: Makpong passed while its file declared the chess position, and
+// failed the moment the file was corrected to Makruk's.
+import '../../play/test-helpers/setup-rules-reader.js'
 
 // The starting position for every variant is content, owned by moddable-rules,
 // and is the exact string the published board diagram is drawn from. These
@@ -30,25 +36,6 @@ function resolveRulesDir() {
 
 const RULES_DIR = resolveRulesDir()
 const describeWithRules = RULES_DIR ? describe : describe.skip
-
-function fenToGrid(fen, rows, cols) {
-  const grid = []
-  for (const rank of fen.split('/')) {
-    const row = []
-    for (let i = 0; i < rank.length; i++) {
-      const ch = rank[i]
-      if (ch >= '0' && ch <= '9') {
-        let n = ch
-        if (rank[i + 1] >= '0' && rank[i + 1] <= '9') { n += rank[i + 1]; i++ }
-        for (let k = 0; k < Number(n); k++) row.push('.')
-      } else row.push(ch)
-    }
-    while (row.length < cols) row.push('.')
-    grid.push(row)
-  }
-  while (grid.length < rows) grid.push(new Array(cols).fill('.'))
-  return grid
-}
 
 // Plugins store cells three different ways: as objects, as bare colour strings,
 // and as raw owner indices. All three have to resolve back to a symbol.
@@ -110,7 +97,7 @@ function everyRegisteredVariant() {
 describeWithRules('start position matches moddable-rules', () => {
   const variants = everyRegisteredVariant()
 
-  const VARIANT_FLOOR = 55
+  const VARIANT_FLOOR = 230
   it('variant coverage meets floor', () => {
     expect(variants.length).toBeGreaterThanOrEqual(VARIANT_FLOOR)
   })
@@ -120,22 +107,11 @@ describeWithRules('start position matches moddable-rules', () => {
     expect(missing.map(([f, k]) => `${f}/${k}`)).toEqual([])
   })
 
-  const KNOWN_MISMATCH = new Set([
-    'chess/breakthrough',
-    'chess/chaturanga',
-    'chess/chess960',
-    'chess/empire',
-    'chess/hexapawn',
-    'chess/horde',
-    'chess/khans-chess',
-    'chess/maharaja',
-    'chess/monsterChess',
-    'chess/ouk-chaktrang',
-    'chess/racingKings',
-    'chess/shatranj',
-    'chess/sittuyin',
-  ])
-  const MISMATCH_CEILING = 13
+  // Chess 960 draws its back rank at random, so no one position is its start.
+  // There were thirteen entries here. Twelve were this test's own FEN walk
+  // failing to read their setups, not the engine starting anywhere wrong.
+  const KNOWN_MISMATCH = new Set(['chess/chess960'])
+  const MISMATCH_CEILING = 1
 
   it(`known mismatch count does not exceed ceiling (${MISMATCH_CEILING})`, () => {
     expect(KNOWN_MISMATCH.size).toBeLessThanOrEqual(MISMATCH_CEILING)
@@ -148,17 +124,34 @@ describeWithRules('start position matches moddable-rules', () => {
 
     const game = createGame(family, key)
     const plugin = game.raw.registry.getPlugins().find(p => p.sliceName === family)
-    const { grid, rows, cols } = boardGrid(game, plugin)
-    const generated = grid.map(r => r.join('')).join('/')
+    const topology = game.raw.topology
+    const board = game.getState().slice.board
+    const occupied = (cells) => {
+      const out = {}
+      for (const [cell, piece] of Object.entries(cells || {})) {
+        if (piece !== null && piece !== undefined && piece !== '') out[cell] = cellSymbol(piece, plugin.vocabulary)
+      }
+      return out
+    }
 
     if (setup === undefined || setup === '') {
       // No declared setup means the game begins on an empty board, as Go does.
-      expect(generated).toMatch(/^[./]+$/)
+      expect(occupied(board)).toEqual({})
       return
     }
 
-    const canon = fenToGrid(setup, rows, cols).map(r => r.join('')).join('/')
-    expect(generated).toBe(canon)
+    // The declared setup read by the game's own topology, the reader the
+    // plugin is meant to have used: a comma rank, a board of layers and a hex
+    // cell list are each read the one way the engine reads them, rather than by
+    // a FEN walk of this test's own that knew only the plain form.
+    const declared = topology.parsePosition(setup, plugin.vocabulary)
+    // Where a setup is not a piece per cell - a pit board's seed counts - the
+    // board is written back out by the same topology and read again.
+    if (!Array.isArray(declared) && ('pits' in declared || 'stores' in declared)) {
+      expect(topology.parsePosition(topology.serializePosition(board, plugin.vocabulary), plugin.vocabulary)).toEqual(declared)
+      return
+    }
+    expect(occupied(board)).toEqual(occupied(declared))
   })
 
   it('no variant silently renders an unknown piece symbol', () => {

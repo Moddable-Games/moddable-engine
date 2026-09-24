@@ -294,11 +294,24 @@ export function betzaToSpec(notation) {
 
     const mods = expandModifiers(rawMods)
     const dirs = directionsFor(atom, mods)
-    const steps = count ? Number(count) : null
 
-    if (steps !== null && JUMPERS.has(atom)) {
-      throw new Error(`Betza: "${atom}${count}" in "${source}" - a step count on a jumping atom is not modelled`)
+    // A doubled atom is that atom repeated along its line: `WW` is a rook, `NN`
+    // a nightrider. So is a count of 0, "any number of times", and a count
+    // caps the repeats. These read as one leap each - `NN` as two knights -
+    // which is the quiet approximation this parser exists to refuse.
+    const doubled = !count && rest[0] === atom
+    if (doubled) rest = rest.slice(1)
+    if (doubled || count === '0' || (count && JUMPERS.has(atom))) {
+      const repeats = doubled || count === '0' ? null : Number(count)
+      specs.push({
+        type: 'rider',
+        dirs,
+        ...(repeats ? { maxSteps: repeats } : {}),
+        ...(mods.length ? { directional: true } : {}),
+      })
+      continue
     }
+    const steps = count ? Number(count) : null
 
     // Forward is only meaningful to a seat, so a term that used f/b/l/r rotates
     // with its owner. Marked per term rather than per string: in `FAvWvD` only

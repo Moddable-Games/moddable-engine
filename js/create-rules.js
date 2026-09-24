@@ -145,12 +145,28 @@ export function defaultRuleValues(family) {
 // Only emit what differs from the default. A config object that restates every
 // default is noise in the exported frontmatter and hides the two lines that
 // actually define the variant.
-export function toPluginConfig(family, values) {
+//
+// `explicit` writes every value, defaults included. The carriage in
+// create-state.js diffs two of these to find what the user changed, and there a
+// value set back to the form's default is still a change: the family may not
+// share the form's idea of the default.
+//
+// `declared` names keys the variant itself sets. They are written whatever
+// their value: a variant stating the form's default may be overriding a family
+// default that is not the form's.
+export function toPluginConfig(family, values, { explicit = false, declared = [] } = {}) {
   const config = {}
+  const stated = new Set(declared)
   for (const field of FAMILY_RULES[family] || []) {
     const value = values?.[field.key]
     if (value === undefined || value === null) continue
     if (field.type === 'number' && Number.isNaN(Number(value))) continue
+    if (explicit || stated.has(field.key)) {
+      config[field.key] = field.type === 'list' ? parseList(value)
+        : field.type === 'number' ? Number(value)
+        : value
+      continue
+    }
 
     if (field.type === 'list') {
       const arr = Array.isArray(value) ? value : parseList(value)
@@ -176,8 +192,21 @@ export function toPluginConfig(family, values) {
   // A board with no royal piece has nothing to be in check about, and leaving
   // check detection on makes every move illegal-check-test against a piece that
   // does not exist.
-  if (family === 'chess' && config.royalType === 'none') config.noCheck = true
+  if (family === 'chess' && (config.royalType ?? values?.royalType) === 'none') config.noCheck = true
   return config
+}
+
+// Whether a value is one this field's control can hold. One that is not - a
+// promotion zone given as a list of rows where the form offers a depth - is
+// kept whole as an "other setting" rather than squeezed into the control.
+export function fitsField(family, key, value) {
+  const field = (FAMILY_RULES[family] || []).find(f => f.key === key)
+  if (!field) return false
+  if (field.type === 'bool') return typeof value === 'boolean'
+  if (field.type === 'number') return typeof value === 'number'
+  if (field.type === 'list') return Array.isArray(value) && value.every(v => typeof v === 'string')
+  if (field.type === 'text') return typeof value === 'string'
+  return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
 }
 
 function parseList(value) {

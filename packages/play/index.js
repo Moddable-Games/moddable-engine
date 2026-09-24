@@ -1,5 +1,5 @@
 export { createGameController } from './src/game-controller.js'
-export { createGameForFamily, getPlugin, getFamilies, hasFamily, setRulesReader, registerTopology, registerPluginFactory, STRUCTURAL_KEYS, resolveFromDisk } from './src/play.js'
+export { createGameForFamily, getPlugin, getFamilies, getConfigKeys, hasFamily, setRulesReader, registerTopology, createTopology, registerPluginFactory, STRUCTURAL_KEYS, resolveFromDisk } from './src/play.js'
 export { resolveVariantAsync } from './src/resolve-frontmatter.js'
 export { defaultSeatFor } from './src/default-seat.js'
 export { boardToSetup } from './src/serialise.js'
@@ -69,3 +69,4 @@ export {
   applyFlags,
   flagPositionKeySuffix,
 } from './src/variant-flags.js'
+export { definitionFromResolved } from './src/variant-definition.js'

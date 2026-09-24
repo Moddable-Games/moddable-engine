@@ -1329,7 +1329,10 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     // S-Chess holds a reserve and never adds to it - "hand pieces are never lost
     // from the hand except by gating" - and seeding one filled it with captured
     // pawns until this asked the right question.
-    if (hands && config.drops) {
+    //
+    // `capturesTo: none` drops from a reserve that captures never feed. Dragon
+    // Chess: "If a Dragon on the board is captured, it is gone permanently".
+    if (hands && config.drops && config.capturesTo !== 'none') {
       const captured = move.captured != null ? getCell(slice.board, move.captured) : getCell(slice.board, move.to)
       if (captured && captured.owner !== playerIdx && captured.type !== royalTypeFor(captured.owner)) {
         hands[handReceiving(playerIdx)].push(handTypeFor(captured))
@@ -1707,6 +1710,15 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return moves.filter(move => {
       if (move.action && actions[move.action] && actions[move.action].skipsCheckFilter) return true
       const board = slice.board
+      // A move from nowhere enters a piece from off the board. Simulating it as
+      // a piece moving `from` undefined read and wrote `board[undefined]`: the
+      // entering piece was never on the board when check was tested, and the
+      // board kept a stray "undefined" key afterwards.
+      if (move.from === undefined) {
+        const placed = board.slice ? board.slice() : { ...board }
+        placed[move.to] = { type: move.type, owner: playerIdx }
+        return !isInCheck(placed, playerIdx)
+      }
       const fromPiece = board[move.from]
       const toPiece = board[move.to]
       let rookFrom, rookTo, capturedPiece, capturedPos

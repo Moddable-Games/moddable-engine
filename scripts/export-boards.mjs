@@ -18,7 +18,7 @@ import './lib/dom-stubs.mjs'
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs'
 import { resolve } from 'path'
 import { createHash } from 'crypto'
-import { resolveSurface } from '../packages/schema/src/surfaces.js'
+import { resolveSurface, effectiveSurface } from '../packages/schema/src/surfaces.js'
 import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolver.js'
 import { renderFromEngine, attachPieceImages } from '../packages/render/src/render-engine.js'
 import {
@@ -70,7 +70,9 @@ for (const { family, familyEngine, slug, path: variantPath, meta, engine: varian
       ? { ...variantEngine, topology: { ...variantEngine.topology, type: normType } }
       : variantEngine
 
-    const surfRef = normVar?.surface || normFam?.surface || null
+    // The same declaration play resolves (resolve-frontmatter.js), so a board
+    // and the game played on it are drawn in the same colours.
+    const surfRef = effectiveSurface(normFam?.surface, normVar?.surface) || null
     const surface = surfRef ? resolveSurface(surfRef) : {}
 
     const { resolved } = cascadeResolve({

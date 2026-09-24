@@ -2,100 +2,84 @@
 //
 // Both previews (the piece definer's "what does this shape do" preview, and the
 // hover preview over an already-placed piece) drive the real `fromConfig`
-// primitive from packages/piece-behaviour rather than a drawing of what the
-// movement is supposed to look like. If the preview is wrong, the piece is
-// wrong.
+// primitive from packages/piece-behaviour over the real topology the board is
+// made of. If the preview is wrong, the piece is wrong.
 //
-// The two used to carry their own copies of the direction and named-offset
-// tables, which had already drifted apart: the hover copy accepted `camel`,
-// the definer copy did not list `all` in the same order. One table now.
+// This used to walk a rectangle of its own, "sufficient for the primitives this
+// page can build". It could not see a void, a blocker or a wrapped edge, so it
+// showed a rook sliding through a hole the game would stop it at, and it had no
+// hex at all. The topology is built by the same registry a game uses.
 
 import { fromConfig } from '../packages/piece-behaviour/index.js'
+import { createTopology } from '../packages/play/index.js'
 import { algebraicId } from '../packages/topologies/grid/index.js'
 
-const DIRS = {
-  orthogonal: [[-1, 0], [1, 0], [0, -1], [0, 1]],
-  diagonal: [[-1, -1], [-1, 1], [1, -1], [1, 1]],
-  all: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]],
+// The topology a game would build from this block, or null where the type has
+// no provider.
+export function previewTopology(topologyBlock) {
+  try { return createTopology(topologyBlock) } catch { return null }
 }
 
-const NAMED_OFFSETS = {
-  knight: [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]],
-  elephant: [[-2, -2], [-2, 2], [2, -2], [2, 2]],
-  camel: [[-3, -1], [-3, 1], [-1, -3], [-1, 3], [1, -3], [1, 3], [3, -1], [3, 1]],
-  dabbaba: [[-2, 0], [2, 0], [0, -2], [0, 2]],
-  zebra: [[-3, -2], [-3, 2], [-2, -3], [-2, 3], [2, -3], [2, 3], [3, -2], [3, 2]],
-  king: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]],
-}
-
-// A minimal board-view of a rectangular grid, sufficient for the primitives
-// this page can build. Not a replacement for topologies/grid: it exists so the
-// preview does not need a live game instance.
-function gridTopology(rows, cols) {
-  return {
-    rays(from, directions, maxSteps) {
-      const resolved = typeof directions === 'string' ? (DIRS[directions] || []) : (directions || [])
-      const fr = Math.floor(from / cols), fc = from % cols
-      const limit = maxSteps || Math.max(rows, cols)
-      return resolved.map(([dr, dc]) => {
-        const ray = []
-        for (let i = 1; i <= limit; i++) {
-          const nr = fr + dr * i, nc = fc + dc * i
-          if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) break
-          ray.push(nr * cols + nc)
-        }
-        return ray
-      })
-    },
-    leapTargets(from, offsets) {
-      const resolved = typeof offsets === 'string' ? (NAMED_OFFSETS[offsets] || []) : (offsets || [])
-      const fr = Math.floor(from / cols), fc = from % cols
-      const out = []
-      for (const [dr, dc] of resolved) {
-        const nr = fr + dr, nc = fc + dc
-        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) out.push(nr * cols + nc)
-      }
-      return out
-    },
-  }
-}
-
-// Returns the move list, or null if the spec does not build. Exported without
-// any DOM dependency so it can be tested.
-export function movesForSpec(spec, { rows, cols, from, board }) {
+// Returns the move list, or null if the spec does not build.
+export function movesForSpec(spec, { topology, from, board }) {
+  if (!topology) return null
   let primitive
   try { primitive = fromConfig(spec) } catch { return null }
-  try { return primitive.genMoves(gridTopology(rows, cols), from, board) } catch { return null }
+  try { return primitive.genMoves(topology, from, board) } catch { return null }
 }
 
-export function boardFromPlacement(placement, rows, cols, moverIsUpper) {
-  const board = new Array(rows * cols).fill(null)
-  for (const [key, fenChar] of Object.entries(placement)) {
+// The cell a preview starts from: the middle of the board.
+export function centreCell(topology) {
+  const cells = topology.getAllCells ? topology.getAllCells() : []
+  if (topology.rows && topology.cols && topology.toIndex) {
+    return topology.toIndex(Math.floor(topology.rows / 2), Math.floor(topology.cols / 2))
+  }
+  if (cells.includes('0,0')) return '0,0'
+  return cells[Math.floor(cells.length / 2)]
+}
+
+// A placement key ("row,col" on a grid, the cell id elsewhere) as the cell the
+// topology addresses.
+export function cellForKey(topology, key) {
+  if (topology.toIndex && /^\d+,\d+$/.test(key)) {
     const [r, c] = key.split(',').map(Number)
-    if (r < 0 || r >= rows || c < 0 || c >= cols) continue
-    const isUpper = fenChar === fenChar.toUpperCase()
-    board[r * cols + c] = { friendly: isUpper === moverIsUpper, enemy: isUpper !== moverIsUpper }
+    return topology.toIndex(r, c)
+  }
+  return key
+}
+
+// The board a primitive reads: each occupied cell marked friendly or enemy to
+// the piece being previewed. Indexed the way the topology indexes its cells.
+export function boardFromPlacement(topology, placement, moverIsUpper) {
+  const board = topology.toIndex ? new Array(topology.size || 0).fill(null) : {}
+  for (const [key, symbol] of Object.entries(placement)) {
+    const cell = cellForKey(topology, key)
+    if (cell === undefined || cell === null) continue
+    const isUpper = symbol === symbol.toUpperCase()
+    board[cell] = { friendly: isUpper === moverIsUpper, enemy: isUpper !== moverIsUpper }
   }
   return board
 }
 
-function cellSelector(container, r, c, rows, idStyle) {
-  const algebraic = algebraicId(r, c, rows)
+// The `data-sq` a topology cell is drawn with.
+function cellElement(container, topology, cell, idStyle) {
+  if (!topology.toRC) return container.querySelector(`[data-sq="${cell}"]`)
+  const [r, c] = topology.toRC(cell)
+  const algebraic = algebraicId(r, c, topology.rows)
   return container.querySelector(`[data-sq="${idStyle === 'rc' ? `${r},${c}` : algebraic}"]`)
     || container.querySelector(`[data-sq="${r},${c}"]`)
     || container.querySelector(`[data-sq="${algebraic}"]`)
 }
 
-export function paintDots(container, cells, { rows, cols, className, fill, radiusFactor = 0.15, idStyle }) {
+export function paintDots(container, cells, { topology, className, fill, radiusFactor = 0.15, idStyle }) {
   const svgEl = container.querySelector('svg')
-  if (!svgEl) return 0
+  if (!svgEl || !topology) return 0
   let painted = 0
   for (const entry of cells) {
-    const idx = typeof entry === 'number' ? entry : entry.to
-    const r = Math.floor(idx / cols), c = idx % cols
-    const cell = cellSelector(container, r, c, rows, idStyle)
-    if (!cell || !cell.getBBox) continue
-    const rect = cell.getBBox()
+    const cell = typeof entry === 'object' && entry !== null ? entry.to : entry
+    const el = cellElement(container, topology, cell, idStyle)
+    if (!el || !el.getBBox) continue
+    const rect = el.getBBox()
     const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
     dot.setAttribute('cx', rect.x + rect.width / 2)
     dot.setAttribute('cy', rect.y + rect.height / 2)

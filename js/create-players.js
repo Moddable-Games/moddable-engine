@@ -94,8 +94,11 @@ export function toPlayerConfig(family, players) {
     names.push(given || fallback[i] || `player${i + 1}`)
   }
 
+  // A loaded variant says which of these it declares, and only those are
+  // written: four seats named in `players` need no `playerCount` beside them.
+  const declared = players?.declared
   const config = {}
-  if (count > 2) config.playerCount = count
+  if (declared ? declared.playerCount : count > 2) config.playerCount = count
 
   const shape = ADVANCEMENT_SHAPE[family]
   if (shape) {
@@ -108,7 +111,7 @@ export function toPlayerConfig(family, players) {
       const expected = i === 0 ? 'up' : 'down'
       if (dir !== expected) differsFromDefault = true
     }
-    if (differsFromDefault) config.advancement = advancement
+    if (declared ? declared.advancement : differsFromDefault) config.advancement = advancement
   }
 
   return { players: names, config }
@@ -144,7 +147,8 @@ export function playersFromResolved(resolved, family) {
   const fallback = DEFAULT_PLAYER_NAMES[family] || DEFAULT_PLAYER_NAMES.chess
   const resolvedNames = []
   for (let i = 0; i < count; i++) resolvedNames.push(names[i] || fallback[i] || `player${i + 1}`)
-  return { count, names: resolvedNames, advancement }
+  const declared = { playerCount: block.playerCount !== undefined, advancement: block.advancement !== undefined }
+  return { count, names: resolvedNames, advancement, declared }
 }
 
 export function buildPlayersPanel(container, family, players, onChange) {

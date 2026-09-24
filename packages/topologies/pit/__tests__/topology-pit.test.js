@@ -206,3 +206,18 @@ describe('topology-pit', () => {
     })
   })
 })
+
+// Oware and Bao have no stores, and the corpus still writes a store's field
+// after each side. Read as a side, that `0` emptied the second player's pits.
+describe('a storeless board written with store fields', () => {
+  test('reads both sides', () => {
+    const topology = createPitTopology({ cols: 6, stores: false })
+    const { pits } = topology.parsePosition('4,4,4,4,4,4;0;4,4,4,4,4,4;0')
+    expect(pits).toEqual(new Array(12).fill(4))
+  })
+
+  test('and still reads the form without them', () => {
+    const topology = createPitTopology({ cols: 6, stores: false })
+    expect(topology.parsePosition('1,2,3,4,5,6;6,5,4,3,2,1').pits).toEqual([1, 2, 3, 4, 5, 6, 6, 5, 4, 3, 2, 1])
+  })
+})

@@ -3,7 +3,7 @@ import { createGameFromDefinition } from '../../game/index.js'
 import { WIRED_RULES } from './rules.js'
 import { produce } from '../../schema/index.js'
 import { getVariantConfig, hasVariant, getSlugForKey, setVariantSources as _setVariantSources } from './variant-registry.js'
-import { definitionFromVariant } from './variant-definition.js'
+import { definitionFromVariant, STRUCTURAL_KEYS } from './variant-definition.js'
 import { parseVariantKey, applyFlags, familySupportsFlag, registerPluginFlags } from './variant-flags.js'
 import { registerSearchPolicies } from './search-policy-registry.js'
 import { findFamilyPlugin } from './find-plugin.js'
@@ -55,6 +55,14 @@ export function registerTopology(type, factory) {
   TOPOLOGIES[type] = factory
 }
 
+// A topology instance for a topology block, from whichever provider registered
+// its type. For tools that need the real geometry without a game: the create
+// page's move preview walks the same rays a game would.
+export function createTopology(config) {
+  const factory = TOPOLOGIES[config?.type]
+  return factory ? factory(config) : null
+}
+
 export function registerPluginFactory(family, factory) {
   PLUGIN_FACTORIES[family] = factory
   if (factory.flags) registerPluginFlags(family, factory.flags)
@@ -93,6 +101,12 @@ export function getPlugin(family) {
   const factory = PLUGIN_FACTORIES[family]
   if (!factory) return null
   return { factory }
+}
+
+// Every config key a family's plugin reads, as the plugin declares it.
+export function getConfigKeys(family) {
+  const factory = PLUGIN_FACTORIES[family]
+  return factory?.configKeys ? [...factory.configKeys] : []
 }
 
 export function getFamilies() {
@@ -234,7 +248,7 @@ export function setRulesReader(readFn, listFn) {
   }
 }
 
-export const STRUCTURAL_KEYS = new Set(['topology', 'players', 'firstPlayer', 'turnOrder', 'meta', 'surface', 'render', 'components', 'plugins', 'pieces'])
+export { STRUCTURAL_KEYS }
 
 export function resolveFromDisk(family, variant) {
   if (!_readFile) return null

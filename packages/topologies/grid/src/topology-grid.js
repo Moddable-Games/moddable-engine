@@ -1,4 +1,4 @@
-import { readPosition, parseRankRuns, fileLabel, fileIndex, intersectionLabel, splitCellId } from '../../../core/index.js'
+import { readPosition, writePosition, parseRankRuns, fileLabel, fileIndex, intersectionLabel, splitCellId } from '../../../core/index.js'
 export const schema = {
   type: 'grid',
   required: ['rows', 'cols'],
@@ -597,38 +597,24 @@ export function createGridTopology(config) {
     }
   }
 
+  // Written by core's `writePosition`, which this and the other two writers of
+  // the notation each had a loop of their own for. A symbol longer than one
+  // character is bracketed: Dai Shogi has 29 piece types, and `LN` written raw
+  // reads back as an `L` and an `N`. Four or more seats write comma-separated
+  // tokens instead, the form a seat-prefixed symbol like `yR` needs.
   function serializePosition(cellStates, vocabulary) {
     const symbolMap = buildSymbolMap(vocabulary)
-    const multiOwner = hasMultipleOwners(cellStates)
-
-    if (multiOwner) {
-      return serializeMultiChar(cellStates, symbolMap)
-    }
-
-    const rowStrings = []
+    const ranks = []
     for (let r = 0; r < rows; r++) {
-      let rowStr = ''
-      let empty = 0
+      const cells = []
       for (let c = 0; c < cols; c++) {
         const idx = toIndex(r, c)
         const cell = cellStates[idx] || cellStates.get?.(idx) || null
-        if (cell === null || cell === undefined) {
-          empty++
-        } else {
-          if (empty > 0) { rowStr += String(empty); empty = 0 }
-          // A symbol longer than one character is bracketed. A plugin
-          // vocabulary may use multi-character codes when a variant has more
-          // piece types than there are letters - Dai Shogi has 29 - and
-          // written raw, `LN` reads back as an `L` and an `N`, so the row
-          // parses to twice its width and the position is not the one served.
-          const sym = symbolMap.toSymbol(cell)
-          rowStr += String(sym).length > 1 ? `[${sym}]` : sym
-        }
+        cells.push(cell === null || cell === undefined ? null : symbolMap.toSymbol(cell))
       }
-      if (empty > 0) rowStr += String(empty)
-      rowStrings.push(rowStr)
+      ranks.push(cells)
     }
-    return rowStrings.join('/')
+    return writePosition(ranks, { commas: hasMultipleOwners(cellStates) })
   }
 
   function hasMultipleOwners(cellStates) {
@@ -637,27 +623,6 @@ export function createGridTopology(config) {
       if (cell && typeof cell === 'object' && cell.owner > 1) return true
     }
     return false
-  }
-
-  function serializeMultiChar(cellStates, symbolMap) {
-    const rowStrings = []
-    for (let r = 0; r < rows; r++) {
-      const tokens = []
-      let empty = 0
-      for (let c = 0; c < cols; c++) {
-        const idx = toIndex(r, c)
-        const cell = cellStates[idx] || cellStates.get?.(idx) || null
-        if (cell === null || cell === undefined) {
-          empty++
-        } else {
-          if (empty > 0) { tokens.push(String(empty)); empty = 0 }
-          tokens.push(symbolMap.toSymbol(cell))
-        }
-      }
-      if (empty > 0) tokens.push(String(empty))
-      rowStrings.push(tokens.join(','))
-    }
-    return rowStrings.join('/')
   }
 
   function parsePosition(notation, vocabulary) {
@@ -688,38 +653,21 @@ export function createGridTopology(config) {
     const symbolMap = buildSymbolMap(vocabulary)
     const cells = new Array(layers > 1 ? layers * plane : rows * cols).fill(null)
     const rowStrings = notation.split(' ')[0].split('/')
-    const isCommaSeparated = rowStrings.some(r => r.includes(','))
 
     if (rowStrings.length !== rows && rowStrings[0] !== '') {
       throw new Error(`FEN has ${rowStrings.length} ranks but topology has ${rows} rows.`)
     }
 
     for (let r = 0; r < rowStrings.length && r < rows; r++) {
-      let c = 0
-      if (isCommaSeparated) {
-        const tokens = rowStrings[r].split(',')
-        for (const token of tokens) {
-          const trimmed = token.trim()
-          if (!trimmed) continue
-          if (/^\d+$/.test(trimmed)) { c += parseInt(trimmed, 10) }
-          else {
-            const piece = symbolMap.fromSymbol(trimmed)
-            if (!piece) throw new Error(`Unmapped FEN symbol "${trimmed}" at row ${r}, col ${c}. Declare it in vocabulary.`)
-            if (c < cols) cells[toIndex(r, c)] = piece
-            c++
-          }
-        }
-        if (c > cols) throw new Error(`Rank ${r} has ${c} cells but topology has ${cols} columns.`)
-      } else {
-        const { cells: read, widths } = readPosition(rowStrings[r])
-        for (const { col, symbol } of read) {
-          const piece = symbolMap.fromSymbol(symbol)
-          if (!piece) throw new Error(`Unmapped FEN symbol "${symbol}" at row ${r}, col ${col}. Declare it in vocabulary.`)
-          if (col < cols) cells[toIndex(r, col)] = piece
-        }
-        c = widths[0] ?? 0
-        if (c > cols) throw new Error(`Rank ${r} has ${c} cells but topology has ${cols} columns.`)
+      // One reader for every form of rank, comma-separated ones included.
+      const { cells: read, widths } = readPosition(rowStrings[r])
+      for (const { col, symbol } of read) {
+        const piece = symbolMap.fromSymbol(symbol)
+        if (!piece) throw new Error(`Unmapped FEN symbol "${symbol}" at row ${r}, col ${col}. Declare it in vocabulary.`)
+        if (col < cols) cells[toIndex(r, col)] = piece
       }
+      const c = widths[0] ?? 0
+      if (c > cols) throw new Error(`Rank ${r} has ${c} cells but topology has ${cols} columns.`)
     }
     return cells
   }

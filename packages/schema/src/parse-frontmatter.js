@@ -102,7 +102,10 @@ function parseList(lines, start, end, baseIndent) {
     const itemContent = trimmed.slice(2)
     const itemColonIdx = itemContent.indexOf(':')
 
-    if (itemColonIdx === -1 || itemContent.startsWith('[') || (itemContent.startsWith('{') && itemContent.endsWith('}'))) {
+    // A quoted item is a string whatever it contains. `- "https://..."` has a
+    // colon in it, and was read as a map keyed `"https`.
+    if (itemColonIdx === -1 || itemContent.startsWith('[') || (itemContent.startsWith('{') && itemContent.endsWith('}')) ||
+        isQuoted(itemContent)) {
       items.push(parseValue(itemContent))
       i++
     } else {
@@ -209,8 +212,12 @@ function parseValue(raw) {
   if (raw === '{}') return {}
   if (/^-?\d+$/.test(raw)) return parseInt(raw, 10)
   if (/^-?\d+\.\d+$/.test(raw)) return parseFloat(raw)
-  if ((raw.startsWith('"') && raw.endsWith('"')) ||
-      (raw.startsWith("'") && raw.endsWith("'"))) {
+  // Inside double quotes `\"` is a quote and `\\` a backslash, as YAML has
+  // it. Read raw, a `special:` that quoted a word showed its backslashes.
+  if (raw.length >= 2 && raw.startsWith('"') && raw.endsWith('"')) {
+    return raw.slice(1, -1).replace(/\\(["\\])/g, '$1')
+  }
+  if (raw.length >= 2 && raw.startsWith("'") && raw.endsWith("'")) {
     return raw.slice(1, -1)
   }
   if (raw.startsWith('[') && raw.endsWith(']')) {
@@ -242,6 +249,10 @@ function parseInlineObject(raw) {
     result[key] = parseValue(val)
   }
   return result
+}
+
+function isQuoted(raw) {
+  return raw.length >= 2 && ((raw.startsWith('"') && raw.endsWith('"')) || (raw.startsWith("'") && raw.endsWith("'")))
 }
 
 function splitRespectingBrackets(str) {

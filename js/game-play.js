@@ -1,5 +1,5 @@
 import {
-  createGameForFamily, STRUCTURAL_KEYS, createGameController,
+  createGameForFamily, definitionFromResolved, createGameController,
   listVariants, getVariantConfig,
   parseUrlFlags, deriveCompatibleFlags, familySupportsFlag, serializeVariantKey,
   createAI, interactionModelFor, clickCellOf,
@@ -130,41 +130,6 @@ const FAMILY_AI_OPTIONS = {
   ],
 }
 
-const REGISTRY_PRESENTATION_KEYS = new Set(['key', 'label', 'title', 'group', 'description', 'rule', 'board', 'extends', 'hidden', 'playerNames', 'definition', 'rows', 'cols', 'size', 'notation', 'topology', 'players'])
-
-function buildDefinitionFromResolved(family, variant, resolved, registryCfg) {
-  const registryTopo = registryCfg.topology || {}
-  const topo = resolved.topology || {}
-  const topology = topo.type ? { ...registryTopo, ...topo } : undefined
-  const players = resolved.players || ['white', 'black']
-
-  const pluginConfig = {}
-  for (const [k, v] of Object.entries(registryCfg)) {
-    if (REGISTRY_PRESENTATION_KEYS.has(k)) continue
-    pluginConfig[k] = v
-  }
-  for (const [k, v] of Object.entries(resolved)) {
-    if (STRUCTURAL_KEYS.has(k)) continue
-    if (v !== undefined) pluginConfig[k] = v
-  }
-  const pluginBlock = resolved.plugins?.[family]
-  if (pluginBlock) {
-    for (const [k, v] of Object.entries(pluginBlock)) {
-      if (v !== undefined) pluginConfig[k] = v
-    }
-  }
-
-  // Who opens and in what order seats move are the game's, not the plugin's,
-  // and were dropped here: the page opened every game with the first seat and
-  // rotated round the table whatever the variant said.
-  const engine = { players, plugins: { [family]: pluginConfig } }
-  if (resolved.firstPlayer !== undefined) engine.firstPlayer = resolved.firstPlayer
-  if (resolved.turnOrder !== undefined) engine.turnOrder = resolved.turnOrder
-  const def = { title: resolved.meta?.label || variant, slug: variant, parent: family, engine }
-  if (topology) def.engine.topology = topology
-  return def
-}
-
 export function createPlaySession(options = {}) {
   const {
     family,
@@ -234,14 +199,14 @@ export function createPlaySession(options = {}) {
     let frontmatterDef
     if (draftState) {
       resolvedBoard = buildResolvedFromState(draftState)
-      frontmatterDef = buildDefinitionFromResolved(family, variant, resolvedBoard, {})
+      frontmatterDef = definitionFromResolved(family, variant, resolvedBoard, {})
     } else {
       const variantCfg = getVariantConfig(family, variant) || {}
       const playable = getPlayableVariants(family)
       const variantEntry = playable.find(e => e.variant === variant)
       const slug = variantEntry?.slug || variant
       resolvedBoard = await resolveVariantBoard(family, variantCfg, variant, slug)
-      frontmatterDef = buildDefinitionFromResolved(family, variant, resolvedBoard, variantCfg)
+      frontmatterDef = definitionFromResolved(family, variant, resolvedBoard, variantCfg)
     }
 
     const variantKey = flags.length ? serializeVariantKey(variant, flags) : variant

@@ -8,6 +8,8 @@
 // worth testing: when it was inline browser code, draughts men serialised to
 // symbols that resolved to chess artwork and nothing caught it.
 
+import { writePosition } from '../../core/index.js'
+
 export function cellToSymbol(cell, vocabulary = {}) {
   if (cell === null || cell === undefined) return null
 
@@ -160,35 +162,26 @@ export function boardToSetup(slice, topo = {}, vocabulary = {}, opts = {}) {
     return boardToFen4(board, rows, cols, vocabulary, players)
   }
 
-  const fenRows = []
+  // `writePosition` brackets a symbol longer than one character. Dai Shogi's
+  // vocabulary is two-character codes, and written raw `LN` reads back as an
+  // `L` and an `N`, so every row served to the renderer was twice too long and
+  // the board came back with pieces that were never on it.
+  const ranks = []
   for (let r = 0; r < rows; r++) {
-    let row = ''
-    let empty = 0
-    for (let c = 0; c < cols; c++) {
-      const symbol = cellToSymbol(board[r * cols + c], vocabulary)
-      if (!symbol) { empty++; continue }
-      if (empty > 0) { row += empty; empty = 0 }
-      // Bracketed when the symbol is longer than one character. Dai Shogi's
-      // vocabulary is two-character codes, and written raw `LN` reads back as
-      // an `L` and an `N`, so every row served to the renderer was twice too
-      // long and the board came back with pieces that were never on it.
-      row += String(symbol).length > 1 ? `[${symbol}]` : symbol
-    }
-    if (empty > 0) row += empty
-    fenRows.push(row)
+    const cells = []
+    for (let c = 0; c < cols; c++) cells.push(cellToSymbol(board[r * cols + c], vocabulary) || null)
+    ranks.push(cells)
   }
-  return fenRows.join('/')
+  return writePosition(ranks)
 }
 
 function boardToFen4(board, rows, cols, vocabulary, players) {
-  const fenRows = []
+  const ranks = []
   for (let r = 0; r < rows; r++) {
     const tokens = []
-    let empty = 0
     for (let c = 0; c < cols; c++) {
       const cell = board[r * cols + c]
-      if (!cell) { empty++; continue }
-      if (empty > 0) { tokens.push(String(empty)); empty = 0 }
+      if (!cell) { tokens.push(null); continue }
       // Not every family stores a piece as an object. Go holds a stone as its
       // colour, and this path is taken whenever a game seats more than two -
       // which pair play does, with four seats and two colours. `cellToSymbol`
@@ -197,7 +190,7 @@ function boardToFen4(board, rows, cols, vocabulary, players) {
       // first stone placed in a four-seat Go game threw on `cell.type[0]`.
       const shared = cellToSymbol(cell, vocabulary)
       if (shared) { tokens.push(shared); continue }
-      if (typeof cell !== 'object') { empty++; continue }
+      if (typeof cell !== 'object') { tokens.push(null); continue }
       const entry = vocabulary[cell.type]
       const ownerSym = entry?.symbols?.[String(cell.owner)]
       if (ownerSym) {
@@ -208,10 +201,9 @@ function boardToFen4(board, rows, cols, vocabulary, players) {
         tokens.push(prefix + letter)
       }
     }
-    if (empty > 0) tokens.push(String(empty))
-    fenRows.push(tokens.join(','))
+    ranks.push(tokens)
   }
-  return fenRows.join('/')
+  return writePosition(ranks, { commas: true })
 }
 
 // Every symbol boardToSetup can emit, so a test can assert each one resolves to

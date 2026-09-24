@@ -168,6 +168,22 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Changelog
 
+#### 2026-09-24
+- The create page loads, exports and plays every one of the 239 playable variants without losing anything. It used to rebuild a variant from its own controls, so everything it had no control for was dropped: 44 of 239 survived a load and an export. It now keeps the variant it was given and writes back only what was changed, and a test checks five ways in and out for every playable variant against what the engine plays
+- Anything playable can also be built on the create page. Settings with no control of their own (a turn order, a pawn configuration, a drawing program, a board of several layers) are shown under Other settings as the YAML they are written as, and the page offers every setting the family's plugin reads
+- A cell brush paints cells void, blocked or tinted, and writes a board's voids and its drawn holes as one pair. Painting the centre of a 7x7 board void gives Rollerball's board
+- Boards can wrap their edges, stack layers, and be hex boards of any shape, orientation or set of cells. Setups in four-player notation, on hex cells and across layers can be placed on, where before they could only be loaded
+- A piece can take its artwork from any set, emoji included, by name (`pieces.art`), and its movement in Betza notation, which any family now reads. A Betza doubled atom is a rider: `NN` is the nightrider, `WW` the rook, where they compiled to two single leaps
+- Move previews walk the board's real topology, so they stop at voids and wrap round edges; Try in Play works on every topology; the family picker offers every playable family
+- Dragon Chess let a player in check gate a Dragon anywhere, and one captured pawn gave an endless supply of Dragons. It now uses the shared drop rule from a reserve that captures never feed
+- Makpong started from the chess position everywhere but the play page. It starts from Makruk's
+- The frontmatter writer loses nothing across the whole rules corpus. It wrote nested lists as `[object Object]` and empty blocks as nothing; the reader took a quoted URL in a list for a map and never unescaped a quote
+- Resolving a variant no longer edits the variant it was given
+- A variant's surface colours sit on its family's surface before its derived colours are worked out, the same in play as on the board gallery
+- Four-player setups are read and written by one reader and one writer in core, where the grid topology, the renderer, play and the create page each had a loop
+- A mancala board with no stores read its second side from the store field the corpus writes, and emptied it
+- The start-position test now builds each variant from its rules file. It had been building the family default, and twelve of its thirteen recorded mismatches were its own reader
+
 #### 2026-09-22
 - Delirious Bughouse plays: Bughouse on the model Tandem built, with its author's two changes. Pawns may only be placed on the 2nd to 6th ranks counted from the player's own side (`pawnDropRanks`), and a captured promoted piece stays what it became while its promoter gets the pawn back (`promotionsKept`), so every promotion adds a piece to the game. Seats move White1, Black2, White3, Black4, the order its source records its example game in. The page's later stages (Dice Chess, Worst Move and the fairy stages) are separate games and are not played
 - Stupidhouse plays, and plays the game its source describes. Partners share a colour, so a captured piece belongs to the partner's opponent, and the partner must place it on their own board instead of moving: every capture forces your partner to give their opponent a piece. A dropped piece can now belong to the board's opponent (`dropsFor: opponent`) and a drop can be compulsory (`dropsCompulsory`)

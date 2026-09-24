@@ -22,6 +22,11 @@
  */
 
 export function parseRankRuns(rank) {
+  // A rank of comma-separated tokens is the four-player form: `3,yR,yN,2`,
+  // where a seat letter prefixes every piece. Each token is a count or one
+  // symbol. It had three readers of its own (the grid topology, the renderer
+  // and the create page), each with its own loop.
+  if (rank.includes(',')) return parseCommaRuns(rank)
   const runs = []
   let i = 0
   while (i < rank.length) {
@@ -47,6 +52,45 @@ export function parseRankRuns(rank) {
     i++
   }
   return runs
+}
+
+function parseCommaRuns(rank) {
+  const runs = []
+  for (const raw of rank.split(',')) {
+    const token = raw.trim()
+    if (!token) continue
+    if (/^\d+$/.test(token)) runs.push({ skip: parseInt(token, 10) })
+    else runs.push({ symbol: token })
+  }
+  return runs
+}
+
+/**
+ * The one writer, and `readPosition`'s inverse. `ranks` is one array per rank,
+ * each cell a symbol or null. A symbol longer than one character is bracketed,
+ * or, with `commas`, every token is separated and none is bracketed - the form
+ * the four-player boards are written in.
+ *
+ * `promotion` reads a leading `+` as the promotion marker `readPosition`
+ * reports, and writes it outside the brackets. Without it `+P` is a symbol of
+ * its own, which is how a vocabulary that names promoted types spells them.
+ */
+export function writePosition(ranks, { commas = false, promotion = false } = {}) {
+  return ranks.map(cells => {
+    const tokens = []
+    let empty = 0
+    for (const symbol of cells) {
+      if (symbol === null || symbol === undefined || symbol === '') { empty++; continue }
+      if (empty > 0) { tokens.push(String(empty)); empty = 0 }
+      // `+` marks a promoted piece and is not part of its symbol.
+      const text = String(symbol)
+      const promoted = promotion && text.length > 1 && text.startsWith('+')
+      const base = promoted ? text.slice(1) : text
+      tokens.push((promoted ? '+' : '') + (commas || base.length === 1 ? base : `[${base}]`))
+    }
+    if (empty > 0) tokens.push(String(empty))
+    return tokens.join(commas ? ',' : '')
+  }).join('/')
 }
 
 /**

@@ -152,6 +152,21 @@ function deriveCrossTopoDefaults(colors) {
   return c
 }
 
+// A variant's surface declared over its family's, as one declaration. A name,
+// or an object naming its own `base`, replaces what is under it; an object of
+// overrides sits on it. Resolving the variant's declaration alone and laying the
+// family's colours over the result afterwards meant a family's `stroke` reached
+// `stroke` and none of the colours derived from it.
+export function effectiveSurface(inherited, own) {
+  if (own === undefined || own === null) return inherited
+  if (typeof own !== 'object' || own.base) return own
+  if (typeof inherited === 'string') return { base: inherited, ...own }
+  if (inherited && typeof inherited === 'object') {
+    return { ...inherited, ...own, colors: { ...(inherited.colors || {}), ...(own.colors || {}) } }
+  }
+  return own
+}
+
 export function resolveSurface(ref) {
   if (!ref) return {}
 

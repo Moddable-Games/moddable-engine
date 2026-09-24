@@ -1,3 +1,5 @@
+import { betzaToSpec } from './betza.js'
+
 export const OFFSETS = {
   knight: [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]],
   king: [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]],
@@ -965,6 +967,12 @@ export function hopper(dirs, opts = {}) {
 }
 
 export function fromConfig(config, resolve) {
+  // A movement may be given in the Betza notation its source prints. Only the
+  // shogi plugin compiled it, so a chess piece - or a piece built on the create
+  // page - declared as `{ betza: 'NAD' }` built nothing.
+  if (config && typeof config === 'object' && !Array.isArray(config) && config.betza) {
+    return fromConfig(betzaToSpec(config.betza), resolve)
+  }
   if (config.divergent) {
     return divergent(
       buildPrimitive(config.divergent.move, resolve),

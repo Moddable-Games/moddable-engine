@@ -6,7 +6,7 @@
  * reader had its own idea of what "20" meant.
  */
 
-import { parseRankRuns, parsePositionRuns } from '../src/fen-runs.js'
+import { parseRankRuns, parsePositionRuns, readPosition, writePosition } from '../src/fen-runs.js'
 import { fenToPosition } from '../../render/src/render-engine.js'
 import { createGridTopology } from '../../topologies/grid/src/topology-grid.js'
 
@@ -79,5 +79,35 @@ describe('every reader agrees on a board wider than nine files', () => {
     const pos = fenToPosition(SETUP, ROWS, COLS)
     expect(pos.c4).toBeUndefined()
     expect(pos.d4).toBeUndefined()
+  })
+})
+
+// The four-player form had three readers and three writers of its own - the
+// grid topology, the renderer, play's serialiser and the create page - each a
+// loop over the same tokens. One of each now.
+describe('comma-separated ranks and the one writer', () => {
+  test('a comma rank reads token by token, a count or one whole symbol', () => {
+    const { cells, widths } = readPosition('3,yR,yN,2/rK,6')
+    expect(widths).toEqual([7, 7])
+    expect(cells).toEqual([
+      { row: 0, col: 3, symbol: 'yR', promoted: false },
+      { row: 0, col: 4, symbol: 'yN', promoted: false },
+      { row: 1, col: 0, symbol: 'rK', promoted: false },
+    ])
+  })
+
+  test('writePosition is readPosition inverted, in both forms', () => {
+    const ranks = [[null, null, 'yR', 'LN'], ['K', null, null, null]]
+    expect(writePosition(ranks)).toBe('2[yR][LN]/K3')
+    expect(writePosition(ranks, { commas: true })).toBe('2,yR,LN/K,3')
+    for (const text of [writePosition(ranks), writePosition(ranks, { commas: true })]) {
+      const { cells } = readPosition(text)
+      expect(cells.map(c => `${c.row},${c.col}=${c.symbol}`)).toEqual(['0,2=yR', '0,3=LN', '1,0=K'])
+    }
+  })
+
+  test('a leading + is a promotion only when asked', () => {
+    expect(writePosition([['+LN', 'P']], { promotion: true })).toBe('+[LN]P')
+    expect(writePosition([['+P']])).toBe('[+P]')
   })
 })

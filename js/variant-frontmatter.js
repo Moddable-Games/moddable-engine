@@ -2,7 +2,7 @@
 // Thin wrapper over packages/play/src/resolve-frontmatter.js adding _variantMeta.
 
 import { resolveVariantAsync } from '../packages/play/index.js'
-import { parseFrontmatter } from '../packages/schema/index.js'
+import { parseFrontmatter, effectiveSurface } from '../packages/schema/index.js'
 import { RULES_BASE } from './play-shared.js'
 
 const RULES_FETCH = { cache: 'no-cache' }
@@ -43,7 +43,14 @@ export async function resolveVariantBoard(family, variantConfig, variantKey, slu
     fetch(familyPath, RULES_FETCH).then(r => r.text()),
     fetch(variantPath, RULES_FETCH).then(r => r.ok ? r.text() : ''),
   ])
-  const familyFm = parseFrontmatter(familyMd).meta || {}
+  return annotateVariant(resolved, familyMd, variantMd)
+}
+
+
+// What the pages need from the files beside the resolved engine block. Pure, so
+// the create page's template path can be tested without a fetch.
+export function annotateVariant(resolved, familyMd, variantMd) {
+  const familyFm = parseFrontmatter(familyMd || '').meta || {}
   const variantFm = variantMd ? (parseFrontmatter(variantMd).meta || {}) : {}
 
   resolved._variantMeta = {
@@ -52,5 +59,15 @@ export async function resolveVariantBoard(family, variantConfig, variantKey, slu
     special: variantFm.special || '',
     title: variantFm.title || '',
   }
+  // The rest of the variant's own frontmatter - players, parent, published and
+  // the like - for the create page, which carries it through to its export.
+  const { engine: _engine, ...fileMeta } = variantFm
+  resolved._variantFrontmatter = fileMeta
+  // The surface as written. The resolved one is the palette built from it, and
+  // written back out it would be a hundred colours where the file had a name.
+  // A variant that only overrides colours sits on its family's surface, and a
+  // create-page draft has no family underneath it, so the base is named.
+  resolved._declaredSurface = effectiveSurface(familyFm.engine?.surface, variantFm.engine?.surface)
   return resolved
 }
+

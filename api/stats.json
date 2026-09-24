@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-22",
+  "generated": "2026-09-24",
   "pieces": 120,
   "boards": 334,
   "boardFamilies": 34,
@@ -24,7 +24,7 @@
     "xiangqi": 9
   },
   "variantPluginsByFamily": {
-    "chess": 54,
+    "chess": 53,
     "draughts": 0,
     "go": 3,
     "hex": 0,
@@ -36,7 +36,7 @@
     "xiangqi": 0
   },
   "frontmatterOnlyByFamily": {
-    "chess": 94,
+    "chess": 95,
     "draughts": 20,
     "go": 9,
     "hex": 8,

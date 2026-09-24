@@ -14,14 +14,26 @@ function isPlainObject(val) {
   return val !== null && typeof val === 'object' && !Array.isArray(val)
 }
 
+// The result shares no plain object with either input. It used to hand back
+// the override's own nested objects wherever the base had nothing to merge
+// with, and `deriveDefaults` then wrote `cellColor` and `labels` into them - so
+// resolving a variant quietly edited the variant it was given. The create page
+// keeps the block it imported as the thing it exports, and was exporting
+// defaults the file never declared.
 function deepMerge(base, override) {
   if (!isPlainObject(base) || !isPlainObject(override)) {
-    return override !== undefined ? override : base
+    const value = override !== undefined ? override : base
+    return isPlainObject(value) ? deepMerge({}, value) : value
   }
-  const result = { ...base }
+  const result = {}
+  for (const key of Object.keys(base)) {
+    result[key] = isPlainObject(base[key]) ? deepMerge({}, base[key]) : base[key]
+  }
   for (const key of Object.keys(override)) {
-    if (isPlainObject(base[key]) && isPlainObject(override[key])) {
-      result[key] = deepMerge(base[key], override[key])
+    if (isPlainObject(result[key]) && isPlainObject(override[key])) {
+      result[key] = deepMerge(result[key], override[key])
+    } else if (isPlainObject(override[key])) {
+      result[key] = deepMerge({}, override[key])
     } else if (override[key] !== undefined) {
       result[key] = override[key]
     }

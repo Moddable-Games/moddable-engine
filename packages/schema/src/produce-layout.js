@@ -1337,27 +1337,31 @@ function produceDecorations(decorations, colors, rows, cols, cellSize) {
   const tintDecs = decorations.filter(d => d.type === 'tint')
   if (!tintDecs.length) return null
 
+  // A tint covers a rectangular `region`, or any set of `cells` - a lake, a
+  // promotion zone that is not a band, the cells a board editor painted.
   const regionMap = new Map()
   for (const d of tintDecs) {
+    const fill = colors[d.color] || d.fill || 'rgba(255,200,0,0.15)'
+    const tint = { fill, opacity: d.opacity ?? 0.3 }
     if (d.region) {
       const rStart = d.region.rows?.[0] ?? 0
       const rEnd = d.region.rows?.[1] ?? rows - 1
       const cStart = d.region.cols?.[0] ?? 0
       const cEnd = d.region.cols?.[1] ?? cols - 1
-      const fill = colors[d.color] || d.fill || 'rgba(255,200,0,0.15)'
       for (let r = rStart; r <= rEnd; r++) {
         for (let c = cStart; c <= cEnd; c++) {
-          regionMap.set(`${r},${c}`, fill)
+          regionMap.set(`${r},${c}`, tint)
         }
       }
     }
+    for (const [r, c] of Array.isArray(d.cells) ? d.cells : []) regionMap.set(`${r},${c}`, tint)
   }
 
   if (!regionMap.size) return null
   return (r, c, cx, cy, ts) => {
-    const fill = regionMap.get(`${r},${c}`)
-    if (!fill) return null
-    return [{ tag: 'rect', attrs: { x: cx - ts / 2, y: cy - ts / 2, width: ts, height: ts, fill, opacity: 0.3 } }]
+    const tint = regionMap.get(`${r},${c}`)
+    if (!tint) return null
+    return [{ tag: 'rect', attrs: { x: cx - ts / 2, y: cy - ts / 2, width: ts, height: ts, fill: tint.fill, opacity: tint.opacity } }]
   }
 }
 

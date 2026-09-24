@@ -1,4 +1,6 @@
 import { betzaToSpec } from '../src/betza.js'
+import { fromConfig } from '../src/piece-definitions.js'
+import { createGridTopology } from '../../topologies/grid/index.js'
 
 // The offset convention these assert against is the corpus's own: forward is
 // row -1, and a seat that faces the other way is rotated by the plugin.
@@ -127,14 +129,54 @@ describe('betza refuses what it cannot read', () => {
     expect(() => betzaToSpec(notation)).toThrow(/Betza:/)
   })
 
-  test('a count on a jumping atom is refused rather than approximated', () => {
-    expect(() => betzaToSpec('N2')).toThrow(/jumping atom/)
-  })
-
   test('modifiers that leave nothing are refused', () => {
     // A dabbaba has no offset whose longer component is diagonal, so this must
     // not quietly compile to an empty move set.
     expect(() => betzaToSpec('D')).not.toThrow()
     expect(() => betzaToSpec('')).toThrow(/Betza:/)
+  })
+})
+
+// Any plugin, and the create page's piece editor, may declare a movement as
+// Betza. Only the shogi plugin compiled it, so the same `{ betza }` that moved a
+// shogi piece built nothing for chess.
+describe('fromConfig reads Betza wherever a spec is read', () => {
+  test('an archbishop declared as BN moves as bishop and knight together', () => {
+    const topology = createGridTopology({ rows: 8, cols: 8 })
+    const from = topology.toIndex(4, 4)
+    const board = new Array(64).fill(null)
+    const moves = fromConfig({ betza: 'BN' }).genMoves(topology, from, board).map(m => m.to).sort((a, b) => a - b)
+    const expected = [
+      ...fromConfig({ type: 'rider', dirs: 'diagonal' }).genMoves(topology, from, board),
+      ...fromConfig({ type: 'leaper', offsets: 'knight' }).genMoves(topology, from, board),
+    ].map(m => m.to).sort((a, b) => a - b)
+    expect(moves).toEqual(expected)
+    expect(moves.length).toBe(13 + 8)
+  })
+})
+
+// A doubled atom is that atom's rider, and so is a count of 0. Both read as
+// single leaps - `NN` as two knights - which is the quiet approximation the
+// parser exists to refuse.
+describe('riders written as repeated atoms', () => {
+  test('NN and N0 are the nightrider, WW and W0 the rook', () => {
+    const knight = betzaToSpec('N').offsets
+    expect(betzaToSpec('NN')).toEqual({ type: 'rider', dirs: knight })
+    expect(betzaToSpec('N0')).toEqual({ type: 'rider', dirs: knight })
+    expect(betzaToSpec('WW')).toEqual({ type: 'rider', dirs: betzaToSpec('W').offsets })
+    expect(betzaToSpec('W0')).toEqual(betzaToSpec('WW'))
+  })
+
+  test('a count on a leaping atom caps its repeats', () => {
+    expect(betzaToSpec('N2')).toEqual({ type: 'rider', dirs: betzaToSpec('N').offsets, maxSteps: 2 })
+  })
+
+  test('the nightrider reaches the second leap on an open board', () => {
+    const topology = createGridTopology({ rows: 8, cols: 8 })
+    const from = topology.toIndex(7, 0)
+    const targets = fromConfig({ betza: 'NN' }).genMoves(topology, from, new Array(64).fill(null)).map(m => m.to)
+    expect(targets).toContain(topology.toIndex(5, 1))
+    expect(targets).toContain(topology.toIndex(3, 2))
+    expect(targets).toContain(topology.toIndex(1, 3))
   })
 })

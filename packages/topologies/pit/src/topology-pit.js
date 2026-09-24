@@ -199,6 +199,11 @@ export function createPitTopology(config) {
     const sections = notation.split(';')
     const pits = new Array(totalPits).fill(0)
     const storesArr = new Array(players).fill(0)
+    // A board with no stores may still be written with a store's field after
+    // each side - the corpus writes Oware `4,4,4,4,4,4;0;4,4,4,4,4,4;0` - and
+    // reading the second side from that `0` emptied it. Two fields a side are a
+    // side and its store, whatever the board holds.
+    const withStoreFields = hasStores || sections.length === players * 2
 
     let sectionIdx = 0
     for (let p = 0; p < players; p++) {
@@ -209,8 +214,8 @@ export function createPitTopology(config) {
         }
         sectionIdx++
       }
-      if (hasStores && sectionIdx < sections.length) {
-        storesArr[p] = parseInt(sections[sectionIdx].trim(), 10) || 0
+      if (withStoreFields && sectionIdx < sections.length) {
+        if (hasStores) storesArr[p] = parseInt(sections[sectionIdx].trim(), 10) || 0
         sectionIdx++
       }
     }
