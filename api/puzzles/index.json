@@ -53,14 +53,14 @@
       ],
       "deterministic": "minimax searches a node budget per level, MCTS its iteration count at expert; each record seeded from its id",
       "byDifficulty": {
-        "beginner": 1192,
-        "hard": 150,
-        "medium": 213,
-        "unsolved": 77,
-        "easy": 78,
-        "expert": 23
+        "beginner": 1262,
+        "hard": 160,
+        "medium": 221,
+        "unsolved": 97,
+        "easy": 82,
+        "expert": 27
       },
-      "disagreements": 47
+      "disagreements": 116
     },
     "unsolvedByEngine": [
       "lichess_00SMl",
@@ -116,7 +116,14 @@
       "lichess_02iyq",
       "lichess_05Jwg",
       "lichess_06fTc",
-      "giveaway_gen_2"
+      "giveaway_gen_2",
+      "go_9x9_best_1",
+      "go_phantomGo_best_1",
+      "go_rengo_best_3",
+      "go_toroidalGo_best_2",
+      "mancala_pallanguzhi_best_3",
+      "mancala_sungka_best_3",
+      "reversi_standard_best_1"
     ]
   },
   "standard": [
@@ -66703,7 +66710,22 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "hard",
+            "expert"
+          ],
+          "nodes": 28592
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "hard"
     },
     {
       "id": "go_13x13_best_2",
@@ -66730,7 +66752,25 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 973
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_13x13_best_3",
@@ -66757,7 +66797,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [],
+          "nodes": null
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": true
+      },
+      "difficulty": "unsolved"
     },
     {
       "id": "go_9x9_best_1",
@@ -66784,7 +66838,19 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [],
+          "nodes": null
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "unsolved"
     },
     {
       "id": "go_9x9_best_2",
@@ -66811,7 +66877,25 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 599
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_9x9_best_3",
@@ -66838,7 +66922,25 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 483
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_captureGo_gen_1",
@@ -66866,7 +66968,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 95
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_captureGo_gen_2",
@@ -66894,7 +67016,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 125
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_captureGo_gen_3",
@@ -66922,7 +67064,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 130
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_gomoku_gen_1",
@@ -66949,7 +67111,25 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 305
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_gomoku_gen_2",
@@ -66976,7 +67156,25 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 283
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_gomoku_gen_3",
@@ -67003,7 +67201,25 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 299
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_ninukiRenju_best_1",
@@ -67030,7 +67246,25 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 2,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 1822
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_ninukiRenju_best_2",
@@ -67057,7 +67291,23 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 2,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "hard",
+            "expert"
+          ],
+          "nodes": 2000
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_ninukiRenju_best_3",
@@ -67084,7 +67334,23 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 2,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium"
+          ],
+          "nodes": 1583
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_oneColour_best_1",
@@ -67111,7 +67377,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner"
+          ],
+          "nodes": 2000
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_oneColour_best_2",
@@ -67138,7 +67418,23 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "hard",
+            "expert"
+          ],
+          "nodes": 2000
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_oneColour_best_3",
@@ -67165,7 +67461,23 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "hard",
+            "expert"
+          ],
+          "nodes": 2000
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_phantomGo_best_1",
@@ -67192,7 +67504,19 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [],
+          "nodes": null
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "unsolved"
     },
     {
       "id": "go_phantomGo_best_2",
@@ -67219,7 +67543,22 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "hard",
+            "expert"
+          ],
+          "nodes": 36403
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "hard"
     },
     {
       "id": "go_phantomGo_best_3",
@@ -67246,7 +67585,25 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 483
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_rengo_best_1",
@@ -67671,7 +68028,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner"
+          ],
+          "nodes": 2000
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_rengo_best_2",
@@ -68096,7 +68467,22 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "hard",
+            "expert"
+          ],
+          "nodes": 100000
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "hard"
     },
     {
       "id": "go_rengo_best_3",
@@ -68521,7 +68907,19 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [],
+          "nodes": null
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "unsolved"
     },
     {
       "id": "go_renju_gen_1",
@@ -68548,7 +68946,25 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 287
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_renju_gen_2",
@@ -68575,7 +68991,25 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 343
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_renju_gen_3",
@@ -68602,7 +69036,25 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 309
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_standard_best_1",
@@ -68629,7 +69081,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner"
+          ],
+          "nodes": 2000
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_standard_best_2",
@@ -68656,7 +69122,23 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "hard",
+            "expert"
+          ],
+          "nodes": 2000
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_standard_best_3",
@@ -68683,7 +69165,25 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 2000
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_stoical_best_1",
@@ -68710,7 +69210,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner"
+          ],
+          "nodes": 2000
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_stoical_best_2",
@@ -68737,7 +69251,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner"
+          ],
+          "nodes": 2000
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_stoical_best_3",
@@ -68764,7 +69292,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner"
+          ],
+          "nodes": 2000
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "go_toroidalGo_best_1",
@@ -68791,7 +69333,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "medium"
+          ],
+          "nodes": 30000
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "medium"
     },
     {
       "id": "go_toroidalGo_best_2",
@@ -68818,7 +69374,19 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [],
+          "nodes": null
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "unsolved"
     },
     {
       "id": "go_toroidalGo_best_3",
@@ -68845,7 +69413,23 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 19321
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "medium"
     },
     {
       "id": "mancala_ayo_best_1",
@@ -68907,7 +69491,22 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "hard",
+            "expert"
+          ],
+          "nodes": 4239
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "hard"
     },
     {
       "id": "mancala_ayo_best_2",
@@ -68969,7 +69568,27 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 62
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "mancala_ayo_best_3",
@@ -69031,7 +69650,24 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "hard",
+            "expert"
+          ],
+          "nodes": 7671
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "hard"
     },
     {
       "id": "mancala_bao_best_1",
@@ -69117,7 +69753,22 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 3,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "medium"
+          ],
+          "nodes": 29
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "mancala_bao_best_2",
@@ -69203,7 +69854,26 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 3,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard"
+          ],
+          "nodes": 32
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "mancala_bao_best_3",
@@ -69289,7 +69959,23 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 3,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium"
+          ],
+          "nodes": 38
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "mancala_congkak_best_1",
@@ -69355,7 +70041,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 5,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner"
+          ],
+          "nodes": 47
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "mancala_congkak_best_2",
@@ -69421,7 +70121,23 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 12,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium"
+          ],
+          "nodes": 50
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "mancala_congkak_best_3",
@@ -69488,7 +70204,24 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 26,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "hard",
+            "expert"
+          ],
+          "nodes": 58
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "mancala_kalah_best_1",
@@ -69553,7 +70286,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "easy"
+          ],
+          "nodes": 213
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": false
+      },
+      "difficulty": "easy"
     },
     {
       "id": "mancala_kalah_best_2",
@@ -69618,7 +70365,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 7,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [],
+          "nodes": null
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": true
+      },
+      "difficulty": "unsolved"
     },
     {
       "id": "mancala_kalah_best_3",
@@ -69683,7 +70444,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "easy"
+          ],
+          "nodes": 190
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "easy"
     },
     {
       "id": "mancala_oware_best_1",
@@ -69745,7 +70520,23 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 1003
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "medium"
     },
     {
       "id": "mancala_oware_best_2",
@@ -69807,7 +70598,24 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "hard",
+            "expert"
+          ],
+          "nodes": 5178
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "hard"
     },
     {
       "id": "mancala_oware_best_3",
@@ -69869,7 +70677,24 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "hard",
+            "expert"
+          ],
+          "nodes": 7671
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "hard"
     },
     {
       "id": "mancala_pallanguzhi_best_1",
@@ -69933,7 +70758,23 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 23,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "hard"
+          ],
+          "nodes": 6184
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": true
+      },
+      "difficulty": "hard"
     },
     {
       "id": "mancala_pallanguzhi_best_2",
@@ -69997,7 +70838,23 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 19,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 300000
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "expert"
     },
     {
       "id": "mancala_pallanguzhi_best_3",
@@ -70061,7 +70918,19 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 41,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [],
+          "nodes": null
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": false
+      },
+      "difficulty": "unsolved"
     },
     {
       "id": "mancala_sungka_best_1",
@@ -70127,7 +70996,23 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 8,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner"
+          ],
+          "nodes": 57
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "mancala_sungka_best_2",
@@ -70193,7 +71078,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 18,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 300000
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "expert"
     },
     {
       "id": "mancala_sungka_best_3",
@@ -70259,7 +71158,19 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 18,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [],
+          "nodes": null
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "unsolved"
     },
     {
       "id": "mancala_toguzKorgool_best_1",
@@ -70329,7 +71240,22 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 9,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "hard",
+            "expert"
+          ],
+          "nodes": 20860
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "hard"
     },
     {
       "id": "mancala_toguzKorgool_best_2",
@@ -70399,7 +71325,23 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 9,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 300000
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "expert"
     },
     {
       "id": "mancala_toguzKorgool_best_3",
@@ -70469,7 +71411,24 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 6,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "hard",
+            "expert"
+          ],
+          "nodes": 29293
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "hard"
     },
     {
       "id": "reversi_antiReversi_best_1",
@@ -70497,7 +71456,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 4,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner"
+          ],
+          "nodes": 69
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "reversi_antiReversi_best_2",
@@ -70525,7 +71498,23 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 3,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "medium"
+          ],
+          "nodes": 2118
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": true
+      },
+      "difficulty": "medium"
     },
     {
       "id": "reversi_antiReversi_best_3",
@@ -70553,7 +71542,23 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 5,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "hard",
+            "expert"
+          ],
+          "nodes": 50
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "reversi_sixBySix_best_1",
@@ -70581,7 +71586,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 4,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 300000
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "expert"
     },
     {
       "id": "reversi_sixBySix_best_2",
@@ -70609,7 +71628,27 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 4,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 42
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "reversi_sixBySix_best_3",
@@ -70637,7 +71676,23 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 5,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "hard"
+          ],
+          "nodes": 40
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "reversi_standard_best_1",
@@ -70665,7 +71720,19 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 4,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [],
+          "nodes": null
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "unsolved"
     },
     {
       "id": "reversi_standard_best_2",
@@ -70693,7 +71760,22 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 3,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "easy",
+            "medium"
+          ],
+          "nodes": 242
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "easy"
     },
     {
       "id": "reversi_standard_best_3",
@@ -70721,7 +71803,23 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "square",
       "value": 5,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "hard",
+            "expert"
+          ],
+          "nodes": 50
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "morris_laskerMorris_best_1",
@@ -70905,7 +72003,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [],
+          "nodes": null
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": true
+      },
+      "difficulty": "unsolved"
     },
     {
       "id": "morris_laskerMorris_best_2",
@@ -71089,7 +72201,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [],
+          "nodes": null
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": true
+      },
+      "difficulty": "unsolved"
     },
     {
       "id": "morris_laskerMorris_best_3",
@@ -71273,7 +72399,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [],
+          "nodes": null
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": true
+      },
+      "difficulty": "unsolved"
     },
     {
       "id": "morris_morabaraba_best_1",
@@ -71477,7 +72617,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [],
+          "nodes": null
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": true
+      },
+      "difficulty": "unsolved"
     },
     {
       "id": "morris_morabaraba_best_2",
@@ -71681,7 +72835,27 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 125
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "morris_morabaraba_best_3",
@@ -71885,7 +73059,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [],
+          "nodes": null
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": true
+      },
+      "difficulty": "unsolved"
     },
     {
       "id": "morris_nineMensMorris_best_1",
@@ -72069,7 +73257,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [],
+          "nodes": null
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": true
+      },
+      "difficulty": "unsolved"
     },
     {
       "id": "morris_nineMensMorris_best_2",
@@ -72253,7 +73455,25 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium"
+          ],
+          "nodes": 114
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "morris_nineMensMorris_best_3",
@@ -72437,7 +73657,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [],
+          "nodes": null
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": true
+      },
+      "difficulty": "unsolved"
     },
     {
       "id": "morris_shax_best_1",
@@ -72621,7 +73855,23 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium"
+          ],
+          "nodes": 61
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "morris_shax_best_2",
@@ -72805,7 +74055,25 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium"
+          ],
+          "nodes": 72
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": true
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "morris_shax_best_3",
@@ -72989,7 +74257,27 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 68
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "morris_sixMensMorris_best_1",
@@ -73117,7 +74405,26 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 316
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "easy"
     },
     {
       "id": "morris_sixMensMorris_best_2",
@@ -73245,7 +74552,27 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 60
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "morris_sixMensMorris_best_3",
@@ -73373,7 +74700,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [],
+          "nodes": null
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": true
+      },
+      "difficulty": "unsolved"
     },
     {
       "id": "morris_twelveMensMorris_best_1",
@@ -73577,7 +74918,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [],
+          "nodes": null
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": true
+      },
+      "difficulty": "unsolved"
     },
     {
       "id": "morris_twelveMensMorris_best_2",
@@ -73781,7 +75136,27 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 125
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "morris_twelveMensMorris_best_3",
@@ -73985,7 +75360,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [],
+          "nodes": null
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": true
+      },
+      "difficulty": "unsolved"
     },
     {
       "id": "morris_threeMensMorris_gen_1",
@@ -74088,7 +75477,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 19
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "morris_threeMensMorris_gen_2",
@@ -74191,7 +75600,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 19
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "morris_threeMensMorris_gen_3",
@@ -74294,7 +75723,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 19
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "landlords-game_1904Original_odds_1",
@@ -74421,7 +75870,27 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 7
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "landlords-game_1904Original_odds_2",
@@ -74549,7 +76018,27 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 0.5833,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 7
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "landlords-game_1904Original_odds_3",
@@ -74674,7 +76163,21 @@
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
       "value": 1,
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [],
+          "nodes": null
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": true
+      },
+      "difficulty": "unsolved"
     },
     {
       "id": "hex_13x13_gen_1",
@@ -75065,7 +76568,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 27
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "hex_13x13_gen_2",
@@ -75456,7 +76979,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 65
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "hex_9x9_gen_1",
@@ -75671,7 +77214,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 37
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "hex_9x9_gen_2",
@@ -75886,7 +77449,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 41
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "hex_9x9_gen_3",
@@ -76101,7 +77684,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 27
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "hex_standard_gen_1",
@@ -76396,7 +77999,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 43
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "hex_standard_gen_2",
@@ -76691,7 +78314,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 73
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "hex_standard_gen_3",
@@ -76986,7 +78629,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 65
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "hex_yGame_gen_1",
@@ -77194,7 +78857,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 95
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "hex_yGame_gen_2",
@@ -77402,7 +79085,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 115
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "hex_yGame_gen_3",
@@ -77610,7 +79313,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 107
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "hex_yLarge_gen_1",
@@ -77902,7 +79625,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 205
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "hex_yLarge_gen_2",
@@ -78194,7 +79937,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 167
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "hex_yLarge_gen_3",
@@ -78486,7 +80249,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 117
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "hex_ySmall_gen_1",
@@ -78628,7 +80411,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 75
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "hex_ySmall_gen_2",
@@ -78770,7 +80573,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 53
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "hex_ySmall_gen_3",
@@ -78912,7 +80735,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "move",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 53
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "kingOfTheHill_win2_1",
@@ -78944,7 +80787,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "uci",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 242
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "kingOfTheHill_win2_2",
@@ -78973,7 +80836,27 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "uci",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "beginner",
+            "easy",
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 38
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "beginner"
     },
     {
       "id": "kingOfTheHill_win2_3",
@@ -79004,7 +80887,25 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "uci",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 4281
+        },
+        "mcts": {
+          "solves": [
+            "expert"
+          ],
+          "nodes": 5000
+        },
+        "disagree": false
+      },
+      "difficulty": "medium"
     },
     {
       "id": "standard_win2_1",
@@ -79035,7 +80936,23 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "uci",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 8334
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "medium"
     },
     {
       "id": "standard_win2_2",
@@ -79066,7 +80983,23 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "uci",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 10967
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "medium"
     },
     {
       "id": "standard_win2_3",
@@ -79097,7 +81030,23 @@
       "source": "engine-generated",
       "generator": "scripts/generate-puzzles.mjs",
       "notation": "uci",
-      "license": "proprietary"
+      "license": "proprietary",
+      "ai": {
+        "minimax": {
+          "solves": [
+            "medium",
+            "hard",
+            "expert"
+          ],
+          "nodes": 7442
+        },
+        "mcts": {
+          "solves": [],
+          "nodes": null
+        },
+        "disagree": true
+      },
+      "difficulty": "medium"
     }
   ],
   "rejected": [
