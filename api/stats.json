@@ -4,10 +4,10 @@
   "boards": 334,
   "boardFamilies": 34,
   "tiles": 11,
-  "puzzles": 1951,
+  "puzzles": 1849,
   "puzzlesByType": {
     "standard": 1116,
-    "variants": 835
+    "variants": 733
   },
   "playableVariants": 239,
   "playableFamilies": 10,
