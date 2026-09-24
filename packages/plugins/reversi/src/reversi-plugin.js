@@ -245,4 +245,20 @@ export function createReversiPlugin(variantConfig = {}, context = {}) {
 }
 
 createReversiPlugin.configKeys = CONFIG_KEYS
+
+// What a puzzle is in this game (engine#178). "A move that wins at once"
+// barely exists here, so a puzzle is the one move that does best by a measure
+// the game itself keeps, found and proved by scripts/generate-puzzles.mjs.
+// `measure(before, after, mover)` compares the slice before a turn with the
+// slice after it, from the mover's side.
+function discsOf(slice, player) {
+  return (slice.board || []).filter(cell => cell && cell.owner === player).length
+}
+
+createReversiPlugin.puzzleObjective = {
+  name: 'flips',
+  theme: 'mostFlips',
+  label: 'turn the most discs',
+  measure: (before, after, mover) => discsOf(after, mover) - discsOf(before, mover),
+}
 createReversiPlugin.interaction = 'place'

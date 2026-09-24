@@ -525,5 +525,17 @@ createGoPlugin.searchPolicies = ({ random } = {}) => ({
 })
 
 createGoPlugin.configKeys = CONFIG_KEYS
+
+// What a puzzle is in this game (engine#178). "A move that wins at once"
+// barely exists here, so a puzzle is the one move that does best by a measure
+// the game itself keeps, found and proved by scripts/generate-puzzles.mjs.
+// `measure(before, after, mover)` compares the slice before a turn with the
+// slice after it, from the mover's side.
+createGoPlugin.puzzleObjective = {
+  name: 'capture',
+  theme: 'capture',
+  label: 'capture the most stones',
+  measure: (before, after, mover) => (after.captures?.[mover] || 0) - (before.captures?.[mover] || 0),
+}
 createGoPlugin.interaction = 'place'
 createGoPlugin.mcts = true

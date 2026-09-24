@@ -186,6 +186,13 @@ function normalise(data) {
     const license = licenseFor(record)
     if (!slug) return { ...record, license }
 
+    // A position a FEN cannot carry is the engine's snapshot; the record's
+    // `position` is its display notation and the side to move is the state's.
+    if (record.state) {
+      const turn = (record.state.players?.currentIndex ?? 0) === 0 ? 'white' : 'black'
+      return { ...record, family, turn, variantSlug: slug, license }
+    }
+
     let position
     try {
       position = positionFor(record, slug, family)

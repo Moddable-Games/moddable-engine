@@ -359,6 +359,25 @@ const data = await res.json()
 // license: the record's own licence. CC0 records alone:
 //   data.standard.filter(p => p.license === 'CC0-1.0')
 // meta.licenses gives the basis for each source's licence.
+//
+// difficulty: the weakest level of the engine's own AI that finds the answer
+//   (beginner, easy, medium, hard, expert), or 'unsolved'.
+// ai: { minimax: { solves, nodes }, mcts?: { solves, nodes }, disagree? }
+//   solves lists every level that found it; searches are deterministic, so
+//   the same record gives the same answer on any machine.
+// meta.unsolvedByEngine: the puzzles no level of either search solves.
+//
+// Generated records also carry:
+// shape: 'win' (one move wins), 'win2' (one move forces a win next turn),
+//   'best' (one move does best by the game's own measure: stones captured,
+//   seeds won, a mill formed, discs turned) or 'odds' (one choice gives the
+//   best chance of winning, computed exactly over the dice).
+// state: where a FEN cannot carry the position (mancala, morris, hex, the
+//   Landlord's Game), the engine's own snapshot, and position is the board
+//   in setup notation for drawing it.
+// value: for 'best', what the answer wins; for 'odds', its chance of winning.
+// A solution move with no square notation is written as the move itself,
+//   e.g. {"action":"sow","pit":3}.
 // position: the FEN the solver faces (after setupMove is applied through the engine).
 // fen: provenance — the source position before the opponent's move.
 // setupMove: if present, the move that was applied to fen to produce position.

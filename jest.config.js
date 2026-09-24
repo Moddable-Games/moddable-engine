@@ -21,6 +21,8 @@ export const SLOW_SUITES = [
   'packages/play/__tests__/piece-mobility-all.test.js',
   'packages/play/__tests__/playability-standard.test.js',
   'packages/ai/__tests__/no-repetition.test.js',
+  'packages/play/__tests__/puzzle-proofs.test.js',
+  'packages/play/__tests__/puzzle-ai-ratings.test.js',
 ]
 
 // The performance test asserts nodes per second, so it is the one suite that

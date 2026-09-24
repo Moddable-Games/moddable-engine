@@ -28,6 +28,12 @@ import { createLandlordsPlugin } from '../../plugins/landlords-game/index.js'
 import { createChessPlugin } from '../../plugins/chess/index.js'
 import { createStandard52Deck } from '../../component-deck/index.js'
 import GENERATED_DEFAULTS from '../../../play/family-defaults.json' with { type: 'json' }
+// The composition root: every family's variant modules and evaluators. Loaded
+// here, by the module that builds games, so every way of building one gets
+// them. Only the play page and the test helper loaded it, so the SDK and every
+// script built variants without their modules: Gomoku could not be won, and
+// the puzzle generator proved chess variants' puzzles under standard rules.
+import './bootstrap-plugins.js'
 
 const TOPOLOGIES = {
   grid: (config) => createGridTopology(config),

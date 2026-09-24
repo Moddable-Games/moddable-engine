@@ -56,6 +56,23 @@ export function createLandlordsPlugin(variantConfig = {}, context = {}) {
     return values
   }
 
+  // A roll may carry the dice it came up with. The game rolls its own, from its
+  // seed; a move that says what the dice showed is played as that outcome,
+  // which is how a search - or a replayed record - asks "and if it had been a
+  // double?". Anything that is not a full set of die faces is ignored.
+  function diceOf(move) {
+    const given = move && move.dice
+    if (!Array.isArray(given) || given.length !== config.dice) return null
+    return given.every(v => Number.isInteger(v) && v >= 1 && v <= 6) ? [...given] : null
+  }
+
+  // Every way the dice can fall, each as likely as the others.
+  function allRolls() {
+    let rolls = [[]]
+    for (let i = 0; i < config.dice; i++) rolls = rolls.flatMap(r => [1, 2, 3, 4, 5, 6].map(v => [...r, v]))
+    return rolls
+  }
+
   function isDouble(values) {
     return values.length === 2 && values[0] === values[1]
   }
@@ -223,7 +240,7 @@ export function createLandlordsPlugin(variantConfig = {}, context = {}) {
         return next
       }
 
-      const values = rollFor()
+      const values = diceOf(move) || rollFor()
       if (move.action === 'roll-for-double') {
         if (isDouble(values)) next.jailed = { ...next.jailed, [player]: false }
         return { ...next, pending: values }
@@ -311,6 +328,26 @@ export function createLandlordsPlugin(variantConfig = {}, context = {}) {
       return `roll ${roll}: ${from} to ${trail}${money}`
     },
 
+    // What chance decides in a move: for a roll, every fall of the dice and how
+    // likely it is; for anything else, nothing. A search weighs a roll by these
+    // instead of by the one outcome the seeded dice happen to give.
+    //
+    // Falls that lead to the same place are one outcome: on an ordinary roll
+    // only the total moves the checker, and in jail only whether it is a
+    // double. The dice given for each are one fall that produces it.
+    chanceOutcomes(move) {
+      if (move.action !== 'roll' && move.action !== 'roll-for-double') return null
+      const rolls = allRolls()
+      const byEffect = new Map()
+      for (const dice of rolls) {
+        const effect = move.action === 'roll' ? String(dice.reduce((a, b) => a + b, 0)) : String(isDouble(dice))
+        const entry = byEffect.get(effect) || { move: { ...move, dice }, probability: 0 }
+        entry.probability += 1 / rolls.length
+        byEffect.set(effect, entry)
+      }
+      return [...byEffect.values()]
+    },
+
     checkWin(slice) {
       const done = slice.circuits.every(c => c >= config.circuits)
       if (!done) return null
@@ -324,6 +361,18 @@ export function createLandlordsPlugin(variantConfig = {}, context = {}) {
 
 createLandlordsPlugin.interaction = 'roll'
 createLandlordsPlugin.configKeys = CONFIG_KEYS
+
+// What a puzzle is in this game (engine#178). Dice decide where a checker
+// goes, so no move wins by itself; the question the game does pose is which
+// choice gives the best chance. With every other player finished and only the
+// dice left to fall, that chance is exact, and the puzzle is the choice whose
+// chance of winning is the best (`scripts/generate-puzzles.mjs`, shape odds).
+createLandlordsPlugin.puzzleObjective = {
+  name: 'odds',
+  theme: 'odds',
+  label: 'give yourself the best chance of winning',
+  shape: 'odds',
+}
 
 // Checkers sit on numbered track spaces, and the board is drawn from the
 // perimeter board data rather than as a grid of piece images.

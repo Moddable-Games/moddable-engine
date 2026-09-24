@@ -38,7 +38,7 @@ import '../packages/plugins/index.js'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { createGameForVariant, loadFen, findLegalMove } from '../packages/play/src/fen.js'
+import { createGameForVariant, loadPuzzle, findLegalMove } from '../packages/play/src/fen.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -93,7 +93,7 @@ function whyUnplayable(record) {
   const { game, error } = engineFor(record)
   if (error) return error
   try {
-    loadFen(game, record.position || record.fen)
+    loadPuzzle(game, record)
   } catch (e) {
     return `engine will not load the position: ${e.message}`
   }
@@ -103,7 +103,7 @@ function whyUnplayable(record) {
   return null
 }
 const seenIds = new Set(index.variants.map(r => r.id))
-const fingerprint = r => `${r.variantSlug}|${r.position}|${JSON.stringify(r.solution)}`
+const fingerprint = r => `${r.family}|${r.variantSlug}|${r.state ? JSON.stringify(r.state.slice) : r.position}|${JSON.stringify(r.solution)}`
 const seenPositions = new Set(index.variants.map(fingerprint))
 
 let added = 0, dupeId = 0, dupePosition = 0

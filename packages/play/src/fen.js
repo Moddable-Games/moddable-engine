@@ -229,6 +229,41 @@ function findEnPassantPawn(board, target, cols, owner, plugin) {
   return null
 }
 
+function findWrittenMove(game, notation) {
+  let wanted
+  try { wanted = JSON.parse(notation) } catch { return null }
+  const matches = game.getLegalMoves().filter(move =>
+    Object.entries(wanted).every(([key, value]) => JSON.stringify(move[key]) === JSON.stringify(value)))
+  return matches[0] || null
+}
+
+// A move as `findLegalMove` reads it back when it has no square notation: the
+// fields that pick it out, and nothing a legal-move list derives for itself.
+export function writeMove(move) {
+  const own = {}
+  for (const key of Object.keys(move).sort()) {
+    const value = move[key]
+    if (value === undefined || typeof value === 'function') continue
+    own[key] = value
+  }
+  return JSON.stringify(own)
+}
+
+/**
+ * A puzzle's position loaded into a game. A position a FEN carries exactly is
+ * given as `position`; one it cannot carry - seed counts, a morris board, hex
+ * stones, a Landlord's Game table - is given as `state`, the engine's own
+ * snapshot, which is faithful by construction. The one reader for both, used by
+ * the generator, the merge, the rating and the tests.
+ */
+export function loadPuzzle(game, record) {
+  if (record.state) {
+    game.loadState(structuredClone(record.state))
+    return game
+  }
+  return loadFen(game, record.position || record.fen)
+}
+
 /** Serialise a live game back to a full FEN. */
 export function toFen(game) {
   const topo = game.topology
@@ -347,6 +382,11 @@ function playerIndex(game) {
  * data defect or an expected skip.
  */
 export function findLegalMove(game, notation) {
+  // A move with no square notation - a mancala sow, a morris placement, a hex
+  // stone - is written as the move itself, and names a legal move whose fields
+  // it states. Fields it leaves out are free: a morris puzzle states where to
+  // go and leaves which man the mill removes to the solver.
+  if (typeof notation === 'string' && notation.trim().startsWith('{')) return findWrittenMove(game, notation)
   const dims = tryDimsOf(game)
   if (!dims) {
     return findHexMove(game, notation)

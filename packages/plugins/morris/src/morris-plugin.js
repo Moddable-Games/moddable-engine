@@ -253,6 +253,21 @@ export function createMorrisPlugin(variantConfig = {}, context = {}) {
 createMorrisPlugin.interaction = 'place'
 createMorrisPlugin.configKeys = CONFIG_KEYS
 
+// What a puzzle is in this game (engine#178). "A move that wins at once"
+// barely exists here, so a puzzle is the one move that does best by a measure
+// the game itself keeps, found and proved by scripts/generate-puzzles.mjs.
+// `measure(before, after, mover)` compares the slice before a turn with the
+// slice after it, from the mover's side.
+// Forming a mill removes an opposing man, and which man is a second choice
+// carried in the same move (`remove`). The decision tested is where to go.
+createMorrisPlugin.puzzleObjective = {
+  name: 'mill',
+  theme: 'mill',
+  label: 'form a mill',
+  measure: (before, after, mover) => (after.removed?.[1 - mover] || 0) - (before.removed?.[1 - mover] || 0),
+  decision: ({ remove: _remove, ...move }) => move,
+}
+
 // A morris slice holds one occupant per named point, not pieces on a grid, so
 // guards that walk `slice.board` and match a piece image per occupied cell do
 // not apply to it.

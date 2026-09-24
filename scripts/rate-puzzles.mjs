@@ -21,15 +21,21 @@
  * `meta.unsolvedByEngine` lists the puzzles no level of either search solves:
  * the positions that beat this engine.
  *
+ * MCTS is run at its strongest level only, for the disagreement: a chess
+ * rollout plays to depth 100 at random, and five levels of it over the corpus
+ * is a day's computing for a question one level answers.
+ *
  * Usage:
  *   node scripts/rate-puzzles.mjs [--limit=N] [--family=chess] [--ids=a,b] [--mcts=all|variants|none] [--dry]
+ *   node scripts/rate-puzzles.mjs --shard=0/8 --out=tmp/0.json    # one slice, results only
+ *   node scripts/rate-puzzles.mjs --merge=tmp                      # apply every slice in a directory
  */
 
 import '../packages/play/test-helpers/setup-rules-reader.js'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { createGameForVariant, loadFen, findLegalMove } from '../packages/play/src/fen.js'
+import { createGameForVariant, loadPuzzle, findLegalMove } from '../packages/play/src/fen.js'
 import { createAI } from '../packages/play/src/sdk.js'
 import { createRng } from '../packages/core/src/rng.js'
 
@@ -84,7 +90,7 @@ export function measure(record, search, levels = LEVELS) {
   const family = record.family || 'chess'
   const slug = record.variantSlug || 'standard'
   const game = createGameForVariant(family, slug)
-  loadFen(game, record.position || record.fen)
+  loadPuzzle(game, record)
   const expected = findLegalMove(game, record.solution[0])
   if (!expected) return { error: `solution ${record.solution[0]} is not a legal move` }
   const state = game.getState()
@@ -112,7 +118,7 @@ function rate(record, runMcts) {
   const ai = { minimax: { solves: minimax.solves, nodes: minimax.nodes ?? null } }
   let mctsExpert = null
   if (runMcts) {
-    const mcts = measure(record, 'mcts')
+    const mcts = measure(record, 'mcts', ['expert'])
     ai.mcts = { solves: mcts.solves, nodes: mcts.nodes ?? null }
     mctsExpert = mcts.moves?.expert
     ai.disagree = !sameMove(minimax.moves.expert, mctsExpert)
@@ -121,7 +127,40 @@ function rate(record, runMcts) {
   return { ai, difficulty }
 }
 
+function summarise(data) {
+  const rated = [...data.standard, ...data.variants].filter(r => r.difficulty)
+  const byDifficulty = {}
+  for (const r of rated) byDifficulty[r.difficulty] = (byDifficulty[r.difficulty] || 0) + 1
+  data.meta.aiRated = {
+    levels: LEVELS,
+    deterministic: 'minimax searches a node budget per level, MCTS its iteration count at expert; each record seeded from its id',
+    byDifficulty,
+    disagreements: rated.filter(r => r.ai?.disagree).length,
+  }
+  data.meta.unsolvedByEngine = rated
+    .filter(r => r.difficulty === 'unsolved' && !(r.ai?.mcts?.solves || []).length)
+    .map(r => r.id)
+  return byDifficulty
+}
+
+function merge(dir) {
+  const data = JSON.parse(fs.readFileSync(PUZZLE_FILE, 'utf8'))
+  const results = {}
+  for (const f of fs.readdirSync(dir).filter(n => n.endsWith('.json'))) Object.assign(results, JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')))
+  let applied = 0
+  for (const record of [...data.standard, ...data.variants]) {
+    const result = results[record.id]
+    if (!result) continue
+    record.ai = result.ai
+    record.difficulty = result.difficulty
+    applied++
+  }
+  console.error(`merged ${applied} results`, JSON.stringify(summarise(data)))
+  fs.writeFileSync(PUZZLE_FILE, JSON.stringify(data, null, 2) + '\n')
+}
+
 function main() {
+  if (args.merge) return merge(args.merge)
   const data = JSON.parse(fs.readFileSync(PUZZLE_FILE, 'utf8'))
   const mctsFor = args.mcts || 'variants'
   const ids = args.ids ? new Set(String(args.ids).split(',')) : null
@@ -129,6 +168,11 @@ function main() {
   if (args.family) pool = pool.filter(([, r]) => (r.family || 'chess') === args.family)
   if (ids) pool = pool.filter(([, r]) => ids.has(r.id))
   if (args.limit) pool = pool.slice(0, Number(args.limit))
+  if (args.shard) {
+    const [index, count] = String(args.shard).split('/').map(Number)
+    pool = pool.filter((_, i) => i % count === index)
+  }
+  const results = {}
 
   const started = Date.now()
   const errors = []
@@ -144,22 +188,18 @@ function main() {
     }
     record.ai = result.ai
     record.difficulty = result.difficulty
+    results[record.id] = result
     done++
     if (args.verbose) console.log(record.id, result.difficulty, JSON.stringify(result.ai), `${Date.now() - t}ms`)
   }
 
-  const rated = [...data.standard, ...data.variants].filter(r => r.difficulty)
-  const byDifficulty = {}
-  for (const r of rated) byDifficulty[r.difficulty] = (byDifficulty[r.difficulty] || 0) + 1
-  data.meta.aiRated = {
-    levels: LEVELS,
-    deterministic: 'minimax searches a node budget per level, MCTS its iteration count; each record seeded from its id',
-    byDifficulty,
-    disagreements: rated.filter(r => r.ai?.disagree).length,
+  if (args.out) {
+    fs.writeFileSync(args.out, JSON.stringify(results))
+    console.error(`shard ${args.shard}: rated ${done} of ${pool.length} in ${Math.round((Date.now() - started) / 1000)}s; ${errors.length} could not be rated`)
+    for (const e of errors) console.error('  ' + e)
+    return
   }
-  data.meta.unsolvedByEngine = rated
-    .filter(r => r.difficulty === 'unsolved' && !(r.ai?.mcts?.solves || []).length)
-    .map(r => r.id)
+  const byDifficulty = summarise(data)
 
   console.error(`rated ${done} of ${pool.length} in ${Math.round((Date.now() - started) / 1000)}s; ${errors.length} could not be rated`)
   for (const e of errors.slice(0, 20)) console.error('  ' + e)

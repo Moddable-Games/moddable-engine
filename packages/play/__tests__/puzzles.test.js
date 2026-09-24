@@ -28,7 +28,7 @@ import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import '../test-helpers/setup-rules-reader.js'
 import '../../plugins/index.js'
-import { createGameForVariant, loadFen, findLegalMove } from '../src/fen.js'
+import { createGameForVariant, loadPuzzle, findLegalMove } from '../src/fen.js'
 
 /**
  * KNOWN_BROKEN is a ledger, not a mute button.
@@ -117,7 +117,7 @@ const BUCKETS = [
 // whole-line check, so the two assertions consult different slices of the ledger.
 const LINE_ONLY_CAUSE = 'line-illegal'
 
-// One game per variant; loadFen replaces the whole slice each time.
+// One game per variant; loadPuzzle replaces the whole slice each time.
 const games = new Map()
 const uninstantiable = new Map()
 
@@ -153,7 +153,7 @@ function analyse(record, bucket) {
   }
 
   try {
-    loadFen(game, record.position)
+    loadPuzzle(game, record)
   } catch (error) {
     return { firstMove: 'unloadable-vocabulary', line: 'unloadable-vocabulary', reason: error.message }
   }
@@ -167,7 +167,7 @@ function analyse(record, bucket) {
 
   if (bucket !== 'standard') return { firstMove: 'ok', line: 'ok' }
 
-  loadFen(game, record.position)
+  loadPuzzle(game, record)
   for (let i = 0; i < record.solution.length; i++) {
     const move = findLegalMove(game, record.solution[i])
     if (!move) {
@@ -219,16 +219,18 @@ describe('puzzle pool schema (v2)', () => {
         expect(missing.map(r => r.id)).toEqual([])
       })
 
+      // A record whose position a FEN cannot carry gives the engine's own
+      // snapshot as `state`, and the side to move is read from that.
       it('turn matches the side to move in position', () => {
         const wrong = records.filter(r => {
-          const side = r.position.trim().split(/\s+/)[1] === 'b' ? 'black' : 'white'
-          return r.turn !== side
+          const mover = r.state ? r.state.players.currentIndex : (r.position.trim().split(/\s+/)[1] === 'b' ? 1 : 0)
+          return r.turn !== (mover === 0 ? 'white' : 'black')
         })
         expect(wrong.map(r => r.id)).toEqual([])
       })
 
       it('position differs from fen exactly when setupMove is present', () => {
-        const wrong = records.filter(r => (r.setupMove ? r.position === r.fen : r.position !== r.fen))
+        const wrong = records.filter(r => !r.state && (r.setupMove ? r.position === r.fen : r.position !== r.fen))
         expect(wrong.map(r => r.id)).toEqual([])
       })
 

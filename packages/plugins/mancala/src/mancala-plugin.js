@@ -508,3 +508,30 @@ createMancalaPlugin.interaction = 'select'
 // and would otherwise throw rather than skip. Declared here so the guard can
 // name what it is skipping instead of inferring it from a missing field.
 createMancalaPlugin.configKeys = CONFIG_KEYS
+
+// What a puzzle is in this game (engine#178). "A move that wins at once"
+// barely exists here, so a puzzle is the one move that does best by a measure
+// the game itself keeps, found and proved by scripts/generate-puzzles.mjs.
+// `measure(before, after, mover)` compares the slice before a turn with the
+// slice after it, from the mover's side.
+// The seeds a player controls: those on their own side, and those banked in
+// their store or held in hand. Counting only the banked seeds found nothing in
+// Bao, whose captures are sown back onto the capturer's side and never banked.
+// Side `p` is pits p*n .. (p+1)*n - 1, as the plugin counts them; the stores
+// are the last cell of the board per player.
+function seedsControlled(slice, player) {
+  const board = slice.board || []
+  const perSide = slice._pitsPerSide || 0
+  let seeds = 0
+  for (let i = player * perSide; i < (player + 1) * perSide; i++) seeds += board[i] || 0
+  if (slice._hasStores) seeds += board[board.length - 2 + player] || 0
+  else seeds += slice.held?.[player] || 0
+  return seeds
+}
+
+createMancalaPlugin.puzzleObjective = {
+  name: 'harvest',
+  theme: 'harvest',
+  label: 'win the most seeds',
+  measure: (before, after, mover) => seedsControlled(after, mover) - seedsControlled(before, mover),
+}
