@@ -237,16 +237,31 @@ function findWrittenMove(game, notation) {
   return matches[0] || null
 }
 
-// A move as `findLegalMove` reads it back when it has no square notation: the
-// fields that pick it out, and nothing a legal-move list derives for itself.
-export function writeMove(move) {
+// A move as `findLegalMove` reads it back when it has no square notation. Given
+// the legal moves, only the fields that pick it out among them are written:
+// what a move-list derives for itself - the stones a Go move would capture -
+// is not part of saying which move it is, and a record that wrote it could not
+// be read back where the derivation differs.
+const IDENTIFYING_FIELDS = ['action', 'from', 'to', 'coord', 'pit', 'pos', 'type', 'promotion', 'remove']
+
+export function writeMove(move, legal = null) {
   const own = {}
   for (const key of Object.keys(move).sort()) {
     const value = move[key]
     if (value === undefined || typeof value === 'function') continue
     own[key] = value
   }
-  return JSON.stringify(own)
+  if (!Array.isArray(legal) || !legal.length) return JSON.stringify(own)
+  const order = [...IDENTIFYING_FIELDS.filter(k => k in own), ...Object.keys(own).filter(k => !IDENTIFYING_FIELDS.includes(k))]
+  const chosen = {}
+  const matches = () => legal.filter(m => Object.entries(chosen).every(([k, v]) => JSON.stringify(m[k]) === JSON.stringify(v)))
+  for (const key of order) {
+    if (matches().length === 1) break
+    chosen[key] = own[key]
+  }
+  const sorted = {}
+  for (const key of Object.keys(chosen).sort()) sorted[key] = chosen[key]
+  return JSON.stringify(sorted)
 }
 
 /**

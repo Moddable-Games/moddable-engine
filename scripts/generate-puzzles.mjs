@@ -265,10 +265,10 @@ function promotableSymbols(plugin) {
  * Placement families (reversi, go) have no from-square, so the target square
  * alone is the move; those are marked `notation: "square"` on the record.
  */
-export function moveToNotation(move, rows, cols, plugin) {
+export function moveToNotation(move, rows, cols, plugin, legal = null) {
   // A move with no square notation is written as itself, which findLegalMove
   // reads back by its fields.
-  const written = () => ({ text: writeMove(move), needsUniqueFromTo: false, written: true })
+  const written = () => ({ text: writeMove(move, legal), needsUniqueFromTo: false, written: true })
   const hexCell = v => typeof v === 'string' && v.includes(',')
   if (move.from !== undefined && move.to !== undefined && (typeof move.from === 'number' || hexCell(move.from))) {
     if (typeof move.from === 'string') {
@@ -318,14 +318,14 @@ function resolveNotation(game, notation, plugin, dims) {
   try { viaEngine = findLegalMove(game, notation) } catch { viaEngine = null }
   if (viaEngine) {
     const matches = legal.filter(m => {
-      const written = moveToNotation(m, rows, cols, plugin)
+      const written = moveToNotation(m, rows, cols, plugin, legal)
       return written && written.text === notation
     })
     return { move: viaEngine, ambiguous: matches.length !== 1, resolver: 'findLegalMove' }
   }
   // Placement families and hex: the engine has no UCI for these.
   const matches = legal.filter(m => {
-    const written = moveToNotation(m, rows, cols, plugin)
+    const written = moveToNotation(m, rows, cols, plugin, legal)
     return written && written.text === notation
   })
   if (matches.length === 0) return null
@@ -364,14 +364,14 @@ function replayPath(game, fen, path, plugin, dims) {
     if (!move) return null
     signatures.push(moveSignature(move))
     moves.push(move)
-    const written = moveToNotation(move, dims?.rows, dims?.cols, plugin)
+    const written = moveToNotation(move, dims?.rows, dims?.cols, plugin, legal)
     if (!written) {
       nameable = false
       notation.push(null)
     } else {
       if (written.needsUniqueFromTo || written.placement) {
         const twins = legal.filter(m => {
-          const w = moveToNotation(m, dims?.rows, dims?.cols, plugin)
+          const w = moveToNotation(m, dims?.rows, dims?.cols, plugin, legal)
           return w && w.text === written.text
         })
         if (twins.length !== 1) nameable = false
@@ -444,10 +444,19 @@ export function enumerateTurns(game, fen, mover, plugin, dims, objective = null)
 //   win2   exactly one turn forces a win on the next: every reply leaves a
 //          winning turn. No win at once exists, so the depth is real.
 
-function winShape(turns, mover) {
+// Winning moves that differ only in what the family does not count as the
+// decision - which man a morris mill would remove, when the mill wins outright
+// - are one answer, as `bestShape` counts them.
+function winShape(turns, mover, objective = null) {
+  const decisionOf = t => moveSignature(objective?.decision ? objective.decision(t.moves[0]) : t.moves[0])
   const winning = turns.filter(t => t.winner === mover)
-  if (winning.length !== 1) return { reason: winning.length > 1 ? 'multiWin' : null }
-  return { line: [winning[0]], distractors: turns.length - 1 }
+  const decisions = new Set(winning.map(decisionOf))
+  if (decisions.size !== 1) return { reason: decisions.size > 1 ? 'multiWin' : null }
+  const turn = winning[0]
+  const line = objective?.decision && winning.length > 1
+    ? [{ ...turn, notation: [writeMove(objective.decision(turn.moves[0]))], decisionOnly: true }]
+    : [turn]
+  return { line, distractors: new Set(turns.map(decisionOf)).size - 1 }
 }
 
 export function bestShape(turns, mover, objective) {
@@ -465,7 +474,11 @@ export function bestShape(turns, mover, objective) {
   // The answer is the decision; any part of the move the measure does not tell
   // apart (which man a mill removes) is left to the solver.
   return {
-    line: [{ ...ranked[0].turn, notation: [writeMove(ranked[0].decision)], decisionOnly: !!objective.decision }],
+    // The whole move is the decision unless the family says otherwise, and
+    // then the turn's own notation - a Go stone's square - says it.
+    line: [objective.decision
+      ? { ...ranked[0].turn, notation: [writeMove(ranked[0].decision)], decisionOnly: true }
+      : { ...ranked[0].turn, notation: [ranked[0].turn.notation[0]] }],
     distractors: ranked.length - 1,
     value: ranked[0].value,
     margin: ranked[0].value - ranked[1].value,
@@ -653,6 +666,7 @@ function isCapture(move, slice) {
   return !!(target && typeof target === 'object' && target.owner !== undefined)
 }
 
+// `isInCheck` takes a board, as every plugin that has one declares it.
 export function themesFor({ game, position, line, mover, shape, objective }) {
   const plugin = pluginOf(game)
   const loser = 1 - mover
@@ -672,12 +686,12 @@ export function themesFor({ game, position, line, mover, shape, objective }) {
       if (move.promotion) themes.push('promotion')
       result = game.applyMove(move)
     }
-    if (index === 0 && typeof plugin.isInCheck === 'function') firstGivesCheck = !!plugin.isInCheck(game.getState().slice, loser)
+    if (index === 0 && typeof plugin.isInCheck === 'function') firstGivesCheck = !!plugin.isInCheck(game.getState().slice.board, loser)
   })
   if (line[0].moves.length > 1) themes.push('chain')
   if (shape !== 'best' && shape !== 'odds' && result && result.winner === mover) {
     const end = game.getState().slice
-    if (typeof plugin.isInCheck === 'function' && plugin.isInCheck(end, loser)) themes.push('mate', shape === 'win2' ? 'mateIn2' : 'mateIn1')
+    if (typeof plugin.isInCheck === 'function' && plugin.isInCheck(end.board, loser)) themes.push('mate', shape === 'win2' ? 'mateIn2' : 'mateIn1')
     else if (occupiedBy(end, loser) === 0) themes.push('elimination')
     else if (game.getLegalMoves().length === 0) themes.push('blockade')
   }
@@ -836,7 +850,7 @@ export function verifyRecord(record, { repair = false } = {}) {
   const again = shape === 'best' ? bestShape(turns, mover, objective)
     : shape === 'win2' ? win2Shape(scratch, position, turns, mover, pluginOf(scratch), dimsOf(scratch))
     : shape === 'odds' ? oddsShape(scratch, position, turns, mover, pluginOf(scratch))
-    : winShape(turns, mover)
+    : winShape(turns, mover, objective)
   if (!again.line) return { ok: false, reason: `re-enumeration does not find a ${shape} puzzle here` }
   const firstAgain = again.line[0].notation.join(' ')
   const firstRecorded = record.solution.slice(0, again.line[0].notation.length).join(' ')
@@ -965,7 +979,7 @@ function searchVariant(family, entry, opts, stats) {
               used = 'odds'
             }
             else {
-              found1 = winShape(turns, mover)
+              found1 = winShape(turns, mover, objective)
               used = 'win'
               if (!found1.line && shape === 'auto' && objective && !found1.reason) {
                 found1 = bestShape(turns, mover, objective)

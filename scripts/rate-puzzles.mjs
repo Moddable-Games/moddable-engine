@@ -29,6 +29,7 @@
  *   node scripts/rate-puzzles.mjs [--limit=N] [--family=chess] [--ids=a,b] [--mcts=all|variants|none] [--dry]
  *   node scripts/rate-puzzles.mjs --shard=0/8 --out=tmp/0.json    # one slice, results only
  *   node scripts/rate-puzzles.mjs --merge=tmp                      # apply every slice in a directory
+ *   node scripts/rate-puzzles.mjs --unrated                        # only records not yet rated
  */
 
 import '../packages/play/test-helpers/setup-rules-reader.js'
@@ -167,6 +168,8 @@ function main() {
   let pool = [...data.standard.map(r => ['standard', r]), ...data.variants.map(r => ['variants', r])]
   if (args.family) pool = pool.filter(([, r]) => (r.family || 'chess') === args.family)
   if (ids) pool = pool.filter(([, r]) => ids.has(r.id))
+  // Records added since the pool was last rated.
+  if (args.unrated) pool = pool.filter(([, r]) => !r.difficulty)
   if (args.limit) pool = pool.slice(0, Number(args.limit))
   if (args.shard) {
     const [index, count] = String(args.shard).split('/').map(Number)
