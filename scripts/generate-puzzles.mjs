@@ -456,7 +456,10 @@ function winShape(turns, mover, objective = null) {
   const line = objective?.decision && winning.length > 1
     ? [{ ...turn, notation: [writeMove(objective.decision(turn.moves[0]))], decisionOnly: true }]
     : [turn]
-  return { line, distractors: new Set(turns.map(decisionOf)).size - 1 }
+  // Alternatives are counted as turns, or as decisions where the family groups
+  // its moves into them.
+  const alternatives = objective?.decision ? new Set(turns.map(decisionOf)).size : turns.length
+  return { line, distractors: alternatives - 1 }
 }
 
 export function bestShape(turns, mover, objective) {
