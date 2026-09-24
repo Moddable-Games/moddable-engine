@@ -175,3 +175,23 @@ describe('corpus round-trip: an exported variant is the same game', () => {
     })
   }
 })
+
+// Carrying a setup is not the same as being able to place on it. A variant
+// whose setup the page can only carry as text loads and exports correctly and
+// still cannot be edited on the board. Only seed counts are text by design.
+describe('every playable variant can be placed on', () => {
+  const read = (family, slug) => readFileSync(slug === 'rulebook'
+    ? join(RULES_ROOT, family, 'content', 'rulebook.md')
+    : join(RULES_ROOT, family, 'content', 'variants', `${slug}.md`), 'utf8')
+
+  test('the setup reads onto the board, except seed counts', () => {
+    const textOnly = []
+    for (const { family, slug, variant } of MANIFEST.filter(e => e.playable)) {
+      const name = slug || variant
+      if (!existsSync(join(RULES_ROOT, family, 'content', 'variants', `${name}.md`))) continue
+      const state = stateFromTemplate(annotateVariant(resolveVariantSync(family, name, read), read(family, 'rulebook'), read(family, name)), family, name)
+      if (state.rawSetup !== undefined && state.rawSetup !== '' && state.topology.type !== 'pit') textOnly.push(`${family}/${name}`)
+    }
+    expect(textOnly).toEqual([])
+  })
+})
