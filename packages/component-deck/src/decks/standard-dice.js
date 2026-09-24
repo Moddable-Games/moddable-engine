@@ -33,6 +33,12 @@ registerDeck('standard-dice', {
     }))
   },
 
+  // A die showing `value`, by a stable id: a game that keeps its dice as
+  // numbers asks here for what to draw.
+  face(value, index = 0) {
+    return { id: `die${index}-${value}`, faces: 6, value, display: String(value), art: faceArt(value) }
+  },
+
   roll(dice, seed) {
     const rng = createSeededRng(seed)
     return dice.map(die => {

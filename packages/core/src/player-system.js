@@ -191,6 +191,14 @@ export function createPlayerSystem(config) {
     return seats
   }
 
+  // Who plays next, when the game rather than the rotation decides: a trick's
+  // winner leads the next, and the holder of a named card opens (engine#176).
+  function setCurrent(playerIndex, store) {
+    const s = store.get(sliceName)
+    if (playerIndex < 0 || playerIndex >= players.length) throw new Error(`No seat ${playerIndex}`)
+    store.set(sliceName, { ...s, currentIndex: playerIndex, passCount: 0, turnActions: 0 })
+  }
+
   function setInterleaved(playerIndex, store) {
     const s = store.get(sliceName)
     store.set(sliceName, { ...s, interleavedIndex: playerIndex })
@@ -228,6 +236,7 @@ export function createPlayerSystem(config) {
     controllerOf,
     seatsCommandedBy,
     setInterleaved,
+    setCurrent,
     getInterleaved,
     incrementActions,
     getTurnActions,

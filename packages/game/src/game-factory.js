@@ -39,6 +39,14 @@ export function createGame(definition, opts = {}) {
   registry.initAll(pluginConfigs, store)
   store.set(playerSystem.sliceName, playerSystem.initState(), playerSystem.sliceName)
 
+  // Who opens can depend on the deal: Big 2's first lead is whoever was dealt
+  // the three of diamonds. A plugin that knows says so once its state exists.
+  for (const plugin of plugins) {
+    if (typeof plugin.firstPlayer !== 'function') continue
+    const seat = plugin.firstPlayer(store.get(plugin.sliceName))
+    if (seat !== null && seat !== undefined) playerSystem.setCurrent(seat, store)
+  }
+
   const history = createHistory()
   const eventBus = createEventBus()
   const pipeline = createPipeline(registry, store, history, playerSystem, eventBus)

@@ -82,16 +82,31 @@ export function createAI(family, variant, opts = {}) {
   const searchContext = { random: policyRng ? () => policyRng.next() : undefined }
   const mctsOpts = { difficulty, ...searchPoliciesFor(family, searchContext), ...opts.searchOpts }
 
-  const engine = useMcts
-    ? createMCTS(simulator, mctsOpts)
-    : createMinimax(simulator, {
-        difficulty,
-        openingBook: variantOpeningBook(family, variant, opts.definition),
-        ...opts.searchOpts,
-      })
+  // A game of hidden hands is not searched: a search plays out futures, and
+  // every future it plays out holds the other seats' cards. A plugin for such
+  // a game offers a policy instead, and is asked with nothing but what its own
+  // seat can see (engine#176).
+  const plugin = simulator.plugin
+  const policy = plugin && typeof plugin.policy === 'function' ? plugin.policy : null
+  const engine = policy
+    ? {
+        search(slice, seat) {
+          const moves = simulator.getLegalMoves(slice, seat)
+          if (!moves.length) return null
+          const view = plugin.projectForSeat ? plugin.projectForSeat(slice, seat) : slice
+          return policy(view, seat, moves, { difficulty, random: policyRng ? () => policyRng.next() : Math.random })
+        },
+      }
+    : useMcts
+      ? createMCTS(simulator, mctsOpts)
+      : createMinimax(simulator, {
+          difficulty,
+          openingBook: variantOpeningBook(family, variant, opts.definition),
+          ...opts.searchOpts,
+        })
 
   return {
-    search: useMcts ? 'mcts' : 'minimax',
+    search: policy ? 'policy' : (useMcts ? 'mcts' : 'minimax'),
     difficulty,
     simulator,
     pickMove(sliceState, playerIndex) {

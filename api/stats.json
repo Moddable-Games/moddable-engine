@@ -9,10 +9,11 @@
     "standard": 1116,
     "variants": 696
   },
-  "playableVariants": 241,
-  "playableFamilies": 10,
+  "playableVariants": 251,
+  "playableFamilies": 13,
   "playableByFamily": {
     "chess": 149,
+    "double-six-dominoes": 2,
     "draughts": 20,
     "go": 12,
     "hex": 8,
@@ -21,10 +22,13 @@
     "morris": 7,
     "reversi": 3,
     "shogi": 24,
+    "standard-52": 6,
+    "standard-dice": 2,
     "xiangqi": 9
   },
   "variantPluginsByFamily": {
     "chess": 53,
+    "double-six-dominoes": 0,
     "draughts": 0,
     "go": 3,
     "hex": 0,
@@ -33,10 +37,13 @@
     "morris": 0,
     "reversi": 0,
     "shogi": 0,
+    "standard-52": 0,
+    "standard-dice": 0,
     "xiangqi": 0
   },
   "frontmatterOnlyByFamily": {
     "chess": 96,
+    "double-six-dominoes": 2,
     "draughts": 20,
     "go": 9,
     "hex": 8,
@@ -45,6 +52,8 @@
     "morris": 7,
     "reversi": 3,
     "shogi": 24,
+    "standard-52": 6,
+    "standard-dice": 2,
     "xiangqi": 9
   },
   "tests": 6887,

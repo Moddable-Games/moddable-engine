@@ -1,7 +1,7 @@
 // Resolve a variant's frontmatter from moddable-rules into an engine block.
 // Thin wrapper over packages/play/src/resolve-frontmatter.js adding _variantMeta.
 
-import { resolveVariantAsync } from '../packages/play/index.js'
+import { resolveVariantAsync, variantFilePath } from '../packages/play/index.js'
 import { parseFrontmatter, effectiveSurface } from '../packages/schema/index.js'
 import { RULES_BASE } from './play-shared.js'
 
@@ -30,14 +30,14 @@ export async function loadBoardContent(resolved, basePath) {
   }
 }
 
-export async function resolveVariantBoard(family, variantConfig, variantKey, slugOverride) {
+export async function resolveVariantBoard(family, variantConfig, variantKey, slugOverride, file) {
   const cfg = variantConfig || {}
   const variantSlug = slugOverride || cfg.slug || variantKey || 'standard'
   const basePath = RULES_BASE + 'games/'
 
-  const resolved = await loadBoardContent(await resolveVariantAsync(family, variantSlug, basePath), basePath)
+  const resolved = await loadBoardContent(await resolveVariantAsync(family, variantSlug, basePath, file), basePath)
 
-  const variantPath = basePath + family + '/content/variants/' + variantSlug + '.md'
+  const variantPath = basePath + variantFilePath(family, variantSlug, file)
   const familyPath = basePath + family + '/content/rulebook.md'
   const [familyMd, variantMd] = await Promise.all([
     fetch(familyPath, RULES_FETCH).then(r => r.text()),

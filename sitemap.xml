@@ -185,6 +185,10 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/play/?game=double-six-dominoes</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/play/?game=draughts</loc>
     <priority>0.8</priority>
   </url>
@@ -214,6 +218,14 @@
   </url>
   <url>
     <loc>https://engine.moddable.games/play/?game=shogi</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/play/?game=standard-52</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/play/?game=standard-dice</loc>
     <priority>0.8</priority>
   </url>
   <url>

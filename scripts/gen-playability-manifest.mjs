@@ -21,12 +21,13 @@ import '../packages/play/test-helpers/setup-rules-reader.js'
 // Registration lives in the composition root, and getFamilies() below reads
 // from it, so the plugin list is not restated here either.
 
-import { readdirSync, readFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { createGameForFamily, getFamilies } from '../packages/play/src/play.js'
 import { listVariants, getVariantConfig, getVariantKeys } from '../packages/play/src/variant-registry.js'
 import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
 import { probePicker } from './lib/probe-rng.mjs'
+import { corpusFiles, corpusPaths } from '../packages/play/test-helpers/corpus-files.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUTPUT = process.env.MANIFEST_OUT || resolve(__dirname, '..', 'play', 'playability-manifest.json')
@@ -141,6 +142,7 @@ const RULES_ROOT = process.env.MODDABLE_RULES_DIR || join(process.cwd(), '..', '
 for (const family of FAMILIES) {
   const seen = new Set()
   const allVariants = []
+  const paths = corpusPaths(RULES_ROOT, family)
 
   // Registry variants
   const registryVariants = listVariants(family)
@@ -150,22 +152,20 @@ for (const family of FAMILIES) {
     allVariants.push({ key: v.key, slug: v.slug, label: v.label, group: v.group })
   }
 
-  // Frontmatter variants with playable: true not already in registry
-  try {
-    const dir = join(RULES_ROOT, family, 'content', 'variants')
-    const files = readdirSync(dir).filter(f => f.endsWith('.md'))
-    for (const file of files) {
-      const slug = file.replace('.md', '')
-      const text = readFileSync(join(dir, file), 'utf8')
-      const { meta } = parseFrontmatter(text)
-      const key = meta.key || slug
-      if (seen.has(key) || seen.has(slug)) continue
-      if (meta.playable !== true) continue
-      seen.add(key)
-      seen.add(slug)
-      allVariants.push({ key, slug, label: meta.title || humanize(slug), group: meta.group || 'Other' })
-    }
-  } catch { /* no rules dir */ }
+  // Frontmatter variants with playable: true not already in registry. A board
+  // family keeps them under content/variants; a component family - a deck,
+  // dominoes, dice - keeps one directory per game under content/games, and the
+  // page cannot guess which file a slug lives in, so its entry says (#176).
+  for (const [slug, file] of corpusFiles(RULES_ROOT, family)) {
+    let meta
+    try { meta = parseFrontmatter(readFileSync(file, 'utf8')).meta } catch { continue }
+    const key = meta.key || slug
+    if (seen.has(key) || seen.has(slug)) continue
+    if (meta.playable !== true) continue
+    seen.add(key)
+    seen.add(slug)
+    allVariants.push({ key, slug, label: meta.title || humanize(slug), group: meta.group || 'Other' })
+  }
 
   let familyPlayable = 0
   const label = familyLabel(family, RULES_ROOT)
@@ -184,6 +184,8 @@ for (const family of FAMILIES) {
       group: v.group,
       playable,
     }
+    const path = paths.get(v.slug || v.key)
+    if (path && path.includes('/content/games/')) entry.path = path.slice(family.length + 1)
     manifest.push(entry)
   }
 

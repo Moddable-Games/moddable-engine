@@ -60,10 +60,14 @@ export function createPipeline(registry, store, history, playerSystem, eventBus)
     // the others', and that has to be kept current every move. Folding those
     // into `checkWin` made it return a non-null object on an ordinary move,
     // and every caller reading `checkWin() != null` as "finished" believed it.
+    // A game can also say who plays next, where that is not simply the next
+    // seat round: the winner of a trick leads the next one.
+    let nextSeat = null
     for (const plugin of plugins) {
       if (typeof plugin.turnEffects !== 'function') continue
       const effects = plugin.turnEffects(store.get(plugin.sliceName), store.getAll())
       if (!effects) continue
+      if (effects.next !== undefined && effects.next !== null) nextSeat = effects.next
       if ('interleave' in effects) playerSystem.setInterleaved(effects.interleave, store)
       if ('eliminate' in effects) {
         playerSystem.eliminate(effects.eliminate, store)
@@ -98,7 +102,8 @@ export function createPipeline(registry, store, history, playerSystem, eventBus)
 
     // 6. Advance turn — only if no plugin signalled continueTurn and no winner
     if (winner === null && !continueTurn) {
-      playerSystem.advance(store)
+      if (nextSeat !== null) playerSystem.setCurrent(nextSeat, store)
+      else playerSystem.advance(store)
     }
 
     // 7. Emit

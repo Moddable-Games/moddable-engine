@@ -88,5 +88,7 @@ export function definitionFromResolved(family, variant, resolved, registryCfg = 
   if (resolved.turnOrder !== undefined) engine.turnOrder = resolved.turnOrder
   const def = { title: resolved.meta?.label || variant, slug: variant, parent: family, engine }
   if (topology) def.engine.topology = topology
+  // The deck, tiles or dice a component game is played with (engine#176).
+  if (resolved.components) def.engine.components = resolved.components
   return def
 }

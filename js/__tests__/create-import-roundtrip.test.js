@@ -124,7 +124,9 @@ engine:
 // something on export: turn orders, pawn configurations, layered boards, and
 // family defaults the form disagreed with.
 describe('corpus round-trip: an exported variant is the same game', () => {
-  const MANIFEST_PLAYABLE = MANIFEST.filter(e => e.playable)
+  // The create page edits boards. A game played with cards, tiles or dice
+  // lives under content/games and has no board to export (#176).
+  const MANIFEST_PLAYABLE = MANIFEST.filter(e => e.playable && !e.path)
   const read = (family, slug) => readFileSync(slug === 'rulebook'
     ? join(RULES_ROOT, family, 'content', 'rulebook.md')
     : join(RULES_ROOT, family, 'content', 'variants', `${slug}.md`), 'utf8')

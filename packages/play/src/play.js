@@ -28,6 +28,7 @@ import { createMorrisPlugin } from '../../plugins/morris/index.js'
 import { createHexPlugin } from '../../plugins/hex/index.js'
 import { createLandlordsPlugin } from '../../plugins/landlords-game/index.js'
 import { createChessPlugin } from '../../plugins/chess/index.js'
+import { createTableauPluginFor } from '../../plugins/tableau/index.js'
 import { createStandard52Deck } from '../../component-deck/index.js'
 import GENERATED_DEFAULTS from '../../../play/family-defaults.json' with { type: 'json' }
 // The composition root: every family's variant modules and evaluators. Loaded
@@ -48,6 +49,8 @@ const TOPOLOGIES = {
   triangular: (config) => createTriangularTopology(config),
 }
 
+const COMPONENT_FAMILIES = ['standard-52', 'bavarian-32', 'flower-48', 'double-six-dominoes', 'mahjong', 'standard-dice']
+
 const PLUGIN_FACTORIES = {
   chess: createChessPlugin,
   draughts: createDraughtsPlugin,
@@ -59,6 +62,9 @@ const PLUGIN_FACTORIES = {
   morris: createMorrisPlugin,
   hex: createHexPlugin,
   'landlords-game': createLandlordsPlugin,
+  // The component families: decks, dice, dominoes and tiles. One plugin plays
+  // them all, and each game's frontmatter names the shape it takes (engine#176).
+  ...Object.fromEntries(COMPONENT_FAMILIES.map(family => [family, createTableauPluginFor(family)])),
 }
 
 export function registerTopology(type, factory) {
