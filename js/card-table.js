@@ -22,7 +22,7 @@ const AI_DELAY_MS = 450
 // What the buttons are for a set of legal moves. A move made of cards - play,
 // give - is one button, pressed once the cards are picked; a move that carries
 // a value, a bid, is a button per value; anything else is a move on its own.
-export function cardActions(moves) {
+function cardActions(moves) {
   const out = []
   for (const m of moves) {
     const name = m.action || 'play'
@@ -34,7 +34,7 @@ export function cardActions(moves) {
 
 // The legal move the picked cards make, if they make one. Order does not
 // matter: a pair picked king-first is the same pair.
-export function moveForSelection(moves, selected, action) {
+function moveForSelection(moves, selected, action) {
   const want = [...selected].sort().join(',')
   // Nothing picked is a choice only where a move of no cards exists: rolling
   // every die again.
@@ -44,7 +44,7 @@ export function moveForSelection(moves, selected, action) {
 
 // A button for one of the moves a clicked card could be: what sets it apart
 // from the others - the suit an eight names, the end a tile goes on.
-export function choiceLabel(move) {
+function choiceLabel(move) {
   const { action: _a, cards: _c, ...rest } = move
   return Object.values(rest).join(' ') || move.action
 }

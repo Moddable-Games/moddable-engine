@@ -42,7 +42,7 @@ const valueOf = (id) => +String(id).split('-')[1]
 const indexOf = (id) => +String(id).slice(3).split('-')[0]
 
 // What a set of dice scores if every one of them scores, else null.
-export function setScore(values, s) {
+function setScore(values, s) {
   if (!values.length) return null
   const c = new Map()
   for (const v of values) c.set(v, (c.get(v) || 0) + 1)

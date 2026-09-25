@@ -62,7 +62,7 @@ function longestRun(dice) {
 
 // What a category is worth for these dice. `joker` counts the dice as meeting
 // any lower requirement.
-export function categoryScore(rule, dice, joker = false) {
+function categoryScore(rule, dice, joker = false) {
   const total = dice.reduce((n, v) => n + v, 0)
   const c = counts(dice)
   const worth = rule.score === 'total' || rule.score === undefined ? total : rule.score
