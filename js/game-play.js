@@ -4,8 +4,9 @@ import {
   parseUrlFlags, deriveCompatibleFlags, familySupportsFlag, serializeVariantKey,
   createAI, interactionModelFor, clickCellOf,
   createEmbedBridge, parseEmbedParams, normaliseOutcome,
-  defaultSeatFor, boardToSetup as serialiseBoard, findFamilyPlugin,
+  defaultSeatFor, boardToSetup as serialiseBoard, findFamilyPlugin, getPlugin,
 } from '../packages/play/index.js'
+import { createCardSession } from './card-table.js'
 import { renderFromEngine, attachPieceImages } from '../packages/render/index.js'
 
 import '../packages/play/src/bootstrap-plugins.js'
@@ -131,6 +132,10 @@ const FAMILY_AI_OPTIONS = {
 }
 
 export function createPlaySession(options = {}) {
+  // A game played with cards, tiles or dice has a table, not a board: hands
+  // that only their seat may see, and moves made by picking cards (#176).
+  if (getPlugin(options.family)?.factory?.interaction === 'cards' && !options.draftId) return createCardSession(options)
+
   const {
     family,
     variant,
@@ -1410,7 +1415,9 @@ export function createPlaySession(options = {}) {
     },
     flip() {
       flipped = !flipped
-      cells.setFlipped(flipped)
+      // A board drawn as rings is flipped by turning the drawing round, so its
+      // squares keep their ids and the addressing must not mirror them.
+      cells.setFlipped(flipped && resolvedBoard?.render?.mode !== 'annular')
       if (ctrl) ctrl.setFlipped(flipped)
     },
     markDead: toggleDead,

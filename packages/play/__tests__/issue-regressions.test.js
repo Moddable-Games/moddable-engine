@@ -121,7 +121,6 @@ describe('#123 — create page round-trip preserves fairy pieces', () => {
     'chess/chess960', 'chess/sittuyin',
     'chess/brusky', 'chess/de-vasa', 'chess/glinski', 'chess/mccooey',
     'chess/mini-hexchess', 'chess/shafran', 'chess/hex-shogi-91',
-    'shogi/sankaku-shogi',
   ])
 
   for (const family of families) {

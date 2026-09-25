@@ -51,9 +51,17 @@ export function resolveVariantSync(family, slug, readFile) {
 
 const FETCH_OPTS = { cache: 'no-cache' }
 
-export async function resolveVariantAsync(family, slug, basePath) {
+// `file` is where the variant lives inside its family, for the games that are
+// not under content/variants: a component family keeps each of its games in a
+// directory of its own, content/games/<game>/<file>.md, and the playability
+// manifest records which (engine#176).
+export function variantFilePath(family, slug, file) {
+  return family + '/' + (file || 'content/variants/' + slug + '.md')
+}
+
+export async function resolveVariantAsync(family, slug, basePath, file) {
   const familyPath = basePath + family + '/content/rulebook.md'
-  const variantPath = basePath + family + '/content/variants/' + slug + '.md'
+  const variantPath = basePath + variantFilePath(family, slug, file)
 
   const [familyMd, variantMd] = await Promise.all([
     fetch(familyPath, FETCH_OPTS).then(r => r.text()),

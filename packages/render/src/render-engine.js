@@ -11,17 +11,23 @@ import { fileLabel } from '../../core/index.js'
 
 import { produceLayout, buildCrossMap, pieceImageKey, pieceImageKeys, symbolToPiece, drawsAsStandIn } from '../../schema/index.js'
 import { parseRankRuns, readPosition } from '../../core/index.js'
-import { renderGridLayout } from '../../topologies/grid/index.js'
+import { renderGridLayout, renderAnnularLayout } from '../../topologies/grid/index.js'
 import { renderGraphLayout } from '../../topologies/graph/index.js'
 import { renderPitLayout } from '../../topologies/pit/index.js'
 import { renderTrackLayout } from '../../topologies/track/index.js'
 import { renderHexLayout } from '../../topologies/hex/index.js'
 import { renderTableauLayout } from './render-tableau.js'
+import { createTrisectionTopology, trisectionSize, renderTrisectionLayout } from '../../topologies/trisection/index.js'
+import { createTriangularTopology, renderTriangularLayout } from '../../topologies/triangular/index.js'
 import { elementsToFragment, elementToSvg } from './serialize-layout.js'
 import { renderSurfaceSVG } from './piece-surface.js'
 import { OWNER_PREFIXES, getOwnerFromPrefix } from './recolour.js'
 
-const RENDER_FN = { grid: renderGridLayout, graph: renderGraphLayout, pit: renderPitLayout, track: renderTrackLayout, hex: renderHexLayout, tableau: renderTableauLayout }
+// Boards whose renderer places the pieces itself, from a position it reads in
+// its own terms. Parsing their setup as a FEN here finds nothing, correctly.
+const DRAWS_OWN_PIECES = new Set(['hex', 'pit', 'track', 'hexagonal-trisection', 'triangular'])
+
+const RENDER_FN = { grid: renderGridLayout, graph: renderGraphLayout, pit: renderPitLayout, track: renderTrackLayout, hex: renderHexLayout, tableau: renderTableauLayout, 'hexagonal-trisection': renderTrisectionLayout, triangular: renderTriangularLayout, annular: renderAnnularLayout }
 
 // --- Piece image resolution ---
 
@@ -348,14 +354,42 @@ export function renderFromEngine(resolved, opts = {}) {
     }
   }
 
+  // A trisected board draws its own pieces, from its own cell names, so the
+  // position is read by the topology that defines those names. The symbol is
+  // kept on each piece because a many-seat set is keyed by it: `gK` is the
+  // green King.
+  if (topo.type === 'hexagonal-trisection' && resolved.setup && typeof resolved.setup === 'string' && trisectionSize(topo)) {
+    const vocabulary = ownVocabulary(resolved)
+    const position = createTrisectionTopology(topo).parsePosition(resolved.setup, vocabulary)
+    for (const piece of Object.values(position)) piece.symbol = vocabulary[piece.type]?.symbols?.[piece.owner]
+    render._position = position
+  }
+  if (topo.type === 'triangular' && Array.isArray(topo.shape) && resolved.setup && typeof resolved.setup === 'string') {
+    const vocabulary = ownVocabulary(resolved)
+    try {
+      const position = createTriangularTopology(topo).parsePosition(resolved.setup, vocabulary)
+      for (const piece of Object.values(position)) piece.symbol = vocabulary[piece.type]?.symbols?.[piece.owner]
+      render._position = position
+    } catch { /* a shape the topology refuses renders as nothing, below */ }
+  }
+
   if (topo.type === 'track' && resolved.content?.data) {
     render._boardData = resolved.content.data
     if (resolved.content.board) render._board = resolved.content.board
   }
 
   // Produce layout
-  const result = produceLayout(resolved)
+  let result = produceLayout(resolved)
   if (!result) return null
+  // A board drawn as rings is flipped by turning it round, which the ring
+  // layout does itself so its labels and pieces stay upright. Mirroring its
+  // ids, as a flat grid's are, would put the outer ring inside.
+  const annular = result.type === 'annular'
+  if (annular && opts.flipped) {
+    render.rotation = (render.rotation || 0) + 180
+    result = produceLayout(resolved)
+  }
+  const flipped = opts.flipped && !annular
 
   const renderFn = RENDER_FN[result.type]
   if (!renderFn) return null
@@ -372,7 +406,7 @@ export function renderFromEngine(resolved, opts = {}) {
 
   // Parse setup → position (grid/graph only; hex/pit/track handle internally)
   const position = parsePosition(resolved, topo)
-  if (typeof resolved.setup === 'string' && resolved.setup.includes('/') && resolved.setup.replace(/[\d/]/g, '').length > 0 && Object.keys(position).length === 0) {
+  if (!DRAWS_OWN_PIECES.has(topo.type) && typeof resolved.setup === 'string' && resolved.setup.includes('/') && resolved.setup.replace(/[\d/]/g, '').length > 0 && Object.keys(position).length === 0) {
     console.warn('[render-engine] Non-empty setup produced empty position — possible fenMap or vocabulary mismatch', { setup: resolved.setup.slice(0, 40) })
   }
 
@@ -397,7 +431,7 @@ export function renderFromEngine(resolved, opts = {}) {
     parts.push(collectDefs(position, opts.pieceDefs))
   }
 
-  const flipNonGrid = opts.flipped && topo.type !== 'grid'
+  const flipNonGrid = flipped && topo.type !== 'grid'
   if (flipNonGrid) parts.push(`<g transform="rotate(180 ${W / 2} ${H / 2})">`)
 
   parts.push(elementsToFragment(layout.elements))
@@ -412,14 +446,14 @@ export function renderFromEngine(resolved, opts = {}) {
     const tileSize = render.cellSize || 40
     const colors = surface.colors || {}
     const posAlpha = (resolved.render || {}).positionAlphabet || null
-    const displayPosition = opts.flipped
+    const displayPosition = flipped
       ? flipPosition(position, topo.rows || 8, topo.cols || 8, posAlpha)
       : position
-    let effectiveRotations = opts.flipped ? flipRotations(resolved.pieceRotations) : resolved.pieceRotations
-    if (opts.flipped && !effectiveRotations && resolved.pieces?.directional) {
+    let effectiveRotations = flipped ? flipRotations(resolved.pieceRotations) : resolved.pieceRotations
+    if (flipped && !effectiveRotations && resolved.pieces?.directional) {
       effectiveRotations = Object.fromEntries((resolved.players || ['white', 'black']).map(p => [p, 180]))
     }
-    parts.push(`<g pointer-events="none">${renderPiecesFromCells(displayPosition, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: effectiveRotations, getOwner, pieceDefs: opts.pieceDefs, colors, vocabulary: resolved.vocabulary || {}, pieceScale: render.pieceScale, columnDepths: render._columnDepths, cols: topo.cols, flipped: opts.flipped, rows: topo.rows, onStandIn: opts.onStandIn })}</g>`)
+    parts.push(`<g pointer-events="none">${renderPiecesFromCells(displayPosition, layout.cells, tileSize, { pieceImages, pieceSurfaceMap, pieceSurface, pieceBorders, pieceRotations: effectiveRotations, getOwner, pieceDefs: opts.pieceDefs, colors, vocabulary: resolved.vocabulary || {}, pieceScale: render.pieceScale, columnDepths: render._columnDepths, cols: topo.cols, flipped, rows: topo.rows, onStandIn: opts.onStandIn })}</g>`)
   } else if (position && Object.keys(position).length > 0) {
     parts.push(`<g pointer-events="none"></g>`)
   }
@@ -432,6 +466,15 @@ export function renderFromEngine(resolved, opts = {}) {
 
   parts.push('</svg>')
   return parts.join('\n')
+}
+
+// The vocabulary a board that draws its own pieces was written in. A
+// variant's own block wins over the family's, which is where a board with
+// more seats than the family, or pieces the family does not have, declares
+// its symbols.
+function ownVocabulary(resolved) {
+  const family = resolved.plugins ? Object.values(resolved.plugins)[0] : null
+  return { ...(resolved.vocabulary || {}), ...(family?.vocabulary || {}) }
 }
 
 // --- Flip support ---
@@ -472,7 +515,7 @@ function fallbackOwner(type) {
 function parsePosition(resolved, topo) {
   const setup = resolved.setup
   if (!setup) return {}
-  if (topo.type === 'hex' || topo.type === 'pit' || topo.type === 'track') return {}
+  if (DRAWS_OWN_PIECES.has(topo.type)) return {}
 
   if (typeof setup === 'object' && !Array.isArray(setup)) {
     return setup

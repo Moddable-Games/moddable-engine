@@ -112,7 +112,7 @@ function foldedPluginConfig(family, slug) {
 // fails the ratchet rather than joining the noise.
 //
 // It started at 176 warnings across 176 playable variants - every one of them,
-// so the guard said nothing. What is left are four notes on three variants,
+// so the guard said nothing. What is left are three notes on two variants,
 // all of them prose about why something is not implemented rather than a rule
 // the engine was meant to read. The keys that were rules have been either
 // implemented or renamed to what the plugin reads:
@@ -123,11 +123,11 @@ function foldedPluginConfig(family, slug) {
 //   faceoff        -> implemented, config-driven  synochess, empire
 //   approximations -> reclassified as content, not plugin config   congo
 //   removeImmediately -> implemented                              international
+//   setup_status   -> the setup is encoded (engine#26)             yalta-chess
 const UNCLAIMED = {
   'chess|gating': 1,                  // s-chess - its defining mechanic, now marked unsupported
   'chess|hand': 1,                    // s-chess - only ever a by-product of `drops`
   'chess|rendering_note': 1,          // raumschach
-  'chess|setup_status': 1,            // yalta-chess
 }
 const UNCLAIMED_CEILING = Object.values(UNCLAIMED).reduce((a, b) => a + b, 0)
 
@@ -172,7 +172,7 @@ describe('resolved plugin config has no unclaimed keys (engine#139)', () => {
   })
 
   // What engine#139 actually asked for: load every playable variant and assert
-  // that not one of them warns. The four entries above sit on variants that
+  // that not one of them warns. The three entries above sit on variants that
   // are not playable, so this is genuinely zero rather than zero-by-allowlist.
   it('no playable variant emits an unknown-key warning', () => {
     const noisy = []

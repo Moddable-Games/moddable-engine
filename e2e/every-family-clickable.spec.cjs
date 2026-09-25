@@ -41,7 +41,44 @@ test.describe('every playable family answers a click', () => {
   for (const { family, variant } of FAMILIES) {
     test(`${family}/${variant}`, async ({ page }) => {
       await page.goto(`${BASE}?family=${family}&variant=${variant}&opponent=human`)
-      await page.waitForSelector('#game-play-root [data-sq]', { timeout: 20000 })
+      await page.waitForSelector(
+        '#game-play-root [data-sq], #game-play-root [data-card-id], .game-play-actions button',
+        { timeout: 20000 }
+      )
+
+      const historyText = () => page.locator('.game-play-history').first().textContent().catch(() => '')
+
+      // A card, domino or dice table has no cells. It is played by picking
+      // cards from the hand and pressing the table's actions (Play, Roll, or
+      // the choice a card offers), and the move log is still the witness.
+      if (await page.locator('#game-play-root [data-sq]').count() === 0) {
+        const startLog = ((await historyText()) || '').trim()
+        const moved = async () => ((await historyText()) || '').trim() !== startLog
+        const pressActions = async () => {
+          const labels = await page.locator('.game-play-actions button').allTextContents()
+          for (const label of labels) {
+            if (/^(undo|new game|resign)$/i.test(label.trim())) continue
+            await page.locator('.game-play-actions button', { hasText: label }).first().click({ timeout: 4000 }).catch(() => {})
+            if (await moved()) return true
+          }
+          return false
+        }
+
+        let played = await pressActions()
+        const cards = await page.locator('#game-play-root [data-card-id]').evaluateAll(
+          els => els.map(el => el.getAttribute('data-card-id')).filter(Boolean)
+        )
+        for (const id of cards) {
+          if (played) break
+          const card = page.locator(`#game-play-root [data-card-id="${id}"]`).first()
+          await card.click({ timeout: 4000 }).catch(() => {})
+          if (await moved() || await pressActions()) { played = true; break }
+          // Put it back, so the next card is tried on its own.
+          await card.click({ timeout: 4000 }).catch(() => {})
+        }
+        expect(played, `${family}/${variant}: no card or action produced a move`).toBe(true)
+        return
+      }
 
       const ids = await page.locator('#game-play-root [data-sq]').evaluateAll(
         els => els.map(el => el.getAttribute('data-sq')).filter(Boolean)
@@ -60,8 +97,6 @@ test.describe('every playable family answers a click', () => {
       // And comparing the SVG cannot tell a move from a selection highlight,
       // because both change the markup. The move log is the unambiguous
       // witness: it only grows when a move is actually made.
-      const historyText = () => page.locator('.game-play-history').first().textContent().catch(() => '')
-
       let accepted = 0
       const refused = []
       for (const id of ids.slice(0, 12)) {

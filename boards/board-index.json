@@ -1660,6 +1660,16 @@
     "playable": true
   },
   {
+    "family": "chess",
+    "familyTitle": "Chess — Official Rulebook",
+    "variant": "yalta-chess",
+    "variantTitle": "Yalta Chess",
+    "topology": "hexagonal-trisection",
+    "svg": "svgs/chess--yalta-chess.svg",
+    "rulesUrl": "chess/variants/yalta-chess/index.html",
+    "playable": true
+  },
+  {
     "family": "dou-shou-qi",
     "familyTitle": "Dou Shou Qi (斗兽棋 / Jungle)",
     "variant": "standard",
@@ -1677,7 +1687,7 @@
     "topology": "tableau",
     "svg": "svgs/double-six-dominoes--all-fives.svg",
     "rulesUrl": "double-six-dominoes/games/all-fives/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "double-six-dominoes",
@@ -1687,7 +1697,7 @@
     "topology": "tableau",
     "svg": "svgs/double-six-dominoes--block.svg",
     "rulesUrl": "double-six-dominoes/games/block/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "double-six-dominoes",
@@ -2817,7 +2827,7 @@
     "topology": "triangular",
     "svg": "svgs/shogi--sankaku-shogi.svg",
     "rulesUrl": "shogi/variants/sankaku-shogi/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "shogi",
@@ -2907,7 +2917,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-52--big2.svg",
     "rulesUrl": "standard-52/games/big2/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-52",
@@ -2947,7 +2957,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-52--crazy-eights.svg",
     "rulesUrl": "standard-52/games/crazy-eights/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-52",
@@ -3017,7 +3027,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-52--hearts.svg",
     "rulesUrl": "standard-52/games/hearts/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-52",
@@ -3067,7 +3077,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-52--spades.svg",
     "rulesUrl": "standard-52/games/spades/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-52",
@@ -3087,7 +3097,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-52--war.svg",
     "rulesUrl": "standard-52/games/war/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-52",
@@ -3097,7 +3107,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-52--whist.svg",
     "rulesUrl": "standard-52/games/whist/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-dice",
@@ -3127,7 +3137,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-dice--farkle.svg",
     "rulesUrl": "standard-dice/games/farkle/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-dice",
@@ -3147,7 +3157,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-dice--yahtzee.svg",
     "rulesUrl": "standard-dice/games/yahtzee/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "stern-halma",

@@ -1332,6 +1332,35 @@
     "playable": true
   },
   {
+    "family": "chess",
+    "familyLabel": "Chess",
+    "variant": "yalta-chess",
+    "key": "yalta-chess",
+    "label": "Yalta Chess",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "double-six-dominoes",
+    "familyLabel": "Double-Six Dominoes",
+    "variant": "all-fives",
+    "key": "all-fives",
+    "label": "All Fives",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/all-fives/standard.md"
+  },
+  {
+    "family": "double-six-dominoes",
+    "familyLabel": "Double-Six Dominoes",
+    "variant": "block",
+    "key": "block",
+    "label": "Block Dominoes",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/block/standard.md"
+  },
+  {
     "family": "draughts",
     "familyLabel": "Draughts",
     "variant": "alquerque",
@@ -2000,6 +2029,15 @@
   {
     "family": "shogi",
     "familyLabel": "Shogi",
+    "variant": "sankaku-shogi",
+    "key": "sankaku-shogi",
+    "label": "Sankaku Shogi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "shogi",
+    "familyLabel": "Shogi",
     "variant": "sho-shogi",
     "key": "sho-shogi",
     "label": "Sho Shogi",
@@ -2068,6 +2106,86 @@
     "label": "Yari Shogi",
     "group": "Other",
     "playable": true
+  },
+  {
+    "family": "standard-52",
+    "familyLabel": "Standard 52-Card Deck",
+    "variant": "big2",
+    "key": "big2",
+    "label": "Big 2",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/big2/standard.md"
+  },
+  {
+    "family": "standard-52",
+    "familyLabel": "Standard 52-Card Deck",
+    "variant": "crazy-eights",
+    "key": "crazy-eights",
+    "label": "Crazy Eights",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/crazy-eights/standard.md"
+  },
+  {
+    "family": "standard-52",
+    "familyLabel": "Standard 52-Card Deck",
+    "variant": "hearts",
+    "key": "hearts",
+    "label": "Hearts",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/hearts/standard.md"
+  },
+  {
+    "family": "standard-52",
+    "familyLabel": "Standard 52-Card Deck",
+    "variant": "spades",
+    "key": "spades",
+    "label": "Spades",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/spades/standard.md"
+  },
+  {
+    "family": "standard-52",
+    "familyLabel": "Standard 52-Card Deck",
+    "variant": "war",
+    "key": "war",
+    "label": "War",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/war/standard.md"
+  },
+  {
+    "family": "standard-52",
+    "familyLabel": "Standard 52-Card Deck",
+    "variant": "whist",
+    "key": "whist",
+    "label": "Whist",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/whist/standard.md"
+  },
+  {
+    "family": "standard-dice",
+    "familyLabel": "Standard Dice",
+    "variant": "farkle",
+    "key": "farkle",
+    "label": "Farkle",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/farkle/standard.md"
+  },
+  {
+    "family": "standard-dice",
+    "familyLabel": "Standard Dice",
+    "variant": "yahtzee",
+    "key": "yahtzee",
+    "label": "Yahtzee",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/yahtzee/standard.md"
   },
   {
     "family": "xiangqi",

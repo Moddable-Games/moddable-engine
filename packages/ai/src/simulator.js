@@ -242,5 +242,6 @@ export function createSimulator(plugin, opts = {}) {
     unmakeMove: hasMakeUnmake ? unmakeMove : null,
     playerCount,
     playerNames,
+    plugin,
   }
 }

@@ -218,6 +218,9 @@ describe('Playability Standard', () => {
 
   for (const family of getFamilies()) {
     const variants = listVariants(family)
+    // A component family with no game written for it yet - mahjong, the
+    // hanafuda and Bavarian decks - has a plugin and nothing to play.
+    if (!variants.length) continue
 
     describe(family, () => {
       const familyResults = []

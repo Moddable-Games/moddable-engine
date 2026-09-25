@@ -26,6 +26,7 @@ registerVariants('mancala', {})
 registerVariants('morris', {})
 registerVariants('hex', {})
 registerVariants('landlords-game', {})
+for (const family of ['standard-52', 'bavarian-32', 'flower-48', 'double-six-dominoes', 'mahjong', 'standard-dice']) registerVariants(family, {})
 
 registerEvaluator('chess', chessEvaluate)
 registerEvaluator('go', goEvaluate)

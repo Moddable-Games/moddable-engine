@@ -30,6 +30,12 @@ const MINIMUM_PLAYABLE = {
   hex: 8,
   'landlords-game': 1,
   mancala: 6,
+  // Played with components rather than on a board, through the tableau
+  // plugin (engine#176): Big 2, War, Whist, Hearts, Spades, Crazy Eights;
+  // Block and All Fives; Yahtzee and Farkle.
+  'standard-52': 6,
+  'double-six-dominoes': 2,
+  'standard-dice': 2,
   morris: 7,
   // 13 until hasami-shogi was measured capturing 11 times by displacement
   // against 2 custodially - it was playing shogi capture on a hasami board -

@@ -833,3 +833,8 @@ body.legend-open { overflow: hidden; }
 .game-play-sidebar--right > .game-play-history-label {
   margin-bottom: calc(var(--rail-gap) * -1 + 4px);
 }
+
+/* A card the seat may pick, on a card, domino or dice table. */
+#game-play-root .hand-card {
+  cursor: pointer;
+}

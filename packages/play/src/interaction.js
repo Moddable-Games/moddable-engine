@@ -233,6 +233,31 @@ const rollModel = {
 registerInteractionModel('select', selectModel)
 registerInteractionModel('roll', rollModel)
 
+// A hand of cards, not a board (engine#176). What is clicked is a card id. A
+// turn with nothing to choose - War's turning the cards over - is taken by any
+// click; a turn where every move is one card played is that card; otherwise
+// the card is picked, to be played with others once the set is made.
+const cardsModel = {
+  name: 'cards',
+  needsSelection: true,
+  targetsFor() { return [] },
+  handleClick(pos, ctx) {
+    const moves = ctx.moves || []
+    const holds = (m) => Array.isArray(m.cards) && m.cards.includes(pos)
+    if (moves.length && moves.every(m => !Array.isArray(m.cards) && m.value === undefined)) return { type: 'move', move: moves[0] }
+    if (moves.length && moves.every(m => m.action === 'play' && Array.isArray(m.cards) && m.cards.length === 1)) {
+      // One card can be more than one move - an eight names a suit, a tile
+      // goes on either end - and then the player chooses which.
+      const candidates = moves.filter(holds)
+      if (candidates.length > 1) return { type: 'choice', candidates }
+      return candidates.length ? { type: 'move', move: candidates[0] } : { type: 'reject', reason: 'illegal' }
+    }
+    return moves.some(holds) ? { type: 'select', pos } : { type: 'reject', reason: 'illegal' }
+  },
+}
+
+registerInteractionModel('cards', cardsModel)
+
 // A family declares one interaction model, and some families need more than
 // one over the course of a game.
 //

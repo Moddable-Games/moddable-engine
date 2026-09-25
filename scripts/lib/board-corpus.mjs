@@ -39,7 +39,9 @@ export const SNAP_DIR = process.env.SNAP_DIR
 export const SVG_DIR = resolve(ENGINE_ROOT, 'boards', 'svgs')
 
 // Topology aliases that render through the same pipeline.
-export const TYPE_NORMALIZE = { hexagonal: 'hex', triangular: 'hex' }
+// `triangular` was drawn as a hex board while nothing modelled triangles.
+// It has its own topology now (engine#173) and is not renamed.
+export const TYPE_NORMALIZE = { hexagonal: 'hex' }
 
 export function loadGallery() {
   return JSON.parse(readFileSync(resolve(ENGINE_ROOT, 'pieces/gallery-index.json'), 'utf8'))

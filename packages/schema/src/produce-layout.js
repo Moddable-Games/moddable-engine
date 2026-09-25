@@ -14,6 +14,9 @@ import { resolveSurface } from './surfaces.js'
 import { triangularPointOps } from './produce-layout-triangular-points.js'
 import { perimeterOps } from './produce-layout-perimeter.js'
 import { produceStarLayout } from './produce-layout-star.js'
+import { produceTrisectionLayout } from './produce-layout-trisection.js'
+import { produceAnnularLayout } from './produce-layout-annular.js'
+import { produceTriangularLayout } from './produce-layout-triangular.js'
 
 export function produceLayout(engine) {
   if (!engine || !engine.topology) return null
@@ -30,11 +33,19 @@ export function produceLayout(engine) {
     case 'pit': return producePitLayout(topo, colors, render)
     case 'graph': return produceGraphLayout(topo, colors, render)
     case 'tableau': return produceTableauLayout(topo, colors, render, engine)
+    case 'hexagonal-trisection': return produceTrisectionLayout(topo, colors, render)
+    case 'triangular': return produceTriangularLayout(topo, colors, render)
     default: return null
   }
 }
 
+// Only a board whose files join round can be drawn as rings: on any other
+// the gap between the last file and the first would be a join that is not
+// there.
+const WRAPS_FILES = new Set(['files', 'cylinder', 'torus'])
+
 function produceGridLayout(topo, colors, render) {
+  if (render.mode === 'annular' && WRAPS_FILES.has(topo.wrap)) return produceAnnularLayout(topo, colors, render)
   const rows = topo.rows || 8
   const cols = topo.cols || 8
   const cellSize = render.cellSize || 40

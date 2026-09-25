@@ -120,8 +120,10 @@ function playedPosition(family, key, moveCount, topo) {
     played++
   }
   const slice = game.getState().slice
-  const cols = topo?.cols || slice.cols || slice._cols || Math.round(Math.sqrt(slice.board.length))
-  const rows = topo?.rows || Math.round(slice.board.length / cols)
+  // A card game's slice has hands, not a board.
+  const cells = slice.board ? slice.board.length : 0
+  const cols = topo?.cols || slice.cols || slice._cols || Math.round(Math.sqrt(cells))
+  const rows = topo?.rows || Math.round(cells / cols)
   return {
     game,
     plugin,

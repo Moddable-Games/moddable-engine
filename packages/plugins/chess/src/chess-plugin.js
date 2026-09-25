@@ -6,7 +6,7 @@ import { randomBackRank } from './variants/chess960.js'
 // which only lists the keys that carry a default value.
 export const CONFIG_KEYS = new Set([
   'actions', 'advancement', 'afterMove', 'capturesTo', 'castling', 'checkThreshold', 'cols', 'demotionMap', 'doubleStep',
-  'gating', 'initialHands',
+  'gating', 'initialHands', 'matedArmy',
   'dropMayNotCheck', 'dropRegion', 'dropZone', 'drops', 'dropsCompulsory', 'dropsFor', 'enPassant', 'hexPawnConfig', 'initState', 'moveApply', 'moveFilter', 'noCheck',
   'onTurnEnd', 'pawnCaptureDirections', 'pawnConfig', 'pawnMoveDirections', 'pawnStartRow',
   'pawnDropRanks', 'pawnType', 'placementDistinctColor', 'placementPieces', 'placementZone', 'playerCount',
@@ -338,6 +338,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
   function derivePawnConfig(topo, board) {
     if (config.pawnConfig) return normalizePawnConfig(config.pawnConfig)
+    if (topo && typeof topo.pawnGeometry === 'function') return deriveTopologyPawnConfig(topo)
     if (config.hexPawnConfig && topo && topo.getAllCells) {
       return deriveHexPawnConfig(topo, config.hexPawnConfig)
     }
@@ -345,6 +346,25 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       return deriveGridPawnConfig(topo, board)
     }
     return null
+  }
+
+  // A board whose "forward" is not one direction says what a pawn's is. On the
+  // trisected hexagon a pawn heads for the centre in its own sector and away
+  // from it once across, and promotes on whichever back rank it reaches, so no
+  // single vector or rank can describe it (engine#26). The board hands back
+  // opaque directions that its own `step` understands.
+  function deriveTopologyPawnConfig(topo) {
+    const forwardDir = {}, captureDirections = {}, startCells = {}, promotionCells = {}, doubleStep = {}
+    const wantsDouble = config.doubleStep !== false
+    for (let seat = 0; seat < seatCount(); seat++) {
+      const g = topo.pawnGeometry(seat)
+      forwardDir[seat] = g.forward
+      captureDirections[seat] = g.captures
+      startCells[seat] = new Set(g.startCells)
+      promotionCells[seat] = new Set(g.promotionCells)
+      doubleStep[seat] = typeof config.doubleStep === 'object' ? !!config.doubleStep[seat] : wantsDouble
+    }
+    return { forwardDir, startCells, promotionCells, captureDirections, doubleStep }
   }
 
   function deriveHexPawnConfig(topo, hexConfig) {
@@ -489,7 +509,11 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
   function init(pluginConfig, { request }) {
     topology = request('core.topology')
-    if (topology && topology.getAllCells && !topology.rows && pieceConfigs.knight && pieceConfigs.knight.offsets === 'knight') {
+    // A hex board has a knight of its own. Asked of the board rather than
+    // assumed from "not a grid", because a board of quadrilaterals is not a
+    // grid either and its knight is the ordinary one.
+    const hexKnight = topology && topology.getDirections && topology.getDirections('hex-knight')
+    if (hexKnight && hexKnight.length && !topology.rows && pieceConfigs.knight && pieceConfigs.knight.offsets === 'knight') {
       pieceConfigs.knight = { ...pieceConfigs.knight, offsets: 'hex-knight' }
     }
     const rng = request('core.rng')
@@ -902,13 +926,16 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const moves = []
     const { forwardDir, startCells, promotionCells, captureDirections, doubleStep } = pawnConfig
     const moveDirections = pawnConfig.moveDirections
+    // Which way this pawn runs. A pawn that changes hands keeps its own
+    // direction, so a captured army's pawns do not turn round and walk home.
+    const seat = pawnSeatOf(getCell(slice.board, from), playerIdx)
 
     if (moveDirections) {
-      for (const dir of moveDirections[playerIdx]) {
+      for (const dir of moveDirections[seat]) {
         const target = topology.step(from, dir)
         if (target === null) continue
         if (getCell(slice.board, target) !== null) continue
-        if (promotionCells[playerIdx].has(target)) {
+        if (promotionCells[seat].has(target)) {
           for (const promo of getPromotionChoices(playerIdx)) {
             moves.push({ from, to: target, promotion: promo })
           }
@@ -916,12 +943,12 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
           moves.push({ from, to: target })
         }
       }
-      const playerDoubleStep = typeof doubleStep === 'object' ? doubleStep[playerIdx] : doubleStep
+      const playerDoubleStep = typeof doubleStep === 'object' ? doubleStep[seat] : doubleStep
       const canDoubleStep = config.torpedo
         ? playerDoubleStep
-        : playerDoubleStep && startCells[playerIdx].has(from)
+        : playerDoubleStep && startCells[seat].has(from)
       if (canDoubleStep) {
-        for (const dir of moveDirections[playerIdx]) {
+        for (const dir of moveDirections[seat]) {
           const step1 = topology.step(from, dir)
           if (step1 === null || getCell(slice.board, step1) !== null) continue
           const step2 = topology.step(step1, dir)
@@ -931,10 +958,10 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
         }
       }
     } else {
-      const fwd = forwardDir[playerIdx]
+      const fwd = forwardDir[seat]
       const forward = topology.step(from, fwd)
       if (forward !== null && getCell(slice.board, forward) === null) {
-        if (promotionCells[playerIdx].has(forward)) {
+        if (promotionCells[seat].has(forward)) {
           for (const promo of getPromotionChoices(playerIdx)) {
             moves.push({ from, to: forward, promotion: promo })
           }
@@ -942,14 +969,14 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
           moves.push({ from, to: forward })
         }
 
-        const playerDoubleStep2 = typeof doubleStep === 'object' ? doubleStep[playerIdx] : doubleStep
+        const playerDoubleStep2 = typeof doubleStep === 'object' ? doubleStep[seat] : doubleStep
         const canDoubleStep = config.torpedo
           ? playerDoubleStep2
-          : playerDoubleStep2 && startCells[playerIdx].has(from)
+          : playerDoubleStep2 && startCells[seat].has(from)
         if (canDoubleStep) {
           const doubleForward = topology.step(forward, fwd)
           if (doubleForward !== null && getCell(slice.board, doubleForward) === null) {
-            if (promotionCells[playerIdx].has(doubleForward)) {
+            if (promotionCells[seat].has(doubleForward)) {
               for (const promo of getPromotionChoices(playerIdx)) {
                 moves.push({ from, to: doubleForward, promotion: promo })
               }
@@ -961,14 +988,14 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       }
     }
 
-    const capDirs = captureDirections[playerIdx]
+    const capDirs = captureDirections[seat]
     for (const capDir of capDirs) {
       const target = topology.step(from, capDir)
       if (target === null) continue
 
       const targetPiece = getCell(slice.board, target)
       if (targetPiece !== null && targetPiece.owner !== playerIdx) {
-        if (promotionCells[playerIdx].has(target)) {
+        if (promotionCells[seat].has(target)) {
           for (const promo of getPromotionChoices(playerIdx)) {
             moves.push({ from, to: target, capture: true, promotion: promo })
           }
@@ -982,7 +1009,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
         // The victim is the pawn that made the double step. It is recorded when
         // the opportunity is created; deriving it from an opponent index only
         // works for two players and crashes for seats 2 and 3.
-        const fallbackDir = forwardDir[1 - playerIdx]
+        const fallbackDir = forwardDir[1 - seat]
         const capturedPawn = ep.pawn != null
           ? ep.pawn
           : (fallbackDir ? topology.step(target, fallbackDir) : null)
@@ -995,10 +1022,19 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return moves
   }
 
+  // The seat whose pawn this is, for its direction and its promotion ranks.
+  // Normally its owner; a pawn that has passed to another player records the
+  // seat it started with as `origin`.
+  function pawnSeatOf(piece, fallback) {
+    if (piece && piece.origin !== undefined) return piece.origin
+    return fallback
+  }
+
   function generateCastlingMoves(kingFrom, slice, playerIdx) {
     if (!config.castling || !isCastlingEnabled(playerIdx) || !slice.castlingRights) return []
     const rights = slice.castlingRights[playerIdx]
     if (!rights || (!rights.king && !rights.queen)) return []
+    if (topology && typeof topology.backRank === 'function') return castlingAlongRank(kingFrom, slice, playerIdx, rights)
     if (!topology || topology.cols === undefined) return []
 
     const cols = topology.cols
@@ -1027,6 +1063,43 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       }
     }
 
+    return moves
+  }
+
+  // Castling on a board whose cells are not numbered in rows. The board names
+  // each seat's back rank as a list of its cells from the a-file across, and
+  // castling is read off that list exactly as it is off a chessboard's: the
+  // King goes two files toward the Rook, the Rook lands on the square it
+  // crossed, everything between is empty and the King crosses nothing
+  // attacked. Yalta's three back ranks are three such lists (engine#26).
+  function castlingAlongRank(kingFrom, slice, playerIdx, rights) {
+    const rank = topology.backRank(playerIdx)
+    const k = rank.indexOf(kingFrom)
+    if (k < 0) return []
+    const rookType = config.rookType || 'rook'
+    const moves = []
+    for (const [side, step] of [['king', 1], ['queen', -1]]) {
+      if (!rights[side]) continue
+      const kd = k + 2 * step
+      if (kd < 0 || kd >= rank.length) continue
+      let r = -1
+      for (let i = k + step; i >= 0 && i < rank.length; i += step) {
+        const piece = getCell(slice.board, rank[i])
+        if (piece && piece.type === rookType && piece.owner === playerIdx) r = i
+      }
+      if (r < 0) continue
+      const rd = k + step
+      const lo = Math.min(k, kd, r, rd), hi = Math.max(k, kd, r, rd)
+      let clear = true
+      for (let i = lo; i <= hi && clear; i++) {
+        if (i === k || i === r) continue
+        if (getCell(slice.board, rank[i]) !== null) clear = false
+      }
+      for (let i = k; clear && i !== kd + step; i += step) {
+        if (isSquareAttacked(slice.board, rank[i], playerIdx)) clear = false
+      }
+      if (clear) moves.push({ from: kingFrom, to: rank[kd], castle: true, rookFrom: rank[r], rookTo: rank[rd] })
+    }
     return moves
   }
 
@@ -1119,7 +1192,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     if (isFrozen(board, from)) return false
 
     if (pConfig.movement === 'pawn') {
-      return pawnAttacks(from, target, piece.owner)
+      return pawnAttacks(from, target, piece.owner, piece)
     }
 
     const primitive = buildPieceForPlayer(piece.type, piece.owner)
@@ -1128,9 +1201,9 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return primitive.attacks(topology, from, target, board)
   }
 
-  function pawnAttacks(from, target, owner) {
+  function pawnAttacks(from, target, owner, piece) {
     if (!pawnConfig) return false
-    const capDirs = pawnConfig.captureDirections[owner]
+    const capDirs = pawnConfig.captureDirections[pawnSeatOf(piece, owner)] || []
     for (const capDir of capDirs) {
       const t = topology.step(from, capDir)
       if (t === target) return true
@@ -1479,6 +1552,12 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
   function updateRookCastling(rookPos, owner, rights) {
     if (!rights[owner]) return
+    if (topology && typeof topology.backRank === 'function') {
+      const rank = topology.backRank(owner)
+      if (rookPos === rank[rank.length - 1]) rights[owner].king = false
+      else if (rookPos === rank[0]) rights[owner].queen = false
+      return
+    }
     if (!topology || topology.cols === undefined) return
     const cols = topology.cols
     const backRank = backRankStart(owner)
@@ -1900,13 +1979,20 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     }
 
     if (isMultiplayer) {
+      // Every seat that has lost its royal goes at once. One mate can take two
+      // Kings, and a seat left on the turn order with no King and no pieces
+      // has nothing to move.
+      const gone = []
       for (let opp = 0; opp < config.playerCount; opp++) {
         if (opp === playerIdx) continue
         if (eliminated.includes(opp)) continue
-        const oppRoyal = royalTypeFor(opp)
-        const hasRoyal = slice.board.some(cell => cell && cell.type === oppRoyal && cell.owner === opp)
-        if (!hasRoyal) return { eliminate: opp }
+        if (!hasRoyal(slice.board, opp)) gone.push(opp)
       }
+      if (gone.length) return { eliminate: gone.length === 1 ? gone[0] : gone }
+      // A stalemate with more than two at the table: the seat to move can do
+      // nothing and is not in check. Settled as it is between two players, a
+      // draw. Recorded when the move that caused it was applied.
+      if (slice._stalemate !== undefined && slice._stalemate !== null) return 'draw'
       return null
     }
 
@@ -2060,6 +2146,17 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const cols = topology ? topology.cols : 8
     const rows = topology ? topology.rows : 8
     const parts = []
+    // A board without rows is keyed cell by cell. Walking `rows` here wrote
+    // nothing at all for a hex or trisected board, so every position of a game
+    // on one had the same key.
+    if (topology && !topology.rows && topology.getAllCells) {
+      for (const pos of allPositions()) {
+        const cell = getCell(board, pos)
+        if (!cell) continue
+        const sym = vocabulary[cell.type]?.symbols?.[cell.owner]
+        parts.push(`${pos}:${sym || cell.type[0]}${cell.origin !== undefined ? `~${cell.origin}` : ''},`)
+      }
+    }
     for (let r = 0; r < rows; r++) {
       let empty = 0
       for (let c = 0; c < cols; c++) {
@@ -2074,13 +2171,17 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       if (r < rows - 1) parts.push('/')
     }
     parts.push(' ')
-    parts.push(playerIndex === 0 ? 'w' : 'b')
+    parts.push(seatCount() > 2 ? String(playerIndex) : (playerIndex === 0 ? 'w' : 'b'))
     if (slice.castlingRights) {
       let c = ''
       if (slice.castlingRights[0]?.king) c += 'K'
       if (slice.castlingRights[0]?.queen) c += 'Q'
       if (slice.castlingRights[1]?.king) c += 'k'
       if (slice.castlingRights[1]?.queen) c += 'q'
+      for (let seat = 2; seat < seatCount(); seat++) {
+        if (slice.castlingRights[seat]?.king) c += `${seat}K`
+        if (slice.castlingRights[seat]?.queen) c += `${seat}Q`
+      }
       parts.push(' ')
       parts.push(c || '-')
     }
@@ -2238,6 +2339,119 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return result && result.state ? { ...result, state: counted } : counted
   }
 
+  // Checkmate at a table of more than two (engine#26).
+  //
+  // Between two players a mate ends the game, and `checkWin` asks the one
+  // question that decides it. With three, the game goes on without the mated
+  // player, so a mate has to be found, and something has to happen to the army
+  // left behind. `matedArmy` says what:
+  //
+  //     matedArmy: mater     Yalta: "The player who delivered the checkmate
+  //                          takes control of all the checkmated player's
+  //                          remaining pieces and may use them immediately."
+  //
+  // A mate is judged when the mated player's turn comes, not the moment the
+  // check is given, because in between another player may still save them -
+  // Yalta again: "The player to their left may attempt to help them by
+  // interposing a piece or capturing the checker on that player's own turn."
+  // So after every move the seats due to play next are looked at in turn
+  // order: the first that has a legal move plays, and any before it that is in
+  // check with none is mated.
+  //
+  // The credit goes to whoever gave the check first, which is the source's
+  // rule for two checks at once: "the check delivered first takes priority
+  // for determining which player delivers the mate". A check is recorded
+  // against the player whose move gave it - their own piece if one of theirs
+  // is attacking, otherwise the owner of the piece they uncovered - and kept
+  // until the King is out of check.
+  //
+  // The King leaves the board and the rest of the army changes hands. It
+  // changes colour with them: the engine decides whose a piece is by its
+  // owner, and a piece that still belonged to the mated seat would be one its
+  // new commander's own King could be checked by. Each piece remembers the
+  // seat it came from as `origin`, which is what keeps a captured pawn running
+  // the way it always did.
+  function hasRoyal(board, seat) {
+    const royal = royalTypeFor(seat)
+    return allPositions().some(pos => {
+      const cell = getCell(board, pos)
+      return cell && cell.type === royal && cell.owner === seat
+    })
+  }
+
+  function checkGivenBy(board, seat, mover) {
+    const royal = royalTypeFor(seat)
+    const owners = []
+    for (const target of allPositions()) {
+      const king = getCell(board, target)
+      if (!king || king.type !== royal || king.owner !== seat) continue
+      for (const pos of allPositions()) {
+        const piece = getCell(board, pos)
+        if (!piece || piece.owner === seat) continue
+        if (pieceAttacks(pos, target, piece, board)) owners.push(piece.owner)
+      }
+    }
+    if (owners.includes(mover)) return mover
+    return owners.length ? owners[0] : mover
+  }
+
+  function handOverArmy(board, seat, heir) {
+    const next = cloneBoard(board)
+    const royal = royalTypeFor(seat)
+    for (const pos of allPositions()) {
+      const cell = getCell(next, pos)
+      if (!cell || cell.owner !== seat) continue
+      setCell(next, pos, cell.type === royal
+        ? null
+        : { ...cell, owner: heir, origin: cell.origin !== undefined ? cell.origin : seat })
+    }
+    return next
+  }
+
+  function applyMoveSettlingMates(inner, move, slice, full) {
+    const result = inner(move, slice, full)
+    const wrapped = result && typeof result === 'object' && 'state' in result
+    if (wrapped && result.continueTurn) return result
+    const state = wrapped ? result.state : result
+    if (!state || !state.board) return result
+
+    const mover = full.__players.currentIndex
+    const seats = seatCount()
+    let board = state.board
+    // With three at the table a King can be left where it can be taken: a
+    // third player's move uncovers an attack on it, and the attacker moves
+    // before its owner does. Taking it ends that player as a mate would, and
+    // the army goes the same way, to the player who took it. Left with its
+    // owner it would stand on the board with no one to move it.
+    for (let seat = 0; seat < seats; seat++) {
+      if (seat === mover || hasRoyal(board, seat)) continue
+      if (!allPositions().some(pos => getCell(board, pos)?.owner === seat)) continue
+      board = handOverArmy(board, seat, mover)
+    }
+    const checks = { ...(slice._checkedBy || {}) }
+    for (let seat = 0; seat < seats; seat++) {
+      if (seat === mover || !hasRoyal(board, seat)) { delete checks[seat]; continue }
+      if (!isInCheck(board, seat)) { delete checks[seat]; continue }
+      if (checks[seat] === undefined) checks[seat] = checkGivenBy(board, seat, mover)
+    }
+
+    let stalemate = null
+    for (let k = 1; k < seats; k++) {
+      const seat = (mover + k) % seats
+      if (!hasRoyal(board, seat)) continue
+      const probe = { ...state, board }
+      const asSeat = { ...full, __players: { ...full.__players, currentIndex: seat } }
+      if (getLegalMoves(probe, asSeat).length > 0) break
+      if (!isInCheck(board, seat)) { stalemate = seat; break }
+      const heir = checks[seat] !== undefined ? checks[seat] : mover
+      board = handOverArmy(board, seat, heir)
+      delete checks[seat]
+    }
+
+    const settled = { ...state, board, _checkedBy: checks, _stalemate: stalemate }
+    return wrapped ? { ...result, state: settled } : settled
+  }
+
   return {
     sliceName: 'chess',
     rules: composedRules,
@@ -2261,6 +2475,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       drownSpec ? applyMoveDrowning : null,
       transferSpec ? applyMoveTransferring : null,
       goalRule && goalRule.rotation ? applyMoveTrackingRotation : null,
+      config.matedArmy ? applyMoveSettlingMates : null,
     ].filter(Boolean).reduce((inner, wrap) =>
       (move, slice, full) => wrap(inner, move, slice, full), applyMove),
     getLegalMoves,

@@ -22,6 +22,8 @@ const SOURCES = {
   track: 'packages/topologies/track/src/topology-track.js',
   graph: 'packages/topologies/graph/src/topology-graph.js',
   tableau: 'packages/topologies/tableau/src/topology-tableau.js',
+  'hexagonal-trisection': 'packages/topologies/trisection/src/topology-trisection.js',
+  triangular: 'packages/topologies/triangular/src/topology-triangular.js',
 }
 
 // Read by the renderer and by produce-layout rather than by a topology, the
@@ -94,10 +96,11 @@ const UNREAD = {
 }
 const UNREAD_CEILING = Object.values(UNREAD).reduce((a, b) => a + b, 0)
 
-// Boards whose topology type has no provider at all. Both are the
-// hexagonal-trisection boards waiting on engine#26, plus sankaku-shogi's
-// triangular board. None is playable.
-const NO_PROVIDER = ['hexagonal-trisection', 'triangular']
+// Boards whose topology type has no provider at all. Empty: the
+// hexagonal-trisection boards left it with engine#26 and sankaku-shogi's
+// triangular board with engine#173. A new entry is a board the corpus
+// declares and the engine cannot build.
+const NO_PROVIDER = []
 
 describe('topology keys the engine reads', () => {
   it('found the corpus', () => {

@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { parseFrontmatter } from '../../schema/src/parse-frontmatter.js'
+import { corpusFiles } from '../../play/test-helpers/corpus-files.js'
 import { listVariants, getRegisteredFamilies, getSlugForKey } from '../../play/src/variant-registry.js'
 import { createGame } from '../../play/src/sdk.js'
 
@@ -76,9 +77,11 @@ function variantSetup(family, key) {
     camelToKebab(key),
     camelToKebab(key).replace(/-chess$/, ''),
   ]
+  // A component family's games live one directory each under content/games.
+  const files = corpusFiles(RULES_DIR, family)
   for (const name of candidates) {
-    const file = path.join(RULES_DIR, family, 'content/variants', `${name}.md`)
-    if (fs.existsSync(file)) {
+    const file = files.get(name)
+    if (file && fs.existsSync(file)) {
       const meta = parseFrontmatter(fs.readFileSync(file, 'utf8')).meta || {}
       return { setup: meta.engine?.setup, meta }
     }

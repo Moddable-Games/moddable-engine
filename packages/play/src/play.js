@@ -16,6 +16,8 @@ import { createTrackTopology } from '../../topologies/track/index.js'
 import { createPitTopology } from '../../topologies/pit/index.js'
 import { createGraphTopology } from '../../topologies/graph/index.js'
 import { createTableauTopology } from '../../topologies/tableau/index.js'
+import { createTrisectionTopology } from '../../topologies/trisection/index.js'
+import { createTriangularTopology } from '../../topologies/triangular/index.js'
 import { createGoPlugin } from '../../plugins/go/index.js'
 import { createReversiPlugin } from '../../plugins/reversi/index.js'
 import { createDraughtsPlugin } from '../../plugins/draughts/index.js'
@@ -26,6 +28,7 @@ import { createMorrisPlugin } from '../../plugins/morris/index.js'
 import { createHexPlugin } from '../../plugins/hex/index.js'
 import { createLandlordsPlugin } from '../../plugins/landlords-game/index.js'
 import { createChessPlugin } from '../../plugins/chess/index.js'
+import { createTableauPluginFor } from '../../plugins/tableau/index.js'
 import { createStandard52Deck } from '../../component-deck/index.js'
 import GENERATED_DEFAULTS from '../../../play/family-defaults.json' with { type: 'json' }
 // The composition root: every family's variant modules and evaluators. Loaded
@@ -42,7 +45,11 @@ const TOPOLOGIES = {
   pit: (config) => createPitTopology(config),
   graph: (config) => createGraphTopology(config),
   tableau: (config) => createTableauTopology(config),
+  'hexagonal-trisection': (config) => createTrisectionTopology(config),
+  triangular: (config) => createTriangularTopology(config),
 }
+
+const COMPONENT_FAMILIES = ['standard-52', 'bavarian-32', 'flower-48', 'double-six-dominoes', 'mahjong', 'standard-dice']
 
 const PLUGIN_FACTORIES = {
   chess: createChessPlugin,
@@ -55,6 +62,9 @@ const PLUGIN_FACTORIES = {
   morris: createMorrisPlugin,
   hex: createHexPlugin,
   'landlords-game': createLandlordsPlugin,
+  // The component families: decks, dice, dominoes and tiles. One plugin plays
+  // them all, and each game's frontmatter names the shape it takes (engine#176).
+  ...Object.fromEntries(COMPONENT_FAMILIES.map(family => [family, createTableauPluginFor(family)])),
 }
 
 export function registerTopology(type, factory) {

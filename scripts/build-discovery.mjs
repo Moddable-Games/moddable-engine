@@ -63,6 +63,14 @@ const playManifest = readJSON('play/playability-manifest.json')
 const playableVariants = playManifest.filter(v => v.playable)
 const playableFamilies = [...new Set(playableVariants.map(v => v.family))]
 
+// The homepage's chip for a family whose slug does not read as its name.
+const CHIP_LABELS = {
+  'landlords-game': "Landlord's Game",
+  'standard-52': '52-Card Deck',
+  'double-six-dominoes': 'Dominoes',
+  'standard-dice': 'Dice',
+}
+
 const familyCounts = {}
 playableVariants.forEach(v => { familyCounts[v.family] = (familyCounts[v.family] || 0) + 1 })
 
@@ -313,7 +321,9 @@ const familyPlayPages = playableFamilies.map(f => ({
   priority: '0.8',
 }))
 
-const familyLandingPages = playableFamilies.map(f => ({
+// A family with a landing page of its own. The component families - a deck,
+// dominoes, dice - are played from the play page and have none yet.
+const familyLandingPages = playableFamilies.filter(f => fs.existsSync(resolve('families', f, 'index.html'))).map(f => ({
   path: `/families/${f}/`,
   priority: '0.9',
 }))
@@ -403,7 +413,7 @@ const htmlPatches = [
       [/(\d+) Topology Types/g, `${stats.uniqueTopologies} Topology Types`],
       // Family chips — one entry per playable family
       ...playableFamilies.map(f => {
-        const label = f === 'landlords-game' ? "Landlord's Game" : f.charAt(0).toUpperCase() + f.slice(1)
+        const label = CHIP_LABELS[f] || f.charAt(0).toUpperCase() + f.slice(1)
         return [new RegExp(`(${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} <span class="family-count">)\\d+(<\\/span>)`, 'g'), `$1${stats.familyCounts[f] || 0}$2`]
       }),
       // Topology cards

@@ -454,3 +454,118 @@ function resolveDeckType(components) {
   if (components.dice) return 'standard-dice'
   return resolveTilesType(components.tiles)
 }
+
+// A game in progress, as one seat sees it (engine#176). The static renderer
+// above deals a sample hand from a seed to show what a game looks like; this
+// draws the state a game is actually in, projected for the seat at the bottom
+// of the table, so a card that seat may not see arrives here as `null` and is
+// drawn as a back. What is on the table between the hands - a trick, a battle -
+// the plugin names in groups, so nothing here knows one game from another.
+//
+//     view      the projected slice: { hands: [[id | null]], ... }
+//     seat      the seat at the bottom, whose hand is laid out to be picked from
+//     names     one display name per seat
+//     current   the seat to move, marked
+//     table     [{ label, cards: [id], selectable? }] - what lies face up between
+//               the hands; a selectable group is picked from like a hand
+//     card      id -> card, for the faces
+//     deckType  the deck, for its size and its back
+//     selected  ids raised out of the bottom hand
+export function renderTableState(opts) {
+  const { view, seat = 0, names = [], current = null, table = [], card, deckType, images = null, selected = [] } = opts
+  const deckConfig = getDeckConfig(deckType) || {}
+  const cardW = deckConfig.cardWidth || 44
+  const cardH = deckConfig.cardHeight || 64
+  const hands = view.hands || []
+  const seats = hands.length
+  const raised = new Set(selected)
+
+  const w = 760
+  const pad = 20
+  const lift = 14
+  const ownRow = cardH + lift + 30
+  const centreH = Math.max(cardH + 40, table.length * (cardH + 22) + 10)
+  const oppRow = cardH + 34
+  const h = pad * 2 + oppRow + centreH + ownRow + (seats > 2 ? 40 : 0)
+
+  const els = []
+  els.push({ tag: 'rect', attrs: { x: 0, y: 0, width: w, height: h, fill: '#1b5e3a', rx: 16 } })
+  els.push({ tag: 'rect', attrs: { x: pad / 2, y: pad / 2, width: w - pad, height: h - pad, fill: '#2d7a4f', rx: 12, stroke: '#1a4a2e', 'stroke-width': 2 } })
+
+  const text = (x, y, value, extra = {}) => ({ tag: 'text', attrs: { x, y, 'text-anchor': 'middle', 'font-size': 12, fill: 'rgba(255,255,255,0.8)', 'font-family': 'system-ui', ...extra }, text: value })
+  const face = (id, x, y, up) => renderSingleCard(up && id ? { id, ...(card(id) || {}) } : {}, x, y, cardW, cardH, deckConfig, images, !!(up && id))
+  // A card the seat may pick. Its artwork opts out of clicks like all
+  // decoration, and a group has no area of its own to click, so the card
+  // carries a hit rectangle the size of the face: without one, every hand
+  // drew correctly and no card in it could be picked.
+  const pickable = (id, x, y, up) => ({
+    tag: 'g',
+    attrs: { class: up ? 'hand-card selected' : 'hand-card', 'data-card-id': id },
+    children: [
+      face(id, x, y, true),
+      { tag: 'rect', attrs: { class: 'card-hit', x, y, width: cardW, height: cardH, fill: 'transparent', 'pointer-events': 'all' } },
+    ],
+  })
+  const seatLabel = (s) => `${names[s] || `Player ${s + 1}`}${s === current ? ' ◀' : ''}`
+
+  // The others round the top of the table, clockwise from the left of the
+  // bottom seat, each a fan of backs with a count.
+  // A game nobody holds anything in - dice rolled on the table - has no hands
+  // to draw; the seats are the page's to list.
+  const handless = hands.every(h => !h.length)
+  const others = []
+  if (!handless) for (let i = 1; i < seats; i++) others.push((seat + i) % seats)
+  others.forEach((s, i) => {
+    const hand = hands[s] || []
+    const cx = pad + ((i + 0.5) / others.length) * (w - 2 * pad)
+    const cy = pad + 18
+    const shown = Math.min(hand.length, 8)
+    const step = 7
+    const x0 = cx - (cardW + step * Math.max(0, shown - 1)) / 2
+    const children = []
+    for (let k = 0; k < shown; k++) children.push(face(hand[k], x0 + k * step, cy, hand[k] !== null))
+    els.push({ tag: 'g', attrs: { class: 'seat', 'data-seat': s, 'data-zone': `${names[s] || s} — ${hand.length} cards` }, children })
+    els.push(text(cx, cy + cardH + 14, `${seatLabel(s)} · ${hand.length}`, s === current ? { fill: '#ffd966', 'font-weight': 'bold' } : {}))
+  })
+
+  // The table: each group a labelled row, face up.
+  const centreTop = pad + oppRow + (seats > 2 ? 20 : 0)
+  table.forEach((group, i) => {
+    const y = centreTop + i * (cardH + 22)
+    const cards = group.cards || []
+    const step = Math.min(cardW + 4, (w - 3 * pad) / Math.max(1, cards.length))
+    const x0 = w / 2 - (step * Math.max(0, cards.length - 1) + cardW) / 2
+    // A group the seat picks from - dice to keep - is laid out like a hand.
+    const children = cards.map((id, k) => {
+      if (!group.selectable) return face(id, x0 + k * step, y, true)
+      const up = raised.has(id)
+      return pickable(id, x0 + k * step, y - (up ? lift : 0), up)
+    })
+    els.push({ tag: 'g', attrs: { class: 'table', 'data-zone': group.label }, children })
+    if (group.label) els.push(text(w / 2, y + cardH + 14, group.label, { 'font-size': 11, fill: 'rgba(255,255,255,0.6)' }))
+  })
+  if (!table.length) els.push(text(w / 2, centreTop + cardH / 2, '—', { fill: 'rgba(255,255,255,0.35)' }))
+
+  // The bottom seat's own hand. Cards it can see are laid out to be picked;
+  // a pile it may not look at is a stack with a count.
+  const own = hands[seat] || []
+  const ownY = h - pad - cardH - 26
+  const children = []
+  const visible = own.filter(id => id !== null)
+  if (visible.length) {
+    const step = Math.min(cardW + 4, (w - 2 * pad - cardW) / Math.max(1, own.length - 1))
+    const x0 = w / 2 - (step * Math.max(0, own.length - 1) + cardW) / 2
+    own.forEach((id, k) => {
+      const up = raised.has(id)
+      children.push(pickable(id, x0 + k * step, ownY - (up ? lift : 0), up))
+    })
+  } else if (own.length) {
+    const shown = Math.min(own.length, 8)
+    const x0 = w / 2 - (cardW + 3 * (shown - 1)) / 2
+    for (let k = 0; k < shown; k++) children.push(face(null, x0 + k * 3, ownY, false))
+  }
+  els.push({ tag: 'g', attrs: { class: 'own-hand', 'data-seat': seat, 'data-zone': `${names[seat] || seat} — ${own.length} cards` }, children })
+  if (!handless) els.push(text(w / 2, h - pad + 2, `${seatLabel(seat)} · ${own.length}`, seat === current ? { fill: '#ffd966', 'font-weight': 'bold' } : {}))
+
+  return { width: w, height: h, elements: els, cells: [], labels: [], defs: [] }
+}
