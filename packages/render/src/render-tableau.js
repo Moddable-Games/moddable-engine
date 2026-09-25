@@ -494,6 +494,18 @@ export function renderTableState(opts) {
 
   const text = (x, y, value, extra = {}) => ({ tag: 'text', attrs: { x, y, 'text-anchor': 'middle', 'font-size': 12, fill: 'rgba(255,255,255,0.8)', 'font-family': 'system-ui', ...extra }, text: value })
   const face = (id, x, y, up) => renderSingleCard(up && id ? { id, ...(card(id) || {}) } : {}, x, y, cardW, cardH, deckConfig, images, !!(up && id))
+  // A card the seat may pick. Its artwork opts out of clicks like all
+  // decoration, and a group has no area of its own to click, so the card
+  // carries a hit rectangle the size of the face: without one, every hand
+  // drew correctly and no card in it could be picked.
+  const pickable = (id, x, y, up) => ({
+    tag: 'g',
+    attrs: { class: up ? 'hand-card selected' : 'hand-card', 'data-card-id': id },
+    children: [
+      face(id, x, y, true),
+      { tag: 'rect', attrs: { class: 'card-hit', x, y, width: cardW, height: cardH, fill: 'transparent', 'pointer-events': 'all' } },
+    ],
+  })
   const seatLabel = (s) => `${names[s] || `Player ${s + 1}`}${s === current ? ' ◀' : ''}`
 
   // The others round the top of the table, clockwise from the left of the
@@ -527,7 +539,7 @@ export function renderTableState(opts) {
     const children = cards.map((id, k) => {
       if (!group.selectable) return face(id, x0 + k * step, y, true)
       const up = raised.has(id)
-      return { tag: 'g', attrs: { class: up ? 'hand-card selected' : 'hand-card', 'data-card-id': id, style: 'cursor:pointer' }, children: [face(id, x0 + k * step, y - (up ? lift : 0), true)] }
+      return pickable(id, x0 + k * step, y - (up ? lift : 0), up)
     })
     els.push({ tag: 'g', attrs: { class: 'table', 'data-zone': group.label }, children })
     if (group.label) els.push(text(w / 2, y + cardH + 14, group.label, { 'font-size': 11, fill: 'rgba(255,255,255,0.6)' }))
@@ -545,8 +557,7 @@ export function renderTableState(opts) {
     const x0 = w / 2 - (step * Math.max(0, own.length - 1) + cardW) / 2
     own.forEach((id, k) => {
       const up = raised.has(id)
-      const g = face(id, x0 + k * step, ownY - (up ? lift : 0), true)
-      children.push({ tag: 'g', attrs: { class: up ? 'hand-card selected' : 'hand-card', 'data-card-id': id, style: 'cursor:pointer' }, children: [g] })
+      children.push(pickable(id, x0 + k * step, ownY - (up ? lift : 0), up))
     })
   } else if (own.length) {
     const shown = Math.min(own.length, 8)
