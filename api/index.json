@@ -25,8 +25,8 @@
     {
       "path": "/api/puzzles/index.json",
       "type": "json",
-      "description": "Chess puzzles — 1,812 tactical puzzles with FEN, solutions, and difficulty ratings",
-      "count": 1812
+      "description": "Puzzles — 1,849 puzzles across 10 game families, with positions, solutions, licences and difficulty measured by the engine's own AI",
+      "count": 1849
     }
   ],
   "deprecations": [

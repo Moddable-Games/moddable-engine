@@ -55,6 +55,9 @@ const puzzleData = readJSON('api/puzzles/index.json')
 const standardCount = puzzleData.standard.length
 const variantCount = puzzleData.variants.length
 const puzzleTotal = standardCount + variantCount
+// The pool spans every playable family now, not chess alone; the count is read
+// from the records rather than said.
+const puzzleFamilies = new Set([...puzzleData.standard, ...puzzleData.variants].map(r => r.family || 'chess')).size
 
 const playManifest = readJSON('play/playability-manifest.json')
 const playableVariants = playManifest.filter(v => v.playable)
@@ -156,6 +159,7 @@ const stats = {
   boards: boardSvgCount,
   tiles: tileSets,
   puzzles: puzzleTotal,
+  puzzleFamilies,
   puzzleStandard: standardCount,
   puzzleVariant: variantCount,
   playableVariants: playableVariants.length,
@@ -235,7 +239,7 @@ existingIndex.endpoints = existingIndex.endpoints.map(ep => {
     ep.description = `Tile gallery — ${stats.tiles} hex tile sets for strategy maps`
   } else if (ep.path.includes('puzzles')) {
     ep.count = stats.puzzles
-    ep.description = `Chess puzzles — ${stats.puzzles.toLocaleString()} tactical puzzles with FEN, solutions, and difficulty ratings`
+    ep.description = `Puzzles — ${stats.puzzles.toLocaleString()} puzzles across ${stats.puzzleFamilies} game families, with positions, solutions, licences and difficulty measured by the engine's own AI`
   }
   return ep
 })
@@ -243,13 +247,13 @@ outputs.push({ path: 'api/index.json', content: JSON.stringify(existingIndex, nu
 
 // 3. .well-known/mcp.json
 const mcpJson = readJSON('.well-known/mcp.json')
-mcpJson.description = `Universal board game engine with piece sets (${stats.pieces}), board layouts (${stats.boards}), tile galleries (${stats.tiles}), and chess puzzles (${stats.puzzles.toLocaleString()}). AI tools available via MCP.`
+mcpJson.description = `Universal board game engine with piece sets (${stats.pieces}), board layouts (${stats.boards}), tile galleries (${stats.tiles}), and puzzles across ${stats.puzzleFamilies} game families (${stats.puzzles.toLocaleString()}). AI tools available via MCP.`
 outputs.push({ path: '.well-known/mcp.json', content: JSON.stringify(mcpJson, null, 2) + '\n' })
 
 // 4. llms.txt
 const llmsTxt = `# Moddable Engine
 
-> Universal board game engine with piece sets (${stats.pieces}), board layouts (${stats.boards}), hex tile galleries (${stats.tiles}), and chess puzzles (${stats.puzzles.toLocaleString()}). Topology-driven architecture renders any game from a configuration.
+> Universal board game engine with piece sets (${stats.pieces}), board layouts (${stats.boards}), hex tile galleries (${stats.tiles}), and puzzles across ${stats.puzzleFamilies} game families (${stats.puzzles.toLocaleString()}). Topology-driven architecture renders any game from a configuration.
 
 This site hosts game engine assets and tools. Agents can consume galleries and puzzle data via the static JSON API.
 
@@ -261,7 +265,7 @@ All structured data is available at predictable URLs under \`/api/\`:
 - Piece gallery (${stats.pieces} sets): https://engine.moddable.games/api/pieces/index.json
 - Board gallery (${stats.boards} layouts): https://engine.moddable.games/api/boards/index.json
 - Tile gallery (${stats.tiles} sets): https://engine.moddable.games/api/tiles/index.json
-- Chess puzzles (${stats.puzzles.toLocaleString()}): https://engine.moddable.games/api/puzzles/index.json
+- Puzzles (${stats.puzzles.toLocaleString()}, ${stats.puzzleFamilies} families): https://engine.moddable.games/api/puzzles/index.json
 
 ## MCP Tools
 
@@ -276,7 +280,7 @@ Interactive tools (puzzle generation, board rendering, piece lookup) are availab
 - **Piece sets** — ${stats.pieces} SVG piece collections across chess, shogi, xiangqi, Go, draughts, backgammon, and more
 - **Board layouts** — ${stats.boards} rendered SVG diagrams spanning ${stats.boardFamilies} game families and all supported topologies
 - **Tile sets** — ${stats.tiles} hex tile galleries for strategy map games
-- **Chess puzzles** — ${stats.puzzles.toLocaleString()} tactical puzzles (${stats.puzzleStandard.toLocaleString()} standard + ${stats.puzzleVariant} variant) with FEN, solutions, and ratings
+- **Puzzles** — ${stats.puzzles.toLocaleString()} puzzles (${stats.puzzleStandard.toLocaleString()} standard chess + ${stats.puzzleVariant} across ${stats.puzzleFamilies} families) with positions, solutions, per-record licences and AI-measured difficulty
 
 ## Architecture
 
@@ -438,7 +442,7 @@ const htmlPatches = [
     replacements: [
       [/(\d+) rendered SVG diagrams spanning \d+ game families/g, `${stats.boards} rendered SVG diagrams spanning ${stats.boardFamilies} game families`],
       [/(\d+) hex tile sets/g, `${stats.tiles} hex tile sets`],
-      [/(\d+,?\d*) tactical puzzles/g, `${stats.puzzles.toLocaleString()} tactical puzzles`],
+      [/(\d+,?\d*) puzzles across \d+ game families/g, `${stats.puzzles.toLocaleString()} puzzles across ${stats.puzzleFamilies} game families`],
       [/(\d+) SVG sets/g, `${stats.pieces} SVG sets`],
     ],
   },
