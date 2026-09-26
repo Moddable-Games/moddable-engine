@@ -49,6 +49,10 @@ export const CONFIG_KEYS = new Set([
   // melds: laying (melds on the table), knocking (melds in hand)
   'dealByPlayers', 'rummyDoubles', 'knock', 'bonuses', 'stockFloor', 'cardsEach',
   'values', 'initialMeld', 'canasta', 'redThree', 'goingOut',
+  // lone declarer
+  'jack', 'jackOrder', 'suitBase', 'grandBase', 'nullValues', 'nullOrder', 'cardPoints',
+  // called partner
+  'ober', 'unter', 'trumpSuit', 'plainOrder', 'wenzOrder', 'tariff', 'laufende', 'runAway',
   // a hand per double: trains, branching
   'tilesPerPlayer', 'blankDouble', 'afterStart', 'publicTrain', 'openingArms', 'doubleToes',
   // scorecard dice

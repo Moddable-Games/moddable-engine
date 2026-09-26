@@ -181,6 +181,10 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/play/?game=bavarian-32</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/play/?game=chess</loc>
     <priority>0.8</priority>
   </url>

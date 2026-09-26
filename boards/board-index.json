@@ -117,7 +117,7 @@
     "topology": "tableau",
     "svg": "svgs/bavarian-32--schafkopf.svg",
     "rulesUrl": "bavarian-32/games/schafkopf/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "bavarian-32",
@@ -127,7 +127,7 @@
     "topology": "tableau",
     "svg": "svgs/bavarian-32--skat.svg",
     "rulesUrl": "bavarian-32/games/skat/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "chaupar",

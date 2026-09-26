@@ -1,5 +1,25 @@
 [
   {
+    "family": "bavarian-32",
+    "familyLabel": "Bavarian 32-Card Games",
+    "variant": "schafkopf",
+    "key": "schafkopf",
+    "label": "Schafkopf",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/schafkopf/standard.md"
+  },
+  {
+    "family": "bavarian-32",
+    "familyLabel": "Bavarian 32-Card Games",
+    "variant": "skat",
+    "key": "skat",
+    "label": "Skat",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/skat/standard.md"
+  },
+  {
     "family": "chess",
     "familyLabel": "Chess",
     "variant": "absorption",

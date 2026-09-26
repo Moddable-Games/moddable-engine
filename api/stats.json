@@ -9,9 +9,10 @@
     "standard": 1116,
     "variants": 733
   },
-  "playableVariants": 262,
-  "playableFamilies": 13,
+  "playableVariants": 264,
+  "playableFamilies": 14,
   "playableByFamily": {
+    "bavarian-32": 2,
     "chess": 149,
     "double-six-dominoes": 4,
     "draughts": 20,
@@ -27,6 +28,7 @@
     "xiangqi": 9
   },
   "variantPluginsByFamily": {
+    "bavarian-32": 0,
     "chess": 53,
     "double-six-dominoes": 0,
     "draughts": 0,
@@ -42,6 +44,7 @@
     "xiangqi": 0
   },
   "frontmatterOnlyByFamily": {
+    "bavarian-32": 2,
     "chess": 96,
     "double-six-dominoes": 4,
     "draughts": 20,

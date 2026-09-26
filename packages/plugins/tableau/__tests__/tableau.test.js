@@ -1227,6 +1227,178 @@ describe('trick-taking with an auction (Euchre, Bridge)', () => {
   })
 })
 
+describe('lone declarer (Skat)', () => {
+  const SKAT = { game: 'lone-declarer', jack: 'U', jackOrder: ['acorns', 'leaves', 'hearts', 'bells'], suitBase: { acorns: 12, leaves: 11, hearts: 10, bells: 9 }, grandBase: 24, rankOrder: ['7', '8', '9', 'O', 'K', '10', 'A'], nullOrder: ['7', '8', '9', '10', 'U', 'O', 'K', 'A'], cardPoints: { A: 11, 10: 10, K: 4, O: 3, U: 2 }, rounds: 1 }
+  const plugin = createTableauPluginFor('bavarian-32')(SKAT, { definition: { players: ['p1', 'p2', 'p3'], components: { deck: { type: 'bavarian-32' } } } })
+  const base = plugin.init({ hands: [[], [], []], community: [], drawPile: [] }, noRng)
+  const moves = (slice, seat) => plugin.getLegalMoves(slice, turn(seat))
+
+  test('ten cards each and two in the skat; middlehand bids first, to forehand', () => {
+    const s = createGameForFamily('bavarian-32', { variant: 'skat', rngSeed: 1 }).getState().slice
+    expect(s.hands.map(h => h.length)).toEqual([10, 10, 10])
+    expect(s.skat).toHaveLength(2)
+    expect(s.auction).toMatchObject({ bidder: (s.dealer + 2) % 3, listener: (s.dealer + 1) % 3 })
+    expect(moves(s, s.next).filter(m => m.action === 'bid').map(m => m.value).slice(0, 6)).toEqual(['18', '20', '22', '23', '24', '27'])
+  })
+
+  test('forehand answers yes or pass; rearhand then bids to the survivor; the last bidder declares', () => {
+    let s = { ...base }
+    const F = (s.dealer + 1) % 3, M = (s.dealer + 2) % 3, R = s.dealer
+    s = plugin.applyMove({ action: 'bid', value: '18' }, s, turn(M))
+    expect(moves(s, F)).toEqual([{ action: 'yes' }, { action: 'pass' }])
+    s = plugin.applyMove({ action: 'yes' }, s, turn(F))
+    s = plugin.applyMove({ action: 'pass' }, s, turn(M))
+    expect(s.auction).toMatchObject({ stage: 2, bidder: R, listener: F, value: 18 })
+    s = plugin.applyMove({ action: 'bid', value: '20' }, s, turn(R))
+    s = plugin.applyMove({ action: 'pass' }, s, turn(F))
+    expect(s.phase).toBe('skat')
+    expect(s.declarer).toBe(R)
+    expect(s.bid).toBe(20)
+  })
+
+  test('when nobody bids, forehand plays at 18 or throws the cards in', () => {
+    let s = { ...base }
+    const F = (s.dealer + 1) % 3, M = (s.dealer + 2) % 3, R = s.dealer
+    s = plugin.applyMove({ action: 'pass' }, s, turn(M))
+    s = plugin.applyMove({ action: 'pass' }, s, turn(R))
+    expect(moves(s, F)).toEqual([{ action: 'bid', value: '18' }, { action: 'pass' }])
+    const thrown = plugin.applyMove({ action: 'pass' }, s, turn(F))
+    expect(thrown.hand).toBe(1)
+    expect(thrown.scores).toEqual([0, 0, 0])
+  })
+
+  test('the jacks are the top trumps and follow trump, not their suit; in Null they are ordinary cards', () => {
+    const game = { type: 'suit', suit: 'hearts' }
+    const s = { ...base, phase: 'play', game, declarer: 0, trick: [{ seat: 0, card: 'bells_A' }], hands: [[], ['bells_U', 'bells_7', 'acorns_9'], []], next: 1 }
+    // Bells were led: the Unter of bells is a trump, so the seven must follow.
+    expect(moves(s, 1).map(m => m.cards[0])).toEqual(['bells_7'])
+    const trump = { ...s, trick: [{ seat: 0, card: 'hearts_A' }] }
+    expect(moves(trump, 1).map(m => m.cards[0])).toEqual(['bells_U'])
+    const nul = { ...s, game: { type: 'null' } }
+    expect(moves(nul, 1).map(m => m.cards[0]).sort()).toEqual(['bells_7', 'bells_U'])
+  })
+
+  test('a game is worth its base times matadors plus one, and an overbid game is lost at twice the least multiple that met the bid', () => {
+    // The page's example: hearts, with the Unters of acorns and leaves but not hearts: "with 2", 10 x 3 = 30.
+    const held = ['acorns_U', 'leaves_U', 'hearts_A', 'hearts_10', 'hearts_K', 'hearts_O', 'hearts_9', 'acorns_A', 'acorns_10', 'leaves_A', 'bells_7', 'bells_8']
+    const finish = (bid, declarerTakes) => {
+      const taken = [declarerTakes, [], []]
+      const s = { ...base, phase: 'play', declarer: 0, bid, game: { type: 'suit', suit: 'hearts', hand: false }, held, skat: ['bells_7', 'bells_8'], taken, tricks: [6, 2, 1], trick: [{ seat: 0, card: 'hearts_7' }, { seat: 1, card: 'leaves_7' }], hands: [[], [], ['acorns_7']], next: 2, scores: [0, 0, 0] }
+      return plugin.applyMove({ action: 'play', cards: ['acorns_7'] }, s, turn(2))
+    }
+    // 61 card points is a win, not schneider: +30.
+    const winPile = ['hearts_A', 'hearts_10', 'acorns_A', 'acorns_10', 'leaves_A', 'bells_A', 'bells_10']
+    expect(finish(30, winPile).lastHand).toMatchObject({ won: true, delta: 30 })
+    // Bid 33 but worth 30: lost at twice 40, the least multiple of 10 that meets 33.
+    expect(finish(33, winPile).lastHand).toMatchObject({ won: false, delta: -80 })
+  })
+
+  test('a Null declarer who takes a trick loses at once, twice the value', () => {
+    const s = { ...base, phase: 'play', declarer: 1, bid: 23, game: { type: 'null', hand: false, ouvert: false }, held: [], trick: [{ seat: 0, card: 'acorns_7' }, { seat: 1, card: 'acorns_A' }], hands: [['leaves_7'], ['leaves_8'], ['acorns_8', 'leaves_9']], next: 2, scores: [0, 0, 0] }
+    const after = plugin.applyMove({ action: 'play', cards: ['acorns_8'] }, s, turn(2))
+    expect(after.lastHand).toMatchObject({ won: false, delta: -46 })
+    expect(after.hand).toBe(1)
+  })
+
+  test('a session is as many deals as the players choose, and computer seats play it out', () => {
+    const game = createGameForFamily('bavarian-32', { variant: 'skat', rngSeed: 4, settings: { rounds: 2 } })
+    const ai = createAI('bavarian-32', 'skat', { difficulty: 'medium', definition: game.raw.definition, rngSeed: 4 })
+    for (let ply = 0; ply < 5000; ply++) {
+      const st = game.getState()
+      if (st.slice.finished !== null) break
+      expect(game.applyMove(ai.pickMove(st.slice, st.players.currentIndex)).ok).toBe(true)
+    }
+    const s = game.getState().slice
+    expect(s.finished).not.toBeNull()
+    expect(s.hand).toBe(5)
+  })
+})
+
+describe('called partner (Schafkopf)', () => {
+  const SCHAFKOPF = { game: 'called-partner', ober: 'O', unter: 'U', suitOrder: ['acorns', 'leaves', 'hearts', 'bells'], trumpSuit: 'hearts', plainOrder: ['7', '8', '9', 'K', '10', 'A'], wenzOrder: ['7', '8', '9', 'O', 'K', '10', 'A'], cardPoints: { A: 11, 10: 10, K: 4, O: 3, U: 2 }, tariff: { rufer: 1, solo: 5, wenz: 5, schneider: 1, schwarz: 2, laufende: 1 }, laufende: { rufer: 3, solo: 3, wenz: 2 }, runAway: 4, rounds: 1 }
+  const plugin = createTableauPluginFor('bavarian-32')(SCHAFKOPF, { definition: { players: ['p1', 'p2', 'p3', 'p4'], components: { deck: { type: 'bavarian-32' } } } })
+  const base = plugin.init({ hands: [[], [], [], []], community: [], drawPile: [] }, noRng)
+  const moves = (slice, seat) => plugin.getLegalMoves(slice, turn(seat))
+  const rufer = { type: 'rufer', called: 'bells' }
+
+  test('eight cards each; forehand speaks first', () => {
+    const s = createGameForFamily('bavarian-32', { variant: 'schafkopf', rngSeed: 1 }).getState().slice
+    expect(s.hands.map(h => h.length)).toEqual([8, 8, 8, 8])
+    expect(s.next).toBe((s.dealer + 1) % 4)
+  })
+
+  test('an ace may be called only in a plain suit the caller holds, and not if they hold it; a game must outrank the one standing', () => {
+    const hand = ['bells_7', 'bells_K', 'acorns_A', 'acorns_9', 'hearts_7', 'leaves_O', 'leaves_U', 'hearts_A']
+    const s = { ...base, hands: [hand, [], [], []], next: 0 }
+    const calls = moves(s, 0).filter(m => m.action === 'call').map(m => m.value)
+    // Bells: held and the ace is not; acorns: the ace is held; leaves: only an Ober and Unter, which are trumps.
+    expect(calls).toEqual(['bells'])
+    const afterWenz = { ...s, best: { type: 'wenz', seat: 3 } }
+    expect(moves(afterWenz, 0).some(m => m.action === 'call' || m.action === 'wenz')).toBe(false)
+    expect(moves(afterWenz, 0).some(m => m.action === 'solo')).toBe(true)
+  })
+
+  test('the called ace goes to the first trick its suit is led to, and is not thrown away before', () => {
+    const s = { ...base, phase: 'play', game: rufer, declarer: 0, partner: 2, trick: [{ seat: 0, card: 'bells_7' }], hands: [[], [], ['bells_A', 'bells_9', 'acorns_7'], []], next: 2 }
+    expect(moves({ ...s, next: 2 }, 2)).toEqual([{ action: 'play', cards: ['bells_A'] }])
+    const other = { ...s, trick: [{ seat: 0, card: 'leaves_7' }] }
+    expect(moves(other, 2).map(m => m.cards[0]).sort()).toEqual(['acorns_7', 'bells_9'])
+  })
+
+  test('with four of the called suit its holder may run away, leading a lower card', () => {
+    const hand = ['bells_A', 'bells_9', 'bells_8', 'bells_7', 'acorns_7']
+    const s = { ...base, phase: 'play', game: rufer, declarer: 0, partner: 2, trick: [], hands: [[], [], hand, []], next: 2 }
+    expect(moves(s, 2).map(m => m.cards[0])).toContain('bells_9')
+    const three = { ...s, hands: [[], [], ['bells_A', 'bells_9', 'bells_8', 'acorns_7'], []] }
+    expect(moves(three, 2).map(m => m.cards[0])).not.toContain('bells_9')
+  })
+
+  test('nobody but the holder knows the partner until the ace is played', () => {
+    const s = { ...base, phase: 'play', game: rufer, declarer: 0, partner: 2, revealed: false, trick: [], hands: [['x'], ['x'], ['bells_A'], ['x']], next: 2 }
+    expect(plugin.projectForSeat(s, 0).partner).toBe(null)
+    expect(plugin.projectForSeat(s, 2).partner).toBe(2)
+    const played = plugin.applyMove({ action: 'play', cards: ['bells_A'] }, s, turn(2))
+    expect(plugin.projectForSeat(played, 1).partner).toBe(2)
+  })
+
+  test('Obers, then Unters, then hearts are trump; in a Wenz only the Unters', () => {
+    const s = { ...base, phase: 'play', game: rufer, declarer: 0, partner: 2, trick: [{ seat: 0, card: 'hearts_A' }], hands: [[], ['bells_O', 'bells_7'], [], []], next: 1 }
+    expect(moves(s, 1).map(m => m.cards[0])).toEqual(['bells_O'])
+    const wenz = { ...s, game: { type: 'wenz' } }
+    expect(moves(wenz, 1).map(m => m.cards[0]).sort()).toEqual(['bells_7', 'bells_O'])
+  })
+
+  test('a Solo is paid by each defender; a Rufer by each loser to one winner', () => {
+    const finish = (game, partner, sideTakes) => {
+      const taken = [sideTakes, [], [], []]
+      const held = [['acorns_O', 'leaves_O', 'hearts_O'], ['bells_O'], [], []]
+      const s = { ...base, phase: 'play', game, declarer: 0, partner, held, taken, tricks: [5, 1, 1, 0], trick: [{ seat: 0, card: 'acorns_7' }, { seat: 1, card: 'acorns_8' }, { seat: 2, card: 'acorns_9' }], hands: [[], [], [], ['leaves_7']], next: 3, scores: [0, 0, 0, 0] }
+      return plugin.applyMove({ action: 'play', cards: ['leaves_7'] }, s, turn(3))
+    }
+    const win = ['acorns_A', 'acorns_10', 'leaves_A', 'leaves_10', 'hearts_A', 'hearts_10', 'bells_A']
+    // 72 card points, not schneider; three Obers from the top are three Laufende.
+    const solo = finish({ type: 'solo', suit: 'hearts' }, null, win)
+    expect(solo.lastHand).toMatchObject({ won: true, value: 5 + 3 })
+    expect(solo.scores).toEqual([24, -8, -8, -8])
+    const call = finish(rufer, 2, win)
+    expect(call.lastHand.value).toBe(1 + 3)
+    expect(call.scores).toEqual([4, -4, 4, -4])
+  })
+
+  test('computer seats play a session out, and the scores balance', () => {
+    const game = createGameForFamily('bavarian-32', { variant: 'schafkopf', rngSeed: 2 })
+    const ai = createAI('bavarian-32', 'schafkopf', { difficulty: 'medium', definition: game.raw.definition, rngSeed: 2 })
+    for (let ply = 0; ply < 5000; ply++) {
+      const st = game.getState()
+      if (st.slice.finished !== null) break
+      expect(game.applyMove(ai.pickMove(st.slice, st.players.currentIndex)).ok).toBe(true)
+    }
+    const s = game.getState().slice
+    expect(s.finished).not.toBeNull()
+    expect(s.scores.reduce((a, b) => a + b, 0)).toBe(0)
+  })
+})
+
 describe('dice', () => {
   const definition = { players: ['a', 'b'], components: { dice: { count: 5 } } }
   const rng = { request: () => ({ shuffle: a => a, nextInt: () => 77 }) }
