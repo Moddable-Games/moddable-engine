@@ -252,7 +252,14 @@ const cardsModel = {
       if (candidates.length > 1) return { type: 'choice', candidates }
       return candidates.length ? { type: 'move', move: candidates[0] } : { type: 'reject', reason: 'illegal' }
     }
-    return moves.some(holds) ? { type: 'select', pos } : { type: 'reject', reason: 'illegal' }
+    // A card that goes somewhere - onto a column, a foundation, a free cell -
+    // is moved by clicking it, and where more than one place will take it the
+    // player chooses which.
+    const going = moves.filter(holds)
+    if (going.length && going.every(m => m.to !== undefined && m.cards.length === 1)) {
+      return going.length > 1 ? { type: 'choice', candidates: going } : { type: 'move', move: going[0] }
+    }
+    return going.length ? { type: 'select', pos } : { type: 'reject', reason: 'illegal' }
   },
 }
 

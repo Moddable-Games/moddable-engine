@@ -2150,12 +2150,32 @@
   {
     "family": "standard-52",
     "familyLabel": "Standard 52-Card Deck",
+    "variant": "freecell",
+    "key": "freecell",
+    "label": "FreeCell",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/freecell/standard.md"
+  },
+  {
+    "family": "standard-52",
+    "familyLabel": "Standard 52-Card Deck",
     "variant": "hearts",
     "key": "hearts",
     "label": "Hearts",
     "group": "Other",
     "playable": true,
     "path": "content/games/hearts/standard.md"
+  },
+  {
+    "family": "standard-52",
+    "familyLabel": "Standard 52-Card Deck",
+    "variant": "klondike",
+    "key": "klondike",
+    "label": "Klondike Solitaire",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/klondike/standard.md"
   },
   {
     "family": "standard-52",
@@ -2176,6 +2196,16 @@
     "group": "Other",
     "playable": true,
     "path": "content/games/spades/standard.md"
+  },
+  {
+    "family": "standard-52",
+    "familyLabel": "Standard 52-Card Deck",
+    "variant": "spider-solitaire",
+    "key": "spider-solitaire",
+    "label": "Spider Solitaire",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/spider-solitaire/standard.md"
   },
   {
     "family": "standard-52",

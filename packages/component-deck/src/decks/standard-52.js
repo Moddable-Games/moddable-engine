@@ -19,7 +19,10 @@ registerDeck('standard-52', {
   create(opts = {}) {
     const jokers = opts.jokers || 0
     const cards = []
+    // A game may play with fewer suits (Spider's one- and two-suit games).
+    const only = Array.isArray(opts.suits) ? new Set(opts.suits) : null
     for (let s = 0; s < 4; s++) {
+      if (only && !only.has(SUITS[s])) continue
       for (let r = 0; r < 13; r++) {
         cards.push({
           id: `${SUITS[s]}_${RANKS[r]}`,

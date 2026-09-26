@@ -7,6 +7,7 @@ import { scorecard } from './scorecard.js'
 import { pressYourLuck } from './press-your-luck.js'
 import { trains } from './trains.js'
 import { branching } from './branching.js'
+import { patience } from './patience.js'
 
 // The shapes of game the tableau plugin knows, by the name a game's
 // frontmatter gives as `game:`.
@@ -20,4 +21,5 @@ export const MECHANICS = {
   'press-your-luck': pressYourLuck,
   trains,
   branching,
+  patience,
 }

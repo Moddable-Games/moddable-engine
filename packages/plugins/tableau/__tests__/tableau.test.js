@@ -718,6 +718,155 @@ describe('a hand per double: branching (Chickenfoot)', () => {
   })
 })
 
+describe('patience (Klondike, FreeCell, Spider)', () => {
+  const one = { players: ['p1'], components: { deck: { type: 'standard-52', jokers: 0 } } }
+  const KLONDIKE = { game: 'patience', columns: [1, 2, 3, 4, 5, 6, 7], faceUp: 'top', build: 'alternate-colour', lift: 'alternate-colour', emptyColumn: 'K', foundations: 4, stock: 'waste', drawCount: 1, foundationToTableau: true }
+  const FREECELL = { game: 'patience', columns: [7, 7, 7, 7, 6, 6, 6, 6], faceUp: 'all', build: 'alternate-colour', lift: 'one', supermove: true, emptyColumn: 'any', foundations: 4, freeCells: 4 }
+  const SPIDER = { game: 'patience', columns: [6, 6, 6, 6, 5, 5, 5, 5, 5, 5], faceUp: 'top', build: 'any-suit', lift: 'same-suit', emptyColumn: 'any', completeRuns: 8, stock: 'columns', suitsInPlay: 4 }
+  const make = (config, deck = { type: 'standard-52', jokers: 0 }) => createTableauPluginFor('standard-52')(config, { definition: { ...one, components: { deck } } })
+  const klondike = make(KLONDIKE)
+  const freecell = make(FREECELL)
+  const spider = make(SPIDER, { type: 'standard-52', count: 2, jokers: 0 })
+  const up = (...ids) => ids.map(id => ({ id, up: true }))
+  const down = (...ids) => ids.map(id => ({ id, up: false }))
+  const emptyFoundations = () => ({ 'spades:1': [], 'hearts:1': [], 'clubs:1': [], 'diamonds:1': [] })
+  const position = (plugin, columns, extra = {}) => ({
+    ...plugin.init({ hands: [[]], community: [], drawPile: [] }, noRng),
+    columns, stock: [], waste: [], foundations: emptyFoundations(), completed: [], finished: null, ...extra,
+  })
+  const moves = (plugin, slice) => plugin.getLegalMoves(slice, turn(0))
+  const to = (plugin, slice, id) => moves(plugin, slice).filter(m => m.cards?.[0] === id).map(m => m.to).sort()
+
+  test('Klondike deals seven columns of one to seven, the top card of each face up, and 24 to the stock', () => {
+    const game = createGameForFamily('standard-52', { variant: 'klondike', rngSeed: 1 })
+    const s = game.getState().slice
+    expect(s.columns.map(c => c.length)).toEqual([1, 2, 3, 4, 5, 6, 7])
+    expect(s.columns.every(c => c.filter(x => x.up).length === 1 && c[c.length - 1].up)).toBe(true)
+    expect(s.stock).toHaveLength(24)
+    // Face-down cards and the stock are not shown to the player.
+    const view = klondike.projectForSeat(s, 0)
+    expect(view.columns[6].slice(0, 6).every(x => x.id === null)).toBe(true)
+    expect(view.stock.every(id => id === null)).toBe(true)
+  })
+
+  test('a red card goes on a black card one higher; the same colour does not', () => {
+    const s = position(klondike, [up('clubs_8'), up('hearts_7'), up('spades_7'), up('hearts_A')])
+    expect(to(klondike, s, 'hearts_7')).toContain('column 1')
+    expect(to(klondike, s, 'spades_7')).not.toContain('column 1')
+  })
+
+  test('only a King goes into an empty Klondike column, and a run moves whole, turning the card it uncovers', () => {
+    let s = position(klondike, [[], [...down('clubs_2'), ...up('spades_K', 'hearts_Q')], up('diamonds_J'), up('clubs_Q')])
+    expect(to(klondike, s, 'spades_K')).toEqual(['column 1'])
+    expect(to(klondike, s, 'clubs_Q')).toEqual([])
+    s = klondike.applyMove({ action: 'move', cards: ['spades_K'], to: 'column 1' }, s, turn(0))
+    expect(s.columns[0].map(x => x.id)).toEqual(['spades_K', 'hearts_Q'])
+    expect(s.columns[1]).toEqual([{ id: 'clubs_2', up: true }])
+  })
+
+  test('foundations build up by suit from the Ace, and Klondike lets a card come back off one', () => {
+    let s = position(klondike, [up('spades_A'), up('spades_2'), up('hearts_3')])
+    expect(to(klondike, s, 'spades_2')).not.toContain('foundation')
+    s = klondike.applyMove({ action: 'move', cards: ['spades_A'], to: 'foundation' }, s, turn(0))
+    s = klondike.applyMove({ action: 'move', cards: ['spades_2'], to: 'foundation' }, s, turn(0))
+    expect(s.foundations['spades:1']).toEqual(['spades_A', 'spades_2'])
+    expect(to(klondike, s, 'spades_2')).toContain('column 3')
+  })
+
+  test('Draw 3 turns three to the waste, only the top plays, and the waste turns back over as the stock', () => {
+    const draw3 = make({ ...KLONDIKE, drawCount: 3 })
+    let s = position(draw3, [up('clubs_K')], { stock: ['hearts_A', 'spades_5', 'diamonds_A', 'clubs_9'] })
+    s = draw3.applyMove({ action: 'draw' }, s, turn(0))
+    expect(s.waste).toEqual(['hearts_A', 'spades_5', 'diamonds_A'])
+    expect(to(draw3, s, 'diamonds_A')).toEqual(['foundation'])
+    expect(to(draw3, s, 'hearts_A')).toEqual([])
+    s = draw3.applyMove({ action: 'draw' }, s, turn(0))
+    expect(moves(draw3, s)).toContainEqual({ action: 'redeal' })
+    s = draw3.applyMove({ action: 'redeal' }, s, turn(0))
+    expect(s.stock).toEqual(['hearts_A', 'spades_5', 'diamonds_A', 'clubs_9'])
+  })
+
+  test('FreeCell moves a run no longer than (free cells + 1) x 2^(empty columns)', () => {
+    const run = up('spades_9', 'hearts_8', 'clubs_7', 'diamonds_6')
+    const full = (cells) => position(freecell, [up('hearts_10'), run, up('clubs_9'), up('clubs_2'), up('clubs_3'), up('clubs_4'), up('clubs_5'), up('diamonds_K')], { cells })
+    // No free cell open and no empty column: one card at a time.
+    expect(to(freecell, full(['spades_A', 'spades_2', 'spades_3', 'spades_4']), 'spades_9')).toEqual([])
+    // Three open: the run of four from the 9 goes on the red 10.
+    expect(to(freecell, full(['spades_A', null, null, null]), 'spades_9')).toEqual(['column 1'])
+    // Two open: three at most, so the four cannot move but the three from the 8 can.
+    expect(to(freecell, full(['spades_A', 'spades_2', null, null]), 'spades_9')).toEqual([])
+    expect(to(freecell, full(['spades_A', 'spades_2', null, null]), 'hearts_8')).toEqual(['column 3'])
+    // One open: two at most.
+    expect(to(freecell, full(['spades_A', 'spades_2', 'spades_3', null]), 'hearts_8')).toEqual([])
+  })
+
+  test('a FreeCell card goes to a free cell and back, and never comes back off a foundation', () => {
+    let s = position(freecell, [up('spades_A'), up('hearts_9'), [], [], [], [], [], []], { cells: [null, null, null, null] })
+    s = freecell.applyMove({ action: 'move', cards: ['hearts_9'], to: 'free cell' }, s, turn(0))
+    expect(s.cells).toEqual(['hearts_9', null, null, null])
+    expect(to(freecell, s, 'hearts_9')).toContain('column 2')
+    s = freecell.applyMove({ action: 'move', cards: ['spades_A'], to: 'foundation' }, s, turn(0))
+    expect(to(freecell, s, 'spades_A')).toEqual([])
+  })
+
+  test('FreeCell is lost when no move remains', () => {
+    // Every card on the table is black, so nothing builds; the red cards sit in the cells.
+    const columns = [up('clubs_4', 'spades_5'), up('clubs_6', 'clubs_5'), up('spades_4', 'spades_7'), up('clubs_8', 'clubs_7'), up('spades_8', 'spades_9'), up('clubs_10', 'clubs_9'), up('spades_10', 'spades_J'), up('clubs_Q', 'clubs_J')]
+    const s = position(freecell, columns, { cells: ['hearts_K', 'diamonds_K', 'hearts_Q', null] })
+    expect(moves(freecell, s).every(m => m.to === 'free cell')).toBe(true)
+    const after = freecell.applyMove({ action: 'move', cards: ['spades_5'], to: 'free cell' }, s, turn(0))
+    expect(moves(freecell, after)).toEqual([])
+    expect(after.finished).toBe('draw')
+    expect(freecell.describeResult(after)).toMatch(/No moves left/)
+  })
+
+  test('Spider builds on any suit but lifts only a run of one suit, and a whole run King to Ace leaves', () => {
+    let s = position(spider, [up('hearts_8#1'), up('spades_7#1', 'clubs_6#1'), up('diamonds_7#1'), up('spades_7#2', 'spades_6#1'), up('clubs_K#1'), up('clubs_K#2'), up('hearts_K#1'), up('hearts_K#2'), up('diamonds_K#1'), up('diamonds_K#2')], { foundations: {} })
+    // A seven and six of different suits do not lift together; the six alone goes on any seven.
+    expect(to(spider, s, 'spades_7#1')).toEqual([])
+    expect(to(spider, s, 'clubs_6#1')).toEqual(['column 3'])
+    // A run in one suit lifts, and lands on an eight of another suit.
+    expect(to(spider, s, 'spades_7#2')).toEqual(['column 1'])
+    const kingDown = ['K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'].map(r => `hearts_${r}#1`)
+    s = position(spider, [[...down('clubs_9#1'), ...up(...kingDown)], up('hearts_A#1'), up('clubs_K#1'), up('clubs_Q#1'), up('clubs_J#1'), up('clubs_10#1'), up('diamonds_2#1'), up('diamonds_3#1'), up('diamonds_4#1'), up('diamonds_5#1')], { foundations: {} })
+    s = spider.applyMove({ action: 'move', cards: ['hearts_A#1'], to: 'column 1' }, s, turn(0))
+    expect(s.completed).toEqual(['hearts_K#1'])
+    expect(s.columns[0]).toEqual([{ id: 'clubs_9#1', up: true }])
+  })
+
+  test('Spider deals one to every column, and only when none is empty', () => {
+    const cols = Array.from({ length: 10 }, (_, i) => up(`spades_${['A', '2', '3', '4', '5', '6', '7', '8', '9', '10'][i]}#1`))
+    const stock = Array.from({ length: 10 }, (_, i) => `hearts_${['A', '2', '3', '4', '5', '6', '7', '8', '9', '10'][i]}#1`)
+    let s = position(spider, cols, { stock, foundations: {} })
+    expect(moves(spider, s)).toContainEqual({ action: 'deal' })
+    expect(moves(spider, { ...s, columns: [[], ...cols.slice(1)] })).not.toContainEqual({ action: 'deal' })
+    s = spider.applyMove({ action: 'deal' }, s, turn(0))
+    expect(s.columns.every(c => c.length === 2 && c[1].up)).toBe(true)
+    expect(s.stock).toEqual([])
+  })
+
+  test('fewer suits keep all 104 cards: two suits are spades and hearts, one is spades', () => {
+    const dealt = (suitsInPlay) => {
+      const s = createGameForFamily('standard-52', { variant: 'spider-solitaire', rngSeed: 2, settings: { suitsInPlay } }).getState().slice
+      const ids = [...s.columns.flat().map(x => x.id), ...s.stock]
+      return { count: ids.length, suits: [...new Set(ids.map(id => id.split('_')[0]))].sort() }
+    }
+    expect(dealt(4)).toEqual({ count: 104, suits: ['clubs', 'diamonds', 'hearts', 'spades'] })
+    expect(dealt(2)).toEqual({ count: 104, suits: ['hearts', 'spades'] })
+    expect(dealt(1)).toEqual({ count: 104, suits: ['spades'] })
+  })
+
+  test('the last card home wins', () => {
+    const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
+    const foundations = Object.fromEntries(['spades', 'hearts', 'clubs', 'diamonds'].map(suit => [`${suit}:1`, ranks.map(r => `${suit}_${r}`)]))
+    foundations['diamonds:1'] = foundations['diamonds:1'].slice(0, 12)
+    const s = position(klondike, [up('diamonds_K'), [], [], [], [], [], []], { foundations })
+    const after = klondike.applyMove({ action: 'move', cards: ['diamonds_K'], to: 'foundation' }, s, turn(0))
+    expect(after.finished).toBe(0)
+    expect(klondike.describeResult(after)).toMatch(/Solved/)
+  })
+})
+
 describe('dice', () => {
   const definition = { players: ['a', 'b'], components: { dice: { count: 5 } } }
   const rng = { request: () => ({ shuffle: a => a, nextInt: () => 77 }) }

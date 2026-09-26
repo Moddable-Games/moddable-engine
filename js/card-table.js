@@ -26,6 +26,8 @@ const AI_DELAY_MS = 450
 function cardActions(moves) {
   const out = []
   for (const m of moves) {
+    // A card with somewhere to go is moved by clicking it, not by a button.
+    if (m.to !== undefined && Array.isArray(m.cards)) continue
     const name = m.action || 'play'
     const label = m.value !== undefined ? `${name} ${m.value}${m.points !== undefined ? ` (${m.points})` : ''}` : name
     if (!out.includes(label)) out.push(label)

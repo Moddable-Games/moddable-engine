@@ -42,6 +42,9 @@ export const CONFIG_KEYS = new Set([
   'wild', 'starterSkips',
   // dominoes
   'draw', 'spinner', 'scoreFives',
+  // patience
+  'columns', 'faceUp', 'build', 'lift', 'supermove', 'emptyColumn', 'foundations', 'completeRuns',
+  'freeCells', 'stock', 'drawCount', 'foundationToTableau', 'suitsInPlay',
   // a hand per double: trains, branching
   'tilesPerPlayer', 'blankDouble', 'afterStart', 'publicTrain', 'openingArms', 'doubleToes',
   // scorecard dice
@@ -51,6 +54,15 @@ export const CONFIG_KEYS = new Set([
   // present in the corpus and read by nothing here yet
   'variant', 'trading', 'passReset', 'suitRank',
 ])
+
+// The same number of cards in fewer suits: Spider's two-suit game is four
+// copies of spades and hearts rather than two of every suit.
+const SUIT_ORDER = ['spades', 'hearts', 'clubs', 'diamonds']
+function withSuitsInPlay(spec, suitsInPlay) {
+  const n = Number(suitsInPlay)
+  if (!n || n >= 4 || spec.type !== 'standard-52') return spec
+  return { ...spec, suits: SUIT_ORDER.slice(0, n), count: (spec.count || 1) * (4 / n) }
+}
 
 export function createTableauPluginFor(family) {
   function createTableauPlugin(variantConfig = {}, context = {}) {
@@ -63,7 +75,7 @@ export function createTableauPluginFor(family) {
     const components = definition.components || config.components || {}
     const deckSpec = components.deck || (components.dice ? { type: 'standard-dice' } : null)
     const rolled = deckSpec?.type === 'standard-dice'
-    const deck = deckSpec && !rolled ? buildDeck(deckSpec) : []
+    const deck = deckSpec && !rolled ? buildDeck(withSuitsInPlay(deckSpec, config.suitsInPlay)) : []
     const byId = new Map(deck.map(c => [c.id, c]))
     const dieFace = rolled ? getDeckConfig('standard-dice').face : null
     // A die is named by its place and what it shows: `die2-5`.

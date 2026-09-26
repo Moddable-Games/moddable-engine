@@ -466,8 +466,13 @@ function resolveDeckType(components) {
 //     seat      the seat at the bottom, whose hand is laid out to be picked from
 //     names     one display name per seat
 //     current   the seat to move, marked
-//     table     [{ label, cards: [id], selectable? }] - what lies face up between
-//               the hands; a selectable group is picked from like a hand
+//     table     [{ label, cards: [id], selectable?, layout?, slots? }] - what lies
+//               face up between the hands; a selectable group is picked from
+//               like a hand. A group is a labelled row unless its layout says
+//               otherwise: `pile` groups share one row side by side, each
+//               showing outlines for `slots` it has room for (a free cell, a
+//               foundation), and `column` groups stand side by side as
+//               cascades, a patience tableau, where a null is a face-down card
 //     card      id -> card, for the faces
 //     deckType  the deck, for its size and its back
 //     selected  ids raised out of the bottom hand
@@ -483,10 +488,30 @@ export function renderTableState(opts) {
   const w = 760
   const pad = 20
   const lift = 14
-  const ownRow = cardH + lift + 30
-  const centreH = Math.max(cardH + 40, table.length * (cardH + 22) + 10)
-  const oppRow = cardH + 34
-  const h = pad * 2 + oppRow + centreH + ownRow + (seats > 2 ? 40 : 0)
+  // A game nobody holds anything in - patience, dice rolled on the table -
+  // gives the table the room the hands would have taken.
+  const handless = hands.every(h => !h.length)
+  const ownRow = handless ? 0 : cardH + lift + 30
+  const rows = table.filter(g => !g.layout || g.layout === 'row')
+  const piles = table.filter(g => g.layout === 'pile')
+  const columns = table.filter(g => g.layout === 'column')
+  // A cascade overlaps its cards: a face-down card shows a sliver, a face-up
+  // card enough to read, and a tall column is squeezed to fit.
+  const COLUMN_MAX = cardH * 5
+  const cascade = (cards) => {
+    const steps = cards.slice(0, -1).map(id => (id === null ? 7 : 18))
+    const total = steps.reduce((n, v) => n + v, 0)
+    const squeeze = total > COLUMN_MAX ? COLUMN_MAX / total : 1
+    return steps.map(v => v * squeeze)
+  }
+  const columnsH = columns.length
+    ? cardH + Math.max(0, ...columns.map(g => cascade(g.cards || []).reduce((n, v) => n + v, 0))) + 30
+    : 0
+  const tableH = rows.length * (cardH + 22) + (piles.length ? cardH + 26 : 0) + columnsH
+  const centreH = Math.max(cardH + 40, tableH + 10)
+  const oppRow = handless ? 0 : cardH + 34
+  const margin = handless ? 12 : 0
+  const h = pad * 2 + oppRow + centreH + ownRow + (seats > 2 ? 40 : 0) + margin * 2
 
   const els = []
   els.push({ tag: 'rect', attrs: { x: 0, y: 0, width: w, height: h, fill: '#1b5e3a', rx: 16 } })
@@ -510,9 +535,7 @@ export function renderTableState(opts) {
 
   // The others round the top of the table, clockwise from the left of the
   // bottom seat, each a fan of backs with a count.
-  // A game nobody holds anything in - dice rolled on the table - has no hands
-  // to draw; the seats are the page's to list.
-  const handless = hands.every(h => !h.length)
+  // With no hands to draw, the seats are the page's to list.
   const others = []
   if (!handless) for (let i = 1; i < seats; i++) others.push((seat + i) % seats)
   others.forEach((s, i) => {
@@ -529,8 +552,14 @@ export function renderTableState(opts) {
   })
 
   // The table: each group a labelled row, face up.
-  const centreTop = pad + oppRow + (seats > 2 ? 20 : 0)
-  table.forEach((group, i) => {
+  const centreTop = pad + oppRow + (seats > 2 ? 20 : 0) + margin
+  const cardAt = (group, id, x, y) => {
+    if (!group.selectable || id === null) return face(id, x, y, id !== null)
+    const up = raised.has(id)
+    return pickable(id, x, y - (up ? lift : 0), up)
+  }
+  const outline = (x, y) => ({ tag: 'rect', attrs: { x, y, width: cardW, height: cardH, rx: 4, fill: 'none', stroke: 'rgba(255,255,255,0.35)', 'stroke-width': 1.5, 'stroke-dasharray': '4 3' } })
+  rows.forEach((group, i) => {
     const y = centreTop + i * (cardH + 22)
     const cards = group.cards || []
     const step = Math.min(cardW + 4, (w - 3 * pad) / Math.max(1, cards.length))
@@ -544,6 +573,55 @@ export function renderTableState(opts) {
     els.push({ tag: 'g', attrs: { class: 'table', 'data-zone': group.label }, children })
     if (group.label) els.push(text(w / 2, y + cardH + 14, group.label, { 'font-size': 11, fill: 'rgba(255,255,255,0.6)' }))
   })
+
+  // Piles in one row: stock, waste, free cells, foundations.
+  if (piles.length) {
+    const y = centreTop + rows.length * (cardH + 22)
+    const fan = 12
+    const widthOf = (g) => {
+      const n = Math.max((g.cards || []).length, g.slots || 1)
+      return g.slots ? n * (cardW + 6) - 6 : cardW + fan * Math.max(0, n - 1)
+    }
+    const gap = 22
+    const total = piles.reduce((n, g) => n + widthOf(g), 0) + gap * (piles.length - 1)
+    let x = w / 2 - total / 2
+    for (const group of piles) {
+      const cards = group.cards || []
+      const children = []
+      if (group.slots) {
+        for (let k = 0; k < group.slots; k++) {
+          const cx = x + k * (cardW + 6)
+          children.push(k < cards.length && cards[k] !== undefined ? cardAt(group, cards[k], cx, y) : outline(cx, y))
+        }
+      } else if (!cards.length) {
+        children.push(outline(x, y))
+      } else {
+        cards.forEach((id, k) => children.push(cardAt(group, id, x + k * fan, y)))
+      }
+      els.push({ tag: 'g', attrs: { class: 'table pile', 'data-zone': group.label }, children })
+      if (group.label) els.push(text(x + widthOf(group) / 2, y + cardH + 14, group.label, { 'font-size': 11, fill: 'rgba(255,255,255,0.6)' }))
+      x += widthOf(group) + gap
+    }
+  }
+
+  // Columns side by side, each a cascade read from the top down.
+  if (columns.length) {
+    const y0 = centreTop + rows.length * (cardH + 22) + (piles.length ? cardH + 26 : 0)
+    const colW = Math.min(cardW + 14, (w - 2 * pad) / columns.length)
+    const x0 = w / 2 - (colW * columns.length) / 2 + (colW - cardW) / 2
+    columns.forEach((group, i) => {
+      const cards = group.cards || []
+      const x = x0 + i * colW
+      const steps = cascade(cards)
+      const children = [outline(x, y0)]
+      let y = y0
+      cards.forEach((id, k) => {
+        children.push(cardAt(group, id, x, y))
+        y += steps[k] || 0
+      })
+      els.push({ tag: 'g', attrs: { class: 'table column', 'data-zone': group.label }, children })
+    })
+  }
   if (!table.length) els.push(text(w / 2, centreTop + cardH / 2, '—', { fill: 'rgba(255,255,255,0.35)' }))
 
   // The bottom seat's own hand. Cards it can see are laid out to be picked;

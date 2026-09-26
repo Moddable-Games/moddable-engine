@@ -3007,7 +3007,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-52--freecell.svg",
     "rulesUrl": "standard-52/games/freecell/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-52",
@@ -3037,7 +3037,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-52--klondike.svg",
     "rulesUrl": "standard-52/games/klondike/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-52",
@@ -3087,7 +3087,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-52--spider-solitaire.svg",
     "rulesUrl": "standard-52/games/spider-solitaire/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-52",
