@@ -6,7 +6,8 @@ import { total as blackjackTotal } from '../src/mechanics/house.js'
 import { resolveRoll } from '../src/mechanics/shooting.js'
 import { bestHand } from '../src/mechanics/holdem.js'
 import { koiKoiYaku, goStopScore } from '../src/mechanics/fishing.js'
-import { arrangements, isSevenPairs, isThirteenOrphans } from '../src/mechanics/mahjong-hands.js'
+import { arrangements, isSevenPairs, isThirteenOrphans, placements, doraAfter } from '../src/mechanics/mahjong-hands.js'
+import { riichi, riichiPays } from '../src/mechanics/riichi-scoring.js'
 import { hongKong } from '../src/mechanics/mahjong-scoring.js'
 import { createGameForFamily, createAI } from '../../../play/index.js'
 import '../../../play/src/bootstrap-plugins.js'
@@ -1939,6 +1940,276 @@ describe('wall (Hong Kong mahjong)', () => {
     const s = game.getState().slice
     expect(s.finished).not.toBeNull()
     expect(s.scores.reduce((a, b) => a + b, 0)).toBe(0)
+  })
+})
+
+describe('wall (Riichi mahjong)', () => {
+  // A reading as wall.js hands it to the scorer. Sets are [type, kind, open?];
+  // a chow is named by its lowest tile.
+  const tilesOf = ([type, kind]) => (type === 'chow' ? [0, 1, 2].map(d => kind.replace(/\d$/, n => Number(n) + d)) : Array(type === 'kong' ? 4 : 3).fill(kind))
+  const reading = (sets, pair, extra = {}) => ({
+    sets: sets.map(([type, kind, open]) => ({ type, kind, open: !!open })),
+    pair, special: null,
+    kinds: [...sets.flatMap(tilesOf), pair, pair],
+    seatWind: 'south', roundWind: 'east', selfDrawn: false, concealed: sets.every(x => !x[2]), wait: 'two-sided',
+    ...extra,
+  })
+  const pays = (value, selfDrawn, winnerIsDealer) => (selfDrawn
+    ? [riichiPays(value, { selfDrawn, winnerIsDealer, payerIsDealer: true }), riichiPays(value, { selfDrawn, winnerIsDealer, payerIsDealer: false })]
+    : riichiPays(value, { selfDrawn, winnerIsDealer, payerIsDealer: false }))
+  const names = (v) => v.patterns.map(p => p[0])
+
+  // The EMA Riichi Competition Rules (2016), section 4.3, scoring examples 1 to 10.
+  const straight = [['chow', 'characters_1'], ['chow', 'bamboo_1'], ['chow', 'bamboo_4'], ['chow', 'bamboo_7']]
+  test('EMA examples 1 and 2: riichi, pinfu and a closed pure straight; mangan self-drawn, 4 han 30 fu on a discard', () => {
+    const tsumo = riichi(reading(straight, 'characters_3', { riichi: true, selfDrawn: true }))
+    expect(names(tsumo).sort()).toEqual(['Fully concealed hand', 'Pinfu', 'Pure straight', 'Riichi'])
+    expect([tsumo.value, tsumo.limit]).toEqual([5, 'Mangan'])
+    expect(pays(tsumo, true, false)).toEqual([4000, 2000])
+    expect(pays(tsumo, true, true)).toEqual([4000, 4000])
+    const ron = riichi(reading(straight, 'characters_3', { riichi: true }))
+    expect([ron.value, ron.fu]).toEqual([4, 30])
+    // "4-30 is not rounded to mangan payment."
+    expect([pays(ron, false, true), pays(ron, false, false)]).toEqual([11600, 7700])
+  })
+
+  test('EMA example 3: an open straight with a dora is 2 han, and open pinfu 22 fu rounds to 30', () => {
+    const v = riichi(reading([['chow', 'bamboo_1'], ['chow', 'bamboo_1'], ['chow', 'bamboo_4', true], ['chow', 'bamboo_7']], 'characters_3', { dora: 1 }))
+    expect(names(v)).toEqual(['Pure straight', 'Dora'])
+    expect([v.value, v.fu]).toEqual([2, 30])
+    expect([pays(v, false, true), pays(v, false, false)]).toEqual([2900, 2000])
+  })
+
+  const pungs = [['pung', 'characters_3'], ['pung', 'circles_2'], ['pung', 'circles_4']]
+  test('EMA examples 4 and 5: four concealed pungs self-drawn is yakuman; won on a discard the last pung is open', () => {
+    const yakuman = riichi(reading([...pungs, ['pung', 'bamboo_8']], 'bamboo_3', { selfDrawn: true, wait: 'pung' }))
+    expect(names(yakuman)).toContain('Four Concealed Pungs')
+    expect(pays(yakuman, true, true)).toEqual([16000, 16000])
+    expect(pays(yakuman, true, false)).toEqual([16000, 8000])
+    const baiman = riichi(reading([...pungs, ['pung', 'bamboo_8', true]], 'bamboo_3', { concealed: true, wait: 'pung', dora: 3 }))
+    expect(names(baiman).sort()).toEqual(['All pungs', 'All simples', 'Dora', 'Three concealed pungs'])
+    expect([baiman.value, baiman.limit]).toEqual([8, 'Baiman'])
+    expect([pays(baiman, false, true), pays(baiman, false, false)]).toEqual([24000, 16000])
+  })
+
+  const pairsOf = (...ks) => ({ sets: [], pair: null, special: 'seven-pairs', kinds: ks.flatMap(k => [k, k]), seatWind: 'south', roundWind: 'east', concealed: true, wait: 'pair' })
+  test('EMA examples 6 and 7: seven pairs is 25 fu and nothing more; with riichi, ippatsu and all simples a haneman', () => {
+    const haneman = riichi({ ...pairsOf('characters_2', 'characters_3', 'characters_5', 'circles_2', 'circles_6', 'bamboo_3', 'bamboo_4'), riichi: true, ippatsu: true, selfDrawn: true })
+    expect([haneman.value, haneman.limit]).toEqual([6, 'Haneman'])
+    expect(pays(haneman, true, false)).toEqual([6000, 3000])
+    const plain = riichi({ ...pairsOf('dragon_red', 'characters_3', 'characters_5', 'circles_2', 'circles_6', 'bamboo_3', 'bamboo_4'), selfDrawn: false })
+    expect([plain.value, plain.fu]).toEqual([2, 25])
+    expect([pays(plain, false, true), pays(plain, false, false)]).toEqual([2400, 1600])
+  })
+
+  test('EMA example 8: twice pure double chow, self-drawn on a dragon pair wait, is 4 han 30 fu', () => {
+    const v = riichi(reading([['chow', 'characters_3'], ['chow', 'characters_3'], ['chow', 'circles_1'], ['chow', 'circles_1']], 'dragon_red', { selfDrawn: true, wait: 'pair' }))
+    expect(names(v).sort()).toEqual(['Fully concealed hand', 'Twice pure double chows'])
+    expect([v.value, v.fu]).toEqual([4, 30])
+    expect(pays(v, true, true)).toEqual([3900, 3900])
+    expect(pays(v, true, false)).toEqual([3900, 2000])
+  })
+
+  test('EMA example 9: an open half flush, East pung for seat and round, outside hand and a dora is a haneman', () => {
+    const v = riichi(reading([['chow', 'bamboo_1'], ['chow', 'bamboo_7'], ['pung', 'wind_east', true], ['pung', 'wind_west', true]], 'bamboo_1', { seatWind: 'east', concealed: false, wait: 'pung', dora: 1 }))
+    expect(names(v).sort()).toEqual(['Dora', 'Half flush', 'Outside hand', 'Prevalent wind', 'Seat wind'])
+    expect(v.limit).toBe('Haneman')
+    expect(pays(v, false, true)).toEqual(18000)
+  })
+
+  test('EMA example 10: of the waits the winning tile could finish, the one that scores most is taken', () => {
+    const r = { sets: [{ type: 'pung', kind: 'wind_north' }, { type: 'chow', kind: 'circles_2' }, { type: 'chow', kind: 'circles_5' }, { type: 'chow', kind: 'circles_7' }], pair: 'circles_1' }
+    expect(placements(r, 'circles_7').map(p => p.wait)).toEqual(['two-sided', 'edge'])
+    const edge = riichi(reading([['pung', 'wind_north'], ['chow', 'circles_2'], ['chow', 'circles_5'], ['chow', 'circles_7']], 'circles_1', { selfDrawn: true, wait: 'edge' }))
+    expect([edge.value, edge.fu, edge.limit]).toEqual([4, 40, 'Mangan'])
+    expect(pays(edge, true, false)).toEqual([4000, 2000])
+  })
+
+  test('a hand needs a yaku, dora are not one, and Blessing of Man is a mangan not added to anything', () => {
+    const bare = [['chow', 'characters_1'], ['chow', 'circles_4'], ['chow', 'bamboo_7'], ['pung', 'circles_9', true]]
+    expect(riichi(reading(bare, 'wind_north', { dora: 3, concealed: false, wait: 'closed' }))).toBeNull()
+    expect(riichi(reading(bare, 'wind_north', { blessing: 'man', concealed: false, wait: 'closed' })).limit).toBe('Mangan')
+    expect(doraAfter('circles_9')).toBe('circles_1')
+    expect(doraAfter('wind_north')).toBe('wind_east')
+    expect(doraAfter('dragon_red')).toBe('dragon_white')
+  })
+})
+
+describe('wall (Riichi at the table)', () => {
+  const config = {
+    game: 'wall', scoring: 'riichi', minimum: 1, rounds: 2, startingPoints: 30000, deadWall: 14, riichi: 1000, riichiWall: 4,
+    furiten: true, counters: 300, noten: 3000, dealerKeeps: 'tenpai', swapCalling: false, liability: true, lastDiscard: 'win',
+    kongAfterClaim: false, multipleWinners: true,
+  }
+  const plugin = createTableauPluginFor('mahjong')(config, { definition: { players: ['east', 'south', 'west', 'north'], components: { deck: { type: 'mahjong-136' } } } })
+  const base = plugin.init({ hands: [[], [], [], []], community: [], drawPile: [] }, noRng)
+  const moves = (slice, seat) => plugin.getLegalMoves(slice, turn(seat))
+  const play = (move, slice, seat) => plugin.applyMove(move, slice, turn(seat))
+  const used = new Map()
+  const t = (kind) => { const n = used.get(kind) || 0; used.set(kind, n + 1); return `${kind}_${n}` }
+  const hand = (...ks) => ks.map(t)
+  const of = (ids, kind) => ids.find(id => id.startsWith(`${kind}_`))
+  const four = (v) => [0, 1, 2, 3].map(() => (typeof v === 'function' ? v() : v))
+  // The wall and dead wall are the last copies of kinds, or kinds no test
+  // hand holds: the north wind shows, so the east wind is dora.
+  const ids = (kind) => [0, 1, 2, 3].map(n => `${kind}_${n}`)
+  const table = (hands, extra = {}) => ({
+    ...base, hands, melds: four(() => []), discards: four(() => []), discarded: four(() => []), bonus: four(() => []),
+    riichi: four(null), furiten: four(false), liable: four(null), uninterrupted: false,
+    wall: ['bamboo_8_3', 'characters_7_3', 'characters_7_2', 'characters_8_3', 'characters_8_2'],
+    dead: { replacements: ids('circles_9'), indicators: [...ids('wind_north'), 'wind_west_3'], under: [...ids('characters_9'), 'wind_west_2'], kongs: 0 },
+    dealer: 0, firstDealer: 0, roundWind: 0, scores: four(30000), pot: 0, counters: 0, phase: 'discard', flags: { selfDrawn: true }, next: 0, lastHand: null, lastDiscard: null,
+    ...extra,
+  })
+  // All simples waiting on the 5 or 8 of circles.
+  const tanyao = () => hand('characters_2', 'characters_3', 'characters_4', 'circles_3', 'circles_4', 'circles_5', 'bamboo_5', 'bamboo_6', 'bamboo_7', 'bamboo_2', 'bamboo_2', 'circles_6', 'circles_7')
+  // Two pungs and seven odd tiles: nowhere near waiting.
+  const quiet = () => hand('dragon_white', 'dragon_white', 'dragon_white', 'wind_south', 'wind_south', 'wind_south', 'characters_6', 'characters_8', 'bamboo_9', 'bamboo_7', 'circles_2', 'circles_7', 'bamboo_1')
+
+  test('the deal keeps fourteen tiles back as a dead wall, and only the first indicator shows', () => {
+    expect(base.dead.replacements).toHaveLength(4)
+    expect(base.dead.indicators).toHaveLength(5)
+    expect(base.wall).toHaveLength(136 - 14 - 53)
+    expect(base.scores).toEqual([30000, 30000, 30000, 30000])
+    const view = plugin.projectForSeat(base, 1)
+    expect(view.dead.indicators[0]).toBe(base.dead.indicators[0])
+    expect([...view.dead.indicators.slice(1), ...view.dead.under, ...view.dead.replacements].every(x => x === null)).toBe(true)
+  })
+
+  test('a hand without a yaku cannot win on a discard, but can on its own draw', () => {
+    used.clear()
+    // Closed, waiting on the 3 of bamboo between 2 and 4, a dragon pair: no yaku.
+    const waiting = hand('characters_1', 'characters_2', 'characters_3', 'circles_4', 'circles_5', 'circles_6', 'bamboo_7', 'bamboo_8', 'bamboo_9', 'bamboo_2', 'bamboo_4', 'dragon_red', 'dragon_red')
+    const three = t('bamboo_3')
+    const claim = play({ action: 'discard', cards: [three], to: 'discard' }, table([[three, ...quiet()], waiting, [], []]), 0)
+    expect(moves(claim, 1).some(m => m.action === 'win')).toBe(false)
+    const own = table([[], [...waiting, three], [], []], { next: 1, drawn: three })
+    expect(moves(own, 1)).toContainEqual({ action: 'win' })
+  })
+
+  test('furiten: no win on a discard while a wait is in your own discards, or after passing one until you draw', () => {
+    used.clear()
+    const waiting = tanyao()
+    const five = t('circles_5')
+    const eight = t('circles_8')
+    const s = table([[five, ...hand('characters_1', 'characters_1', 'characters_1', 'bamboo_4', 'bamboo_4', 'bamboo_4', 'dragon_red', 'dragon_red', 'dragon_red', 'circles_1', 'circles_1', 'circles_1', 'wind_south')], [...quiet().slice(0, 12), eight], waiting, hand('bamboo_1', 'bamboo_1', 'bamboo_3', 'bamboo_3', 'bamboo_3', 'characters_5', 'characters_5', 'characters_5', 'dragon_white', 'bamboo_8', 'bamboo_8', 'wind_west', 'dragon_green')])
+    const discarded = (d) => s.discarded.map((x, i) => (i === 2 ? d : x))
+    const ron = (slice) => moves(play({ action: 'discard', cards: [five], to: 'discard' }, slice, 0), 2).some(m => m.action === 'win')
+    expect(ron(s)).toBe(true)
+    expect(ron({ ...s, discarded: discarded([t('circles_8')]) })).toBe(false)
+    // Seat 2 lets the 5 go; seat 1 draws and throws the 8.
+    const passed = play({ action: 'pass' }, play({ action: 'discard', cards: [five], to: 'discard' }, s, 0), 2)
+    expect(passed.furiten[2]).toBe(true)
+    const again = play({ action: 'discard', cards: [eight], to: 'discard' }, passed, 1)
+    expect(again.phase).toBe('claim')
+    expect(moves(again, 2).some(m => m.action === 'win')).toBe(false)
+    expect(play({ action: 'pass' }, again, 2).furiten[2]).toBe(false)
+  })
+
+  test('riichi: the stake goes down once the discard is passed, the hand locks, and a win before the next discard is ippatsu', () => {
+    used.clear()
+    const white = t('dragon_white')
+    const s = table([[...tanyao(), white], hand('wind_south', 'wind_south', 'wind_south', 'characters_6', 'characters_6', 'characters_6', 'bamboo_9', 'bamboo_9', 'bamboo_9', 'bamboo_1', 'bamboo_3', 'dragon_red', 'dragon_red'), hand('characters_1', 'characters_1', 'characters_1', 'bamboo_4', 'bamboo_4', 'bamboo_4', 'wind_south', 'circles_1', 'circles_1', 'circles_1', 'characters_5', 'characters_5', 'characters_5'), []])
+    const declare = moves(s, 0).find(m => m.action === 'riichi' && m.cards[0] === white)
+    expect(declare).toBeDefined()
+    const after = play(declare, s, 0)
+    expect(after.scores[0]).toBe(29000)
+    expect(after.pot).toBe(1000)
+    expect(after.riichi[0]).toEqual({ ippatsu: true, double: false })
+    // Locked: the only discard is the tile just drawn.
+    const drawn = t('characters_7')
+    const locked = { ...after, phase: 'discard', next: 0, hands: after.hands.map((h, i) => (i === 0 ? [...h, drawn] : h)), drawn, flags: { selfDrawn: true } }
+    expect(moves(locked, 0).filter(m => m.action === 'discard').map(m => m.cards[0])).toEqual([drawn])
+    // Seat 1 throws the 8 of circles: riichi, ippatsu, pinfu, all simples; 4 han 30 fu to the dealer.
+    const eight = t('circles_8')
+    const thrown = play({ action: 'discard', cards: [eight], to: 'discard' }, { ...after, hands: after.hands.map((h, i) => (i === 1 ? [...h, eight] : h)) }, 1)
+    const won = play({ action: 'win' }, thrown, 0)
+    expect(won.lastHand.patterns.map(p => p[0])).toEqual(expect.arrayContaining(['Riichi', 'Ippatsu', 'Pinfu', 'All simples']))
+    expect(won.scores.slice(0, 2)).toEqual([29000 + 11600 + 1000, 30000 - 11600])
+  })
+
+  test('no swap-calling: after a pung the claimed kind stays, after a chow neither it nor the far end goes', () => {
+    used.clear()
+    const five = t('circles_5')
+    const pungHand = hand('circles_5', 'circles_5', 'circles_5', 'characters_2', 'characters_3', 'characters_4', 'bamboo_5', 'bamboo_6', 'bamboo_7', 'bamboo_2', 'bamboo_2', 'dragon_white', 'dragon_white')
+    const claim = play({ action: 'discard', cards: [five], to: 'discard' }, table([[five, ...quiet()], [], pungHand, []]), 0)
+    const pung = play({ action: 'pung' }, claim, 2)
+    const left = pung.hands[2].find(id => id.startsWith('circles_5'))
+    expect(moves(pung, 2).some(m => m.action === 'discard' && m.cards[0] === left)).toBe(false)
+    used.clear()
+    const three = t('circles_3')
+    const chowHand = hand('circles_4', 'circles_5', 'circles_6', 'characters_2', 'characters_3', 'characters_4', 'bamboo_5', 'bamboo_6', 'bamboo_7', 'bamboo_2', 'bamboo_2', 'dragon_white', 'dragon_white')
+    const offer = play({ action: 'discard', cards: [three], to: 'discard' }, table([[three, ...quiet()], chowHand, [], []]), 0)
+    const chow = play({ action: 'chow', value: '3-4-5' }, offer, 1)
+    const barred = moves(chow, 1).filter(m => m.action === 'discard').map(m => m.cards[0].replace(/_\d+$/, ''))
+    expect(barred).not.toContain('circles_6')
+    expect(barred).toContain('dragon_white')
+  })
+
+  test('no claim that would leave only tiles barred from discard', () => {
+    used.clear()
+    const three = t('circles_3')
+    const shown = ['bamboo_2', 'bamboo_5', 'characters_4'].map(kind => ({ type: 'pung', kind, tiles: hand(kind, kind, kind), open: true }))
+    const s = table([[three, ...quiet()], hand('circles_4', 'circles_5', 'circles_6', 'circles_6'), [], []], { melds: [[], shown, [], []] })
+    const claim = play({ action: 'discard', cards: [three], to: 'discard' }, s, 0)
+    // 3-4-5 would leave the two 6s, and a 6 is the far end of that chow.
+    expect(moves(claim, 1).some(m => m.action === 'chow' && m.value === '3-4-5')).toBe(false)
+  })
+
+  test('EMA example 5 at the table: a pung finished by a discard is open, so four pungs are three concealed', () => {
+    used.clear()
+    const eight = t('bamboo_8')
+    const waiting = hand('characters_3', 'characters_3', 'characters_3', 'circles_2', 'circles_2', 'circles_2', 'circles_4', 'circles_4', 'circles_4', 'bamboo_3', 'bamboo_3', 'bamboo_8', 'bamboo_8')
+    const s = table([[eight, ...quiet()], waiting, [], []])
+    // The 3 of circles shows, so the 4s are dora.
+    const claim = play({ action: 'discard', cards: [eight], to: 'discard' }, { ...s, dead: { ...s.dead, indicators: ['circles_3_0', ...s.dead.indicators.slice(1)] } }, 0)
+    const won = play({ action: 'win' }, claim, 1)
+    expect(won.lastHand.patterns.map(p => p[0]).sort()).toEqual(['All pungs', 'All simples', 'Dora', 'Three concealed pungs'])
+    expect(won.lastHand.limit).toBe('Baiman')
+    expect(won.scores.slice(0, 2)).toEqual([30000 - 16000, 30000 + 16000])
+  })
+
+  test('a drawn hand: the last discard only wins, those not waiting pay those waiting, and a dealer not waiting passes the deal', () => {
+    used.clear()
+    const red = t('dragon_red')
+    const s = table([[red, ...hand('characters_1', 'characters_1', 'characters_1', 'bamboo_4', 'bamboo_4', 'bamboo_4', 'wind_south', 'circles_1', 'circles_2', 'bamboo_1', 'bamboo_3', 'characters_5', 'characters_7')], quiet(), tanyao(), hand('dragon_red', 'dragon_red', 'bamboo_3', 'bamboo_3', 'characters_5', 'characters_5', 'characters_5', 'characters_6', 'bamboo_1', 'bamboo_1', 'wind_west', 'circles_2', 'circles_2')], { wall: [] })
+    const over = play({ action: 'discard', cards: [red], to: 'discard' }, s, 0)
+    expect(over.lastHand).toMatchObject({ drawn: true, waiting: [2] })
+    expect(over.scores).toEqual([29000, 29000, 33000, 29000])
+    expect(over.dealer).toBe(1)
+    expect(over.counters).toBe(1)
+  })
+
+  test('liability: feeding the third dragon set pays all of a self-drawn Big Three Dragons', () => {
+    used.clear()
+    const red = t('dragon_red')
+    const melds = [{ type: 'pung', kind: 'dragon_white', tiles: hand('dragon_white', 'dragon_white', 'dragon_white'), open: true }, { type: 'pung', kind: 'dragon_green', tiles: hand('dragon_green', 'dragon_green', 'dragon_green'), open: true }]
+    const s = table([[red], hand('dragon_red', 'dragon_red', 'characters_2', 'characters_3', 'characters_4', 'bamboo_5', 'bamboo_6'), [], []], { melds: [[], melds, [], []] })
+    const claim = play({ action: 'discard', cards: [red], to: 'discard' }, s, 0)
+    const pung = play({ action: 'pung' }, claim, 1)
+    expect(pung.liable[1]).toEqual({ by: 0, yakuman: 'Big Three Dragons' })
+    const five = t('bamboo_5')
+    const hand1 = [...pung.hands[1].filter(id => !id.startsWith('bamboo_6')), five]
+    const won = play({ action: 'win' }, { ...pung, hands: pung.hands.map((h, i) => (i === 1 ? hand1 : h)), drawn: five, flags: { selfDrawn: true } }, 1)
+    expect(won.lastHand.patterns.map(p => p[0])).toContain('Big Three Dragons')
+    expect(won.scores).toEqual([30000 - 32000, 30000 + 32000, 30000, 30000])
+  })
+
+  test('computer seats play the East and South rounds out, and every point is accounted for', () => {
+    const game = createGameForFamily('mahjong', { variant: 'riichi', rngSeed: 5 })
+    const ai = createAI('mahjong', 'riichi', { difficulty: 'medium', definition: game.raw.definition, rngSeed: 5 })
+    let riichis = 0
+    for (let ply = 0; ply < 60000; ply++) {
+      const st = game.getState()
+      if (st.slice.finished !== null) break
+      const move = ai.pickMove(st.slice, st.players.currentIndex)
+      if (move.action === 'riichi') riichis++
+      expect(game.applyMove(move).ok).toBe(true)
+    }
+    const s = game.getState().slice
+    expect(s.finished).not.toBeNull()
+    expect(s.scores.reduce((a, b) => a + b, 0) + s.pot).toBe(120000)
+    expect(riichis).toBeGreaterThan(0)
   })
 })
 

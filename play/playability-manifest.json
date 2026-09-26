@@ -1820,6 +1820,16 @@
     "path": "content/games/hong-kong/standard.md"
   },
   {
+    "family": "mahjong",
+    "familyLabel": "Mahjong",
+    "variant": "riichi",
+    "key": "riichi",
+    "label": "Riichi Mahjong",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/riichi/standard.md"
+  },
+  {
     "family": "mancala",
     "familyLabel": "Mancala",
     "variant": "ayo",

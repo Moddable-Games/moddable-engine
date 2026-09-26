@@ -1,4 +1,5 @@
 import { parseKind } from './mahjong-hands.js'
+import { riichi, riichiPays } from './riichi-scoring.js'
 
 // How each mahjong game values a winning hand (engine#184). A scorer is given
 // one reading of the hand:
@@ -92,8 +93,10 @@ function taiwanese(hand, tai = {}) {
 // How each game values a hand and pays for it. Hong Kong: points double with
 // each faan ("full spicy"), a self-drawn win paid one and a half times by
 // everyone. Taiwanese: a tai is a point, every payer pays the same, and the
-// dealer pays and receives double.
+// dealer pays and receives double. Riichi: han and fu make basic points,
+// which riichi-scoring.js turns into what each player pays.
 export const SCORERS = {
-  'hong-kong': { score: hongKong, points: (faan) => 2 ** faan, selfDraw: 1.5, dealerDouble: false, specials: true },
-  taiwanese: { score: taiwanese, points: (tai) => tai, selfDraw: 1, dealerDouble: true, specials: false },
+  'hong-kong': { score: hongKong, points: (faan) => 2 ** faan, selfDraw: 1.5, dealerDouble: false, specials: true, unit: 'faan' },
+  taiwanese: { score: taiwanese, points: (tai) => tai, selfDraw: 1, dealerDouble: true, specials: false, unit: 'tai' },
+  riichi: { score: riichi, pays: riichiPays, specials: true, unit: 'han' },
 }

@@ -63,6 +63,8 @@ export const CONFIG_KEYS = new Set([
   'field', 'cardValues', 'goThreshold',
   // wall (mahjong)
   'minimum', 'handSize', 'multipleWinners', 'tai',
+  'startingPoints', 'deadWall', 'riichi', 'riichiWall', 'furiten', 'counters', 'noten', 'dealerKeeps',
+  'swapCalling', 'liability', 'lastDiscard', 'kongAfterClaim',
   // a hand per double: trains, branching
   'tilesPerPlayer', 'blankDouble', 'afterStart', 'publicTrain', 'openingArms', 'doubleToes',
   // scorecard dice

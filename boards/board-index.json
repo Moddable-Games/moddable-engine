@@ -2367,7 +2367,7 @@
     "topology": "tableau",
     "svg": "svgs/mahjong--riichi.svg",
     "rulesUrl": "mahjong/games/riichi/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "mahjong",
