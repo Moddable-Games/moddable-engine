@@ -2007,7 +2007,7 @@
     "topology": "tableau",
     "svg": "svgs/flower-48--oicho-kabu.svg",
     "rulesUrl": "flower-48/games/oicho-kabu/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "go",

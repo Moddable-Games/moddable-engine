@@ -1769,6 +1769,68 @@ describe('fishing (Koi-Koi, Hana-Awase, Go-Stop)', () => {
   })
 })
 
+describe('tableaus (Oicho-Kabu)', () => {
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October']
+  const plugin = createTableauPluginFor('flower-48')({ game: 'tableaus', chips: { start: 100, bets: [1, 2, 5, 10] }, rounds: 8 }, { definition: { players: ['p1', 'p2', 'p3'], components: { deck: { type: 'hanafuda-48', months } } } })
+  const base = plugin.init({ hands: [[], [], []], community: [], drawPile: [] }, noRng)
+  // Cards by value: January is 1, ... October is 10.
+  const v = { 1: 'pine_crane', 2: 'plum_bush-warbler', 3: 'cherry_curtain', 4: 'wisteria_cuckoo', 5: 'iris_bridge', 6: 'peony_butterflies', 7: 'clover_boar', 8: 'pampas_moon', 9: 'chrysanthemum_sake-cup', 10: 'maple_deer' }
+  const v2 = { 1: 'pine_poetry-ribbon', 4: 'wisteria_red-ribbon', 9: 'chrysanthemum_blue-ribbon', 5: 'iris_red-ribbon' }
+
+  test('forty cards, January to October; four tableaus and the dealer\'s card', () => {
+    expect(base.deck.length + 5).toBe(40)
+    expect(base.tableaus.map(t => t.cards.length)).toEqual([1, 1, 1, 1])
+    expect(plugin.projectForSeat(base, 1).own).toEqual([null])
+  })
+
+  const settleWith = (tableau, own, deck = []) => {
+    const s = { ...base, dealer: 0, stacks: [100, 100, 100], tableaus: [{ cards: tableau, bets: [{ seat: 1, amount: 10 }] }, { cards: [v[3]], bets: [] }, { cards: [v[3]], bets: [] }, { cards: [v[3]], bets: [] }], own, deck, phase: 'dealer', deciding: null, next: 0, round: 0 }
+    return plugin.applyMove({ action: 'stand' }, s, turn(0))
+  }
+
+  test('the hand nearer nine wins; a tie goes to the dealer', () => {
+    // Four and four is 8 against the dealer's 5: the bettor wins.
+    expect(settleWith([v[4], v2[4]], [v[2], v[3]]).stacks).toEqual([90, 110, 100])
+    // Three and three is 6 against 6: the dealer takes the tie.
+    expect(settleWith([v[3], v[3]], [v[2], v[4]]).stacks).toEqual([110, 90, 100])
+  })
+
+  test('arashi, three of a value, is paid triple', () => {
+    expect(settleWith([v[3], v[3], v[3]], [v[2], v[4]]).stacks).toEqual([70, 130, 100])
+  })
+
+  test('a total of three or less must draw and seven or more may not; four to six is the bettor\'s choice', () => {
+    const s = { ...base, dealer: 0, tableaus: [{ cards: [v[1]], bets: [{ seat: 1, amount: 5 }] }, { cards: [v[5]], bets: [{ seat: 2, amount: 5 }] }, { cards: [v[7]], bets: [] }, { cards: [v[3]], bets: [] }], deck: [v[2], v[1], v[6], v[7], v[8]], punters: [1, 2], phase: 'bet', next: 2 }
+    const after = plugin.applyMove({ action: 'skip' }, { ...s, punters: [1, 2] }, turn(2))
+    // Tableau 1: 1 + 2 = 3, drew the 6. Tableau 2: 5 + 1 = 6, its bettor decides.
+    expect(after.tableaus[0].cards).toHaveLength(3)
+    expect(after.phase).toBe('third')
+    expect(after.deciding).toBe(1)
+    expect(after.next).toBe(2)
+  })
+
+  test('kuppin wins every tableau for the dealer, double; shippin wins its tableau double', () => {
+    // The tableau stands on 9; the dealer, showing a 9, is dealt a 1: kuppin.
+    const kup = { ...base, dealer: 0, stacks: [100, 100, 100], tableaus: [{ cards: [v[8], v2[1]], bets: [{ seat: 1, amount: 10 }] }, { cards: [v[3]], bets: [] }, { cards: [v[3]], bets: [] }, { cards: [v[3]], bets: [] }], own: [v[9]], deck: [v[1]], phase: 'third', deciding: 0 }
+    expect(plugin.applyMove({ action: 'stand' }, kup, turn(1)).stacks).toEqual([120, 80, 100])
+    // Four and one on a tableau wins it double, whatever the dealer holds.
+    expect(settleWith([v2[4], v2[1]], [v[2], v[6]]).stacks).toEqual([80, 120, 100])
+  })
+
+  test('computer seats play a session out and every chip is kept', () => {
+    const game = createGameForFamily('flower-48', { variant: 'oicho-kabu', rngSeed: 3 })
+    const ai = createAI('flower-48', 'oicho-kabu', { difficulty: 'medium', definition: game.raw.definition, rngSeed: 3 })
+    for (let ply = 0; ply < 5000; ply++) {
+      const st = game.getState()
+      if (st.slice.finished !== null) break
+      expect(game.applyMove(ai.pickMove(st.slice, st.players.currentIndex)).ok).toBe(true)
+    }
+    const s = game.getState().slice
+    expect(s.finished).not.toBeNull()
+    expect(s.stacks.reduce((a, b) => a + b, 0)).toBe(400)
+  })
+})
+
 describe('dice', () => {
   const definition = { players: ['a', 'b'], components: { dice: { count: 5 } } }
   const rng = { request: () => ({ shuffle: a => a, nextInt: () => 77 }) }
