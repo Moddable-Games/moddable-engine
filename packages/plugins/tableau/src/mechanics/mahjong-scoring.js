@@ -1,6 +1,7 @@
 import { parseKind } from './mahjong-hands.js'
 import { riichi, riichiPays } from './riichi-scoring.js'
 import { zungJung, zungJungPays } from './zung-jung-scoring.js'
+import { redBook, redBookLoser, redBookPays } from './red-book-scoring.js'
 
 // How each mahjong game values a winning hand (engine#184). A scorer is given
 // one reading of the hand:
@@ -78,7 +79,8 @@ export function hongKong(hand) {
 // there scores nothing. `base` is the least a winning hand is worth.
 //
 //     tai: { base: 1, bonusTile: 1, dragonPung: ..., ownWindPung: ..., allPungs: ..., allChows: ... }
-function taiwanese(hand, tai = {}) {
+function taiwanese(hand, config = {}) {
+  const tai = config.tai || {}
   const p = []
   const add = (name, v) => { if (v) p.push([name, v]) }
   const s = shape(hand)
@@ -96,10 +98,12 @@ function taiwanese(hand, tai = {}) {
 // everyone. Taiwanese: a tai is a point, every payer pays the same, and the
 // dealer pays and receives double. Riichi: han and fu make basic points,
 // which riichi-scoring.js turns into what each player pays. Zung Jung: the
-// patterns' points; all three pay, the responsible discarder most.
+// patterns' points; all three pay, the responsible discarder most. The Red
+// Book: every hand scores; the losers pay the winner, then each other.
 export const SCORERS = {
   'hong-kong': { score: hongKong, points: (faan) => 2 ** faan, selfDraw: 1.5, dealerDouble: false, specials: true, unit: 'faan' },
   taiwanese: { score: taiwanese, points: (tai) => tai, selfDraw: 1, dealerDouble: true, specials: false, unit: 'tai' },
   riichi: { score: riichi, pays: riichiPays, specials: true, unit: 'han', dora: true },
+  'red-book': { score: redBook, scoreLoser: redBookLoser, pays: redBookPays, unit: 'points', allPay: true, onlyPlace: true },
   'zung-jung': { score: zungJung, pays: zungJungPays, specials: true, unit: 'points', allPay: true, immunity: true, pairsMayRepeat: true },
 }

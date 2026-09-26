@@ -35,6 +35,7 @@ import { SCORERS } from './mahjong-scoring.js'
 //     liability: true          # feeding the last dragon or wind set pays for it
 //     lastDiscard: win         # the discard after the last tile: only to win
 //     kongAfterClaim: false    # a kong only in a turn that began with a draw
+//     maxKongs: 4              # no more kongs in a hand than this
 //
 // dealerKeeps may also be `never`: the deal passes after every hand.
 
@@ -46,7 +47,7 @@ function settings(ctx) {
   const handSize = Number(c.handSize ?? 13)
   return {
     game,
-    scorer: (hand) => game.score(hand, c.tai || {}),
+    scorer: (hand) => game.score(hand, c),
     minimum: Number(c.minimum ?? 3),
     rounds: Number(c.rounds ?? 1) || 1,
     handSize,
@@ -64,6 +65,7 @@ function settings(ctx) {
     liability: !!c.liability,
     lastDiscardWinOnly: c.lastDiscard === 'win',
     kongAfterClaim: c.kongAfterClaim !== false,
+    maxKongs: Number(c.maxKongs ?? 0),
   }
 }
 
@@ -119,8 +121,9 @@ function drawFor(slice, seat, ctx, fromBack = false) {
   for (;;) {
     let t
     if (fromBack && dead) {
-      if (!dead.replacements.length) break
-      t = dead.replacements[0]
+      if (!wall.length) break
+      // Once the loose tiles are gone, the live wall's last tile is the next one.
+      t = dead.replacements.length ? dead.replacements[0] : wall[wall.length - 1]
       dead = { ...dead, replacements: dead.replacements.slice(1), kongs: dead.kongs + 1 }
       wall.pop()
     } else {
@@ -191,6 +194,29 @@ function circumstances(slice, seat, how, allKinds, ctx) {
   }
 }
 
+// A hand that did not win, for the games that score it: its declared sets
+// and its concealed tiles.
+function loserReading(slice, seat, ctx) {
+  const exposed = slice.melds[seat]
+  const concealedKinds = kinds(slice.hands[seat], ctx)
+  return {
+    sets: exposed.map(m => ({ type: m.type, kind: m.kind, open: m.open })),
+    concealedKinds,
+    kinds: [...concealedKinds, ...exposed.flatMap(m => kinds(m.tiles, ctx))],
+    seatWind: seatWind(slice, seat),
+  }
+}
+
+// The only possible place: the hand before the winning tile waited on that
+// tile alone.
+function onlyPlace(slice, seat, concealedKinds, winning, ctx) {
+  const before = [...concealedKinds]
+  before.splice(before.indexOf(winning), 1)
+  const s = settings(ctx)
+  const melded = slice.melds[seat].length
+  return waits(before, s.sets - melded, s.game.specials && !melded, universe(ctx)).length === 1
+}
+
 // The best value of this seat's hand with these concealed tiles, or null.
 // Every reading is tried, and every place the winning tile could sit in it:
 // won on a discard, a pung that took the winning tile counts as open.
@@ -209,6 +235,7 @@ function valueHand(slice, seat, concealedIds, how, ctx) {
     ...circumstances(slice, seat, how, allKinds, ctx),
     ...how,
   }
+  if (s.game.onlyPlace && how.winning && concealedKinds.includes(how.winning)) base.onlyPlace = onlyPlace(slice, seat, concealedKinds, how.winning, ctx)
   const readings = []
   if (s.game.specials && !exposed.length && isThirteenOrphans(concealedKinds)) readings.push({ ...base, sets: [], pair: null, special: 'thirteen-orphans', wait: null })
   if (s.game.specials && !exposed.length && isSevenPairs(concealedKinds, s.game.pairsMayRepeat)) readings.push({ ...base, sets: [], pair: null, special: 'seven-pairs', wait: 'pair' })
@@ -311,13 +338,27 @@ function win(slice, winners, from, ctx) {
     else pay(from, owed(from) + bonus)
     hands.push({ winner: seat, value: value.value, fu: value.fu, limit: value.limit, patterns: value.patterns, points })
   }
+  // Where every hand scores, the losers settle with each other: each pays
+  // every loser with more the difference, doubled where the dealer is one of them.
+  let losers = null
+  if (game.scoreLoser) {
+    losers = [0, 1, 2, 3].filter(i => !winners.some(w => w.seat === i)).map(seat => ({ seat, value: game.scoreLoser(loserReading(slice, seat, ctx), ctx.config).value }))
+    for (const a of losers) {
+      for (const b of losers) {
+        if (a.value <= b.value) continue
+        const amount = (a.value - b.value) * (a.seat === slice.dealer || b.seat === slice.dealer ? 2 : 1)
+        payment[a.seat] += amount
+        payment[b.seat] -= amount
+      }
+    }
+  }
   // Riichi sticks: a winner who declared takes their own back, and the first
   // winner after the discarder takes the rest.
   let pot = slice.pot
   for (const { seat } of winners) if (slice.riichi[seat]) { payment[seat] += s.riichi; pot -= s.riichi }
   payment[winners[0].seat] += pot
   const dealerWon = winners.some(w => w.seat === slice.dealer)
-  return endHand({ ...slice, pot: 0, lastHand: { ...hands[0], from, winners: hands } }, dealerWon && s.dealerKeeps !== 'never', ctx, payment, dealerWon ? slice.counters + 1 : 0)
+  return endHand({ ...slice, pot: 0, lastHand: { ...hands[0], from, winners: hands, losers } }, dealerWon && s.dealerKeeps !== 'never', ctx, payment, dealerWon ? slice.counters + 1 : 0)
 }
 
 function take(hand, count, kind, ctx) {
@@ -330,10 +371,11 @@ function take(hand, count, kind, ctx) {
   return { taken, rest }
 }
 
-// A kong needs a replacement tile to draw, and a live wall to give one up.
+// A kong needs a live wall to give up a tile, and the game's limit not reached.
 function canKong(slice, ctx) {
-  if (!slice.dead) return true
-  return slice.dead.replacements.length > 0 && slice.wall.length > 0
+  const { maxKongs } = settings(ctx)
+  if (maxKongs && slice.melds.flat().filter(m => m.type === 'kong').length >= maxKongs) return false
+  return !slice.dead || slice.wall.length > 0
 }
 
 // Swap-calling: after a claim, the claimed kind may not be discarded, nor,
@@ -636,7 +678,8 @@ function lastHandLabel(h, unit, name) {
   }
   const how = h.from === null ? 'self-drawn' : `on ${name(h.from)}'s discard`
   const worth = h.limit === 'Yakuman' ? 'yakuman' : `${h.value} ${unit}${h.fu ? ` ${h.fu} fu` : ''}${h.limit ? `, ${h.limit.toLowerCase()}` : ''}`
-  return `Last hand: ${name(h.winner)} ${how}, ${worth} (${h.patterns.map(([n, v]) => `${n} ${v}`).join(', ')})`
+  const others = h.losers ? `; ${h.losers.map(l => `${name(l.seat)} ${l.value}`).join(', ')}` : ''
+  return `Last hand: ${name(h.winner)} ${how}, ${worth} (${h.patterns.map(([n, v]) => `${n} ${v}`).join(', ')})${others}`
 }
 
 // Win whenever allowed; pung dragons and winds that score; declare riichi

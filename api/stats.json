@@ -9,7 +9,7 @@
     "standard": 1116,
     "variants": 733
   },
-  "playableVariants": 279,
+  "playableVariants": 280,
   "playableFamilies": 16,
   "playableByFamily": {
     "bavarian-32": 2,
@@ -20,7 +20,7 @@
     "go": 12,
     "hex": 8,
     "landlords-game": 1,
-    "mahjong": 3,
+    "mahjong": 4,
     "mancala": 8,
     "morris": 7,
     "reversi": 3,
@@ -56,7 +56,7 @@
     "go": 9,
     "hex": 8,
     "landlords-game": 1,
-    "mahjong": 3,
+    "mahjong": 4,
     "mancala": 8,
     "morris": 7,
     "reversi": 3,

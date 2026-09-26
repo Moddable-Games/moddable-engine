@@ -2347,7 +2347,7 @@
     "topology": "tableau",
     "svg": "svgs/mahjong--american-classic.svg",
     "rulesUrl": "mahjong/games/american-classic/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "mahjong",

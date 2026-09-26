@@ -1812,6 +1812,16 @@
   {
     "family": "mahjong",
     "familyLabel": "Mahjong",
+    "variant": "american-classic",
+    "key": "american-classic",
+    "label": "American Mahjong (Classic)",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/american-classic/standard.md"
+  },
+  {
+    "family": "mahjong",
+    "familyLabel": "Mahjong",
     "variant": "hong-kong",
     "key": "hong-kong",
     "label": "Hong Kong Mahjong",
