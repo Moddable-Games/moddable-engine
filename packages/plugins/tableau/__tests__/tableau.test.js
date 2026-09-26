@@ -1908,6 +1908,26 @@ describe('wall (Hong Kong mahjong)', () => {
     expect(won.lastHand.from).toBe(0)
   })
 
+
+  test('sixteen-tile hands read as five sets and a pair; several may win on one discard; the dealer pays double', () => {
+    const tw = createTableauPluginFor('mahjong')({ game: 'wall', scoring: 'taiwanese', minimum: 1, handSize: 16, multipleWinners: true, tai: { base: 1, bonusTile: 1 } }, { definition: { players: ['east', 'south', 'west', 'north'], components: { deck: { type: 'mahjong-136', flowers: 8 } } } })
+    const tw0 = tw.init({ hands: [[], [], [], []], community: [], drawPile: [] }, noRng)
+    expect(tw0.hands.filter((h, i) => i !== tw0.dealer).every(h => h.length === 16)).toBe(true)
+    used.clear()
+    // Seats 1 and 2 both wait on the 5 of characters; seat 0, the dealer, discards it.
+    const waiting = () => hand('bamboo_1', 'bamboo_2', 'bamboo_3', 'circles_2', 'circles_3', 'circles_4', 'bamboo_7', 'bamboo_8', 'bamboo_9', 'circles_6', 'circles_7', 'circles_8', 'characters_4', 'characters_6', 'dragon_red', 'dragon_red')
+    const five = t('characters_5')
+    const s = { ...tw0, hands: [[five], waiting(), waiting(), []], melds: [[], [], [], []], discards: [[], [], [], []], bonus: [[], [], [], []], dealer: 0, firstDealer: 0, scores: [0, 0, 0, 0], phase: 'discard', flags: {}, next: 0 }
+    let after = tw.applyMove({ action: 'discard', cards: [five], to: 'discard' }, s, turn(0))
+    expect(after.claim.queue).toEqual([1, 2])
+    after = tw.applyMove({ action: 'win' }, after, turn(1))
+    expect(after.phase).toBe('claim')
+    after = tw.applyMove({ action: 'win' }, after, turn(2))
+    // Each hand is the base tai, 1; the dealer discarded, so pays each winner double.
+    expect(after.lastHand.winners.map(w => w.winner)).toEqual([1, 2])
+    expect(after.scores).toEqual([-4, 2, 2, 0])
+  })
+
   test('computer seats play an East round out, and every point paid is received', () => {
     const game = createGameForFamily('mahjong', { variant: 'hong-kong', rngSeed: 3 })
     const ai = createAI('mahjong', 'hong-kong', { difficulty: 'medium', definition: game.raw.definition, rngSeed: 3 })

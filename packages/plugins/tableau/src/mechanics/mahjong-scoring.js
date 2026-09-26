@@ -71,9 +71,29 @@ export function hongKong(hand) {
   return { value, patterns: p }
 }
 
-// Full spicy: points double with each faan.
-export function hongKongPoints(faan) {
-  return 2 ** faan
+// Taiwanese, from the frontmatter's own table: the tai each pattern earns,
+// since sources differ and players agree on them. A pattern with no value
+// there scores nothing. `base` is the least a winning hand is worth.
+//
+//     tai: { base: 1, bonusTile: 1, dragonPung: ..., ownWindPung: ..., allPungs: ..., allChows: ... }
+export function taiwanese(hand, tai = {}) {
+  const p = []
+  const add = (name, v) => { if (v) p.push([name, v]) }
+  const s = shape(hand)
+  for (let k = 0; k < s.dragonPungs.length; k++) add('Dragon pung', Number(tai.dragonPung || 0))
+  for (const set of s.windPungs) if (parseKind(set.kind).rank === hand.seatWind) add('Own wind pung', Number(tai.ownWindPung || 0))
+  if (hand.sets.length && hand.sets.every(x => x.type !== 'chow')) add('All Pungs', Number(tai.allPungs || 0))
+  if (hand.sets.length && hand.sets.every(x => x.type === 'chow')) add('All Chows', Number(tai.allChows || 0))
+  for (let k = 0; k < hand.bonus.length; k++) add('Bonus tile', Number(tai.bonusTile ?? 1))
+  const value = Math.max(Number(tai.base ?? 1), p.reduce((n, [, v]) => n + v, 0))
+  return { value, patterns: p.length ? p : [['Base hand', value]] }
 }
 
-export const SCORERS = { 'hong-kong': hongKong }
+// How each game values a hand and pays for it. Hong Kong: points double with
+// each faan ("full spicy"), a self-drawn win paid one and a half times by
+// everyone. Taiwanese: a tai is a point, every payer pays the same, and the
+// dealer pays and receives double.
+export const SCORERS = {
+  'hong-kong': { score: hongKong, points: (faan) => 2 ** faan, selfDraw: 1.5, dealerDouble: false, specials: true },
+  taiwanese: { score: taiwanese, points: (tai) => tai, selfDraw: 1, dealerDouble: true, specials: false },
+}

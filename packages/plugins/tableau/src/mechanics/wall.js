@@ -1,6 +1,6 @@
 import { createRng } from '../../../../core/index.js'
 import { kindOf, parseKind, isBonus, arrangements, isSevenPairs, isThirteenOrphans } from './mahjong-hands.js'
-import { SCORERS, hongKongPoints } from './mahjong-scoring.js'
+import { SCORERS } from './mahjong-scoring.js'
 
 // Wall: mahjong (engine#184). Four players draw from a wall and discard. A
 // discard may be claimed out of turn: "Win (any player)", then "Kong",
@@ -15,12 +15,25 @@ import { SCORERS, hongKongPoints } from './mahjong-scoring.js'
 //     scoring: hong-kong
 //     minimum: 3
 //     rounds: 1                # wind rounds: every seat deals once in each
+//     handSize: 13             # 16 for five sets and a pair
+//     multipleWinners: false   # several players may win on one discard
+//     tai: { ... }             # a scorer's table, where the game declares one
 
 const WINDS = ['east', 'south', 'west', 'north']
 
 function settings(ctx) {
   const c = ctx.config
-  return { scorer: SCORERS[c.scoring || 'hong-kong'], minimum: Number(c.minimum ?? 3), rounds: Number(c.rounds ?? 1) || 1 }
+  const game = SCORERS[c.scoring || 'hong-kong']
+  const handSize = Number(c.handSize ?? 13)
+  return {
+    game,
+    scorer: (hand) => game.score(hand, c.tai || {}),
+    minimum: Number(c.minimum ?? 3),
+    rounds: Number(c.rounds ?? 1) || 1,
+    handSize,
+    sets: (handSize - 1) / 3,
+    multipleWinners: !!c.multipleWinners,
+  }
 }
 
 const tileOf = (ctx, id) => ctx.card(id)
@@ -45,7 +58,8 @@ function drawFor(slice, seat, ctx, fromBack = false) {
 function deal(slice, ctx) {
   const wall = createRng((slice.seed ^ Math.imul(slice.deals + 1, 0x9E3779B1)) >>> 0).shuffle(ctx.deck.map(c => c.id))
   let next = { ...slice, deals: slice.deals + 1, wall, hands: [[], [], [], []], melds: [[], [], [], []], discards: [[], [], [], []], bonus: [[], [], [], []], lastDiscard: null, claim: null, drawn: null, flags: {} }
-  for (let k = 0; k < 13; k++) for (let p = 0; p < 4; p++) next = drawFor(next, (next.dealer + p) % 4, ctx)
+  const { handSize } = settings(ctx)
+  for (let k = 0; k < handSize; k++) for (let p = 0; p < 4; p++) next = drawFor(next, (next.dealer + p) % 4, ctx)
   return startTurn({ ...next, phase: 'discard' }, next.dealer, ctx, false)
 }
 
@@ -72,10 +86,10 @@ function valueHand(slice, seat, concealedIds, how, ctx) {
     ...how,
   }
   const readings = []
-  if (!exposed.length && isThirteenOrphans(concealedKinds)) readings.push({ ...base, sets: [], pair: null, special: 'thirteen-orphans' })
-  if (!exposed.length && isSevenPairs(concealedKinds)) readings.push({ ...base, sets: [], pair: null, special: 'seven-pairs' })
+  if (s.game.specials && !exposed.length && isThirteenOrphans(concealedKinds)) readings.push({ ...base, sets: [], pair: null, special: 'thirteen-orphans' })
+  if (s.game.specials && !exposed.length && isSevenPairs(concealedKinds)) readings.push({ ...base, sets: [], pair: null, special: 'seven-pairs' })
   const openSets = exposed.map(m => ({ type: m.type, kind: m.kind, open: m.open }))
-  for (const a of arrangements(concealedKinds, 4 - exposed.length)) {
+  for (const a of arrangements(concealedKinds, s.sets - exposed.length)) {
     // Won on a discard, a pung that took the winning tile counts as open.
     const sets = a.sets.map(x => ({ ...x, open: !how.selfDrawn && x.type === 'pung' && x.kind === how.winning && a.pair !== how.winning }))
     readings.push({ ...base, sets: [...openSets, ...sets], pair: a.pair, special: null })
@@ -113,17 +127,25 @@ function endHand(slice, winner, ctx, payment = null) {
   return deal(next, ctx)
 }
 
-function win(slice, seat, value, from, ctx) {
-  const points = hongKongPoints(value.value)
+// Pay one or more winners: on a self-drawn win every other player pays, on a
+// discard the discarder pays each winner. Where the game says so, a payment
+// the dealer makes or receives is doubled.
+function win(slice, winners, from, ctx) {
+  const { game } = settings(ctx)
   const payment = [0, 0, 0, 0]
-  if (from === null) {
-    // "Self-pick": every other player pays one and a half times.
-    for (let i = 0; i < 4; i++) if (i !== seat) { payment[i] -= points * 1.5; payment[seat] += points * 1.5 }
-  } else {
-    payment[from] -= points
-    payment[seat] += points
+  const hands = []
+  for (const { seat, value } of winners) {
+    const points = game.points(value.value)
+    const pay = (payer) => {
+      const amount = points * (from === null ? game.selfDraw : 1) * (game.dealerDouble && (payer === slice.dealer || seat === slice.dealer) ? 2 : 1)
+      payment[payer] -= amount
+      payment[seat] += amount
+    }
+    if (from === null) { for (let i = 0; i < 4; i++) if (i !== seat) pay(i) } else pay(from)
+    hands.push({ winner: seat, value: value.value, patterns: value.patterns, points })
   }
-  return endHand({ ...slice, lastHand: { winner: seat, from, value: value.value, patterns: value.patterns, points } }, seat, ctx, payment)
+  const keeps = winners.some(w => w.seat === slice.dealer) ? slice.dealer : winners[0].seat
+  return endHand({ ...slice, lastHand: { ...hands[0], from, winners: hands } }, keeps, ctx, payment)
 }
 
 // After a discard, who may claim it and how.
@@ -196,7 +218,7 @@ export const wall = {
 
   apply(move, slice, seat, ctx) {
     if (slice.phase === 'rob') {
-      if (move.action === 'win') return win(slice, seat, valueHand(slice, seat, [...slice.hands[seat], slice.robbing.tile], { selfDrawn: false, robbing: true, winning: kindOf(tileOf(ctx, slice.robbing.tile)) }, ctx), slice.robbing.by, ctx)
+      if (move.action === 'win') return win(slice, [{ seat, value: valueHand(slice, seat, [...slice.hands[seat], slice.robbing.tile], { selfDrawn: false, robbing: true, winning: kindOf(tileOf(ctx, slice.robbing.tile)) }, ctx) }], slice.robbing.by, ctx)
       const queue = slice.claim.queue.slice(1)
       if (queue.length) return { ...slice, claim: { queue }, next: queue[0] }
       return startTurn({ ...slice, phase: 'discard', robbing: null, claim: null }, slice.robbing.by, ctx, true)
@@ -204,12 +226,18 @@ export const wall = {
     if (slice.phase === 'claim') {
       const tile = slice.lastDiscard.tile
       const k = kindOf(tileOf(ctx, tile))
-      if (move.action === 'pass') {
-        const queue = slice.claim.queue.slice(1)
-        if (queue.length) return { ...slice, claim: { queue }, next: queue[0] }
+      const s = settings(ctx)
+      const winners = slice.claim.winners || []
+      const canWin = (o) => claimsFor(slice, o, tile, ctx).some(m => m.action === 'win')
+      if (move.action === 'pass' || (move.action === 'win' && s.multipleWinners)) {
+        const now = move.action === 'win' ? [...winners, { seat, value: valueHand(slice, seat, [...slice.hands[seat], tile], { selfDrawn: false, winning: k }, ctx) }] : winners
+        // Once anyone has won, only other winners are still asked.
+        const queue = slice.claim.queue.slice(1).filter(o => !now.length || canWin(o))
+        if (queue.length) return { ...slice, claim: { queue, winners: now }, next: queue[0] }
+        if (now.length) return win(slice, now, slice.lastDiscard.by, ctx)
         return startTurn({ ...slice, claim: null }, nextSeat(slice.lastDiscard.by), ctx, false)
       }
-      if (move.action === 'win') return win(slice, seat, valueHand(slice, seat, [...slice.hands[seat], tile], { selfDrawn: false, winning: k }, ctx), slice.lastDiscard.by, ctx)
+      if (move.action === 'win') return win(slice, [{ seat, value: valueHand(slice, seat, [...slice.hands[seat], tile], { selfDrawn: false, winning: k }, ctx) }], slice.lastDiscard.by, ctx)
       const discards = slice.discards.map((d, i) => (i === slice.lastDiscard.by ? d.slice(0, -1) : d))
       let used
       let meld
@@ -235,7 +263,7 @@ export const wall = {
     }
 
     // The player to move.
-    if (move.action === 'win') return win(slice, seat, valueHand(slice, seat, slice.hands[seat], { ...slice.flags, winning: slice.drawn ? kindOf(tileOf(ctx, slice.drawn)) : null }, ctx), null, ctx)
+    if (move.action === 'win') return win(slice, [{ seat, value: valueHand(slice, seat, slice.hands[seat], { ...slice.flags, winning: slice.drawn ? kindOf(tileOf(ctx, slice.drawn)) : null }, ctx) }], null, ctx)
     if (move.action === 'kong') {
       const k = move.value.replace(' ', '_')
       const pung = slice.melds[seat].findIndex(m => m.type === 'pung' && m.kind === k)

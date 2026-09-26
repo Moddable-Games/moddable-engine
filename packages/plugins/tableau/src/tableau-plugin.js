@@ -62,7 +62,7 @@ export const CONFIG_KEYS = new Set([
   // fishing
   'field', 'cardValues', 'goThreshold',
   // wall (mahjong)
-  'minimum',
+  'minimum', 'handSize', 'multipleWinners', 'tai',
   // a hand per double: trains, branching
   'tilesPerPlayer', 'blankDouble', 'afterStart', 'publicTrain', 'openingArms', 'doubleToes',
   // scorecard dice
