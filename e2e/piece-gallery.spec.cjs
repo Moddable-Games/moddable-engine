@@ -7,11 +7,14 @@ const BASE = process.env.BASE_URL || 'http://localhost:80/MODDABLE/moddable-engi
 // and read each inherited file from the wrong folder. A piece Congo replaced
 // was listed twice besides. Every set, every tile.
 test('every piece in every set draws, and no set lists a piece twice', async ({ page }) => {
-  test.setTimeout(120000)
+  // Every tile of every set is loaded before anything is checked: thousands of
+  // images, a minute locally and more on a shared runner. The limits are about
+  // how long that takes, not what is being tested, and grow with the gallery.
+  test.setTimeout(300000)
   await page.goto(`${BASE}/pieces/`, { waitUntil: 'networkidle' })
   await page.waitForSelector('.set-section')
   await page.evaluate(() => document.querySelectorAll('img[loading="lazy"]').forEach(i => { i.loading = 'eager' }))
-  await page.waitForFunction(() => [...document.querySelectorAll('.set-section img')].every(i => !i.src || i.complete), null, { timeout: 90000 })
+  await page.waitForFunction(() => [...document.querySelectorAll('.set-section img')].every(i => !i.src || i.complete), null, { timeout: 240000 })
 
   const problems = await page.evaluate(() => {
     const out = []
