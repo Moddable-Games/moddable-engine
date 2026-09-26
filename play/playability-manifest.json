@@ -2160,6 +2160,16 @@
   {
     "family": "standard-52",
     "familyLabel": "Standard 52-Card Deck",
+    "variant": "blackjack",
+    "key": "blackjack",
+    "label": "Blackjack (Twenty-One)",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/blackjack/standard.md"
+  },
+  {
+    "family": "standard-52",
+    "familyLabel": "Standard 52-Card Deck",
     "variant": "bridge",
     "key": "bridge",
     "label": "Rubber Bridge",
@@ -2260,6 +2270,16 @@
   {
     "family": "standard-52",
     "familyLabel": "Standard 52-Card Deck",
+    "variant": "poker",
+    "key": "poker",
+    "label": "Texas Hold'em Poker",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/poker/standard.md"
+  },
+  {
+    "family": "standard-52",
+    "familyLabel": "Standard 52-Card Deck",
     "variant": "president",
     "key": "president",
     "label": "President",
@@ -2336,6 +2356,16 @@
     "group": "Other",
     "playable": true,
     "path": "content/games/bunco/standard.md"
+  },
+  {
+    "family": "standard-dice",
+    "familyLabel": "Standard Dice",
+    "variant": "craps",
+    "key": "craps",
+    "label": "Craps",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/craps/standard.md"
   },
   {
     "family": "standard-dice",

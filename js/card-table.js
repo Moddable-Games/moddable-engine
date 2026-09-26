@@ -107,6 +107,9 @@ export function createCardSession(options = {}) {
     plugin = findFamilyPlugin(game.raw.registry.getPlugins(), family)
     ai = opponent === 'ai' ? createAI(family, variant, { difficulty, definition }) : null
     humanIdx = /^\d+$/.test(String(seat)) ? Math.min(parseInt(seat, 10), names().length - 1) : Math.max(0, names().indexOf(seat))
+    // A seat that never chooses - the house in Blackjack - is not one a person takes.
+    const choosers = plugin.seatsThatChoose ? plugin.seatsThatChoose(game.getState().slice) : null
+    if (choosers && choosers.length && !choosers.includes(humanIdx)) humanIdx = choosers[0]
 
     await loadGalleryIndex()
     images = attachPieceImages(resolved, getGalleryIndex() || []).images || null
@@ -286,6 +289,9 @@ export function createCardSession(options = {}) {
     get variantMeta() { return resolved?._variantMeta || null },
     get resolved() { return resolved },
     get playerNames() { return names() },
+    // The seats a person may take, and the one they have.
+    get choosers() { return game && plugin?.seatsThatChoose ? plugin.seatsThatChoose(game.getState().slice) : null },
+    get seat() { return humanIdx },
     // What the player may choose before a game: seats, rounds.
     get settings() { return resolved ? settingsFor(resolved, family, settings) : [] },
     start,

@@ -9,7 +9,7 @@
     "standard": 1116,
     "variants": 733
   },
-  "playableVariants": 269,
+  "playableVariants": 272,
   "playableFamilies": 14,
   "playableByFamily": {
     "bavarian-32": 2,
@@ -23,8 +23,8 @@
     "morris": 7,
     "reversi": 3,
     "shogi": 24,
-    "standard-52": 18,
-    "standard-dice": 4,
+    "standard-52": 20,
+    "standard-dice": 5,
     "xiangqi": 9
   },
   "variantPluginsByFamily": {
@@ -55,8 +55,8 @@
     "morris": 7,
     "reversi": 3,
     "shogi": 24,
-    "standard-52": 18,
-    "standard-dice": 4,
+    "standard-52": 20,
+    "standard-dice": 5,
     "xiangqi": 9
   },
   "tests": 6887,

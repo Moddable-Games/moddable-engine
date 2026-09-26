@@ -2,6 +2,9 @@ import { createTableauPluginFor } from '../index.js'
 import { buildDeck, cardIdOf, ordering } from '../src/cards.js'
 import { showScore } from '../src/mechanics/pegging.js'
 import { scoreRoll } from '../src/mechanics/rolling-rounds.js'
+import { total as blackjackTotal } from '../src/mechanics/house.js'
+import { resolveRoll } from '../src/mechanics/shooting.js'
+import { bestHand } from '../src/mechanics/holdem.js'
 import { createGameForFamily, createAI } from '../../../play/index.js'
 import '../../../play/src/bootstrap-plugins.js'
 import '../../../play/test-helpers/setup-rules-reader.js'
@@ -1563,6 +1566,111 @@ describe('bluffing (Liar\'s Dice) and rolling rounds (Bunco)', () => {
       const game = createGameForFamily('standard-dice', { variant, rngSeed: 2, settings })
       const ai = createAI('standard-dice', variant, { difficulty: 'medium', definition: game.raw.definition, rngSeed: 2 })
       for (let ply = 0; ply < 50000; ply++) {
+        const st = game.getState()
+        if (st.slice.finished !== null) break
+        expect(game.applyMove(ai.pickMove(st.slice, st.players.currentIndex)).ok).toBe(true)
+      }
+      expect(game.getState().slice.finished).not.toBeNull()
+    }
+  })
+})
+
+describe('play chips: house (Blackjack), shooting (Craps), holdem (Poker)', () => {
+  const deck = { type: 'standard-52', jokers: 0 }
+  const HOUSE = { game: 'house', chips: { start: 100, bets: [1, 2, 5, 10, 25] }, hitSoft17: false, rounds: 10 }
+  // One deck, so the cards are named without a copy number.
+  const bj = createTableauPluginFor('standard-52')(HOUSE, { definition: { players: ['dealer', 'p1', 'p2'], components: { deck } } })
+  const ctx = { card: bj.cardOf }
+  const bjBase = bj.init({ hands: [[], [], []], community: [], drawPile: [] }, noRng)
+  const table = (boxes, house, shoe, extra = {}) => ({ ...bjBase, phase: 'play', bets: [0, 10, 10], stacks: [0, 90, 90], boxes: [[], ...boxes], house, shoe, insured: [0, 0, 0], active: { seat: 1, box: 0 }, next: 1, revealed: false, ...extra })
+
+  test('an Ace counts eleven unless that busts; Ace and a ten is Blackjack', () => {
+    expect(blackjackTotal(['spades_A', 'hearts_6'], ctx)).toEqual({ value: 17, soft: true })
+    expect(blackjackTotal(['spades_A', 'hearts_6', 'clubs_9'], ctx)).toEqual({ value: 16, soft: false })
+    expect(blackjackTotal(['spades_A', 'hearts_K'], ctx).value).toBe(21)
+  })
+
+  test('the house never has a choice, so nobody plays it', () => {
+    expect(bj.seatsThatChoose(bjBase)).toEqual([1, 2])
+  })
+
+  test('the house draws to 16 and stands on soft 17; a higher hand wins even money', () => {
+    const s = table([[{ cards: ['clubs_10', 'clubs_9'], bet: 10, done: false }], [{ cards: ['clubs_8', 'clubs_7'], bet: 10, done: true, outcome: 'bust' }]], ['hearts_10', 'hearts_6'], ['diamonds_A', 'diamonds_5'])
+    const after = bj.applyMove({ action: 'stand' }, s, turn(1))
+    // Ten and six is sixteen: the house takes the Ace, to a hard 17, and stands.
+    expect(after.lastRound.house).toEqual(['hearts_10', 'hearts_6', 'diamonds_A'])
+    expect(after.stacks[1]).toBe(90 + 20)
+    const soft = table([[{ cards: ['clubs_10', 'clubs_9'], bet: 10, done: false }], []], ['hearts_A', 'hearts_6'], ['diamonds_5'])
+    expect(bj.applyMove({ action: 'stand' }, soft, turn(1)).lastRound.house).toEqual(['hearts_A', 'hearts_6'])
+  })
+
+  test('doubling doubles the bet for one card; split Aces take one card each; surrender returns half', () => {
+    const d = bj.applyMove({ action: 'double' }, table([[{ cards: ['clubs_5', 'clubs_6'], bet: 10, done: false }], []], ['hearts_10', 'hearts_8'], ['diamonds_K']), turn(1))
+    expect(d.lastRound.results.find(r => r.seat === 1).outcome).toBe('win')
+    expect(d.stacks[1]).toBe(80 + 40)
+    const split = bj.applyMove({ action: 'split' }, table([[{ cards: ['clubs_A', 'spades_A'], bet: 10, done: false }], [{ cards: ['clubs_8', 'clubs_7'], bet: 10, done: false }]], ['hearts_10', 'hearts_8'], ['diamonds_K', 'diamonds_9']), turn(1))
+    expect(split.boxes[1].map(b => b.cards.length)).toEqual([2, 2])
+    expect(split.boxes[1].every(b => b.done)).toBe(true)
+    const sur = bj.applyMove({ action: 'surrender' }, table([[{ cards: ['clubs_10', 'clubs_6'], bet: 10, done: false }], [{ cards: ['clubs_8', 'clubs_7'], bet: 10, done: false }]], ['hearts_10', 'hearts_8'], []), turn(1))
+    expect(sur.stacks[1]).toBe(95)
+  })
+
+  test('Craps: seven or eleven on the come-out wins the Pass Line, two or three wins Don\'t Pass, twelve pushes it', () => {
+    const crapsCtx = { config: { shooters: 2, chips: { bets: [5] } } }
+    const come = { stacks: [95, 95], turns: [0, 0], shooter: 0, rolls: 0, point: null, line: [{ type: 'pass', amount: 5 }, { type: 'dont', amount: 5 }], odds: [0, 0], seed: 1 }
+    expect(resolveRoll(come, 0, [3, 4], crapsCtx).stacks).toEqual([105, 95])
+    expect(resolveRoll(come, 0, [1, 2], crapsCtx).stacks).toEqual([95, 105])
+    expect(resolveRoll(come, 0, [6, 6], crapsCtx).stacks).toEqual([95, 100])
+    const point = resolveRoll(come, 0, [2, 2], crapsCtx)
+    expect(point.point).toBe(4)
+  })
+
+  test('Craps: making the point pays Pass and its Odds at true odds; a seven-out passes the dice', () => {
+    const crapsCtx = { config: { shooters: 2, chips: { bets: [5] } } }
+    const onFour = { stacks: [90, 95], turns: [0, 0], shooter: 0, rolls: 3, point: 4, line: [{ type: 'pass', amount: 5 }, { type: 'dont', amount: 5 }], odds: [5, 0], seed: 1 }
+    // Pass 5 even money, odds 5 at 2:1 on four.
+    expect(resolveRoll(onFour, 0, [1, 3], crapsCtx).stacks).toEqual([90 + 10 + 15, 95])
+    const out = resolveRoll(onFour, 0, [3, 4], crapsCtx)
+    expect(out.stacks).toEqual([90, 105])
+    expect(out.shooter).toBe(1)
+    expect(out.turns).toEqual([1, 0])
+  })
+
+  test('Poker ranks the best five of seven: straight flush, four of a kind, full house, and the wheel', () => {
+    const pctx = { card: bj.cardOf }
+    const rank = (ids) => bestHand(ids, pctx)[0]
+    expect(rank(['hearts_9', 'hearts_10', 'hearts_J', 'hearts_Q', 'hearts_K', 'clubs_2', 'spades_2'])).toBe(8)
+    expect(rank(['hearts_9', 'clubs_9', 'spades_9', 'diamonds_9', 'hearts_K', 'clubs_2', 'spades_3'])).toBe(7)
+    expect(rank(['hearts_9', 'clubs_9', 'spades_9', 'diamonds_K', 'hearts_K', 'clubs_2', 'spades_3'])).toBe(6)
+    expect(bestHand(['hearts_A', 'clubs_2', 'spades_3', 'diamonds_4', 'hearts_5', 'clubs_9', 'spades_J'], pctx)).toEqual([4, 5])
+    // A higher kicker wins between equal pairs.
+    const a = bestHand(['hearts_9', 'clubs_9', 'spades_A', 'diamonds_7', 'hearts_4', 'clubs_2', 'spades_3'], pctx)
+    const b = bestHand(['diamonds_9', 'spades_9', 'spades_K', 'diamonds_7', 'hearts_4', 'clubs_2', 'spades_3'], pctx)
+    expect(a[2]).toBeGreaterThan(b[2])
+  })
+
+  test('Poker keeps every chip: side pots go to who contested them, and an uncalled bet goes back', () => {
+    for (const players of [2, 3, 6]) {
+      const game = createGameForFamily('standard-52', { variant: 'poker', rngSeed: players, settings: { players } })
+      const ai = createAI('standard-52', 'poker', { difficulty: 'medium', definition: game.raw.definition, rngSeed: players })
+      for (let ply = 0; ply < 100000; ply++) {
+        const st = game.getState()
+        if (st.slice.finished !== null) break
+        expect(game.applyMove(ai.pickMove(st.slice, st.players.currentIndex)).ok).toBe(true)
+        const s = game.getState().slice
+        if (s.finished === null) expect(s.stacks.reduce((x, y) => x + y, 0) + s.total.reduce((x, y) => x + y, 0)).toBe(players * 1000)
+      }
+      const end = game.getState().slice
+      expect(end.finished).not.toBeNull()
+      expect(end.stacks[end.finished]).toBe(players * 1000)
+    }
+  })
+
+  test('computer seats play Blackjack and Craps sessions out', () => {
+    for (const [family, variant] of [['standard-52', 'blackjack'], ['standard-dice', 'craps']]) {
+      const game = createGameForFamily(family, { variant, rngSeed: 5 })
+      const ai = createAI(family, variant, { difficulty: 'medium', definition: game.raw.definition, rngSeed: 5 })
+      for (let ply = 0; ply < 20000; ply++) {
         const st = game.getState()
         if (st.slice.finished !== null) break
         expect(game.applyMove(ai.pickMove(st.slice, st.players.currentIndex)).ok).toBe(true)

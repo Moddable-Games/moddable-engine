@@ -57,6 +57,8 @@ export const CONFIG_KEYS = new Set([
   'toCrib', 'cribFromDeck',
   // bluffing, rolling rounds
   'dicePerPlayer', 'faces', 'bunco', 'threeOfAKind', 'roundEnds',
+  // play chips: house, shooting, holdem
+  'chips', 'hitSoft17', 'blinds', 'odds', 'shooters',
   // a hand per double: trains, branching
   'tilesPerPlayer', 'blankDouble', 'afterStart', 'publicTrain', 'openingArms', 'doubleToes',
   // scorecard dice
@@ -148,6 +150,11 @@ export function createTableauPluginFor(family) {
 
       applyMove(move, slice, full) {
         return mechanic.apply(move, slice, full.__players.currentIndex, ctx)
+      },
+
+      // The seats a person may take: not a house that plays by rule alone.
+      seatsThatChoose(slice) {
+        return mechanic && mechanic.seatsThatChoose ? mechanic.seatsThatChoose(slice, ctx) : null
       },
 
       // The seat that chooses for the seat to play, where that is someone else.

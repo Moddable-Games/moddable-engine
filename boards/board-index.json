@@ -2927,7 +2927,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-52--blackjack.svg",
     "rulesUrl": "standard-52/games/blackjack/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-52",
@@ -3049,7 +3049,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-52--poker.svg",
     "rulesUrl": "standard-52/games/poker/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-52",
@@ -3129,7 +3129,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-dice--craps.svg",
     "rulesUrl": "standard-dice/games/craps/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-dice",

@@ -1954,6 +1954,12 @@ export async function initGamePlay(container, defaults = {}) {
       rebuildVariantSelect(config.family)
       variantSelect.value = config.variant
       rebuildSeatSelect(config.family, session.playerNames)
+      // A seat nobody may take - the house - is not offered, and the select
+      // shows the seat the person was given.
+      if (session.choosers) {
+        for (const o of [...seatSelect.options]) if (!session.choosers.includes(Number(o.value))) o.remove()
+        seatSelect.value = String(session.seat)
+      }
       buildFlagToggles()
       buildSettingControls()
       updateRules()

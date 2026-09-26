@@ -33,11 +33,12 @@ const MINIMUM_PLAYABLE = {
   // Played with components rather than on a board, through the tableau
   // plugin (engine#176, #184): Big 2, President, War, Whist, Hearts, Spades,
   // Euchre, Bridge, Crazy Eights, Klondike, FreeCell, Spider, Rummy, Gin
-  // Rummy, Canasta and Cribbage for two, three and four; Block, All Fives,
-  // Mexican Train and Chickenfoot; Yahtzee and Farkle; Skat and Schafkopf.
-  'standard-52': 18,
+  // Rummy, Canasta, Cribbage for two, three and four, Blackjack and Texas
+  // Hold'em; Block, All Fives, Mexican Train and Chickenfoot; Yahtzee,
+  // Farkle, Liar's Dice, Bunco and Craps; Skat and Schafkopf.
+  'standard-52': 20,
   'double-six-dominoes': 4,
-  'standard-dice': 4,
+  'standard-dice': 5,
   'bavarian-32': 2,
   morris: 7,
   // 13 until hasami-shogi was measured capturing 11 times by displacement

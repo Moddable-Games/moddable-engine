@@ -16,6 +16,9 @@ import { calledPartner } from './called-partner.js'
 import { pegging } from './pegging.js'
 import { bluffing } from './bluffing.js'
 import { rollingRounds } from './rolling-rounds.js'
+import { house } from './house.js'
+import { shooting } from './shooting.js'
+import { holdem } from './holdem.js'
 
 // The shapes of game the tableau plugin knows, by the name a game's
 // frontmatter gives as `game:`.
@@ -38,4 +41,7 @@ export const MECHANICS = {
   pegging,
   bluffing,
   'rolling-rounds': rollingRounds,
+  house,
+  shooting,
+  holdem,
 }
