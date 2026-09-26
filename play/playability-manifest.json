@@ -1361,6 +1361,26 @@
     "path": "content/games/block/standard.md"
   },
   {
+    "family": "double-six-dominoes",
+    "familyLabel": "Double-Six Dominoes",
+    "variant": "chickenfoot",
+    "key": "chickenfoot",
+    "label": "Chickenfoot",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/chickenfoot/standard.md"
+  },
+  {
+    "family": "double-six-dominoes",
+    "familyLabel": "Double-Six Dominoes",
+    "variant": "mexican-train",
+    "key": "mexican-train",
+    "label": "Mexican Train",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/mexican-train/standard.md"
+  },
+  {
     "family": "draughts",
     "familyLabel": "Draughts",
     "variant": "alquerque",

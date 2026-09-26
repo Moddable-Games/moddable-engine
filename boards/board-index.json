@@ -1707,7 +1707,7 @@
     "topology": "tableau",
     "svg": "svgs/double-six-dominoes--chickenfoot.svg",
     "rulesUrl": "double-six-dominoes/games/chickenfoot/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "double-six-dominoes",
@@ -1717,7 +1717,7 @@
     "topology": "tableau",
     "svg": "svgs/double-six-dominoes--mexican-train.svg",
     "rulesUrl": "double-six-dominoes/games/mexican-train/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "draughts",

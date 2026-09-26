@@ -42,6 +42,8 @@ export const CONFIG_KEYS = new Set([
   'wild', 'starterSkips',
   // dominoes
   'draw', 'spinner', 'scoreFives',
+  // a hand per double: trains, branching
+  'tilesPerPlayer', 'blankDouble', 'afterStart', 'publicTrain', 'openingArms', 'doubleToes',
   // scorecard dice
   'dice', 'rolls', 'categories', 'bonuses', 'repeat',
   // press-your-luck dice

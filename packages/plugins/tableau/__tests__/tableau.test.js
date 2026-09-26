@@ -584,6 +584,140 @@ describe('dominoes', () => {
   })
 })
 
+describe('a hand per double: trains (Mexican Train)', () => {
+  const TRAINS = { game: 'trains', publicTrain: true, afterStart: 'holder', tilesPerPlayer: { 2: 5 } }
+  const definition = { players: ['p1', 'p2'], components: { deck: { type: 'dominoes-28', maxPips: 12 } } }
+  const plugin = createTableauPluginFor('double-six-dominoes')(TRAINS, { definition })
+  const base = plugin.init({ hands: [[], []], community: [], drawPile: [] }, noRng)
+  // The 12-12 is down; both players have started unless a test says otherwise.
+  const table = (hands, extra = {}) => ({ ...base, hands, drawPile: ['1_2', '3_4'], started: [true, true], next: 0, ...extra })
+  const moves = (slice, seat) => plugin.getLegalMoves(slice, turn(seat))
+  const targets = (slice, seat) => new Set(moves(slice, seat).filter(m => m.action === 'play').map(m => m.train))
+
+  test('the engine is the double-twelve and the game is thirteen hands', () => {
+    expect(base.hub).toBe('12_12')
+    expect(base.value).toBe(12)
+    const game = createGameForFamily('double-six-dominoes', { variant: 'mexican-train', rngSeed: 4 })
+    expect(game.getState().slice.hub).toBe('12_12')
+  })
+
+  test('a first turn is a run on one\'s own train, ended at will', () => {
+    let s = table([['5_12', '5_7', '0_0'], ['11_12']], { started: [false, false] })
+    expect(targets(s, 0)).toEqual(new Set([0]))
+    s = plugin.applyMove({ action: 'play', cards: ['5_12'], train: 0 }, s, turn(0))
+    expect(s.next).toBe(0)
+    expect(moves(s, 0)).toEqual(expect.arrayContaining([{ action: 'play', cards: ['5_7'], train: 0 }, { action: 'end' }]))
+    s = plugin.applyMove({ action: 'play', cards: ['5_7'], train: 0 }, s, turn(0))
+    s = plugin.applyMove({ action: 'end' }, s, turn(0))
+    expect(s.started[0]).toBe(true)
+    expect(s.next).toBe(1)
+  })
+
+  test('after the first turn: one\'s own train and the Mexican Train, and another\'s only once it is marked', () => {
+    const s = table([['3_12'], ['4_12']])
+    expect(targets(s, 0)).toEqual(new Set([0, 'public']))
+    expect(targets({ ...s, markers: [false, true] }, 0)).toEqual(new Set([0, 'public', 1]))
+  })
+
+  test('a player who cannot play draws one, may play only it, and otherwise marks their train', () => {
+    let s = table([['1_1'], ['2_2']], { drawPile: ['4_5', '6_12'] })
+    expect(moves(s, 0)).toEqual([{ action: 'draw' }])
+    s = plugin.applyMove({ action: 'draw' }, s, turn(0))
+    expect(s.hands[0]).toContain('4_5')
+    expect(moves(s, 0)).toEqual([{ action: 'pass' }])
+    s = plugin.applyMove({ action: 'pass' }, s, turn(0))
+    expect(s.markers[0]).toBe(true)
+    expect(s.next).toBe(1)
+    // Playing on one's own marked train takes the marker off.
+    const back = plugin.applyMove({ action: 'play', cards: ['6_12'], train: 0 }, { ...s, hands: [['6_12', '1_1'], ['2_2']], next: 0 }, turn(0))
+    expect(back.markers[0]).toBe(false)
+  })
+
+  test('a double earns another tile, and a double left open must be answered next, on its train', () => {
+    let s = table([['7_12', '7_7', '3_3'], ['2_7', '9_12']])
+    s = plugin.applyMove({ action: 'play', cards: ['7_12'], train: 0 }, s, turn(0))
+    s = { ...s, next: 0 }
+    s = plugin.applyMove({ action: 'play', cards: ['7_7'], train: 0 }, s, turn(0))
+    expect(s.next).toBe(0)
+    expect(s.unsatisfied).toEqual([0])
+    // Nothing else of seat 0's fits anywhere: it draws, then passes, and the double stays open.
+    s = plugin.applyMove({ action: 'draw' }, { ...s, drawPile: ['1_2'] }, turn(0))
+    s = plugin.applyMove({ action: 'pass' }, s, turn(0))
+    expect(s.next).toBe(1)
+    // Seat 1 could start its own train or the Mexican Train with 12-9, but must answer the 7-7.
+    expect(moves(s, 1).filter(m => m.action === 'play')).toEqual([{ action: 'play', cards: ['2_7'], train: 0 }])
+    s = plugin.applyMove({ action: 'play', cards: ['2_7'], train: 0 }, s, turn(1))
+    expect(s.unsatisfied).toEqual([])
+  })
+
+  test('the hand ends when a player is out, even on a double, and everyone is charged the pips they hold', () => {
+    const s = table([['5_12'], ['6_6', '0_3']], { hand: 0 })
+    const after = plugin.applyMove({ action: 'play', cards: ['5_12'], train: 0 }, s, turn(0))
+    expect(after.hand).toBe(1)
+    expect(after.totals).toEqual([0, 15])
+    expect(after.hub).toBe('11_11')
+  })
+})
+
+describe('a hand per double: branching (Chickenfoot)', () => {
+  const BRANCHING = { game: 'branching', openingArms: 4, doubleToes: 3, afterStart: 'next', blankDouble: 50, tilesPerPlayer: { 2: 5 } }
+  const definition = { players: ['p1', 'p2'], components: { deck: { type: 'dominoes-28', maxPips: 9 } } }
+  const plugin = createTableauPluginFor('double-six-dominoes')(BRANCHING, { definition })
+  const base = plugin.init({ hands: [[], []], community: [], drawPile: [] }, noRng)
+  const table = (hands, extra = {}) => ({ ...base, hands, drawPile: [], next: 0, ...extra })
+  const ends = (slice, seat) => plugin.getLegalMoves(slice, turn(seat)).filter(m => m.action === 'play')
+
+  test('the first double is the 9-9, with four arms, and the game is ten hands', () => {
+    expect(base.root).toBe('9_9')
+    expect(base.ends).toHaveLength(4)
+    expect(base.ends.every(e => e.value === 9 && e.toe)).toBe(true)
+  })
+
+  test('all four arms of the opening double are filled before any is extended', () => {
+    let s = table([['1_9', '1_5'], ['2_9', '3_9', '4_9', '0_0']])
+    s = plugin.applyMove({ action: 'play', cards: ['1_9'], end: 'e0' }, s, turn(0))
+    // The 1 now showing cannot be played on while three arms are empty.
+    expect(ends(s, 0)).toEqual([])
+    expect(ends(s, 1).map(m => m.cards[0]).sort()).toEqual(['2_9', '3_9', '4_9'])
+    for (const [seat, id] of [[1, '2_9'], [1, '3_9'], [1, '4_9']]) {
+      const end = s.ends.find(e => e.toe).key
+      s = plugin.applyMove({ action: 'play', cards: [id], end }, s, turn(seat))
+    }
+    expect(ends(s, 0).map(m => m.cards[0])).toEqual(['1_5'])
+  })
+
+  test('a later double opens a chicken foot of three toes that must all be filled first', () => {
+    let s = table([['5_5', '2_8'], ['1_5', '2_5', '3_5', '0_8']], { ends: [{ key: 'a', value: 5, toe: false }, { key: 'b', value: 8, toe: false }], endCount: 2 })
+    s = plugin.applyMove({ action: 'play', cards: ['5_5'], end: 'a' }, s, turn(0))
+    expect(s.ends.filter(e => e.toe)).toHaveLength(3)
+    // Seat 1 holds 8-0 for the open 8, but may only fill toes.
+    expect(ends(s, 1).map(m => m.cards[0]).sort()).toEqual(['1_5', '2_5', '3_5'])
+  })
+
+  test('the 0-0 left in a hand costs fifty', () => {
+    const s = table([['0_4'], ['0_0', '1_1']], { ends: [{ key: 'a', value: 4, toe: false }], endCount: 1 })
+    const after = plugin.applyMove({ action: 'play', cards: ['0_4'], end: 'a' }, s, turn(0))
+    expect(after.totals).toEqual([0, 52])
+    expect(after.root).toBe('8_8')
+  })
+
+  test('both games are played out to the lowest total by computer seats', () => {
+    for (const variant of ['chickenfoot', 'mexican-train']) {
+      const game = createGameForFamily('double-six-dominoes', { variant, rngSeed: 3 })
+      const ai = createAI('double-six-dominoes', variant, { difficulty: 'medium', definition: game.raw.definition })
+      for (let ply = 0; ply < 20000; ply++) {
+        const st = game.getState()
+        if (st.slice.finished !== null) break
+        expect(game.applyMove(ai.pickMove(st.slice, st.players.currentIndex)).ok).toBe(true)
+      }
+      const s = game.getState().slice
+      expect(s.finished).not.toBeNull()
+      expect(s.hand).toBe(variant === 'chickenfoot' ? 9 : 12)
+      if (s.finished !== 'draw') expect(s.totals[s.finished]).toBe(Math.min(...s.totals))
+    }
+  })
+})
+
 describe('dice', () => {
   const definition = { players: ['a', 'b'], components: { dice: { count: 5 } } }
   const rng = { request: () => ({ shuffle: a => a, nextInt: () => 77 }) }

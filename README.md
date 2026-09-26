@@ -170,6 +170,8 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-26
+- Mexican Train and Chickenfoot play (engine#184). Two new shapes share one way of running a hand per double, the highest first, charging the pips left in hand: `trains` (a train per player and the public Mexican Train, markers that open a train, a free first turn, a double that earns another tile and must be answered next) and `branching` (the opening double's four arms and every later double's three toes filled before play goes elsewhere, the 0-0 costing 50). Their rules pages were rewritten from Pagat, which corrected Chickenfoot's set and deal
+- A domino set of our own, blank to twelve (`mce-dominoes-double12`, drawn by `scripts/gen-domino-set.mjs`), for the double-nine and double-twelve games the six-pip sets could not draw
 - President plays (engine#184). The climbing shape Big 2 uses can play on past the first player out to a full finishing order (`playTo: finishing-order`). Finishing places become roles, the lower roles' best cards pass up before the next round and the higher roles return as many of their choosing, and the Scum leads. A sequence of three or more consecutive ranks is a combination, as the rules name it
 - A variant can offer settings to choose before a game: the number of players its deal allows, and any option its plugin block declares. The play page shows each as a select; President offers four to eight players and a number of rounds, or open play
 

@@ -1,6 +1,6 @@
 {
   "generated": "2026-09-26",
-  "pieces": 120,
+  "pieces": 121,
   "boards": 335,
   "boardFamilies": 34,
   "tiles": 11,
@@ -9,11 +9,11 @@
     "standard": 1116,
     "variants": 733
   },
-  "playableVariants": 252,
+  "playableVariants": 254,
   "playableFamilies": 13,
   "playableByFamily": {
     "chess": 149,
-    "double-six-dominoes": 2,
+    "double-six-dominoes": 4,
     "draughts": 20,
     "go": 12,
     "hex": 8,
@@ -43,7 +43,7 @@
   },
   "frontmatterOnlyByFamily": {
     "chess": 96,
-    "double-six-dominoes": 2,
+    "double-six-dominoes": 4,
     "draughts": 20,
     "go": 9,
     "hex": 8,
