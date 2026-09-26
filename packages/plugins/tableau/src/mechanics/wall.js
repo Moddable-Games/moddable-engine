@@ -35,6 +35,8 @@ import { SCORERS } from './mahjong-scoring.js'
 //     liability: true          # feeding the last dragon or wind set pays for it
 //     lastDiscard: win         # the discard after the last tile: only to win
 //     kongAfterClaim: false    # a kong only in a turn that began with a draw
+//
+// dealerKeeps may also be `never`: the deal passes after every hand.
 
 const WINDS = ['east', 'south', 'west', 'north']
 
@@ -146,7 +148,7 @@ function deal(slice, ctx) {
   let next = {
     ...slice, deals: slice.deals + 1, wall, dead,
     hands: four(() => []), melds: four(() => []), discards: four(() => []), discarded: four(() => []), bonus: four(() => []),
-    riichi: four(null), furiten: four(false), liable: four(null), uninterrupted: true,
+    riichi: four(null), furiten: four(false), liable: four(null), uninterrupted: true, log: [],
     lastDiscard: null, claim: null, drawn: null, flags: {},
   }
   for (let k = 0; k < s.handSize; k++) for (let p = 0; p < 4; p++) next = drawFor(next, (next.dealer + p) % 4, ctx)
@@ -164,7 +166,7 @@ function startTurn(slice, seat, ctx, afterKong) {
 // Dora: each indicator turned points to the next tile, and each tile of that
 // kind in the hand is a han; after riichi the tiles beneath count as well.
 function doraIn(slice, allKinds, riichi, ctx) {
-  if (!slice.dead) return {}
+  if (!slice.dead || !settings(ctx).game.dora) return {}
   const turned = 1 + slice.dead.kongs
   const count = (ids) => ids.slice(0, turned).reduce((n, id) => n + allKinds.filter(k => k === doraAfter(kindOf(tileOf(ctx, id)))).length, 0)
   return { dora: count(slice.dead.indicators), uraDora: riichi ? count(slice.dead.under) : 0 }
@@ -178,11 +180,13 @@ function circumstances(slice, seat, how, allKinds, ctx) {
   let blessing = null
   if (first && how.selfDrawn) blessing = seat === slice.dealer ? 'heaven' : 'earth'
   if (first && !how.selfDrawn && seat !== slice.dealer) blessing = 'man'
+  const opening = slice.lastDiscard
   return {
     riichi: !!declared,
     doubleRiichi: !!declared?.double,
     ippatsu: !!declared?.ippatsu,
     blessing,
+    dealersFirstDiscard: !how.selfDrawn && !!opening && opening.by === slice.dealer && slice.discarded[slice.dealer].length === 1,
     ...doraIn(slice, allKinds, !!declared, ctx),
   }
 }
@@ -207,7 +211,7 @@ function valueHand(slice, seat, concealedIds, how, ctx) {
   }
   const readings = []
   if (s.game.specials && !exposed.length && isThirteenOrphans(concealedKinds)) readings.push({ ...base, sets: [], pair: null, special: 'thirteen-orphans', wait: null })
-  if (s.game.specials && !exposed.length && isSevenPairs(concealedKinds)) readings.push({ ...base, sets: [], pair: null, special: 'seven-pairs', wait: 'pair' })
+  if (s.game.specials && !exposed.length && isSevenPairs(concealedKinds, s.game.pairsMayRepeat)) readings.push({ ...base, sets: [], pair: null, special: 'seven-pairs', wait: 'pair' })
   const openSets = exposed.map(m => ({ type: m.type, kind: m.kind, open: m.open }))
   for (const a of arrangements(concealedKinds, s.sets - exposed.length)) {
     const where = placements(a, how.winning)
@@ -261,8 +265,20 @@ function exhausted(slice, ctx) {
   if (s.noten && waiting.length > 0 && waiting.length < 4) {
     for (let i = 0; i < 4; i++) payment[i] = waiting.includes(i) ? s.noten / waiting.length : -s.noten / (4 - waiting.length)
   }
-  const keeps = s.dealerKeeps === 'tenpai' ? waiting.includes(slice.dealer) : true
+  const keeps = s.dealerKeeps === 'tenpai' ? waiting.includes(slice.dealer) : s.dealerKeeps !== 'never'
   return endHand({ ...slice, lastHand: { drawn: true, waiting } }, keeps, ctx, payment, slice.counters + 1)
+}
+
+// Same-round immunity: of the discards since the winner's own last one
+// (that one included), the first of the winning kind makes its discarder
+// responsible; if that was the winner's own, no one is.
+function sameRound(slice, winner, ctx) {
+  const log = slice.log
+  const kind = kindOf(tileOf(ctx, log[log.length - 1].tile))
+  let start = 0
+  for (let i = log.length - 2; i >= 0; i--) if (log[i].by === winner) { start = i; break }
+  const first = log.slice(start).find(e => kindOf(tileOf(ctx, e.tile)) === kind)
+  return first.by === winner ? null : first.by
 }
 
 // Pay one or more winners: on a self-drawn win every other player pays, on a
@@ -278,9 +294,10 @@ function win(slice, winners, from, ctx) {
   const hands = []
   for (const { seat, value } of winners) {
     const selfDrawn = from === null
-    const points = game.pays ? value.basic : game.points(value.value)
+    const points = game.pays ? (value.basic ?? value.value) : game.points(value.value)
+    const responsible = selfDrawn ? null : game.immunity && !slice.robbing ? sameRound(slice, seat, ctx) : from
     const owed = (payer) => (game.pays
-      ? game.pays(value, { selfDrawn, winnerIsDealer: seat === slice.dealer, payerIsDealer: payer === slice.dealer })
+      ? game.pays(value, { selfDrawn, winnerIsDealer: seat === slice.dealer, payerIsDealer: payer === slice.dealer, responsible: responsible === null ? null : payer === responsible })
       : points * (selfDrawn ? game.selfDraw : 1) * (game.dealerDouble && (payer === slice.dealer || seat === slice.dealer) ? 2 : 1))
     const pay = (payer, amount) => { payment[payer] -= amount; payment[seat] += amount }
     const bonus = s.counters * slice.counters
@@ -290,6 +307,7 @@ function win(slice, winners, from, ctx) {
     if (selfDrawn && liable !== null) pay(liable, others.reduce((n, i) => n + owed(i), 0) + bonus)
     else if (selfDrawn) for (const i of others) pay(i, owed(i) + bonus / 3)
     else if (liable !== null && liable !== from) { pay(from, owed(from) / 2 + bonus); pay(liable, owed(from) / 2) }
+    else if (game.allPay) for (const i of others) pay(i, owed(i))
     else pay(from, owed(from) + bonus)
     hands.push({ winner: seat, value: value.value, fu: value.fu, limit: value.limit, patterns: value.patterns, points })
   }
@@ -299,7 +317,7 @@ function win(slice, winners, from, ctx) {
   for (const { seat } of winners) if (slice.riichi[seat]) { payment[seat] += s.riichi; pot -= s.riichi }
   payment[winners[0].seat] += pot
   const dealerWon = winners.some(w => w.seat === slice.dealer)
-  return endHand({ ...slice, pot: 0, lastHand: { ...hands[0], from, winners: hands } }, dealerWon, ctx, payment, dealerWon ? slice.counters + 1 : 0)
+  return endHand({ ...slice, pot: 0, lastHand: { ...hands[0], from, winners: hands } }, dealerWon && s.dealerKeeps !== 'never', ctx, payment, dealerWon ? slice.counters + 1 : 0)
 }
 
 function take(hand, count, kind, ctx) {
@@ -540,6 +558,7 @@ export const wall = {
       hands: slice.hands.map((h, i) => (i === seat ? h.filter(t => t !== id) : h)),
       discards: slice.discards.map((d, i) => (i === seat ? [...d, id] : d)),
       discarded: slice.discarded.map((d, i) => (i === seat ? [...d, id] : d)),
+      log: [...slice.log, { by: seat, tile: id }],
       riichi: slice.riichi.map((r, i) => (i === seat && r ? { ...r, ippatsu: false } : r)),
       lastDiscard: { tile: id, by: seat, riichi: declaring, double: declaring && slice.uninterrupted && !slice.discarded[seat].length },
       drawn: null,
@@ -573,7 +592,7 @@ export const wall = {
     if (s.counters && view.counters) extras.push(`${view.counters} counter${view.counters === 1 ? '' : 's'}`)
     if (view.pot) extras.push(`${view.pot} in riichi sticks`)
     groups.push({ label: [`Wall ${view.wall.length} · ${WINDS[view.roundWind]} round, ${name(view.dealer)} deals`, ...extras].join(' · '), cards: [] })
-    if (view.dead) groups.push({ label: 'Dora indicators', cards: view.dead.indicators.filter(Boolean) })
+    if (view.dead && s.game.dora) groups.push({ label: 'Dora indicators', cards: view.dead.indicators.filter(Boolean) })
     for (let seat = 0; seat < 4; seat++) {
       const melds = view.melds[seat].flatMap(m => m.tiles)
       const shown = [...view.bonus[seat], ...melds]

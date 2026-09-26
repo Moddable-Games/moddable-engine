@@ -1830,6 +1830,16 @@
     "path": "content/games/riichi/standard.md"
   },
   {
+    "family": "mahjong",
+    "familyLabel": "Mahjong",
+    "variant": "zung-jung",
+    "key": "zung-jung",
+    "label": "Zung Jung",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/zung-jung/standard.md"
+  },
+  {
     "family": "mancala",
     "familyLabel": "Mancala",
     "variant": "ayo",

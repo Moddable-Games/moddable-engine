@@ -56,10 +56,12 @@ export function arrangements(kinds, sets) {
   return out
 }
 
-export function isSevenPairs(kinds) {
+// Seven different pairs; where `mayRepeat`, four of a kind undeclared as a
+// kong may stand for two of them.
+export function isSevenPairs(kinds, mayRepeat = false) {
   if (kinds.length !== 14) return false
-  const counts = countKinds(kinds)
-  return counts.size === 7 && [...counts.values()].every(n => n === 2)
+  const counts = [...countKinds(kinds).values()]
+  return mayRepeat ? counts.every(n => n % 2 === 0) : counts.length === 7 && counts.every(n => n === 2)
 }
 
 const ORPHANS = ['bamboo_1', 'bamboo_9', 'circles_1', 'circles_9', 'characters_1', 'characters_9', 'wind_east', 'wind_south', 'wind_west', 'wind_north', 'dragon_red', 'dragon_green', 'dragon_white']

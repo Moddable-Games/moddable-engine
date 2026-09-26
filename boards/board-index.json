@@ -2387,7 +2387,7 @@
     "topology": "tableau",
     "svg": "svgs/mahjong--zung-jung.svg",
     "rulesUrl": "mahjong/games/zung-jung/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "mancala",
