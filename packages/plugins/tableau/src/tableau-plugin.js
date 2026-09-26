@@ -59,6 +59,8 @@ export const CONFIG_KEYS = new Set([
   'dicePerPlayer', 'faces', 'bunco', 'threeOfAKind', 'roundEnds',
   // play chips: house, shooting, holdem
   'chips', 'hitSoft17', 'blinds', 'odds', 'shooters',
+  // fishing
+  'field', 'cardValues', 'goThreshold',
   // a hand per double: trains, branching
   'tilesPerPlayer', 'blankDouble', 'afterStart', 'publicTrain', 'openingArms', 'doubleToes',
   // scorecard dice

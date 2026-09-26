@@ -1581,6 +1581,36 @@
     "playable": true
   },
   {
+    "family": "flower-48",
+    "familyLabel": "Flower 48",
+    "variant": "go-stop",
+    "key": "go-stop",
+    "label": "Go-Stop",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/go-stop/standard.md"
+  },
+  {
+    "family": "flower-48",
+    "familyLabel": "Flower 48",
+    "variant": "hana-awase",
+    "key": "hana-awase",
+    "label": "Hana-Awase",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/hana-awase/standard.md"
+  },
+  {
+    "family": "flower-48",
+    "familyLabel": "Flower 48",
+    "variant": "koi-koi",
+    "key": "koi-koi",
+    "label": "Koi-Koi",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/koi-koi/standard.md"
+  },
+  {
     "family": "go",
     "familyLabel": "Go",
     "variant": "13x13",

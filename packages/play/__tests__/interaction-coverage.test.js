@@ -43,9 +43,11 @@ describe('a click on a legal move produces that move', () => {
     const moves = game.getLegalMoves().filter(m => m.action !== 'pass' && m.action !== 'resign')
     expect(moves.length).toBeGreaterThan(0)
 
-    // The cell a player would click for the first legal move.
+    // The cell a player would click for the first legal move; in a card game,
+    // the card, even where the move also names where it goes.
     const target = moves[0]
-    const pos = target.coord !== undefined ? target.coord
+    const pos = Array.isArray(target.cards) && target.cards.length ? target.cards[0]
+      : target.coord !== undefined ? target.coord
       : target.from !== undefined ? target.from
       : target.to
     // Some games open with an action rather than a click - landlords rolls

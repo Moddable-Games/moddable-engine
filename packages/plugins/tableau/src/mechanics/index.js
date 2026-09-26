@@ -19,6 +19,7 @@ import { rollingRounds } from './rolling-rounds.js'
 import { house } from './house.js'
 import { shooting } from './shooting.js'
 import { holdem } from './holdem.js'
+import { fishing } from './fishing.js'
 
 // The shapes of game the tableau plugin knows, by the name a game's
 // frontmatter gives as `game:`.
@@ -44,4 +45,5 @@ export const MECHANICS = {
   house,
   shooting,
   holdem,
+  fishing,
 }

@@ -35,11 +35,13 @@ const MINIMUM_PLAYABLE = {
   // Euchre, Bridge, Crazy Eights, Klondike, FreeCell, Spider, Rummy, Gin
   // Rummy, Canasta, Cribbage for two, three and four, Blackjack and Texas
   // Hold'em; Block, All Fives, Mexican Train and Chickenfoot; Yahtzee,
-  // Farkle, Liar's Dice, Bunco and Craps; Skat and Schafkopf.
+  // Farkle, Liar's Dice, Bunco and Craps; Skat and Schafkopf; Koi-Koi,
+  // Hana-Awase and Go-Stop.
   'standard-52': 20,
   'double-six-dominoes': 4,
   'standard-dice': 5,
   'bavarian-32': 2,
+  'flower-48': 3,
   morris: 7,
   // 13 until hasami-shogi was measured capturing 11 times by displacement
   // against 2 custodially - it was playing shogi capture on a hasami board -

@@ -5,6 +5,7 @@ import { scoreRoll } from '../src/mechanics/rolling-rounds.js'
 import { total as blackjackTotal } from '../src/mechanics/house.js'
 import { resolveRoll } from '../src/mechanics/shooting.js'
 import { bestHand } from '../src/mechanics/holdem.js'
+import { koiKoiYaku, goStopScore } from '../src/mechanics/fishing.js'
 import { createGameForFamily, createAI } from '../../../play/index.js'
 import '../../../play/src/bootstrap-plugins.js'
 import '../../../play/test-helpers/setup-rules-reader.js'
@@ -1670,6 +1671,94 @@ describe('play chips: house (Blackjack), shooting (Craps), holdem (Poker)', () =
     for (const [family, variant] of [['standard-52', 'blackjack'], ['standard-dice', 'craps']]) {
       const game = createGameForFamily(family, { variant, rngSeed: 5 })
       const ai = createAI(family, variant, { difficulty: 'medium', definition: game.raw.definition, rngSeed: 5 })
+      for (let ply = 0; ply < 20000; ply++) {
+        const st = game.getState()
+        if (st.slice.finished !== null) break
+        expect(game.applyMove(ai.pickMove(st.slice, st.players.currentIndex)).ok).toBe(true)
+      }
+      expect(game.getState().slice.finished).not.toBeNull()
+    }
+  })
+})
+
+describe('fishing (Koi-Koi, Hana-Awase, Go-Stop)', () => {
+  const deck = { type: 'hanafuda-48' }
+  const make = (config, players) => createTableauPluginFor('flower-48')({ game: 'fishing', ...config }, { definition: { players, components: { deck } } })
+  const koi = make({ scoring: 'yaku', cardsEach: { 2: 8 }, field: { 2: 8 }, rounds: 12 }, ['p1', 'p2'])
+  const ctx = { card: koi.cardOf }
+  const yaku = (pile) => Object.fromEntries(koiKoiYaku(pile, ctx))
+  const base = koi.init({ hands: [[], []], community: [], drawPile: [] }, noRng)
+  const plains = (month, n) => Array.from({ length: n }, (_, k) => `${month}_plain-${k + 1}`)
+
+  test('Koi-Koi yaku: the brights with and without the rain man, the viewings, boar-deer-butterfly, and counting', () => {
+    expect(yaku(['pine_crane', 'cherry_curtain', 'pampas_moon', 'willow_rain-man', 'paulownia_phoenix'])).toEqual({ Goko: 10 })
+    expect(yaku(['pine_crane', 'cherry_curtain', 'pampas_moon', 'willow_rain-man'])).toEqual({ 'Ame-Shiko': 7 })
+    expect(yaku(['pine_crane', 'cherry_curtain', 'pampas_moon', 'paulownia_phoenix'])).toEqual({ Shiko: 8 })
+    expect(yaku(['pine_crane', 'cherry_curtain', 'willow_rain-man'])).toEqual({})
+    expect(yaku(['pampas_moon', 'chrysanthemum_sake-cup', 'cherry_curtain'])).toEqual({ 'Tsukimi-zake': 5, 'Hanami-zake': 5 })
+    expect(yaku(['clover_boar', 'maple_deer', 'peony_butterflies'])).toEqual({ Inoshikacho: 5 })
+    // The sake cup is a plain as well as an animal: nine plains and the cup make ten.
+    expect(yaku([...plains('pine', 2), ...plains('plum', 2), ...plains('cherry', 2), ...plains('wisteria', 2), 'iris_plain-1', 'chrysanthemum_sake-cup'])).toEqual({ Kasu: 1 })
+  })
+
+  test('a played card takes the one it matches, chooses between two, and takes all three', () => {
+    const s = { ...base, field: ['pine_crane', 'pine_poetry-ribbon', 'plum_plain-1', 'cherry_plain-1', 'cherry_plain-2', 'cherry_poetry-ribbon'], hands: [['pine_plain-1', 'cherry_curtain', 'iris_bridge'], ['clover_boar']], drawPile: ['paulownia_plain-1'], next: 0 }
+    const moves = koi.getLegalMoves(s, turn(0))
+    expect(moves.filter(m => m.cards[0] === 'pine_plain-1').map(m => m.to).sort()).toEqual([koi.cardOf('pine_crane').display, koi.cardOf('pine_poetry-ribbon').display].sort())
+    const three = koi.applyMove(moves.find(m => m.cards[0] === 'cherry_curtain'), s, turn(0))
+    expect(three.piles[0].sort()).toEqual(['cherry_curtain', 'cherry_plain-1', 'cherry_plain-2', 'cherry_poetry-ribbon'].sort())
+    const none = koi.applyMove(moves.find(m => m.cards[0] === 'iris_bridge'), s, turn(0))
+    expect(none.field).toContain('iris_bridge')
+  })
+
+  test('stopping scores the yaku, double at seven or more, and double again after the opponent\'s koi-koi', () => {
+    const pile = ['pine_crane', 'cherry_curtain', 'pampas_moon', 'paulownia_phoenix']
+    const s = { ...base, phase: 'call', piles: [pile, []], called: [0, 1], lastScore: [8, 0], next: 0, scores: [0, 0] }
+    const after = koi.applyMove({ action: 'stop' }, s, turn(0))
+    expect(after.scores).toEqual([8 * 2 * 2, 0])
+    expect(after.dealer).toBe(0)
+  })
+
+  test('with nobody stopping, the dealer scores one and deals again', () => {
+    const s = { ...base, dealer: 1, hands: [[], ['iris_bridge']], field: ['pine_crane'], drawPile: [], piles: [[], []], scores: [0, 0], next: 1 }
+    const after = koi.applyMove({ action: 'play', cards: ['iris_bridge'], to: 'table' }, s, turn(1))
+    expect(after.scores).toEqual([0, 1])
+    expect(after.dealer).toBe(1)
+    expect(after.round).toBe(1)
+  })
+
+  test('Hana-Awase adds the card values, twenty, ten, five and one, and four play as partners', () => {
+    const hana = make({ scoring: 'points', cardsEach: { 4: 5 }, field: { 4: 8 }, cardValues: { hikari: 20, tane: 10, tanzaku: 5, kasu: 1 }, partnerships: [['p1', 'p3'], ['p2', 'p4']], rounds: 1 }, ['p1', 'p2', 'p3', 'p4'])
+    const hb = hana.init({ hands: [[], [], [], []], community: [], drawPile: [] }, noRng)
+    const s = { ...hb, hands: [[], [], [], ['iris_bridge']], field: [], drawPile: [], piles: [['pine_crane'], ['plum_bush-warbler'], ['plum_poetry-ribbon', 'plum_plain-1'], []], scores: [0, 0], next: 3 }
+    const after = hana.applyMove({ action: 'play', cards: ['iris_bridge'], to: 'table' }, s, turn(3))
+    expect(after.scores).toEqual([20 + 5 + 1, 10])
+    expect(after.finished).toBe(0)
+  })
+
+  test('Go-Stop scores godori, the grass ribbons and double junk', () => {
+    const gs = make({ scoring: 'go-stop' }, ['p1', 'p2'])
+    const gctx = { card: gs.cardOf }
+    expect(goStopScore(['plum_bush-warbler', 'wisteria_cuckoo', 'pampas_geese'], gctx)).toBe(5)
+    expect(goStopScore(['wisteria_red-ribbon', 'iris_red-ribbon', 'clover_red-ribbon'], gctx)).toBe(3)
+    // Eight junk and the two double cards make twelve: three points.
+    expect(goStopScore([...plains('pine', 2), ...plains('plum', 2), ...plains('cherry', 2), ...plains('iris', 2), 'willow_lightning', 'paulownia_plain-3'], gctx)).toBe(3)
+  })
+
+  test('Go-Stop: the drawn fourth of a month after a pair is ttadak, taking a junk card from the other player', () => {
+    const gs = make({ scoring: 'go-stop', cardsEach: { 2: 10 }, field: { 2: 8 }, goThreshold: { 2: 7 } }, ['p1', 'p2'])
+    const g0 = gs.init({ hands: [[], []], community: [], drawPile: [] }, noRng)
+    const s = { ...g0, field: ['pine_crane', 'pine_poetry-ribbon'], hands: [['pine_plain-1', 'iris_bridge'], ['clover_boar']], drawPile: ['pine_plain-2'], piles: [[], ['maple_plain-1']], next: 0 }
+    const move = gs.getLegalMoves(s, turn(0)).find(m => m.cards[0] === 'pine_plain-1')
+    const after = gs.applyMove(move, s, turn(0))
+    expect(after.piles[0]).toEqual(expect.arrayContaining(['pine_crane', 'pine_poetry-ribbon', 'pine_plain-1', 'pine_plain-2', 'maple_plain-1']))
+    expect(after.piles[1]).toEqual([])
+  })
+
+  test('computer seats play each game out', () => {
+    for (const [variant, settings] of [['koi-koi', { rounds: 3 }], ['hana-awase', {}], ['go-stop', { rounds: 3 }]]) {
+      const game = createGameForFamily('flower-48', { variant, rngSeed: 4, settings })
+      const ai = createAI('flower-48', variant, { difficulty: 'medium', definition: game.raw.definition, rngSeed: 4 })
       for (let ply = 0; ply < 20000; ply++) {
         const st = game.getState()
         if (st.slice.finished !== null) break

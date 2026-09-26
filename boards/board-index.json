@@ -1977,7 +1977,7 @@
     "topology": "tableau",
     "svg": "svgs/flower-48--go-stop.svg",
     "rulesUrl": "flower-48/games/go-stop/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "flower-48",
@@ -1987,7 +1987,7 @@
     "topology": "tableau",
     "svg": "svgs/flower-48--hana-awase.svg",
     "rulesUrl": "flower-48/games/hana-awase/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "flower-48",
@@ -1997,7 +1997,7 @@
     "topology": "tableau",
     "svg": "svgs/flower-48--koi-koi.svg",
     "rulesUrl": "flower-48/games/koi-koi/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "flower-48",

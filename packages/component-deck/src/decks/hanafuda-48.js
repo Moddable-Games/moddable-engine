@@ -83,7 +83,10 @@ registerDeck('hanafuda-48', {
   types: TYPES,
 
   create(opts = {}) {
-    return CARD_DEFS.map((def, i) => ({
+    // A game may play with some months only: Oicho-Kabu drops November and December.
+    const months = Array.isArray(opts.months) ? new Set(opts.months.map(m => String(m).toLowerCase())) : null
+    const kept = months ? CARD_DEFS.filter(def => months.has(MONTHS[def.month]) || months.has(MONTH_NAMES[def.month].toLowerCase())) : CARD_DEFS
+    return kept.map((def, i) => ({
       id: `${MONTHS[def.month]}_${def.name.toLowerCase().replace(/\s+/g, '-')}`,
       month: MONTHS[def.month],
       monthIndex: def.month,
