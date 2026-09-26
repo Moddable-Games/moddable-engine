@@ -83,6 +83,10 @@ for (const family of listFamilies()) {
       // one that offers none.
       rulesUrl: rulesUrlFor(family, slug),
       playable: meta.playable === true,
+      // The name the play page knows it by, where it is not the gallery's: a
+      // second game in one directory is filed as dir-file, but its frontmatter
+      // gives it a slug of its own (three-player-cribbage).
+      ...(meta.slug && meta.slug !== slug ? { playAs: meta.slug } : {}),
     })
   }
 }

@@ -2967,7 +2967,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-52--cribbage.svg",
     "rulesUrl": "standard-52/games/cribbage/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-52",
@@ -2977,7 +2977,8 @@
     "topology": "tableau",
     "svg": "svgs/standard-52--cribbage-four-player.svg",
     "rulesUrl": "",
-    "playable": false
+    "playable": true,
+    "playAs": "four-player-cribbage"
   },
   {
     "family": "standard-52",
@@ -2987,7 +2988,8 @@
     "topology": "tableau",
     "svg": "svgs/standard-52--cribbage-three-player.svg",
     "rulesUrl": "",
-    "playable": false
+    "playable": true,
+    "playAs": "three-player-cribbage"
   },
   {
     "family": "standard-52",

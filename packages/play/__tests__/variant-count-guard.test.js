@@ -33,9 +33,9 @@ const MINIMUM_PLAYABLE = {
   // Played with components rather than on a board, through the tableau
   // plugin (engine#176, #184): Big 2, President, War, Whist, Hearts, Spades,
   // Euchre, Bridge, Crazy Eights, Klondike, FreeCell, Spider, Rummy, Gin
-  // Rummy and Canasta; Block, All Fives, Mexican Train and Chickenfoot;
-  // Yahtzee and Farkle; Skat and Schafkopf.
-  'standard-52': 15,
+  // Rummy, Canasta and Cribbage for two, three and four; Block, All Fives,
+  // Mexican Train and Chickenfoot; Yahtzee and Farkle; Skat and Schafkopf.
+  'standard-52': 18,
   'double-six-dominoes': 4,
   'standard-dice': 2,
   'bavarian-32': 2,

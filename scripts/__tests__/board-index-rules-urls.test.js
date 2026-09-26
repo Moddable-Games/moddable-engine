@@ -55,7 +55,7 @@ describe('board gallery rules links', () => {
       readFileSync(resolve(ENGINE_ROOT, 'play/playability-manifest.json'), 'utf8')
     )
     const inManifest = new Set(manifest.map(v => `${v.family}/${v.variant}`))
-    const inGallery = new Set(index.filter(e => e.playable).map(e => `${e.family}/${e.variant}`))
+    const inGallery = new Set(index.filter(e => e.playable).map(e => `${e.family}/${e.playAs || e.variant}`))
 
     const galleryOnly = [...inGallery].filter(k => !inManifest.has(k)).sort()
     const manifestOnly = [...inManifest].filter(k => !inGallery.has(k)).sort()

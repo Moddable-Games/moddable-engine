@@ -2190,12 +2190,32 @@
   {
     "family": "standard-52",
     "familyLabel": "Standard 52-Card Deck",
+    "variant": "cribbage",
+    "key": "cribbage",
+    "label": "Cribbage",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/cribbage/standard.md"
+  },
+  {
+    "family": "standard-52",
+    "familyLabel": "Standard 52-Card Deck",
     "variant": "euchre",
     "key": "euchre",
     "label": "Euchre",
     "group": "Other",
     "playable": true,
     "path": "content/games/euchre/standard.md"
+  },
+  {
+    "family": "standard-52",
+    "familyLabel": "Standard 52-Card Deck",
+    "variant": "four-player-cribbage",
+    "key": "four-player-cribbage",
+    "label": "4-Player Cribbage (Partnership)",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/cribbage/four-player.md"
   },
   {
     "family": "standard-52",
@@ -2276,6 +2296,16 @@
     "group": "Other",
     "playable": true,
     "path": "content/games/spider-solitaire/standard.md"
+  },
+  {
+    "family": "standard-52",
+    "familyLabel": "Standard 52-Card Deck",
+    "variant": "three-player-cribbage",
+    "key": "three-player-cribbage",
+    "label": "3-Player Cribbage",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/cribbage/three-player.md"
   },
   {
     "family": "standard-52",

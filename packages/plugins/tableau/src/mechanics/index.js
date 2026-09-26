@@ -13,6 +13,7 @@ import { knocking } from './knocking.js'
 import { partnershipMelds } from './partnership-melds.js'
 import { loneDeclarer } from './lone-declarer.js'
 import { calledPartner } from './called-partner.js'
+import { pegging } from './pegging.js'
 
 // The shapes of game the tableau plugin knows, by the name a game's
 // frontmatter gives as `game:`.
@@ -32,4 +33,5 @@ export const MECHANICS = {
   'partnership-melds': partnershipMelds,
   'lone-declarer': loneDeclarer,
   'called-partner': calledPartner,
+  pegging,
 }

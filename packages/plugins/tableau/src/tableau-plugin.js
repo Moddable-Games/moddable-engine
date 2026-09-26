@@ -53,6 +53,8 @@ export const CONFIG_KEYS = new Set([
   'jack', 'jackOrder', 'suitBase', 'grandBase', 'nullValues', 'nullOrder', 'cardPoints',
   // called partner
   'ober', 'unter', 'trumpSuit', 'plainOrder', 'wenzOrder', 'tariff', 'laufende', 'runAway',
+  // pegging
+  'toCrib', 'cribFromDeck',
   // a hand per double: trains, branching
   'tilesPerPlayer', 'blankDouble', 'afterStart', 'publicTrain', 'openingArms', 'doubleToes',
   // scorecard dice

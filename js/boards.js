@@ -15,7 +15,7 @@ const rulesLinkFor = (b) => (b.rulesUrl
 // Only for boards the engine can actually start a game on. A diagram is not a
 // game, and a Play link on one lands the reader somewhere that cannot play.
 const playLinkFor = (b) => (b.playable
-  ? `<a href="${base}/play/?family=${encodeURIComponent(b.family)}&variant=${encodeURIComponent(b.variant)}" class="board-card-link" title="Play this variant">Play</a>`
+  ? `<a href="${base}/play/?family=${encodeURIComponent(b.family)}&variant=${encodeURIComponent(b.playAs || b.variant)}" class="board-card-link" title="Play this variant">Play</a>`
   : '')
 
 let BOARDS = []

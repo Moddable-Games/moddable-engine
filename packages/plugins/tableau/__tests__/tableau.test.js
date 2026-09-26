@@ -1,5 +1,6 @@
 import { createTableauPluginFor } from '../index.js'
 import { buildDeck, cardIdOf, ordering } from '../src/cards.js'
+import { showScore } from '../src/mechanics/pegging.js'
 import { createGameForFamily, createAI } from '../../../play/index.js'
 import '../../../play/src/bootstrap-plugins.js'
 import '../../../play/test-helpers/setup-rules-reader.js'
@@ -1396,6 +1397,98 @@ describe('called partner (Schafkopf)', () => {
     const s = game.getState().slice
     expect(s.finished).not.toBeNull()
     expect(s.scores.reduce((a, b) => a + b, 0)).toBe(0)
+  })
+})
+
+describe('pegging (Cribbage)', () => {
+  const CRIB = { game: 'pegging', cardsEach: 6, toCrib: 2, cribFromDeck: 0, target: 121 }
+  const deckDef = { components: { deck: { type: 'standard-52', jokers: 0 } } }
+  const plugin = createTableauPluginFor('standard-52')(CRIB, { definition: { players: ['p1', 'p2'], ...deckDef } })
+  const ctx = { card: plugin.cardOf }
+  const base = plugin.init({ hands: [[], []], community: [], drawPile: [] }, noRng)
+  const moves = (slice, seat) => plugin.getLegalMoves(slice, turn(seat))
+
+  test('the show counts fifteens, pairs, runs, flushes and nobs: three fives and the right Jack with a five turned is 29', () => {
+    expect(showScore(['hearts_5', 'diamonds_5', 'clubs_5', 'spades_J'], 'spades_5', ctx)).toBe(29)
+    // Seven, eight, eight, nine with a king: two fifteens, a pair and a double run.
+    expect(showScore(['hearts_7', 'clubs_8', 'diamonds_8', 'spades_9'], 'hearts_K', ctx)).toBe(4 + 2 + 6)
+    // Four hearts in hand is a flush, but not in the crib unless the starter matches.
+    const hearts = ['hearts_2', 'hearts_4', 'hearts_6', 'hearts_K']
+    expect(showScore(hearts, 'clubs_Q', ctx)).toBe(4)
+    expect(showScore(hearts, 'clubs_Q', ctx, true)).toBe(0)
+    expect(showScore(hearts, 'hearts_Q', ctx, true)).toBe(5)
+  })
+
+  test('a Jack turned up is two for his heels to the dealer', () => {
+    let s = { ...base, dealer: 0, hands: [['clubs_A', 'clubs_2', 'clubs_3', 'clubs_4', 'clubs_6', 'clubs_7'], ['hearts_A', 'hearts_2', 'hearts_3', 'hearts_4', 'hearts_6', 'hearts_7']], drawPile: ['spades_J'], next: 1 }
+    s = plugin.applyMove({ action: 'discard', cards: ['hearts_6', 'hearts_7'] }, s, turn(1))
+    s = plugin.applyMove({ action: 'discard', cards: ['clubs_6', 'clubs_7'] }, s, turn(0))
+    expect(s.starter).toBe('spades_J')
+    expect(s.scores).toEqual([2, 0])
+    expect(s.phase).toBe('peg')
+    expect(s.next).toBe(1)
+  })
+
+  const pegging = (hands, extra = {}) => ({ ...base, phase: 'peg', dealer: 0, starter: 'diamonds_K', kept: hands, hands, count: 0, sequence: [], passed: [], lastPlayer: null, next: 1, scores: [0, 0], ...extra })
+
+  test('fifteen and thirty-one score two, pairs two and six, and a run counts in any order', () => {
+    let s = pegging([['hearts_8', 'clubs_8', 'spades_4', 'spades_2'], ['diamonds_7', 'diamonds_8', 'clubs_3', 'clubs_K']])
+    s = plugin.applyMove({ action: 'play', cards: ['diamonds_7'] }, s, turn(1))
+    s = plugin.applyMove({ action: 'play', cards: ['hearts_8'] }, s, turn(0))
+    expect(s.scores).toEqual([2, 0])
+    s = plugin.applyMove({ action: 'play', cards: ['diamonds_8'] }, s, turn(1))
+    expect(s.scores).toEqual([2, 2])
+    s = plugin.applyMove({ action: 'play', cards: ['clubs_8'] }, s, turn(0))
+    // Three eights: six. The count is 31: two more.
+    expect(s.scores).toEqual([2 + 6 + 2, 2])
+    expect(s.count).toBe(0)
+    // Four, six, five: the last three are a run of three in any order, and fifteen too.
+    const runs = pegging([['spades_4', 'spades_5'], ['hearts_6', 'clubs_K']], { next: 0 })
+    let r = plugin.applyMove({ action: 'play', cards: ['spades_4'] }, runs, turn(0))
+    r = plugin.applyMove({ action: 'play', cards: ['hearts_6'] }, r, turn(1))
+    r = plugin.applyMove({ action: 'play', cards: ['spades_5'] }, r, turn(0))
+    expect(r.scores).toEqual([3 + 2, 0])
+  })
+
+  test('a player who cannot play says go, and the last to play pegs one', () => {
+    let s = pegging([['clubs_K', 'hearts_Q'], ['spades_K', 'diamonds_9', 'hearts_2']], { next: 0 })
+    s = plugin.applyMove({ action: 'play', cards: ['clubs_K'] }, s, turn(0))
+    s = plugin.applyMove({ action: 'play', cards: ['spades_K'] }, s, turn(1))
+    s = plugin.applyMove({ action: 'play', cards: ['hearts_Q'] }, s, turn(0))
+    // Thirty on the count: the two would make 32, so seat 1 can only say go.
+    expect(moves(s, 1)).toEqual([{ action: 'go' }])
+    s = plugin.applyMove({ action: 'go' }, s, turn(1))
+    expect(s.scores[0]).toBe(1)
+    expect(s.count).toBe(0)
+    expect(s.next).toBe(1)
+  })
+
+  test('the game ends the moment a score reaches 121', () => {
+    const s = pegging([['hearts_5'], ['clubs_K', 'clubs_Q']], { scores: [119, 0], count: 10, sequence: ['spades_10'], next: 0 })
+    const after = plugin.applyMove({ action: 'play', cards: ['hearts_5'] }, s, turn(0))
+    expect(after.finished).toBe(0)
+    expect(after.scores[0]).toBe(121)
+  })
+
+  test('three players: five cards, one to the crib each and one from the deck; four players score as partners', () => {
+    const three = createGameForFamily('standard-52', { variant: 'three-player-cribbage', rngSeed: 1 }).getState().slice
+    expect(three.hands.map(h => h.length)).toEqual([5, 5, 5])
+    expect(three.crib).toHaveLength(1)
+    const four = createGameForFamily('standard-52', { variant: 'four-player-cribbage', rngSeed: 1 }).getState().slice
+    expect(four.scores).toHaveLength(2)
+  })
+
+  test('computer seats play each game to 121', () => {
+    for (const variant of ['cribbage', 'three-player-cribbage', 'four-player-cribbage']) {
+      const game = createGameForFamily('standard-52', { variant, rngSeed: 3 })
+      const ai = createAI('standard-52', variant, { difficulty: 'medium', definition: game.raw.definition, rngSeed: 3 })
+      for (let ply = 0; ply < 20000; ply++) {
+        const st = game.getState()
+        if (st.slice.finished !== null) break
+        expect(game.applyMove(ai.pickMove(st.slice, st.players.currentIndex)).ok).toBe(true)
+      }
+      expect(Math.max(...game.getState().slice.scores)).toBeGreaterThanOrEqual(121)
+    }
   })
 })
 
