@@ -3119,7 +3119,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-dice--bunco.svg",
     "rulesUrl": "standard-dice/games/bunco/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-dice",
@@ -3149,7 +3149,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-dice--liars-dice.svg",
     "rulesUrl": "standard-dice/games/liars-dice/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-dice",

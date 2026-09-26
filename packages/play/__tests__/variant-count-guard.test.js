@@ -37,7 +37,7 @@ const MINIMUM_PLAYABLE = {
   // Mexican Train and Chickenfoot; Yahtzee and Farkle; Skat and Schafkopf.
   'standard-52': 18,
   'double-six-dominoes': 4,
-  'standard-dice': 2,
+  'standard-dice': 4,
   'bavarian-32': 2,
   morris: 7,
   // 13 until hasami-shogi was measured capturing 11 times by displacement

@@ -55,6 +55,8 @@ export const CONFIG_KEYS = new Set([
   'ober', 'unter', 'trumpSuit', 'plainOrder', 'wenzOrder', 'tariff', 'laufende', 'runAway',
   // pegging
   'toCrib', 'cribFromDeck',
+  // bluffing, rolling rounds
+  'dicePerPlayer', 'faces', 'bunco', 'threeOfAKind', 'roundEnds',
   // a hand per double: trains, branching
   'tilesPerPlayer', 'blankDouble', 'afterStart', 'publicTrain', 'openingArms', 'doubleToes',
   // scorecard dice

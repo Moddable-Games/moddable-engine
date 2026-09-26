@@ -6,6 +6,7 @@
 // game.
 //
 //   deal: { minPlayers: 4, maxPlayers: 8, defaultPlayers: 4 }   -> Players
+//   deal: { playerCounts: [4, 8, 12] }                          -> only those
 //   plugins.<family>.options:
 //     rounds: { label: Rounds, values: [open, 3, 5, 10] }      -> Rounds
 //
@@ -22,9 +23,11 @@ export function settingsFor(resolved, family, chosen = {}) {
   const out = []
   const deal = resolved?.deal || pluginBlock(resolved, family).deal || {}
   const min = Number(deal.minPlayers), max = Number(deal.maxPlayers)
-  if (Number.isInteger(min) && Number.isInteger(max) && max > min) {
-    const values = []
-    for (let n = min; n <= max; n++) values.push(n)
+  // A game that seats only some counts (Bunco: tables of four) lists them.
+  const listed = Array.isArray(deal.playerCounts) ? deal.playerCounts.map(Number) : null
+  if (listed ? listed.length > 1 : (Number.isInteger(min) && Number.isInteger(max) && max > min)) {
+    const values = listed || []
+    if (!listed) for (let n = min; n <= max; n++) values.push(n)
     const current = chosen.players ?? (resolved?.players?.length || deal.defaultPlayers || min)
     out.push({ key: 'players', label: 'Players', values, value: Number(current) })
   }

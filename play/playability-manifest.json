@@ -2330,12 +2330,32 @@
   {
     "family": "standard-dice",
     "familyLabel": "Standard Dice",
+    "variant": "bunco",
+    "key": "bunco",
+    "label": "Bunco",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/bunco/standard.md"
+  },
+  {
+    "family": "standard-dice",
+    "familyLabel": "Standard Dice",
     "variant": "farkle",
     "key": "farkle",
     "label": "Farkle",
     "group": "Other",
     "playable": true,
     "path": "content/games/farkle/standard.md"
+  },
+  {
+    "family": "standard-dice",
+    "familyLabel": "Standard Dice",
+    "variant": "liars-dice",
+    "key": "liars-dice",
+    "label": "Liar's Dice",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/liars-dice/standard.md"
   },
   {
     "family": "standard-dice",

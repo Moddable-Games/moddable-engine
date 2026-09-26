@@ -1843,12 +1843,42 @@ export async function initGamePlay(container, defaults = {}) {
     actionsEl.innerHTML = ''
     if (!session) return
     const actions = session.actions()
+    // An action with many values - a bid in Bridge or Liar's Dice - is one
+    // list to pick from and one button, rather than a button for every value.
+    const MANY = 8
+    const byName = new Map()
     for (const action of actions) {
-      const btn = document.createElement('button')
-      btn.className = 'btn'
-      btn.textContent = action[0].toUpperCase() + action.slice(1)
-      btn.addEventListener('click', () => session.controller.performAction(action))
-      actionsEl.appendChild(btn)
+      const name = action.split(' ')[0]
+      if (!byName.has(name)) byName.set(name, [])
+      byName.get(name).push(action)
+    }
+    const capital = (text) => text[0].toUpperCase() + text.slice(1)
+    for (const [name, group] of byName) {
+      const hasValues = group.every(a => a.includes(' '))
+      if (group.length > MANY && hasValues) {
+        const pick = document.createElement('select')
+        pick.className = 'game-play-choice'
+        for (const action of group) {
+          const o = document.createElement('option')
+          o.value = action
+          o.textContent = action.slice(name.length + 1)
+          pick.appendChild(o)
+        }
+        const btn = document.createElement('button')
+        btn.className = 'btn'
+        btn.textContent = capital(name)
+        btn.addEventListener('click', () => session.controller.performAction(pick.value))
+        actionsEl.appendChild(pick)
+        actionsEl.appendChild(btn)
+        continue
+      }
+      for (const action of group) {
+        const btn = document.createElement('button')
+        btn.className = 'btn'
+        btn.textContent = capital(action)
+        btn.addEventListener('click', () => session.controller.performAction(action))
+        actionsEl.appendChild(btn)
+      }
     }
     const undoBtn = document.createElement('button')
     undoBtn.className = 'btn'

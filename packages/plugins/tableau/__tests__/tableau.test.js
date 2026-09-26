@@ -1,6 +1,7 @@
 import { createTableauPluginFor } from '../index.js'
 import { buildDeck, cardIdOf, ordering } from '../src/cards.js'
 import { showScore } from '../src/mechanics/pegging.js'
+import { scoreRoll } from '../src/mechanics/rolling-rounds.js'
 import { createGameForFamily, createAI } from '../../../play/index.js'
 import '../../../play/src/bootstrap-plugins.js'
 import '../../../play/test-helpers/setup-rules-reader.js'
@@ -1488,6 +1489,85 @@ describe('pegging (Cribbage)', () => {
         expect(game.applyMove(ai.pickMove(st.slice, st.players.currentIndex)).ok).toBe(true)
       }
       expect(Math.max(...game.getState().slice.scores)).toBeGreaterThanOrEqual(121)
+    }
+  })
+})
+
+describe('bluffing (Liar\'s Dice) and rolling rounds (Bunco)', () => {
+  const dice = { players: ['p1', 'p2', 'p3'], components: { dice: { type: 'standard', count: 5 } } }
+  const liars = createTableauPluginFor('standard-dice')({ game: 'bluffing', dicePerPlayer: 5, faces: 6 }, { definition: dice })
+  const base = liars.init({ hands: [[], [], []], community: [], drawPile: [] }, noRng)
+  const moves = (slice, seat) => liars.getLegalMoves(slice, turn(seat))
+
+  test('five dice each, seen only by their owner', () => {
+    expect(base.hands.map(h => h.length)).toEqual([5, 5, 5])
+    const view = liars.projectForSeat(base, 1)
+    expect(view.hands[1].every(id => id !== null)).toBe(true)
+    expect(view.hands[0].every(id => id === null)).toBe(true)
+  })
+
+  test('a raise is a higher quantity, or the same quantity of a higher face; a challenge needs a bid', () => {
+    expect(moves(base, 0).some(m => m.action === 'challenge')).toBe(false)
+    const s = liars.applyMove({ action: 'bid', value: '3 fours' }, base, turn(0))
+    const bids = moves(s, 1).filter(m => m.action === 'bid').map(m => m.value)
+    expect(bids).not.toContain('3 fours')
+    expect(bids).not.toContain('3 twos')
+    expect(bids).toContain('3 fives')
+    expect(bids).toContain('4 ones')
+    expect(moves(s, 1)).toContainEqual({ action: 'challenge' })
+  })
+
+  test('a challenge counts every die: the bid stands and the challenger loses one, or the bidder does; the loser bids next', () => {
+    const hands = [['die0-4', 'die1-4', 'die2-1', 'die3-2', 'die4-6'], ['die5-4', 'die6-3', 'die7-3', 'die8-5', 'die9-5'], ['die10-2', 'die11-2', 'die12-1', 'die13-6', 'die14-6']]
+    const s = { ...base, hands, bid: { qty: 3, face: 4, seat: 0 }, next: 1 }
+    const held = liars.applyMove({ action: 'challenge' }, s, turn(1))
+    expect(held.counts).toEqual([5, 4, 5])
+    expect(held.next).toBe(1)
+    const failed = liars.applyMove({ action: 'challenge' }, { ...s, bid: { qty: 4, face: 4, seat: 0 } }, turn(1))
+    expect(failed.counts).toEqual([4, 5, 5])
+    expect(failed.next).toBe(0)
+    expect(failed.hands.map(h => h.length)).toEqual([4, 5, 5])
+  })
+
+  test('the last player with dice wins', () => {
+    const s = { ...base, counts: [1, 0, 1], hands: [['die0-2'], [], ['die10-5']], bid: { qty: 1, face: 3, seat: 2 }, next: 0 }
+    const after = liars.applyMove({ action: 'challenge' }, s, turn(0))
+    expect(after.finished).toBe(0)
+  })
+
+  test('Bunco scores one for each die of the round\'s number, five for three of another, and 21 for three of the round\'s', () => {
+    const s = { bunco: 21, triple: 5 }
+    expect(scoreRoll([2, 2, 5], 2, s)).toEqual({ points: 2, bunco: false })
+    expect(scoreRoll([4, 4, 4], 2, s)).toEqual({ points: 5, bunco: false })
+    expect(scoreRoll([2, 2, 2], 2, s)).toEqual({ points: 21, bunco: true })
+    expect(scoreRoll([1, 3, 5], 2, s)).toEqual({ points: 0, bunco: false })
+  })
+
+  test('twelve players sit at three tables; a round ends at 21 at the head table, winners up and losers down', () => {
+    const bunco = createTableauPluginFor('standard-dice')({ game: 'rolling-rounds', dice: 3, rounds: 6, bunco: 21, threeOfAKind: 5, roundEnds: 21 }, { definition: { players: Array.from({ length: 12 }, (_, i) => `p${i}`), components: { dice: { type: 'standard' } } } })
+    const s = bunco.init({ hands: [], community: [], drawPile: [] }, noRng)
+    expect(s.tables).toEqual([[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11]])
+    // The head table's first team is one point short; the middle table's second team leads.
+    const nearly = { ...s, points: [[20, 3], [1, 9], [5, 5]], active: 0, next: 0 }
+    let after = nearly
+    for (let k = 0; k < 200 && after.round === 1; k++) after = bunco.applyMove({ action: 'roll' }, { ...after, active: 0, next: after.tables[0][after.roller[0]] }, turn(after.tables[0][after.roller[0]]))
+    expect(after.round).toBe(2)
+    const headWinners = after.lastRound[0].winner
+    expect(after.tables[0]).toEqual(expect.arrayContaining(headWinners))
+    // The middle table's winners (5 and 7) moved up to the head table.
+    expect(after.tables[0]).toEqual(expect.arrayContaining([5, 7]))
+  })
+
+  test('computer seats play both games to a result', () => {
+    for (const [variant, settings] of [['liars-dice', {}], ['bunco', { players: 8 }]]) {
+      const game = createGameForFamily('standard-dice', { variant, rngSeed: 2, settings })
+      const ai = createAI('standard-dice', variant, { difficulty: 'medium', definition: game.raw.definition, rngSeed: 2 })
+      for (let ply = 0; ply < 50000; ply++) {
+        const st = game.getState()
+        if (st.slice.finished !== null) break
+        expect(game.applyMove(ai.pickMove(st.slice, st.players.currentIndex)).ok).toBe(true)
+      }
+      expect(game.getState().slice.finished).not.toBeNull()
     }
   })
 })
