@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-25",
+  "generated": "2026-09-26",
   "pieces": 120,
   "boards": 335,
   "boardFamilies": 34,
@@ -9,7 +9,7 @@
     "standard": 1116,
     "variants": 733
   },
-  "playableVariants": 251,
+  "playableVariants": 252,
   "playableFamilies": 13,
   "playableByFamily": {
     "chess": 149,
@@ -22,7 +22,7 @@
     "morris": 7,
     "reversi": 3,
     "shogi": 24,
-    "standard-52": 6,
+    "standard-52": 7,
     "standard-dice": 2,
     "xiangqi": 9
   },
@@ -52,7 +52,7 @@
     "morris": 7,
     "reversi": 3,
     "shogi": 24,
-    "standard-52": 6,
+    "standard-52": 7,
     "standard-dice": 2,
     "xiangqi": 9
   },

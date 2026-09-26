@@ -31,6 +31,7 @@ import { createChessPlugin } from '../../plugins/chess/index.js'
 import { createTableauPluginFor } from '../../plugins/tableau/index.js'
 import { createStandard52Deck } from '../../component-deck/index.js'
 import GENERATED_DEFAULTS from '../../../play/family-defaults.json' with { type: 'json' }
+import { applySettings } from './game-settings.js'
 // The composition root: every family's variant modules and evaluators. Loaded
 // here, by the module that builds games, so every way of building one gets
 // them. Only the play page and the test helper loaded it, so the SDK and every
@@ -133,8 +134,15 @@ export function hasFamily(family) {
   return family in PLUGIN_FACTORIES
 }
 
+// A variant's frontmatter with the players' choices applied: how many seat
+// themselves, how many rounds (engine#184).
+function withSettings(meta, family, settings) {
+  if (!settings || !meta?.engine) return meta
+  return { ...meta, engine: applySettings(meta.engine, family, settings) }
+}
+
 export function createGameForFamily(family, opts = {}) {
-  const { variant, definition: userDefinition, rngSeed } = opts
+  const { variant, definition: userDefinition, rngSeed, settings } = opts
 
   const factory = PLUGIN_FACTORIES[family]
   if (!factory) {
@@ -144,7 +152,7 @@ export function createGameForFamily(family, opts = {}) {
   const { base, flags } = variant ? parseVariantKey(variant) : { base: variant, flags: [] }
   let definition = userDefinition
     ? (userDefinition.topology !== undefined ? userDefinition : produce(userDefinition))
-    : produce(resolveMeta(family, base || variant))
+    : produce(withSettings(resolveMeta(family, base || variant), family, settings))
   const usableFlags = flags.filter(f => familySupportsFlag(family, f))
   if (usableFlags.length) definition = applyFlags(definition, usableFlags)
 

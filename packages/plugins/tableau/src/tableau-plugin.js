@@ -31,7 +31,9 @@ export const CONFIG_KEYS = new Set([
   // shared by several shapes
   'rankOrder', 'suitOrder', 'firstLead', 'winner',
   // climbing
-  'combinations', 'fiveCardHands', 'straights',
+  'combinations', 'fiveCardHands', 'straights', 'sequence', 'playTo', 'roles', 'exchange', 'laterLead', 'rounds',
+  // settings a player chooses before a game, on the play page
+  'options',
   // trick-taking
   'trump', 'leadsWith', 'breaking', 'firstTrickForbids', 'passing', 'bidding', 'partnerships', 'scoring', 'target',
   // war
@@ -45,7 +47,7 @@ export const CONFIG_KEYS = new Set([
   // press-your-luck dice
   'singles', 'triples', 'multiples', 'straight', 'threePairs', 'opening', 'finalRound',
   // present in the corpus and read by nothing here yet
-  'variant', 'rounds', 'roles', 'trading', 'passReset', 'suitRank',
+  'variant', 'trading', 'passReset', 'suitRank',
 ])
 
 export function createTableauPluginFor(family) {

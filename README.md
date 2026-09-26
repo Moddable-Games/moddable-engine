@@ -169,6 +169,10 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Changelog
 
+#### 2026-09-26
+- President plays (engine#184). The climbing shape Big 2 uses can play on past the first player out to a full finishing order (`playTo: finishing-order`). Finishing places become roles, the lower roles' best cards pass up before the next round and the higher roles return as many of their choosing, and the Scum leads. A sequence of three or more consecutive ranks is a combination, as the rules name it
+- A variant can offer settings to choose before a game: the number of players its deal allows, and any option its plugin block declares. The play page shows each as a select; President offers four to eight players and a number of rounds, or open play
+
 #### 2026-09-25
 - Hand cards can be picked. Card artwork opts out of clicks like all decoration, and a card's group has no area of its own, so every hand drew correctly and none of it could be played in the browser. Each pickable card now carries a hit rectangle, and the every-family click sweep plays card, domino and dice tables through their cards and actions, witnessed by the move log
 - The config-key guard checks every family with core's shared check. It had been reading an empty plugin registry and passing over nothing

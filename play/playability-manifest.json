@@ -2140,6 +2140,16 @@
   {
     "family": "standard-52",
     "familyLabel": "Standard 52-Card Deck",
+    "variant": "president",
+    "key": "president",
+    "label": "President",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/president/standard.md"
+  },
+  {
+    "family": "standard-52",
+    "familyLabel": "Standard 52-Card Deck",
     "variant": "spades",
     "key": "spades",
     "label": "Spades",

@@ -12,6 +12,7 @@
 
 import {
   createGameForFamily, definitionFromResolved, createAI, findFamilyPlugin, interactionModelFor,
+  settingsFor, applySettings,
 } from '../packages/play/index.js'
 import { renderTableState, serializeLayout, attachPieceImages } from '../packages/render/index.js'
 import { getPlayableVariants, loadGalleryIndex, getGalleryIndex } from './play-shared.js'
@@ -59,6 +60,7 @@ export function createCardSession(options = {}) {
     family, variant, container,
     opponent = 'ai', difficulty = 'medium', seat = '0',
     legendContainer = null, onStatus = null, embed = null,
+    settings = {},
   } = options
 
   let game = null
@@ -90,7 +92,7 @@ export function createCardSession(options = {}) {
     choice = null
     const entry = getPlayableVariants(family).find(e => e.variant === variant)
     resolved = await resolveVariantBoard(family, {}, variant, entry?.slug || variant, entry?.path)
-    const definition = definitionFromResolved(family, variant, resolved, {})
+    const definition = definitionFromResolved(family, variant, applySettings(resolved, family, settings), {})
     game = createGameForFamily(family, { variant, definition, rngSeed: Math.floor(Math.random() * 1000000) })
     plugin = findFamilyPlugin(game.raw.registry.getPlugins(), family)
     ai = opponent === 'ai' ? createAI(family, variant, { difficulty, definition }) : null
@@ -260,6 +262,8 @@ export function createCardSession(options = {}) {
     get variantMeta() { return resolved?._variantMeta || null },
     get resolved() { return resolved },
     get playerNames() { return names() },
+    // What the player may choose before a game: seats, rounds.
+    get settings() { return resolved ? settingsFor(resolved, family, settings) : [] },
     start,
     draw,
     summarise,

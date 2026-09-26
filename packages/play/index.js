@@ -70,3 +70,4 @@ export {
   flagPositionKeySuffix,
 } from './src/variant-flags.js'
 export { definitionFromResolved } from './src/variant-definition.js'
+export { settingsFor, applySettings } from './src/game-settings.js'

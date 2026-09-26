@@ -3057,7 +3057,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-52--president.svg",
     "rulesUrl": "standard-52/games/president/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-52",

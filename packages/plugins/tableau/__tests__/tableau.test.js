@@ -141,6 +141,147 @@ describe('climbing (Big 2)', () => {
   })
 })
 
+describe('climbing to a finishing order (President)', () => {
+  const PRESIDENT = {
+    game: 'climbing',
+    rankOrder: [3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K', 'A', 2],
+    combinations: ['single', 'pair', 'triple', 'sequence'],
+    sequence: { min: 3 },
+    playTo: 'finishing-order',
+    roles: [{ place: 1, title: 'President' }, { place: 2, title: 'Vice President' }, { place: -2, title: 'Vice Scum' }, { place: -1, title: 'Scum' }],
+    exchange: [{ from: -1, to: 1, count: 2 }, { from: -2, to: 2, count: 1 }],
+    laterLead: -1,
+    rounds: 3,
+  }
+  const definition = { players: ['p1', 'p2', 'p3', 'p4'], components: { deck: { type: 'standard-52', jokers: 0 } }, deal: { perPlayer: 'all' } }
+  const plugin = createTableauPluginFor('standard-52')({ ...PRESIDENT, deal: { perPlayer: 'all' } }, { definition })
+  const fresh = (hands, extra = {}) => ({
+    ...plugin.init({ hands: [[], [], [], []], community: [], drawPile: [] }, noRng),
+    hands, ...extra,
+  })
+  const plays = (slice, seat) => plugin.getLegalMoves(slice, turn(seat)).filter(m => m.action === 'play')
+
+  test('a sequence is three or more consecutive ranks in any suits, and beats a lower one of its length', () => {
+    const slice = fresh([['hearts_4', 'clubs_5', 'spades_6', 'diamonds_7'], [], [], []])
+    const seqs = plays(slice, 0).filter(m => m.cards.length >= 3).map(m => [...m.cards].sort().join(','))
+    expect(seqs).toContain(['clubs_5', 'hearts_4', 'spades_6'].join(','))
+    expect(seqs).toContain(['clubs_5', 'diamonds_7', 'hearts_4', 'spades_6'].join(','))
+    // 4-5-6 on the table: 5-6-7 beats it, and a four-card run does not answer a three.
+    const led = plugin.applyMove({ action: 'play', cards: ['hearts_4', 'clubs_5', 'spades_6'] }, fresh([['hearts_4', 'clubs_5', 'spades_6', 'hearts_K'], ['clubs_6', 'hearts_7', 'spades_5', 'clubs_8'], ['clubs_K'], ['diamonds_K']]), turn(0))
+    const answers = plays(led, 1).map(m => [...m.cards].sort().join(','))
+    expect(answers).toContain(['clubs_6', 'hearts_7', 'spades_5'].join(','))
+    expect(answers.every(a => a.split(',').length === 3)).toBe(true)
+    expect(answers).not.toContain(['clubs_6', 'hearts_7', 'spades_5', 'clubs_8'].sort().join(','))
+  })
+
+  test('an equal rank does not beat, because suits are not ranked', () => {
+    const led = plugin.applyMove({ action: 'play', cards: ['hearts_9'] }, fresh([['hearts_9', 'hearts_3'], ['spades_9', 'clubs_3'], ['clubs_4'], ['clubs_5']]), turn(0))
+    expect(plays(led, 1).map(m => m.cards[0])).not.toContain('spades_9')
+  })
+
+  test('play goes on past the first player out, who takes no further part', () => {
+    const slice = fresh([['spades_2'], ['hearts_3', 'hearts_4'], ['clubs_3', 'clubs_4'], ['diamonds_3', 'diamonds_4']])
+    const out = plugin.applyMove({ action: 'play', cards: ['spades_2'] }, slice, turn(0))
+    expect(out.out).toEqual([0])
+    expect(out.finished).toBeNull()
+    expect(out.next).toBe(1)
+    // The three still in pass on the 2; the next still in after its player leads.
+    let s = out
+    for (const seat of [1, 2, 3]) s = plugin.applyMove({ action: 'pass' }, s, turn(seat))
+    expect(s.trick).toBeNull()
+    expect(s.next).toBe(1)
+    expect(plugin.getLegalMoves(s, turn(0))).toEqual([])
+  })
+
+  test('the round ends when one player still holds cards, and the exchange follows', () => {
+    // Seats go out 2, 0, 3; seat 1 is last, the Scum.
+    let s = fresh([['hearts_5'], ['spades_3', 'clubs_3', 'hearts_3'], ['spades_A'], ['diamonds_9']])
+    s = plugin.applyMove({ action: 'play', cards: ['spades_A'] }, { ...s, next: 2 }, turn(2))
+    for (const seat of [3, 0, 1]) s = plugin.applyMove({ action: 'pass' }, s, turn(seat))
+    expect(s.next).toBe(3)
+    s = plugin.applyMove({ action: 'play', cards: ['diamonds_9'] }, s, turn(3))
+    for (const seat of [0, 1]) s = plugin.applyMove({ action: 'pass' }, s, turn(seat))
+    expect(s.next).toBe(0)
+    s = plugin.applyMove({ action: 'play', cards: ['hearts_5'] }, s, turn(0))
+
+    expect(s.round).toBe(1)
+    expect(s.lastRound.order).toEqual([2, 3, 0, 1])
+    expect(s.titles).toEqual([0, 0, 1, 0])
+    expect(s.roles).toEqual(['Vice Scum', 'Scum', 'President', 'Vice President'])
+    expect(s.phase).toBe('exchange')
+    // The Scum's two best went to the President already; the President chooses two to return.
+    expect(s.hands[2]).toHaveLength(15)
+    expect(s.hands[1]).toHaveLength(11)
+    expect(s.next).toBe(2)
+    const returns = plugin.getLegalMoves(s, turn(2))
+    expect(returns.every(m => m.action === 'give' && m.cards.length === 2)).toBe(true)
+    const back = returns[0].cards
+    s = plugin.applyMove(returns[0], s, turn(2))
+    expect(s.hands[1]).toEqual(expect.arrayContaining(back))
+    // Then the Vice President returns one to the Vice Scum.
+    expect(s.next).toBe(3)
+    s = plugin.applyMove(plugin.getLegalMoves(s, turn(3))[0], s, turn(3))
+    expect(s.hands.map(h => h.length)).toEqual([13, 13, 13, 13])
+    // And the Scum leads the round.
+    expect(s.phase).toBe('play')
+    expect(s.next).toBe(1)
+  })
+
+  test('the best cards are the ones taken from the lower role', () => {
+    const { valueOf } = ordering(PRESIDENT)
+    let s = fresh([['hearts_5'], ['spades_3', 'clubs_3', 'hearts_3'], ['spades_A'], ['diamonds_9']])
+    s = plugin.applyMove({ action: 'play', cards: ['spades_A'] }, { ...s, next: 2 }, turn(2))
+    for (const seat of [3, 0, 1]) s = plugin.applyMove({ action: 'pass' }, s, turn(seat))
+    s = plugin.applyMove({ action: 'play', cards: ['diamonds_9'] }, s, turn(3))
+    for (const seat of [0, 1]) s = plugin.applyMove({ action: 'pass' }, s, turn(seat))
+    const before = plugin.applyMove({ action: 'play', cards: ['hearts_5'] }, s, turn(0))
+    // Everything the Scum still holds is below the two the President was given.
+    const given = before.hands[2].slice(13)
+    expect(given).toHaveLength(2)
+    const kept = Math.max(...before.hands[1].map(id => valueOf(plugin.cardOf(id))))
+    expect(given.every(id => valueOf(plugin.cardOf(id)) >= kept)).toBe(true)
+  })
+
+  test('after the chosen number of rounds the most first places wins; open play never ends by itself', () => {
+    const play = (settings, stopAt) => {
+      const game = createGameForFamily('standard-52', { variant: 'president', rngSeed: 7, settings })
+      const ai = createAI('standard-52', 'president', { difficulty: 'medium', definition: game.raw.definition })
+      for (let ply = 0; ply < 5000; ply++) {
+        const st = game.getState()
+        if (st.slice.finished !== null || st.slice.round >= stopAt) break
+        expect(game.applyMove(ai.pickMove(st.slice, st.players.currentIndex)).ok).toBe(true)
+      }
+      return game.getState().slice
+    }
+    const three = play({ rounds: 3 }, 99)
+    expect(three.finished).not.toBeNull()
+    expect(three.round).toBeGreaterThanOrEqual(3)
+    const top = Math.max(...three.titles)
+    expect(three.titles[three.finished]).toBe(top)
+    expect(three.titles.filter(n => n === top)).toHaveLength(1)
+
+    const open = play({ rounds: 'open' }, 4)
+    expect(open.round).toBe(4)
+    expect(open.finished).toBeNull()
+  })
+
+  test('four to eight seat themselves, and the deck is shared evenly', () => {
+    for (const players of [4, 5, 8]) {
+      const game = createGameForFamily('standard-52', { variant: 'president', rngSeed: 2, settings: { players } })
+      const hands = game.getState().slice.hands
+      expect(hands).toHaveLength(players)
+      expect(new Set(hands.map(h => h.length)).size).toBe(1)
+      expect(hands[0]).toHaveLength(Math.floor(52 / players))
+    }
+  })
+
+  test('the first round is led by the holder of the 3 of Clubs', () => {
+    const game = createGameForFamily('standard-52', { variant: 'president', rngSeed: 5 })
+    const st = game.getState()
+    expect(st.slice.hands[st.players.currentIndex]).toContain('clubs_3')
+  })
+})
+
 describe('war', () => {
   const WAR = { game: 'war', rankOrder: [2, 3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K', 'A'], warFaceDown: 3 }
   const definition = { players: ['p1', 'p2'], components: { deck: { type: 'standard-52', jokers: 0 } } }

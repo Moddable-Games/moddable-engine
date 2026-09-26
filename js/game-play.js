@@ -1538,6 +1538,20 @@ export async function initGamePlay(container, defaults = {}) {
   flagsContainer.className = 'game-play-flags'
   leftSidebar.appendChild(flagsContainer)
 
+  // Choices the variant offers before a game starts: players, rounds.
+  const settingsContainer = document.createElement('div')
+  settingsContainer.className = 'game-play-settings'
+  leftSidebar.appendChild(settingsContainer)
+
+  function buildSettingControls() {
+    settingsContainer.innerHTML = ''
+    for (const setting of session?.settings || []) {
+      const options = setting.values.map(v => ({ value: String(v), label: String(v)[0].toUpperCase() + String(v).slice(1) }))
+      const select = buildSelect(settingsContainer, setting.label, options, String(setting.value))
+      select.addEventListener('change', () => restart({ settings: { ...config.settings, [setting.key]: select.value } }))
+    }
+  }
+
   function buildFlagToggles() {
     flagsContainer.innerHTML = ''
     const compatible = session?.resolved
@@ -1911,6 +1925,7 @@ export async function initGamePlay(container, defaults = {}) {
       variantSelect.value = config.variant
       rebuildSeatSelect(config.family, session.playerNames)
       buildFlagToggles()
+      buildSettingControls()
       updateRules()
       populatePieceSetSelect(config.variant, session.setup)
       renderActions()
@@ -1941,14 +1956,14 @@ export async function initGamePlay(container, defaults = {}) {
     const newVariant = pickVariant(family, null)
     variantSelect.value = newVariant
     const draftId = newVariant.startsWith(DRAFT_PREFIX) ? newVariant.slice(DRAFT_PREFIX.length) : null
-    restart({ family, variant: newVariant, draftId, seat: seatSelect.value })
+    restart({ family, variant: newVariant, draftId, seat: seatSelect.value, settings: {} })
   })
   variantSelect.addEventListener('change', () => {
     activeFlags = []
     buildFlagToggles()
     const value = variantSelect.value
     const draftId = value.startsWith(DRAFT_PREFIX) ? value.slice(DRAFT_PREFIX.length) : null
-    restart({ variant: value, draftId })
+    restart({ variant: value, draftId, settings: {} })
   })
   opponentSelect.addEventListener('change', () => restart({ opponent: opponentSelect.value }))
   difficultySelect.addEventListener('change', () => restart({ difficulty: difficultySelect.value }))
