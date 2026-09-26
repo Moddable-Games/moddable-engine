@@ -76,7 +76,7 @@ export function hongKong(hand) {
 // there scores nothing. `base` is the least a winning hand is worth.
 //
 //     tai: { base: 1, bonusTile: 1, dragonPung: ..., ownWindPung: ..., allPungs: ..., allChows: ... }
-export function taiwanese(hand, tai = {}) {
+function taiwanese(hand, tai = {}) {
   const p = []
   const add = (name, v) => { if (v) p.push([name, v]) }
   const s = shape(hand)
