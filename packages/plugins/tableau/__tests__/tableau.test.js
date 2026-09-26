@@ -867,6 +867,127 @@ describe('patience (Klondike, FreeCell, Spider)', () => {
   })
 })
 
+describe('melds: laying (Rummy) and knocking (Gin Rummy)', () => {
+  const deck = { type: 'standard-52', jokers: 0 }
+  const LAYING = { game: 'laying', dealByPlayers: { 2: 10, 3: 7, 4: 7, 5: 6, 6: 6 }, rummyDoubles: true, target: 100 }
+  const KNOCKING = { game: 'knocking', knock: 10, stockFloor: 2, target: 100, bonuses: { gin: 25, bigGin: 31, undercut: 25, game: 100, box: 25, shutout: 100 } }
+  const rummy = createTableauPluginFor('standard-52')(LAYING, { definition: { players: ['p1', 'p2', 'p3'], components: { deck } } })
+  const gin = createTableauPluginFor('standard-52')(KNOCKING, { definition: { players: ['p1', 'p2'], components: { deck } } })
+  const rummyBase = rummy.init({ hands: [[], [], []], community: [], drawPile: [] }, noRng)
+  const ginBase = gin.init({ hands: [[], []], community: [], drawPile: [] }, noRng)
+  const moves = (plugin, slice, seat) => plugin.getLegalMoves(slice, turn(seat))
+  const melds = (plugin, slice, seat) => moves(plugin, slice, seat).filter(m => m.action === 'meld').map(m => [...m.cards].sort().join(','))
+
+  test('Rummy deals ten each to two, seven to three or four, six to five or six, and turns up a discard', () => {
+    for (const [players, each] of [[2, 10], [4, 7], [6, 6]]) {
+      const s = createGameForFamily('standard-52', { variant: 'rummy', rngSeed: 1, settings: { players } }).getState().slice
+      expect(s.hands.map(h => h.length)).toEqual(Array(players).fill(each))
+      expect(s.discard).toHaveLength(1)
+      expect(s.drawPile).toHaveLength(52 - players * each - 1)
+    }
+  })
+
+  test('sets and runs meld; aces are low, so A-2-3 is a run and Q-K-A is not', () => {
+    const hand = ['hearts_A', 'hearts_2', 'hearts_3', 'spades_Q', 'spades_K', 'spades_A', 'clubs_7', 'diamonds_7', 'spades_7']
+    const s = { ...rummyBase, hands: [hand, [], []], phase: 'play', next: 0 }
+    const found = melds(rummy, s, 0)
+    expect(found).toContain(['hearts_2', 'hearts_3', 'hearts_A'].join(','))
+    expect(found).toContain(['clubs_7', 'diamonds_7', 'spades_7'].join(','))
+    expect(found.some(m => m.includes('spades_Q') && m.includes('spades_A'))).toBe(false)
+  })
+
+  test('a card taken from the discard pile may not be discarded on the same turn', () => {
+    let s = { ...rummyBase, hands: [['clubs_4', 'hearts_9'], [], []], discard: ['spades_K'], phase: 'draw', next: 0 }
+    s = rummy.applyMove({ action: 'take' }, s, turn(0))
+    const discards = moves(rummy, s, 0).filter(m => m.action === 'discard').map(m => m.cards[0])
+    expect(discards).toEqual(['clubs_4', 'hearts_9'])
+  })
+
+  test('a card lays off onto anyone\'s meld', () => {
+    const s = { ...rummyBase, hands: [['hearts_9', 'clubs_2'], [], []], melds: [{ cards: ['hearts_6', 'hearts_7', 'hearts_8'], kind: 'run', by: 2 }], phase: 'play', next: 0 }
+    const off = moves(rummy, s, 0).filter(m => m.action === 'lay off')
+    expect(off.map(m => m.cards[0])).toEqual(['hearts_9'])
+    const after = rummy.applyMove(off[0], s, turn(0))
+    expect(after.melds[0].cards).toContain('hearts_9')
+  })
+
+  test('when the stock runs out the discard pile turns over, without shuffling, as the stock', () => {
+    const s = { ...rummyBase, hands: [['clubs_4'], [], []], drawPile: [], discard: ['spades_2', 'spades_3', 'spades_4'], phase: 'draw', next: 0 }
+    const after = rummy.applyMove({ action: 'draw' }, s, turn(0))
+    // The bottom of the discard pile is now the top of the stock.
+    expect(after.hands[0]).toContain('spades_2')
+    expect(after.drawPile).toEqual(['spades_3', 'spades_4'])
+  })
+
+  test('going out scores the cards left in the other hands, doubled for going rummy', () => {
+    const table = (hasMelded) => ({ ...rummyBase, hands: [['clubs_5', 'hearts_5', 'spades_5'], ['diamonds_K', 'clubs_2'], ['hearts_A']], hasMelded, phase: 'play', cleanTurn: !hasMelded[0], next: 0 })
+    const once = rummy.applyMove({ action: 'meld', cards: ['clubs_5', 'hearts_5', 'spades_5'] }, table([true, false, false]), turn(0))
+    expect(once.scores).toEqual([13, 0, 0])
+    const rum = rummy.applyMove({ action: 'meld', cards: ['clubs_5', 'hearts_5', 'spades_5'] }, table([false, false, false]), turn(0))
+    expect(rum.scores).toEqual([26, 0, 0])
+    expect(rum.lastHand.rummy).toBe(true)
+  })
+
+  test('Gin offers the upcard to the non-dealer, then the dealer; if both pass the non-dealer draws from the stock', () => {
+    let s = { ...ginBase }
+    expect(s.phase).toBe('upcard')
+    expect(s.next).toBe(1 - s.dealer)
+    s = gin.applyMove({ action: 'pass' }, s, turn(s.next))
+    expect(s.next).toBe(s.dealer)
+    s = gin.applyMove({ action: 'pass' }, s, turn(s.next))
+    expect(s.phase).toBe('draw')
+    expect(s.next).toBe(1 - s.dealer)
+    expect(moves(gin, s, s.next)).toEqual([{ action: 'draw' }])
+  })
+
+  const hand11 = ['hearts_2', 'hearts_3', 'hearts_4', 'clubs_9', 'diamonds_9', 'spades_9', 'clubs_K', 'diamonds_K', 'spades_K', 'clubs_A', 'clubs_Q']
+  test('a player may knock with ten or less deadwood, and goes gin with none', () => {
+    const s = { ...ginBase, hands: [hand11, ['spades_A']], phase: 'discard', fromDiscard: null, next: 0 }
+    const list = moves(gin, s, 0)
+    // Discarding the queen leaves the ace, 1 point: a knock. Nothing leaves none.
+    expect(list).toContainEqual({ action: 'knock', cards: ['clubs_Q'] })
+    expect(list.some(m => m.action === 'gin')).toBe(false)
+    const ginHand = [...hand11.slice(0, 9), 'hearts_5', 'clubs_Q']
+    expect(moves(gin, { ...s, hands: [ginHand, ['spades_A']] }, 0)).toContainEqual({ action: 'gin', cards: ['clubs_Q'] })
+  })
+
+  test('a knock scores the difference, laying off first; an undercut scores the opponent the difference and 25', () => {
+    const s = { ...ginBase, hands: [hand11, ['hearts_5', 'clubs_3', 'diamonds_4', 'spades_6', 'hearts_10', 'hearts_J', 'clubs_8', 'diamonds_2', 'spades_3', 'clubs_4']], phase: 'discard', fromDiscard: null, next: 0, scores: [0, 0], boxes: [0, 0] }
+    const knocked = gin.applyMove({ action: 'knock', cards: ['clubs_Q'] }, s, turn(0))
+    // The 5 of hearts lays off on 2-3-4 of hearts; the rest counts.
+    const counted = 3 + 4 + 6 + 10 + 10 + 8 + 2 + 3 + 4
+    expect(knocked.scores).toEqual([counted - 1, 0])
+    // The knocker keeps a 10 for deadwood; the opponent has melded everything.
+    const tens = hand11.map(id => (id === 'clubs_A' ? 'clubs_10' : id))
+    const melded = ['spades_A', 'hearts_A', 'diamonds_A', 'hearts_6', 'hearts_7', 'hearts_8', 'hearts_9', 'spades_2', 'clubs_2', 'diamonds_2']
+    const undercut = gin.applyMove({ action: 'knock', cards: ['clubs_Q'] }, { ...s, hands: [tens, melded] }, turn(0))
+    expect(undercut.scores).toEqual([0, 10 + 25])
+  })
+
+  test('the hand is void when the stock is down to two cards and nobody knocked; the same dealer deals', () => {
+    const s = { ...ginBase, hands: [['clubs_2', 'clubs_9'], ['hearts_4']], drawPile: ['spades_5', 'spades_6'], phase: 'discard', fromDiscard: null, next: 0, dealer: 1 }
+    const after = gin.applyMove({ action: 'discard', cards: ['clubs_9'] }, s, turn(0))
+    expect(after.hand).toBe(s.hand + 1)
+    expect(after.dealer).toBe(1)
+    expect(after.scores).toEqual(s.scores)
+  })
+
+  test('both games are played out by computer seats', () => {
+    for (const variant of ['rummy', 'gin-rummy']) {
+      const game = createGameForFamily('standard-52', { variant, rngSeed: 4 })
+      const ai = createAI('standard-52', variant, { difficulty: 'medium', definition: game.raw.definition, rngSeed: 4 })
+      for (let ply = 0; ply < 30000; ply++) {
+        const st = game.getState()
+        if (st.slice.finished !== null) break
+        expect(game.applyMove(ai.pickMove(st.slice, st.players.currentIndex)).ok).toBe(true)
+      }
+      const s = game.getState().slice
+      expect(s.finished).not.toBeNull()
+      expect(Math.max(...s.scores)).toBeGreaterThanOrEqual(100)
+    }
+  })
+})
+
 describe('dice', () => {
   const definition = { players: ['a', 'b'], components: { dice: { count: 5 } } }
   const rng = { request: () => ({ shuffle: a => a, nextInt: () => 77 }) }

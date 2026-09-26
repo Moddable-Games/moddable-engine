@@ -48,6 +48,7 @@ function moveForSelection(moves, selected, action) {
 // A button for one of the moves a clicked card could be: what sets it apart
 // from the others - the suit an eight names, the end a tile goes on.
 function choiceLabel(move) {
+  if (move.label) return move.label
   const { action: _a, cards: _c, ...rest } = move
   return Object.values(rest).join(' ') || move.action
 }
@@ -210,6 +211,16 @@ export function createCardSession(options = {}) {
     const moves = legal()
     const [name, value] = String(action).split(' ')
     if (moves.some(m => m.action === name && Array.isArray(m.cards))) {
+      // The picked cards could go more than one way - onto either of two
+      // melds - so the player chooses.
+      const want = [...selected].sort().join(',')
+      const ways = moves.filter(m => m.action === name && Array.isArray(m.cards) && [...m.cards].sort().join(',') === want)
+      if (ways.length > 1) {
+        choice = ways
+        draw()
+        if (onStatus) onStatus({ text: 'Choose where', gameOver: false })
+        return false
+      }
       const move = moveForSelection(moves, selected, name)
       if (!move) {
         if (onStatus) onStatus({ text: selected.size ? `Those cards cannot ${name} here` : `Pick the cards to ${name} first`, gameOver: false })

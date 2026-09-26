@@ -45,6 +45,8 @@ export const CONFIG_KEYS = new Set([
   // patience
   'columns', 'faceUp', 'build', 'lift', 'supermove', 'emptyColumn', 'foundations', 'completeRuns',
   'freeCells', 'stock', 'drawCount', 'foundationToTableau', 'suitsInPlay',
+  // melds: laying (melds on the table), knocking (melds in hand)
+  'dealByPlayers', 'rummyDoubles', 'knock', 'bonuses', 'stockFloor', 'cardsEach',
   // a hand per double: trains, branching
   'tilesPerPlayer', 'blankDouble', 'afterStart', 'publicTrain', 'openingArms', 'doubleToes',
   // scorecard dice
@@ -166,7 +168,7 @@ export function createTableauPluginFor(family) {
       policy(view, seat, moves, opts = {}) {
         const random = opts.random || (() => 0)
         if (opts.difficulty !== 'beginner' && mechanic && mechanic.policy) {
-          const chosen = mechanic.policy(view, seat, moves, ctx)
+          const chosen = mechanic.policy(view, seat, moves, ctx, random)
           if (chosen) return chosen
         }
         return moves[Math.floor(random() * moves.length)]

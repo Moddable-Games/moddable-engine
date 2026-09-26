@@ -3017,7 +3017,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-52--gin-rummy.svg",
     "rulesUrl": "standard-52/games/gin-rummy/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-52",
@@ -3067,7 +3067,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-52--rummy.svg",
     "rulesUrl": "standard-52/games/rummy/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-52",

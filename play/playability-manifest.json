@@ -2160,6 +2160,16 @@
   {
     "family": "standard-52",
     "familyLabel": "Standard 52-Card Deck",
+    "variant": "gin-rummy",
+    "key": "gin-rummy",
+    "label": "Gin Rummy",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/gin-rummy/standard.md"
+  },
+  {
+    "family": "standard-52",
+    "familyLabel": "Standard 52-Card Deck",
     "variant": "hearts",
     "key": "hearts",
     "label": "Hearts",
@@ -2186,6 +2196,16 @@
     "group": "Other",
     "playable": true,
     "path": "content/games/president/standard.md"
+  },
+  {
+    "family": "standard-52",
+    "familyLabel": "Standard 52-Card Deck",
+    "variant": "rummy",
+    "key": "rummy",
+    "label": "Rummy",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/rummy/standard.md"
   },
   {
     "family": "standard-52",

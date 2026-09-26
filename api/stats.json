@@ -9,7 +9,7 @@
     "standard": 1116,
     "variants": 733
   },
-  "playableVariants": 257,
+  "playableVariants": 259,
   "playableFamilies": 13,
   "playableByFamily": {
     "chess": 149,
@@ -22,7 +22,7 @@
     "morris": 7,
     "reversi": 3,
     "shogi": 24,
-    "standard-52": 10,
+    "standard-52": 12,
     "standard-dice": 2,
     "xiangqi": 9
   },
@@ -52,7 +52,7 @@
     "morris": 7,
     "reversi": 3,
     "shogi": 24,
-    "standard-52": 10,
+    "standard-52": 12,
     "standard-dice": 2,
     "xiangqi": 9
   },
