@@ -21,9 +21,12 @@ registerDeck('standard-52', {
     const cards = []
     // A game may play with fewer suits (Spider's one- and two-suit games).
     const only = Array.isArray(opts.suits) ? new Set(opts.suits) : null
+    // And fewer ranks: Euchre plays with the nine up.
+    const ranks = Array.isArray(opts.subset) ? new Set(opts.subset.map(r => String(r).toUpperCase())) : null
     for (let s = 0; s < 4; s++) {
       if (only && !only.has(SUITS[s])) continue
       for (let r = 0; r < 13; r++) {
+        if (ranks && !ranks.has(RANKS[r])) continue
         cards.push({
           id: `${SUITS[s]}_${RANKS[r]}`,
           suit: SUITS[s],

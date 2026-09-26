@@ -2140,6 +2140,16 @@
   {
     "family": "standard-52",
     "familyLabel": "Standard 52-Card Deck",
+    "variant": "bridge",
+    "key": "bridge",
+    "label": "Rubber Bridge",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/bridge/standard.md"
+  },
+  {
+    "family": "standard-52",
+    "familyLabel": "Standard 52-Card Deck",
     "variant": "canasta",
     "key": "canasta",
     "label": "Canasta (Classic)",
@@ -2156,6 +2166,16 @@
     "group": "Other",
     "playable": true,
     "path": "content/games/crazy-eights/standard.md"
+  },
+  {
+    "family": "standard-52",
+    "familyLabel": "Standard 52-Card Deck",
+    "variant": "euchre",
+    "key": "euchre",
+    "label": "Euchre",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/euchre/standard.md"
   },
   {
     "family": "standard-52",

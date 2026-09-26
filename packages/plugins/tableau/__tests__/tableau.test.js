@@ -1080,6 +1080,153 @@ describe('partnership melds (Canasta)', () => {
   })
 })
 
+describe('trick-taking with an auction (Euchre, Bridge)', () => {
+  const EUCHRE = { game: 'trick-taking', rankOrder: [9, 10, 'J', 'Q', 'K', 'A'], partnerships: [['p1', 'p3'], ['p2', 'p4']], auction: 'order-up', bowers: true, goingAlone: true, scoring: { type: 'makers' }, target: 10, deal: { perPlayer: 5 } }
+  const BRIDGE = { game: 'trick-taking', rankOrder: [2, 3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K', 'A'], partnerships: [['p1', 'p3'], ['p2', 'p4']], auction: 'contract', scoring: { type: 'rubber' }, deal: { perPlayer: 13 } }
+  const four = ['p1', 'p2', 'p3', 'p4']
+  const euchre = createTableauPluginFor('standard-52')(EUCHRE, { definition: { players: four, components: { deck: { type: 'standard-52', jokers: 0, subset: [9, 10, 'J', 'Q', 'K', 'A'] } } } })
+  const bridge = createTableauPluginFor('standard-52')(BRIDGE, { definition: { players: four, components: { deck: { type: 'standard-52', jokers: 0 } } } })
+  const moves = (plugin, slice, seat) => plugin.getLegalMoves(slice, turn(seat))
+  const eBase = euchre.init({ hands: [[], [], [], []], community: [], drawPile: [] }, noRng)
+  const bBase = bridge.init({ hands: [[], [], [], []], community: [], drawPile: [] }, noRng)
+
+  test('Euchre deals five each from the nine up and turns up a card', () => {
+    const s = createGameForFamily('standard-52', { variant: 'euchre', rngSeed: 1 }).getState().slice
+    expect(s.hands.map(h => h.length)).toEqual([5, 5, 5, 5])
+    expect([...s.hands.flat(), ...s.drawPile]).toHaveLength(24)
+    expect(s.phase).toBe('order')
+    expect(s.upcard).toBe(s.drawPile[0])
+  })
+
+  test('ordering up makes the upcard trump; the dealer takes it and discards', () => {
+    const hands = [['spades_9', 'spades_10', 'hearts_A', 'clubs_K', 'clubs_Q'], ['hearts_9', 'hearts_10', 'hearts_J', 'hearts_Q', 'hearts_K'], ['diamonds_9', 'diamonds_10', 'diamonds_J', 'diamonds_Q', 'diamonds_K'], ['clubs_9', 'clubs_10', 'clubs_J', 'spades_Q', 'spades_K']]
+    let s = { ...eBase, hands, dealer: 3, upcard: 'spades_A', drawPile: ['spades_A', 'diamonds_A', 'clubs_A', 'spades_J'], next: 0 }
+    s = euchre.applyMove({ action: 'order' }, s, turn(0))
+    expect(s.trump).toBe('spades')
+    expect(s.phase).toBe('dealer-discard')
+    expect(s.hands[3]).toContain('spades_A')
+    s = euchre.applyMove({ action: 'discard', cards: ['clubs_9'] }, s, turn(3))
+    expect(s.hands[3]).toHaveLength(5)
+    expect(s.phase).toBe('play')
+    expect(s.next).toBe(0)
+  })
+
+  test('the Jack of trump is highest and the Jack of the same colour is a trump', () => {
+    const s = { ...eBase, phase: 'play', trump: 'hearts', trick: [{ seat: 0, card: 'hearts_A' }], hands: [[], ['diamonds_J', 'diamonds_9'], [], []], out: null, next: 1 }
+    // Hearts were led: the Jack of diamonds is a heart now, so it must follow.
+    expect(moves(euchre, s, 1).map(m => m.cards[0])).toEqual(['diamonds_J'])
+    const after = euchre.applyMove({ action: 'play', cards: ['diamonds_J'] }, { ...s, trick: [{ seat: 0, card: 'hearts_A' }] }, turn(1))
+    const trick = [...after.trick, { seat: 2, card: 'hearts_J' }, { seat: 3, card: 'hearts_K' }]
+    const done = euchre.applyMove({ action: 'play', cards: ['hearts_K'] }, { ...after, trick: trick.slice(0, 3), hands: [['clubs_9'], [], [], ['hearts_K', 'clubs_10']], next: 3 }, turn(3))
+    expect(done.lastTrick.winner).toBe(2)
+  })
+
+  test('the dealer is stuck in the second round, and the turned-down suit cannot be named', () => {
+    const s = { ...eBase, round: 2, upcard: 'spades_A', dealer: 3, next: 3 }
+    const list = moves(euchre, s, 3)
+    expect(list.some(m => m.action === 'pass')).toBe(false)
+    expect(list.some(m => String(m.value).startsWith('spades'))).toBe(false)
+    expect(moves(euchre, { ...s, next: 1 }, 1).some(m => m.action === 'pass')).toBe(true)
+  })
+
+  test('the dealer\'s partner may only order up alone; the partner sits out and the lone player\'s left leads', () => {
+    const s = { ...eBase, dealer: 3, upcard: 'spades_A', round: 1, next: 1 }
+    expect(moves(euchre, s, 1).filter(m => m.action === 'order')).toEqual([{ action: 'order', value: 'alone' }])
+    const alone = euchre.applyMove({ action: 'order', value: 'alone' }, s, turn(1))
+    expect(alone.out).toBe(3)
+    expect(alone.phase).toBe('play')
+    expect(alone.next).toBe(2)
+  })
+
+  test('makers score 1 for three or four, 2 for all five, 4 alone; euchred, the defenders score 2', () => {
+    // The last trick of the hand, spades trump; the maker is seat 0. Seat 3 plays
+    // last, the Jack of spades to take the trick or a low club to lose it.
+    const score = (wonBefore, makerTakesLast, alone = false) => {
+      const plays = alone ? [[0, 'spades_A'], [1, 'clubs_9']] : [[0, 'spades_A'], [1, 'clubs_9'], [2, 'clubs_10']]
+      const last = makerTakesLast ? 'clubs_Q' : 'spades_J'
+      const s = { ...eBase, phase: 'play', trump: 'spades', maker: 0, alone, out: alone ? 2 : null, won: wonBefore, trick: plays.map(([seat, card]) => ({ seat, card })), hands: [[], [], alone ? ['hearts_9'] : [], [last]], trickNo: 4, next: 3, scores: [0, 0] }
+      return euchre.applyMove({ action: 'play', cards: [last] }, s, turn(3)).lastHand.delta
+    }
+    expect(score([1, 1, 1, 1], true)).toEqual([1, 0])
+    expect(score([2, 0, 2, 0], true)).toEqual([2, 0])
+    expect(score([4, 0, 0, 0], true, true)).toEqual([4, 0])
+    expect(score([1, 1, 1, 1], false)).toEqual([0, 2])
+  })
+
+  test('Bridge bids must rise; only an opponent\'s bid may be doubled and only an opponent\'s double redoubled', () => {
+    let s = { ...bBase, dealer: 0, next: 0 }
+    s = bridge.applyMove({ action: 'bid', value: '1♥' }, s, turn(0))
+    const bids = moves(bridge, s, 1).filter(m => m.action === 'bid').map(m => m.value)
+    expect(bids).not.toContain('1♣')
+    expect(bids).toContain('1♠')
+    expect(moves(bridge, s, 1)).toContainEqual({ action: 'double' })
+    s = bridge.applyMove({ action: 'double' }, s, turn(1))
+    expect(moves(bridge, s, 2)).toContainEqual({ action: 'redouble' })
+    expect(moves(bridge, s, 2).some(m => m.action === 'double')).toBe(false)
+  })
+
+  test('three passes end the auction; the declarer is the first of the side to name the strain, and their left leads', () => {
+    let s = { ...bBase, dealer: 0, next: 0 }
+    for (const [seat, move] of [[0, { action: 'pass' }], [1, { action: 'bid', value: '1♠' }], [2, { action: 'pass' }], [3, { action: 'bid', value: '2♠' }], [0, { action: 'pass' }], [1, { action: 'pass' }], [2, { action: 'pass' }]]) {
+      s = bridge.applyMove(move, s, turn(seat))
+    }
+    expect(s.contract).toMatchObject({ level: 2, strain: '♠', doubled: 1, declarer: 1 })
+    expect(s.dummy).toBe(3)
+    expect(s.phase).toBe('play')
+    expect(s.next).toBe(2)
+    // The declarer chooses the dummy's cards.
+    expect(bridge.actsFor(s, 3)).toBe(1)
+    expect(bridge.actsFor(s, 2)).toBe(null)
+  })
+
+  test('four passes throw the hand in', () => {
+    let s = { ...bBase, dealer: 0, next: 0, hand: 0 }
+    for (const seat of [0, 1, 2, 3]) s = bridge.applyMove({ action: 'pass' }, s, turn(seat))
+    expect(s.hand).toBe(1)
+    expect(s.phase).toBe('auction')
+    expect(s.contract).toBe(null)
+  })
+
+  test('rubber scoring: a game below the line, penalties above it, and the rubber bonus', () => {
+    const finish = (contract, tricks, rubber) => {
+      const won = [0, 0, 0, 0]
+      won[contract.declarer] = tricks
+      won[(contract.declarer + 1) % 4] = 13 - tricks
+      const s = { ...bBase, phase: 'play', contract, declarer: contract.declarer, dummy: (contract.declarer + 2) % 4, trump: 'spades', rubber, won, trick: [{ seat: 0, card: 'clubs_2' }, { seat: 1, card: 'clubs_3' }, { seat: 2, card: 'clubs_4' }], hands: [[], [], [], ['clubs_5']], trickNo: 12, next: 3, scores: [0, 0] }
+      const after = bridge.applyMove({ action: 'play', cards: ['clubs_5'] }, s, turn(3))
+      return after
+    }
+    const fresh = () => ({ below: [0, 0], above: [0, 0], games: [0, 0] })
+    // 4♠ made exactly, not vulnerable: 120 below, a game.
+    const made = finish({ level: 4, strain: '♠', doubled: 1, declarer: 0, side: 0 }, 10, fresh())
+    expect(made.rubber.games).toEqual([1, 0])
+    expect(made.scores[0]).toBe(120)
+    // Down two undoubled, vulnerable: 100 a trick.
+    const down = finish({ level: 4, strain: '♠', doubled: 1, declarer: 0, side: 0 }, 8, { below: [0, 0], above: [0, 0], games: [1, 0] })
+    expect(down.rubber.above).toEqual([0, 200])
+    // Made redoubled: 4 x 30 x 4 below, and 100 for the insult.
+    const redoubled = finish({ level: 1, strain: '♠', doubled: 4, declarer: 0, side: 0 }, 7, fresh())
+    expect(redoubled.scores[0]).toBe(120 + 100)
+    // A second game closes the rubber with 700 when the other side has none.
+    const rubber = finish({ level: 3, strain: 'NT', doubled: 1, declarer: 0, side: 0 }, 9, { below: [0, 0], above: [0, 0], games: [1, 0] })
+    expect(rubber.finished).not.toBeNull()
+    expect(rubber.scores[0]).toBe(100 + 700)
+  })
+
+  test('both games are played out by computer seats', () => {
+    for (const variant of ['euchre', 'bridge']) {
+      const game = createGameForFamily('standard-52', { variant, rngSeed: 2 })
+      const ai = createAI('standard-52', variant, { difficulty: 'medium', definition: game.raw.definition, rngSeed: 2 })
+      for (let ply = 0; ply < 40000; ply++) {
+        const st = game.getState()
+        if (st.slice.finished !== null) break
+        expect(game.applyMove(ai.pickMove(st.slice, st.players.currentIndex)).ok).toBe(true)
+      }
+      expect(game.getState().slice.finished).not.toBeNull()
+    }
+  })
+})
+
 describe('dice', () => {
   const definition = { players: ['a', 'b'], components: { dice: { count: 5 } } }
   const rng = { request: () => ({ shuffle: a => a, nextInt: () => 77 }) }

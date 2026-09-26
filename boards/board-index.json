@@ -2937,7 +2937,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-52--bridge.svg",
     "rulesUrl": "standard-52/games/bridge/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-52",
@@ -2997,7 +2997,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-52--euchre.svg",
     "rulesUrl": "standard-52/games/euchre/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-52",

@@ -1,6 +1,10 @@
 import { deal } from '../../../../component-deck/index.js'
 import { createRng } from '../../../../core/index.js'
 import { ordering, cardIdOf, suitName } from '../cards.js'
+import {
+  orderUpDeal, orderUpMoves, orderUpApply, bowerSuit, bowerRank, scoreMakers,
+  contractDeal, contractMoves, contractApply, scoreRubber, suitLabel,
+} from './auctions.js'
 
 // Trick-taking: Whist, Hearts, Spades. "Each player must follow suit if
 // possible. If unable to follow suit, a player may play any card. The highest
@@ -26,6 +30,10 @@ import { ordering, cardIdOf, suitName } from '../cards.js'
 //       moon: 26                               # penalty: taking every point card
 //       perTrick: 10, bagLimit: 10, bagPenalty: 100, nil: 100   # contract
 //     target: 100             # the game ends on a hand that takes a score here
+//     auction: order-up | contract   # trump or a contract decided before play (auctions.js)
+//     bowers: true            # the Jacks of the trump colour rank above the Ace, both as trumps
+//     goingAlone: true        # a maker may play without their partner
+//     scoring: { type: makers | rubber }
 //
 // The dealer rotates each hand; the player to the dealer's left is dealt to
 // first, passes first, bids first and, unless `leadsWith` says otherwise, leads.
@@ -59,7 +67,39 @@ function settings(ctx) {
     bidding: c.bidding || null,
     target: c.target ?? null,
     lowWins: scoring.type === 'penalty',
+    auction: c.auction || null,
+    bowers: !!c.bowers,
   }
+}
+
+// A card's suit and rank in play, once trump is known: the bowers change both.
+function suitIn(ctx, id, trump) {
+  const card = ctx.card(id)
+  return ctx.config.bowers ? bowerSuit(card, trump) : card.suit
+}
+
+function rankIn(ctx, id, trump) {
+  const { rankOf } = ordering(ctx.config)
+  const card = ctx.card(id)
+  return ctx.config.bowers ? bowerRank(card, trump, rankOf(card)) : rankOf(card)
+}
+
+// The seats taking part in a hand: a lone maker's partner sits out.
+function inPlay(slice, ctx) {
+  return ctx.seats - (slice.out === null || slice.out === undefined ? 0 : 1)
+}
+
+function nextIn(slice, seat, ctx) {
+  let next = (seat + 1) % ctx.seats
+  if (next === slice.out) next = (next + 1) % ctx.seats
+  return next
+}
+
+// Play begins once an auction is settled.
+function startPlay(slice, ctx) {
+  const left = slice.leader ?? (slice.dealer + 1) % ctx.seats
+  const lead = left === slice.out ? (left + 1) % ctx.seats : left
+  return { ...slice, phase: 'play', trick: [], trickNo: 0, next: lead }
 }
 
 // A hand dealt from the seed: the dealer's left is dealt to first, so the last
@@ -86,7 +126,7 @@ function dealHand(slice, handNo, ctx) {
   const direction = s.passing ? (s.passing.cycle || ['left'])[handNo % (s.passing.cycle || ['left']).length] : 'none'
   const phase = direction !== 'none' && s.passing ? 'pass' : (s.bidding ? 'bid' : 'play')
   const next = phase === 'play' ? leaderOf(hands, left, s) : left
-  return {
+  const fresh = {
     ...slice,
     hands,
     community: [],
@@ -105,8 +145,13 @@ function dealHand(slice, handNo, ctx) {
     broken: false,
     won: Array(seats).fill(0),
     taken: Array(seats).fill(0),
+    out: null,
+    leader: null,
     next,
   }
+  if (s.auction === 'order-up') return orderUpDeal(fresh, dealer, ctx)
+  if (s.auction === 'contract') return contractDeal(fresh, dealer)
+  return fresh
 }
 
 function leaderOf(hands, fallback, s) {
@@ -124,7 +169,7 @@ function choose(list, k, start = 0, prefix = [], out = []) {
 function playable(slice, seat, ctx) {
   const s = settings(ctx)
   const hand = slice.hands[seat]
-  const suitOf = (id) => ctx.card(id)?.suit
+  const suitOf = (id) => suitIn(ctx, id, slice.trump)
   if (!slice.trick.length) {
     // The first trick of a hand may have to open with a named card.
     if (slice.trickNo === 0 && s.leadsWith && hand.includes(s.leadsWith)) return [s.leadsWith]
@@ -145,15 +190,16 @@ function playable(slice, seat, ctx) {
 }
 
 function trickWinner(trick, trump, ctx) {
-  const { rankOf } = ordering(ctx.config)
-  const led = ctx.card(trick[0].card).suit
+  const suit = (id) => suitIn(ctx, id, trump)
+  const rank = (id) => rankIn(ctx, id, trump)
+  const led = suit(trick[0].card)
   let best = trick[0]
   for (const play of trick.slice(1)) {
-    const a = ctx.card(play.card), b = ctx.card(best.card)
-    const aTrump = trump && a.suit === trump, bTrump = trump && b.suit === trump
+    const a = suit(play.card), b = suit(best.card)
+    const aTrump = trump && a === trump, bTrump = trump && b === trump
     if (aTrump && !bTrump) best = play
-    else if (aTrump === bTrump && a.suit === b.suit && rankOf(a) > rankOf(b)) best = play
-    else if (!aTrump && !bTrump && a.suit === led && b.suit !== led) best = play
+    else if (aTrump === bTrump && a === b && rank(play.card) > rank(best.card)) best = play
+    else if (!aTrump && !bTrump && a === led && b !== led) best = play
   }
   return best.seat
 }
@@ -182,6 +228,7 @@ function scoreHand(slice, ctx) {
     }
     return { delta, bags }
   }
+  if (sc.type === 'makers') return { delta: scoreMakers(slice, s.teams), bags }
   const tricksOf = (side) => (s.teams.length ? s.teams[side].reduce((n, seat) => n + slice.won[seat], 0) : slice.won[side])
   if (sc.type === 'contract') {
     const per = sc.perTrick ?? 10
@@ -236,6 +283,7 @@ export const trickTaking = {
   init(base, ctx) {
     const s = settings(ctx)
     const slice = { seed: ctx.seed || 1, scores: Array(s.sides).fill(0), bags: Array(s.sides).fill(0), finished: null, next: null }
+    if (s.scoring.type === 'rubber') slice.rubber = { below: [0, 0], above: [0, 0], games: [0, 0] }
     return dealHand(slice, 0, ctx)
   },
 
@@ -245,6 +293,8 @@ export const trickTaking = {
 
   legalMoves(slice, seat, ctx) {
     const s = settings(ctx)
+    if (slice.phase === 'order' || slice.phase === 'dealer-discard') return orderUpMoves(slice, seat, ctx)
+    if (slice.phase === 'auction') return contractMoves(slice, seat)
     if (slice.phase === 'pass') {
       if (slice.gives[seat]) return []
       return choose(slice.hands[seat], s.passing.count || 3).map(cards => ({ action: 'give', cards }))
@@ -262,6 +312,8 @@ export const trickTaking = {
   apply(move, slice, seat, ctx) {
     const s = settings(ctx)
     const seats = ctx.seats
+    if (slice.phase === 'order' || slice.phase === 'dealer-discard') return orderUpApply(move, slice, seat, ctx, (x) => startPlay(x, ctx))
+    if (slice.phase === 'auction') return contractApply(move, slice, seat, ctx, (x) => startPlay(x, ctx), () => dealHand(slice, slice.hand + 1, ctx))
     if (move.action === 'give') {
       const gives = slice.gives.map((g, i) => (i === seat ? move.cards : g))
       if (gives.some(g => g === null)) return { ...slice, gives, next: (seat + 1) % seats }
@@ -286,14 +338,25 @@ export const trickTaking = {
     const trick = [...slice.trick, { seat, card: id }]
     const led = ctx.card(trick[0].card).suit
     const broken = slice.broken || (s.breaking && card.suit === s.breaking && (trick.length > 1 ? card.suit !== led : false))
-    if (trick.length < seats) return { ...slice, hands, trick, broken, next: (seat + 1) % seats }
+    if (trick.length < inPlay(slice, ctx)) return { ...slice, hands, trick, broken, next: nextIn(slice, seat, ctx) }
 
     const winner = trickWinner(trick, slice.trump, ctx)
     const won = slice.won.map((n, i) => (i === winner ? n + 1 : n))
     const points = trick.reduce((n, p) => n + s.penaltyOf(p.card), 0)
     const taken = slice.taken.map((n, i) => (i === winner ? n + points : n))
     const after = { ...slice, hands, trick: [], lastTrick: { plays: trick, winner }, trickNo: slice.trickNo + 1, broken, won, taken, next: winner }
-    if (hands.some(h => h.length)) return after
+    if (hands.some((h, i) => i !== slice.out && h.length)) return after
+
+    if (s.scoring.type === 'rubber') {
+      const { rubber, over } = scoreRubber(after, s.teams)
+      const scores = rubber.above.map((v, i) => v + rubber.below[i])
+      const lastHand = { won, contract: after.contract }
+      if (over) {
+        const side = scores[0] >= scores[1] ? 0 : 1
+        return { ...after, rubber, scores, lastHand, phase: 'over', finished: s.teams[side][0], winningSide: side, next: null }
+      }
+      return dealHand({ ...after, rubber, scores, lastHand }, after.hand + 1, ctx)
+    }
 
     // The hand is over: score it, and either the game is or the next is dealt.
     const { delta, bags } = scoreHand(after, ctx)
@@ -314,18 +377,40 @@ export const trickTaking = {
   // Everyone's own hand and nobody else's, and the cards being passed only to
   // the seat passing them. Tricks are played face up, so what has been taken
   // is known to all.
+  // The dummy's hand is laid face up once the opening lead is made.
   project(slice, seat) {
+    const dummyShown = slice.dummy !== null && slice.dummy !== undefined && slice.phase === 'play' && (slice.trickNo > 0 || slice.trick.length > 0)
     return {
       ...slice,
-      hands: slice.hands.map((h, i) => (i === seat ? h : h.map(() => null))),
+      viewer: seat,
+      hands: slice.hands.map((h, i) => (i === seat || (dummyShown && i === slice.dummy) ? h : h.map(() => null))),
       drawPile: slice.drawPile.map(() => null),
       gives: slice.gives.map((g, i) => (i === seat || g === null ? g : g.map(() => null))),
     }
   },
 
+  // The declarer plays the dummy's cards.
+  actsFor(slice, seat) {
+    return slice.phase === 'play' && slice.dummy !== null && slice.dummy !== undefined && seat === slice.dummy ? slice.declarer : null
+  },
+
   table(view, ctx) {
     const name = (seat) => ctx.names[seat] || `Player ${seat + 1}`
     const groups = []
+    if (view.phase === 'order' && view.round === 1) groups.push({ label: 'Upcard: order it up, or pass', cards: [view.upcard] })
+    if (view.phase === 'order' && view.round === 2) groups.push({ label: `Name trump (not ${view.upcard ? ctx.card(view.upcard).suit : ''})`, cards: [] })
+    if (view.phase === 'auction') {
+      const recent = view.calls.slice(-8).map(c => `${name(c.seat)} ${c.call}`).join(' · ')
+      groups.push({ label: recent || `${name(view.next)} to call first`, cards: [] })
+    }
+    if (view.contract) {
+      const c = view.contract
+      groups.push({ label: `Contract ${c.level}${c.strain}${c.doubled === 4 ? ' redoubled' : c.doubled === 2 ? ' doubled' : ''} by ${name(c.declarer)}`, cards: [] })
+    }
+    if (view.dummy !== null && view.dummy !== undefined && view.hands[view.dummy].every(id => id !== null) && view.viewer !== view.dummy) {
+      groups.push({ label: `Dummy · ${name(view.dummy)}`, cards: view.hands[view.dummy], selectable: view.viewer === view.declarer && view.next === view.dummy })
+    }
+    if (view.maker !== null && view.maker !== undefined && view.trump) groups.push({ label: `${name(view.maker)} made ${suitLabel(view.trump)}${view.alone ? ', alone' : ''}`, cards: [] })
     if (view.trumpCard && view.trickNo === 0 && !view.trick.length) groups.push({ label: `Trump: ${view.trump} (turned)`, cards: [view.trumpCard] })
     if (view.trick.length) {
       groups.push({ label: `${view.trump ? `Trump ${view.trump} · ` : ''}Led by ${name(view.trick[0].seat)}`, cards: view.trick.map(p => p.card) })
@@ -349,7 +434,12 @@ export const trickTaking = {
   describeSeat(view, seat, ctx) {
     const s = settings(ctx)
     const side = s.teamOf(seat)
+    if (view.out === seat) return `sitting out · score ${view.scores[side]}`
     const parts = [`${view.won[seat]} tricks`]
+    if (view.rubber) {
+      parts.push(`games ${view.rubber.games[side]}`, `below ${view.rubber.below[side]}`, `total ${view.scores[side]}`)
+      return parts.join(' · ')
+    }
     if (view.bids[seat] !== null && view.bids[seat] !== undefined) parts.push(`bid ${view.bids[seat] === 0 && s.bidding?.nil ? 'nil' : view.bids[seat]}`)
     if (s.scoring.type === 'penalty') parts.push(`${view.taken[seat]} this hand`)
     parts.push(`score ${view.scores[side]}`)
@@ -361,6 +451,7 @@ export const trickTaking = {
     const { rankOf } = ordering(ctx.config)
     const card = (id) => ctx.card(id)
     const hand = view.hands[seat]
+    if (view.phase === 'order' || view.phase === 'dealer-discard' || view.phase === 'auction') return auctionPolicy(view, seat, moves, ctx)
     if (view.phase === 'pass') {
       // Pass what is most likely to take points or tricks the seat does not want.
       const danger = (id) => s.penaltyOf(id) * 20 + rankOf(card(id))
@@ -413,8 +504,69 @@ export const trickTaking = {
   },
 
   describe(move, ctx) {
+    if (move.action === 'discard') return 'discards'
+    if (move.action === 'order') return move.value ? 'orders up, alone' : 'orders up'
+    if (move.action === 'call') return `calls ${move.value}`
+    if (move.action === 'double' || move.action === 'redouble' || move.action === 'pass') return move.action
     if (move.action === 'bid') return `bid ${move.value}`
     if (move.action === 'give') return `passes ${move.cards.length}`
     return move.cards.map(id => ctx.card(id)?.display || id).join(' ')
   },
+}
+
+// How a computer seat bids. Euchre: order up or name a suit holding three
+// trumps (counting the bowers), and discard the weakest card. Bridge: open
+// the longest suit with 13 high-card points, raise a partner's suit with
+// support, bid game when the side has 26 between them, and never double.
+const HCP = { A: 4, K: 3, Q: 2, J: 1 }
+const GAME_LEVEL = { '♣': 5, '♦': 5, '♥': 4, '♠': 4, NT: 3 }
+const STRAIN_OF = { clubs: '♣', diamonds: '♦', hearts: '♥', spades: '♠' }
+
+function auctionPolicy(view, seat, moves, ctx) {
+  const hand = view.hands[seat]
+  const pick = (action, value) => moves.find(m => m.action === action && (value === undefined || m.value === value))
+  if (view.phase === 'dealer-discard') {
+    const worth = (id) => (suitIn(ctx, id, view.trump) === view.trump ? 1000 : 0) + rankIn(ctx, id, view.trump)
+    return moves.reduce((a, b) => (worth(b.cards[0]) < worth(a.cards[0]) ? b : a))
+  }
+  if (view.phase === 'order') {
+    const trumps = (suit) => hand.filter(id => suitIn(ctx, id, suit) === suit).length
+    if (view.round === 1) {
+      const suit = ctx.card(view.upcard).suit
+      const count = trumps(suit) + (seat === view.dealer ? 1 : 0)
+      return count >= 3 ? pick('order') : (pick('pass') || pick('order'))
+    }
+    const options = moves.filter(m => m.action === 'call' && !String(m.value).includes('alone'))
+    const best = options.reduce((a, b) => (trumps(b.value) > trumps(a.value) ? b : a), options[0])
+    return trumps(best.value) >= 3 ? best : (pick('pass') || best)
+  }
+  // Bridge.
+  const points = hand.reduce((n, id) => n + (HCP[ctx.card(id).rank] || 0), 0)
+  const bySuit = new Map()
+  for (const id of hand) bySuit.set(ctx.card(id).suit, (bySuit.get(ctx.card(id).suit) || 0) + 1)
+  const longest = [...bySuit.entries()].sort((a, b) => b[1] - a[1])[0][0]
+  const partner = (seat + 2) % 4
+  const partnerBid = [...view.calls].reverse().find(c => c.seat === partner && /^[1-7]/.test(c.call))
+  const mine = view.calls.some(c => c.seat === seat && /^[1-7]/.test(c.call))
+  const cheapest = (strain, atMost) => {
+    for (let level = 1; level <= atMost; level++) {
+      const m = pick('bid', `${level}${strain}`)
+      if (m) return m
+    }
+    return null
+  }
+  if (partnerBid && points >= 6) {
+    const strain = partnerBid.call.slice(1)
+    const support = strain === 'NT' ? 2 : (bySuit.get(Object.keys(STRAIN_OF).find(k => STRAIN_OF[k] === strain)) || 0)
+    if (support >= 3 || strain === 'NT') {
+      const target = points + 13 >= 26 ? GAME_LEVEL[strain] : Number(partnerBid.call[0]) + 1
+      const raise = cheapest(strain, target)
+      if (raise && Number(raise.value[0]) === target) return raise
+    }
+  }
+  if (!mine && !partnerBid && points >= 13) {
+    const open = cheapest(STRAIN_OF[longest], 2)
+    if (open) return open
+  }
+  return pick('pass')
 }

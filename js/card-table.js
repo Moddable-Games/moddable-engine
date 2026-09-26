@@ -85,7 +85,14 @@ export function createCardSession(options = {}) {
   const legal = () => (over ? [] : game.getLegalMoves())
   // Seats at one screen take turns at the bottom of the table; against the
   // computer the person's seat is always there.
-  const viewSeat = () => (ai ? humanIdx : current())
+  // Who chooses the move: the seat to play, unless the game says another
+  // seat plays for it - Bridge's declarer playing the dummy's cards.
+  const decider = () => {
+    const seatToPlay = current()
+    const other = plugin?.actsFor ? plugin.actsFor(game.getState().slice, seatToPlay) : null
+    return other === null || other === undefined ? seatToPlay : other
+  }
+  const viewSeat = () => (ai ? humanIdx : decider())
 
   async function start() {
     clearTimeout(timer)
@@ -138,7 +145,7 @@ export function createCardSession(options = {}) {
   }
 
   function toggle(id) {
-    if (over || isAi(current())) return
+    if (over || isAi(decider())) return
     const moves = legal()
     const result = interactionModelFor(family).handleClick(id, { moves })
     if (result.type === 'move') { apply(result.move); return }
@@ -194,22 +201,26 @@ export function createCardSession(options = {}) {
 
   function scheduleAi() {
     clearTimeout(timer)
-    if (over || !ai || !isAi(current())) return
+    if (over || !ai || !isAi(decider())) return
     timer = setTimeout(() => {
-      if (over || !isAi(current())) return
+      if (over || !isAi(decider())) return
       const move = ai.pickMove(game.getState().slice, current())
       if (move) apply(move)
     }, AI_DELAY_MS)
   }
 
   function performAction(action) {
-    if (over || isAi(current())) return false
+    if (over || isAi(decider())) return false
     if (choice) {
       const move = choice.find(m => choiceLabel(m) === action)
       if (move) return apply(move)
     }
     const moves = legal()
-    const [name, value] = String(action).split(' ')
+    // An action's name is its first word; the rest is its value ("call hearts alone").
+    const text = String(action)
+    const cut = text.indexOf(' ')
+    const name = cut < 0 ? text : text.slice(0, cut)
+    const value = cut < 0 ? undefined : text.slice(cut + 1)
     if (moves.some(m => m.action === name && Array.isArray(m.cards))) {
       // The picked cards could go more than one way - onto either of two
       // melds - so the player chooses.
@@ -239,7 +250,7 @@ export function createCardSession(options = {}) {
     do {
       if (!game.undo()) break
       history.pop()
-    } while (ai && isAi(current()) && history.length)
+    } while (ai && isAi(decider()) && history.length)
     over = false
     selected = new Set()
     choice = null
@@ -285,7 +296,7 @@ export function createCardSession(options = {}) {
     resign: noop,
     undo,
     actions: () => {
-      if (!game || isAi(current())) return []
+      if (!game || isAi(decider())) return []
       if (choice) return choice.map(choiceLabel)
       const moves = legal()
       return oneClick(moves) ? [] : cardActions(moves)

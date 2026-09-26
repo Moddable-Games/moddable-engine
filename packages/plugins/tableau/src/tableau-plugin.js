@@ -36,6 +36,7 @@ export const CONFIG_KEYS = new Set([
   'options',
   // trick-taking
   'trump', 'leadsWith', 'breaking', 'firstTrickForbids', 'passing', 'bidding', 'partnerships', 'scoring', 'target',
+  'auction', 'bowers', 'goingAlone',
   // war
   'warFaceDown',
   // shedding
@@ -139,6 +140,11 @@ export function createTableauPluginFor(family) {
 
       applyMove(move, slice, full) {
         return mechanic.apply(move, slice, full.__players.currentIndex, ctx)
+      },
+
+      // The seat that chooses for the seat to play, where that is someone else.
+      actsFor(slice, seat) {
+        return mechanic && mechanic.actsFor ? mechanic.actsFor(slice, seat, ctx) : null
       },
 
       turnEffects(slice) {
