@@ -1810,6 +1810,16 @@
     "playable": true
   },
   {
+    "family": "mahjong",
+    "familyLabel": "Mahjong",
+    "variant": "hong-kong",
+    "key": "hong-kong",
+    "label": "Hong Kong Mahjong",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/hong-kong/standard.md"
+  },
+  {
     "family": "mancala",
     "familyLabel": "Mancala",
     "variant": "ayo",

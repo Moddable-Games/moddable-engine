@@ -61,6 +61,8 @@ export const CONFIG_KEYS = new Set([
   'chips', 'hitSoft17', 'blinds', 'odds', 'shooters',
   // fishing
   'field', 'cardValues', 'goThreshold',
+  // wall (mahjong)
+  'minimum',
   // a hand per double: trains, branching
   'tilesPerPlayer', 'blankDouble', 'afterStart', 'publicTrain', 'openingArms', 'doubleToes',
   // scorecard dice

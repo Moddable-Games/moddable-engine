@@ -2357,7 +2357,7 @@
     "topology": "tableau",
     "svg": "svgs/mahjong--hong-kong.svg",
     "rulesUrl": "mahjong/games/hong-kong/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "mahjong",

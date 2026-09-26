@@ -213,6 +213,10 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/play/?game=mahjong</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/play/?game=mancala</loc>
     <priority>0.8</priority>
   </url>

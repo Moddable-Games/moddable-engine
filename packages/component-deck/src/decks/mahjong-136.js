@@ -66,6 +66,9 @@ registerDeck('mahjong-136', {
 
     const flowerNames = ['Plum', 'Orchid', 'Chrysanthemum', 'Bamboo']
     const seasonNames = ['Spring', 'Summer', 'Autumn', 'Winter']
+    // The tile sets file the bonus tiles by name: mei, lan, ju, zhu; spring to winter.
+    const flowerArt = ['mei', 'lan', 'ju', 'zhu']
+    const seasonArt = ['spring', 'summer', 'autumn', 'winter']
     for (let f = 0; f < Math.min(flowers, 4); f++) {
       tiles.push({
         id: `flower_${f + 1}`,
@@ -74,7 +77,7 @@ registerDeck('mahjong-136', {
         rank: f + 1,
         copy: 0,
         display: flowerNames[f],
-        art: tileArt('flower', f + 1),
+        art: flowerArt[f],
       })
     }
     for (let s = 0; s < Math.min(flowers - 4, 4); s++) {
@@ -85,7 +88,7 @@ registerDeck('mahjong-136', {
         rank: s + 1,
         copy: 0,
         display: seasonNames[s],
-        art: tileArt('season', s + 1),
+        art: seasonArt[s],
       })
     }
 

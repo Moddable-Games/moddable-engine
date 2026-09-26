@@ -6,6 +6,8 @@ import { total as blackjackTotal } from '../src/mechanics/house.js'
 import { resolveRoll } from '../src/mechanics/shooting.js'
 import { bestHand } from '../src/mechanics/holdem.js'
 import { koiKoiYaku, goStopScore } from '../src/mechanics/fishing.js'
+import { arrangements, isSevenPairs, isThirteenOrphans } from '../src/mechanics/mahjong-hands.js'
+import { hongKong } from '../src/mechanics/mahjong-scoring.js'
 import { createGameForFamily, createAI } from '../../../play/index.js'
 import '../../../play/src/bootstrap-plugins.js'
 import '../../../play/test-helpers/setup-rules-reader.js'
@@ -1828,6 +1830,95 @@ describe('tableaus (Oicho-Kabu)', () => {
     const s = game.getState().slice
     expect(s.finished).not.toBeNull()
     expect(s.stacks.reduce((a, b) => a + b, 0)).toBe(400)
+  })
+})
+
+describe('wall (Hong Kong mahjong)', () => {
+  const plugin = createTableauPluginFor('mahjong')({ game: 'wall', scoring: 'hong-kong', minimum: 3, rounds: 1 }, { definition: { players: ['east', 'south', 'west', 'north'], components: { deck: { type: 'mahjong-136', flowers: 8 } } } })
+  const base = plugin.init({ hands: [[], [], [], []], community: [], drawPile: [] }, noRng)
+  const moves = (slice, seat) => plugin.getLegalMoves(slice, turn(seat))
+  // Tiles by kind, a copy at a time: t('bamboo_3') is a 3 of bamboo not yet used.
+  const used = new Map()
+  const t = (kind) => { const n = used.get(kind) || 0; used.set(kind, n + 1); return `${kind}_${n}` }
+  const hand = (...ks) => ks.map(t)
+
+  test('a hand reads as four sets and a pair, or seven pairs, or thirteen orphans', () => {
+    const ks = ['bamboo_1', 'bamboo_2', 'bamboo_3', 'circles_5', 'circles_5', 'circles_5', 'wind_east', 'wind_east', 'wind_east', 'dragon_red', 'dragon_red', 'dragon_red', 'characters_9', 'characters_9']
+    expect(arrangements(ks, 4)).toHaveLength(1)
+    expect(arrangements(ks.slice(0, 13).concat(['characters_8']), 4)).toHaveLength(0)
+    expect(isSevenPairs(['bamboo_1', 'bamboo_1', 'bamboo_4', 'bamboo_4', 'circles_2', 'circles_2', 'circles_7', 'circles_7', 'wind_east', 'wind_east', 'dragon_red', 'dragon_red', 'characters_3', 'characters_3'])).toBe(true)
+    expect(isThirteenOrphans(['bamboo_1', 'bamboo_9', 'circles_1', 'circles_9', 'characters_1', 'characters_9', 'wind_east', 'wind_south', 'wind_west', 'wind_north', 'dragon_red', 'dragon_green', 'dragon_white', 'dragon_white'])).toBe(true)
+  })
+
+  test('Hong Kong faan: triplets, one suit, dragons and the winds, to a limit of 13', () => {
+    const reading = (sets, pair, extra = {}) => hongKong({ sets, pair, special: null, kinds: [...sets.flatMap(x => (x.type === 'chow' ? [0, 1, 2].map(d => x.kind.replace(/\d$/, n => Number(n) + d)) : [x.kind, x.kind, x.kind])), pair, pair], bonus: [], seatWind: 'south', roundWind: 'east', selfDrawn: false, concealed: false, ...extra })
+    const pung = (kind) => ({ type: 'pung', kind, open: true })
+    const dragons = reading([pung('dragon_red'), pung('dragon_green'), pung('dragon_white'), pung('bamboo_2')], 'bamboo_5')
+    expect(Object.fromEntries(dragons.patterns)).toMatchObject({ 'All in Triplets': 3, 'Mixed One Suit': 3, 'Great Dragons': 8 })
+    expect(dragons.value).toBe(13)
+    const flush = reading([{ type: 'chow', kind: 'circles_1', open: true }, { type: 'chow', kind: 'circles_4', open: true }, { type: 'chow', kind: 'circles_6', open: true }, { type: 'chow', kind: 'circles_2', open: true }], 'circles_9')
+    expect(Object.fromEntries(flush.patterns)).toMatchObject({ 'Common Hand': 1, 'All One Suit': 7 })
+    const winds = reading([pung('wind_south'), pung('wind_east'), pung('bamboo_2'), pung('circles_3')], 'characters_5')
+    expect(Object.fromEntries(winds.patterns)).toMatchObject({ 'Seat Wind': 1, 'Prevailing Wind': 1 })
+  })
+
+  // Each seat holds its own flower, one faan towards the minimum.
+  const flowers = [['flower_1'], ['flower_2'], ['flower_3'], ['flower_4']]
+  const table = (hands, extra = {}) => ({ ...base, hands, melds: [[], [], [], []], discards: [[], [], [], []], bonus: flowers, wall: [t('bamboo_9'), t('circles_9'), t('characters_9'), t('bamboo_8')], dealer: 0, firstDealer: 0, roundWind: 0, scores: [0, 0, 0, 0], ...extra })
+
+  test('a discard goes first to a player who can win, then to a pung, and a chow only to the next player', () => {
+    used.clear()
+    const winner = hand('bamboo_1', 'bamboo_1', 'bamboo_1', 'circles_2', 'circles_3', 'circles_4', 'wind_east', 'wind_east', 'wind_east', 'dragon_red', 'dragon_red', 'dragon_red', 'characters_5')
+    const punger = hand('characters_5', 'characters_5', 'bamboo_7', 'bamboo_8', 'bamboo_9', 'circles_6', 'circles_7', 'circles_8', 'wind_west', 'wind_west', 'wind_north', 'dragon_green', 'dragon_white')
+    const chower = hand('characters_3', 'characters_4', 'bamboo_2', 'bamboo_3', 'bamboo_4', 'circles_1', 'circles_1', 'circles_5', 'wind_south', 'wind_south', 'wind_north', 'dragon_green', 'dragon_white')
+    const discarder = hand('characters_5', 'bamboo_5', 'bamboo_5', 'circles_9', 'circles_9', 'circles_7', 'characters_7', 'characters_7', 'characters_1', 'characters_2', 'bamboo_6', 'wind_north', 'dragon_green', 'dragon_green')
+    const s = table([discarder, chower, punger, winner])
+    const after = plugin.applyMove({ action: 'discard', cards: [discarder[0]], to: 'discard' }, { ...s, phase: 'discard', flags: {}, next: 0 }, turn(0))
+    expect(after.phase).toBe('claim')
+    expect(after.claim.queue).toEqual([3, 2, 1])
+    expect(moves(after, 1)).toContainEqual({ action: 'chow', value: '3-4-5' })
+    expect(moves(after, 2).some(m => m.action === 'chow')).toBe(false)
+    expect(moves(after, 3)).toContainEqual({ action: 'win' })
+  })
+
+  test('a discard win is paid by the discarder; a self-drawn win by everyone, one and a half times', () => {
+    used.clear()
+    const winning = hand('bamboo_1', 'bamboo_1', 'bamboo_1', 'bamboo_2', 'bamboo_2', 'bamboo_2', 'bamboo_3', 'bamboo_3', 'bamboo_3', 'bamboo_7', 'bamboo_7', 'bamboo_7', 'bamboo_9')
+    const s = table([[], [], [], winning], { phase: 'claim', lastDiscard: { tile: t('bamboo_9'), by: 0 }, claim: { queue: [3] }, next: 3 })
+    const ron = plugin.applyMove({ action: 'win' }, { ...s, discards: [[s.lastDiscard.tile], [], [], []] }, turn(3))
+    const pts = ron.lastHand.points
+    expect(ron.scores).toEqual([-pts, 0, 0, pts])
+    const tsumo = plugin.applyMove({ action: 'win' }, { ...s, phase: 'discard', hands: [[], [], [], [...winning, s.lastDiscard.tile]], drawn: s.lastDiscard.tile, flags: { selfDrawn: true }, next: 3 }, turn(3))
+    const p2 = tsumo.lastHand.points
+    expect(tsumo.scores).toEqual([-p2 * 1.5, -p2 * 1.5, -p2 * 1.5, p2 * 4.5])
+  })
+
+  test('a pung added to with the fourth tile can be robbed by a player who wins on it', () => {
+    used.clear()
+    // Seat 1 waits on the 5 of characters between its 4 and 6.
+    const robber = hand('bamboo_1', 'bamboo_2', 'bamboo_3', 'circles_2', 'circles_3', 'circles_4', 'wind_east', 'wind_east', 'wind_east', 'characters_4', 'characters_6', 'dragon_red', 'dragon_red')
+    const pungTiles = hand('characters_5', 'characters_5', 'characters_5')
+    const fourth = t('characters_5')
+    const s = table([[fourth, t('bamboo_9')], robber, [], []], { melds: [[{ type: 'pung', kind: 'characters_5', tiles: pungTiles, open: true }], [], [], []], phase: 'discard', flags: { selfDrawn: true }, next: 0 })
+    const rob = plugin.applyMove({ action: 'kong', value: 'characters 5' }, s, turn(0))
+    expect(rob.phase).toBe('rob')
+    expect(rob.next).toBe(1)
+    const won = plugin.applyMove({ action: 'win' }, rob, turn(1))
+    expect(won.lastHand.patterns.map(p => p[0])).toContain('Robbing Kong')
+    expect(won.lastHand.from).toBe(0)
+  })
+
+  test('computer seats play an East round out, and every point paid is received', () => {
+    const game = createGameForFamily('mahjong', { variant: 'hong-kong', rngSeed: 3 })
+    const ai = createAI('mahjong', 'hong-kong', { difficulty: 'medium', definition: game.raw.definition, rngSeed: 3 })
+    for (let ply = 0; ply < 40000; ply++) {
+      const st = game.getState()
+      if (st.slice.finished !== null) break
+      expect(game.applyMove(ai.pickMove(st.slice, st.players.currentIndex)).ok).toBe(true)
+    }
+    const s = game.getState().slice
+    expect(s.finished).not.toBeNull()
+    expect(s.scores.reduce((a, b) => a + b, 0)).toBe(0)
   })
 })
 
