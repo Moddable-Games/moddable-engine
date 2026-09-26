@@ -988,6 +988,98 @@ describe('melds: laying (Rummy) and knocking (Gin Rummy)', () => {
   })
 })
 
+describe('partnership melds (Canasta)', () => {
+  const CANASTA = { game: 'partnership-melds', partnerships: [['p1', 'p3'], ['p2', 'p4']], target: 5000 }
+  const definition = { players: ['p1', 'p2', 'p3', 'p4'], components: { deck: { type: 'standard-52', count: 2, jokers: 2 } } }
+  const plugin = createTableauPluginFor('standard-52')(CANASTA, { definition })
+  const base = plugin.init({ hands: [[], [], [], []], community: [], drawPile: [] }, noRng)
+  const moves = (slice, seat) => plugin.getLegalMoves(slice, turn(seat))
+  const playing = (hands, extra = {}) => ({
+    ...base, hands, pile: [], frozen: false, melds: [{}, {}], melded: [true, true], red: [[], []], scores: [0, 0], phase: 'play', next: 0,
+    turn: { meldedAtStart: 0, hand: hands[0], melds: {}, pending: [], tookPile: false, wasMelded: true, changed: false }, ...extra,
+  })
+
+  test('two decks and four jokers make 108 cards, eleven dealt to each, red threes laid out and replaced', () => {
+    const s = createGameForFamily('standard-52', { variant: 'canasta', rngSeed: 1 }).getState().slice
+    const all = [...s.hands.flat(), ...s.stock, ...s.pile, ...s.red.flat()]
+    expect(all).toHaveLength(108)
+    expect(new Set(all).size).toBe(108)
+    expect(s.hands.map(h => h.length)).toEqual([11, 11, 11, 11])
+    expect(s.hands.flat().some(id => /^(hearts|diamonds)_3/.test(id))).toBe(false)
+  })
+
+  test('a meld needs two naturals and holds at most three wild cards', () => {
+    const hand = ['clubs_7#1', 'hearts_7#1', 'spades_2#1', 'hearts_2#1', 'clubs_2#1', 'joker_1#1', 'diamonds_K#1', 'spades_K#1']
+    const melds = moves(playing([hand, [], [], []]), 0).filter(m => m.action === 'meld').map(m => m.cards)
+    expect(melds.some(c => c.length === 5 && c.filter(id => id.includes('7')).length === 2)).toBe(true)
+    expect(melds.some(c => c.filter(id => /_2#|joker/.test(id)).length > 3)).toBe(false)
+    expect(melds.some(c => c.every(id => /_2#|joker/.test(id)))).toBe(false)
+  })
+
+  test('first melds must reach the minimum before the player may discard, and can be taken back', () => {
+    const hand = ['clubs_5#1', 'hearts_5#1', 'spades_5#1', 'diamonds_9#1', 'clubs_J#1']
+    let s = playing([hand, [], [], []], { melded: [false, false] })
+    s = plugin.applyMove({ action: 'meld', cards: ['clubs_5#1', 'hearts_5#1', 'spades_5#1'] }, s, turn(0))
+    // Three fives are 15, short of 50: no discard until more is laid or it is taken back.
+    expect(moves(s, 0).some(m => m.action === 'discard')).toBe(false)
+    expect(moves(s, 0)).toContainEqual({ action: 'withdraw' })
+    s = plugin.applyMove({ action: 'withdraw' }, s, turn(0))
+    expect(s.hands[0]).toEqual(hand)
+    expect(moves(s, 0).some(m => m.action === 'discard')).toBe(true)
+  })
+
+  test('the pile is taken with two naturals, or a natural and a wild; a frozen pile takes two naturals; a black three blocks it', () => {
+    // Each hand keeps cards back, so taking the pile leaves something to discard.
+    const draw = (hand, pile, extra = {}) => ({ ...playing([[...hand, 'clubs_5#1', 'hearts_6#1'], [], [], []]), phase: 'draw', pile, ...extra })
+    const takes = (s) => moves(s, 0).some(m => m.action === 'take')
+    expect(takes(draw(['clubs_9#1', 'hearts_9#1', 'spades_4#1'], ['diamonds_9#1']))).toBe(true)
+    expect(takes(draw(['clubs_9#1', 'hearts_2#1', 'spades_4#1'], ['diamonds_9#1']))).toBe(true)
+    expect(takes(draw(['clubs_9#1', 'hearts_2#1', 'spades_4#1'], ['spades_2#2', 'diamonds_9#1'], { frozen: true }))).toBe(false)
+    expect(takes(draw(['clubs_9#1', 'hearts_9#1', 'spades_4#1'], ['spades_2#2', 'diamonds_9#1'], { frozen: true }))).toBe(true)
+    expect(takes(draw(['clubs_3#1', 'spades_3#1', 'spades_4#1'], ['spades_3#2']))).toBe(false)
+    // Taking with the last cards in hand would leave nothing to discard without a canasta.
+    expect(takes({ ...playing([['clubs_9#1', 'hearts_9#1', 'spades_4#1'], [], [], []]), phase: 'draw', pile: ['diamonds_9#1'] })).toBe(false)
+  })
+
+  test('a player may go out only once the side has a canasta', () => {
+    const run = ['clubs_Q#1', 'hearts_Q#1', 'spades_Q#1', 'diamonds_Q#1', 'clubs_Q#2', 'hearts_Q#2']
+    const without = playing([['spades_Q#2', 'clubs_4#1'], [], [], []], { melds: [{ Q: run.slice(0, 5) }, {}] })
+    expect(moves(without, 0).some(m => m.action === 'discard')).toBe(true)
+    expect(moves(playing([['clubs_4#1'], [], [], []], { melds: [{ Q: run.slice(0, 5) }, {}] }), 0)).toEqual([])
+    const withCanasta = playing([['clubs_4#1'], [], [], []], { melds: [{ Q: [...run, 'spades_Q#2'] }, {}] })
+    expect(moves(withCanasta, 0)).toContainEqual({ action: 'discard', cards: ['clubs_4#1'] })
+  })
+
+  test('going out scores the melds, the canasta bonus, red threes and 100, less what is left in hand', () => {
+    const natural = ['clubs_Q#1', 'hearts_Q#1', 'spades_Q#1', 'diamonds_Q#1', 'clubs_Q#2', 'hearts_Q#2', 'spades_Q#2']
+    const s = playing([['clubs_4#1'], ['spades_K#1'], [], []], { melds: [{ Q: natural }, { 9: ['clubs_9#1', 'hearts_9#1', 'spades_2#1'] }], red: [['hearts_3#1'], []] })
+    const after = plugin.applyMove({ action: 'discard', cards: ['clubs_4#1'] }, s, turn(0))
+    // Seven queens at 10, a natural canasta, one red three, going out.
+    expect(after.lastHand.scores[0]).toBe(70 + 500 + 100 + 100)
+    // Nines and a two, less the king still held.
+    expect(after.lastHand.scores[1]).toBe(10 + 10 + 20 - 10)
+  })
+
+  test('a red three counts against a side that never melded', () => {
+    const s = playing([['clubs_4#1'], [], [], []], { melds: [{ Q: ['clubs_Q#1', 'hearts_Q#1', 'spades_Q#1', 'diamonds_Q#1', 'clubs_Q#2', 'hearts_Q#2', 'spades_Q#2'] }, {}], melded: [true, false], red: [[], ['hearts_3#1']] })
+    const after = plugin.applyMove({ action: 'discard', cards: ['clubs_4#1'] }, s, turn(0))
+    expect(after.lastHand.scores[1]).toBe(-100)
+  })
+
+  test('a game between four computer seats is played out to a winning side', () => {
+    const game = createGameForFamily('standard-52', { variant: 'canasta', rngSeed: 3 })
+    const ai = createAI('standard-52', 'canasta', { difficulty: 'medium', definition: game.raw.definition, rngSeed: 3 })
+    for (let ply = 0; ply < 60000; ply++) {
+      const st = game.getState()
+      if (st.slice.finished !== null) break
+      expect(game.applyMove(ai.pickMove(st.slice, st.players.currentIndex)).ok).toBe(true)
+    }
+    const s = game.getState().slice
+    expect(s.finished).not.toBeNull()
+    expect(Math.max(...s.scores)).toBeGreaterThanOrEqual(5000)
+  })
+})
+
 describe('dice', () => {
   const definition = { players: ['a', 'b'], components: { dice: { count: 5 } } }
   const rng = { request: () => ({ shuffle: a => a, nextInt: () => 77 }) }

@@ -2947,7 +2947,7 @@
     "topology": "tableau",
     "svg": "svgs/standard-52--canasta.svg",
     "rulesUrl": "standard-52/games/canasta/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "standard-52",

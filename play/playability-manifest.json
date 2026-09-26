@@ -2140,6 +2140,16 @@
   {
     "family": "standard-52",
     "familyLabel": "Standard 52-Card Deck",
+    "variant": "canasta",
+    "key": "canasta",
+    "label": "Canasta (Classic)",
+    "group": "Other",
+    "playable": true,
+    "path": "content/games/canasta/standard.md"
+  },
+  {
+    "family": "standard-52",
+    "familyLabel": "Standard 52-Card Deck",
     "variant": "crazy-eights",
     "key": "crazy-eights",
     "label": "Crazy Eights",

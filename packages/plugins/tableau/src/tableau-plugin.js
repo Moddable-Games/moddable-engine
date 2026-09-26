@@ -47,6 +47,7 @@ export const CONFIG_KEYS = new Set([
   'freeCells', 'stock', 'drawCount', 'foundationToTableau', 'suitsInPlay',
   // melds: laying (melds on the table), knocking (melds in hand)
   'dealByPlayers', 'rummyDoubles', 'knock', 'bonuses', 'stockFloor', 'cardsEach',
+  'values', 'initialMeld', 'canasta', 'redThree', 'goingOut',
   // a hand per double: trains, branching
   'tilesPerPlayer', 'blankDouble', 'afterStart', 'publicTrain', 'openingArms', 'doubleToes',
   // scorecard dice
