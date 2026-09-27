@@ -89,6 +89,39 @@ function pitBoardToSetup(board, slice, topo) {
   return parts.join(';')
 }
 
+// Checkers counted per point: every occupied cell has a numeric `count`.
+function isStackBoard(board) {
+  if (!board || Array.isArray(board)) return false
+  let seen = 0
+  for (const cell of Object.values(board)) {
+    if (cell === null || cell === undefined) continue
+    if (typeof cell !== 'object' || typeof cell.count !== 'number') return false
+    seen++
+  }
+  return seen > 0
+}
+
+function stackBoardToSetup(board, slice) {
+  const letter = side => (side === 1 ? 'B' : 'W')
+  const colourOf = cell => (cell.side !== undefined ? cell.side : cell.owner)
+  const points = []
+  const extras = []
+  for (const [id, cell] of Object.entries(board)) {
+    if (!cell || !cell.count) continue
+    const point = /^point-(\d+)$/.exec(id)
+    const bar = /^bar-(\d+)$/.exec(id)
+    if (point) {
+      const pinned = cell.under !== undefined && cell.under !== null ? `/${letter(cell.under)}` : ''
+      points.push([Number(point[1]) - 1, `${Number(point[1]) - 1}:${cell.count}${letter(colourOf(cell))}${pinned}`])
+    } else if (bar) {
+      extras.push(`bar:${cell.count}${letter(colourOf(cell))}`)
+    }
+  }
+  points.sort((a, b) => a[0] - b[0])
+  const off = Array.isArray(slice?.off) ? slice.off.map((n, side) => `off:${n}${letter(side)}`) : []
+  return [...points.map(p => p[1]), ...extras, ...off].join(',')
+}
+
 export function boardToSetup(slice, topo = {}, vocabulary = {}, opts = {}) {
   const board = slice.board || []
 
@@ -131,6 +164,14 @@ export function boardToSetup(slice, topo = {}, vocabulary = {}, opts = {}) {
   if (topo.type === 'track' && Array.isArray(slice?.positions)) {
     return slice.positions.map((pos, seat) => `pos-${pos}:p${seat}`).join(',')
   }
+
+  // A track that stacks checkers keeps a count on each point, keyed `point-N`,
+  // with each side's bar beside them. It is written the way the corpus writes
+  // such a position - `0:2W,5:5B` - followed by the bar and the checkers borne
+  // off, and a checker pinned beneath another as `5:1W/B`. The letter is the
+  // cell's colour (`side`), which is not always its seat: a game can seat more
+  // players than it has colours.
+  if (topo.type === 'track' && isStackBoard(board)) return stackBoardToSetup(board, slice)
 
   if (!Array.isArray(board)) {
     const entries = []

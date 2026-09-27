@@ -1819,14 +1819,20 @@ export async function initGamePlay(container, defaults = {}) {
     // the whole move log stopped rendering, which is the second time this
     // afternoon that a sidebar helper grabbed the wrong scope.
     const perRound = Math.max(2, (session.playerNames || []).length || 2)
+    // A turn is every move one player makes before the next player's: a
+    // backgammon turn is a roll and up to four checkers, a draughts turn a
+    // chain of jumps. Counted a move at a time, one player's second checker
+    // was numbered with the other player's roll.
+    const turns = []
+    for (const entry of moves) {
+      const last = turns[turns.length - 1]
+      if (last && entry.player !== undefined && last.player === entry.player) last.notation += `, ${entry.notation || ''}`
+      else turns.push({ player: entry.player, notation: entry.notation || '' })
+    }
     const rounds = []
-    for (let i = 0; i < moves.length; i += perRound) {
+    for (let i = 0; i < turns.length; i += perRound) {
       const num = Math.floor(i / perRound) + 1
-      const inRound = []
-      for (let seat = 0; seat < perRound; seat++) {
-        const entry = moves[i + seat]
-        if (entry) inRound.push(entry.notation || '')
-      }
+      const inRound = turns.slice(i, i + perRound).map(turn => turn.notation)
       rounds.push(`<span class="move-pair">${num}. ${inRound.join(' ')}</span>`)
     }
     historyEl.innerHTML = rounds.join(' ')

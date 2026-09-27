@@ -22,7 +22,7 @@ import {
   listVariants,
 } from '../index.js'
 
-const EXPECTED_FAMILIES = ['chess', 'draughts', 'go', 'hex', 'landlords-game', 'mancala', 'morris', 'reversi', 'shogi', 'xiangqi']
+const EXPECTED_FAMILIES = ['backgammon', 'chess', 'draughts', 'go', 'hex', 'landlords-game', 'mancala', 'morris', 'reversi', 'shogi', 'xiangqi']
 
 describe('SDK consumer path (no frontmatter, no variant registration)', () => {
   // Every expected family must be present. Not asserted as an exact set:
@@ -42,7 +42,6 @@ describe('SDK consumer path (no frontmatter, no variant registration)', () => {
   test('hasFamily is false for non-existent families', () => {
     // Families with no plugin yet. Implementing one moves it into
     // EXPECTED_FAMILIES rather than being deleted from here.
-    expect(hasFamily('backgammon')).toBe(false)
     expect(hasFamily('tafl')).toBe(false)
     expect(hasFamily('halma')).toBe(false)
   })

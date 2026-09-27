@@ -154,6 +154,30 @@ describeWithRules('start position matches moddable-rules', () => {
       expect(topology.parsePosition(topology.serializePosition(board, plugin.vocabulary), plugin.vocabulary)).toEqual(declared)
       return
     }
+    // Where a setup counts checkers onto points - `0:2W` - the topology reads a
+    // stack of pieces per point and the game keeps a count. Compared as counts,
+    // and a checker off the track - on the bar, or waiting to enter - by colour
+    // alone, because a setup names the one holding area and a game names each
+    // side's own.
+    const stacks = Object.values(declared).some(Array.isArray)
+    if (stacks) {
+      const counted = (cells, isStack) => {
+        const out = {}
+        for (const [cell, held] of Object.entries(cells || {})) {
+          if (held === null || held === undefined) continue
+          const groups = isStack ? held.map(piece => [piece, 1]) : [[held, held.count]]
+          for (const [piece, count] of groups) {
+            if (!count) continue
+            const symbol = cellSymbol(piece, plugin.vocabulary)
+            const key = topology.isValid(cell) ? `${cell}:${symbol}` : `held:${symbol}`
+            out[key] = (out[key] || 0) + count
+          }
+        }
+        return out
+      }
+      expect(counted(board, false)).toEqual(counted(declared, true))
+      return
+    }
     expect(occupied(board)).toEqual(occupied(declared))
   })
 

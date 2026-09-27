@@ -1,5 +1,77 @@
 [
   {
+    "family": "backgammon",
+    "familyLabel": "Backgammon",
+    "variant": "acey-deucey",
+    "key": "acey-deucey",
+    "label": "Acey-Deucey",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "backgammon",
+    "familyLabel": "Backgammon",
+    "variant": "chouette",
+    "key": "chouette",
+    "label": "Chouette",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "backgammon",
+    "familyLabel": "Backgammon",
+    "variant": "fevga",
+    "key": "fevga",
+    "label": "Fevga",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "backgammon",
+    "familyLabel": "Backgammon",
+    "variant": "hypergammon",
+    "key": "hypergammon",
+    "label": "Hypergammon",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "backgammon",
+    "familyLabel": "Backgammon",
+    "variant": "nackgammon",
+    "key": "nackgammon",
+    "label": "Nackgammon",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "backgammon",
+    "familyLabel": "Backgammon",
+    "variant": "nardi",
+    "key": "nardi",
+    "label": "Nardi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "backgammon",
+    "familyLabel": "Backgammon",
+    "variant": "plakoto",
+    "key": "plakoto",
+    "label": "Plakoto",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "backgammon",
+    "familyLabel": "Backgammon",
+    "variant": "standard",
+    "key": "standard",
+    "label": "Standard Backgammon",
+    "group": "Other",
+    "playable": true
+  },
+  {
     "family": "bavarian-32",
     "familyLabel": "Bavarian 32-Card Games",
     "variant": "schafkopf",

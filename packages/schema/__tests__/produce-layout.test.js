@@ -212,6 +212,38 @@ describe('produceLayout', () => {
       expect(overflowTexts.length).toBe(1) // overflow count on the 7-stack
     })
 
+    test('a position in play gives each bar half and the bear-off tray a cell, and draws a pinned checker', () => {
+      const engine = {
+        topology: { type: 'track', positions: 24 },
+        surface: 'parchment',
+        render: {
+          trackStyle: 'triangular-points',
+          _parsedSetup: { dark: { 3: 1 }, light: { 3: 2 }, pinned: { 3: 'dark' }, bar: { light: 1, dark: 0 }, off: { light: 3, dark: 0 } },
+        },
+      }
+      const result = produceLayout(engine)
+      const cells = result.config.ops.map(o => o.attrs?.['data-sq']).filter(Boolean)
+      expect(cells).toEqual(expect.arrayContaining(['bar-0', 'bar-1', 'off']))
+      expect(result.config.width).toBe(16 * 2 + 32 * 6 * 2 + 24 + 32 + 8)
+      // Point 4: the pinned dark checker, then two light over it; one on the bar.
+      const circles = result.config.ops.filter(o => o.tag === 'circle')
+      expect(circles.length).toBe(1 + 1 + 2 + 1)
+      // Checkers in play let a click through to the point beneath.
+      expect(circles.every(c => c.attrs['pointer-events'] === 'none')).toBe(true)
+      // Three borne off, edge-on in the tray.
+      expect(result.config.ops.filter(o => o.tag === 'rect' && o.attrs.height === 5)).toHaveLength(3)
+    })
+
+    test('an opening position draws no tray and no bar cells', () => {
+      const engine = {
+        topology: { type: 'track', positions: 24 },
+        surface: 'parchment',
+        render: { trackStyle: 'triangular-points', _parsedSetup: { dark: { 0: 2 }, light: { 23: 2 } } },
+      }
+      const cells = produceLayout(engine).config.ops.map(o => o.attrs?.['data-sq']).filter(Boolean)
+      expect(cells.some(c => c === 'off' || c.startsWith('bar'))).toBe(false)
+    })
+
     test('perimeter — landlords produces ops from board data', () => {
       const engine = {
         topology: { type: 'track', positions: 40 },
