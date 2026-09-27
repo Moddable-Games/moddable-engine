@@ -172,6 +172,7 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 #### 2026-09-27
 - Taiwanese mahjong plays, scored by Mahjong Time's table: winning on all eight flowers and seasons or by robbing the eighth, ready on the original hand (declared with the first discard, then locked), seven pairs and a triplet, early winning by the number of discards, and graded patterns scoring only their highest. On a discard the discarder alone pays; a dealer's bonus, a continued-deal bonus and a 40-tai limit are options
 - Every component game now plays: 281 playable variants
+- Board export refuses a board whose named piece set is not in the gallery, or whose piece artwork is missing from the checkout, and exits non-zero so the rules repo's sync stops before recording it as fresh. The earlier check read letters in the setup and refused eight boards that are right to be empty (pieces starting in `home:`, Nukes' terrain setups)
 
 #### 2026-09-26
 - Riichi mahjong plays, scored as the European Mahjong Association's 2016 rules: a 14-tile dead wall with dora, kan dora and ura dora, the riichi stake and lock with ippatsu, furiten from one's own discards and from a passed winning tile, swap-calling barred, counters, noten payments with the dealer keeping the deal only while waiting, liability for Big Three Dragons and Big Four Winds, and han and fu with the named limits. All ten of the EMA's worked examples are tests
