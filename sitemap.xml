@@ -193,6 +193,10 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/play/?game=dou-shou-qi</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/play/?game=double-six-dominoes</loc>
     <priority>0.8</priority>
   </url>

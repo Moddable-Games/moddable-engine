@@ -28,6 +28,9 @@ const MINIMUM_PLAYABLE = {
   // The tables games from frontmatter keys alone (engine#150), Chouette as a
   // session of games between the box and a rotating team.
   backgammon: 8,
+  // Played by the chess plugin, which its rulebook names: ranks, the river,
+  // traps and the den are all declared there (engine#157).
+  'dou-shou-qi': 1,
   draughts: 13,
   go: 10,
   hex: 8,

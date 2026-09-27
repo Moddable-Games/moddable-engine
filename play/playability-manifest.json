@@ -1433,6 +1433,15 @@
     "playable": true
   },
   {
+    "family": "dou-shou-qi",
+    "familyLabel": "Dou Shou Qi (斗兽棋 / Jungle)",
+    "variant": "standard",
+    "key": "standard",
+    "label": "Dou Shou Qi (Standard)",
+    "group": "Other",
+    "playable": true
+  },
+  {
     "family": "double-six-dominoes",
     "familyLabel": "Double-Six Dominoes",
     "variant": "all-fives",
