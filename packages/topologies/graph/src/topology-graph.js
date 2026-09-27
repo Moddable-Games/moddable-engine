@@ -1,4 +1,5 @@
 import { concentricRings } from './concentric-rings.js'
+import { starStations } from './star.js'
 export const schema = {
   type: 'graph',
   required: ['nodes', 'edges'],
@@ -9,8 +10,9 @@ export function createGraphTopology(config) {
   // structure and let the structure generate them. `structure:
   // concentric-rings` existed only as a rendering instruction, so every morris
   // variant carried a complete engine block and still had no board to play on.
-  const generated = !config.nodes && config.structure === 'concentric-rings'
-    ? concentricRings(config.params || {})
+  const GENERATORS = { 'concentric-rings': concentricRings, star: starStations }
+  const generated = !config.nodes && GENERATORS[config.structure]
+    ? GENERATORS[config.structure](config.params || {})
     : null
   const nodes = config.nodes || generated?.nodes || []
   const edges = config.edges || generated?.edges || []
@@ -120,10 +122,31 @@ export function createGraphTopology(config) {
     return str
   }
 
+  // Where each node lies, for a board whose nodes carry lattice coordinates
+  // (the star). A jump or a ray on such a board goes straight; on a board of
+  // bare names, any path is a line.
+  const coords = new Map()
+  const byCoord = new Map()
+  for (const node of nodes) {
+    if (typeof node !== 'object' || node.x === undefined || node.y === undefined) continue
+    coords.set(node.name, [node.x, node.y])
+    byCoord.set(`${node.x},${node.y}`, node.name)
+  }
+  function beyond(from, via) {
+    const a = coords.get(from), b = coords.get(via)
+    if (!a || !b) return null
+    return byCoord.get(`${2 * b[0] - a[0]},${2 * b[1] - a[1]}`) || null
+  }
+
   function jumpPairs(from, directions) {
     const adj = neighbours(from)
     const pairs = []
     for (const over of adj) {
+      if (coords.size) {
+        const landing = beyond(from, over)
+        if (landing) pairs.push({ over, landing })
+        continue
+      }
       for (const landing of neighbours(over)) {
         if (landing !== from && !adj.includes(landing)) {
           pairs.push({ over, landing })
@@ -131,6 +154,25 @@ export function createGraphTopology(config) {
       }
     }
     return pairs
+  }
+
+  // One ray per neighbour, running straight on across the lattice. Only a
+  // board with coordinates has straight lines to run along.
+  function rays(from, _directions, maxSteps = Infinity) {
+    const out = []
+    for (const first of neighbours(from)) {
+      const ray = [first]
+      let prev = from, here = first
+      while (ray.length < maxSteps) {
+        const next = beyond(prev, here)
+        if (!next) break
+        ray.push(next)
+        prev = here
+        here = next
+      }
+      out.push(coords.size ? ray : [first])
+    }
+    return out
   }
 
   function adjacentPairs(from) {
@@ -367,6 +409,7 @@ export function createGraphTopology(config) {
     fromJSON,
     jumpPairs,
     adjacentPairs,
+    rays,
     getLayout,
     renderLayout,
     serializePosition,
