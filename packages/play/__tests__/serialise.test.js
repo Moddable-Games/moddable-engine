@@ -120,3 +120,17 @@ describe('emittableSymbols', () => {
     expect(symbols.find(s => s.type === 'king' && s.owner === 0).symbol).toBe('K')
   })
 })
+
+// The race games keep their grid as an object keyed by cell index. Written as
+// `coord:symbol` pairs, the grid renderer read nothing and drew an empty board.
+describe('a grid board kept as an object', () => {
+  const vocabulary = { piece: { symbols: { 0: 'M', 1: 'm' } } }
+  it('is written as FEN, like an array', () => {
+    const board = { 0: { type: 'piece', owner: 0 }, 3: { type: 'piece', owner: 1 } }
+    expect(boardToSetup({ board }, { type: 'grid', rows: 2, cols: 3 }, vocabulary)).toBe('M2/m2')
+  })
+  it('leaves a board keyed by node names as coordinates', () => {
+    const board = { n3: { type: 'piece', owner: 0 } }
+    expect(boardToSetup({ board }, { type: 'graph' }, vocabulary)).toBe('n3:M')
+  })
+})

@@ -31,6 +31,11 @@ const MINIMUM_PLAYABLE = {
   // returned by their owner, played by the chess plugin (engine#157).
   agon: 1,
   backgammon: 8,
+  // Race games on routes laid over their boards, played by the race plugin
+  // their rulebooks name (engine#151).
+  nyout: 1,
+  'royal-ur': 1,
+  senet: 1,
   // Played by the chess plugin, which its rulebook names: ranks, the river,
   // traps and the den are all declared there (engine#157).
   'dou-shou-qi': 1,

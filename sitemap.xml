@@ -241,7 +241,19 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/play/?game=nyout</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/play/?game=reversi</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/play/?game=royal-ur</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/play/?game=senet</loc>
     <priority>0.8</priority>
   </url>
   <url>

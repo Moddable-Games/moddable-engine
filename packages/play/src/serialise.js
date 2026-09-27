@@ -173,7 +173,13 @@ export function boardToSetup(slice, topo = {}, vocabulary = {}, opts = {}) {
   // players than it has colours.
   if (topo.type === 'track' && isStackBoard(board)) return stackBoardToSetup(board, slice)
 
-  if (!Array.isArray(board)) {
+  // A board kept as an object may still be a grid: the race games key their
+  // cells by the grid's own index. Written as coordinates, the grid renderer
+  // read nothing and drew an empty board, so a grid-indexed board goes the
+  // FEN way like an array does.
+  const gridIndexed = !Array.isArray(board) && topo.rows && topo.cols &&
+    Object.keys(board).every(key => /^\d+$/.test(key))
+  if (!Array.isArray(board) && !gridIndexed) {
     const entries = []
     for (const [coord, cell] of Object.entries(board)) {
       // `if (!cell)` drops seat 0, because seat 0 is the number 0. Hex and

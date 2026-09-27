@@ -2587,7 +2587,7 @@
     "topology": "graph",
     "svg": "svgs/nyout--standard.svg",
     "rulesUrl": "nyout/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "pachisi",
@@ -2657,7 +2657,7 @@
     "topology": "grid",
     "svg": "svgs/royal-ur--standard.svg",
     "rulesUrl": "royal-ur/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "senet",
@@ -2667,7 +2667,7 @@
     "topology": "grid",
     "svg": "svgs/senet--standard.svg",
     "rulesUrl": "senet/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "shogi",

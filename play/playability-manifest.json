@@ -2094,6 +2094,15 @@
     "playable": true
   },
   {
+    "family": "nyout",
+    "familyLabel": "Nyout (유놓이 / Yut Nori)",
+    "variant": "standard",
+    "key": "standard",
+    "label": "Nyout (Standard)",
+    "group": "Other",
+    "playable": true
+  },
+  {
     "family": "reversi",
     "familyLabel": "Reversi",
     "variant": "anti-reversi",
@@ -2117,6 +2126,24 @@
     "variant": "standard",
     "key": "standard",
     "label": "Standard Reversi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "royal-ur",
+    "familyLabel": "Royal Game of Ur",
+    "variant": "standard",
+    "key": "standard",
+    "label": "Royal Game of Ur (Standard)",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "senet",
+    "familyLabel": "Senet",
+    "variant": "standard",
+    "key": "standard",
+    "label": "Senet (Kendall Reconstruction)",
     "group": "Other",
     "playable": true
   },

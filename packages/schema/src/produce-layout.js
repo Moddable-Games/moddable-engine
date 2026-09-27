@@ -993,7 +993,7 @@ function produceGraphLayout(topo, colors, render) {
   const pointRadius = render.nodeRadius || (structure === 'grid-cross' ? 6 : 7)
 
   switch (structure) {
-    case 'perimeter-cross': return { type: 'graph', config: { ops: perimeterCrossOps(size, 0, 0, colors, pointRadius, params), width: size, height: size } }
+    case 'perimeter-cross': return { type: 'graph', config: { ops: perimeterCrossOps(size, 0, 0, colors, pointRadius, params, render), width: size, height: size } }
     case 'concentric-rings': return { type: 'graph', config: { ops: concentricRingOps(size, 0, 0, colors, pointRadius, params, render), width: size, height: size } }
     case 'grid-cross': return { type: 'graph', config: { ops: gridCrossOps(size, 0, 0, colors, pointRadius, params, render), width: size, height: size } }
     case 'star': return produceStarLayout(colors, render, params)
@@ -1058,15 +1058,19 @@ function perimeterCrossStations(size, ox, oy, params) {
   return { nodes, edges, junctions, centreIdx }
 }
 
-function perimeterCrossOps(size, ox, oy, colors, pointRadius, params) {
+// Pieces are drawn on the stations as every other graph board draws them;
+// Nyout's tokens were on the board in play and nowhere on the picture.
+function perimeterCrossOps(size, ox, oy, colors, pointRadius, params, render) {
   const { nodes, edges, junctions, centreIdx } = perimeterCrossStations(size, ox, oy, params)
   const dotR = (i) => i === centreIdx ? pointRadius * 1.4 : junctions.has(i) ? pointRadius * 1.2 : pointRadius
+  const pieces = nodePieceOps(nodes, render)
   return [
     { op: 'rect', attrs: { x: ox, y: oy, width: size, height: size, fill: colors.background, rx: 4 } },
     { op: 'edges', attrs: { fill: 'none', stroke: colors.line, 'stroke-width': 2.5, 'stroke-linecap': 'round' }, nodes, pairs: edges },
     { op: 'nodes', group: {}, items: nodes,
       dot: { radius: (n, i) => dotR(i), fill: (n, i) => i === centreIdx ? colors.centre : junctions.has(i) ? colors.junction : colors.point },
       hit: { radius: (n, i) => dotR(i) * 2, id: (n, i) => `n${i + 1}`, dataType: 'node' } },
+    ...(pieces.items.length ? [pieces] : []),
   ]
 }
 
