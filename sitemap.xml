@@ -193,6 +193,10 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/play/?game=chaupar</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/play/?game=chess</loc>
     <priority>0.8</priority>
   </url>
@@ -242,6 +246,10 @@
   </url>
   <url>
     <loc>https://engine.moddable.games/play/?game=nyout</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/play/?game=pachisi</loc>
     <priority>0.8</priority>
   </url>
   <url>

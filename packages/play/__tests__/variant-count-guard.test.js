@@ -34,6 +34,9 @@ const MINIMUM_PLAYABLE = {
   // Race games on routes laid over their boards, played by the race plugin
   // their rulebooks name (engine#151).
   nyout: 1,
+  // Pachisi's cross, its four routes and the Chaupar that shares them (engine#152).
+  pachisi: 3,
+  chaupar: 1,
   'royal-ur': 1,
   senet: 1,
   // Played by the chess plugin, which its rulebook names: ranks, the river,

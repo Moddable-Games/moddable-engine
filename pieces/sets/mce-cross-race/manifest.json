@@ -1,0 +1,33 @@
+{
+  "id": "mce-cross-race",
+  "name": "MCE Cross Race",
+  "family": "pachisi",
+  "virtual": true,
+  "recolorable": true,
+  "baseSet": "playstrategy-draughts-plain",
+  "recolourMatch": "#F8F6F2",
+  "owners": {
+    "red": {
+      "fill": "#d32f2f",
+      "stroke": "#000"
+    },
+    "yellow": {
+      "fill": "#fdd835",
+      "stroke": "#000"
+    },
+    "green": {
+      "fill": "#2e7d32",
+      "stroke": "#000"
+    },
+    "blue": {
+      "fill": "#1565c0",
+      "stroke": "#000"
+    }
+  },
+  "pieces": {
+    "rM": "wM.svg",
+    "yM": "wM.svg",
+    "gM": "wM.svg",
+    "bM": "wM.svg"
+  }
+}
