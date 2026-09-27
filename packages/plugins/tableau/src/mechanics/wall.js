@@ -1,5 +1,5 @@
 import { createRng } from '../../../../core/index.js'
-import { kindOf, parseKind, isBonus, arrangements, isSevenPairs, isThirteenOrphans, waits, placements, doraAfter } from './mahjong-hands.js'
+import { kindOf, parseKind, isBonus, arrangements, isSevenPairs, isThirteenOrphans, isHalfPairs, waits, placements, doraAfter } from './mahjong-hands.js'
 import { SCORERS } from './mahjong-scoring.js'
 
 // Wall: mahjong (engine#184). Four players draw from a wall and discard. A
@@ -36,6 +36,8 @@ import { SCORERS } from './mahjong-scoring.js'
 //     lastDiscard: win         # the discard after the last tile: only to win
 //     kongAfterClaim: false    # a kong only in a turn that began with a draw
 //     maxKongs: 4              # no more kongs in a hand than this
+//     readyOnOriginal: true    # a player whose dealt hand is waiting may declare
+//                              # it ready with the first discard, and is locked
 //
 // dealerKeeps may also be `never`: the deal passes after every hand.
 
@@ -66,6 +68,7 @@ function settings(ctx) {
     lastDiscardWinOnly: c.lastDiscard === 'win',
     kongAfterClaim: c.kongAfterClaim !== false,
     maxKongs: Number(c.maxKongs ?? 0),
+    readyOnOriginal: !!c.readyOnOriginal,
   }
 }
 
@@ -81,11 +84,18 @@ function universe(ctx) {
   return universes.get(ctx.deck)
 }
 
+// The special hands a game allows, all of them concealed: seven pairs and
+// thirteen orphans, or seven pairs and a triplet.
+function specialHand(s, melded) {
+  if (melded) return null
+  return (whole) => (s.game.specials && (isSevenPairs(whole, s.game.pairsMayRepeat) || isThirteenOrphans(whole))) || (s.game.halfPairs && isHalfPairs(whole))
+}
+
 // What a seat's concealed tiles wait on.
 function waitsOf(slice, seat, ctx, ids = slice.hands[seat]) {
   const s = settings(ctx)
   const melded = slice.melds[seat].length
-  return waits(kinds(ids, ctx), s.sets - melded, s.game.specials && !melded, universe(ctx))
+  return waits(kinds(ids, ctx), s.sets - melded, specialHand(s, melded), universe(ctx))
 }
 
 // Waiting: a tile would complete the hand, and the player does not already
@@ -118,24 +128,50 @@ function drawFor(slice, seat, ctx, fromBack = false) {
   let dead = slice.dead
   const bonus = slice.bonus.map(b => [...b])
   let tile = null
+  let forKong = fromBack
+  let bonusWin = slice.bonusWin || null
   for (;;) {
     let t
     if (fromBack && dead) {
       if (!wall.length) break
       // Once the loose tiles are gone, the live wall's last tile is the next one.
       t = dead.replacements.length ? dead.replacements[0] : wall[wall.length - 1]
-      dead = { ...dead, replacements: dead.replacements.slice(1), kongs: dead.kongs + 1 }
+      dead = { ...dead, replacements: dead.replacements.slice(1), kongs: dead.kongs + (forKong ? 1 : 0) }
+      forKong = false
       wall.pop()
     } else {
       if (!wall.length) break
       t = fromBack ? wall.pop() : wall.shift()
     }
-    if (isBonus(tileOf(ctx, t))) { bonus[seat].push(t); fromBack = true; continue }
+    if (isBonus(tileOf(ctx, t))) {
+      bonus[seat].push(t)
+      fromBack = true
+      if (!bonusWin && settings(ctx).game.bonusWins) bonusWin = flowerWin(bonus, seat)
+      continue
+    }
     tile = t
     break
   }
   if (tile === null) return null
-  return { ...slice, wall, dead, bonus, hands: slice.hands.map((h, i) => (i === seat ? [...h, tile] : h)), drawn: tile }
+  return { ...slice, wall, dead, bonus, bonusWin, hands: slice.hands.map((h, i) => (i === seat ? [...h, tile] : h)), drawn: tile }
+}
+
+// Winning on flowers and seasons: all eight win outright; and when a player
+// draws the eighth while another holds the other seven, that player robs it,
+// the drawer paying as a discarder would.
+function flowerWin(bonus, seat) {
+  if (bonus[seat].length === 8) return { seat, from: null, special: 'all-flowers' }
+  const robber = bonus.findIndex((b, i) => i !== seat && b.length === 7)
+  if (robber >= 0 && bonus[seat].length === 1) return { seat: robber, from: seat, special: 'robbing-the-eighth' }
+  return null
+}
+
+// A hand ended by flowers and seasons alone: nothing else is scored.
+function winOnFlowers(slice, ctx) {
+  const { seat, from, special } = slice.bonusWin
+  const s = settings(ctx)
+  const value = s.scorer({ special, sets: [], pair: null, kinds: [], bonus: slice.bonus[seat].map(id => tileOf(ctx, id)), seat, seatWind: seatWind(slice, seat) })
+  return win({ ...slice, bonusWin: null }, [{ seat, value }], from, ctx)
 }
 
 function deal(slice, ctx) {
@@ -152,7 +188,7 @@ function deal(slice, ctx) {
     ...slice, deals: slice.deals + 1, wall, dead,
     hands: four(() => []), melds: four(() => []), discards: four(() => []), discarded: four(() => []), bonus: four(() => []),
     riichi: four(null), furiten: four(false), liable: four(null), uninterrupted: true, log: [],
-    lastDiscard: null, claim: null, drawn: null, flags: {},
+    lastDiscard: null, claim: null, drawn: null, flags: {}, bonusWin: null,
   }
   for (let k = 0; k < s.handSize; k++) for (let p = 0; p < 4; p++) next = drawFor(next, (next.dealer + p) % 4, ctx)
   return startTurn({ ...next, phase: 'discard' }, next.dealer, ctx, false)
@@ -162,6 +198,7 @@ function deal(slice, ctx) {
 function startTurn(slice, seat, ctx, afterKong) {
   const drew = drawFor(slice, seat, ctx, afterKong)
   if (!drew) return exhausted(slice, ctx)
+  if (drew.bonusWin) return winOnFlowers({ ...drew, phase: 'discard' }, ctx)
   const cleared = drew.furiten.map((f, i) => (i === seat && !drew.riichi[i] ? false : f))
   return { ...drew, furiten: cleared, phase: 'discard', next: seat, flags: { selfDrawn: true, afterKong, lastTile: !drew.wall.length } }
 }
@@ -214,7 +251,7 @@ function onlyPlace(slice, seat, concealedKinds, winning, ctx) {
   before.splice(before.indexOf(winning), 1)
   const s = settings(ctx)
   const melded = slice.melds[seat].length
-  return waits(before, s.sets - melded, s.game.specials && !melded, universe(ctx)).length === 1
+  return waits(before, s.sets - melded, specialHand(s, melded), universe(ctx)).length === 1
 }
 
 // The best value of this seat's hand with these concealed tiles, or null.
@@ -232,6 +269,7 @@ function valueHand(slice, seat, concealedIds, how, ctx) {
     roundWind: WINDS[slice.roundWind],
     seat,
     concealed: exposed.every(m => !m.open),
+    discards: slice.discarded.reduce((n, d) => n + d.length, 0),
     ...circumstances(slice, seat, how, allKinds, ctx),
     ...how,
   }
@@ -239,6 +277,7 @@ function valueHand(slice, seat, concealedIds, how, ctx) {
   const readings = []
   if (s.game.specials && !exposed.length && isThirteenOrphans(concealedKinds)) readings.push({ ...base, sets: [], pair: null, special: 'thirteen-orphans', wait: null })
   if (s.game.specials && !exposed.length && isSevenPairs(concealedKinds, s.game.pairsMayRepeat)) readings.push({ ...base, sets: [], pair: null, special: 'seven-pairs', wait: 'pair' })
+  if (s.game.halfPairs && !exposed.length && isHalfPairs(concealedKinds)) readings.push({ ...base, sets: [], pair: null, special: 'half-pairs', wait: null })
   const openSets = exposed.map(m => ({ type: m.type, kind: m.kind, open: m.open }))
   for (const a of arrangements(concealedKinds, s.sets - exposed.length)) {
     const where = placements(a, how.winning)
@@ -324,7 +363,7 @@ function win(slice, winners, from, ctx) {
     const points = game.pays ? (value.basic ?? value.value) : game.points(value.value)
     const responsible = selfDrawn ? null : game.immunity && !slice.robbing ? sameRound(slice, seat, ctx) : from
     const owed = (payer) => (game.pays
-      ? game.pays(value, { selfDrawn, winnerIsDealer: seat === slice.dealer, payerIsDealer: payer === slice.dealer, responsible: responsible === null ? null : payer === responsible })
+      ? game.pays(value, { selfDrawn, winnerIsDealer: seat === slice.dealer, payerIsDealer: payer === slice.dealer, responsible: responsible === null ? null : payer === responsible, counters: slice.counters, config: ctx.config })
       : points * (selfDrawn ? game.selfDraw : 1) * (game.dealerDouble && (payer === slice.dealer || seat === slice.dealer) ? 2 : 1))
     const pay = (payer, amount) => { payment[payer] -= amount; payment[seat] += amount }
     const bonus = s.counters * slice.counters
@@ -466,7 +505,7 @@ function riichiKong(slice, seat, kind, ctx) {
   const sets = s.sets - slice.melds[seat].length
   if (!was.every(w => arrangements([...beforeKinds, w], sets).every(a => a.sets.some(x => x.type === 'pung' && x.kind === kind)))) return false
   const after = beforeKinds.filter(k => k !== kind)
-  const now = waits(after, sets - 1, false, universe(ctx))
+  const now = waits(after, sets - 1, null, universe(ctx))
   return now.length === was.length && now.every(w => was.includes(w))
 }
 
@@ -508,6 +547,13 @@ export const wall = {
         if (tenpai(slice, seat, ctx, hand.filter(t => t !== id))) out.push({ action: 'riichi', cards: [id], to: 'discard', label: 'Riichi' })
       }
     }
+    // Ready on the original hand: the dealt tiles already wait, declared with
+    // the first discard; anyone but the dealer throws the tile just drawn.
+    if (s.readyOnOriginal && !locked && !slice.discarded[seat].length && !slice.melds[seat].length) {
+      for (const id of seat === slice.dealer ? hand : [slice.drawn].filter(Boolean)) {
+        if (tenpai(slice, seat, ctx, hand.filter(t => t !== id))) out.push({ action: 'riichi', cards: [id], to: 'discard', label: 'Declare ready' })
+      }
+    }
     if (!canKong(slice, ctx) || (!s.kongAfterClaim && !slice.flags.selfDrawn)) return out
     const counts = new Map()
     for (const id of hand) counts.set(kindOf(tileOf(ctx, id)), (counts.get(kindOf(tileOf(ctx, id))) || 0) + 1)
@@ -523,7 +569,7 @@ export const wall = {
     if (slice.phase === 'rob') {
       const tile = slice.robbing.tile
       const k = kindOf(tileOf(ctx, tile))
-      if (move.action === 'win') return win(slice, [{ seat, value: valueHand(slice, seat, [...slice.hands[seat], tile], { selfDrawn: false, robbing: true, winning: k }, ctx) }], slice.robbing.by, ctx)
+      if (move.action === 'win') return win(slice, [{ seat, value: valueHand(slice, seat, [...slice.hands[seat], tile], { selfDrawn: false, robbing: true, winning: k, lastTile: !slice.wall.length }, ctx) }], slice.robbing.by, ctx)
       const queue = slice.claim.queue.slice(1)
       if (queue.length) return { ...slice, claim: { queue }, next: queue[0] }
       return startTurn(markPassed({ ...slice, phase: 'discard', robbing: null, claim: null }, k, slice.robbing.by, ctx), slice.robbing.by, ctx, true)
@@ -583,7 +629,7 @@ export const wall = {
         const { taken, rest } = take(called.hands[seat], 1, k, ctx)
         const melds = called.melds.map((m, i) => (i === seat ? m.map((x, j) => (j === pung ? { ...x, type: 'kong', tiles: [...x.tiles, ...taken] } : x)) : m))
         const next = { ...called, hands: called.hands.map((h, i) => (i === seat ? rest : h)), melds }
-        const robbers = [1, 2, 3].map(d => (seat + d) % 4).filter(o => !furiten(next, o, ctx) && valueHand(next, o, [...next.hands[o], taken[0]], { selfDrawn: false, robbing: true, winning: k }, ctx))
+        const robbers = [1, 2, 3].map(d => (seat + d) % 4).filter(o => !furiten(next, o, ctx) && valueHand(next, o, [...next.hands[o], taken[0]], { selfDrawn: false, robbing: true, winning: k, lastTile: !next.wall.length }, ctx))
         if (robbers.length) return { ...next, phase: 'rob', robbing: { tile: taken[0], by: seat }, claim: { queue: robbers }, next: robbers[0] }
         return startTurn(markPassed(next, k, seat, ctx), seat, ctx, true)
       }
@@ -664,7 +710,7 @@ export const wall = {
 
   describe(move, ctx) {
     if (move.action === 'discard') return `discards ${tileOf(ctx, move.cards[0])?.display || move.cards[0]}`
-    if (move.action === 'riichi') return `riichi, discarding ${tileOf(ctx, move.cards[0])?.display || move.cards[0]}`
+    if (move.action === 'riichi') return `${(move.label || 'riichi').toLowerCase()}, discarding ${tileOf(ctx, move.cards[0])?.display || move.cards[0]}`
     if (move.action === 'chow') return `chows ${move.value}`
     if (move.action === 'kong' && move.value) return `kongs ${move.value}`
     return move.action === 'win' ? 'mahjong!' : move.action

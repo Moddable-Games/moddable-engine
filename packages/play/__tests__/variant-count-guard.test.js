@@ -36,13 +36,13 @@ const MINIMUM_PLAYABLE = {
   // Rummy, Canasta, Cribbage for two, three and four, Blackjack and Texas
   // Hold'em; Block, All Fives, Mexican Train and Chickenfoot; Yahtzee,
   // Farkle, Liar's Dice, Bunco and Craps; Skat and Schafkopf; Koi-Koi,
-  // Hana-Awase, Go-Stop and Oicho-Kabu; Hong Kong, Riichi, Zung Jung and American Classic mahjong.
+  // Hana-Awase, Go-Stop and Oicho-Kabu; all five mahjong games.
   'standard-52': 20,
   'double-six-dominoes': 4,
   'standard-dice': 5,
   'bavarian-32': 2,
   'flower-48': 4,
-  mahjong: 4,
+  mahjong: 5,
   morris: 7,
   // 13 until hasami-shogi was measured capturing 11 times by displacement
   // against 2 custodially - it was playing shogi capture on a hasami board -

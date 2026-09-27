@@ -62,7 +62,7 @@ export const CONFIG_KEYS = new Set([
   // fishing
   'field', 'cardValues', 'goThreshold',
   // wall (mahjong)
-  'minimum', 'handSize', 'multipleWinners', 'tai',
+  'minimum', 'handSize', 'multipleWinners', 'readyOnOriginal', 'dealerBonus', 'continuedDealBonus',
   'startingPoints', 'deadWall', 'riichi', 'riichiWall', 'furiten', 'counters', 'noten', 'dealerKeeps',
   'swapCalling', 'liability', 'lastDiscard', 'kongAfterClaim', 'maxKongs', 'limit',
   // a hand per double: trains, branching

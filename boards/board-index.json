@@ -2377,7 +2377,7 @@
     "topology": "tableau",
     "svg": "svgs/mahjong--taiwanese.svg",
     "rulesUrl": "mahjong/games/taiwanese/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "mahjong",

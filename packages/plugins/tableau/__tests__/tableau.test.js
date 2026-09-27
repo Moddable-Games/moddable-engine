@@ -10,6 +10,7 @@ import { arrangements, isSevenPairs, isThirteenOrphans, placements, doraAfter } 
 import { riichi, riichiPays } from '../src/mechanics/riichi-scoring.js'
 import { zungJung, zungJungPays } from '../src/mechanics/zung-jung-scoring.js'
 import { redBook, redBookLoser } from '../src/mechanics/red-book-scoring.js'
+import { taiwanese } from '../src/mechanics/taiwanese-scoring.js'
 import { hongKong } from '../src/mechanics/mahjong-scoring.js'
 import { createGameForFamily, createAI } from '../../../play/index.js'
 import '../../../play/src/bootstrap-plugins.js'
@@ -1912,25 +1913,6 @@ describe('wall (Hong Kong mahjong)', () => {
   })
 
 
-  test('sixteen-tile hands read as five sets and a pair; several may win on one discard; the dealer pays double', () => {
-    const tw = createTableauPluginFor('mahjong')({ game: 'wall', scoring: 'taiwanese', minimum: 1, handSize: 16, multipleWinners: true, tai: { base: 1, bonusTile: 1 } }, { definition: { players: ['east', 'south', 'west', 'north'], components: { deck: { type: 'mahjong-136', flowers: 8 } } } })
-    const tw0 = tw.init({ hands: [[], [], [], []], community: [], drawPile: [] }, noRng)
-    expect(tw0.hands.filter((h, i) => i !== tw0.dealer).every(h => h.length === 16)).toBe(true)
-    used.clear()
-    // Seats 1 and 2 both wait on the 5 of characters; seat 0, the dealer, discards it.
-    const waiting = () => hand('bamboo_1', 'bamboo_2', 'bamboo_3', 'circles_2', 'circles_3', 'circles_4', 'bamboo_7', 'bamboo_8', 'bamboo_9', 'circles_6', 'circles_7', 'circles_8', 'characters_4', 'characters_6', 'dragon_red', 'dragon_red')
-    const five = t('characters_5')
-    const s = { ...tw0, hands: [[five], waiting(), waiting(), []], melds: [[], [], [], []], discards: [[], [], [], []], bonus: [[], [], [], []], dealer: 0, firstDealer: 0, scores: [0, 0, 0, 0], phase: 'discard', flags: {}, next: 0 }
-    let after = tw.applyMove({ action: 'discard', cards: [five], to: 'discard' }, s, turn(0))
-    expect(after.claim.queue).toEqual([1, 2])
-    after = tw.applyMove({ action: 'win' }, after, turn(1))
-    expect(after.phase).toBe('claim')
-    after = tw.applyMove({ action: 'win' }, after, turn(2))
-    // Each hand is the base tai, 1; the dealer discarded, so pays each winner double.
-    expect(after.lastHand.winners.map(w => w.winner)).toEqual([1, 2])
-    expect(after.scores).toEqual([-4, 2, 2, 0])
-  })
-
   test('computer seats play an East round out, and every point paid is received', () => {
     const game = createGameForFamily('mahjong', { variant: 'hong-kong', rngSeed: 3 })
     const ai = createAI('mahjong', 'hong-kong', { difficulty: 'medium', definition: game.raw.definition, rngSeed: 3 })
@@ -2452,6 +2434,141 @@ describe('wall (American Classic, the Red Book)', () => {
     const s = game.getState().slice
     expect(s.finished).not.toBeNull()
     expect(s.scores.reduce((a, b) => a + b, 0)).toBe(8000)
+  })
+})
+
+describe('wall (Taiwanese, Mahjong Time)', () => {
+  const tilesOf = ([type, kind]) => (type === 'chow' ? [0, 1, 2].map(d => kind.replace(/\d$/, n => Number(n) + d)) : Array(type === 'kong' ? 4 : 3).fill(kind))
+  const score = (sets, pair, extra = {}) => taiwanese({
+    sets: sets.map(([type, kind, open]) => ({ type, kind, open: !!open })), pair, special: null,
+    kinds: [...sets.flatMap(tilesOf), pair, pair], bonus: [], seatWind: 'north', selfDrawn: false, discards: 20,
+    concealed: sets.every(x => !x[2]), wait: 'two-sided', ...extra,
+  })
+  const names = (v) => v.patterns.map(p => p[0])
+
+  // Mahjong Time, "5.3 Calculating the total score": North claims the East
+  // wind from East and scores Winning 2, Melded Kong 1, two Honor pungs,
+  // Pung hand 10 and Out on a pair 1, 16 tai. The example is played without
+  // flowers and seasons; with them in play, having none earns one tai more.
+  test('the worked example: 16 tai, and one more for no flowers or seasons', () => {
+    const v = score([['kong', 'wind_south', true], ['pung', 'dragon_red', true], ['pung', 'bamboo_2', true], ['pung', 'characters_5', true], ['pung', 'circles_7']], 'wind_east', { concealed: false, wait: 'pair' })
+    expect(names(v).sort()).toEqual(['Melded Kong', 'No Flowers or Seasons', 'Out on a pair', 'Pung hand', 'Pung/Kong of Honors', 'Pung/Kong of Honors', 'Winning'])
+    expect(v.value).toBe(16 + 1)
+  })
+
+  test('a pattern that implies another is not counted twice; one that does not imply it is', () => {
+    const chows = [['chow', 'bamboo_1'], ['chow', 'bamboo_4'], ['chow', 'circles_2'], ['chow', 'characters_5'], ['chow', 'circles_6']]
+    // Fully concealed implies the self-drawn tile; the last tile of the wall does not.
+    const drawn = score(chows, 'characters_2', { selfDrawn: true, concealed: true, lastTile: true })
+    expect(names(drawn)).toEqual(expect.arrayContaining(['Fully concealed hand', 'Out on the last tile of the Wall']))
+    expect(names(drawn)).not.toContain('Self-drawn last tile')
+    // The chow hand with no honours or flowers implies them both.
+    expect(names(drawn)).toContain('Chow hand with no Honors/Flowers')
+    expect(names(drawn)).not.toContain('No Flowers and no Honors')
+    // An exposed hand, every set melded and out on the pair, implies out on a pair.
+    const exposed = score(chows.map(([t, k]) => [t, k, true]), 'dragon_red', { concealed: false, wait: 'pair' })
+    expect(names(exposed)).toContain('Exposed hand')
+    expect(names(exposed)).not.toContain('Out on a pair')
+  })
+
+  test('the limit hands, and a graded series scores only its highest', () => {
+    const winds = score([['pung', 'wind_east'], ['pung', 'wind_south'], ['pung', 'wind_west'], ['pung', 'wind_north', true], ['chow', 'bamboo_2']], 'dragon_red', { concealed: false })
+    expect(names(winds)).toContain('Big Four Winds')
+    expect(names(winds)).not.toContain('Big Three Winds')
+    expect(names(winds)).toContain('Three concealed triplets')
+    expect(score([['chow', 'bamboo_1'], ['chow', 'bamboo_4'], ['chow', 'bamboo_7'], ['chow', 'circles_2'], ['pung', 'dragon_red']], 'wind_east').patterns).toContainEqual(['3 Chows of 1 suit, step 3', 10])
+    expect(score([['chow', 'bamboo_1', true], ['chow', 'bamboo_4'], ['chow', 'bamboo_7'], ['chow', 'circles_2'], ['pung', 'dragon_red']], 'wind_east', { concealed: false }).patterns).toContainEqual(['3 Chows of 1 suit, step 3', 5])
+    // Early winning: 5 or fewer discards 10 tai, fewer than 10 five.
+    const quick = (n) => score([['pung', 'dragon_red'], ['chow', 'bamboo_1'], ['chow', 'circles_2'], ['chow', 'characters_5'], ['chow', 'circles_6']], 'bamboo_9', { discards: n }).patterns.find(p => p[0] === 'Early winning')
+    expect([quick(5)?.[1], quick(9)?.[1], quick(10)]).toEqual([10, 5, undefined])
+  })
+
+  const config = { game: 'wall', scoring: 'taiwanese', minimum: 0, rounds: 4, handSize: 16, multipleWinners: true, readyOnOriginal: true }
+  const make = (extra = {}) => createTableauPluginFor('mahjong')({ ...config, ...extra }, { definition: { players: ['east', 'south', 'west', 'north'], components: { deck: { type: 'mahjong-136', flowers: 8 } } } })
+  const plugin = make()
+  const base = plugin.init({ hands: [[], [], [], []], community: [], drawPile: [] }, noRng)
+  const play = (move, slice, seat, p = plugin) => p.applyMove(move, slice, turn(seat))
+  const used = new Map()
+  const t = (kind) => { const n = used.get(kind) || 0; used.set(kind, n + 1); return `${kind}_${n}` }
+  const hand = (...ks) => ks.map(t)
+  const four = (v) => [0, 1, 2, 3].map(() => (typeof v === 'function' ? v() : v))
+  const table = (hands, extra = {}) => ({
+    ...base, hands, melds: four(() => []), discards: four(() => []), discarded: four(() => []), bonus: four(() => []), log: [],
+    riichi: four(null), furiten: four(false), liable: four(null), uninterrupted: false, dealer: 0, firstDealer: 0, roundWind: 0,
+    scores: four(0), pot: 0, counters: 0, phase: 'discard', flags: {}, next: 0, lastDiscard: null, lastHand: null, bonusWin: null, dead: null, ...extra,
+  })
+  // Closed, waiting on the 5 of characters between its 4 and 6.
+  const waiting = () => hand('bamboo_1', 'bamboo_2', 'bamboo_3', 'circles_2', 'circles_3', 'circles_4', 'bamboo_7', 'bamboo_8', 'bamboo_9', 'circles_6', 'circles_7', 'circles_8', 'characters_4', 'characters_6', 'dragon_red', 'dragon_red')
+
+  test('sixteen tiles each; on a discard the discarder alone pays each winner, and the dealer pays no more than anyone', () => {
+    expect(base.hands.filter((h, i) => i !== base.dealer).every(h => h.length === 16)).toBe(true)
+    used.clear()
+    const five = t('characters_5')
+    const s = table([[five], waiting(), waiting(), []])
+    let after = play({ action: 'discard', cards: [five], to: 'discard' }, s, 0)
+    expect(after.claim.queue).toEqual([1, 2])
+    after = play({ action: 'win' }, play({ action: 'win' }, after, 1), 2)
+    // Winning 2, no flowers 1, concealed 1, one-chance chow 1, chow hand 3, early winning 10.
+    expect(after.lastHand.winners.map(w => [w.winner, w.value])).toEqual([[1, 18], [2, 18]])
+    expect(after.scores).toEqual([-36, 18, 18, 0])
+  })
+
+  test('where the players agree, a dealer\'s bonus and a bonus for each continued deal', () => {
+    used.clear()
+    const bonuses = make({ dealerBonus: 1, continuedDealBonus: 2 })
+    const five = t('characters_5')
+    const s = table([[five], waiting(), [], []], { counters: 1 })
+    const after = play({ action: 'win' }, play({ action: 'discard', cards: [five], to: 'discard' }, s, 0, bonuses), 1, bonuses)
+    expect(after.scores.slice(0, 2)).toEqual([-(18 + 1 + 2), 18 + 1 + 2])
+  })
+
+  test('flowers and seasons: all eight win 30 from everyone; the eighth drawn beside seven is robbed for 20', () => {
+    used.clear()
+    const seven = ['flower_1', 'flower_2', 'flower_3', 'flower_4', 'season_1', 'season_2', 'season_3']
+    const pass = t('dragon_white')
+    const drawEighth = (holder) => play({ action: 'discard', cards: [pass], to: 'discard' }, table([[pass], [], [], []], { bonus: four(() => []).map((b, i) => (i === holder ? [...seven] : b)), wall: ['season_4', ...hand('bamboo_5', 'bamboo_6')] }), 0)
+    const all = drawEighth(1)
+    expect(all.lastHand.patterns).toEqual([['All Flowers and Seasons', 30]])
+    expect(all.scores).toEqual([-30, 90, -30, -30])
+    const robbed = drawEighth(2)
+    expect(robbed.lastHand.patterns).toEqual([['Seven Flowers and Seasons, robbing the 8th', 20]])
+    expect(robbed.scores).toEqual([0, -20, 20, 0])
+  })
+
+  test('ready on the original hand: declared with the first discard, the tile just drawn, for 15 tai', () => {
+    used.clear()
+    // A third red dragon: throwing any red leaves the hand waiting, but only the tile just drawn keeps the dealt hand.
+    const held = waiting()
+    const drawn = t('dragon_red')
+    const s = table([[], [...held, drawn], [], []], { next: 1, drawn, flags: { selfDrawn: true } })
+    const ready = plugin.getLegalMoves(s, turn(1)).filter(m => m.action === 'riichi')
+    expect(ready.map(m => m.cards[0])).toEqual([drawn])
+    const declared = play(ready[0], s, 1)
+    expect(declared.riichi[1]).toBeTruthy()
+    const five = t('characters_5')
+    const thrown = play({ action: 'discard', cards: [five], to: 'discard' }, { ...declared, hands: declared.hands.map((h, i) => (i === 2 ? [five] : h)), phase: 'discard', next: 2, flags: {} }, 2)
+    expect(play({ action: 'win' }, thrown, 1).lastHand.patterns).toContainEqual(['Ready on original hand', 15])
+  })
+
+  test('seven pairs and a triplet is a winning hand of 30 tai', () => {
+    used.clear()
+    const eight = hand('characters_1', 'characters_1', 'characters_3', 'characters_3', 'circles_5', 'circles_5', 'circles_7', 'circles_7', 'bamboo_2', 'bamboo_2', 'bamboo_6', 'bamboo_6', 'dragon_white', 'dragon_white', 'wind_north', 'wind_north', 'wind_north')
+    const s = table([eight, [], [], []], { drawn: eight[16], flags: { selfDrawn: true } })
+    expect(plugin.getLegalMoves(s, turn(0))).toContainEqual({ action: 'win' })
+    expect(play({ action: 'win' }, s, 0).lastHand.patterns).toContainEqual(['Seven pairs and a triplet', 30])
+  })
+
+  test('computer seats play a game out, and every point paid is received', () => {
+    const game = createGameForFamily('mahjong', { variant: 'taiwanese', rngSeed: 13 })
+    const ai = createAI('mahjong', 'taiwanese', { difficulty: 'medium', definition: game.raw.definition, rngSeed: 13 })
+    for (let ply = 0; ply < 80000; ply++) {
+      const st = game.getState()
+      if (st.slice.finished !== null) break
+      expect(game.applyMove(ai.pickMove(st.slice, st.players.currentIndex)).ok).toBe(true)
+    }
+    const s = game.getState().slice
+    expect(s.finished).not.toBeNull()
+    expect(s.scores.reduce((a, b) => a + b, 0)).toBe(0)
   })
 })
 

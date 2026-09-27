@@ -71,13 +71,20 @@ export function isThirteenOrphans(kinds) {
   return ORPHANS.every(k => counts.has(k)) && [...counts.keys()].every(k => ORPHANS.includes(k))
 }
 
+// Seven pairs, identical pairs allowed, and a triplet: seventeen tiles.
+export function isHalfPairs(kinds) {
+  if (kinds.length !== 17) return false
+  const counts = countKinds(kinds)
+  return [...counts].some(([k, n]) => n >= 3 && [...counts].every(([o, m]) => (o === k ? m - 3 : m) % 2 === 0))
+}
+
 // Every kind in `universe` that would complete these concealed kinds as
-// `sets` sets and a pair, or, with `specials` and no melds, as seven pairs
-// or thirteen orphans. An empty list is a hand that is not waiting.
-export function waits(kinds, sets, specials, universe) {
+// `sets` sets and a pair, or as one of the game's special hands, which
+// `special` tells apart. An empty list is a hand that is not waiting.
+export function waits(kinds, sets, special, universe) {
   return universe.filter(k => {
     const whole = [...kinds, k]
-    return arrangements(whole, sets).length > 0 || (specials && (isSevenPairs(whole) || isThirteenOrphans(whole)))
+    return arrangements(whole, sets).length > 0 || (special && special(whole))
   })
 }
 

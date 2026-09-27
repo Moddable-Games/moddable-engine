@@ -2,6 +2,7 @@ import { parseKind } from './mahjong-hands.js'
 import { riichi, riichiPays } from './riichi-scoring.js'
 import { zungJung, zungJungPays } from './zung-jung-scoring.js'
 import { redBook, redBookLoser, redBookPays } from './red-book-scoring.js'
+import { taiwanese, taiwanesePays } from './taiwanese-scoring.js'
 
 // How each mahjong game values a winning hand (engine#184). A scorer is given
 // one reading of the hand:
@@ -74,35 +75,16 @@ export function hongKong(hand) {
   return { value, patterns: p }
 }
 
-// Taiwanese, from the frontmatter's own table: the tai each pattern earns,
-// since sources differ and players agree on them. A pattern with no value
-// there scores nothing. `base` is the least a winning hand is worth.
-//
-//     tai: { base: 1, bonusTile: 1, dragonPung: ..., ownWindPung: ..., allPungs: ..., allChows: ... }
-function taiwanese(hand, config = {}) {
-  const tai = config.tai || {}
-  const p = []
-  const add = (name, v) => { if (v) p.push([name, v]) }
-  const s = shape(hand)
-  for (let k = 0; k < s.dragonPungs.length; k++) add('Dragon pung', Number(tai.dragonPung || 0))
-  for (const set of s.windPungs) if (parseKind(set.kind).rank === hand.seatWind) add('Own wind pung', Number(tai.ownWindPung || 0))
-  if (hand.sets.length && hand.sets.every(x => x.type !== 'chow')) add('All Pungs', Number(tai.allPungs || 0))
-  if (hand.sets.length && hand.sets.every(x => x.type === 'chow')) add('All Chows', Number(tai.allChows || 0))
-  for (let k = 0; k < hand.bonus.length; k++) add('Bonus tile', Number(tai.bonusTile ?? 1))
-  const value = Math.max(Number(tai.base ?? 1), p.reduce((n, [, v]) => n + v, 0))
-  return { value, patterns: p.length ? p : [['Base hand', value]] }
-}
-
 // How each game values a hand and pays for it. Hong Kong: points double with
 // each faan ("full spicy"), a self-drawn win paid one and a half times by
-// everyone. Taiwanese: a tai is a point, every payer pays the same, and the
-// dealer pays and receives double. Riichi: han and fu make basic points,
+// everyone. Taiwanese: a tai is a point, paid by everyone on a self-drawn win
+// and by the discarder alone otherwise (taiwanese-scoring.js). Riichi: han and fu make basic points,
 // which riichi-scoring.js turns into what each player pays. Zung Jung: the
 // patterns' points; all three pay, the responsible discarder most. The Red
 // Book: every hand scores; the losers pay the winner, then each other.
 export const SCORERS = {
   'hong-kong': { score: hongKong, points: (faan) => 2 ** faan, selfDraw: 1.5, dealerDouble: false, specials: true, unit: 'faan' },
-  taiwanese: { score: taiwanese, points: (tai) => tai, selfDraw: 1, dealerDouble: true, specials: false, unit: 'tai' },
+  taiwanese: { score: taiwanese, pays: taiwanesePays, unit: 'tai', halfPairs: true, bonusWins: true },
   riichi: { score: riichi, pays: riichiPays, specials: true, unit: 'han', dora: true },
   'red-book': { score: redBook, scoreLoser: redBookLoser, pays: redBookPays, unit: 'points', allPay: true, onlyPlace: true },
   'zung-jung': { score: zungJung, pays: zungJungPays, specials: true, unit: 'points', allPay: true, immunity: true, pairsMayRepeat: true },
