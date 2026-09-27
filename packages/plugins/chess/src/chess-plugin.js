@@ -10,7 +10,7 @@ export const CONFIG_KEYS = new Set([
   'dropMayNotCheck', 'dropRegion', 'dropZone', 'drops', 'dropsCompulsory', 'dropsFor', 'enPassant', 'hexPawnConfig', 'initState', 'moveApply', 'moveFilter', 'noCheck',
   'onTurnEnd', 'pawnCaptureDirections', 'ranks', 'pawnConfig', 'pawnMoveDirections', 'pawnStartRow',
   'pawnDropRanks', 'pawnType', 'placementDistinctColor', 'placementPieces', 'placementZone', 'playerCount',
-  'promotion', 'promotionChoices', 'promotionRegion', 'promotionsKept', 'promotionRow', 'regions',
+  'promotion', 'promotionChoices', 'promotionRegion', 'promotionsKept', 'promotionRow', 'quietLimit', 'regions',
   'faceoff', 'freeze', 'goal', 'matchEnds', 'promotionZone', 'randomSetup', 'rookType', 'rows', 'royalType', 'setup', 'transfer',
   'stalemateMeaning', 'teams', 'terrain', 'torpedo', 'turnEffects', 'turnLogic', 'visibility', 'winCondition',
 ])
@@ -1977,6 +1977,24 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   // board's centre, and the sum has to be positive.
   const goalRule = config.goal || null
 
+  // A game that has stopped making progress. Chess draws after fifty moves each
+  // with no capture or pawn move. Surakarta ends "by mutual agreement" and "the
+  // player with more pieces remaining wins", which the engine reads as the same
+  // quiet stretch decided on material:
+  //
+  //     quietLimit: { plies: 100, decide: material }
+  const quietPlies = config.quietLimit?.plies ?? 100
+  function quietOutcome(slice) {
+    if (config.quietLimit?.decide !== 'material') return 'draw'
+    const counts = [0, 0]
+    for (const pos of allPositions()) {
+      const cell = getCell(slice.board, pos)
+      if (cell && counts[cell.owner] !== undefined) counts[cell.owner]++
+    }
+    if (counts[0] === counts[1]) return 'draw'
+    return counts[0] > counts[1] ? 0 : 1
+  }
+
   // A goal names the piece that must arrive, or none: in Dou Shou Qi "any one
   // of their pieces" entering the opponent's den wins.
   function isGoalPiece(piece) {
@@ -2038,7 +2056,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     if (!config.winCondition) return null
     const result = config.winCondition(slice, { currentPlayer: playerIdx, config })
     if (result !== null && result !== undefined) return result
-    if (slice.halfmoveClock >= 100) return 'draw'
+    if (slice.halfmoveClock >= quietPlies) return quietOutcome(slice)
     return null
   }
 
@@ -2107,7 +2125,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       return 'draw'
     }
 
-    if (slice.halfmoveClock >= 100) return 'draw'
+    if (slice.halfmoveClock >= quietPlies) return quietOutcome(slice)
 
     return null
   }

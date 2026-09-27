@@ -9,8 +9,8 @@
     "standard": 1116,
     "variants": 733
   },
-  "playableVariants": 291,
-  "playableFamilies": 19,
+  "playableVariants": 292,
+  "playableFamilies": 20,
   "playableByFamily": {
     "backgammon": 8,
     "bavarian-32": 2,
@@ -30,6 +30,7 @@
     "shogi": 24,
     "standard-52": 20,
     "standard-dice": 5,
+    "surakarta": 1,
     "xiangqi": 9
   },
   "variantPluginsByFamily": {
@@ -51,6 +52,7 @@
     "shogi": 0,
     "standard-52": 0,
     "standard-dice": 0,
+    "surakarta": 0,
     "xiangqi": 0
   },
   "frontmatterOnlyByFamily": {
@@ -72,6 +74,7 @@
     "shogi": 24,
     "standard-52": 20,
     "standard-dice": 5,
+    "surakarta": 1,
     "xiangqi": 9
   },
   "tests": 6887,

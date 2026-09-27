@@ -2578,6 +2578,15 @@
     "path": "content/games/yahtzee/standard.md"
   },
   {
+    "family": "surakarta",
+    "familyLabel": "Surakarta",
+    "variant": "standard",
+    "key": "standard",
+    "label": "Surakarta (Standard)",
+    "group": "Other",
+    "playable": true
+  },
+  {
     "family": "xiangqi",
     "familyLabel": "Xiangqi",
     "variant": "banqi",

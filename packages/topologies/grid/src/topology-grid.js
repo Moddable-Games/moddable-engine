@@ -5,7 +5,7 @@ export const schema = {
 }
 
 export function createGridTopology(config) {
-  const { rows, cols, wrap = false, voids: voidList, blockers: blockerList, diagonals: diagonalRule = 'full', layers = 1, layerAdjacency = 'none', layerSeats = null } = config
+  const { rows, cols, wrap = false, voids: voidList, blockers: blockerList, diagonals: diagonalRule = 'full', layers = 1, layerAdjacency = 'none', layerSeats = null, arcs: arcList = null } = config
 
   // A stack of boards is ONE board with a layer coordinate, not N boards.
   // `topology.grid` already takes an explicit cell list, the variants that need
@@ -768,6 +768,42 @@ export function createGridTopology(config) {
     return nl * plane + toIndex(nr, nc)
   }
 
+  // Arcs join two edge points around the outside of the board. Surakarta's
+  // eight loops leave the board at one edge and come back in at the other, so
+  // a line that runs off the board at an arc's end carries on through it:
+  //
+  //     arcs:
+  //       - [[0, 1], [1, 0]]    # off the top at b6, back in along row 5
+  //
+  // Each end is an edge point, and the arc leaves it straight outward, so an
+  // end on a corner (two outward directions) is refused. Ordinary movement
+  // never uses an arc; `arcStep` is the only way along one.
+  function outwardAt(r, c) {
+    const out = []
+    if (r === 0) out.push([-1, 0])
+    if (r === rows - 1) out.push([1, 0])
+    if (c === 0) out.push([0, -1])
+    if (c === cols - 1) out.push([0, 1])
+    if (out.length !== 1) throw new Error(`An arc must end on one edge of the board, not at [${r}, ${c}]`)
+    return out[0]
+  }
+  const arcEnds = new Map()
+  for (const [a, b] of arcList || []) {
+    const ends = [a, b].map(([r, c]) => ({ cell: toIndex(r, c), out: outwardAt(r, c) }))
+    for (const [here, there] of [[ends[0], ends[1]], [ends[1], ends[0]]]) {
+      arcEnds.set(`${here.cell}|${here.out[0]},${here.out[1]}`, { to: there.cell, dir: [-there.out[0] || 0, -there.out[1] || 0] })
+    }
+  }
+
+  // One step along a line, following an arc where the line runs into one:
+  // `{ to, dir, arc }`, where `dir` is the direction the walk carries on in.
+  function arcStep(from, direction) {
+    const next = step(from, direction)
+    if (next !== null) return { to: next, dir: direction, arc: false }
+    const through = arcEnds.get(`${from}|${direction[0]},${direction[1]}`)
+    return through ? { to: through.to, dir: through.dir, arc: true } : null
+  }
+
   function renderLayout(config = {}) {
     // A layered board draws one grid per layer, and the topology is the only
     // thing that knows how many there are.
@@ -808,6 +844,8 @@ export function createGridTopology(config) {
     getAllCells,
     getCellCount,
     step,
+    arcStep,
+    hasArcs: arcEnds.size > 0,
     serializePosition,
     parsePosition,
     isBlocker,
