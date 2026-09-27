@@ -32,6 +32,9 @@ const MINIMUM_PLAYABLE = {
   // traps and the den are all declared there (engine#157).
   'dou-shou-qi': 1,
   draughts: 13,
+  // Alquerque's board with capture by approach and withdrawal, played by the
+  // draughts plugin its rulebook names (engine#157).
+  fanorona: 1,
   go: 10,
   hex: 8,
   'landlords-game': 1,
