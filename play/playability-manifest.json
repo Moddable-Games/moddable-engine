@@ -1,5 +1,14 @@
 [
   {
+    "family": "agon",
+    "familyLabel": "Agon",
+    "variant": "standard",
+    "key": "standard",
+    "label": "Agon (Standard)",
+    "group": "Other",
+    "playable": true
+  },
+  {
     "family": "backgammon",
     "familyLabel": "Backgammon",
     "variant": "acey-deucey",

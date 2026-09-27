@@ -2377,6 +2377,23 @@
     }
   },
   {
+    "id": "mce-agon",
+    "name": "MCE Agon",
+    "family": "agon",
+    "author": "Moddable Games (composite)",
+    "license": "MIT",
+    "source": "https://github.com/Moddable-Games/moddable-engine",
+    "playable": true,
+    "recolorable": true,
+    "virtual": true,
+    "extends": "mce-chess",
+    "pieces": {},
+    "depicts": {
+      "Q": "queen",
+      "P": "guard"
+    }
+  },
+  {
     "id": "mce-jungle",
     "name": "MCE Jungle",
     "family": "jungle",

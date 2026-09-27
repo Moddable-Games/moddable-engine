@@ -7,7 +7,7 @@
     "topology": "hex",
     "svg": "svgs/agon--standard.svg",
     "rulesUrl": "agon/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "asalto",

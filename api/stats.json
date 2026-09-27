@@ -1,6 +1,6 @@
 {
   "generated": "2026-09-27",
-  "pieces": 121,
+  "pieces": 122,
   "boards": 335,
   "boardFamilies": 34,
   "tiles": 11,
@@ -9,9 +9,10 @@
     "standard": 1116,
     "variants": 733
   },
-  "playableVariants": 292,
-  "playableFamilies": 20,
+  "playableVariants": 293,
+  "playableFamilies": 21,
   "playableByFamily": {
+    "agon": 1,
     "backgammon": 8,
     "bavarian-32": 2,
     "chess": 149,
@@ -34,6 +35,7 @@
     "xiangqi": 9
   },
   "variantPluginsByFamily": {
+    "agon": 0,
     "backgammon": 0,
     "bavarian-32": 0,
     "chess": 53,
@@ -56,6 +58,7 @@
     "xiangqi": 0
   },
   "frontmatterOnlyByFamily": {
+    "agon": 1,
     "backgammon": 8,
     "bavarian-32": 2,
     "chess": 96,
