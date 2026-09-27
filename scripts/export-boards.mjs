@@ -23,7 +23,7 @@ import { resolve as cascadeResolve } from '../packages/schema/src/cascade-resolv
 import { renderFromEngine, attachPieceImages } from '../packages/render/src/render-engine.js'
 import {
   ENGINE_ROOT, GAMES_DIR,
-  TYPE_NORMALIZE, loadGallery, parseArgs, walkCorpus, embedPieceImages,
+  TYPE_NORMALIZE, loadGallery, parseArgs, walkCorpus, embedPieceImages, missingPieceFiles,
 } from './lib/board-corpus.mjs'
 
 const gallery = loadGallery()
@@ -103,14 +103,19 @@ for (const { family, familyEngine, slug, path: variantPath, meta, engine: varian
     // engine checkout where its piece set did not yet exist. The renderer will
     // happily draw an empty board; nothing downstream can tell that apart from
     // a board that is meant to be empty. This can.
-    const setupHasPieces = typeof resolved.setup === 'string' &&
-      /[a-zA-Z]/.test(resolved.setup.replace(/\[[^\]]*\]/g, 'X'))
-    // Checked on the raw SVG, where a piece is an <image>; the `#piece-` symbol
-    // references only exist after embedPieceImages has run.
-    if (setupHasPieces && !/<image\s/.test(rawSvg)) {
-      const named = pieceSetId ? `"${pieceSetId}"` : 'its piece set'
-      const known = pieceSetId && !setDef ? ' - which is not in pieces/gallery-index.json' : ''
-      console.error(`✗ ${family}/${slug}: setup declares pieces and none were drawn. Could not resolve ${named}${known}.`)
+    //
+    // It asks the two exact questions rather than reading letters in the setup
+    // string. That heuristic refused eight boards that are right to be empty:
+    // Pachisi and Acey-Deucey start every piece in `home:`, and a Nukes setup
+    // names terrain, not pieces.
+    if (pieceSetId && !setDef) {
+      console.error(`✗ ${family}/${slug}: piece set "${pieceSetId}" is not in pieces/gallery-index.json. Board not written.`)
+      errors++
+      continue
+    }
+    const missing = missingPieceFiles(rawSvg)
+    if (missing.length) {
+      console.error(`✗ ${family}/${slug}: ${missing.length} piece file(s) not in this checkout, e.g. ${missing[0]}. Board not written.`)
       errors++
       continue
     }
@@ -135,4 +140,8 @@ if (!doExport) {
   if (doSync) parts.push(`${unchanged} unchanged`)
   console.log(`Done: ${parts.join(', ')}`)
   if (doSync) writeFileSync(CACHE_PATH, JSON.stringify(newCache, null, 2))
+  // A refused board has to stop the caller. moddable-rules' sync-boards.sh
+  // runs under `set -e` and refreshes its freshness hashes after this exits;
+  // exiting 0 would record a board that was never written as up to date.
+  if (errors) process.exitCode = 1
 }

@@ -136,6 +136,29 @@ function stripSvgBloat(svgContent) {
   return s.trim()
 }
 
+// Where an <image href> in a rendered board lives on disk, or null when the
+// href is not a gallery path. embedPieceImages and missingPieceFiles both ask
+// this, so the guard and the embedder cannot disagree about a file.
+function pieceFilePath(href) {
+  const cleanHref = href.split('#')[0]
+  if (cleanHref.startsWith('../pieces/')) return resolve(ENGINE_ROOT, cleanHref.replace('../', ''))
+  if (cleanHref.startsWith('pieces/')) return resolve(ENGINE_ROOT, cleanHref)
+  return null
+}
+
+// Piece artwork a rendered board refers to and the checkout does not have.
+// embedPieceImages skips such a file silently and writes the board without
+// it, which is how a virtual set whose borrowed sources are absent turns into
+// a board with no pieces on it.
+export function missingPieceFiles(svg) {
+  const missing = new Set()
+  for (const match of svg.matchAll(/<image\s+href="([^"]+)"/g)) {
+    const filePath = pieceFilePath(match[1])
+    if (filePath && !existsSync(filePath)) missing.add(match[1].split('#')[0])
+  }
+  return [...missing]
+}
+
 export function embedPieceImages(svg, setDef) {
   const imagePattern = /<image\s+href="([^"]+)"\s+x="([^"]+)"\s+y="([^"]+)"\s+width="([^"]+)"\s+height="([^"]+)"[^/>]*\/>/g
   const owners = setDef?.owners || null
@@ -160,13 +183,8 @@ export function embedPieceImages(svg, setDef) {
   const defs = []
   const fileCache = new Map()
   for (const [href, symbolId] of hrefToSymbol) {
-    const cleanHref = href.split('#')[0]
     const fragment = href.includes('#') ? href.split('#')[1] : null
-    const filePath = cleanHref.startsWith('../pieces/')
-      ? resolve(ENGINE_ROOT, cleanHref.replace('../', ''))
-      : cleanHref.startsWith('pieces/')
-        ? resolve(ENGINE_ROOT, cleanHref)
-        : null
+    const filePath = pieceFilePath(href)
     if (!filePath || !existsSync(filePath)) continue
 
     let content = fileCache.get(filePath)
