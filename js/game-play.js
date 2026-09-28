@@ -11,7 +11,7 @@ import { renderFromEngine, attachPieceImages } from '../packages/render/index.js
 
 import '../packages/play/src/bootstrap-plugins.js'
 
-import { BOARD_THEMES, ANIM_THEME, CAPTURE_BURST_THEME, PIECE_STYLES, loadGalleryIndex, getGalleryIndex, loadVariantManifest, getManifestVariants, loadPlayabilityManifest, getPlayableVariants, getAllManifestVariants, getPlayableFamilies, getFamilyLabel, loadRecolouredPieces } from './play-shared.js'
+import { BOARD_THEMES, ANIM_THEME, CAPTURE_BURST_THEME, PIECE_STYLES, loadGalleryIndex, getGalleryIndex, RULES_BASE, loadVariantManifest, getManifestVariants, loadPlayabilityManifest, getPlayableVariants, getAllManifestVariants, getPlayableFamilies, getFamilyLabel, loadRecolouredPieces } from './play-shared.js'
 import { createCellAddressing, createDirectAddressing } from './play-cells.js'
 import { paintHighlight, paintIndicator, paintFog, paintEffect, createOverlay } from './play-overlays.js'
 import { bindBoardInteraction } from './play-interaction.js'
@@ -37,7 +37,7 @@ import { buildLegend } from './play-legend.js'
 import { moveToSAN } from '../packages/plugins/chess/index.js'
 import { getDraft, resolveDraftId, listDrafts, WORKING_ID } from './create-drafts.js'
 import { buildResolvedFromState } from './create-state.js'
-import { resolveVariantBoard } from './variant-frontmatter.js'
+import { resolveVariantBoard, loadBoardContent } from './variant-frontmatter.js'
 
 const DIFFICULTIES = ['beginner', 'easy', 'medium', 'hard', 'expert']
 
@@ -203,7 +203,10 @@ export function createPlaySession(options = {}) {
 
     let frontmatterDef
     if (draftState) {
-      resolvedBoard = buildResolvedFromState(draftState)
+      // A draft names its board file as the variant did and does not carry the
+      // file's contents, so it is fetched here as it is for a variant. Without
+      // it a Landlord's Game draft played with no board to play on.
+      resolvedBoard = await loadBoardContent(buildResolvedFromState(draftState), RULES_BASE + 'games/')
       frontmatterDef = definitionFromResolved(family, variant, resolvedBoard, {})
     } else {
       const variantCfg = getVariantConfig(family, variant) || {}
@@ -502,8 +505,11 @@ export function createPlaySession(options = {}) {
   // same content across the width of the page is one screenful.
   let legendEls = null
 
+  // A draft from the create page has no variant file, so no metadata. This
+  // fell back to a `variantMeta` that was never declared, and the throw it
+  // made stopped every "Try in Play" board from drawing at all.
   function variantLabel() {
-    const meta = session?.variantMeta || variantMeta
+    const meta = session?.variantMeta
     return (meta && meta.title) || humaniseLabel(variant)
   }
 
@@ -1776,9 +1782,11 @@ export async function initGamePlay(container, defaults = {}) {
       // Play back to create for a variant that is not a draft. It opens as a
       // starting point, not as a claim to be that variant, which is why the
       // create page says so when it loads one.
-      if (session?.resolved?.topology?.type !== 'grid') return
-      const playable = getPlayableVariants(config.family)
-      const slug = playable.find(e => e.variant === config.variant)?.slug || config.variant
+      // Offered where the create page can carry the variant back here as the
+      // same game, which the manifest measures; it was grid boards only.
+      const entry = getPlayableVariants(config.family).find(e => e.variant === config.variant)
+      if (!entry?.creatable) return
+      const slug = entry.slug || config.variant
       link.href = `../create/?family=${encodeURIComponent(config.family)}&variant=${encodeURIComponent(slug)}`
       link.title = 'Open this variant in the board editor as a starting point'
     }

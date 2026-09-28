@@ -9,6 +9,9 @@ import { fileURLToPath } from 'url'
 import { withStableGeneratedDate } from './lib/stable-generated-date.mjs'
 import '../packages/hex-generators/index.js'
 import { getRegisteredGames, getGameConfig } from '../packages/hex-generators/src/game-registry.js'
+import { buildFamilyPages, familyChips, footerFamiliesColumn, familiesIndex } from './lib/family-pages.mjs'
+import { buildDocsToc } from './lib/docs-toc.mjs'
+import { sdkCapabilities } from './lib/sdk-capabilities.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -63,13 +66,6 @@ const playManifest = readJSON('play/playability-manifest.json')
 const playableVariants = playManifest.filter(v => v.playable)
 const playableFamilies = [...new Set(playableVariants.map(v => v.family))]
 
-// The homepage's chip for a family whose slug does not read as its name.
-const CHIP_LABELS = {
-  'landlords-game': "Landlord's Game",
-  'standard-52': '52-Card Deck',
-  'double-six-dominoes': 'Dominoes',
-  'standard-dice': 'Dice',
-}
 
 const familyCounts = {}
 playableVariants.forEach(v => { familyCounts[v.family] = (familyCounts[v.family] || 0) + 1 })
@@ -126,33 +122,16 @@ if (fs.existsSync(countsPath)) {
   console.warn('    Publishing zero rather than a number nobody measured.')
 }
 
-const FAMILY_TOPOLOGY = {
-  'moddable-chess': 'grid', draughts: 'grid', go: 'grid', reversi: 'grid',
-  shogi: 'grid', xiangqi: 'grid', halma: 'grid', 'stern-halma': 'grid',
-  tafl: 'grid', lattaque: 'grid', 'dou-shou-qi': 'grid', surakarta: 'grid',
-  'dungeon-chess': 'grid', fanorona: 'grid', asalto: 'grid',
-  hex: 'hex', agon: 'hex', nukes: 'hex',
-  backgammon: 'track', pachisi: 'track', chaupar: 'track', nyout: 'track',
-  'royal-ur': 'track', 'landlords-game': 'track', econopoly: 'track',
-  mancala: 'pit',
-  morris: 'graph',
-  'standard-52': 'tableau', 'flower-48': 'tableau', mahjong: 'tableau',
-  'double-six-dominoes': 'tableau', 'bavarian-32': 'tableau',
-  'standard-dice': 'tableau',
-}
-
-const boardSvgFamilies = fs.readdirSync(resolve('boards/svgs'))
-  .filter(f => f.endsWith('.svg'))
-  .map(f => f.replace(/--.*/, ''))
-
+// Which topology each board is, as the board index records it from the
+// board's own frontmatter. This was a hand-kept family-to-topology table that
+// had lost chess (154 boards counted as "other") and put Royal Ur, a grid, on
+// a track.
+const boardIndex = readJSON('boards/board-index.json')
 const topoCounts = {}
-boardSvgFamilies.forEach(family => {
-  const topo = FAMILY_TOPOLOGY[family] || 'other'
-  topoCounts[topo] = (topoCounts[topo] || 0) + 1
-})
+for (const board of boardIndex) topoCounts[board.topology] = (topoCounts[board.topology] || 0) + 1
 
-const TOPOLOGY_TYPES = ['grid', 'hex', 'track', 'pit', 'graph', 'tableau']
-const uniqueTopologies = TOPOLOGY_TYPES.filter(t => topoCounts[t] > 0).length
+const TOPOLOGY_TYPES = Object.keys(topoCounts).sort((a, b) => topoCounts[b] - topoCounts[a])
+const uniqueTopologies = TOPOLOGY_TYPES.length
 
 const stats = {
   pieces: pieceCount,
@@ -186,6 +165,39 @@ console.log(`  Topologies: ${JSON.stringify(stats.topoCounts)}`)
 // --- Generate files ---
 
 const outputs = []
+
+// What the SDK does for each family, measured by running it.
+const sdkRows = sdkCapabilities(playManifest)
+const docsPages = new Set(fs.readdirSync(resolve('docs')))
+const PLUGIN_DOCS = { race: 'race.html', hop: 'hop.html', backgammon: 'backgammon.html', chess: 'hosted-families.html', draughts: 'hosted-families.html' }
+const sdkDocFor = (row) => (docsPages.has(`${row.family}.html`) ? `${row.family}.html`
+  : row.family !== row.plugin && PLUGIN_DOCS[row.plugin] ? PLUGIN_DOCS[row.plugin]
+    : PLUGIN_DOCS[row.plugin] || (row.svg === 'no' && row.hidden ? 'tableau.html' : null))
+const docsLabels = Object.fromEntries(readJSON('docs/toc.json').groups.flatMap(g => g.pages.map(([file, label]) => [file, label])))
+const tick = (flag) => (flag ? '&#x2713;' : '')
+const sdkTable = `  <table class="docs-table">
+    <thead>
+      <tr><th>Family</th><th>Plugin</th><th><code>createAI</code></th><th><code>renderStateAsSvg</code></th><th>Dice</th><th>Hidden hands</th><th>Docs</th></tr>
+    </thead>
+    <tbody>
+${sdkRows.map(r => `      <tr id="${r.family}"><td><a href="../families/${r.family}/">${r.label}</a></td><td>${r.plugin || ''}</td><td>${r.error ? 'error' : r.ai || ''}</td><td>${r.svg || ''}</td><td>${tick(r.chance)}</td><td>${tick(r.hidden)}</td><td>${sdkDocFor(r) ? `<a href="${sdkDocFor(r)}">${docsLabels[sdkDocFor(r)] || sdkDocFor(r)}</a>` : ''}</td></tr>`).join('\n')}
+    </tbody>
+  </table>`
+
+// 0. Family landing pages, generated for every playable family without a
+// hand-written one, and the homepage chips and page footers that list them.
+const RULES_ROOT = process.env.MODDABLE_RULES_DIR || path.join(ROOT, '..', 'moddable-rules', 'games')
+const siteVersion = fs.readFileSync(resolve('version.txt'), 'utf-8').trim()
+const familySymbols = readJSON('data/family-symbols.json')
+const familyDocs = Object.fromEntries(sdkRows.map(r => [r.family, sdkDocFor(r) ? `../../docs/${sdkDocFor(r)}` : `../../docs/sdk.html#${r.family}`]))
+const familyPages = buildFamilyPages({ root: ROOT, rulesRoot: RULES_ROOT, manifest: playManifest, boardIndex, version: siteVersion, symbols: familySymbols, docs: familyDocs })
+outputs.push(...familyPages.outputs)
+outputs.push(familiesIndex({
+  pages: familyPages.pages, counts: familyPages.counts, symbols: familySymbols, version: siteVersion,
+  template: familyPages.outputs[0]?.content || fs.readFileSync(resolve('families/tafl/index.html'), 'utf-8'),
+}))
+// The docs navigation, from docs/toc.json, in every docs page.
+outputs.push(...buildDocsToc(ROOT))
 
 // 1. api/stats.json
 // From the gallery index rather than the published copy of it: the published
@@ -284,7 +296,7 @@ Interactive tools (puzzle generation, board rendering, piece lookup) are availab
 
 ## Architecture
 
-The engine uses a topology-driven architecture. Games are defined by configuration (frontmatter), not code. Supported topologies: grid, hex, track, pit, graph, tableau. Any game expressible as a combination of topology + pieces + rules can be rendered.
+The engine uses a topology-driven architecture. Games are defined by configuration (frontmatter), not code. Supported topologies: ${TOPOLOGY_TYPES.join(', ')}. Any game expressible as a combination of topology + pieces + rules can be rendered.
 
 ## Related
 
@@ -303,6 +315,7 @@ const staticPages = [
   { path: '/', priority: '1.0' },
   { path: '/play/', priority: '0.9' },
   { path: '/create/', priority: '0.7' },
+  { path: '/families/', priority: '0.9' },
   { path: '/boards/', priority: '0.9' },
   { path: '/pieces/', priority: '0.8' },
   { path: '/tiles/', priority: '0.8' },
@@ -323,12 +336,13 @@ const familyPlayPages = playableFamilies.map(f => ({
 
 // A family with a landing page of its own. The component families - a deck,
 // dominoes, dice - are played from the play page and have none yet.
-const familyLandingPages = playableFamilies.filter(f => fs.existsSync(resolve('families', f, 'index.html'))).map(f => ({
+const familyLandingPages = familyPages.pages.map(({ family: f }) => ({
   path: `/families/${f}/`,
   priority: '0.9',
 }))
 
-const topologyNames = ['grid', 'hex', 'track', 'pit', 'graph', 'tableau']
+// Every topology with a landing page of its own.
+const topologyNames = TOPOLOGY_TYPES.filter(t => fs.existsSync(resolve('topologies', t, 'index.html')))
 const topologyLandingPages = topologyNames.map(t => ({
   path: `/topologies/${t}/`,
   priority: '0.8',
@@ -365,7 +379,6 @@ if (puzzleParsed.meta.count !== puzzleTotal) {
 // yalta board that does not render, and was missing every variant added since.
 // Generated from boards/board-index.json, which is itself generated from the
 // snapshots, so the published list cannot disagree with the files it names.
-const boardIndex = readJSON('boards/board-index.json')
 const boardEntries = (boardIndex.boards || boardIndex).map(b => {
   const id = b.svg.replace(/^svgs\//, '').replace(/\.svg$/, '')
   return { id, file: `${id}.svg`, url: `/boards/svgs/${id}.svg` }
@@ -387,7 +400,28 @@ const frontmatterOnlyCount = stats.playableVariants - 1
 const frontmatterPct = Math.floor((frontmatterOnlyCount / stats.playableVariants) * 100)
 const ogDesc = `One engine for every board game. ${stats.playableFamilies} playable families, ${stats.playableVariants} variants, ${stats.uniqueTopologies} topologies. Games are configuration files, not code.`
 
+const TOPOLOGY_LABELS = { grid: 'Grid', hex: 'Hex', track: 'Track', pit: 'Pit', graph: 'Graph', tableau: 'Tableau', 'hexagonal-trisection': 'Hexagonal Trisection', triangular: 'Triangular' }
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`
+
+// The plugins there are, read from their directories rather than said.
+const pluginNames = fs.readdirSync(resolve('packages/plugins'), { withFileTypes: true })
+  .filter(d => d.isDirectory() && fs.existsSync(resolve('packages/plugins', d.name, 'index.js')))
+  .map(d => d.name)
+  .sort()
+const pluginProse = pluginNames.map(n => (n === 'landlords-game' ? "the Landlord's Game" : n)).join(', ').replace(/, ([^,]+)$/, ' and $1')
+
 const htmlPatches = [
+  {
+    file: 'docs/sdk.html',
+    replacements: [[/(<!-- sdk-table:start -->)[\s\S]*?(<!-- sdk-table:end -->)/, `$1\n${sdkTable}\n  $2`]],
+  },
+  {
+    file: 'docs/plugins.html',
+    replacements: [
+      [/The engine has \d+ built-in plugins covering [^.]*\./g, `The engine has ${pluginNames.length} built-in plugins: ${pluginProse}. Families without a plugin of their own name one of these in their rulebook; see <a href="hosted-families.html">Families on Shared Plugins</a>.`],
+      [/(content=")\d+ plugin families covering [^"]*(")/g, `$1${pluginNames.length} plugins playing ${stats.playableFamilies} families, from chess and go to race, hopping and card games.$2`],
+    ],
+  },
   {
     file: 'index.html',
     replacements: [
@@ -411,11 +445,8 @@ const htmlPatches = [
       // Section heading: playable families
       [/(\d+) Playable Families/g, `${stats.playableFamilies} Playable Families`],
       [/(\d+) Topology Types/g, `${stats.uniqueTopologies} Topology Types`],
-      // Family chips — one entry per playable family
-      ...playableFamilies.map(f => {
-        const label = CHIP_LABELS[f] || f.charAt(0).toUpperCase() + f.slice(1)
-        return [new RegExp(`(${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} <span class="family-count">)\\d+(<\\/span>)`, 'g'), `$1${stats.familyCounts[f] || 0}$2`]
-      }),
+      // Family chips: every playable family, generated between the markers.
+      [/(<!-- family-chips:start -->)[\s\S]*?(<!-- family-chips:end -->)/, `$1\n${familyChips(familyPages.pages, stats.familyCounts, familySymbols)}\n      $2`],
       // Topology cards
       [/(<h4 class="topo-name">Grid<\/h4>[\s\S]*?<span class="topo-count">)\d+ variants(<\/span>)/g, `$1${stats.topoCounts.grid || 0} variants$2`],
       [/(<h4 class="topo-name">Hex<\/h4>[\s\S]*?<span class="topo-count">)\d+ variants(<\/span>)/g, `$1${stats.topoCounts.hex || 0} variants$2`],
@@ -423,6 +454,8 @@ const htmlPatches = [
       [/(<h4 class="topo-name">Pit<\/h4>[\s\S]*?<span class="topo-count">)\d+ variants(<\/span>)/g, `$1${stats.topoCounts.pit || 0} variants$2`],
       [/(<h4 class="topo-name">Graph<\/h4>[\s\S]*?<span class="topo-count">)\d+ variants(<\/span>)/g, `$1${stats.topoCounts.graph || 0} variants$2`],
       [/(<h4 class="topo-name">Tableau<\/h4>[\s\S]*?<span class="topo-count">)\d+ variants(<\/span>)/g, `$1${stats.topoCounts.tableau || 0} variants$2`],
+      [/(<h4 class="topo-name">Hexagonal Trisection<\/h4>[\s\S]*?<span class="topo-count">)\d+ variants?(<\/span>)/g, `$1${plural(stats.topoCounts['hexagonal-trisection'] || 0, 'variant')}$2`],
+      [/(<h4 class="topo-name">Triangular<\/h4>[\s\S]*?<span class="topo-count">)\d+ variants?(<\/span>)/g, `$1${plural(stats.topoCounts.triangular || 0, 'variant')}$2`],
     ],
   },
   {
@@ -479,6 +512,20 @@ const htmlPatches = [
       [/<strong>\d+ topology types<\/strong>/g, `<strong>${stats.uniqueTopologies} topology types</strong>`],
     ],
   },
+  // Every topology page's variant count, from the board index, and a footer
+  // that lists every topology page.
+  ...topologyNames.map(t => ({
+    file: `topologies/${t}/index.html`,
+    replacements: [
+      [/(data-stat="variants">)\d+(<)/g, `$1${stats.topoCounts[t] || 0}$2`],
+      [/<h4 class="footer-heading">Topologies<\/h4>[\s\S]*?<\/div>/, `<h4 class="footer-heading">Topologies</h4>\n${topologyNames.map(n => `        <a href="../${n}/">${TOPOLOGY_LABELS[n] || n}</a>`).join('\n')}\n      </div>`],
+    ],
+  })),
+  // Every family page's footer lists every family page.
+  ...familyPages.pages.map(({ family }) => ({
+    file: `families/${family}/index.html`,
+    replacements: [[/<h4 class="footer-heading">Families<\/h4>[\s\S]*?<\/div>/, footerFamiliesColumn(familyPages.pages, '../', familyPages.counts)]],
+  })),
   // Family pages: patch all dynamic stats
   ...playableFamilies.map(family => {
     const vp = variantPluginCounts[family] || 0
@@ -497,10 +544,15 @@ const htmlPatches = [
   }),
 ]
 
+// A page already generated above (a family page, a docs page with its
+// navigation) is patched as generated, not as it stands on disk, so the two
+// passes compose instead of the later one undoing the earlier.
+const pending = new Map(outputs.map((o, i) => [o.path, i]))
 for (const { file, replacements } of htmlPatches) {
   const fullPath = resolve(file)
-  if (!fs.existsSync(fullPath)) continue
-  let html = fs.readFileSync(fullPath, 'utf-8')
+  const at = pending.get(file)
+  if (at === undefined && !fs.existsSync(fullPath)) continue
+  let html = at !== undefined ? outputs[at].content : fs.readFileSync(fullPath, 'utf-8')
   let changed = false
   for (const [pattern, replacement] of replacements) {
     const before = html
@@ -508,7 +560,8 @@ for (const { file, replacements } of htmlPatches) {
     if (html !== before) changed = true
   }
   if (changed) {
-    outputs.push({ path: file, content: html })
+    if (at !== undefined) outputs[at] = { path: file, content: html }
+    else outputs.push({ path: file, content: html })
   }
 }
 

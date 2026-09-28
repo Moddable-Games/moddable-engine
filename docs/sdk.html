@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SDK &mdash; Moddable Engine</title>
+<meta name="description" content="The headless SDK every family shares: list families and variants, build a game, ask the AI for a move, draw the board. What each family supports, measured.">
+<meta property="og:title" content="SDK &mdash; Moddable Engine">
+<meta property="og:description" content="The headless SDK every family shares: list families and variants, build a game, ask the AI for a move, draw the board. What each family supports, measured.">
+<meta property="og:image" content="https://engine.moddable.games/og/docs.png?v=1.0.42">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://engine.moddable.games/docs/sdk.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SDK &mdash; Moddable Engine">
+<meta name="twitter:description" content="The headless SDK every family shares: list families and variants, build a game, ask the AI for a move, draw the board. What each family supports, measured.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/docs.png?v=1.0.42">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../css/home.css?v=1.0.42">
+<link rel="stylesheet" href="../css/docs.css?v=1.0.42">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../play/" class="nav-link">Play</a>
+      <a href="../create/" class="nav-link">Create</a>
+      <a href="../boards/" class="nav-link">Boards</a>
+      <a href="../pieces/" class="nav-link">Pieces</a>
+      <a href="../tiles/" class="nav-link">Tiles</a>
+      <a href="./" class="nav-link nav-link--active">Docs</a>
+      <a href="../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+  </div>
+</header>
+<div class="docs-layout">
+<button class="docs-toc-toggle">Navigation</button>
+<nav class="docs-toc">
+  <div class="docs-toc-title">Guides</div>
+  <ul class="docs-toc-list">
+    <li><a href="./">Overview</a></li>
+    <li><a href="authoring.html">Authoring a Variant</a></li>
+    <li><a href="frontmatter.html">Frontmatter</a></li>
+    <li><a href="topologies.html">Topologies</a></li>
+    <li><a href="surfaces.html">Surfaces</a></li>
+    <li><a href="pieces.html">Piece Sets</a></li>
+    <li><a href="sdk.html" class="active">SDK</a></li>
+    <li><a href="plugins.html">Plugins</a></li>
+    <li><a href="hosted-families.html">Families on Shared Plugins</a></li>
+    <li><a href="render-pipeline.html">Render Pipeline</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">Families</div>
+  <ul class="docs-toc-list">
+    <li><a href="chess.html">Chess</a></li>
+    <li><a href="go.html">Go</a></li>
+    <li><a href="draughts.html">Draughts</a></li>
+    <li><a href="hex.html">Hex</a></li>
+    <li><a href="mancala.html">Mancala</a></li>
+    <li><a href="morris.html">Morris</a></li>
+    <li><a href="xiangqi.html">Xiangqi</a></li>
+    <li><a href="shogi.html">Shogi</a></li>
+    <li><a href="reversi.html">Reversi</a></li>
+    <li><a href="landlords-game.html">Landlord's Game</a></li>
+    <li><a href="backgammon.html">Backgammon</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">Shared Plugins</div>
+  <ul class="docs-toc-list">
+    <li><a href="race.html">Race Games</a></li>
+    <li><a href="hop.html">Hopping Games</a></li>
+    <li><a href="tableau.html">Cards, Tiles and Dice</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">Tools</div>
+  <ul class="docs-toc-list">
+    <li><a href="hexmaps.html">Hex Maps</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">On this page</div>
+  <ul class="docs-toc-list">
+    <li><a href="#install">Installing</a></li>
+    <li><a href="#families">Families and variants</a></li>
+    <li><a href="#games">Playing a game</a></li>
+    <li><a href="#ai">The AI</a></li>
+    <li><a href="#render">Drawing a position</a></li>
+    <li><a href="#support">What each family supports</a></li>
+  </ul>
+</nav>
+<div class="docs-body">
+  <h1>SDK</h1>
+  <p class="docs-lede">Every playable family is reached through one SDK, <code>@moddable/engine/play</code>. The tools server and other sites use it to list games, play them headless, ask the AI for a move and draw a position. The table below is measured by running the SDK against each family whenever the site is built.</p>
+
+  <h2 id="install">Installing</h2>
+  <p>The package is <code>@moddable/engine</code>, pure ES modules with no build step. Link a checkout of the repository, as the tools server does:</p>
+  <pre><code>{
+  "dependencies": { "@moddable/engine": "file:../moddable-engine" }
+}</code></pre>
+
+  <h2 id="families">Families and variants</h2>
+  <pre><code>import { getFamilies, listVariants } from '@moddable/engine/play'
+
+getFamilies()            // every family the engine plays
+listVariants('tafl')     // its variants, with their labels and groups</code></pre>
+
+  <h2 id="games">Playing a game</h2>
+  <pre><code>import { createGameForFamily } from '@moddable/engine/play'
+
+const game = createGameForFamily('senet', { variant: 'standard', rngSeed: 7 })
+game.getLegalMoves()     // moves are plain objects; pass one back to apply it
+game.applyMove(game.getLegalMoves()[0])
+game.checkWin()          // a seat index, 'draw', or null
+game.getState()          // serialisable; game.loadState(state) restores it</code></pre>
+  <p>A game with dice, sticks or shells throws from its own seeded generator, so the same <code>rngSeed</code> replays the same game. A game with hidden hands answers <code>game.viewForSeat(seat)</code> with only what that seat may see.</p>
+
+  <h2 id="ai">The AI</h2>
+  <pre><code>import { createAI } from '@moddable/engine/play'
+
+const ai = createAI('pachisi', 'standard', { difficulty: 'medium' })
+const state = game.getState()
+const move = ai.pickMove(state.slice, state.players.currentIndex)</code></pre>
+  <p><code>createAI</code> chooses the right search for the family: minimax, Monte Carlo tree search, or the family plugin's own policy for games of chance and hidden hands. Call it rather than a search directly: a minimax search cannot play a game whose next position depends on a throw.</p>
+
+  <h2 id="render">Drawing a position</h2>
+  <pre><code>import { renderStateAsSvg } from '@moddable/engine/play'
+
+const svg = renderStateAsSvg('tafl', game.getState(), { variant: 'standard' })</code></pre>
+
+  <h2 id="support">What each family supports</h2>
+  <!-- sdk-table:start -->
+  <table class="docs-table">
+    <thead>
+      <tr><th>Family</th><th>Plugin</th><th><code>createAI</code></th><th><code>renderStateAsSvg</code></th><th>Dice</th><th>Hidden hands</th><th>Docs</th></tr>
+    </thead>
+    <tbody>
+      <tr id="agon"><td><a href="../families/agon/">Agon</a></td><td>chess</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="hosted-families.html">Families on Shared Plugins</a></td></tr>
+      <tr id="asalto"><td><a href="../families/asalto/">Asalto</a></td><td>hop</td><td>policy</td><td>yes</td><td></td><td></td><td><a href="hop.html">Hopping Games</a></td></tr>
+      <tr id="backgammon"><td><a href="../families/backgammon/">Backgammon</a></td><td>backgammon</td><td>policy</td><td>board only</td><td>&#x2713;</td><td></td><td><a href="backgammon.html">Backgammon</a></td></tr>
+      <tr id="bavarian-32"><td><a href="../families/bavarian-32/">Bavarian 32-Card Games</a></td><td>bavarian-32</td><td>policy</td><td>no</td><td></td><td>&#x2713;</td><td><a href="tableau.html">Cards, Tiles and Dice</a></td></tr>
+      <tr id="chaupar"><td><a href="../families/chaupar/">Chaupar</a></td><td>race</td><td>policy</td><td>yes</td><td>&#x2713;</td><td></td><td><a href="race.html">Race Games</a></td></tr>
+      <tr id="chess"><td><a href="../families/chess/">Chess</a></td><td>chess</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="chess.html">Chess</a></td></tr>
+      <tr id="dou-shou-qi"><td><a href="../families/dou-shou-qi/">Dou Shou Qi (斗兽棋 / Jungle)</a></td><td>chess</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="hosted-families.html">Families on Shared Plugins</a></td></tr>
+      <tr id="double-six-dominoes"><td><a href="../families/double-six-dominoes/">Double-Six Dominoes</a></td><td>double-six-dominoes</td><td>policy</td><td>no</td><td></td><td>&#x2713;</td><td><a href="tableau.html">Cards, Tiles and Dice</a></td></tr>
+      <tr id="draughts"><td><a href="../families/draughts/">Draughts</a></td><td>draughts</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="draughts.html">Draughts</a></td></tr>
+      <tr id="fanorona"><td><a href="../families/fanorona/">Fanorona</a></td><td>draughts</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="hosted-families.html">Families on Shared Plugins</a></td></tr>
+      <tr id="flower-48"><td><a href="../families/flower-48/">Flower 48</a></td><td>flower-48</td><td>policy</td><td>no</td><td></td><td>&#x2713;</td><td><a href="tableau.html">Cards, Tiles and Dice</a></td></tr>
+      <tr id="go"><td><a href="../families/go/">Go</a></td><td>go</td><td>mcts</td><td>yes</td><td></td><td></td><td><a href="go.html">Go</a></td></tr>
+      <tr id="halma"><td><a href="../families/halma/">Halma</a></td><td>hop</td><td>policy</td><td>yes</td><td></td><td></td><td><a href="hop.html">Hopping Games</a></td></tr>
+      <tr id="hex"><td><a href="../families/hex/">Hex</a></td><td>hex</td><td>mcts</td><td>yes</td><td></td><td></td><td><a href="hex.html">Hex</a></td></tr>
+      <tr id="landlords-game"><td><a href="../families/landlords-game/">The Landlord's Game</a></td><td>landlords</td><td>minimax</td><td>board only</td><td>&#x2713;</td><td></td><td><a href="landlords-game.html">Landlord's Game</a></td></tr>
+      <tr id="mahjong"><td><a href="../families/mahjong/">Mahjong</a></td><td>mahjong</td><td>policy</td><td>no</td><td></td><td>&#x2713;</td><td><a href="tableau.html">Cards, Tiles and Dice</a></td></tr>
+      <tr id="mancala"><td><a href="../families/mancala/">Mancala</a></td><td>mancala</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="mancala.html">Mancala</a></td></tr>
+      <tr id="morris"><td><a href="../families/morris/">Nine Men's Morris</a></td><td>morris</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="morris.html">Morris</a></td></tr>
+      <tr id="nyout"><td><a href="../families/nyout/">Nyout (유놓이 / Yut Nori)</a></td><td>race</td><td>policy</td><td>yes</td><td>&#x2713;</td><td></td><td><a href="race.html">Race Games</a></td></tr>
+      <tr id="pachisi"><td><a href="../families/pachisi/">Pachisi</a></td><td>race</td><td>policy</td><td>yes</td><td>&#x2713;</td><td></td><td><a href="race.html">Race Games</a></td></tr>
+      <tr id="reversi"><td><a href="../families/reversi/">Reversi</a></td><td>reversi</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="reversi.html">Reversi</a></td></tr>
+      <tr id="royal-ur"><td><a href="../families/royal-ur/">Royal Game of Ur</a></td><td>race</td><td>policy</td><td>yes</td><td>&#x2713;</td><td></td><td><a href="race.html">Race Games</a></td></tr>
+      <tr id="senet"><td><a href="../families/senet/">Senet</a></td><td>race</td><td>policy</td><td>yes</td><td>&#x2713;</td><td></td><td><a href="race.html">Race Games</a></td></tr>
+      <tr id="shogi"><td><a href="../families/shogi/">Shogi</a></td><td>shogi</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="shogi.html">Shogi</a></td></tr>
+      <tr id="standard-52"><td><a href="../families/standard-52/">Standard 52-Card Deck</a></td><td>standard-52</td><td>policy</td><td>no</td><td></td><td>&#x2713;</td><td><a href="tableau.html">Cards, Tiles and Dice</a></td></tr>
+      <tr id="standard-dice"><td><a href="../families/standard-dice/">Standard Dice</a></td><td>standard-dice</td><td>policy</td><td>no</td><td></td><td>&#x2713;</td><td><a href="tableau.html">Cards, Tiles and Dice</a></td></tr>
+      <tr id="stern-halma"><td><a href="../families/stern-halma/">Stern-Halma</a></td><td>hop</td><td>policy</td><td>yes</td><td></td><td></td><td><a href="hop.html">Hopping Games</a></td></tr>
+      <tr id="surakarta"><td><a href="../families/surakarta/">Surakarta</a></td><td>chess</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="hosted-families.html">Families on Shared Plugins</a></td></tr>
+      <tr id="tafl"><td><a href="../families/tafl/">Tafl</a></td><td>chess</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="hosted-families.html">Families on Shared Plugins</a></td></tr>
+      <tr id="xiangqi"><td><a href="../families/xiangqi/">Xiangqi</a></td><td>xiangqi</td><td>minimax</td><td>yes</td><td></td><td>&#x2713;</td><td><a href="xiangqi.html">Xiangqi</a></td></tr>
+    </tbody>
+  </table>
+  <!-- sdk-table:end -->
+</div>
+</div>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../play/">Play</a>
+        <a href="../boards/">Boards</a>
+        <a href="../pieces/">Pieces</a>
+        <a href="../tiles/">Tiles</a>
+        <a href="../docs/">Docs</a>
+        <a href="../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Moddable Games</h4>
+        <a href="https://moddable.games" target="_blank" rel="noopener">Homepage</a>
+        <a href="https://rules.moddable.games" target="_blank" rel="noopener">Rules</a>
+        <a href="https://moddable.games/news/" target="_blank" rel="noopener">News</a>
+        <a href="https://discord.gg/VhsVGNq6Za" target="_blank" rel="noopener">Discord</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.42</span>
+    </div>
+  </div>
+</footer><script src="../js/site-nav.js?v=1.0.42"></script>
+</body>
+</html>

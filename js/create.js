@@ -1,7 +1,7 @@
 import { renderFromEngine, attachPieceImages, pieceIdToFenChar } from '../packages/render/index.js'
 import { parseFrontmatter } from '../packages/schema/index.js'
-import { getPlayableFamilies, getFamilyLabel, loadPlayabilityManifest, getPlayableVariants } from './play-shared.js'
-import { resolveVariantBoard } from './variant-frontmatter.js'
+import { getPlayableFamilies, getFamilyLabel, loadPlayabilityManifest, getCreatableFamilies, getCreatableVariants, getAllManifestVariants, RULES_BASE } from './play-shared.js'
+import { resolveVariantBoard, loadBoardContent } from './variant-frontmatter.js'
 import { defaultState, buildResolvedFromState, buildSetup, parseSetup, stateFromResolved, resolveImported, isGrid,
   frontmatterFromState, exportText, pieceSpecsFromState, familyOf, extendsOf, inlineExtends, stateFromTemplate, slugify, overrideLook, setGridLayout, setTopologyType, emptyExtra,
   setHexShape, paintCell, restoreAllCells,
@@ -296,8 +296,30 @@ async function loadGallery() {
   catch { galleryIndex = [] }
 }
 
+// Boards read from a data file, by the file they came from. The state names the
+// file and never holds its contents, so the export stays what the variant
+// wrote; the preview fetches it once and draws again when it arrives. The
+// Landlord's Game loaded as a template drew an empty canvas without it.
+const boardContent = new Map()
+
+function withBoardContent(resolved) {
+  const source = resolved.content?.source
+  if (!source || resolved.content.data) return resolved
+  if (boardContent.has(source)) {
+    const data = boardContent.get(source)
+    return data ? { ...resolved, content: { ...resolved.content, data } } : resolved
+  }
+  boardContent.set(source, null)
+  loadBoardContent(resolved, RULES_BASE + 'games/').then(loaded => {
+    if (!loaded.content?.data) return
+    boardContent.set(source, loaded.content.data)
+    render()
+  })
+  return resolved
+}
+
 function render() {
-  const resolved = buildResolvedFromState(state)
+  const resolved = withBoardContent(buildResolvedFromState(state))
   const container = $('board-svg')
 
   const opts = {}
@@ -841,15 +863,16 @@ function renderExtras() {
 
 // --- templates ---
 
-// The families a board can be built for: every one the manifest calls playable.
-// This was a six-name literal, the fault the play page's picker had until it
-// read the manifest too, and a hex or mancala template loaded into a select
-// that could not show its family.
+// The families a board can be built for: every one the manifest calls
+// creatable. This was a six-name literal, the fault the play page's picker had
+// until it read the manifest too, and a hex or mancala template loaded into a
+// select that could not show its family. Playable was the next measure, and it
+// offered card and tile games the page has no board to edit for.
 function populateFamilies() {
   const sel = $('family-select')
   if (!sel) return
   sel.innerHTML = ''
-  for (const f of getPlayableFamilies()) {
+  for (const f of getCreatableFamilies()) {
     const o = document.createElement('option')
     o.value = f
     o.textContent = getFamilyLabel(f)
@@ -860,7 +883,7 @@ function populateFamilies() {
 function populateTemplateFamilies() {
   const sel = $('template-family')
   if (!sel) return
-  for (const f of getPlayableFamilies()) {
+  for (const f of getCreatableFamilies()) {
     const o = document.createElement('option')
     o.value = f
     o.textContent = getFamilyLabel(f)
@@ -874,7 +897,7 @@ function populateTemplateVariants() {
   const sel = $('template-variant')
   if (!sel) return
   sel.innerHTML = ''
-  const entries = getPlayableVariants(val('template-family') || 'chess')
+  const entries = getCreatableVariants(val('template-family') || 'chess')
   for (const e of entries) {
     const o = document.createElement('option')
     o.value = e.slug || e.variant
@@ -884,7 +907,7 @@ function populateTemplateVariants() {
   if (!entries.length) {
     const o = document.createElement('option')
     o.value = ''
-    o.textContent = 'No playable variants'
+    o.textContent = 'No variants to start from'
     sel.appendChild(o)
   }
 }
@@ -1035,11 +1058,20 @@ async function init() {
   } else if (params.get('variant')) {
     // The other direction of the round-trip: a variant played on the play page
     // opens here as a starting point. Same path as the template picker.
-    $('template-family').value = params.get('family') || 'chess'
-    populateTemplateVariants()
-    $('template-variant').value = params.get('variant')
-    await loadTemplate()
-    restored = true
+    // A link can name a variant the page cannot carry; say why rather than
+    // quietly loading whatever the pickers fall back to.
+    const family = params.get('family') || 'chess'
+    const variant = params.get('variant')
+    const entry = getAllManifestVariants(family).find(e => (e.slug || e.variant) === variant || e.variant === variant)
+    if (entry && !entry.creatable) {
+      setStatus(`${entry.label || variant} cannot be built here yet: ${entry.createGap || 'it does not survive the round trip'}.`)
+    } else {
+      $('template-family').value = family
+      populateTemplateVariants()
+      $('template-variant').value = variant
+      await loadTemplate()
+      restored = true
+    }
   } else {
     const working = drafts.getWorkingDraft()
     if (working && drafts.hasContent(working.state, defaultState)) {

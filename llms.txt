@@ -31,7 +31,7 @@ Interactive tools (puzzle generation, board rendering, piece lookup) are availab
 
 ## Architecture
 
-The engine uses a topology-driven architecture. Games are defined by configuration (frontmatter), not code. Supported topologies: grid, hex, track, pit, graph, tableau. Any game expressible as a combination of topology + pieces + rules can be rendered.
+The engine uses a topology-driven architecture. Games are defined by configuration (frontmatter), not code. Supported topologies: grid, tableau, hex, graph, track, pit, hexagonal-trisection, triangular. Any game expressible as a combination of topology + pieces + rules can be rendered.
 
 ## Related
 

@@ -170,7 +170,24 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 
 ## Changelog
 
+#### 2026-09-28
+- Every playable family has a showcase page under `/families/`, generated from the rules corpus: a live board, the variants with their rules and play links, a frontmatter excerpt and its SDK docs. A families index lists all thirty, and the site footer names the eight largest with a link to the rest
+- Docs navigation is generated from one table of contents (`docs/toc.json`): every page's sidebar and "On this page" list, and the guides table on the docs index. A page missing from the table fails the build
+- SDK docs cover every family: new pages for Backgammon, the race and hop plugins, the tableau plugin (cards, tiles and dice) and hosted families, and an SDK page whose table is measured per family by running the SDK (moves, hidden information, chance, AI search, SVG rendering)
+- Topology pages for hexagonal trisection and triangular boards; the topologies guide documents grid arcs, tableau, trisection and triangular cells
+- The create page offers only variants it can carry end to end: load, export, re-import and play as the same game. The manifest records `creatable` and `createGap` per variant; 273 of 313 playable variants qualify, and the card, tile and dice games do not yet
+- Khan's Chess loads again: the piece legend read its per-seat promotion choices as one list and stopped the board drawing
+- A Landlord's Game draft, and its preview on the create page, draw the board: both now fetch the board file the variant names
+- "Edit Variant" on the play page is offered for every creatable variant, not only grid boards
+- Surakarta's loops are drawn from the arcs its grid topology declares, round the corners outside the board, where they had sat inside it and half off the frame
+- Boards embedded on family pages no longer overflow their frame: embed mode drops the play page's top margin
+- `renderStateAsSvg` reads a hosted family's state from its host plugin, so Tafl, Asalto and the other hosted families render through the SDK
+
 #### 2026-09-27
+- Royal Ur, Senet, Nyout, Pachisi and Chaupar play through one race plugin: tracks, entry and exit, safe squares, and throws from shells, sticks or dice all declared in frontmatter
+- Halma and Stern-Halma play through one hop plugin on grid and star boards, the star board being a graph with holes, neighbours and straight rays
+- Tafl and Asalto play with two seats that are not mirror images: different pieces, goals and capture rules per side
+- A family can be hosted by another family's plugin (`engine.plugin`), so a game that is a configuration of an existing one needs no code
 - Taiwanese mahjong plays, scored by Mahjong Time's table: winning on all eight flowers and seasons or by robbing the eighth, ready on the original hand (declared with the first discard, then locked), seven pairs and a triplet, early winning by the number of discards, and graded patterns scoring only their highest. On a discard the discarder alone pays; a dealer's bonus, a continued-deal bonus and a 40-tai limit are options
 - Every component game now plays: 281 playable variants
 - Board export refuses a board whose named piece set is not in the gallery, or whose piece artwork is missing from the checkout, and exits non-zero so the rules repo's sync stops before recording it as fresh. The earlier check read letters in the setup and refused eight boards that are right to be empty (pieces starting in `home:`, Nukes' terrain setups)

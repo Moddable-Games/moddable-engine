@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Plugins — Moddable Engine</title>
-<meta name="description" content="13 plugin families covering chess, go, draughts, reversi, mancala, backgammon, shogi, xiangqi, and more.">
+<meta name="description" content="14 plugins playing 30 families, from chess and go to race, hopping and card games.">
 <meta property="og:title" content="Plugins — Moddable Engine">
-<meta property="og:description" content="13 plugin families covering chess, go, draughts, reversi, mancala, backgammon, shogi, xiangqi, and more.">
+<meta property="og:description" content="14 plugins playing 30 families, from chess and go to race, hopping and card games.">
 <meta property="og:image" content="https://engine.moddable.games/og/docs-plugins.png?v=1.0.42">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -15,7 +15,7 @@
 <meta property="og:site_name" content="Moddable Engine">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Plugins — Moddable Engine">
-<meta name="twitter:description" content="13 plugin families covering chess, go, draughts, reversi, mancala, backgammon, shogi, xiangqi, and more.">
+<meta name="twitter:description" content="14 plugins playing 30 families, from chess and go to race, hopping and card games.">
 <meta name="twitter:image" content="https://engine.moddable.games/og/docs-plugins.png?v=1.0.42">
 <meta name="theme-color" content="#0a0d2a">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
@@ -39,13 +39,13 @@
       <a href="../api/" class="nav-link">API</a>
       <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
     </nav>
-    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+    <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
   </div>
 </header>
 <div class="docs-layout">
-<button class="docs-toc-toggle" onclick="this.classList.toggle('active');this.nextElementSibling.classList.toggle('open')">Navigation</button>
+<button class="docs-toc-toggle">Navigation</button>
 <nav class="docs-toc">
-  <div class="docs-toc-title">Pages</div>
+  <div class="docs-toc-title">Guides</div>
   <ul class="docs-toc-list">
     <li><a href="./">Overview</a></li>
     <li><a href="authoring.html">Authoring a Variant</a></li>
@@ -53,8 +53,13 @@
     <li><a href="topologies.html">Topologies</a></li>
     <li><a href="surfaces.html">Surfaces</a></li>
     <li><a href="pieces.html">Piece Sets</a></li>
+    <li><a href="sdk.html">SDK</a></li>
     <li><a href="plugins.html" class="active">Plugins</a></li>
+    <li><a href="hosted-families.html">Families on Shared Plugins</a></li>
     <li><a href="render-pipeline.html">Render Pipeline</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">Families</div>
+  <ul class="docs-toc-list">
     <li><a href="chess.html">Chess</a></li>
     <li><a href="go.html">Go</a></li>
     <li><a href="draughts.html">Draughts</a></li>
@@ -65,9 +70,19 @@
     <li><a href="shogi.html">Shogi</a></li>
     <li><a href="reversi.html">Reversi</a></li>
     <li><a href="landlords-game.html">Landlord's Game</a></li>
+    <li><a href="backgammon.html">Backgammon</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">Shared Plugins</div>
+  <ul class="docs-toc-list">
+    <li><a href="race.html">Race Games</a></li>
+    <li><a href="hop.html">Hopping Games</a></li>
+    <li><a href="tableau.html">Cards, Tiles and Dice</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">Tools</div>
+  <ul class="docs-toc-list">
     <li><a href="hexmaps.html">Hex Maps</a></li>
   </ul>
-  <div class="docs-toc-title" style="margin-top:20px">On this page</div>
+  <div class="docs-toc-title docs-toc-title--spaced">On this page</div>
   <ul class="docs-toc-list">
     <li><a href="#what">What plugins are</a></li>
     <li><a href="#structure">Plugin structure</a></li>
@@ -83,7 +98,7 @@
   <p class="docs-lede">Game-family-specific logic. Each plugin handles all variants within its family through configuration, not code branching.</p>
 
   <h2 id="what">What plugins are</h2>
-  <p>A plugin encapsulates the rules for a game family: legal move generation, capture mechanics, win/draw detection, and turn flow. The engine has 13 built-in plugins covering chess, go, draughts, reversi, mancala, backgammon, morris, hex, halma, shogi, xiangqi, race games, and Big 2.</p>
+  <p>A plugin encapsulates the rules for a game family: legal move generation, capture mechanics, win/draw detection, and turn flow. The engine has 14 built-in plugins: backgammon, chess, draughts, go, hex, hop, the Landlord's Game, mancala, morris, race, reversi, shogi, tableau and xiangqi. Families without a plugin of their own name one of these in their rulebook; see <a href="hosted-families.html">Families on Shared Plugins</a>.</p>
   <p>Plugins receive configuration (from frontmatter) and produce behaviour. The same chess plugin handles standard, Fischer Random, Capablanca, and 72 other variants through different config parameters.</p>
 
   <h2 id="structure">Plugin structure</h2>
@@ -191,5 +206,6 @@ const plugin = factory(variantConfig, context)</code></pre>
       <span class="footer-version">v1.0.42</span>
     </div>
   </div>
-</footer></body>
+</footer><script src="../js/site-nav.js?v=1.0.42"></script>
+</body>
 </html>

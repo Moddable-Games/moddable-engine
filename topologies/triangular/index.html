@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en" data-topology="hex">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Triangular Topology — Moddable Engine</title>
+<meta name="description" content="A board of triangles declared as a picture, one character per cell: Sankaku Shogi on 44 triangles.">
+<meta property="og:title" content="Triangular Topology — Moddable Engine">
+<meta property="og:description" content="A board of triangles declared as a picture, one character per cell: Sankaku Shogi on 44 triangles.">
+<meta property="og:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.42">
+<meta property="og:url" content="https://engine.moddable.games/topologies/triangular/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Triangular Topology — Moddable Engine">
+<meta name="twitter:description" content="A board of triangles declared as a picture, one character per cell: Sankaku Shogi on 44 triangles.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.42">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="stylesheet" href="../../css/families.css?v=1.0.42">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../../play/" class="nav-link">Play</a>
+      <a href="../../create/" class="nav-link">Create</a>
+      <a href="../../boards/" class="nav-link">Boards</a>
+      <a href="../../pieces/" class="nav-link">Pieces</a>
+      <a href="../../tiles/" class="nav-link">Tiles</a>
+      <a href="../../docs/" class="nav-link">Docs</a>
+      <a href="../../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<section class="family-hero">
+  <div class="family-hero-inner">
+    <span class="hero-symbol">&#x25B2;</span>
+    <h1>Triangular</h1>
+    <p class="hero-lede">A board of triangles, declared as a picture: one string per rank, one character per cell, A for a triangle pointing up and V for one pointing down. Neighbouring triangles share their slanted sides.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-value" data-stat="variants">1</span>
+        <span class="hero-meta-label">Variants</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">44</span>
+        <span class="hero-meta-label">Cells</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">2</span>
+        <span class="hero-meta-label">Orientations</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="showcase">
+  <div class="showcase-intro">
+    <h2>Drawn as It Is Played</h2>
+    <p>The shape in the frontmatter is the source&#39;s own diagram, read cell by cell. The topology works out which triangles touch and which lines run straight; the shogi plugin moves its pieces along them.</p>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Sankaku Shogi <a href="https://rules.moddable.games/shogi/variants/sankaku-shogi/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">Shogi on 44 triangles in a diamond with its four extreme corners removed.</p>
+      <pre><code>engine:
+  topology:
+    type: triangular
+    shape:
+      - "..AVA.."
+      - ".AVAVA."
+      - "AVAVAVA"
+      - "VAVAVAV"
+      - "AVAVAVA"
+      - "VAVAVAV"
+      - ".VAVAV."
+      - "..VAV.."</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&amp;family=shogi&amp;variant=sankaku-shogi" loading="lazy" title="Sankaku Shogi"></iframe>
+      <p class="board-caption">Sankaku Shogi: 44 triangles</p>
+    </div>
+  </div>
+</section>
+
+<section class="family-cta">
+  <h2>Play Sankaku Shogi</h2>
+  <p>Shogi on a board of triangles.</p>
+  <div class="cta-actions">
+    <a href="../../play/?family=shogi&amp;variant=sankaku-shogi" class="btn btn--primary">Play Sankaku Shogi</a>
+    <a href="../../docs/topologies.html#triangular" class="btn btn--ghost">Read the Docs</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../../play/">Play</a>
+        <a href="../../boards/">Boards</a>
+        <a href="../../pieces/">Pieces</a>
+        <a href="../../tiles/">Tiles</a>
+        <a href="../../docs/">Docs</a>
+        <a href="../../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Topologies</h4>
+        <a href="../grid/">Grid</a>
+        <a href="../tableau/">Tableau</a>
+        <a href="../hex/">Hex</a>
+        <a href="../graph/">Graph</a>
+        <a href="../track/">Track</a>
+        <a href="../pit/">Pit</a>
+        <a href="../hexagonal-trisection/">Hexagonal Trisection</a>
+        <a href="../triangular/">Triangular</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.42</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../../js/families.js?v=1.0.42"></script>
+<script src="../../js/site-nav.js?v=1.0.42"></script>
+</body>
+</html>

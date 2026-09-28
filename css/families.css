@@ -423,3 +423,40 @@ a { color: inherit; text-decoration: none; }
   .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
   .hero-meta { gap: 20px; }
 }
+
+/* The family chips, as the homepage draws them, for the families index. */
+.family-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+.family-chip {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 15px;
+  padding: 12px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: border-color 0.2s;
+}
+.family-chip:hover { border-color: var(--border-glow); }
+.family-symbol {
+  font-size: 18px;
+  color: var(--cosmic-glow);
+  width: 24px;
+  text-align: center;
+}
+.family-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  background: rgba(111, 181, 255, 0.08);
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-left: 4px;
+}

@@ -6,7 +6,8 @@
     "key": "standard",
     "label": "Agon (Standard)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "asalto",
@@ -15,7 +16,8 @@
     "key": "royal-garrison",
     "label": "Royal Garrison",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "asalto",
@@ -24,7 +26,8 @@
     "key": "standard",
     "label": "Asalto (Standard)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "backgammon",
@@ -33,7 +36,8 @@
     "key": "acey-deucey",
     "label": "Acey-Deucey",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "backgammon",
@@ -42,7 +46,8 @@
     "key": "chouette",
     "label": "Chouette",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "backgammon",
@@ -51,7 +56,8 @@
     "key": "fevga",
     "label": "Fevga",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "backgammon",
@@ -60,7 +66,8 @@
     "key": "hypergammon",
     "label": "Hypergammon",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "backgammon",
@@ -69,7 +76,8 @@
     "key": "nackgammon",
     "label": "Nackgammon",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "backgammon",
@@ -78,7 +86,8 @@
     "key": "nardi",
     "label": "Nardi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "backgammon",
@@ -87,7 +96,8 @@
     "key": "plakoto",
     "label": "Plakoto",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "backgammon",
@@ -96,7 +106,8 @@
     "key": "standard",
     "label": "Standard Backgammon",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "bavarian-32",
@@ -106,7 +117,9 @@
     "label": "Schafkopf",
     "group": "Other",
     "playable": true,
-    "path": "content/games/schafkopf/standard.md"
+    "path": "content/games/schafkopf/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "bavarian-32",
@@ -116,7 +129,9 @@
     "label": "Skat",
     "group": "Other",
     "playable": true,
-    "path": "content/games/skat/standard.md"
+    "path": "content/games/skat/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "chaupar",
@@ -125,7 +140,8 @@
     "key": "standard",
     "label": "Chaupar (Standard)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -134,7 +150,8 @@
     "key": "absorptionChess",
     "label": "Absorption Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -143,7 +160,8 @@
     "key": "alice",
     "label": "Alice Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -152,7 +170,8 @@
     "key": "almost-chess",
     "label": "Almost Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -161,7 +180,8 @@
     "key": "amazon-chess",
     "label": "Amazon Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -170,7 +190,8 @@
     "key": "andernachChess",
     "label": "Andernach Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -179,7 +200,8 @@
     "key": "anti-king-chess-2",
     "label": "Anti-King Chess II",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -188,7 +210,8 @@
     "key": "antichess",
     "label": "Antichess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -197,7 +220,8 @@
     "key": "archchess",
     "label": "Archchess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -206,7 +230,8 @@
     "key": "asean",
     "label": "ASEAN Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -215,7 +240,8 @@
     "key": "atomic",
     "label": "Atomic Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -224,7 +250,8 @@
     "key": "avalanche",
     "label": "Avalanche Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -233,7 +260,8 @@
     "key": "balbos-chess",
     "label": "Balbo's Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -242,7 +270,8 @@
     "key": "benedictChess",
     "label": "Benedict Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -251,7 +280,8 @@
     "key": "berolinaChess",
     "label": "Berolina Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -260,7 +290,8 @@
     "key": "berserkChess",
     "label": "Berserk Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -269,7 +300,8 @@
     "key": "birds-chess",
     "label": "Bird's Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -278,7 +310,8 @@
     "key": "breakthrough",
     "label": "Breakthrough",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -287,7 +320,8 @@
     "key": "brusky",
     "label": "Brusky's Hexagonal Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -296,7 +330,8 @@
     "key": "byzantine-chess",
     "label": "Byzantine Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -305,7 +340,8 @@
     "key": "capablanca",
     "label": "Capablanca Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -314,7 +350,8 @@
     "key": "carrera",
     "label": "Carrera's Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -323,7 +360,8 @@
     "key": "chak",
     "label": "Chak",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -332,7 +370,8 @@
     "key": "chancellor-chess",
     "label": "Chancellor Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -341,7 +380,8 @@
     "key": "chaturanga",
     "label": "Chaturanga",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -350,7 +390,8 @@
     "key": "checklessChess",
     "label": "Checkless Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -359,7 +400,8 @@
     "key": "chennis",
     "label": "Chennis",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -368,7 +410,8 @@
     "key": "chigorin",
     "label": "Chigorin",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -377,7 +420,8 @@
     "key": "circular-chess",
     "label": "Circular Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -386,7 +430,8 @@
     "key": "citadel-chess",
     "label": "Citadel Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -395,7 +440,8 @@
     "key": "codrus",
     "label": "Codrus",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -404,7 +450,8 @@
     "key": "congo",
     "label": "Congo",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -413,7 +460,8 @@
     "key": "courier",
     "label": "Courier Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -422,7 +470,8 @@
     "key": "crazyhouse",
     "label": "Crazyhouse",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -431,7 +480,8 @@
     "key": "cylinder-chess",
     "label": "Cylinder Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -440,7 +490,8 @@
     "key": "cylindrical-chess",
     "label": "Cylindrical Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -449,7 +500,8 @@
     "key": "darkChess",
     "label": "Dark Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -458,7 +510,8 @@
     "key": "de-vasa",
     "label": "De Vasa's Hexagonal Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -467,7 +520,8 @@
     "key": "delirious-bughouse",
     "label": "Delirious Bughouse",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -476,7 +530,8 @@
     "key": "diana",
     "label": "Diana Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -485,7 +540,8 @@
     "key": "diceChess",
     "label": "Dice Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -494,7 +550,8 @@
     "key": "displacementChess",
     "label": "Displacement Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -503,7 +560,8 @@
     "key": "djambi",
     "label": "Djambi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -512,7 +570,8 @@
     "key": "dragon-chess",
     "label": "Dragon Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -521,7 +580,8 @@
     "key": "duckChess",
     "label": "Duck Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -530,7 +590,8 @@
     "key": "einsteinChess",
     "label": "Einstein Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -539,7 +600,8 @@
     "key": "empire",
     "label": "Empire Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -548,7 +610,8 @@
     "key": "endgame-chess",
     "label": "Endgame Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -557,7 +620,8 @@
     "key": "extinction",
     "label": "Extinction Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -566,7 +630,8 @@
     "key": "fanorona-chess",
     "label": "Fanorona Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -575,7 +640,8 @@
     "key": "chess960",
     "label": "Fischer Random (Chess960)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -584,7 +650,8 @@
     "key": "fiveCheck",
     "label": "Five-Check",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -593,7 +660,8 @@
     "key": "fogOfWar",
     "label": "Fog of War Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -602,7 +670,8 @@
     "key": "four-handed-chess",
     "label": "Four-Handed Chess (Chaturaji)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -611,7 +680,8 @@
     "key": "giveaway",
     "label": "Giveaway",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -620,7 +690,8 @@
     "key": "glinski",
     "label": "Glinski's Hexagonal Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -629,7 +700,8 @@
     "key": "grand",
     "label": "Grand Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -638,7 +710,8 @@
     "key": "grasshopper",
     "label": "Standard Grasshopper Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -647,7 +720,8 @@
     "key": "gridChess",
     "label": "Grid Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -656,7 +730,8 @@
     "key": "gustav-iii-chess",
     "label": "Gustav III's Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -665,7 +740,8 @@
     "key": "gygax",
     "label": "Gygax Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -674,7 +750,8 @@
     "key": "half-chess",
     "label": "Half Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -683,7 +760,8 @@
     "key": "hexapawn",
     "label": "Hexapawn",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -692,7 +770,8 @@
     "key": "hole-chess",
     "label": "Hole Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -701,7 +780,8 @@
     "key": "hoppel-poppel",
     "label": "Hoppel-Poppel",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -710,7 +790,8 @@
     "key": "horde",
     "label": "Horde Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -719,7 +800,8 @@
     "key": "hostage-chess",
     "label": "Hostage Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -728,7 +810,8 @@
     "key": "immunizationChess",
     "label": "Immunization Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -737,7 +820,8 @@
     "key": "janus",
     "label": "Janus Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -746,7 +830,8 @@
     "key": "khans-chess",
     "label": "Khan's Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -755,7 +840,8 @@
     "key": "kingOfTheHill",
     "label": "King of the Hill",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -764,7 +850,8 @@
     "key": "klein-bottle-chess",
     "label": "Klein Bottle Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -773,7 +860,8 @@
     "key": "knightmate",
     "label": "Knightmate",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -782,7 +870,8 @@
     "key": "kriegspiel",
     "label": "Kriegspiel",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -791,7 +880,8 @@
     "key": "leganChess",
     "label": "Legan Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -800,7 +890,8 @@
     "key": "los-alamos",
     "label": "Los Alamos",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -809,7 +900,8 @@
     "key": "los-alamos-vierschach",
     "label": "Los Alamos Vierschach",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -818,7 +910,8 @@
     "key": "madrasiChess",
     "label": "Madrasi Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -827,7 +920,8 @@
     "key": "maharaja",
     "label": "Maharaja & Sepoys",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -836,7 +930,8 @@
     "key": "makpong",
     "label": "Makpong",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -845,7 +940,8 @@
     "key": "makruk",
     "label": "Makruk",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -854,7 +950,8 @@
     "key": "mansindam",
     "label": "Mansindam (Pantheon Tale)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -863,7 +960,8 @@
     "key": "marseillais",
     "label": "Marseillais Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -872,7 +970,8 @@
     "key": "mccooey",
     "label": "McCooey's Hexagonal Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -881,7 +980,8 @@
     "key": "medusaChess",
     "label": "Medusa Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -890,7 +990,8 @@
     "key": "metamachy",
     "label": "Metamachy",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -899,7 +1000,8 @@
     "key": "mini-hexchess",
     "label": "Mini Hexchess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -908,7 +1010,8 @@
     "key": "minichess",
     "label": "Minichess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -917,7 +1020,8 @@
     "key": "mobius-strip-chess",
     "label": "Möbius Strip Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -926,7 +1030,8 @@
     "key": "monsterChess",
     "label": "Monster Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -935,7 +1040,8 @@
     "key": "nightrider",
     "label": "Standard Nightrider Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -944,7 +1050,8 @@
     "key": "no-castling",
     "label": "No Castling Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -953,7 +1060,8 @@
     "key": "noRetreat",
     "label": "No Retreat",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -962,7 +1070,8 @@
     "key": "oblong-chess",
     "label": "Oblong Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -971,7 +1080,8 @@
     "key": "omega-chess",
     "label": "Omega Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -980,7 +1090,8 @@
     "key": "omnicide",
     "label": "Omnicide",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -989,7 +1100,8 @@
     "key": "orda-chess",
     "label": "Orda Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -998,7 +1110,8 @@
     "key": "orda-mirror",
     "label": "Orda Mirror",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1007,7 +1120,8 @@
     "key": "ouk-chaktrang",
     "label": "Ouk Chaktrang (Cambodian Chess)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1016,7 +1130,8 @@
     "key": "patrolChess",
     "label": "Patrol Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1025,7 +1140,8 @@
     "key": "pawns-only",
     "label": "Pawns Only",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1034,7 +1150,8 @@
     "key": "peasants-revolt",
     "label": "Peasants' Revolt",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1043,7 +1160,8 @@
     "key": "petty",
     "label": "Petty Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1052,7 +1170,8 @@
     "key": "placement-chess",
     "label": "Placement Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1061,7 +1180,8 @@
     "key": "pocket-knight",
     "label": "Pocket Knight Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1070,7 +1190,8 @@
     "key": "poisonChess",
     "label": "Poison Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1079,7 +1200,8 @@
     "key": "progressive",
     "label": "Progressive",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1088,7 +1210,8 @@
     "key": "progressive-italian",
     "label": "Progressive Italian",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1097,7 +1220,8 @@
     "key": "racingKings",
     "label": "Racing Kings",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1106,7 +1230,8 @@
     "key": "raumschach",
     "label": "Raumschach",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1115,7 +1240,8 @@
     "key": "recruitmentChess",
     "label": "Recruitment Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1124,7 +1250,8 @@
     "key": "rifle",
     "label": "Rifle Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1133,7 +1260,8 @@
     "key": "rollerball",
     "label": "Rollerball",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1142,7 +1270,8 @@
     "key": "romanchenkos-chess",
     "label": "Romanchenko's Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1151,7 +1280,8 @@
     "key": "s-chess",
     "label": "S-Chess (Seirawan Chess)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1160,7 +1290,8 @@
     "key": "senterej",
     "label": "Senterej",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1169,7 +1300,8 @@
     "key": "shafran",
     "label": "Shafran's Hexagonal Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1178,7 +1310,8 @@
     "key": "shako",
     "label": "Shako",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1187,7 +1320,8 @@
     "key": "shatar",
     "label": "Shatar",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1196,7 +1330,8 @@
     "key": "shatranj",
     "label": "Shatranj",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1205,7 +1340,8 @@
     "key": "shatranj-kamil",
     "label": "Shatranj Kamil",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1214,7 +1350,8 @@
     "key": "shinobi",
     "label": "Shinobi Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1223,7 +1360,8 @@
     "key": "shinobiplus",
     "label": "Shinobi+",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1232,7 +1370,8 @@
     "key": "shogun",
     "label": "Shogun Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1241,7 +1380,8 @@
     "key": "singleCheck",
     "label": "Single-Check",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1250,7 +1390,8 @@
     "key": "sittuyin",
     "label": "Sittuyin",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1259,7 +1400,8 @@
     "key": "spartan",
     "label": "Spartan Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1268,7 +1410,8 @@
     "key": "spherical-chess",
     "label": "Spherical Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1277,7 +1420,8 @@
     "key": "stalemate-wins",
     "label": "Stalemate Wins",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1286,7 +1430,8 @@
     "key": "standard",
     "label": "Standard Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1295,7 +1440,8 @@
     "key": "stupidhouse",
     "label": "Stupidhouse",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1304,7 +1450,8 @@
     "key": "suicideChess",
     "label": "Suicide Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1313,7 +1460,8 @@
     "key": "synochess",
     "label": "Synochess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1322,7 +1470,8 @@
     "key": "tamerlane",
     "label": "Tamerlane Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1331,7 +1480,8 @@
     "key": "tandem-chess",
     "label": "Tandem Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1340,7 +1490,8 @@
     "key": "teleportChess",
     "label": "Teleportation Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1349,7 +1500,8 @@
     "key": "threeCheck",
     "label": "Three-Check",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1358,7 +1510,8 @@
     "key": "toroidal-byzantine",
     "label": "Toroidal Byzantine Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1367,7 +1520,8 @@
     "key": "toroidal-chess",
     "label": "Gadsden's Toroidal Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1376,7 +1530,8 @@
     "key": "torpedo",
     "label": "Torpedo Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1385,7 +1540,8 @@
     "key": "turkish-great-chess-ii",
     "label": "Turkish Great Chess II (Atranj)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1394,7 +1550,8 @@
     "key": "turkish-great-chess-iii",
     "label": "Turkish Great Chess III",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1403,7 +1560,8 @@
     "key": "turkish-great-chess-iv",
     "label": "Turkish Great Chess IV",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1412,7 +1570,8 @@
     "key": "ultima",
     "label": "Ultima (Baroque Chess)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1421,7 +1580,8 @@
     "key": "upside-down",
     "label": "Upside-Down",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1430,7 +1590,8 @@
     "key": "vierschach",
     "label": "Vierschach",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1439,7 +1600,8 @@
     "key": "weakChess",
     "label": "Weak!",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1448,7 +1610,8 @@
     "key": "wildebeest",
     "label": "Standard Wildebeest Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1457,7 +1620,8 @@
     "key": "xiang-fu",
     "label": "Xiang Fu",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "chess",
@@ -1466,7 +1630,8 @@
     "key": "yalta-chess",
     "label": "Yalta Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "dou-shou-qi",
@@ -1475,7 +1640,8 @@
     "key": "standard",
     "label": "Dou Shou Qi (Standard)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "double-six-dominoes",
@@ -1485,7 +1651,9 @@
     "label": "All Fives",
     "group": "Other",
     "playable": true,
-    "path": "content/games/all-fives/standard.md"
+    "path": "content/games/all-fives/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "double-six-dominoes",
@@ -1495,7 +1663,9 @@
     "label": "Block Dominoes",
     "group": "Other",
     "playable": true,
-    "path": "content/games/block/standard.md"
+    "path": "content/games/block/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "double-six-dominoes",
@@ -1505,7 +1675,9 @@
     "label": "Chickenfoot",
     "group": "Other",
     "playable": true,
-    "path": "content/games/chickenfoot/standard.md"
+    "path": "content/games/chickenfoot/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "double-six-dominoes",
@@ -1515,7 +1687,9 @@
     "label": "Mexican Train",
     "group": "Other",
     "playable": true,
-    "path": "content/games/mexican-train/standard.md"
+    "path": "content/games/mexican-train/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "draughts",
@@ -1524,7 +1698,8 @@
     "key": "alquerque",
     "label": "Alquerque",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "draughts",
@@ -1533,7 +1708,8 @@
     "key": "bashni",
     "label": "Bashni",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "draughts",
@@ -1542,7 +1718,8 @@
     "key": "brazilian",
     "label": "Brazilian Draughts",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "draughts",
@@ -1551,7 +1728,8 @@
     "key": "canadian",
     "label": "Canadian Draughts",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "draughts",
@@ -1560,7 +1738,8 @@
     "key": "czech",
     "label": "Czech Draughts",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "draughts",
@@ -1569,7 +1748,8 @@
     "key": "dameo",
     "label": "Dameo",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "draughts",
@@ -1578,7 +1758,8 @@
     "key": "diagonal",
     "label": "Diagonal Draughts",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "draughts",
@@ -1587,7 +1768,8 @@
     "key": "english",
     "label": "English Draughts",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "draughts",
@@ -1596,7 +1778,8 @@
     "key": "frisian",
     "label": "Frisian Draughts",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "draughts",
@@ -1605,7 +1788,8 @@
     "key": "german",
     "label": "German Draughts",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "draughts",
@@ -1614,7 +1798,8 @@
     "key": "ghanaian",
     "label": "Ghanaian Draughts",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "draughts",
@@ -1623,7 +1808,8 @@
     "key": "international",
     "label": "International Draughts",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "draughts",
@@ -1632,7 +1818,8 @@
     "key": "italian",
     "label": "Italian Draughts",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "draughts",
@@ -1641,7 +1828,8 @@
     "key": "lasca",
     "label": "Lasca",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "draughts",
@@ -1650,7 +1838,8 @@
     "key": "pool",
     "label": "Pool Checkers",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "draughts",
@@ -1659,7 +1848,8 @@
     "key": "russian",
     "label": "Russian Draughts",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "draughts",
@@ -1668,7 +1858,8 @@
     "key": "spanish",
     "label": "Spanish Draughts",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "draughts",
@@ -1677,7 +1868,8 @@
     "key": "spantsiretti",
     "label": "Spantsiretti",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "draughts",
@@ -1686,7 +1878,8 @@
     "key": "thai",
     "label": "Thai Draughts",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "draughts",
@@ -1695,7 +1888,8 @@
     "key": "turkish-draughts",
     "label": "Turkish Draughts",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "fanorona",
@@ -1704,7 +1898,8 @@
     "key": "standard",
     "label": "Fanorona (Standard)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "flower-48",
@@ -1714,7 +1909,9 @@
     "label": "Go-Stop",
     "group": "Other",
     "playable": true,
-    "path": "content/games/go-stop/standard.md"
+    "path": "content/games/go-stop/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "flower-48",
@@ -1724,7 +1921,9 @@
     "label": "Hana-Awase",
     "group": "Other",
     "playable": true,
-    "path": "content/games/hana-awase/standard.md"
+    "path": "content/games/hana-awase/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "flower-48",
@@ -1734,7 +1933,9 @@
     "label": "Koi-Koi",
     "group": "Other",
     "playable": true,
-    "path": "content/games/koi-koi/standard.md"
+    "path": "content/games/koi-koi/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "flower-48",
@@ -1744,7 +1945,9 @@
     "label": "Oicho-Kabu",
     "group": "Other",
     "playable": true,
-    "path": "content/games/oicho-kabu/standard.md"
+    "path": "content/games/oicho-kabu/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "go",
@@ -1753,7 +1956,8 @@
     "key": "13x13",
     "label": "13×13 Go",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "go",
@@ -1762,7 +1966,8 @@
     "key": "9x9",
     "label": "9×9 Go",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "go",
@@ -1771,7 +1976,8 @@
     "key": "capture-go",
     "label": "Capture Go",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "go",
@@ -1780,7 +1986,8 @@
     "key": "gomoku",
     "label": "Gomoku",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "go",
@@ -1789,7 +1996,8 @@
     "key": "ninuki-renju",
     "label": "Ninuki-Renju",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "go",
@@ -1798,7 +2006,8 @@
     "key": "one-colour",
     "label": "One-Colour Go",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "go",
@@ -1807,7 +2016,8 @@
     "key": "phantom-go",
     "label": "Phantom Go",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "go",
@@ -1816,7 +2026,8 @@
     "key": "rengo",
     "label": "Rengo",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "go",
@@ -1825,7 +2036,8 @@
     "key": "renju",
     "label": "Renju",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "go",
@@ -1834,7 +2046,8 @@
     "key": "standard",
     "label": "Standard Go (19×19)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "go",
@@ -1843,7 +2056,8 @@
     "key": "stoical",
     "label": "Stoical Go",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "go",
@@ -1852,7 +2066,8 @@
     "key": "toroidal-go",
     "label": "Toroidal Go",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "halma",
@@ -1861,7 +2076,8 @@
     "key": "standard-2p",
     "label": "Standard 2-Player Halma",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "halma",
@@ -1870,7 +2086,8 @@
     "key": "standard-4p",
     "label": "Standard 4-Player Halma",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "hex",
@@ -1879,7 +2096,8 @@
     "key": "13x13",
     "label": "Hex (13×13)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "hex",
@@ -1888,7 +2106,8 @@
     "key": "14x14",
     "label": "Hex (14×14)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "hex",
@@ -1897,7 +2116,8 @@
     "key": "19x19",
     "label": "Hex (19×19)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "hex",
@@ -1906,7 +2126,8 @@
     "key": "9x9",
     "label": "Hex (9×9)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "hex",
@@ -1915,7 +2136,8 @@
     "key": "standard",
     "label": "Hex (11×11)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "hex",
@@ -1924,7 +2146,8 @@
     "key": "y-game",
     "label": "Y",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "hex",
@@ -1933,7 +2156,8 @@
     "key": "y-large",
     "label": "Y (Large — 15)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "hex",
@@ -1942,7 +2166,8 @@
     "key": "y-small",
     "label": "Y (Small — 9)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "landlords-game",
@@ -1951,7 +2176,8 @@
     "key": "1904-original",
     "label": "1904 Original",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "mahjong",
@@ -1961,7 +2187,9 @@
     "label": "American Mahjong (Classic)",
     "group": "Other",
     "playable": true,
-    "path": "content/games/american-classic/standard.md"
+    "path": "content/games/american-classic/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "mahjong",
@@ -1971,7 +2199,9 @@
     "label": "Hong Kong Mahjong",
     "group": "Other",
     "playable": true,
-    "path": "content/games/hong-kong/standard.md"
+    "path": "content/games/hong-kong/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "mahjong",
@@ -1981,7 +2211,9 @@
     "label": "Riichi Mahjong",
     "group": "Other",
     "playable": true,
-    "path": "content/games/riichi/standard.md"
+    "path": "content/games/riichi/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "mahjong",
@@ -1991,7 +2223,9 @@
     "label": "Taiwanese 16-Tile Mahjong",
     "group": "Other",
     "playable": true,
-    "path": "content/games/taiwanese/standard.md"
+    "path": "content/games/taiwanese/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "mahjong",
@@ -2001,7 +2235,9 @@
     "label": "Zung Jung",
     "group": "Other",
     "playable": true,
-    "path": "content/games/zung-jung/standard.md"
+    "path": "content/games/zung-jung/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "mancala",
@@ -2010,7 +2246,8 @@
     "key": "ayo",
     "label": "Ayo",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "mancala",
@@ -2019,7 +2256,8 @@
     "key": "bao",
     "label": "Bao",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "mancala",
@@ -2028,7 +2266,8 @@
     "key": "congkak",
     "label": "Congkak",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "mancala",
@@ -2037,7 +2276,8 @@
     "key": "kalah",
     "label": "Kalah",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "mancala",
@@ -2046,7 +2286,8 @@
     "key": "oware",
     "label": "Oware",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "mancala",
@@ -2055,7 +2296,8 @@
     "key": "pallanguzhi",
     "label": "Pallanguzhi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "mancala",
@@ -2064,7 +2306,8 @@
     "key": "sungka",
     "label": "Sungka",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "mancala",
@@ -2073,7 +2316,8 @@
     "key": "toguz-korgool",
     "label": "Toguz Korgool",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "morris",
@@ -2082,7 +2326,8 @@
     "key": "lasker-morris",
     "label": "Lasker Morris",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "morris",
@@ -2091,7 +2336,8 @@
     "key": "morabaraba",
     "label": "Morabaraba",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "morris",
@@ -2100,7 +2346,8 @@
     "key": "nine-mens-morris",
     "label": "Nine Men's Morris",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "morris",
@@ -2109,7 +2356,8 @@
     "key": "shax",
     "label": "Shax",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "morris",
@@ -2118,7 +2366,8 @@
     "key": "six-mens-morris",
     "label": "Six Men's Morris",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "morris",
@@ -2127,7 +2376,8 @@
     "key": "three-mens-morris",
     "label": "Three Men's Morris",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "morris",
@@ -2136,7 +2386,8 @@
     "key": "twelve-mens-morris",
     "label": "Twelve Men's Morris",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "nyout",
@@ -2145,7 +2396,8 @@
     "key": "standard",
     "label": "Nyout (Standard)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "pachisi",
@@ -2154,7 +2406,8 @@
     "key": "seven-shell",
     "label": "Seven-Shell Pachisi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "pachisi",
@@ -2163,7 +2416,8 @@
     "key": "standard",
     "label": "Pachisi (Standard)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "pachisi",
@@ -2172,7 +2426,8 @@
     "key": "two-player",
     "label": "2-Player Pachisi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "reversi",
@@ -2181,7 +2436,8 @@
     "key": "anti-reversi",
     "label": "Anti-Reversi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "reversi",
@@ -2190,7 +2446,8 @@
     "key": "six-by-six",
     "label": "Six-by-Six Reversi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "reversi",
@@ -2199,7 +2456,8 @@
     "key": "standard",
     "label": "Standard Reversi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "royal-ur",
@@ -2208,7 +2466,8 @@
     "key": "standard",
     "label": "Royal Game of Ur (Standard)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "senet",
@@ -2217,7 +2476,8 @@
     "key": "standard",
     "label": "Senet (Kendall Reconstruction)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2226,7 +2486,8 @@
     "key": "annan-shogi",
     "label": "Annan Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2235,7 +2496,8 @@
     "key": "cannon-shogi",
     "label": "Cannon Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2244,7 +2506,8 @@
     "key": "chu-shogi",
     "label": "Chu Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2253,7 +2516,8 @@
     "key": "dai-shogi",
     "label": "Dai Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2262,7 +2526,8 @@
     "key": "dobutsu",
     "label": "Dobutsu Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2271,7 +2536,8 @@
     "key": "four-player-shogi",
     "label": "Four Player Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2280,7 +2546,8 @@
     "key": "gorogoro-plus",
     "label": "Gorogoro+",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2289,7 +2556,8 @@
     "key": "hasami-shogi",
     "label": "Hasami Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2298,7 +2566,8 @@
     "key": "heian-shogi",
     "label": "Heian Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2307,7 +2576,8 @@
     "key": "hex-shogi-91",
     "label": "Hex Shogi 91",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2316,7 +2586,8 @@
     "key": "judkins-shogi",
     "label": "Judkins' Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2325,7 +2596,8 @@
     "key": "kyoto-shogi",
     "label": "Kyoto Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2334,7 +2606,8 @@
     "key": "maka-dai-dai-shogi",
     "label": "Maka-Dai-Dai Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2343,7 +2616,8 @@
     "key": "minishogi",
     "label": "Minishogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2352,7 +2626,8 @@
     "key": "mortal-shogi",
     "label": "Mortal Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2361,7 +2636,8 @@
     "key": "sankaku-shogi",
     "label": "Sankaku Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2370,7 +2646,8 @@
     "key": "sho-shogi",
     "label": "Sho Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2379,7 +2656,8 @@
     "key": "standard",
     "label": "Standard Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2388,7 +2666,8 @@
     "key": "tai-shogi",
     "label": "Tai Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2397,7 +2676,8 @@
     "key": "taikyoku-shogi",
     "label": "Taikyoku Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2406,7 +2686,8 @@
     "key": "tenjiku-shogi",
     "label": "Tenjiku Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2415,7 +2696,8 @@
     "key": "tori-shogi",
     "label": "Tori Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2424,7 +2706,8 @@
     "key": "wa-shogi",
     "label": "Wa Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "shogi",
@@ -2433,7 +2716,8 @@
     "key": "yari-shogi",
     "label": "Yari Shogi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "standard-52",
@@ -2443,7 +2727,9 @@
     "label": "Big 2",
     "group": "Other",
     "playable": true,
-    "path": "content/games/big2/standard.md"
+    "path": "content/games/big2/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-52",
@@ -2453,7 +2739,9 @@
     "label": "Blackjack (Twenty-One)",
     "group": "Other",
     "playable": true,
-    "path": "content/games/blackjack/standard.md"
+    "path": "content/games/blackjack/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-52",
@@ -2463,7 +2751,9 @@
     "label": "Rubber Bridge",
     "group": "Other",
     "playable": true,
-    "path": "content/games/bridge/standard.md"
+    "path": "content/games/bridge/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-52",
@@ -2473,7 +2763,9 @@
     "label": "Canasta (Classic)",
     "group": "Other",
     "playable": true,
-    "path": "content/games/canasta/standard.md"
+    "path": "content/games/canasta/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-52",
@@ -2483,7 +2775,9 @@
     "label": "Crazy Eights",
     "group": "Other",
     "playable": true,
-    "path": "content/games/crazy-eights/standard.md"
+    "path": "content/games/crazy-eights/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-52",
@@ -2493,7 +2787,9 @@
     "label": "Cribbage",
     "group": "Other",
     "playable": true,
-    "path": "content/games/cribbage/standard.md"
+    "path": "content/games/cribbage/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-52",
@@ -2503,7 +2799,9 @@
     "label": "Euchre",
     "group": "Other",
     "playable": true,
-    "path": "content/games/euchre/standard.md"
+    "path": "content/games/euchre/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-52",
@@ -2513,7 +2811,9 @@
     "label": "4-Player Cribbage (Partnership)",
     "group": "Other",
     "playable": true,
-    "path": "content/games/cribbage/four-player.md"
+    "path": "content/games/cribbage/four-player.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-52",
@@ -2523,7 +2823,9 @@
     "label": "FreeCell",
     "group": "Other",
     "playable": true,
-    "path": "content/games/freecell/standard.md"
+    "path": "content/games/freecell/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-52",
@@ -2533,7 +2835,9 @@
     "label": "Gin Rummy",
     "group": "Other",
     "playable": true,
-    "path": "content/games/gin-rummy/standard.md"
+    "path": "content/games/gin-rummy/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-52",
@@ -2543,7 +2847,9 @@
     "label": "Hearts",
     "group": "Other",
     "playable": true,
-    "path": "content/games/hearts/standard.md"
+    "path": "content/games/hearts/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-52",
@@ -2553,7 +2859,9 @@
     "label": "Klondike Solitaire",
     "group": "Other",
     "playable": true,
-    "path": "content/games/klondike/standard.md"
+    "path": "content/games/klondike/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-52",
@@ -2563,7 +2871,9 @@
     "label": "Texas Hold'em Poker",
     "group": "Other",
     "playable": true,
-    "path": "content/games/poker/standard.md"
+    "path": "content/games/poker/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-52",
@@ -2573,7 +2883,9 @@
     "label": "President",
     "group": "Other",
     "playable": true,
-    "path": "content/games/president/standard.md"
+    "path": "content/games/president/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-52",
@@ -2583,7 +2895,9 @@
     "label": "Rummy",
     "group": "Other",
     "playable": true,
-    "path": "content/games/rummy/standard.md"
+    "path": "content/games/rummy/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-52",
@@ -2593,7 +2907,9 @@
     "label": "Spades",
     "group": "Other",
     "playable": true,
-    "path": "content/games/spades/standard.md"
+    "path": "content/games/spades/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-52",
@@ -2603,7 +2919,9 @@
     "label": "Spider Solitaire",
     "group": "Other",
     "playable": true,
-    "path": "content/games/spider-solitaire/standard.md"
+    "path": "content/games/spider-solitaire/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-52",
@@ -2613,7 +2931,9 @@
     "label": "3-Player Cribbage",
     "group": "Other",
     "playable": true,
-    "path": "content/games/cribbage/three-player.md"
+    "path": "content/games/cribbage/three-player.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-52",
@@ -2623,7 +2943,9 @@
     "label": "War",
     "group": "Other",
     "playable": true,
-    "path": "content/games/war/standard.md"
+    "path": "content/games/war/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-52",
@@ -2633,7 +2955,9 @@
     "label": "Whist",
     "group": "Other",
     "playable": true,
-    "path": "content/games/whist/standard.md"
+    "path": "content/games/whist/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-dice",
@@ -2643,7 +2967,9 @@
     "label": "Bunco",
     "group": "Other",
     "playable": true,
-    "path": "content/games/bunco/standard.md"
+    "path": "content/games/bunco/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-dice",
@@ -2653,7 +2979,9 @@
     "label": "Craps",
     "group": "Other",
     "playable": true,
-    "path": "content/games/craps/standard.md"
+    "path": "content/games/craps/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-dice",
@@ -2663,7 +2991,9 @@
     "label": "Farkle",
     "group": "Other",
     "playable": true,
-    "path": "content/games/farkle/standard.md"
+    "path": "content/games/farkle/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-dice",
@@ -2673,7 +3003,9 @@
     "label": "Liar's Dice",
     "group": "Other",
     "playable": true,
-    "path": "content/games/liars-dice/standard.md"
+    "path": "content/games/liars-dice/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "standard-dice",
@@ -2683,7 +3015,9 @@
     "label": "Yahtzee",
     "group": "Other",
     "playable": true,
-    "path": "content/games/yahtzee/standard.md"
+    "path": "content/games/yahtzee/standard.md",
+    "creatable": false,
+    "createGap": "Played with cards, tiles or dice: the create page edits boards, and this game has none"
   },
   {
     "family": "stern-halma",
@@ -2692,7 +3026,8 @@
     "key": "standard-2p",
     "label": "Standard 2-Player Stern-Halma",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "stern-halma",
@@ -2701,7 +3036,8 @@
     "key": "standard-3p",
     "label": "Standard 3-Player Stern-Halma",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "stern-halma",
@@ -2710,7 +3046,8 @@
     "key": "standard-4p",
     "label": "Standard 4-Player Stern-Halma",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "stern-halma",
@@ -2719,7 +3056,8 @@
     "key": "standard-6p",
     "label": "Standard 6-Player Stern-Halma",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "stern-halma",
@@ -2728,7 +3066,8 @@
     "key": "super-chinese-checkers",
     "label": "Super Chinese Checkers",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "surakarta",
@@ -2737,7 +3076,8 @@
     "key": "standard",
     "label": "Surakarta (Standard)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "tafl",
@@ -2746,7 +3086,8 @@
     "key": "brandubh",
     "label": "Brandubh",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "tafl",
@@ -2755,7 +3096,8 @@
     "key": "hnefatafl",
     "label": "Hnefatafl",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "tafl",
@@ -2764,7 +3106,8 @@
     "key": "standard",
     "label": "Tablut",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "tafl",
@@ -2773,7 +3116,8 @@
     "key": "tawlbwrdd",
     "label": "Tawlbwrdd",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "xiangqi",
@@ -2782,7 +3126,8 @@
     "key": "banqi",
     "label": "Banqi (Half Chess)",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "xiangqi",
@@ -2791,7 +3136,8 @@
     "key": "janggi",
     "label": "Janggi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "xiangqi",
@@ -2800,7 +3146,8 @@
     "key": "jieqi",
     "label": "Jieqi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "xiangqi",
@@ -2809,7 +3156,8 @@
     "key": "manchu-plus",
     "label": "Manchu+",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "xiangqi",
@@ -2818,7 +3166,8 @@
     "key": "minixiangqi",
     "label": "Minixiangqi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "xiangqi",
@@ -2827,7 +3176,8 @@
     "key": "quang-trung",
     "label": "Quang Trung Chess",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "xiangqi",
@@ -2836,7 +3186,8 @@
     "key": "standard",
     "label": "Standard Xiangqi",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "xiangqi",
@@ -2845,7 +3196,8 @@
     "key": "xiangqi-42",
     "label": "Xiangqi 42",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   },
   {
     "family": "xiangqi",
@@ -2854,6 +3206,7 @@
     "key": "yang-qi",
     "label": "Yáng Qí",
     "group": "Other",
-    "playable": true
+    "playable": true,
+    "creatable": true
   }
 ]
