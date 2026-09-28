@@ -448,6 +448,9 @@ body.embed-mode {
 
 body.embed-mode .game-play {
   grid-template-columns: 1fr;
+  /* The page keeps room for the site header, which an embed hides; kept, it
+     pushed every embedded board 71px down and out of its frame. */
+  margin-top: 0;
   padding-top: 0;
   min-height: 0;
   height: 100vh;

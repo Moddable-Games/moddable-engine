@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en" data-topology="hex">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hexagonal Trisection Topology — Moddable Engine</title>
+<meta name="description" content="A hexagon cut into three sectors, one per player: Yalta Chess in its cells and San-kwo-ki on its points.">
+<meta property="og:title" content="Hexagonal Trisection Topology — Moddable Engine">
+<meta property="og:description" content="A hexagon cut into three sectors, one per player: Yalta Chess in its cells and San-kwo-ki on its points.">
+<meta property="og:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.42">
+<meta property="og:url" content="https://engine.moddable.games/topologies/hexagonal-trisection/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Hexagonal Trisection Topology — Moddable Engine">
+<meta name="twitter:description" content="A hexagon cut into three sectors, one per player: Yalta Chess in its cells and San-kwo-ki on its points.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/homepage.png?v=1.0.42">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="stylesheet" href="../../css/families.css?v=1.0.42">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../../play/" class="nav-link">Play</a>
+      <a href="../../create/" class="nav-link">Create</a>
+      <a href="../../boards/" class="nav-link">Boards</a>
+      <a href="../../pieces/" class="nav-link">Pieces</a>
+      <a href="../../tiles/" class="nav-link">Tiles</a>
+      <a href="../../docs/" class="nav-link">Docs</a>
+      <a href="../../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<section class="family-hero">
+  <div class="family-hero-inner">
+    <span class="hero-symbol">&#x2B21;</span>
+    <h1>Hexagonal Trisection</h1>
+    <p class="hero-lede">A hexagon cut into three sectors, one per player, meeting at the centre. Each sector is a half-board of two quadrilaterals, so three players each get a board of their own that joins the others at the middle. Pieces stand in the cells or where the lines cross.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-value" data-stat="variants">1</span>
+        <span class="hero-meta-label">Variants</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">3</span>
+        <span class="hero-meta-label">Sectors</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-value">2</span>
+        <span class="hero-meta-label">Modes</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="showcase">
+  <div class="showcase-intro">
+    <h2>Three Boards, One Centre</h2>
+    <p>The topology names every cell by its sector, file and rank as its owner reads them, and knows where the lines fork at the centre. The chess plugin plays Yalta on it without knowing it is not a chessboard.</p>
+  </div>
+
+  <div class="showcase-pair">
+    <div class="showcase-code">
+      <h3>Yalta Chess <a href="https://rules.moddable.games/chess/variants/yalta-chess/" class="rules-link" target="_blank" rel="noopener">Rules</a></h3>
+      <p class="showcase-desc">Three-player chess on 96 quadrilateral cells: three boards of 32, one per player, meeting at the centre where the lines fork.</p>
+      <pre><code>engine:
+  topology:
+    type: hexagonal-trisection
+  players: [red, green, blue]</code></pre>
+    </div>
+    <div class="showcase-board">
+      <iframe src="../../play/?embed=1&amp;family=chess&amp;variant=yalta-chess" loading="lazy" title="Yalta Chess"></iframe>
+      <p class="board-caption">Yalta Chess: three sectors, three armies</p>
+    </div>
+  </div>
+</section>
+
+<section class="family-cta">
+  <h2>Play Yalta Chess</h2>
+  <p>Three players, three half-boards, one centre.</p>
+  <div class="cta-actions">
+    <a href="../../play/?family=chess&amp;variant=yalta-chess" class="btn btn--primary">Play Yalta Chess</a>
+    <a href="../../docs/topologies.html#hexagonal-trisection" class="btn btn--ghost">Read the Docs</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../../play/">Play</a>
+        <a href="../../boards/">Boards</a>
+        <a href="../../pieces/">Pieces</a>
+        <a href="../../tiles/">Tiles</a>
+        <a href="../../docs/">Docs</a>
+        <a href="../../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Topologies</h4>
+        <a href="../grid/">Grid</a>
+        <a href="../tableau/">Tableau</a>
+        <a href="../hex/">Hex</a>
+        <a href="../graph/">Graph</a>
+        <a href="../track/">Track</a>
+        <a href="../pit/">Pit</a>
+        <a href="../hexagonal-trisection/">Hexagonal Trisection</a>
+        <a href="../triangular/">Triangular</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.42</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../../js/families.js?v=1.0.42"></script>
+<script src="../../js/site-nav.js?v=1.0.42"></script>
+</body>
+</html>

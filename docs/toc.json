@@ -1,0 +1,149 @@
+{
+  "_comment": "The docs navigation, in one place. build-discovery writes it into every docs page and fails if a page is missing from it or listed and absent.",
+  "groups": [
+    {
+      "title": "Guides",
+      "pages": [
+        [
+          "index.html",
+          "Overview"
+        ],
+        [
+          "authoring.html",
+          "Authoring a Variant",
+          "Writing a variant from scratch, step by step"
+        ],
+        [
+          "frontmatter.html",
+          "Frontmatter",
+          "The engine block: topology, render, pieces, setup notation"
+        ],
+        [
+          "topologies.html",
+          "Topologies",
+          "Grid, hex, track, pit, graph, tableau and more: fields and coordinates"
+        ],
+        [
+          "surfaces.html",
+          "Surfaces",
+          "Named surfaces and colour customisation"
+        ],
+        [
+          "pieces.html",
+          "Piece Sets",
+          "Gallery index format, virtual sets, extends, surfaces"
+        ],
+        [
+          "sdk.html",
+          "SDK",
+          "Every family through one headless SDK, and what each supports"
+        ],
+        [
+          "plugins.html",
+          "Plugins",
+          "Plugin structure, hooks, registry, adding a family"
+        ],
+        [
+          "hosted-families.html",
+          "Families on Shared Plugins",
+          "Naming the plugin that plays a family, and the keys each shared plugin reads"
+        ],
+        [
+          "render-pipeline.html",
+          "Render Pipeline",
+          "How frontmatter becomes an SVG board"
+        ]
+      ]
+    },
+    {
+      "title": "Families",
+      "pages": [
+        [
+          "chess.html",
+          "Chess",
+          "Chess SDK, embed, variant parameters, AI and puzzles"
+        ],
+        [
+          "go.html",
+          "Go",
+          "Go SDK, embed and variants"
+        ],
+        [
+          "draughts.html",
+          "Draughts",
+          "Draughts SDK, embed and variant keys"
+        ],
+        [
+          "hex.html",
+          "Hex",
+          "Hex connection games: embed, variants, AI"
+        ],
+        [
+          "mancala.html",
+          "Mancala",
+          "Mancala sowing games: embed and variant keys"
+        ],
+        [
+          "morris.html",
+          "Morris",
+          "Morris mill games: embed and variant keys"
+        ],
+        [
+          "xiangqi.html",
+          "Xiangqi",
+          "Xiangqi SDK, embed and variants"
+        ],
+        [
+          "shogi.html",
+          "Shogi",
+          "Shogi SDK, embed, drops and variants"
+        ],
+        [
+          "reversi.html",
+          "Reversi",
+          "Reversi: embed and variants"
+        ],
+        [
+          "landlords-game.html",
+          "Landlord's Game",
+          "The Landlord's Game: embed and editions"
+        ],
+        [
+          "backgammon.html",
+          "Backgammon",
+          "The tables games: dice, variant keys, AI"
+        ]
+      ]
+    },
+    {
+      "title": "Shared Plugins",
+      "pages": [
+        [
+          "race.html",
+          "Race Games",
+          "Routes, declared randomisers and landing rules: Ur, Senet, Nyout, Pachisi, Chaupar"
+        ],
+        [
+          "hop.html",
+          "Hopping Games",
+          "Steps, chained hops, goal camps and asymmetric seats: Halma, Stern-Halma, Asalto"
+        ],
+        [
+          "tableau.html",
+          "Cards, Tiles and Dice",
+          "Every card, tile and dice game, and hidden hands"
+        ]
+      ]
+    },
+    {
+      "title": "Tools",
+      "pages": [
+        [
+          "hexmaps.html",
+          "Hex Maps",
+          "Hex map generators and tile styles"
+        ]
+      ]
+    }
+  ]
+}

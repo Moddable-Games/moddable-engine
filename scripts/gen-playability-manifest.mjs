@@ -27,6 +27,7 @@ import { createGameForFamily, getFamilies } from '../packages/play/src/play.js'
 import { listVariants, getVariantConfig, getVariantKeys } from '../packages/play/src/variant-registry.js'
 import { parseFrontmatter } from '../packages/schema/src/parse-frontmatter.js'
 import { probePicker } from './lib/probe-rng.mjs'
+import { creatability } from './lib/creatable.mjs'
 import { corpusFiles, corpusPaths } from '../packages/play/test-helpers/corpus-files.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -186,6 +187,14 @@ for (const family of FAMILIES) {
     }
     const path = paths.get(v.slug || v.key)
     if (path && path.includes('/content/games/')) entry.path = path.slice(family.length + 1)
+    // Playable is not the same as creatable: the create page offers only the
+    // variants it can load, export and play again as the same game, and says
+    // why of the rest.
+    if (playable) {
+      const { creatable, gap } = creatability(RULES_ROOT, entry)
+      entry.creatable = creatable
+      if (gap) entry.createGap = gap
+    }
     manifest.push(entry)
   }
 
@@ -203,4 +212,4 @@ manifest.sort((a, b) => {
 writeFileSync(OUTPUT, JSON.stringify(manifest, null, 2) + '\n')
 
 console.log(`\nWrote ${OUTPUT}`)
-console.log(`Total: ${totalPlayable}/${totalVariants} playable`)
+console.log(`Total: ${totalPlayable}/${totalVariants} playable, ${manifest.filter(e => e.creatable).length} creatable`)

@@ -39,13 +39,13 @@
       <a href="../api/" class="nav-link">API</a>
       <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
     </nav>
-    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+    <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
   </div>
 </header>
 <div class="docs-layout">
-<button class="docs-toc-toggle" onclick="this.classList.toggle('active');this.nextElementSibling.classList.toggle('open')">Navigation</button>
+<button class="docs-toc-toggle">Navigation</button>
 <nav class="docs-toc">
-  <div class="docs-toc-title">Pages</div>
+  <div class="docs-toc-title">Guides</div>
   <ul class="docs-toc-list">
     <li><a href="./">Overview</a></li>
     <li><a href="authoring.html">Authoring a Variant</a></li>
@@ -53,8 +53,13 @@
     <li><a href="topologies.html">Topologies</a></li>
     <li><a href="surfaces.html">Surfaces</a></li>
     <li><a href="pieces.html">Piece Sets</a></li>
+    <li><a href="sdk.html">SDK</a></li>
     <li><a href="plugins.html">Plugins</a></li>
+    <li><a href="hosted-families.html">Families on Shared Plugins</a></li>
     <li><a href="render-pipeline.html">Render Pipeline</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">Families</div>
+  <ul class="docs-toc-list">
     <li><a href="chess.html">Chess</a></li>
     <li><a href="go.html">Go</a></li>
     <li><a href="draughts.html" class="active">Draughts</a></li>
@@ -65,9 +70,19 @@
     <li><a href="shogi.html">Shogi</a></li>
     <li><a href="reversi.html">Reversi</a></li>
     <li><a href="landlords-game.html">Landlord's Game</a></li>
+    <li><a href="backgammon.html">Backgammon</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">Shared Plugins</div>
+  <ul class="docs-toc-list">
+    <li><a href="race.html">Race Games</a></li>
+    <li><a href="hop.html">Hopping Games</a></li>
+    <li><a href="tableau.html">Cards, Tiles and Dice</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">Tools</div>
+  <ul class="docs-toc-list">
     <li><a href="hexmaps.html">Hex Maps</a></li>
   </ul>
-  <div class="docs-toc-title" style="margin-top:20px">On this page</div>
+  <div class="docs-toc-title docs-toc-title--spaced">On this page</div>
   <ul class="docs-toc-list">
     <li><a href="#embed">Embed via iframe</a></li>
     <li><a href="#variants">Variants</a></li>
@@ -212,5 +227,6 @@ model.handleClick(pos, ctx)                     // rejects clicks that abandon a
       <span class="footer-version">v1.0.42</span>
     </div>
   </div>
-</footer></body>
+</footer><script src="../js/site-nav.js?v=1.0.42"></script>
+</body>
 </html>

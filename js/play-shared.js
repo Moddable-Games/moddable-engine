@@ -133,6 +133,17 @@ export function getPlayableVariants(family) {
   return getPlayabilityManifest().filter(e => e.family === family && e.playable)
 }
 
+// What the create page can offer as a starting point: a playable variant it
+// can load, export and play again as the same game. The manifest measures it
+// and says why of the rest (`createGap`).
+export function getCreatableVariants(family) {
+  return getPlayabilityManifest().filter(e => e.family === family && e.creatable)
+}
+
+export function getCreatableFamilies() {
+  return [...new Set(getPlayabilityManifest().filter(e => e.creatable).map(e => e.family))]
+}
+
 export function getAllManifestVariants(family) {
   return getPlayabilityManifest().filter(e => e.family === family)
 }

@@ -8,7 +8,8 @@
 
 // Row hole counts for a six-pointed star of arm size n: n arm rows counting up,
 // then 2n+1 body rows (central hexagon row + the two side arms), then n arm rows
-// counting down. n = 4 gives the classic [1,2,3,4,13,12,11,10,9,10,11,12,13,4,3,2,1].
+// counting down. n = 4 gives the classic 121-hole board: arms of 1 to 4 holes,
+// body rows narrowing from 13 to 9 and widening back to 13.
 export function starRowWidths(n) {
   const widths = []
   for (let row = 0; row < n; row++) widths.push(row + 1)

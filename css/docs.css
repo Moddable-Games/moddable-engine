@@ -244,3 +244,8 @@
   .docs-toc.open { display: block; }
   .docs-body { padding: 24px 0 60px; }
 }
+
+/* The "On this page" heading, set apart from the page list above it. */
+.docs-toc-title--spaced {
+  margin-top: 20px;
+}

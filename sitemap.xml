@@ -13,6 +13,10 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/families/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/boards/</loc>
     <priority>0.9</priority>
   </url>
@@ -41,7 +45,35 @@
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/families/agon/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/families/asalto/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/families/backgammon/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/families/bavarian-32/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/families/chaupar/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/families/chess/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/families/dou-shou-qi/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/families/double-six-dominoes/</loc>
     <priority>0.9</priority>
   </url>
   <url>
@@ -49,7 +81,19 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/families/fanorona/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/families/flower-48/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/families/go/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/families/halma/</loc>
     <priority>0.9</priority>
   </url>
   <url>
@@ -61,6 +105,10 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/families/mahjong/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/families/mancala/</loc>
     <priority>0.9</priority>
   </url>
@@ -69,11 +117,47 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/families/nyout/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/families/pachisi/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/families/reversi/</loc>
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/families/royal-ur/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/families/senet/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/families/shogi/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/families/standard-52/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/families/standard-dice/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/families/stern-halma/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/families/surakarta/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/families/tafl/</loc>
     <priority>0.9</priority>
   </url>
   <url>
@@ -85,7 +169,15 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/topologies/tableau/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/topologies/hex/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/topologies/graph/</loc>
     <priority>0.8</priority>
   </url>
   <url>
@@ -97,15 +189,19 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://engine.moddable.games/topologies/graph/</loc>
+    <loc>https://engine.moddable.games/topologies/hexagonal-trisection/</loc>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://engine.moddable.games/topologies/tableau/</loc>
+    <loc>https://engine.moddable.games/topologies/triangular/</loc>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://engine.moddable.games/docs/authoring.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/docs/backgammon.html</loc>
     <priority>0.7</priority>
   </url>
   <url>
@@ -133,6 +229,14 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/docs/hop.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/docs/hosted-families.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/docs/index.html</loc>
     <priority>0.7</priority>
   </url>
@@ -157,6 +261,10 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/docs/race.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/docs/render-pipeline.html</loc>
     <priority>0.7</priority>
   </url>
@@ -165,11 +273,19 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://engine.moddable.games/docs/sdk.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://engine.moddable.games/docs/shogi.html</loc>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://engine.moddable.games/docs/surfaces.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://engine.moddable.games/docs/tableau.html</loc>
     <priority>0.7</priority>
   </url>
   <url>

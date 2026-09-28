@@ -68,8 +68,15 @@ export function pieceTypesInPlay(plugin, slice) {
       for (const to of rule.to || []) seen.add(to)
     }
   } else {
-    for (const choice of config.promotionChoices || []) {
-      if (typeof choice === 'string') seen.add(choice)
+    // One list for every seat, or a list per seat: Khan's Chess promotes
+    // White's pawns to the four FIDE pieces and the Horde's to a Khatun, and
+    // reading its seat map as a list stopped the play page drawing the board.
+    const choices = config.promotionChoices || []
+    const lists = Array.isArray(choices) ? [choices] : Object.values(choices)
+    for (const list of lists) {
+      for (const choice of Array.isArray(list) ? list : []) {
+        if (typeof choice === 'string') seen.add(choice)
+      }
     }
   }
   for (const hand of slice?.hands || []) {

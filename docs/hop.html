@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hopping Games &mdash; Moddable Engine</title>
+<meta name="description" content="The hop plugin: steps, chained hops and goal camps on any board, with seats that may play by different rules. Halma, Stern-Halma and Asalto.">
+<meta property="og:title" content="Hopping Games &mdash; Moddable Engine">
+<meta property="og:description" content="The hop plugin: steps, chained hops and goal camps on any board, with seats that may play by different rules. Halma, Stern-Halma and Asalto.">
+<meta property="og:image" content="https://engine.moddable.games/og/docs.png?v=1.0.42">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://engine.moddable.games/docs/hop.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Hopping Games &mdash; Moddable Engine">
+<meta name="twitter:description" content="The hop plugin: steps, chained hops and goal camps on any board, with seats that may play by different rules. Halma, Stern-Halma and Asalto.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/docs.png?v=1.0.42">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../css/home.css?v=1.0.42">
+<link rel="stylesheet" href="../css/docs.css?v=1.0.42">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../play/" class="nav-link">Play</a>
+      <a href="../create/" class="nav-link">Create</a>
+      <a href="../boards/" class="nav-link">Boards</a>
+      <a href="../pieces/" class="nav-link">Pieces</a>
+      <a href="../tiles/" class="nav-link">Tiles</a>
+      <a href="./" class="nav-link nav-link--active">Docs</a>
+      <a href="../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+  </div>
+</header>
+<div class="docs-layout">
+<button class="docs-toc-toggle">Navigation</button>
+<nav class="docs-toc">
+  <div class="docs-toc-title">Guides</div>
+  <ul class="docs-toc-list">
+    <li><a href="./">Overview</a></li>
+    <li><a href="authoring.html">Authoring a Variant</a></li>
+    <li><a href="frontmatter.html">Frontmatter</a></li>
+    <li><a href="topologies.html">Topologies</a></li>
+    <li><a href="surfaces.html">Surfaces</a></li>
+    <li><a href="pieces.html">Piece Sets</a></li>
+    <li><a href="sdk.html">SDK</a></li>
+    <li><a href="plugins.html">Plugins</a></li>
+    <li><a href="hosted-families.html">Families on Shared Plugins</a></li>
+    <li><a href="render-pipeline.html">Render Pipeline</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">Families</div>
+  <ul class="docs-toc-list">
+    <li><a href="chess.html">Chess</a></li>
+    <li><a href="go.html">Go</a></li>
+    <li><a href="draughts.html">Draughts</a></li>
+    <li><a href="hex.html">Hex</a></li>
+    <li><a href="mancala.html">Mancala</a></li>
+    <li><a href="morris.html">Morris</a></li>
+    <li><a href="xiangqi.html">Xiangqi</a></li>
+    <li><a href="shogi.html">Shogi</a></li>
+    <li><a href="reversi.html">Reversi</a></li>
+    <li><a href="landlords-game.html">Landlord's Game</a></li>
+    <li><a href="backgammon.html">Backgammon</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">Shared Plugins</div>
+  <ul class="docs-toc-list">
+    <li><a href="race.html">Race Games</a></li>
+    <li><a href="hop.html" class="active">Hopping Games</a></li>
+    <li><a href="tableau.html">Cards, Tiles and Dice</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">Tools</div>
+  <ul class="docs-toc-list">
+    <li><a href="hexmaps.html">Hex Maps</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">On this page</div>
+  <ul class="docs-toc-list">
+    <li><a href="#hosting">How a family uses it</a></li>
+    <li><a href="#keys">Keys</a></li>
+    <li><a href="#asymmetry">Seats that differ</a></li>
+    <li><a href="#games">Games</a></li>
+  </ul>
+</nav>
+<div class="docs-body">
+  <h1>Hopping Games</h1>
+  <p class="docs-lede">One plugin plays Halma on its square board, Stern-Halma on its star and Asalto on its cross. A piece steps to a neighbour or chains hops over pieces, and each seat may play by rules of its own.</p>
+
+  <h2 id="hosting">How a family uses it</h2>
+  <pre><code>engine:
+  topology: { type: graph, structure: star }
+  plugin: hop
+  plugins:
+    stern-halma:
+      campLock: true
+      goals:
+        - [h112, h113, ...]
+        - [h1, h2, ...]</code></pre>
+  <p>The plugin moves along <code>topology.rays</code>, so the same code plays a grid and a graph whose nodes lie on a lattice. The graph topology generates the Stern-Halma star and the Asalto cross with those coordinates.</p>
+
+  <h2 id="keys">Keys</h2>
+  <table class="docs-table">
+    <thead><tr><th>Key</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>directions</code></td><td>Which way a piece may go, as the board names its directions (a grid&#39;s <code>all</code> is the eight)</td></tr>
+      <tr><td><code>start</code></td><td>The cells each seat starts on; where absent, the <code>setup</code> position</td></tr>
+      <tr><td><code>goals</code></td><td>The cells each seat must fill to win</td></tr>
+      <tr><td><code>campLock</code></td><td>A piece in its goal may not leave it</td></tr>
+      <tr><td><code>hop</code></td><td><code>adjacent</code>, or <code>long</code>: over the first piece along a line, landing as far beyond it</td></tr>
+      <tr><td><code>seats</code></td><td>Per seat: <code>steps</code> (<code>all</code>, or <code>{{ rows: [-1, 0] }}</code>) and <code>hops</code> (<code>any</code>, <code>capture</code> or <code>none</code>)</td></tr>
+      <tr><td><code>noMovesLoses</code></td><td>A side with no move on its turn has lost</td></tr>
+      <tr><td><code>fewerThan</code></td><td>Per seat, the piece count below which that seat has lost</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="asymmetry">Seats that differ</h2>
+  <p>Asalto&#39;s Officers step any way and jump Soldiers to take them; its Soldiers step forward or sideways and never jump. The Soldiers win by filling the fortress or leaving the Officers no move, the Officers by leaving too few Soldiers to fill it. All of it is the <code>seats</code>, <code>goals</code>, <code>noMovesLoses</code> and <code>fewerThan</code> keys.</p>
+
+  <h2 id="games">Games</h2>
+  <p><a href="../families/halma/">Halma</a>, <a href="../families/stern-halma/">Stern-Halma</a> and <a href="../families/asalto/">Asalto</a>.</p>
+</div>
+</div>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../play/">Play</a>
+        <a href="../boards/">Boards</a>
+        <a href="../pieces/">Pieces</a>
+        <a href="../tiles/">Tiles</a>
+        <a href="../docs/">Docs</a>
+        <a href="../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Moddable Games</h4>
+        <a href="https://moddable.games" target="_blank" rel="noopener">Homepage</a>
+        <a href="https://rules.moddable.games" target="_blank" rel="noopener">Rules</a>
+        <a href="https://moddable.games/news/" target="_blank" rel="noopener">News</a>
+        <a href="https://discord.gg/VhsVGNq6Za" target="_blank" rel="noopener">Discord</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.42</span>
+    </div>
+  </div>
+</footer><script src="../js/site-nav.js?v=1.0.42"></script>
+</body>
+</html>

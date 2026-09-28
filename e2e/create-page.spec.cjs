@@ -42,6 +42,43 @@ test('a hex variant loads as a template, shows its family and can be tried', asy
   expect(errors).toEqual([])
 })
 
+// "Try in Play" opened the play page on a draft and drew nothing: the page's
+// title lookup read a variable that was never declared, a draft has no variant
+// file to take a title from, and the throw was caught and logged. No page
+// error, no board.
+test('a loaded template plays when tried', async ({ page }) => {
+  const errors = await openCreate(page, '?family=chess&variant=congo')
+  const failures = []
+  page.on('console', m => { if (m.type() === 'error' && /load failed/.test(m.text())) failures.push(m.text()) })
+  await Promise.all([page.waitForNavigation(), page.click('#try-play-btn')])
+  await page.waitForSelector('#game-play-root [data-sq]', { timeout: 15000 })
+  expect(await page.locator('#game-play-root [data-sq]').count()).toBe(49)
+  expect(failures).toEqual([])
+  expect(errors).toEqual([])
+})
+
+// The Landlord's Game reads its spaces from a data file the variant names.
+// The template and its draft both name the file without its contents, and
+// both drew an empty canvas until each fetched it.
+test('a board read from a data file draws in the preview and in the draft', async ({ page }) => {
+  const errors = await openCreate(page, '?family=landlords-game&variant=1904-original')
+  await expect.poll(() => page.locator('#board-svg [data-sq]').count(), { timeout: 15000 }).toBe(44)
+  await Promise.all([page.waitForNavigation(), page.click('#try-play-btn')])
+  await expect.poll(() => page.locator('#game-play-root [data-sq]').count(), { timeout: 15000 }).toBe(44)
+  expect(errors).toEqual([])
+})
+
+// Playable is not creatable. A card game plays, and the page has no board to
+// build it on: it is not offered, and a link to one says why.
+test('only variants that survive the round trip are offered as starting points', async ({ page }) => {
+  const errors = await openCreate(page, '?family=standard-52&variant=blackjack')
+  await expect(page.locator('#create-status')).toContainText('cannot be built here yet')
+  const families = await page.$$eval('#template-family option', os => os.map(o => o.value))
+  expect(families).toContain('chess')
+  expect(families).not.toContain('standard-52')
+  expect(errors).toEqual([])
+})
+
 test('a variant the controls do not cover keeps everything in other settings', async ({ page }) => {
   const errors = await openCreate(page, '?family=chess&variant=tandem-chess')
   const settings = await page.$$eval('#extras-panel textarea', areas => areas.map(a => a.value).join('\n'))

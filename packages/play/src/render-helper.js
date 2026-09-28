@@ -1,5 +1,6 @@
 import { createBoardRenderer } from '../../render/index.js'
 import { createGameForFamily } from './play.js'
+import { familySliceKey } from './find-plugin.js'
 
 export function renderStateAsSvg(family, state, opts = {}) {
   const game = createGameForFamily(family, {
@@ -18,7 +19,11 @@ export function renderStateAsSvg(family, state, opts = {}) {
     throw new Error(`Family "${family}" has no topology layout (card games cannot be rendered as boards)`)
   }
 
-  const gameState = rawGame.getState(family)
+  // The plugin's own slice, which is not always named after the family: a
+  // family played by a shared plugin (Tafl by chess, Senet by race) keeps its
+  // state under that plugin's name, and read by the family's name its board
+  // came back empty.
+  const gameState = rawGame.getState(familySliceKey(rawGame.registry.getPlugins(), family))
   const pieces = buildPieceMap(gameState, rawGame.definition.players.names)
 
   const renderer = createBoardRenderer({ padding: opts.padding || 20 })

@@ -54,7 +54,7 @@ function produceGridLayout(topo, colors, render) {
   const showLabels = render.labels !== false
 
   if (render.ops) {
-    return produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabels, colors, render)
+    return produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabels, colors, render, topo.arcs)
   }
 
   const inset = isIntersection ? Math.round(cellSize * 0.5) : 0
@@ -103,7 +103,7 @@ function suppressRiver(render) {
   return { ...render, ops, decorations }
 }
 
-function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabels, colors, render) {
+function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabels, colors, render, arcs = null) {
   const isIntersection = positionType === 'intersection'
   render = suppressRiver(render)
   const inset = render.insetFactor != null ? cellSize * render.insetFactor : (render.inset != null ? render.inset : (isIntersection ? Math.round(cellSize * 0.5) : 0))
@@ -134,8 +134,8 @@ function produceFromOpsDeclaration(rows, cols, cellSize, positionType, showLabel
     if (cellDecs) ops.push({ op: 'cell-decorations', fn: cellDecs })
     const diags = produceDiagonals(render.decorations, colors)
     if (diags) ops.push({ op: 'diagonals', predicate: diags.predicate, forward: diags.forward, backward: diags.backward, color: diags.color || colors.stroke || '#333', width: diags.width || 1.5 })
-    const topo = { rows, cols, layout: isIntersection ? 'intersections' : 'cells' }
-    const paths = producePaths(render.decorations, topo, cellSize)
+    const topo = { rows, cols, layout: isIntersection ? 'intersections' : 'cells', arcs }
+    const paths = producePaths(render.decorations, topo, cellSize, gx, gy)
     for (const p of paths) ops.push({ op: 'element', tag: 'path', attrs: { d: p.d, fill: p.fill || 'none', stroke: p.stroke, 'stroke-width': p.strokeWidth || 2.5, 'stroke-linecap': p.linecap || 'round' } })
     const markers = produceMarkers(render.decorations, topo)
     if (markers.length) {
@@ -1424,7 +1424,7 @@ function produceTexts(decorations, topo, cellSize, colors, gx, gridW, gy, render
   return items
 }
 
-function producePaths(decorations, topo, cellSize) {
+function producePaths(decorations, topo, cellSize, gx = 0, gy = 0) {
   if (!decorations || !Array.isArray(decorations)) return []
   const result = []
 
@@ -1433,11 +1433,39 @@ function producePaths(decorations, topo, cellSize) {
       continue
     }
     if (dec.type === 'arcs') {
-      result.push(...generateArcPaths(topo, dec, cellSize))
+      result.push(...(Array.isArray(topo.arcs) && topo.arcs.length
+        ? topologyArcPaths(topo, cellSize, gx, gy, dec)
+        : generateArcPaths(topo, dec, cellSize)))
     }
   }
 
   return result
+}
+
+// The arcs a board declares on its topology, drawn where they are played:
+// each joins its two edge points round the outside of the board, a
+// three-quarter circle about the corner the two lines meet at. Surakarta's
+// loops were drawn from a table of insets that put them inside the board and
+// half off it; the play page and the published diagram both showed it.
+function topologyArcPaths(topo, cellSize, gx, gy, dec) {
+  const rows = topo.rows
+  const onRowEdge = ([r]) => r === 0 || r === rows - 1
+  const colour = dec.stroke || '#8b6914'
+  return topo.arcs.map(([a, b]) => {
+    const rowEnd = onRowEdge(a) ? a : b
+    const colEnd = rowEnd === a ? b : a
+    // The corner the arc goes round: the row of the end on a top or bottom
+    // edge, the column of the end on a side edge.
+    const cx = gx + colEnd[1] * cellSize, cy = gy + rowEnd[0] * cellSize
+    const ax = gx + a[1] * cellSize, ay = gy + a[0] * cellSize
+    const bx = gx + b[1] * cellSize, by = gy + b[0] * cellSize
+    const radius = Math.abs(rowEnd[1] - colEnd[1]) * cellSize
+    // The short way from one end to the other runs inside the board, so the
+    // arc goes the other way round, through the three quarters outside it.
+    const cross = (ax - cx) * (by - cy) - (ay - cy) * (bx - cx)
+    const sweep = cross > 0 ? 0 : 1
+    return { d: `M ${ax} ${ay} A ${radius} ${radius} 0 1 ${sweep} ${bx} ${by}`, stroke: colour, strokeWidth: 2, fill: 'none', linecap: 'round' }
+  })
 }
 
 function generateArcPaths(topo, dec, cellSize) {

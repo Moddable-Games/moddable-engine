@@ -39,13 +39,13 @@
       <a href="../api/" class="nav-link">API</a>
       <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
     </nav>
-    <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.classList.toggle('active');this.previousElementSibling.classList.toggle('open')"><span></span><span></span><span></span></button>
+    <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
   </div>
 </header>
 <div class="docs-layout">
-<button class="docs-toc-toggle" onclick="this.classList.toggle('active');this.nextElementSibling.classList.toggle('open')">Navigation</button>
+<button class="docs-toc-toggle">Navigation</button>
 <nav class="docs-toc">
-  <div class="docs-toc-title">Pages</div>
+  <div class="docs-toc-title">Guides</div>
   <ul class="docs-toc-list">
     <li><a href="./">Overview</a></li>
     <li><a href="authoring.html">Authoring a Variant</a></li>
@@ -53,8 +53,13 @@
     <li><a href="topologies.html" class="active">Topologies</a></li>
     <li><a href="surfaces.html">Surfaces</a></li>
     <li><a href="pieces.html">Piece Sets</a></li>
+    <li><a href="sdk.html">SDK</a></li>
     <li><a href="plugins.html">Plugins</a></li>
+    <li><a href="hosted-families.html">Families on Shared Plugins</a></li>
     <li><a href="render-pipeline.html">Render Pipeline</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">Families</div>
+  <ul class="docs-toc-list">
     <li><a href="chess.html">Chess</a></li>
     <li><a href="go.html">Go</a></li>
     <li><a href="draughts.html">Draughts</a></li>
@@ -65,9 +70,19 @@
     <li><a href="shogi.html">Shogi</a></li>
     <li><a href="reversi.html">Reversi</a></li>
     <li><a href="landlords-game.html">Landlord's Game</a></li>
+    <li><a href="backgammon.html">Backgammon</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">Shared Plugins</div>
+  <ul class="docs-toc-list">
+    <li><a href="race.html">Race Games</a></li>
+    <li><a href="hop.html">Hopping Games</a></li>
+    <li><a href="tableau.html">Cards, Tiles and Dice</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">Tools</div>
+  <ul class="docs-toc-list">
     <li><a href="hexmaps.html">Hex Maps</a></li>
   </ul>
-  <div class="docs-toc-title" style="margin-top:20px">On this page</div>
+  <div class="docs-toc-title docs-toc-title--spaced">On this page</div>
   <ul class="docs-toc-list">
     <li><a href="#principle">The universal adapter</a></li>
     <li><a href="#grid">Grid</a></li>
@@ -75,6 +90,9 @@
     <li><a href="#track">Track</a></li>
     <li><a href="#pit">Pit</a></li>
     <li><a href="#graph">Graph</a></li>
+    <li><a href="#tableau">Tableau</a></li>
+    <li><a href="#hexagonal-trisection">Hexagonal trisection</a></li>
+    <li><a href="#triangular">Triangular</a></li>
     <li><a href="#registry">Registry</a></li>
   </ul>
 </nav>
@@ -89,7 +107,7 @@
 
   <h2 id="grid">Grid</h2>
   <p>Rectangular boards with cells addressed by algebraic notation (a1, b2, etc.).</p>
-  <p><strong>Games:</strong> Chess (75 variants), Draughts (20), Go (14), Xiangqi (8), Shogi (25), Reversi, Tafl, Dou Shou Qi.</p>
+  <p><strong>Games:</strong> Chess, Draughts, Go, Xiangqi, Shogi, Reversi, Tafl, Halma, Dou Shou Qi, Fanorona, Surakarta, the Royal Game of Ur, Senet, Pachisi and Chaupar.</p>
   <p><strong>Layouts:</strong></p>
   <ul>
     <li><code>cells</code> — pieces occupy squares (chess, draughts)</li>
@@ -102,6 +120,14 @@
   rows: 8
   cols: 8
   layout: cells    # or intersections, cross</code></pre>
+  <p><strong>Arcs:</strong> <code>arcs</code> joins pairs of edge points round the outside of the board, so a line that runs off one end carries on through it. Surakarta's eight loops are declared this way. Ordinary moves never use an arc; a capture declared as a <code>rail</code> does.</p>
+  <pre><code>topology:
+  type: grid
+  rows: 6
+  cols: 6
+  layout: intersections
+  arcs:
+    - [[0, 1], [1, 0]]   # off the top at b6, back in along row 5</code></pre>
 
   <h2 id="hex">Hex</h2>
   <p>Hexagonal boards using axial coordinates (q, r).</p>
@@ -122,7 +148,7 @@
 
   <h2 id="track">Track</h2>
   <p>Linear or circuit paths with numbered positions.</p>
-  <p><strong>Games:</strong> Backgammon (8 variants), Landlord's Game (5 editions), Royal Ur.</p>
+  <p><strong>Games:</strong> Backgammon and the Landlord's Game. The race games walk routes laid over their own boards instead; see <a href="race.html">Race Games</a>.</p>
   <p><strong>Coordinates:</strong> Zero-indexed position numbers — <code>0</code> to <code>positions-1</code>.</p>
   <pre><code>topology:
   type: track
@@ -140,7 +166,7 @@
 
   <h2 id="graph">Graph</h2>
   <p>Arbitrary node-edge structures for boards that aren't regular grids.</p>
-  <p><strong>Games:</strong> Morris (7 variants), Stern-Halma (5), Nyout, Asalto.</p>
+  <p><strong>Games:</strong> Morris, Stern-Halma, Nyout and Asalto.</p>
   <p><strong>Structures:</strong></p>
   <ul>
     <li><code>concentric-rings</code> — Morris boards (2-4 rings with midpoint connections)</li>
@@ -148,13 +174,37 @@
     <li><code>perimeter-cross</code> — Nyout (circular with cross shortcuts)</li>
     <li><code>grid-cross</code> — Asalto (grid with fortress extension)</li>
   </ul>
-  <p><strong>Coordinates:</strong> Node IDs — <code>n0</code>, <code>n1</code>, etc. (auto-generated) or custom IDs from explicit node definitions.</p>
+  <p><strong>Coordinates:</strong> Node IDs, numbered from one in the order the structure lays them out: <code>n1</code>, <code>n2</code> and so on, or <code>h1</code> to <code>h121</code> for the star. Explicit node definitions may name their own. The star and the cross place their nodes on a lattice, so rays and jumps across them run straight.</p>
   <pre><code>topology:
   type: graph
   structure: concentric-rings
   params:
     rings: 3
     midpoints: true</code></pre>
+
+  <h2 id="tableau">Tableau</h2>
+  <p>The table a card, tile or dice game is played on: hands, piles, a wall, a layout of cards. It has no cells to move between; the tableau plugin places components on it.</p>
+  <p><strong>Games:</strong> every card, domino, mahjong and dice game. See <a href="tableau.html">Cards, Tiles and Dice</a>.</p>
+
+  <h2 id="hexagonal-trisection">Hexagonal trisection</h2>
+  <p>A hexagon cut into three sectors, one per player, meeting at the centre. Each sector is two quadrilaterals of <code>size</code> by <code>size</code>, a half-board of <code>2 * size</code> files by <code>size</code> ranks. Pieces stand in the cells (Yalta Chess) or where the lines cross (San-kwo-k'i).</p>
+  <p><strong>Coordinates:</strong> sector, file and rank, each as its owner reads them: <code>Ae2</code> is the first seat's e2, <code>Be2</code> the second's.</p>
+  <pre><code>topology:
+  type: hexagonal-trisection</code></pre>
+
+  <h2 id="triangular">Triangular</h2>
+  <p>A board of triangles, declared as a picture: one string per rank from the top, <code>A</code> for a triangle with its apex up, <code>V</code> apex down, <code>.</code> no cell. Sankaku Shogi's 44 triangles are its only board so far.</p>
+  <pre><code>topology:
+  type: triangular
+  shape:
+    - "..AVA.."
+    - ".AVAVA."
+    - "AVAVAVA"
+    - "VAVAVAV"
+    - "AVAVAVA"
+    - "VAVAVAV"
+    - ".VAVAV."
+    - "..VAV.."</code></pre>
 
   <h2 id="registry">Registry</h2>
   <p>Topologies are registered at <code>packages/topologies/registry.js</code>. All 5 built-in types auto-register when <code>packages/topologies/index.js</code> is imported. Custom topologies can be added at runtime:</p>
@@ -197,5 +247,6 @@ register('triangular', {
       <span class="footer-version">v1.0.42</span>
     </div>
   </div>
-</footer></body>
+</footer><script src="../js/site-nav.js?v=1.0.42"></script>
+</body>
 </html>

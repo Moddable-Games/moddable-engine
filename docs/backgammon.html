@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backgammon &mdash; Moddable Engine</title>
+<meta name="description" content="Eight tables games from one backgammon plugin, every variant declared in frontmatter, with seeded dice and an AI that weighs every roll.">
+<meta property="og:title" content="Backgammon &mdash; Moddable Engine">
+<meta property="og:description" content="Eight tables games from one backgammon plugin, every variant declared in frontmatter, with seeded dice and an AI that weighs every roll.">
+<meta property="og:image" content="https://engine.moddable.games/og/docs.png?v=1.0.42">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://engine.moddable.games/docs/backgammon.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Moddable Engine">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Backgammon &mdash; Moddable Engine">
+<meta name="twitter:description" content="Eight tables games from one backgammon plugin, every variant declared in frontmatter, with seeded dice and an AI that weighs every roll.">
+<meta name="twitter:image" content="https://engine.moddable.games/og/docs.png?v=1.0.42">
+<meta name="theme-color" content="#0a0d2a">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../css/home.css?v=1.0.42">
+<link rel="stylesheet" href="../css/docs.css?v=1.0.42">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="header-brand">
+      <span class="brand-icon">&#x2B22;</span>
+      <span class="brand-text">moddable<span class="brand-accent">.engine</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="../play/" class="nav-link">Play</a>
+      <a href="../create/" class="nav-link">Create</a>
+      <a href="../boards/" class="nav-link">Boards</a>
+      <a href="../pieces/" class="nav-link">Pieces</a>
+      <a href="../tiles/" class="nav-link">Tiles</a>
+      <a href="./" class="nav-link nav-link--active">Docs</a>
+      <a href="../api/" class="nav-link">API</a>
+      <a href="https://github.com/Moddable-Games/moddable-engine" class="nav-link nav-link--gh" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+  </div>
+</header>
+<div class="docs-layout">
+<button class="docs-toc-toggle">Navigation</button>
+<nav class="docs-toc">
+  <div class="docs-toc-title">Guides</div>
+  <ul class="docs-toc-list">
+    <li><a href="./">Overview</a></li>
+    <li><a href="authoring.html">Authoring a Variant</a></li>
+    <li><a href="frontmatter.html">Frontmatter</a></li>
+    <li><a href="topologies.html">Topologies</a></li>
+    <li><a href="surfaces.html">Surfaces</a></li>
+    <li><a href="pieces.html">Piece Sets</a></li>
+    <li><a href="sdk.html">SDK</a></li>
+    <li><a href="plugins.html">Plugins</a></li>
+    <li><a href="hosted-families.html">Families on Shared Plugins</a></li>
+    <li><a href="render-pipeline.html">Render Pipeline</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">Families</div>
+  <ul class="docs-toc-list">
+    <li><a href="chess.html">Chess</a></li>
+    <li><a href="go.html">Go</a></li>
+    <li><a href="draughts.html">Draughts</a></li>
+    <li><a href="hex.html">Hex</a></li>
+    <li><a href="mancala.html">Mancala</a></li>
+    <li><a href="morris.html">Morris</a></li>
+    <li><a href="xiangqi.html">Xiangqi</a></li>
+    <li><a href="shogi.html">Shogi</a></li>
+    <li><a href="reversi.html">Reversi</a></li>
+    <li><a href="landlords-game.html">Landlord's Game</a></li>
+    <li><a href="backgammon.html" class="active">Backgammon</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">Shared Plugins</div>
+  <ul class="docs-toc-list">
+    <li><a href="race.html">Race Games</a></li>
+    <li><a href="hop.html">Hopping Games</a></li>
+    <li><a href="tableau.html">Cards, Tiles and Dice</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">Tools</div>
+  <ul class="docs-toc-list">
+    <li><a href="hexmaps.html">Hex Maps</a></li>
+  </ul>
+  <div class="docs-toc-title docs-toc-title--spaced">On this page</div>
+  <ul class="docs-toc-list">
+    <li><a href="#embed">Embed via iframe</a></li>
+    <li><a href="#keys">Variant keys</a></li>
+    <li><a href="#dice">Dice and moves</a></li>
+    <li><a href="#ai">AI</a></li>
+  </ul>
+</nav>
+<div class="docs-body">
+  <h1>Backgammon</h1>
+  <p class="docs-lede">Eight tables games from one plugin: Backgammon, Nackgammon, Hypergammon, Acey-Deucey, Fevga, Nardi, Plakoto and Chouette. No variant has code of its own; each is the handful of keys below.</p>
+
+  <h2 id="embed">Embed via iframe</h2>
+  <p>Select the family and variant through the URL, as every family does.</p>
+  <pre><code>&lt;iframe
+  src="https://engine.moddable.games/play/?embed=1&amp;family=backgammon&amp;variant=standard"
+  style="width:100%;max-width:560px;aspect-ratio:1/1;border:none"
+  title="Play Backgammon"
+&gt;&lt;/iframe&gt;</code></pre>
+
+  <h2 id="keys">Variant keys</h2>
+  <p>Keys go in the variant's <code>engine.plugins.backgammon</code> block.</p>
+  <table class="docs-table">
+    <thead><tr><th>Key</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>movement</code></td><td><code>opposite</code> or <code>same</code>: which way the two sides travel</td></tr>
+      <tr><td><code>start</code></td><td>The track index of each side&#39;s starting point</td></tr>
+      <tr><td><code>contact</code></td><td><code>hit</code>, <code>pin</code> or <code>block</code>: what landing on a lone opposing checker does</td></tr>
+      <tr><td><code>doublingCube</code>, <code>cubeOwner</code></td><td>Offer, take or drop a doubled stake; who holds the cube at the start</td></tr>
+      <tr><td><code>gammons</code>, <code>backgammons</code></td><td>Double and triple stakes for a heavier loss</td></tr>
+      <tr><td><code>aceyDeucey</code></td><td>A 1-2 is played, then a doublet of the player&#39;s choosing, then another roll</td></tr>
+      <tr><td><code>headLimit</code>, <code>headDoubles</code></td><td>Checkers that may leave the starting point in one turn, and the opening doublets that may take one more</td></tr>
+      <tr><td><code>primeLimit</code></td><td>No block this long with no opposing checker ahead of it</td></tr>
+      <tr><td><code>firstPast</code></td><td>No second checker leaves the start until one has passed the opponent&#39;s</td></tr>
+      <tr><td><code>pinStartWins</code></td><td>Pinning the opponent&#39;s last checker on its own start wins at once</td></tr>
+      <tr><td><code>openingRoll</code></td><td>Each side rolls one die and the higher plays both</td></tr>
+      <tr><td><code>games</code></td><td>A session of games: the box against a rotating team (Chouette)</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="dice">Dice and moves</h2>
+  <p>A turn begins with a <code>{ action: 'roll' }</code> move, drawn from the game's seeded generator, so a game replays from its seed. A roll that names its dice (<code>{ action: 'roll', dice: [3, 5] }</code>) is played as that fall. Each checker move uses one die, <code>{ from, to, die }</code>, and the turn continues until the dice are spent.</p>
+  <p><code>chanceOutcomes</code> lists every fall of the dice with its probability, which is how a search weighs a roll instead of the one it got.</p>
+
+  <h2 id="ai">AI</h2>
+  <p>The AI chooses whole plays of the dice. Easy and medium judge the position after each play; hard and expert also weigh the best few plays over every one of the opponent&#39;s 21 rolls.</p>
+</div>
+</div>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4 class="footer-heading">Engine</h4>
+        <a href="../play/">Play</a>
+        <a href="../boards/">Boards</a>
+        <a href="../pieces/">Pieces</a>
+        <a href="../tiles/">Tiles</a>
+        <a href="../docs/">Docs</a>
+        <a href="../api/">API</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Moddable Games</h4>
+        <a href="https://moddable.games" target="_blank" rel="noopener">Homepage</a>
+        <a href="https://rules.moddable.games" target="_blank" rel="noopener">Rules</a>
+        <a href="https://moddable.games/news/" target="_blank" rel="noopener">News</a>
+        <a href="https://discord.gg/VhsVGNq6Za" target="_blank" rel="noopener">Discord</a>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Source</h4>
+        <a href="https://github.com/Moddable-Games/moddable-engine" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Moddable-Games/moddable-rules" target="_blank" rel="noopener">Rules Repo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2012&ndash;2026 Moddable Games. MIT License.</span>
+      <span class="footer-version">v1.0.42</span>
+    </div>
+  </div>
+</footer><script src="../js/site-nav.js?v=1.0.42"></script>
+</body>
+</html>
