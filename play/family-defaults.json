@@ -330,6 +330,103 @@
       }
     }
   },
+  "agon": {
+    "plugin": "chess",
+    "default": {
+      "title": "Agon (Standard)",
+      "slug": "standard",
+      "parent": "agon",
+      "engine": {
+        "topology": {
+          "type": "hex",
+          "shape": "hexagonal",
+          "radius": 5,
+          "orientation": "pointy"
+        },
+        "players": [
+          "white",
+          "black"
+        ],
+        "plugins": {
+          "agon": {
+            "castling": false,
+            "enPassant": false,
+            "noCheck": true,
+            "regions": {
+              "throne": {
+                "ring": [
+                  0,
+                  0
+                ]
+              },
+              "outerRing": {
+                "ring": [
+                  5,
+                  5
+                ]
+              },
+              "notThrone": {
+                "not": [
+                  "throne"
+                ]
+              }
+            },
+            "vocabulary": {
+              "pawn": {
+                "symbols": {}
+              },
+              "queen": {
+                "symbols": {
+                  "0": "Q",
+                  "1": "q"
+                }
+              },
+              "guard": {
+                "symbols": {
+                  "0": "P",
+                  "1": "p"
+                }
+              }
+            },
+            "pieces": {
+              "queen": {
+                "type": "rider",
+                "dirs": "orthogonal",
+                "maxSteps": 1,
+                "inward": true
+              },
+              "guard": {
+                "type": "rider",
+                "dirs": "orthogonal",
+                "maxSteps": 1,
+                "inward": true,
+                "confine": "notThrone"
+              }
+            },
+            "custodial": {
+              "dirs": "orthogonal",
+              "displacement": false
+            },
+            "drops": true,
+            "capturesTo": "owner",
+            "dropsCompulsory": true,
+            "dropFirst": [
+              "queen"
+            ],
+            "dropRegions": {
+              "guard": "outerRing"
+            },
+            "goal": {
+              "piece": "queen",
+              "in": "throne",
+              "escort": "guard"
+            },
+            "setup": "-5,0:Q,5,0:q,4,-5:P,5,-2:P,3,2:P,-1,5:P,-5,4:P,-1,-4:P,1,-5:p,5,-4:p,1,4:p,-4,5:p,-5,2:p,-3,-2:p"
+          }
+        }
+      }
+    }
+  },
   "dou-shou-qi": {
     "plugin": "chess",
     "default": {

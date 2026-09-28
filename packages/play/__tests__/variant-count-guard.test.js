@@ -27,6 +27,9 @@ const MINIMUM_PLAYABLE = {
   chess: 135,
   // The tables games from frontmatter keys alone (engine#150), Chouette as a
   // session of games between the box and a rotating team.
+  // A queen and six guards on the hex board, custodial capture and pieces
+  // returned by their owner, played by the chess plugin (engine#157).
+  agon: 1,
   backgammon: 8,
   // Played by the chess plugin, which its rulebook names: ranks, the river,
   // traps and the den are all declared there (engine#157).

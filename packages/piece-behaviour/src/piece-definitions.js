@@ -339,6 +339,28 @@ export function rail(dirs, opts = {}) {
   }
 }
 
+/**
+ * Keep only the moves that end no further from the centre than they began.
+ *
+ * Agon's pieces move "either sideways in the same ring, or towards the throne"
+ * and never outward. The rings are the topology's (`getRing`), so this knows
+ * nothing about thrones; on a board without rings it changes nothing.
+ */
+export function inwardOnly(primitive) {
+  const allowed = (topology, from, to) =>
+    typeof topology.getRing !== 'function' || topology.getRing(to) <= topology.getRing(from)
+  return {
+    type: 'inward',
+    inner: primitive,
+    genMoves(topology, from, board) {
+      return primitive.genMoves(topology, from, board).filter(m => allowed(topology, from, m.to))
+    },
+    attacks(topology, from, target, board) {
+      return allowed(topology, from, target) && primitive.attacks(topology, from, target, board)
+    },
+  }
+}
+
 export function compose(...primitives) {
   return {
     type: 'compound',

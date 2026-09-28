@@ -1,5 +1,5 @@
 import { warnUnknownConfigKeys } from '../../../core/index.js'
-import { rider, leaper, compose, divergent, confine, positional, reboundRider, targeted, warp, cross, fromConfig, OFFSETS } from '../../../piece-behaviour/index.js'
+import { rider, leaper, compose, divergent, confine, positional, reboundRider, targeted, warp, cross, inwardOnly, fromConfig, OFFSETS } from '../../../piece-behaviour/index.js'
 import { randomBackRank } from './variants/chess960.js'
 // Every config key this plugin reads. Exported so the corpus guard and the
 // authoring docs share one source of truth, and kept separate from `defaults`,
@@ -7,7 +7,7 @@ import { randomBackRank } from './variants/chess960.js'
 export const CONFIG_KEYS = new Set([
   'actions', 'advancement', 'afterMove', 'capturesTo', 'castling', 'checkThreshold', 'cols', 'demotionMap', 'doubleStep',
   'gating', 'initialHands', 'matedArmy',
-  'dropMayNotCheck', 'dropRegion', 'dropZone', 'drops', 'dropsCompulsory', 'dropsFor', 'enPassant', 'hexPawnConfig', 'initState', 'moveApply', 'moveFilter', 'noCheck',
+  'dropFirst', 'dropMayNotCheck', 'dropRegion', 'dropRegions', 'dropZone', 'drops', 'custodial', 'dropsCompulsory', 'dropsFor', 'enPassant', 'hexPawnConfig', 'initState', 'moveApply', 'moveFilter', 'noCheck',
   'onTurnEnd', 'pawnCaptureDirections', 'ranks', 'pawnConfig', 'pawnMoveDirections', 'pawnStartRow',
   'pawnDropRanks', 'pawnType', 'placementDistinctColor', 'placementPieces', 'placementZone', 'playerCount',
   'promotion', 'promotionChoices', 'promotionRegion', 'promotionsKept', 'promotionRow', 'quietLimit', 'regions',
@@ -190,6 +190,17 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       return [Math.floor(local / nCols), local % nCols, Math.floor(pos / plane)]
     }
     const inLayers = (l) => !layers || (l >= layers[0] && l <= layers[1])
+    // The cells a given number of rings out from the centre, on a board that
+    // has rings. Agon's throne is ring 0 and its outer ring is ring 5:
+    //     throne: { ring: [0, 0] }
+    if (spec.ring) {
+      if (!topology || typeof topology.getRing !== 'function') return null
+      const [lo, hi] = spec.ring
+      return (pos) => {
+        const n = topology.getRing(pos)
+        return n >= lo && n <= hi
+      }
+    }
     // Everywhere outside the named regions. Dou Shou Qi's animals walk the
     // land, which is the board less the water and their own den:
     //     land: { not: [water, ownDen] }
@@ -222,7 +233,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   // Does this spec, at any depth, need to know which seat it is being built for?
   function needsSeat(spec) {
     if (!spec || typeof spec !== 'object') return false
-    if (spec.directional || spec.confine || spec.type === 'positional' || spec.type === 'cross' || spec.type === 'warp') return true
+    if (spec.directional || spec.confine || spec.inward || spec.type === 'positional' || spec.type === 'cross' || spec.type === 'warp') return true
     if (Array.isArray(spec.parts)) return spec.parts.some(needsSeat)
     if (spec.divergent) return needsSeat(spec.divergent.move) || needsSeat(spec.divergent.capture)
     return false
@@ -274,6 +285,14 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       const inner = buildSpec(rest, playerIdx)
       if (!inner) return inner
       return targeted(inner, (victim) => Boolean(victim) && (!wanted || victim.type === wanted))
+    }
+
+    // Never further from the centre than where the piece stands. Agon's pieces
+    // move "either sideways in the same ring, or towards the throne".
+    if (spec.inward) {
+      const { inward: _i, ...rest } = spec
+      const inner = buildSpec(rest, playerIdx)
+      return inner ? inwardOnly(inner) : inner
     }
 
     if (spec.confine) {
@@ -1003,6 +1022,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   }
 
   function withCaptureRules(moves, board) {
+    if (config.custodial?.displacement === false) moves = moves.filter(m => !m.capture)
     if (!captureRulesDeclared) return moves
     return moves.filter(m => !m.capture || captureAllowed(board, m.from, m.captured ?? m.to))
   }
@@ -1397,10 +1417,19 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
         const zone = config.dropZone
           ? new Set(ownEdgeRowCells(slice, playerIdx, config.dropZone))
           : null
-        for (const type of uniqueTypes) {
+        // A piece that must come back before any other: Agon's "if one of the
+        // pieces captured was the queen, it must be moved first".
+        const first = (config.dropFirst || []).filter(type => uniqueTypes.includes(type))
+        for (const type of first.length ? first : uniqueTypes) {
+          // Where this kind of piece may be put back. Agon's guards return to
+          // the outer ring and its queen to any vacant cell.
+          const typeRegion = config.dropRegions && config.dropRegions[type]
+            ? regionPredicate(config.dropRegions[type], playerIdx)
+            : null
           for (const pos of allPositions()) {
             if (zone && !zone.has(pos)) continue
             if (region && !region(pos)) continue
+            if (typeRegion && !typeRegion(pos)) continue
             if (getCell(slice.board, pos) !== null) continue
             if (type === (config.pawnType || 'pawn') && promoRows.has(pos)) continue
             // Delirious Bughouse: "Pawns may be placed only from the Second to
@@ -1495,7 +1524,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     if (hands && config.drops && config.capturesTo !== 'none') {
       const captured = move.captured != null ? getCell(slice.board, move.captured) : getCell(slice.board, move.to)
       if (captured && captured.owner !== playerIdx && captured.type !== royalTypeFor(captured.owner)) {
-        hands[handReceiving(playerIdx)].push(handTypeFor(captured))
+        hands[config.capturesTo === 'owner' ? captured.owner : handReceiving(playerIdx)].push(handTypeFor(captured))
         // "Promoted Pawns are returned to the player that promoted the pawn,
         // to be inserted again" - so a promotion adds a piece to the game.
         if (config.promotionsKept && captured.wasPromoted && hands[captured.owner]) {
@@ -1529,6 +1558,31 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
     if (move.promotion) {
       setCell(board, move.to, { type: move.promotion, owner: playerIdx, wasPromoted: config.drops || undefined })
+    }
+
+    // Custodial capture: an enemy left between the piece that moved and
+    // another of the mover's, along a line, is taken. Agon: "A piece is
+    // captured when two enemy pieces are on adjacent sides of it, in a
+    // straight line", and only by the move that closes the line - a piece may
+    // step between two enemies and stand there.
+    //
+    //     custodial: { dirs: orthogonal, displacement: false }
+    //
+    // `displacement: false` means there is no capture by moving onto a piece.
+    if (config.custodial) {
+      for (const dir of topology.getDirections(config.custodial.dirs || 'orthogonal')) {
+        const victimPos = topology.step(move.to, dir)
+        const anchorPos = victimPos === null ? null : topology.step(victimPos, dir)
+        if (anchorPos === null) continue
+        const victim = getCell(board, victimPos)
+        const anchor = getCell(board, anchorPos)
+        if (!victim || !anchor || victim.owner === playerIdx || anchor.owner !== playerIdx) continue
+        setCell(board, victimPos, null)
+        halfmoveClock = 0
+        if (hands && config.drops && config.capturesTo !== 'none') {
+          hands[config.capturesTo === 'owner' ? victim.owner : handReceiving(playerIdx)].push(handTypeFor(victim))
+        }
+      }
     }
 
     if (config.enPassant && piece.type === (config.pawnType || 'pawn') && pawnConfig) {
@@ -2001,6 +2055,18 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return !goalRule.piece || goalRule.piece === 'any' || piece.type === goalRule.piece
   }
 
+  // A goal may also need the arriving piece surrounded by its own side. Agon
+  // is won with the queen on the throne "and surround her with all six of her
+  // guards":
+  //     goal: { piece: queen, in: throne, escort: guard }
+  function escorted(board, pos, playerIdx) {
+    const around = topology.neighbours(pos)
+    return around.length > 0 && around.every(n => {
+      const cell = getCell(board, n)
+      return cell && cell.owner === playerIdx && cell.type === goalRule.escort
+    })
+  }
+
   function goalRegionFor(playerIdx) {
     if (!goalRule) return null
     return regionPredicate(goalRule.in, playerIdx)
@@ -2041,6 +2107,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       const cell = getCell(slice.board, pos)
       if (!cell || cell.owner !== playerIdx || !isGoalPiece(cell)) continue
       if (!inGoal(pos)) continue
+      if (goalRule.escort && !escorted(slice.board, pos, playerIdx)) continue
       if (goalRule.rotation === 'cw' && !((slice._swept || [0, 0])[playerIdx] > 0)) continue
       if (goalRule.rotation === 'ccw' && !((slice._swept || [0, 0])[playerIdx] < 0)) continue
       return playerIdx
