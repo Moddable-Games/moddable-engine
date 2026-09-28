@@ -172,7 +172,7 @@ const docsPages = new Set(fs.readdirSync(resolve('docs')))
 const PLUGIN_DOCS = { race: 'race.html', hop: 'hop.html', backgammon: 'backgammon.html', chess: 'hosted-families.html', draughts: 'hosted-families.html' }
 const sdkDocFor = (row) => (docsPages.has(`${row.family}.html`) ? `${row.family}.html`
   : row.family !== row.plugin && PLUGIN_DOCS[row.plugin] ? PLUGIN_DOCS[row.plugin]
-    : PLUGIN_DOCS[row.plugin] || (row.svg === 'no' && row.hidden ? 'tableau.html' : null))
+    : PLUGIN_DOCS[row.plugin] || (row.table ? 'tableau.html' : null))
 const docsLabels = Object.fromEntries(readJSON('docs/toc.json').groups.flatMap(g => g.pages.map(([file, label]) => [file, label])))
 const tick = (flag) => (flag ? '&#x2713;' : '')
 const sdkTable = `  <table class="docs-table">

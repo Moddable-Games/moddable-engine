@@ -6,7 +6,21 @@
 // written, so the docs cannot promise what the SDK does not do.
 
 import '../../packages/play/test-helpers/setup-rules-reader.js'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import * as sdk from '../../packages/play/index.js'
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
+const gallery = JSON.parse(fs.readFileSync(path.join(ROOT, 'pieces', 'gallery-index.json'), 'utf8'))
+
+// What a consumer passes: the gallery for artwork, and a board's data file
+// where its frontmatter names one.
+function renderOpts(family, variant) {
+  const source = sdk.resolveFromDisk(family, variant)?.content?.source
+  const file = source ? path.join(ROOT, 'data', source) : null
+  return { variant, gallery, content: file && fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : undefined }
+}
 
 // Pieces in play: on the board, or on a track kept beside it.
 const occupied = (slice) => {
@@ -33,11 +47,10 @@ export function sdkCapabilities(manifest) {
       try {
         row.ai = sdk.createAI(family, variant, { difficulty: 'medium', rngSeed: 1 }).search
       } catch { row.ai = null }
-      // A table of cards and tiles is drawn by the play page's card table, not
-      // by the board renderer the SDK uses.
-      if (sdk.getPlugin(family)?.factory?.interaction === 'cards') row.svg = 'no'
-      else try {
-        const svg = String(sdk.renderStateAsSvg(family, state, { variant }))
+      // Cards, tiles and dice are drawn as a table, projected for one seat.
+      row.table = sdk.getPlugin(family)?.factory?.interaction === 'cards'
+      try {
+        const svg = String(sdk.renderStateAsSvg(family, state, renderOpts(family, variant)))
         const marks = (svg.match(/<(image|circle|text|use)\b/g) || []).length
         // A board that holds pieces and draws none is not a rendering of it.
         row.svg = !svg.includes('<svg') ? 'no' : (occupied(state.slice) > 0 && marks === 0 ? 'board only' : 'yes')
