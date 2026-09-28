@@ -5944,5 +5944,23 @@
       "domino-12-12": "domino-12-12.svg",
       "domino-back": "domino-back.svg"
     }
+  },
+  {
+    "id": "mce-player-tokens",
+    "name": "MCE Player Tokens",
+    "family": "landlords-game",
+    "author": "Mark Smalley",
+    "license": "MIT",
+    "licenseUrl": "https://opensource.org/licenses/MIT",
+    "source": "https://github.com/Moddable-Games/moddable-engine",
+    "format": "svg",
+    "pieces": {
+      "p0": "p0.svg",
+      "p1": "p1.svg",
+      "p2": "p2.svg",
+      "p3": "p3.svg",
+      "p4": "p4.svg",
+      "p5": "p5.svg"
+    }
   }
 ]

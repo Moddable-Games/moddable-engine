@@ -58,10 +58,12 @@ function perimeterStyle(board) {
 // rendered a board with both players invisible and no way to see the game
 // being played. Every space already carries `data-sq="pos-N"` with its
 // rectangle, so the positions come from what has just been drawn.
-const TOKEN_COLOURS = ['#c0392b', '#2471a3', '#1e8449', '#b7950b', '#6c3483', '#117864']
-
-function tokenElements(els, tokens) {
-  if (!tokens || !tokens.length) return []
+//
+// A token is its seat's picture from the piece set the variant names (`p0`,
+// `p1`, ...), as every other piece is. They were circles from a palette kept
+// here, the one family whose pieces were not in the gallery (engine#200).
+function tokenElements(els, tokens, images) {
+  if (!tokens || !tokens.length || !images) return []
   const rects = new Map()
   for (const entry of els) {
     const attrs = entry?.attrs
@@ -73,22 +75,22 @@ function tokenElements(els, tokens) {
   const perSquare = new Map()
   for (const token of tokens) {
     const attrs = rects.get(token.square)
-    if (!attrs) continue
+    const href = images[`p${token.seat}`]
+    if (!attrs || !href) continue
     // Two players on one space must not sit exactly on top of each other.
     const seen = perSquare.get(token.square) || 0
     perSquare.set(token.square, seen + 1)
     const w = Number(attrs.width) || 0
     const h = Number(attrs.height) || w
-    const r = Math.max(3, Math.min(w, h) * 0.22)
-    const cx = Number(attrs.x) + w / 2 + (seen - 0.5) * r * 1.2
+    const size = Math.max(8, Math.min(w, h) * 0.5)
+    const cx = Number(attrs.x) + w / 2 + (seen - 0.5) * size * 0.6
     const cy = Number(attrs.y) + h / 2
     out.push({
       op: 'element',
-      tag: 'circle',
+      tag: 'image',
       attrs: {
-        cx: cx.toFixed(1), cy: cy.toFixed(1), r: r.toFixed(1),
-        fill: TOKEN_COLOURS[token.seat % TOKEN_COLOURS.length],
-        stroke: '#1a1a1a', 'stroke-width': 1.2, 'pointer-events': 'none',
+        href, x: (cx - size / 2).toFixed(1), y: (cy - size / 2).toFixed(1),
+        width: size.toFixed(1), height: size.toFixed(1), 'pointer-events': 'none',
       },
     })
   }
@@ -351,7 +353,7 @@ export function perimeterOps(colors, render) {
 
   perimeterInner(el, board, cornerSize, boardW, boardH, theme, style)
 
-  els.push(...tokenElements(els, render._tokens))
+  els.push(...tokenElements(els, render._tokens, render._pieceImages))
 
   return { type: 'track', config: { style: 'perimeter', ops: els, width: boardW, height: boardH } }
 }

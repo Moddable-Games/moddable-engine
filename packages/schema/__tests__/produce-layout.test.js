@@ -199,16 +199,20 @@ describe('produceLayout', () => {
       expect(result.config.width).toBe(16 * 2 + 32 * 6 * 2 + 24)
     })
 
+    // Checkers are the set's pictures; without one a checker is not drawn
+    // (engine#200), so these name a picture for each colour.
+    const CHECKERS = { bM: 'dark.svg', wM: 'light.svg' }
+
     test('backgammon — checker stacks from parsed setup', () => {
       const engine = {
         topology: { type: 'track', positions: 24 },
         surface: 'parchment',
-        render: { trackStyle: 'triangular-points', _parsedSetup: { dark: { 0: 2 }, light: { 23: 7 } } },
+        render: { trackStyle: 'triangular-points', _parsedSetup: { dark: { 0: 2 }, light: { 23: 7 } }, _pieceImages: CHECKERS },
       }
       const result = produceLayout(engine)
-      const circles = result.config.ops.filter(o => o.tag === 'circle')
+      const checkers = result.config.ops.filter(o => o.tag === 'image')
       const overflowTexts = result.config.ops.filter(o => o.tag === 'text')
-      expect(circles.length).toBe(2 + 5) // 2 dark + 5 shown of 7 light
+      expect(checkers.length).toBe(2 + 5) // 2 dark + 5 shown of 7 light
       expect(overflowTexts.length).toBe(1) // overflow count on the 7-stack
     })
 
@@ -219,6 +223,7 @@ describe('produceLayout', () => {
         render: {
           trackStyle: 'triangular-points',
           _parsedSetup: { dark: { 3: 1 }, light: { 3: 2 }, pinned: { 3: 'dark' }, bar: { light: 1, dark: 0 }, off: { light: 3, dark: 0 } },
+          _pieceImages: CHECKERS,
         },
       }
       const result = produceLayout(engine)
@@ -226,10 +231,10 @@ describe('produceLayout', () => {
       expect(cells).toEqual(expect.arrayContaining(['bar-0', 'bar-1', 'off']))
       expect(result.config.width).toBe(16 * 2 + 32 * 6 * 2 + 24 + 32 + 8)
       // Point 4: the pinned dark checker, then two light over it; one on the bar.
-      const circles = result.config.ops.filter(o => o.tag === 'circle')
-      expect(circles.length).toBe(1 + 1 + 2 + 1)
+      const checkers = result.config.ops.filter(o => o.tag === 'image')
+      expect(checkers.length).toBe(1 + 1 + 2 + 1)
       // Checkers in play let a click through to the point beneath.
-      expect(circles.every(c => c.attrs['pointer-events'] === 'none')).toBe(true)
+      expect(checkers.every(c => c.attrs['pointer-events'] === 'none')).toBe(true)
       // Three borne off, edge-on in the tray.
       expect(result.config.ops.filter(o => o.tag === 'rect' && o.attrs.height === 5)).toHaveLength(3)
     })

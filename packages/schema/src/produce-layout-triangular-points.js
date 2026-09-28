@@ -82,11 +82,7 @@ export function triangularPointOps(colors, render) {
           const cy = startY + dir * j * pieceSpacing
           // In play a click on a checker is a click on its point.
           const through = live ? { 'pointer-events': 'none' } : {}
-          if (img) {
-            el('image', { href: img, x: cx - pieceSize / 2, y: cy - pieceSize / 2, width: pieceSize, height: pieceSize, ...through })
-          } else {
-            el('circle', { cx, cy, r: pieceSize / 2 - 1, fill: isDarkPiece ? '#191716' : '#F8F6F2', stroke: isDarkPiece ? '#4d433a' : '#5E5854', 'stroke-width': 1.5, ...through })
-          }
+          if (img) el('image', { href: img, x: cx - pieceSize / 2, y: cy - pieceSize / 2, width: pieceSize, height: pieceSize, ...through })
           if (j === 0 && overflow > 0) {
             el('text', { x: cx, y: cy + 4, 'font-family': 'sans-serif', 'font-size': 9, 'font-weight': 'bold', 'text-anchor': 'middle', fill: isDarkPiece ? '#fff' : '#333', ...through }, String(overflow))
           }
@@ -111,7 +107,6 @@ export function triangularPointOps(colors, render) {
       const piece = (cx, cy, dark) => {
         const img = dark ? darkImg : lightImg
         if (img) el('image', { href: img, x: cx - pieceSize / 2, y: cy - pieceSize / 2, width: pieceSize, height: pieceSize, 'pointer-events': 'none' })
-        else el('circle', { cx, cy, r: pieceSize / 2 - 1, fill: dark ? '#191716' : '#F8F6F2', stroke: dark ? '#4d433a' : '#5E5854', 'stroke-width': 1.5, 'pointer-events': 'none' })
       }
       const barStack = (count, dark, fromY, dir) => {
         const show = Math.min(count, 4)

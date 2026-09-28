@@ -66,7 +66,7 @@ describe('renderStateAsSvg', () => {
   it('asks for a board data file rather than drawing an empty board', () => {
     expect(() => renderStateAsSvg('landlords-game')).toThrow(/landlords-game-boards\.json/)
     const content = JSON.parse(readFileSync(join(ROOT, 'data', 'landlords-game-boards.json'), 'utf8'))
-    const svg = renderStateAsSvg('landlords-game', null, { content })
+    const svg = renderStateAsSvg('landlords-game', null, { content, gallery })
     expect((svg.match(/data-sq=/g) || []).length).toBe(44)
   })
 })

@@ -779,20 +779,23 @@ function producePitOps(topo, colors, render) {
   const parsedSetup = render._parsedSetup || null
   const seedsPerPit = render._seedsPerPit || 4
   const pieceImages = render._pieceImages || null
-  const seedRadius = Math.min(4.5, pitRadius * 0.2)
 
   const els = []
-  const el = (tag, attrs) => els.push({ op: 'element', tag, attrs })
+  const el = (tag, attrs, text) => els.push({ op: 'element', tag, attrs, text })
 
+  // Seeds are the set's own pictures of a pit holding that many. Past the
+  // largest count the set draws (48 in playstrategy-oware), the largest picture
+  // stands in with the number written on it: a store in Congkak can reach 98.
+  const counts = Object.keys(pieceImages || {}).map(Number).filter(Number.isInteger)
+  const largest = counts.length ? Math.max(...counts) : 0
   const seeds = (cx, cy, count) => {
-    if (count <= 0) return
-    if (pieceImages && pieceImages[String(count)]) {
-      const size = pitRadius * 1.6
-      el('image', { href: pieceImages[String(count)], x: cx - size / 2, y: cy - size / 2, width: size, height: size, 'pointer-events': 'none' })
-      return
-    }
-    for (const [sx, sy] of seedLayout(count, seedRadius)) {
-      el('circle', { cx: cx + sx, cy: cy + sy, r: seedRadius, fill: colors.seed, stroke: colors['seed-stroke'], 'stroke-width': 0.5 })
+    if (count <= 0 || !largest) return
+    const size = pitRadius * 1.6
+    const href = pieceImages[String(Math.min(count, largest))]
+    if (!href) return
+    el('image', { href, x: cx - size / 2, y: cy - size / 2, width: size, height: size, 'pointer-events': 'none' })
+    if (count > largest) {
+      el('text', { x: cx, y: cy + pitRadius * 0.2, 'text-anchor': 'middle', 'font-size': pitRadius * 0.6, 'font-weight': 'bold', fill: colors.text || '#fff', stroke: '#000', 'stroke-width': 0.6, 'pointer-events': 'none' }, String(count))
     }
   }
 
@@ -946,41 +949,6 @@ function producePitOps(topo, colors, render) {
 }
 
 // Seed packing geometry (drawing-layout data factory, game-agnostic)
-function seedLayout(count, r) {
-  if (count <= 0) return []
-  const gap = r * 2.5
-  if (count === 1) return [[0, 0]]
-  if (count === 2) return [[-gap / 2, 0], [gap / 2, 0]]
-  if (count === 3) return [[0, -gap / 2], [-gap / 2, gap / 2], [gap / 2, gap / 2]]
-  if (count === 4) return [[-gap / 2, -gap / 2], [gap / 2, -gap / 2], [-gap / 2, gap / 2], [gap / 2, gap / 2]]
-  if (count <= 6) {
-    const top = Math.ceil(count / 2)
-    const bot = count - top
-    const result = []
-    for (let i = 0; i < top; i++) result.push([(i - (top - 1) / 2) * gap, -gap / 2])
-    for (let i = 0; i < bot; i++) result.push([(i - (bot - 1) / 2) * gap, gap / 2])
-    return result
-  }
-  if (count <= 9) {
-    const rows = [Math.ceil(count / 3), Math.ceil((count - Math.ceil(count / 3)) / 2), count - Math.ceil(count / 3) - Math.ceil((count - Math.ceil(count / 3)) / 2)]
-    const result = []
-    for (let ri = 0; ri < 3; ri++) {
-      const n = rows[ri]
-      for (let i = 0; i < n; i++) result.push([(i - (n - 1) / 2) * gap, (ri - 1) * gap])
-    }
-    return result
-  }
-  const result = []
-  const side = Math.ceil(Math.sqrt(count))
-  for (let i = 0; i < count; i++) {
-    const row = Math.floor(i / side)
-    const col = i % side
-    const rowCount = (row < Math.floor(count / side)) ? side : count % side || side
-    result.push([(col - (rowCount - 1) / 2) * gap * 0.8, (row - (Math.ceil(count / side) - 1) / 2) * gap * 0.8])
-  }
-  return result
-}
-
 function produceTableauLayout(topo, colors, render, engine) {
   const config = { ...topo, colors, render, deal: engine?.deal, components: engine?.components, meta: engine?.meta, seed: engine?.setup?.seed || 42 }
   return { type: 'tableau', config }
@@ -1114,12 +1082,7 @@ function nodePieceOps(nodes, render) {
     if (!piece) continue
     const p = typeof piece === 'object' ? piece : { type: String(piece) }
     const href = pieceImages[pieceImageKey(p, pieceImages)]
-    if (href) {
-      pieces.push({ tag: 'image', attrs: { href, x: nodes[i].x - pieceSize / 2, y: nodes[i].y - pieceSize / 2, width: pieceSize, height: pieceSize, 'pointer-events': 'none' } })
-    } else {
-      const white = p.owner === 0 || p.color === 'white'
-      pieces.push({ tag: 'circle', attrs: { cx: nodes[i].x, cy: nodes[i].y, r: pointRadius * 1.5, fill: white ? '#f2efe6' : '#2b2622', stroke: white ? '#8a8272' : '#000', 'stroke-width': 1.5, 'pointer-events': 'none' } })
-    }
+    if (href) pieces.push({ tag: 'image', attrs: { href, x: nodes[i].x - pieceSize / 2, y: nodes[i].y - pieceSize / 2, width: pieceSize, height: pieceSize, 'pointer-events': 'none' } })
   }
   return { op: 'elements', items: pieces }
 }

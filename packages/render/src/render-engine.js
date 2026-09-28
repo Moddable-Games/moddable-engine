@@ -611,10 +611,6 @@ function renderPiecesFromCells(position, cells, tileSize, opts) {
       } else {
         parts.push(`<image href="${pieceImages[imageKey]}" x="${x}" y="${y}" width="${drawSize}" height="${drawSize}" pointer-events="none"/>`)
       }
-    } else if (piece.type === 'stone') {
-      parts.push(drawStone(piece, pos.x, pos.y, tileSize * 0.42, opts.colors || {}))
-    } else if (piece.type === 'man' || piece.type === 'king') {
-      parts.push(drawDiscPiece(piece, pos.x, pos.y, tileSize * 0.38, opts.colors || {}))
     } else if (pieceImages[piece.type]) {
       const x = pos.x - drawSize / 2, y = pos.y - drawSize / 2
       parts.push(`<image href="${pieceImages[piece.type]}" x="${x}" y="${y}" width="${drawSize}" height="${drawSize}" pointer-events="none"/>`)
@@ -634,24 +630,6 @@ function renderPiecesFromCells(position, cells, tileSize, opts) {
   }
 
   return parts.join('')
-}
-
-function drawStone(piece, cx, cy, r, C) {
-  const isW = piece.owner === 0 || piece.color === 'white'
-  const fill = isW ? (C.whitePieceFill || '#fff') : (C.blackPieceFill || '#1c1c1c')
-  const stroke = isW ? (C.whitePieceStroke || '#333') : (C.blackPieceStroke || '#888')
-  return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>`
-}
-
-function drawDiscPiece(piece, cx, cy, r, C) {
-  const isW = piece.owner === 0 || piece.color === 'white'
-  const fill = isW ? '#fff' : '#333'
-  const stroke = isW ? '#333' : '#111'
-  const inner = isW ? '#ccc' : '#555'
-  let svg = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>`
-  svg += `<circle cx="${cx}" cy="${cy}" r="${r * 0.64}" fill="none" stroke="${inner}" stroke-width="1"/>`
-  if (piece.type === 'king') svg += `<circle cx="${cx}" cy="${cy}" r="${r * 0.4}" fill="none" stroke="${inner}" stroke-width="1.5"/>`
-  return svg
 }
 
 function collectDefs(position, pieceDefs) {

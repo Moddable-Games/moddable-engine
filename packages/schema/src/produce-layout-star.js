@@ -6,7 +6,6 @@ const STAR_ARMS = ['N', 'NE', 'SE', 'S', 'SW', 'NW']
 // no image for the arm. Indexed by STAR_ARMS. Not derivable from the resolved
 // engine: nothing in it maps a player colour name to a hex value.
 const STAR_ARM_PIECE_KEYS = ['red-circle', 'blue-circle', 'green-circle', 'black-circle', 'purple-circle', 'brown-circle']
-const STAR_ARM_COLORS = ['#d32f2f', '#1565c0', '#2e7d32', '#1a1a1a', '#6a1b9a', '#5d4037']
 
 // Star outline (inner hexagon + six tips) as offsets from the lattice centre,
 // calibrated at STAR_OUTLINE_REF_SPACING / STAR_OUTLINE_REF_ARM. Both the hole
@@ -74,11 +73,9 @@ export function produceStarLayout(colors, render, params) {
     const armName = filledArms[a], holeIdxs = arms[armName]
     const colorIdx = STAR_ARMS.indexOf(armName)
     const img = pieceImages[STAR_ARM_PIECE_KEYS[colorIdx]] || null
-    const color = STAR_ARM_COLORS[colorIdx] || STAR_ARM_COLORS[a]
     for (const idx of holeIdxs) {
       const hp = positions[idx]
       if (img) pieces.push({ tag: 'image', attrs: { href: img, x: hp.x - pieceSz / 2, y: hp.y - pieceSz / 2, width: pieceSz, height: pieceSz } })
-      else pieces.push({ tag: 'circle', attrs: { cx: hp.x, cy: hp.y, r: pieceR - 1, fill: color, stroke: 'rgba(255,255,255,0.6)', 'stroke-width': 1.5 } })
     }
   }
   // A game in progress: the pieces stand wherever the position puts them,
@@ -89,9 +86,7 @@ export function produceStarLayout(colors, render, params) {
     const hp = positions[idx]
     if (!hp || !piece) continue
     const img = pieceImages[pieceImageKey(piece, pieceImages)] || null
-    const color = STAR_ARM_COLORS[typeof piece === 'object' && Number.isInteger(piece.owner) ? piece.owner : 0]
     if (img) pieces.push({ tag: 'image', attrs: { href: img, x: hp.x - pieceSz / 2, y: hp.y - pieceSz / 2, width: pieceSz, height: pieceSz, 'pointer-events': 'none' } })
-    else pieces.push({ tag: 'circle', attrs: { cx: hp.x, cy: hp.y, r: pieceR - 1, fill: color, stroke: 'rgba(255,255,255,0.6)', 'stroke-width': 1.5, 'pointer-events': 'none' } })
   }
   ops.push({ op: 'elements', items: pieces })
   const labelPad = spacing * 1.0
