@@ -3,7 +3,7 @@ import { warnUnknownConfigKeys } from '../../../core/index.js'
 // authoring docs share one source of truth, and kept separate from `defaults`,
 // which only lists the keys that carry a default value.
 export const CONFIG_KEYS = new Set([
-  'captureBackward', 'captureDirections', 'cols', 'directions', 'flyingKings', 'forcedCapture',
+  'captureBackward', 'captureDirections', 'captureMethods', 'chain', 'cols', 'directions', 'flyingKings', 'forcedCapture',
   'columns', 'kingMoveLimit', 'phalanx',
   'kingCapturePriority', 'kingLandsBehindCapture', 'loseOnSinglePiece', 'majorityPrefersKing',
   'manCapture', 'manMove',
@@ -371,6 +371,78 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
     return chains
   }
 
+  // Capture by approach and by withdrawal. Fanorona's pieces do not jump:
+  // "Move a piece to an adjacent intersection such that an enemy piece occupies
+  // the next intersection in the same direction of movement. That enemy piece
+  // and all successive enemy pieces in an unbroken line beyond it are
+  // captured", and withdrawal is the same taken from the intersection just
+  // vacated, in the opposite direction.
+  //
+  //     captureMethods: [approach, withdrawal]     # default [jump]
+  //     chain:
+  //       optional: true           # the player may stop after any capture
+  //       revisit: false           # nor land where the piece has already been
+  //       repeatDirection: false   # nor go the way it just went
+  //
+  // A step that captures both ways is two moves, told apart by `method`. The
+  // lines are the board's own: every step asks the topology, so a diagonal is
+  // only followed where one is drawn.
+  const captureMethods = config.captureMethods || ['jump']
+  const stepCapture = captureMethods.includes('approach') || captureMethods.includes('withdrawal')
+  const chainRules = { optional: false, revisit: true, repeatDirection: true, ...config.chain }
+
+  function stepFrom(pos, dr, dc) {
+    if (topology && topology.step) return topology.step(pos, [dr, dc])
+    const [r, c] = rowCol(pos)
+    return inBounds(r + dr, c + dc) ? cellIndex(r + dr, c + dc) : null
+  }
+
+  // The unbroken run of enemy pieces starting at `pos` and running on along
+  // the direction.
+  function enemyLine(board, pos, dr, dc, playerIndex) {
+    const line = []
+    let at = pos
+    while (at !== null && board[at] && board[at].owner !== playerIndex) {
+      line.push(at)
+      at = stepFrom(at, dr, dc)
+    }
+    return line
+  }
+
+  function findStepCaptures(board, playerIndex, fromPos = null, chain = null) {
+    const moves = []
+    const positions = fromPos !== null ? [fromPos] : getAllPositions(board, playerIndex)
+    for (const from of positions) {
+      const piece = board[from]
+      if (!piece || piece.owner !== playerIndex) continue
+      for (const [dr, dc] of getCaptureDirs(piece, playerIndex)) {
+        const to = stepFrom(from, dr, dc)
+        if (to === null || board[to] !== null) continue
+        if (chain && !chainRules.repeatDirection && chain.dir && chain.dir[0] === dr && chain.dir[1] === dc) continue
+        if (chain && !chainRules.revisit && chain.visited.includes(to)) continue
+        if (captureMethods.includes('approach')) {
+          const ahead = stepFrom(to, dr, dc)
+          const line = ahead === null ? [] : enemyLine(board, ahead, dr, dc, playerIndex)
+          if (line.length) moves.push({ from, to, captures: line, captureCount: line.length, method: 'approach' })
+        }
+        if (captureMethods.includes('withdrawal')) {
+          const behind = stepFrom(from, -dr, -dc)
+          const line = behind === null ? [] : enemyLine(board, behind, -dr, -dc, playerIndex)
+          if (line.length) moves.push({ from, to, captures: line, captureCount: line.length, method: 'withdrawal' })
+        }
+      }
+    }
+    return moves
+  }
+
+  // Every capture the side to move has, however this game captures.
+  function capturesFor(board, playerIndex, fromPos = null, chain = null) {
+    return stepCapture ? findStepCaptures(board, playerIndex, fromPos, chain) : findCaptures(board, playerIndex, fromPos)
+  }
+
+  // Ending a turn mid-chain, where the chain is optional.
+  const STOP = { action: 'stop' }
+
   function getAllPositions(board, playerIndex) {
     const positions = []
     for (let i = 0; i < board.length; i++) {
@@ -448,6 +520,15 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
     return buildSetupBoard()
   }
 
+  function chainOf(slice) {
+    return { visited: slice._chainVisited || [], dir: slice._chainDir || null }
+  }
+
+  function endChain(slice) {
+    const { _chainVisited: _v, _chainDir: _d, ...rest } = slice
+    return { ...rest, _chainActive: false, _chainFrom: null }
+  }
+
   function capturesAKing(move, board) {
     const captured = move.captures || move.captured || []
     return captured.some(pos => {
@@ -467,6 +548,11 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
     vocabulary: VOCABULARY,
     config,
     rules: ['capture.replacement', 'forced-capture', 'chain-capture', 'promotion.rank-reach'],
+    // Stopping an optional chain is offered alongside the captures that would
+    // continue it, and the forced-capture filter must not take it away.
+    ruleDefaults: {
+      'forced-capture': { captureDetector: (m) => m.action === 'stop' || Boolean(m.captures && m.captures.length > 0) },
+    },
 
     init(pluginConfig, { request }) {
       topology = request('core.topology')
@@ -486,9 +572,10 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
     validateMove(move, slice, full) {
       const playerIndex = full.__players.currentIndex
       if (slice._chainActive) {
+        if (move.action === 'stop') return chainRules.optional
         if (move.from !== slice._chainFrom) return false
-        const captures = findCaptures(slice.board, playerIndex, move.from)
-        return captures.some(c => c.to === move.to)
+        const captures = capturesFor(slice.board, playerIndex, move.from, chainOf(slice))
+        return captures.some(c => c.to === move.to && (!move.method || c.method === move.method))
       }
       const legal = this.getLegalMoves(slice, full)
       return legal.some(m => m.from === move.from && m.to === move.to)
@@ -496,6 +583,7 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
 
     applyMove(move, slice, full) {
       const playerIndex = full.__players.currentIndex
+      if (move.action === 'stop') return endChain(slice)
       const board = [...slice.board]
 
       const piece = board[move.from]
@@ -547,6 +635,22 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
         slice = { ...slice, _kingStreak: streaks }
       }
 
+      if (stepCapture) {
+        if (!move.captures || move.captures.length === 0) return endChain({ ...slice, board })
+        // The chain remembers where the piece has been and which way it went.
+        const [fr, fc] = rowCol(move.from)
+        const [tr, tc] = rowCol(move.to)
+        const chain = {
+          visited: [...(slice._chainActive ? slice._chainVisited || [] : [move.from]), move.to],
+          dir: [tr - fr, tc - fc],
+        }
+        if (capturesFor(board, playerIndex, move.to, chain).length === 0) return endChain({ ...slice, board })
+        return {
+          state: { ...slice, board, _chainActive: true, _chainFrom: move.to, _chainVisited: chain.visited, _chainDir: chain.dir },
+          continueTurn: true,
+        }
+      }
+
       const furtherCaptures = findCaptures(board, playerIndex, move.to)
       if (move.captures && move.captures.length > 0 && furtherCaptures.length > 0 && landingPiece.type === piece.type) {
         return {
@@ -572,10 +676,11 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
       const playerIndex = full.__players.currentIndex
 
       if (slice._chainActive) {
-        return hooks.moveFilter(findCaptures(slice.board, playerIndex, slice._chainFrom), slice, full)
+        const more = capturesFor(slice.board, playerIndex, slice._chainFrom, chainOf(slice))
+        return hooks.moveFilter(chainRules.optional ? [...more, STOP] : more, slice, full)
       }
 
-      let captures = findCaptures(slice.board, playerIndex)
+      let captures = capturesFor(slice.board, playerIndex)
 
       if (config.menCannotCaptureKings) {
         captures = captures.filter(c => !capturesAKing(c, slice.board))
@@ -629,7 +734,7 @@ export function createDraughtsPlugin(variantConfig = {}, context = {}) {
         return winnerName(playerIndex)
       }
 
-      const opponentMoves = findCaptures(slice.board, opponent)
+      const opponentMoves = capturesFor(slice.board, opponent)
       if (opponentMoves.length === 0) {
         const opponentSimple = findSimpleMoves(slice.board, opponent)
         if (opponentSimple.length === 0) {

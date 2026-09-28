@@ -650,5 +650,45 @@
         }
       }
     }
+  },
+  "fanorona": {
+    "plugin": "draughts",
+    "default": {
+      "title": "Fanorona (Standard)",
+      "slug": "standard",
+      "parent": "fanorona",
+      "engine": {
+        "topology": {
+          "type": "grid",
+          "rows": 5,
+          "cols": 9,
+          "layout": "intersections"
+        },
+        "players": [
+          "white",
+          "black"
+        ],
+        "plugins": {
+          "fanorona": {
+            "directions": "all",
+            "manMove": "all",
+            "manCapture": "all",
+            "promotion": false,
+            "forcedCapture": true,
+            "piecesPerPlayer": 22,
+            "captureMethods": [
+              "approach",
+              "withdrawal"
+            ],
+            "chain": {
+              "optional": true,
+              "revisit": false,
+              "repeatDirection": false
+            },
+            "setup": "bbbbbbbbb/bbbbbbbbb/bwbw1bwbw/wwwwwwwww/wwwwwwwww"
+          }
+        }
+      }
+    }
   }
 }

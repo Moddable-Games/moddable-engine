@@ -1967,7 +1967,7 @@
     "topology": "grid",
     "svg": "svgs/fanorona--standard.svg",
     "rulesUrl": "fanorona/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "flower-48",
