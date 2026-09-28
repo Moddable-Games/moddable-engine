@@ -79,6 +79,7 @@ registerDeck('hanafuda-48', {
   cardCount: 48,
   cardWidth: 44,
   cardHeight: 64,
+  backArt: 'card-back',
   months: MONTHS,
   types: TYPES,
 

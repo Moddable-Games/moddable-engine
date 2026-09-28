@@ -78,4 +78,11 @@ describe('cardArtwork', () => {
     expect(art.cardUrl(ace)).toBe('https://engine.moddable.games/pieces/sets/letele-cards/S-A.svg')
     expect(art.backUrl()).toBe('https://engine.moddable.games/pieces/sets/letele-cards/B-1.svg')
   })
+
+  // engine#205. The hanafuda set ships a back; the deck never named it, so a
+  // face-down card had nothing to draw.
+  it('resolves the hanafuda back from the set the family declares', () => {
+    const art = cardArtwork('flower-48', { variant: 'koi-koi', gallery, assetBase: 'https://engine.moddable.games' })
+    expect(art.backUrl()).toBe('https://engine.moddable.games/pieces/sets/hanafuda-traditional/Hanafuda_card_back_Alt.svg')
+  })
 })
