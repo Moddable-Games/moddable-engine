@@ -7,8 +7,8 @@
     {
       "path": "/api/pieces/index.json",
       "type": "json",
-      "description": "Piece gallery — 124 SVG sets across chess, shogi, xiangqi, Go, draughts, backgammon",
-      "count": 124
+      "description": "Piece gallery — 125 SVG sets across chess, shogi, xiangqi, Go, draughts, backgammon",
+      "count": 125
     },
     {
       "path": "/api/boards/index.json",
