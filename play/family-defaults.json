@@ -427,6 +427,130 @@
       }
     }
   },
+  "asalto": {
+    "plugin": "hop",
+    "default": {
+      "title": "Asalto (Standard)",
+      "slug": "standard",
+      "parent": "asalto",
+      "engine": {
+        "topology": {
+          "type": "graph",
+          "structure": "grid-cross",
+          "params": {
+            "rows": [
+              [
+                2,
+                3,
+                4
+              ],
+              [
+                2,
+                3,
+                4
+              ],
+              [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              [
+                2,
+                3,
+                4
+              ],
+              [
+                2,
+                3,
+                4
+              ]
+            ],
+            "fortressRows": 2,
+            "fortressExtraRow": 2,
+            "fortressCols": [
+              2,
+              3,
+              4
+            ],
+            "diagonals": true
+          }
+        },
+        "players": [
+          "officers",
+          "soldiers"
+        ],
+        "plugins": {
+          "asalto": {
+            "vocabulary": {
+              "piece": {
+                "symbols": {
+                  "0": "w",
+                  "1": "b"
+                }
+              }
+            },
+            "seats": [
+              {
+                "steps": "all",
+                "hops": "capture"
+              },
+              {
+                "steps": {
+                  "rows": [
+                    -1,
+                    0
+                  ]
+                },
+                "hops": "none"
+              }
+            ],
+            "noMovesLoses": true,
+            "goals": [
+              [],
+              [
+                "n1",
+                "n2",
+                "n3",
+                "n4",
+                "n5",
+                "n6",
+                "n9",
+                "n10",
+                "n11"
+              ]
+            ],
+            "fewerThan": [
+              0,
+              9
+            ],
+            "setup": "n4:w,n6:w,n7:b,n8:b,n12:b,n13:b,n14:b,n15:b,n16:b,n17:b,n18:b,n19:b,n20:b,n21:b,n22:b,n23:b,n24:b,n25:b,n26:b,n27:b,n28:b,n29:b,n30:b,n31:b,n32:b,n33:b"
+          }
+        }
+      }
+    }
+  },
   "chaupar": {
     "plugin": "race",
     "default": {
@@ -4792,6 +4916,123 @@
               }
             },
             "setup": "bbbbbb/bbbbbb/6/6/wwwwww/wwwwww"
+          }
+        }
+      }
+    }
+  },
+  "tafl": {
+    "plugin": "chess",
+    "default": {
+      "title": "Tablut",
+      "slug": "standard",
+      "parent": "tafl",
+      "engine": {
+        "topology": {
+          "type": "grid",
+          "rows": 9,
+          "cols": 9
+        },
+        "players": [
+          "attackers",
+          "defenders"
+        ],
+        "plugins": {
+          "tafl": {
+            "castling": false,
+            "enPassant": false,
+            "noCheck": true,
+            "vocabulary": {
+              "bishop": {
+                "symbols": {}
+              },
+              "attacker": {
+                "symbols": {
+                  "0": "b"
+                }
+              },
+              "defender": {
+                "symbols": {
+                  "1": "w"
+                }
+              },
+              "king": {
+                "symbols": {
+                  "1": "K"
+                }
+              }
+            },
+            "loseWithout": [
+              null,
+              "king"
+            ],
+            "regions": {
+              "throne": {
+                "cells": [
+                  [
+                    4,
+                    4
+                  ]
+                ]
+              },
+              "interior": {
+                "rows": [
+                  1,
+                  7
+                ],
+                "cols": [
+                  1,
+                  7
+                ]
+              },
+              "edge": {
+                "not": [
+                  "interior"
+                ]
+              },
+              "common": {
+                "not": [
+                  "throne"
+                ]
+              },
+              "royal": {
+                "not": [
+                  "throne"
+                ]
+              }
+            },
+            "pieces": {
+              "attacker": {
+                "type": "rider",
+                "dirs": "orthogonal",
+                "confine": "common"
+              },
+              "defender": {
+                "type": "rider",
+                "dirs": "orthogonal",
+                "confine": "common"
+              },
+              "king": {
+                "type": "rider",
+                "dirs": "orthogonal",
+                "confine": "royal"
+              }
+            },
+            "custodial": {
+              "dirs": "orthogonal",
+              "displacement": false,
+              "hostile": [
+                "throne"
+              ],
+              "enclose": {
+                "piece": "king"
+              }
+            },
+            "goal": {
+              "piece": "king",
+              "in": "edge"
+            },
+            "setup": "3bbb3/4b4/4w4/b3w3b/bbwwKwwbb/b3w3b/4w4/4b4/3bbb3"
           }
         }
       }

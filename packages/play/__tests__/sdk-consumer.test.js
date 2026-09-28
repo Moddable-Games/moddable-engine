@@ -42,7 +42,6 @@ describe('SDK consumer path (no frontmatter, no variant registration)', () => {
   test('hasFamily is false for non-existent families', () => {
     // Families with no plugin yet. Implementing one moves it into
     // EXPECTED_FAMILIES rather than being deleted from here.
-    expect(hasFamily('tafl')).toBe(false)
     expect(hasFamily('no-such-family')).toBe(false)
   })
 

@@ -576,6 +576,7 @@ function produceHexDirect(topo, colors, render) {
 const HEX_EDGE_NEIGHBOURS = [[1, 0], [0, 1], [-1, 1], [-1, 0], [0, -1], [1, -1]]
 
 import { HexMath } from '../../topologies/hex/index.js'
+import { gridCrossPoints, DEFAULT_GRID_CROSS } from '../../topologies/graph/index.js'
 import { buildCrossMap } from './cross-map.js'
 
 function axialToPixelPointy(q, r, size) {
@@ -1168,63 +1169,21 @@ function concentricRingOps(size, ox, oy, colors, pointRadius, params, render) {
   ]
 }
 
-// Default grid-cross frame (alquerque cross) when no `rows` are declared.
-const DEFAULT_GRID_CROSS = {
-  rows: [[2,3,4],[2,3,4],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[2,3,4],[2,3,4]],
-  fortressRows: 2, fortressExtraRow: 2, fortressCols: [2,3,4],
-}
-
+// Pixel positions for the cross board's points, which the graph topology
+// generates: the renderer and the game read one list, in one order.
 function gridCrossNodes(size, ox, oy, gridDef) {
-  const nodes = [], edges = [], fortressNodes = new Set()
-  const rowDefs = gridDef.rows.map((cols, y) => ({ cols, y }))
-  const fortressRowCount = gridDef.fortressRows || 2
-  const maxCol = Math.max(...rowDefs.flatMap(r => r.cols))
-  const maxRow = rowDefs.length - 1
+  const { points, edges, at } = gridCrossPoints(gridDef)
+  const maxCol = Math.max(...gridDef.rows.flat())
+  const maxRow = gridDef.rows.length - 1
   const margin = size * 0.08
   const usable = size - margin * 2
   const hGaps = maxCol, vGaps = maxRow
   const spacing = usable / Math.max(hGaps, vGaps)
   const xOffset = ox + (size - hGaps * spacing) / 2
   const yOffset = oy + (size - vGaps * spacing) / 2
-  const fortressExtraRow = gridDef.fortressExtraRow
-  const fortressCols = gridDef.fortressCols || null
-  const nodeMap = {}
-  for (const row of rowDefs) {
-    for (const col of row.cols) {
-      const idx = nodes.length
-      nodeMap[`${row.y},${col}`] = idx
-      nodes.push({ x: xOffset + col * spacing, y: yOffset + row.y * spacing })
-      if (row.y < fortressRowCount) fortressNodes.add(idx)
-      else if (row.y === fortressExtraRow && fortressCols && fortressCols.includes(col)) fortressNodes.add(idx)
-    }
-  }
-  for (const row of rowDefs) {
-    for (let i = 0; i < row.cols.length - 1; i++) {
-      if (row.cols[i + 1] - row.cols[i] === 1) edges.push([nodeMap[`${row.y},${row.cols[i]}`], nodeMap[`${row.y},${row.cols[i + 1]}`]])
-    }
-  }
-  for (let ri = 0; ri < rowDefs.length - 1; ri++) {
-    const r1 = rowDefs[ri], r2 = rowDefs[ri + 1]
-    for (const col of r1.cols) { if (r2.cols.includes(col)) edges.push([nodeMap[`${r1.y},${col}`], nodeMap[`${r2.y},${col}`]]) }
-  }
-  for (let ri = 0; ri < rowDefs.length - 1; ri++) {
-    const r1 = rowDefs[ri], r2 = rowDefs[ri + 1]
-    for (const col of r1.cols) {
-      if (r1.cols.includes(col + 1) && r2.cols.includes(col) && r2.cols.includes(col + 1)) {
-        edges.push([nodeMap[`${r1.y},${col}`], nodeMap[`${r2.y},${col + 1}`]])
-        edges.push([nodeMap[`${r1.y},${col + 1}`], nodeMap[`${r2.y},${col}`]])
-      }
-    }
-  }
-  if (gridDef.extraNodes) {
-    for (const extra of gridDef.extraNodes) {
-      const idx = nodes.length
-      nodes.push({ x: xOffset + extra.col * spacing, y: yOffset + extra.row * spacing })
-      if (extra.fortress) fortressNodes.add(idx)
-      for (const target of extra.connectsTo) { const tIdx = nodeMap[`${target[0]},${target[1]}`]; if (tIdx !== undefined) edges.push([idx, tIdx]) }
-    }
-  }
-  return { nodes, edges, fortressNodes, nodeMap }
+  const nodes = points.map(p => ({ x: xOffset + p.x * spacing, y: yOffset + p.y * spacing }))
+  const fortressNodes = new Set(points.map((p, i) => (p.fortress ? i : -1)).filter(i => i >= 0))
+  return { nodes, edges, fortressNodes, nodeMap: at }
 }
 
 function gridCrossFortressElements(nodes, fortressNodes, nodeMap, gridDef, colors) {

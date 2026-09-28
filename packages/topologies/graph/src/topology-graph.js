@@ -1,5 +1,6 @@
 import { concentricRings } from './concentric-rings.js'
 import { starStations } from './star.js'
+import { gridCrossGraph } from './grid-cross.js'
 export const schema = {
   type: 'graph',
   required: ['nodes', 'edges'],
@@ -10,7 +11,7 @@ export function createGraphTopology(config) {
   // structure and let the structure generate them. `structure:
   // concentric-rings` existed only as a rendering instruction, so every morris
   // variant carried a complete engine block and still had no board to play on.
-  const GENERATORS = { 'concentric-rings': concentricRings, star: starStations }
+  const GENERATORS = { 'concentric-rings': concentricRings, star: starStations, 'grid-cross': gridCrossGraph }
   const generated = !config.nodes && GENERATORS[config.structure]
     ? GENERATORS[config.structure](config.params || {})
     : null
@@ -135,7 +136,15 @@ export function createGraphTopology(config) {
   function beyond(from, via) {
     const a = coords.get(from), b = coords.get(via)
     if (!a || !b) return null
-    return byCoord.get(`${2 * b[0] - a[0]},${2 * b[1] - a[1]}`) || null
+    const next = byCoord.get(`${2 * b[0] - a[0]},${2 * b[1] - a[1]}`) || null
+    // The point beyond must be joined to this one by a drawn line.
+    return next && neighbours(via).includes(next) ? next : null
+  }
+
+  // Where a node lies on its lattice, as [row, col], for a board that has one.
+  function toRC(node) {
+    const c = coords.get(node)
+    return c ? [c[1], c[0]] : null
   }
 
   function jumpPairs(from, directions) {
@@ -410,6 +419,7 @@ export function createGraphTopology(config) {
     jumpPairs,
     adjacentPairs,
     rays,
+    toRC,
     getLayout,
     renderLayout,
     serializePosition,

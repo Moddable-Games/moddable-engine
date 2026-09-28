@@ -2087,6 +2087,52 @@
     }
   },
   {
+    "id": "mce-tafl",
+    "name": "MCE Tafl",
+    "family": "tafl",
+    "author": "Moddable Games (composite)",
+    "license": "Mixed (see sources)",
+    "source": "https://github.com/Moddable-Games/moddable-engine",
+    "playable": true,
+    "recolorable": false,
+    "virtual": true,
+    "sources": {
+      "playstrategy-go-classic": "../playstrategy-go-classic/",
+      "mce-chess": "../mce-chess/"
+    },
+    "surface": {
+      "type": "disc",
+      "owners": {
+        "white": {
+          "fill": "#f2efe6",
+          "stroke": "#8a8272"
+        },
+        "black": {
+          "fill": "#2b2622",
+          "stroke": "#000"
+        }
+      }
+    },
+    "pieces": {
+      "wS": {
+        "source": "playstrategy-go-classic",
+        "file": "wS.svg"
+      },
+      "bS": {
+        "source": "playstrategy-go-classic",
+        "file": "bS.svg"
+      },
+      "wK": {
+        "source": "mce-chess",
+        "file": "wK.svg",
+        "surface": "disc"
+      }
+    },
+    "depicts": {
+      "K": "king"
+    }
+  },
+  {
     "id": "mce-4player-shogi",
     "name": "MCE 4-Player Shogi",
     "family": "shogi",
@@ -3120,13 +3166,26 @@
     "virtual": true,
     "extends": "playstrategy-go-classic",
     "sources": {
-      "playstrategy-draughts-wide-crown": "../playstrategy-draughts-wide-crown/"
+      "playstrategy-go-classic": "../playstrategy-go-classic/",
+      "mce-chess": "../mce-chess/"
     },
     "pieces": {
+      "wS": {
+        "source": "playstrategy-go-classic",
+        "file": "wS.svg"
+      },
+      "bS": {
+        "source": "playstrategy-go-classic",
+        "file": "bS.svg"
+      },
       "wK": {
-        "source": "playstrategy-draughts-wide-crown",
-        "file": "wK.svg"
+        "source": "mce-chess",
+        "file": "wK.svg",
+        "surface": "disc"
       }
+    },
+    "depicts": {
+      "K": "king"
     }
   },
   {
