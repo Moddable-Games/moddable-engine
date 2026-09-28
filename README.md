@@ -171,6 +171,7 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-28
+- CI on a push takes the fast tier and the browser tests in parallel, about ten minutes where it took ninety. The slow suites run in their own workflow, each as its own job with the puzzle ratings split six ways: nightly, on main, and on pull requests that touch the AI, piece movement, the plugins or the puzzles. `npm run test:changed` runs only the tests reachable from what changed
 - Every playable family has a showcase page under `/families/`, generated from the rules corpus: a live board, the variants with their rules and play links, a frontmatter excerpt and its SDK docs. A families index lists all thirty, and the site footer names the eight largest with a link to the rest
 - Docs navigation is generated from one table of contents (`docs/toc.json`): every page's sidebar and "On this page" list, and the guides table on the docs index. A page missing from the table fails the build
 - SDK docs cover every family: new pages for Backgammon, the race and hop plugins, the tableau plugin (cards, tiles and dice) and hosted families, and an SDK page whose table is measured per family by running the SDK (moves, hidden information, chance, AI search, SVG rendering)

@@ -34,6 +34,7 @@
     "test:slow": "node scripts/run-tests.mjs slow",
     "test:perf": "node scripts/run-tests.mjs perf",
     "test:related": "node scripts/run-tests.mjs related",
+    "test:changed": "node scripts/run-tests.mjs changed",
     "test:all": "node scripts/run-tests.mjs all",
     "build": "npm run build --workspaces",
     "variant-report": "node --experimental-vm-modules scripts/variant-report.mjs",

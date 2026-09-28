@@ -1,4 +1,4 @@
-# CI — runs on every push and PR to dev/main.
+# CI: runs on every push and PR to dev/main. The slow suites are in slow.yml.
 # GATE: all three jobs must pass for a PR to merge.
 # Configure branch protection on dev and main to require the "gate" status check.
 name: CI
@@ -47,16 +47,9 @@ jobs:
         env:
           NODE_OPTIONS: '--experimental-vm-modules'
           MODDABLE_RULES_DIR: ${{ github.workspace }}/moddable-rules/games
-      - name: Unit tests (slow tier)
-        run: npm run test:slow -- --no-coverage
-        env:
-          NODE_OPTIONS: '--experimental-vm-modules'
-          MODDABLE_RULES_DIR: ${{ github.workspace }}/moddable-rules/games
-      - name: Performance (alone, in band)
-        run: npm run test:perf -- --no-coverage
-        env:
-          NODE_OPTIONS: '--experimental-vm-modules'
-          MODDABLE_RULES_DIR: ${{ github.workspace }}/moddable-rules/games
+      # The slow tier and the performance test run in slow.yml: nightly, on
+      # main, and on pull requests that touch what they cover. On this path
+      # they made every push wait about 90 minutes (engine#201).
       # The discovery check belongs in this job, because this is the job that
       # ran the suite, and the test count is now measured from that run rather
       # than scraped out of a README line.
@@ -137,9 +130,10 @@ jobs:
             exit 1
           fi
 
+  # Starts with the other jobs rather than after the unit tests: it checks
+  # something different, and waiting for them doubled the run.
   playwright:
     runs-on: ubuntu-latest
-    needs: unit-tests
     steps:
       - uses: actions/checkout@v4
         with:

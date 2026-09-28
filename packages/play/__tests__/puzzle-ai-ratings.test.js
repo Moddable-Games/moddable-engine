@@ -11,6 +11,12 @@ import { measure } from '../../../scripts/rate-puzzles.mjs'
 const data = JSON.parse(readFileSync(join(process.cwd(), 'api', 'puzzles', 'index.json'), 'utf8'))
 const rated = [...data.standard, ...data.variants].filter(r => r.ai?.minimax?.solves?.length)
 
+// PUZZLE_SHARD=i/n checks every n-th puzzle from the i-th, so CI can spread the
+// pool over n jobs. Unset, it checks all of them (engine#201: one job took 69
+// minutes).
+const [shard, shards] = (process.env.PUZZLE_SHARD || '0/1').split('/').map(Number)
+const mine = rated.filter((_, i) => i % shards === shard)
+
 // Until scripts/rate-puzzles.mjs has been run over the pool and merged there is
 // nothing to hold the AI to; said here, so the skip is visible (engine#178).
 const describeRated = data.meta.aiRated ? describe : describe.skip
@@ -23,7 +29,7 @@ test('the pool is rated', () => {
 
 test('each puzzle is still solved by the weakest level recorded as solving it', () => {
   const lost = []
-  for (const record of rated) {
+  for (const record of mine) {
     const level = record.ai.minimax.solves[0]
     const now = measure(record, 'minimax', [level])
     if (!now.solves.includes(level)) lost.push(`${record.id}: ${level}`)

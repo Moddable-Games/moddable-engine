@@ -1,0 +1,64 @@
+# The O(variants) suites and the performance test, off the push path
+# (engine#201). Each suite is its own job and the puzzle ratings are split six
+# ways, so the run takes about as long as its longest job rather than the
+# ninety minutes the suites took in sequence.
+#
+# They run nightly, on main (where a regression must not land), on demand, and
+# on a pull request that touches what they check: the AI, piece movement, the
+# plugins that move pieces, or the puzzles.
+name: Slow suites
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  push:
+    branches: [main]
+  workflow_dispatch:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'packages/ai/**'
+      - 'packages/piece-behaviour/**'
+      - 'packages/plugins/**'
+      - 'api/puzzles/**'
+      - 'scripts/rate-puzzles.mjs'
+
+jobs:
+  suite:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: ai-both-seats, suite: packages/play/__tests__/ai-both-seats.test.js }
+          - { name: piece-mobility-all, suite: packages/play/__tests__/piece-mobility-all.test.js }
+          - { name: playability-standard, suite: packages/play/__tests__/playability-standard.test.js }
+          - { name: no-repetition, suite: packages/ai/__tests__/no-repetition.test.js }
+          - { name: puzzle-proofs, suite: packages/play/__tests__/puzzle-proofs.test.js }
+          - { name: puzzle-ratings-1, suite: packages/play/__tests__/puzzle-ai-ratings.test.js, shard: 0/6 }
+          - { name: puzzle-ratings-2, suite: packages/play/__tests__/puzzle-ai-ratings.test.js, shard: 1/6 }
+          - { name: puzzle-ratings-3, suite: packages/play/__tests__/puzzle-ai-ratings.test.js, shard: 2/6 }
+          - { name: puzzle-ratings-4, suite: packages/play/__tests__/puzzle-ai-ratings.test.js, shard: 3/6 }
+          - { name: puzzle-ratings-5, suite: packages/play/__tests__/puzzle-ai-ratings.test.js, shard: 4/6 }
+          - { name: puzzle-ratings-6, suite: packages/play/__tests__/puzzle-ai-ratings.test.js, shard: 5/6 }
+          - { name: performance, suite: packages/ai/__tests__/performance.test.js, inBand: true }
+    name: ${{ matrix.name }}
+    steps:
+      - uses: actions/checkout@v4
+      # Corpus branch paired with the branch being built, as in ci.yml.
+      - uses: actions/checkout@v4
+        with:
+          repository: Moddable-Games/moddable-rules
+          path: moddable-rules
+          ref: ${{ (github.base_ref || github.ref_name) == 'main' && 'main' || 'dev' }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci --ignore-scripts
+      - name: ${{ matrix.suite }}
+        run: npx jest ${{ matrix.suite }} --no-coverage ${{ matrix.inBand && '--runInBand' || '' }}
+        env:
+          NODE_OPTIONS: '--experimental-vm-modules'
+          MODDABLE_RULES_DIR: ${{ github.workspace }}/moddable-rules/games
+          MODDABLE_PUBLISH_TEST_COUNTS: '0'
+          PUZZLE_SHARD: ${{ matrix.shard || '0/1' }}

@@ -11,6 +11,8 @@
  *   all    every tier, in that order.
  *   related tests reachable from the files named after `--`, minus the slow
  *          tier. `npm run test:related -- packages/render/src/serialize-layout.js`
+ *   changed tests reachable from what changed since dev (or $BASE), minus the
+ *          slow tier. The default while working: `npm run test:changed`
  *
  * The tiers come from `jest.config.js`, so nothing here is a second list that
  * can drift from the first.
@@ -54,11 +56,12 @@ const RUN = {
   perf: () => jest([PERF_SUITE, '--runInBand'], 'performance'),
   // `npm run test:related -- path/to/file.js ...`
   related: () => jest([...IGNORE_SLOW, '--findRelatedTests'], 'tests related to the given files'),
+  changed: () => jest([...IGNORE_SLOW, '--changedSince', process.env.BASE || 'origin/dev'], 'tests related to changes since ' + (process.env.BASE || 'origin/dev')),
 }
 RUN.all = () => ['fast', 'slow', 'perf'].map(t => RUN[t]()).every(Boolean)
 
 if (!RUN[tier]) {
-  console.error(`Unknown tier "${tier}". One of: fast, slow, perf, related, all`)
+  console.error(`Unknown tier "${tier}". One of: fast, slow, perf, related, changed, all`)
   process.exit(2)
 }
 process.exit(RUN[tier]() ? 0 : 1)
