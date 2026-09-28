@@ -690,5 +690,65 @@
         }
       }
     }
+  },
+  "surakarta": {
+    "plugin": "chess",
+    "default": {
+      "title": "Surakarta (Standard)",
+      "slug": "standard",
+      "parent": "surakarta",
+      "engine": {
+        "topology": {
+          "type": "grid",
+          "rows": 6,
+          "cols": 6,
+          "layout": "intersections"
+        },
+        "players": [
+          "white",
+          "black"
+        ],
+        "plugins": {
+          "surakarta": {
+            "castling": false,
+            "enPassant": false,
+            "noCheck": true,
+            "stalemateMeaning": "loss",
+            "quietLimit": {
+              "plies": 100,
+              "decide": "material"
+            },
+            "vocabulary": {
+              "bishop": {
+                "symbols": {}
+              },
+              "stone": {
+                "symbols": {
+                  "0": "w",
+                  "1": "b"
+                }
+              }
+            },
+            "pieces": {
+              "stone": {
+                "divergent": {
+                  "move": {
+                    "type": "rider",
+                    "dirs": "all",
+                    "maxSteps": 1
+                  },
+                  "capture": {
+                    "type": "rail",
+                    "dirs": "orthogonal",
+                    "minArcs": 1
+                  }
+                }
+              }
+            },
+            "setup": "bbbbbb/bbbbbb/6/6/wwwwww/wwwwww"
+          }
+        }
+      }
+    }
   }
 }

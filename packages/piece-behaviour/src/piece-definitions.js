@@ -283,6 +283,62 @@ export function cross(dirs, over) {
   }
 }
 
+/**
+ * A capture along the board's lines and through its arcs.
+ *
+ * Surakarta: "The piece travels along a grid line away from its starting
+ * intersection. When it reaches an intersection where a loop arc begins, it
+ * follows the arc around the corner", and "lands on the first opponent piece it
+ * reaches". A capture must pass through at least `minArcs` arcs, and "every
+ * intersection along the path, except the destination, must be empty". The
+ * piece's own starting point is empty while it travels, so the path may cross
+ * it.
+ *
+ * The arcs are the topology's (`arcStep`), so this knows nothing about loops
+ * or corners. A walk that comes back to where it began, going the same way,
+ * has found nothing and stops.
+ */
+export function rail(dirs, opts = {}) {
+  const minArcs = opts.minArcs ?? 1
+  function strike(topology, from, dir, board) {
+    let pos = from
+    let heading = dir
+    let arcs = 0
+    const seen = new Set()
+    for (;;) {
+      const next = topology.arcStep(pos, heading)
+      if (!next) return null
+      if (next.arc) arcs++
+      pos = next.to
+      heading = next.dir
+      const key = `${pos}|${heading}`
+      if (seen.has(key)) return null
+      seen.add(key)
+      if (pos === from) continue
+      const occupant = board[pos]
+      if (!occupant) continue
+      return occupant.enemy && arcs >= minArcs ? pos : null
+    }
+  }
+  const directionsOn = (topology) => (typeof dirs === 'string' ? topology.getDirections(dirs) : dirs)
+  return {
+    type: 'rail',
+    genMoves(topology, from, board) {
+      if (!topology.arcStep) return []
+      const moves = []
+      for (const dir of directionsOn(topology)) {
+        const to = strike(topology, from, dir, board)
+        if (to !== null && !moves.some(m => m.to === to)) moves.push({ from, to, capture: true })
+      }
+      return moves
+    },
+    attacks(topology, from, target, board) {
+      if (!topology.arcStep) return false
+      return directionsOn(topology).some(dir => strike(topology, from, dir, board) === target)
+    },
+  }
+}
+
 export function compose(...primitives) {
   return {
     type: 'compound',
@@ -1106,6 +1162,7 @@ function buildPrimitive(spec, resolve) {
   if (spec.type === 'universal') return universalLeaper({ quiet: spec.quiet })
   if (spec.type === 'rangeCapture') return rangeCapture(spec.dirs || spec.offsets, { ranks: spec.ranks })
   if (spec.type === 'shoot') return shoot(spec.dirs || spec.offsets)
+  if (spec.type === 'rail') return rail(spec.dirs || 'orthogonal', { minArcs: spec.minArcs })
   if (spec.type === 'area') return areaMove(spec.dirs || spec.offsets, { steps: spec.steps, sameLine: spec.sameLine, quiet: spec.quiet })
   if (spec.type === 'locust') return locust(resolveLeapOffsets(spec.dirs || spec.offsets))
   if (spec.type === 'bent') return bent({ first: spec.first, firstSteps: spec.firstSteps, minSecondLeg: spec.minSecondLeg, second: spec.second, secondSteps: spec.secondSteps })
