@@ -5,7 +5,7 @@ export { defaultSeatFor } from './src/default-seat.js'
 export { boardToSetup } from './src/serialise.js'
 export { findFamilyPlugin, familySliceKey } from './src/find-plugin.js'
 export { createSimulatorForFamily } from './src/simulator-helper.js'
-export { renderStateAsSvg } from './src/render-helper.js'
+export { renderStateAsSvg, cardArtwork } from './src/render-helper.js'
 
 export {
   registerVariant,

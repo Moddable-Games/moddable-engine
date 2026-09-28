@@ -69,6 +69,30 @@ export function serializeLayout(layout, opts = {}) {
 }
 
 /** Serialize a list of structured elements to an SVG fragment string (no joins). */
+// Mark cells on any board by id: a copy of each marked cell's own shape, set
+// straight after it so it sits inside the same group and transform, filled
+// with the highlight colour and never a click target. A rectangle for a
+// square, a polygon for a backgammon point or a hex, a circle for a morris
+// node - the topology already drew the shape, so nothing here knows which.
+export function withHighlights(elements, highlights = []) {
+  const marks = new Map()
+  for (const h of highlights || []) {
+    const key = typeof h === 'string' ? h : h?.key ?? h?.cell
+    if (key !== undefined && key !== null) marks.set(String(key), (typeof h === 'object' && h.color) || '#f5c542')
+  }
+  if (!marks.size) return elements
+  const walk = (list) => list.flatMap(el => {
+    if (!el || !el.tag) return [el]
+    const next = el.children ? { ...el, children: walk(el.children) } : el
+    const key = el.attrs?.['data-sq']
+    if (key === undefined || !marks.has(String(key))) return [next]
+    const { 'data-sq': _id, class: _cls, ...shape } = el.attrs
+    const mark = { tag: el.tag, attrs: { ...shape, fill: marks.get(String(key)), 'fill-opacity': 0.55, stroke: 'none', class: 'highlight', 'pointer-events': 'none' } }
+    return [next, mark]
+  })
+  return walk(elements)
+}
+
 export function elementsToFragment(elements) {
   return elements.map(elementToSvg).join('')
 }

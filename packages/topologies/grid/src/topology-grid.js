@@ -1164,7 +1164,7 @@ const OP_HANDLERS = {
   },
 
   markers(op, geom, elements, cells) {
-    const { rows, cols, posX, posY } = geom
+    const { rows, cols, posX, posY, gx, gy, gridW, gridH } = geom
     let items = op.items
     if (op.allCells) {
       items = []
@@ -1177,6 +1177,12 @@ const OP_HANDLERS = {
       for (const marker of items) {
         const [r, c] = Array.isArray(marker) ? marker : [marker.r, marker.c]
         const cx = posX(c), cy = posY(r)
+        // A marker off the grid is not on this board. A variant that inherits
+        // its family's markers from a bigger board - Dobutsu's 4x3 under
+        // shogi's 9x9 hoshi - drew them outside the frame, where an embed
+        // clipped all but a stray dot. The grid's own extent is the bound: its
+        // edge lines on a board of squares, its outer points on one of points.
+        if (cx < gx - 0.5 || cx > gx + gridW + 0.5 || cy < gy - 0.5 || cy > gy + gridH + 0.5) continue
         const attrs = { cx, cy, r: (Array.isArray(marker) ? undefined : marker.radius) || op.radius }
         if (op.itemFill !== undefined) attrs.fill = (Array.isArray(marker) ? undefined : marker.fill) || op.itemFill
         list.push({ tag: 'circle', attrs })

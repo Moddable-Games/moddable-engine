@@ -19,7 +19,7 @@ import { renderHexLayout } from '../../topologies/hex/index.js'
 import { renderTableauLayout } from './render-tableau.js'
 import { createTrisectionTopology, trisectionSize, renderTrisectionLayout } from '../../topologies/trisection/index.js'
 import { createTriangularTopology, renderTriangularLayout } from '../../topologies/triangular/index.js'
-import { elementsToFragment, elementToSvg } from './serialize-layout.js'
+import { elementsToFragment, elementToSvg, withHighlights } from './serialize-layout.js'
 import { renderSurfaceSVG } from './piece-surface.js'
 import { OWNER_PREFIXES, getOwnerFromPrefix } from './recolour.js'
 
@@ -434,7 +434,7 @@ export function renderFromEngine(resolved, opts = {}) {
   const flipNonGrid = flipped && topo.type !== 'grid'
   if (flipNonGrid) parts.push(`<g transform="rotate(180 ${W / 2} ${H / 2})">`)
 
-  parts.push(elementsToFragment(layout.elements))
+  parts.push(elementsToFragment(withHighlights(layout.elements, opts.highlights)))
 
   if (render.overlays && render.overlays.length > 0) {
     const tileSize = render.cellSize || 40

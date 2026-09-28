@@ -129,7 +129,23 @@ const move = ai.pickMove(state.slice, state.players.currentIndex)</code></pre>
   <h2 id="render">Drawing a position</h2>
   <pre><code>import { renderStateAsSvg } from '@moddable/engine/play'
 
-const svg = renderStateAsSvg('tafl', game.getState(), { variant: 'standard' })</code></pre>
+const gallery = await fetch('https://engine.moddable.games/pieces/gallery-index.json').then(r => r.json())
+const svg = renderStateAsSvg('tafl', game.getState(), {
+  variant: 'brandubh',
+  gallery,                                        // piece and card artwork
+  assetBase: 'https://engine.moddable.games/',    // where artwork paths resolve
+  highlights: ['d4', { key: 'd5', color: '#f5c542' }],
+})</code></pre>
+  <p>A position is drawn the way the play page draws it: the variant's own board, surface and piece set. A board is written back to the variant's setup notation, and a table of cards, tiles or dice is drawn as it looks to one seat (<code>seat</code>, default 0), with that seat's hand face up and the others face down. Highlights name cells by the ids the board draws them with (<code>e4</code>, <code>point-6</code>, <code>n1</code>); a square grid also takes an index. A variant that names a piece set needs <code>gallery</code>, and the call throws without it rather than drawing a board with its pieces missing.</p>
+  <p>A variant whose board is a data file names it under <code>content.source</code>, and the SDK leaves reading it to you so it runs in a browser as well as Node. The Landlord's Game is one: fetch <code>https://engine.moddable.games/data/landlords-game-boards.json</code> and pass it as <code>content</code>. Without it the call throws and names the file, where it used to draw an empty board.</p>
+  <h3 id="card-artwork">Card and tile artwork</h3>
+  <pre><code>import { cardArtwork } from '@moddable/engine/play'
+import { createDeck } from '@moddable/engine/component-deck'
+
+const art = cardArtwork('standard-52', { variant: 'hearts', gallery, assetBase: 'https://engine.moddable.games/' })
+art.cardUrl(createDeck('standard-52')[0])   // .../pieces/sets/letele-cards/S-A.svg
+art.backUrl()                               // .../pieces/sets/letele-cards/B-1.svg</code></pre>
+  <p>Artwork belongs to the family, not the deck: each family's frontmatter names the set its cards, tiles or dominoes are drawn from, and <code>cardArtwork</code> resolves through it as the play page does.</p>
 
   <h2 id="support">What each family supports</h2>
   <!-- sdk-table:start -->
@@ -140,20 +156,20 @@ const svg = renderStateAsSvg('tafl', game.getState(), { variant: 'standard' })</
     <tbody>
       <tr id="agon"><td><a href="../families/agon/">Agon</a></td><td>chess</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="hosted-families.html">Families on Shared Plugins</a></td></tr>
       <tr id="asalto"><td><a href="../families/asalto/">Asalto</a></td><td>hop</td><td>policy</td><td>yes</td><td></td><td></td><td><a href="hop.html">Hopping Games</a></td></tr>
-      <tr id="backgammon"><td><a href="../families/backgammon/">Backgammon</a></td><td>backgammon</td><td>policy</td><td>board only</td><td>&#x2713;</td><td></td><td><a href="backgammon.html">Backgammon</a></td></tr>
-      <tr id="bavarian-32"><td><a href="../families/bavarian-32/">Bavarian 32-Card Games</a></td><td>bavarian-32</td><td>policy</td><td>no</td><td></td><td>&#x2713;</td><td><a href="tableau.html">Cards, Tiles and Dice</a></td></tr>
+      <tr id="backgammon"><td><a href="../families/backgammon/">Backgammon</a></td><td>backgammon</td><td>policy</td><td>yes</td><td>&#x2713;</td><td></td><td><a href="backgammon.html">Backgammon</a></td></tr>
+      <tr id="bavarian-32"><td><a href="../families/bavarian-32/">Bavarian 32-Card Games</a></td><td>bavarian-32</td><td>policy</td><td>yes</td><td></td><td>&#x2713;</td><td><a href="tableau.html">Cards, Tiles and Dice</a></td></tr>
       <tr id="chaupar"><td><a href="../families/chaupar/">Chaupar</a></td><td>race</td><td>policy</td><td>yes</td><td>&#x2713;</td><td></td><td><a href="race.html">Race Games</a></td></tr>
       <tr id="chess"><td><a href="../families/chess/">Chess</a></td><td>chess</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="chess.html">Chess</a></td></tr>
       <tr id="dou-shou-qi"><td><a href="../families/dou-shou-qi/">Dou Shou Qi (斗兽棋 / Jungle)</a></td><td>chess</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="hosted-families.html">Families on Shared Plugins</a></td></tr>
-      <tr id="double-six-dominoes"><td><a href="../families/double-six-dominoes/">Double-Six Dominoes</a></td><td>double-six-dominoes</td><td>policy</td><td>no</td><td></td><td>&#x2713;</td><td><a href="tableau.html">Cards, Tiles and Dice</a></td></tr>
+      <tr id="double-six-dominoes"><td><a href="../families/double-six-dominoes/">Double-Six Dominoes</a></td><td>double-six-dominoes</td><td>policy</td><td>yes</td><td></td><td>&#x2713;</td><td><a href="tableau.html">Cards, Tiles and Dice</a></td></tr>
       <tr id="draughts"><td><a href="../families/draughts/">Draughts</a></td><td>draughts</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="draughts.html">Draughts</a></td></tr>
       <tr id="fanorona"><td><a href="../families/fanorona/">Fanorona</a></td><td>draughts</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="hosted-families.html">Families on Shared Plugins</a></td></tr>
-      <tr id="flower-48"><td><a href="../families/flower-48/">Flower 48</a></td><td>flower-48</td><td>policy</td><td>no</td><td></td><td>&#x2713;</td><td><a href="tableau.html">Cards, Tiles and Dice</a></td></tr>
+      <tr id="flower-48"><td><a href="../families/flower-48/">Flower 48</a></td><td>flower-48</td><td>policy</td><td>yes</td><td></td><td>&#x2713;</td><td><a href="tableau.html">Cards, Tiles and Dice</a></td></tr>
       <tr id="go"><td><a href="../families/go/">Go</a></td><td>go</td><td>mcts</td><td>yes</td><td></td><td></td><td><a href="go.html">Go</a></td></tr>
       <tr id="halma"><td><a href="../families/halma/">Halma</a></td><td>hop</td><td>policy</td><td>yes</td><td></td><td></td><td><a href="hop.html">Hopping Games</a></td></tr>
       <tr id="hex"><td><a href="../families/hex/">Hex</a></td><td>hex</td><td>mcts</td><td>yes</td><td></td><td></td><td><a href="hex.html">Hex</a></td></tr>
-      <tr id="landlords-game"><td><a href="../families/landlords-game/">The Landlord's Game</a></td><td>landlords</td><td>minimax</td><td>board only</td><td>&#x2713;</td><td></td><td><a href="landlords-game.html">Landlord's Game</a></td></tr>
-      <tr id="mahjong"><td><a href="../families/mahjong/">Mahjong</a></td><td>mahjong</td><td>policy</td><td>no</td><td></td><td>&#x2713;</td><td><a href="tableau.html">Cards, Tiles and Dice</a></td></tr>
+      <tr id="landlords-game"><td><a href="../families/landlords-game/">The Landlord's Game</a></td><td>landlords</td><td>minimax</td><td>yes</td><td>&#x2713;</td><td></td><td><a href="landlords-game.html">Landlord's Game</a></td></tr>
+      <tr id="mahjong"><td><a href="../families/mahjong/">Mahjong</a></td><td>mahjong</td><td>policy</td><td>yes</td><td></td><td>&#x2713;</td><td><a href="tableau.html">Cards, Tiles and Dice</a></td></tr>
       <tr id="mancala"><td><a href="../families/mancala/">Mancala</a></td><td>mancala</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="mancala.html">Mancala</a></td></tr>
       <tr id="morris"><td><a href="../families/morris/">Nine Men's Morris</a></td><td>morris</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="morris.html">Morris</a></td></tr>
       <tr id="nyout"><td><a href="../families/nyout/">Nyout (유놓이 / Yut Nori)</a></td><td>race</td><td>policy</td><td>yes</td><td>&#x2713;</td><td></td><td><a href="race.html">Race Games</a></td></tr>
@@ -162,8 +178,8 @@ const svg = renderStateAsSvg('tafl', game.getState(), { variant: 'standard' })</
       <tr id="royal-ur"><td><a href="../families/royal-ur/">Royal Game of Ur</a></td><td>race</td><td>policy</td><td>yes</td><td>&#x2713;</td><td></td><td><a href="race.html">Race Games</a></td></tr>
       <tr id="senet"><td><a href="../families/senet/">Senet</a></td><td>race</td><td>policy</td><td>yes</td><td>&#x2713;</td><td></td><td><a href="race.html">Race Games</a></td></tr>
       <tr id="shogi"><td><a href="../families/shogi/">Shogi</a></td><td>shogi</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="shogi.html">Shogi</a></td></tr>
-      <tr id="standard-52"><td><a href="../families/standard-52/">Standard 52-Card Deck</a></td><td>standard-52</td><td>policy</td><td>no</td><td></td><td>&#x2713;</td><td><a href="tableau.html">Cards, Tiles and Dice</a></td></tr>
-      <tr id="standard-dice"><td><a href="../families/standard-dice/">Standard Dice</a></td><td>standard-dice</td><td>policy</td><td>no</td><td></td><td>&#x2713;</td><td><a href="tableau.html">Cards, Tiles and Dice</a></td></tr>
+      <tr id="standard-52"><td><a href="../families/standard-52/">Standard 52-Card Deck</a></td><td>standard-52</td><td>policy</td><td>yes</td><td></td><td>&#x2713;</td><td><a href="tableau.html">Cards, Tiles and Dice</a></td></tr>
+      <tr id="standard-dice"><td><a href="../families/standard-dice/">Standard Dice</a></td><td>standard-dice</td><td>policy</td><td>yes</td><td></td><td>&#x2713;</td><td><a href="tableau.html">Cards, Tiles and Dice</a></td></tr>
       <tr id="stern-halma"><td><a href="../families/stern-halma/">Stern-Halma</a></td><td>hop</td><td>policy</td><td>yes</td><td></td><td></td><td><a href="hop.html">Hopping Games</a></td></tr>
       <tr id="surakarta"><td><a href="../families/surakarta/">Surakarta</a></td><td>chess</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="hosted-families.html">Families on Shared Plugins</a></td></tr>
       <tr id="tafl"><td><a href="../families/tafl/">Tafl</a></td><td>chess</td><td>minimax</td><td>yes</td><td></td><td></td><td><a href="hosted-families.html">Families on Shared Plugins</a></td></tr>
