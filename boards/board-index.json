@@ -137,7 +137,7 @@
     "topology": "grid",
     "svg": "svgs/chaupar--standard.svg",
     "rulesUrl": "chaupar/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "chess",
@@ -2597,7 +2597,7 @@
     "topology": "grid",
     "svg": "svgs/pachisi--seven-shell.svg",
     "rulesUrl": "pachisi/variants/seven-shell/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "pachisi",
@@ -2607,7 +2607,7 @@
     "topology": "grid",
     "svg": "svgs/pachisi--standard.svg",
     "rulesUrl": "pachisi/variants/standard/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "pachisi",
@@ -2617,7 +2617,7 @@
     "topology": "grid",
     "svg": "svgs/pachisi--two-player.svg",
     "rulesUrl": "pachisi/variants/two-player/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "reversi",

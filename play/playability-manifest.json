@@ -101,6 +101,15 @@
     "path": "content/games/skat/standard.md"
   },
   {
+    "family": "chaupar",
+    "familyLabel": "Chaupar",
+    "variant": "standard",
+    "key": "standard",
+    "label": "Chaupar (Standard)",
+    "group": "Other",
+    "playable": true
+  },
+  {
     "family": "chess",
     "familyLabel": "Chess",
     "variant": "absorption",
@@ -2099,6 +2108,33 @@
     "variant": "standard",
     "key": "standard",
     "label": "Nyout (Standard)",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "pachisi",
+    "familyLabel": "Pachisi",
+    "variant": "seven-shell",
+    "key": "seven-shell",
+    "label": "Seven-Shell Pachisi",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "pachisi",
+    "familyLabel": "Pachisi",
+    "variant": "standard",
+    "key": "standard",
+    "label": "Pachisi (Standard)",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "pachisi",
+    "familyLabel": "Pachisi",
+    "variant": "two-player",
+    "key": "two-player",
+    "label": "2-Player Pachisi",
     "group": "Other",
     "playable": true
   },

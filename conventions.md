@@ -56,3 +56,20 @@ When modifying an existing guard:
 - If cases shrink, lower the floor (never raise it without justification)
 - If allowlist entries are removed, lower the ceiling
 - Never add to an allowlist without a corresponding fix plan (issue link)
+
+## Declaring a randomiser
+
+A game that throws something declares what it throws in frontmatter. The engine assumes no randomiser is a d6 and none is uniform. The race plugin reads two shapes:
+
+```yaml
+# Lots: two-sided sticks, shells or tetrahedral dice. The number showing
+# their marked side is looked up in `scores` (the count itself where absent).
+throw: { lots: 6, scores: { 0: 25, 1: 10 }, again: [25, 10, 6] }
+
+# Dice with any faces, summed, or shared among pieces when `split` is set.
+throw: { dice: [[1, 2, 5, 6], [1, 2, 5, 6], [1, 2, 5, 6]], split: true }
+```
+
+- `again` lists the scores that throw again, after moving; with `bank: true` the extra throw is taken at once and every throw is played afterwards (Nyout).
+- Lots are fair and two-sided, so a count of `k` marked sides has binomial probability; each die is fair over its own faces. `chanceOutcomes` reports every outcome that plays differently, with its probability, and a search weighs a throw by them.
+- A throw draws from the game's seeded generator, never `Math.random`, so a game replays from its seed. A throw move that names what fell (`value` for lots, `dice` for dice) is played as that fall.

@@ -14,17 +14,32 @@ function game(family, seed = 1) {
   return createGameForFamily(family, { variant: 'standard', rngSeed: seed })
 }
 
-function position(family, { board = {}, reserve, off, toMove = WHITE } = {}) {
+// A position from a board of `piece()` entries and reserves counted per seat.
+// Each piece's place along its route is found from the rulebook's own route,
+// as the plugin finds it.
+function position(family, { board = {}, reserve, off, toMove = WHITE, captured } = {}) {
   const g = game(family)
   const slice = g.getState().slice
+  const plugin = g.raw.definition.plugins[family]
+  const cols = g.raw.definition.topology.cols
+  const cellOf = (ref) => (Array.isArray(ref) ? ref[0] * cols + ref[1] : ref)
+  const stepOn = (route, cell) => plugin.routes[route].map(cellOf).indexOf(cell)
+  const built = {}
+  for (const [key, spec] of Object.entries(board)) {
+    const cell = typeof Object.values(plugin.routes)[0][0] === 'string' ? key : Number(key)
+    const step = spec.step ?? stepOn(spec.route, cell)
+    built[key] = { type: 'piece', owner: spec.owner, count: spec.count, items: Array.from({ length: spec.count }, () => ({ route: spec.route, step })) }
+  }
+  const routesOf = (seat) => { const r = plugin.seatRoutes; const own = Array.isArray(r) ? r[seat] : r; return Array.isArray(own) ? own : [own] }
+  const reserves = reserve ? reserve.map((n, seat) => ({ [routesOf(seat)[0]]: n })) : slice.reserve
   g.loadState({
-    slice: { ...slice, board, reserve: reserve || slice.reserve, off: off || slice.off, toMove, phase: 'throw', throws: [], again: false },
+    slice: { ...slice, board: built, reserve: reserves, off: off || slice.off, captured: captured || slice.captured, toMove, phase: 'throw', throws: [], again: false },
     players: { currentIndex: toMove },
   })
   return g
 }
 
-const piece = (owner, route, count = 1) => ({ type: 'piece', owner, count, route })
+const piece = (owner, route, count = 1, step) => ({ owner, route, count, step })
 const thrown = (g, value) => { g.applyMove({ action: 'throw', value }); return g.getLegalMoves() }
 const slice = (g) => g.getState().slice
 
@@ -38,13 +53,13 @@ describe('the race games are played by one plugin their rulebooks name', () => {
   })
 
   it('opens each game as its rulebook sets it', () => {
-    expect(slice(game('royal-ur')).reserve).toEqual([7, 7])
+    expect(slice(game('royal-ur')).reserve).toEqual([{ white: 7 }, { black: 7 }])
     expect(Object.keys(slice(game('senet')).board)).toHaveLength(10)
-    expect(slice(game('nyout')).reserve).toEqual([4, 4])
+    expect(slice(game('nyout')).reserve).toEqual([{ outer: 4 }, { outer: 4 }])
   })
 
   it('weighs a throw of four lots binomially', () => {
-    const outcomes = getPlugin('royal-ur').factory({ throw: { lots: 4 } }).chanceOutcomes({ action: 'throw' })
+    const outcomes = createRacePlugin({ throw: { lots: 4 } }).chanceOutcomes({ action: 'throw' })
     expect(outcomes.map(o => [o.move.value, o.probability])).toEqual([[0, 1 / 16], [1, 4 / 16], [2, 6 / 16], [3, 4 / 16], [4, 1 / 16]])
   })
 })
@@ -62,7 +77,7 @@ describe('the Royal Game of Ur', () => {
     const g = position('royal-ur', { board: { [ur(1, 1)]: piece(WHITE, 'white'), [ur(1, 2)]: piece(BLACK, 'black') }, reserve: [6, 6] })
     thrown(g, 1)
     g.applyMove({ from: ur(1, 1), to: ur(1, 2), throw: 1 })
-    expect(slice(g).reserve[BLACK]).toBe(7)
+    expect(slice(g).reserve[BLACK].black).toBe(7)
   })
 
   it('gives another throw on a rosette, and makes it safe', () => {
@@ -78,7 +93,7 @@ describe('the Royal Game of Ur', () => {
     const over = position('royal-ur', { board: { [ur(2, 6)]: piece(WHITE, 'white') }, reserve: [0, 7], off: [6, 0] })
     expect(thrown(over, 2).some(m => m.action === 'bear off')).toBe(false)
     const exact = position('royal-ur', { board: { [ur(2, 6)]: piece(WHITE, 'white') }, reserve: [0, 7], off: [6, 0] })
-    expect(thrown(exact, 1)).toEqual([{ action: 'bear off', piece: ur(2, 6), throw: 1, route: 'white' }])
+    expect(thrown(exact, 1)).toEqual([{ action: 'bear off', piece: ur(2, 6), throw: 1, route: 'white', step: 13 }])
     exact.applyMove({ action: 'bear off', piece: ur(2, 6), throw: 1 })
     expect(exact.checkWin()).toBe(WHITE)
   })
@@ -101,14 +116,14 @@ describe('Senet', () => {
   })
 
   it('stops every piece on the House of Happiness', () => {
-    const g = position('senet', { board: { [sn(2, 3)]: piece(WHITE, 'path') }, reserve: [0, 0], off: [4, 5] })
+    const g = position('senet', { board: { [sn(2, 3)]: piece(WHITE, 'path') }, reserve: [0, 0], off: [4, 4] })
     expect(thrown(g, 3).filter(m => !m.back).some(m => m.from === sn(2, 3))).toBe(false)
-    const lands = position('senet', { board: { [sn(2, 3)]: piece(WHITE, 'path') }, reserve: [0, 0], off: [4, 5] })
+    const lands = position('senet', { board: { [sn(2, 3)]: piece(WHITE, 'path') }, reserve: [0, 0], off: [4, 4] })
     expect(thrown(lands, 2).map(m => m.to)).toEqual([sn(2, 5)])
   })
 
   it('sends a piece in the water back to the House of Rebirth', () => {
-    const g = position('senet', { board: { [sn(2, 5)]: piece(WHITE, 'path') }, reserve: [0, 0], off: [4, 5] })
+    const g = position('senet', { board: { [sn(2, 5)]: piece(WHITE, 'path') }, reserve: [0, 0], off: [4, 4] })
     thrown(g, 1)
     g.applyMove({ from: sn(2, 5), to: sn(2, 6), throw: 1 })
     expect(slice(g).board[sn(1, 5)]?.owner).toBe(WHITE)
@@ -116,24 +131,24 @@ describe('Senet', () => {
   })
 
   it('bears off from the last three squares with their own throw only', () => {
-    const g = position('senet', { board: { [sn(2, 7)]: piece(WHITE, 'path') }, reserve: [0, 0], off: [4, 5] })
-    expect(thrown(g, 3)).toEqual([{ action: 'bear off', piece: sn(2, 7), throw: 3, route: 'path' }])
-    const early = position('senet', { board: { [sn(2, 5)]: piece(WHITE, 'path') }, reserve: [0, 0], off: [4, 5] })
+    const g = position('senet', { board: { [sn(2, 7)]: piece(WHITE, 'path') }, reserve: [0, 0], off: [4, 4] })
+    expect(thrown(g, 3)).toEqual([{ action: 'bear off', piece: sn(2, 7), throw: 3, route: 'path', step: 27 }])
+    const early = position('senet', { board: { [sn(2, 5)]: piece(WHITE, 'path') }, reserve: [0, 0], off: [4, 4] })
     expect(thrown(early, 5).some(m => m.action === 'bear off')).toBe(false)
   })
 
   it('steps back to the nearest empty square when nothing can go forward', () => {
     // On 30 only a 1 bears off, and there is nowhere further to go.
     const g = position('senet', { board: { [sn(2, 9)]: piece(WHITE, 'path'), [sn(2, 8)]: piece(BLACK, 'path') }, reserve: [0, 0], off: [4, 4] })
-    expect(thrown(g, 2)).toEqual([{ from: sn(2, 9), to: sn(2, 7), throw: 2, route: 'path', back: true }])
+    expect(thrown(g, 2)).toEqual([{ from: sn(2, 9), to: sn(2, 7), throw: 2, route: 'path', step: 29, back: true }])
   })
 
   it('throws again after a 1, 4 or 5, and not after a 2', () => {
-    const again = position('senet', { board: { [sn(0, 0)]: piece(WHITE, 'path') }, reserve: [0, 0], off: [4, 5] })
+    const again = position('senet', { board: { [sn(0, 0)]: piece(WHITE, 'path') }, reserve: [0, 0], off: [4, 4] })
     thrown(again, 4)
     again.applyMove({ from: sn(0, 0), to: sn(0, 4), throw: 4 })
     expect(again.currentPlayer()).toBe('white')
-    const not = position('senet', { board: { [sn(0, 0)]: piece(WHITE, 'path') }, reserve: [0, 0], off: [4, 5] })
+    const not = position('senet', { board: { [sn(0, 0)]: piece(WHITE, 'path') }, reserve: [0, 0], off: [4, 4] })
     thrown(not, 2)
     not.applyMove({ from: sn(0, 0), to: sn(0, 2), throw: 2 })
     expect(not.currentPlayer()).toBe('black')
@@ -175,7 +190,7 @@ describe('Nyout', () => {
     const hit = position('nyout', { board: { n4: piece(WHITE, 'outer', 2), n2: piece(BLACK, 'outer') }, reserve: [2, 3], toMove: BLACK })
     thrown(hit, 2)
     hit.applyMove({ from: 'n2', to: 'n4', throw: 2 })
-    expect(slice(hit).reserve[WHITE]).toBe(4)
+    expect(slice(hit).reserve[WHITE].outer).toBe(4)
     expect(hit.currentPlayer()).toBe('black')
   })
 })
@@ -195,5 +210,133 @@ describe('a race game answers clicks', () => {
     expect(ctrl.getState().selected).toBe(move.from)
     ctrl.handleClick(move.to)
     expect(slice(g).board[move.to]?.owner).toBe(WHITE)
+  })
+})
+
+// engine#152. Pachisi and Chaupar share the cross and its four routes; each
+// route goes down its own middle column and comes back up it, so a piece
+// knows its step, not only its cell. South's route begins at [11,9].
+const px = (r, c) => r * 19 + c
+const R = 0, Y = 1, G = 2, B = 3
+
+describe('Pachisi', () => {
+  it('opens with one piece of each side on the first square of its arm', () => {
+    const board = slice(game('pachisi')).board
+    expect(board[px(11, 9)]).toMatchObject({ owner: R, items: [{ route: 'south', step: 0 }] })
+    expect(board[px(7, 9)]).toMatchObject({ owner: G, items: [{ route: 'north', step: 0 }] })
+  })
+
+  it('brings a piece out only with a grace, onto the first square', () => {
+    const plain = position('pachisi', { reserve: [3, 3, 3, 3] })
+    expect(thrown(plain, 4).some(m => m.action === 'enter')).toBe(false)
+    const grace = position('pachisi', { reserve: [3, 3, 3, 3] })
+    expect(thrown(grace, 25)).toContainEqual({ action: 'enter', to: px(11, 9), throw: 25, route: 'south' })
+  })
+
+  it('throws again after a grace, and not after a 4', () => {
+    const g = position('pachisi', { board: { [px(12, 9)]: piece(R, 'south') }, reserve: [3, 3, 3, 3] })
+    thrown(g, 6)
+    g.applyMove({ from: px(12, 9), to: px(18, 9), throw: 6 })
+    expect(g.currentPlayer()).toBe('red')
+  })
+
+  it('tells a piece leaving its middle column from one coming home up it', () => {
+    // [13,9] is step 2 going out and step 80 coming back.
+    const out = position('pachisi', { board: { [px(13, 9)]: piece(R, 'south', 1, 2) }, reserve: [3, 3, 3, 3] })
+    expect(thrown(out, 2).map(m => m.to)).toContain(px(15, 9))
+    const home = position('pachisi', { board: { [px(13, 9)]: piece(R, 'south', 1, 80) }, reserve: [3, 3, 3, 3] })
+    expect(thrown(home, 3)).toContainEqual(expect.objectContaining({ action: 'bear off', piece: px(13, 9), step: 80 }))
+  })
+
+  it('keeps a piece on a castle safe, and lets a side share a square', () => {
+    // [15,10] is a castle, 13 steps along South's route.
+    // [15,10] is a castle: South's step 11, on every other side's way round.
+    const castle = position('pachisi', { board: { [px(15, 10)]: piece(Y, 'west'), [px(17, 10)]: piece(R, 'south') }, reserve: [3, 3, 3, 3] })
+    expect(thrown(castle, 2).some(m => m.to === px(15, 10))).toBe(false)
+    const open = position('pachisi', { board: { [px(16, 10)]: piece(Y, 'west'), [px(18, 10)]: piece(R, 'south') }, reserve: [3, 3, 3, 3] })
+    expect(thrown(open, 2).some(m => m.to === px(16, 10))).toBe(true)
+    const share = position('pachisi', { board: { [px(12, 9)]: piece(R, 'south', 1, 1), [px(14, 9)]: piece(R, 'south', 1, 3) }, reserve: [2, 3, 3, 3] })
+    thrown(share, 2)
+    share.applyMove({ from: px(12, 9), to: px(14, 9), throw: 2, step: 1 })
+    expect(slice(share).board[px(14, 9)].count).toBe(2)
+  })
+
+  it('lets a player refuse to move', () => {
+    const g = position('pachisi', { board: { [px(12, 9)]: piece(R, 'south') }, reserve: [3, 3, 3, 3] })
+    expect(thrown(g, 3)).toContainEqual({ action: 'pass' })
+    g.applyMove({ action: 'pass' })
+    expect(g.currentPlayer()).toBe('yellow')
+  })
+
+  it('throws seven shells in the seven-shell game, and gives two arms to each player in the two-player game', () => {
+    const seven = createGameForFamily('pachisi', { variant: 'seven-shell', rngSeed: 1 })
+    const values = seven.raw.registry.getPlugins().find(p => p.sliceName === 'race').chanceOutcomes({ action: 'throw' }).map(o => o.move.value).sort((a, b) => a - b)
+    expect(values).toEqual([2, 3, 4, 7, 10, 14, 25, 35])
+    const two = createGameForFamily('pachisi', { variant: 'two-player', rngSeed: 1 })
+    expect(slice(two).reserve).toEqual([{ south: 3, north: 3 }, { west: 3, east: 3 }])
+  })
+})
+
+// The cell `n` steps along a route, read from the rulebook.
+function routeCell(family, route, n) {
+  const def = game(family).raw.definition
+  const [r, c] = def.plugins[family].routes[route][n]
+  return r * def.topology.cols + c
+}
+
+describe('Chaupar', () => {
+  it('splits three long dice among pieces in any grouping', () => {
+    const g = position('chaupar', { board: { [px(12, 9)]: piece(R, 'south', 1, 1) }, reserve: [3, 4, 4, 4] })
+    g.applyMove({ action: 'throw', dice: [1, 2, 6] })
+    const spends = [...new Set(g.getLegalMoves().filter(m => m.from === px(12, 9)).map(m => m.dice.join('+')))].sort()
+    expect(spends).toEqual(['1', '1+2', '1+2+6', '1+6', '2', '2+6', '6'])
+  })
+
+  it('moves pieces standing together as one, taking a single piece', () => {
+    // South steps 17 and 20 are on the right arm's outer row, where every
+    // side's route passes.
+    const from = routeCell('chaupar', 'south', 17)
+    const to = routeCell('chaupar', 'south', 20)
+    const g = position('chaupar', { board: { [from]: piece(R, 'south', 2), [to]: piece(G, 'north') }, reserve: [2, 4, 3, 4] })
+    g.applyMove({ action: 'throw', dice: [1, 1, 1] })
+    g.applyMove({ from, to, throw: 3, dice: [1, 1, 1] })
+    expect(slice(g).board[to]).toMatchObject({ owner: R, count: 2 })
+    expect(slice(g).board[from]).toBeUndefined()
+    expect(slice(g).reserve[G].north).toBe(4)
+  })
+
+  it('keeps a pair from a single piece that lands on it', () => {
+    const pair = routeCell('chaupar', 'south', 20)
+    const north = game('chaupar').raw.definition.plugins.chaupar.routes.north.map(([r, c]) => r * 19 + c)
+    const at = north.indexOf(pair)
+    const green = north[at - 3]
+    const g = position('chaupar', { board: { [green]: piece(G, 'north'), [pair]: piece(R, 'south', 2) }, reserve: [2, 4, 3, 4], toMove: G })
+    g.applyMove({ action: 'throw', dice: [1, 1, 1] })
+    const reach = g.getLegalMoves().filter(m => m.from === green).map(m => m.to)
+    expect(reach).toEqual(expect.arrayContaining([north[at - 2], north[at - 1]]))
+    expect(reach).not.toContain(pair)
+  })
+
+  it('lets no piece finish before its side has captured', () => {
+    const before = position('chaupar', { board: { [px(13, 9)]: piece(R, 'south', 1, 80) }, reserve: [3, 4, 4, 4] })
+    before.applyMove({ action: 'throw', dice: [1, 1, 1] })
+    expect(before.getLegalMoves().some(m => m.action && m.action.startsWith('bear off'))).toBe(false)
+    const after = position('chaupar', { board: { [px(13, 9)]: piece(R, 'south', 1, 80) }, reserve: [3, 4, 4, 4], captured: [true, false, false, false] })
+    after.applyMove({ action: 'throw', dice: [1, 1, 1] })
+    expect(after.getLegalMoves().some(m => m.action && m.action.startsWith('bear off'))).toBe(true)
+  })
+
+  it('finishes partners in order, and wins as a team', () => {
+    // Green's step 80 is three from home; Green waits for Red.
+    const home = routeCell('chaupar', 'north', 80)
+    const g = position('chaupar', { board: { [home]: piece(G, 'north', 1, 80) }, reserve: [0, 4, 0, 4], off: [4, 0, 3, 0], toMove: G, captured: [true, false, true, false] })
+    g.applyMove({ action: 'throw', dice: [1, 1, 1] })
+    const off = g.getLegalMoves().find(m => m.action && m.action.startsWith('bear off'))
+    expect(off).toBeDefined()
+    g.applyMove(off)
+    expect(g.checkWin()).toBe(R)
+    const waits = position('chaupar', { board: { [home]: piece(G, 'north', 1, 80) }, reserve: [1, 4, 0, 4], off: [3, 0, 3, 0], toMove: G, captured: [true, false, true, false] })
+    waits.applyMove({ action: 'throw', dice: [1, 1, 1] })
+    expect(waits.getLegalMoves().some(m => m.action && m.action.startsWith('bear off'))).toBe(false)
   })
 })
