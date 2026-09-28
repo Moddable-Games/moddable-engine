@@ -1837,6 +1837,24 @@
     "playable": true
   },
   {
+    "family": "halma",
+    "familyLabel": "Halma",
+    "variant": "standard-2p",
+    "key": "standard-2p",
+    "label": "Standard 2-Player Halma",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "halma",
+    "familyLabel": "Halma",
+    "variant": "standard-4p",
+    "key": "standard-4p",
+    "label": "Standard 4-Player Halma",
+    "group": "Other",
+    "playable": true
+  },
+  {
     "family": "hex",
     "familyLabel": "Hex",
     "variant": "13x13",
@@ -2648,6 +2666,51 @@
     "group": "Other",
     "playable": true,
     "path": "content/games/yahtzee/standard.md"
+  },
+  {
+    "family": "stern-halma",
+    "familyLabel": "Stern-Halma",
+    "variant": "standard-2p",
+    "key": "standard-2p",
+    "label": "Standard 2-Player Stern-Halma",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "stern-halma",
+    "familyLabel": "Stern-Halma",
+    "variant": "standard-3p",
+    "key": "standard-3p",
+    "label": "Standard 3-Player Stern-Halma",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "stern-halma",
+    "familyLabel": "Stern-Halma",
+    "variant": "standard-4p",
+    "key": "standard-4p",
+    "label": "Standard 4-Player Stern-Halma",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "stern-halma",
+    "familyLabel": "Stern-Halma",
+    "variant": "standard-6p",
+    "key": "standard-6p",
+    "label": "Standard 6-Player Stern-Halma",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "stern-halma",
+    "familyLabel": "Stern-Halma",
+    "variant": "super-chinese-checkers",
+    "key": "super-chinese-checkers",
+    "label": "Super Chinese Checkers",
+    "group": "Other",
+    "playable": true
   },
   {
     "family": "surakarta",

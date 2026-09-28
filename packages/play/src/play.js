@@ -31,6 +31,7 @@ import { createBackgammonPlugin } from '../../plugins/backgammon/index.js'
 import { createChessPlugin } from '../../plugins/chess/index.js'
 import { createTableauPluginFor } from '../../plugins/tableau/index.js'
 import { createRacePlugin } from '../../plugins/race/index.js'
+import { createHopPlugin } from '../../plugins/hop/index.js'
 import { createStandard52Deck } from '../../component-deck/index.js'
 import GENERATED_DEFAULTS from '../../../play/family-defaults.json' with { type: 'json' }
 import { applySettings } from './game-settings.js'
@@ -79,8 +80,9 @@ const PLUGIN_FACTORIES = {
 // the rulebook through the generated defaults, so no family is listed here.
 //
 // Some plugins play only the families that name them and are no family of
-// their own: the race games (Ur, Senet, Nyout) share one.
-const HOSTED_PLUGINS = { race: createRacePlugin }
+// their own: the race games share one, and the hopping games (Halma,
+// Stern-Halma) another.
+const HOSTED_PLUGINS = { race: createRacePlugin, hop: createHopPlugin }
 for (const [family, entry] of Object.entries(GENERATED_DEFAULTS)) {
   const host = PLUGIN_FACTORIES[entry.plugin] || HOSTED_PLUGINS[entry.plugin]
   if (!entry.plugin || PLUGIN_FACTORIES[family] || !host) continue

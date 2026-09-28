@@ -43,6 +43,10 @@ const MINIMUM_PLAYABLE = {
   // traps and the den are all declared there (engine#157).
   'dou-shou-qi': 1,
   draughts: 13,
+  // Hopping races on a square board and a star, played by the hop plugin
+  // their rulebooks name (engine#153).
+  halma: 2,
+  'stern-halma': 5,
   // Alquerque's board with capture by approach and withdrawal, played by the
   // draughts plugin its rulebook names (engine#157).
   fanorona: 1,

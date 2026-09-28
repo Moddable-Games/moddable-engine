@@ -1,3 +1,5 @@
+import { starRowWidths, starArmOf } from '../../topologies/graph/index.js'
+import { pieceImageKey } from './piece-symbols.js'
 const STAR_ARMS = ['N', 'NE', 'SE', 'S', 'SW', 'NW']
 
 // Fallback piece appearance per arm, used only when the resolved piece set has
@@ -14,21 +16,6 @@ const STAR_OUTLINE_REF_SPACING = 24
 const STAR_OUTLINE_REF_ARM = 4
 const STAR_HEX_OFFSETS = [[-50.5, -93], [50.5, -93], [104.3, 0], [50.5, 92.9], [-50.5, 92.9], [-104.3, 0]]
 const STAR_TIP_OFFSETS = [[0, -180.3], [158, -93], [158, 92.9], [0, 180.3], [-158, 92.9], [-158, -93]]
-
-// Row hole counts for a six-pointed star of arm size n: n arm rows counting up,
-// then 2n+1 body rows (central hexagon row + the two side arms), then n arm rows
-// counting down. n = 4 gives the classic [1,2,3,4,13,12,11,10,9,10,11,12,13,4,3,2,1].
-function starRowWidths(n) {
-  const widths = []
-  for (let row = 0; row < n; row++) widths.push(row + 1)
-  for (let m = 0; m <= 2 * n; m++) {
-    const central = n + 1 + Math.min(m, 2 * n - m)
-    const armWidth = m < n ? n - m : (m > n ? m - n : 0)
-    widths.push(central + 2 * armWidth)
-  }
-  for (let row = 3 * n + 1; row <= 4 * n; row++) widths.push(4 * n + 1 - row)
-  return widths
-}
 
 export function produceStarLayout(colors, render, params) {
   const armSize = params.armSize || 4
@@ -50,10 +37,8 @@ export function produceStarLayout(colors, render, params) {
     for (let i = 0; i < w; i++) {
       const x = startX + i * spacing, idx = positions.length
       positions.push({ x, y, row, col: i })
-      if (row < armSize) arms.N.push(idx)
-      else if (row > 3 * armSize) arms.S.push(idx)
-      else if (row <= 2 * armSize - 1) { const armWidth = armSize - (row - armSize); if (i < armWidth) arms.NW.push(idx); else if (i >= w - armWidth) arms.NE.push(idx) }
-      else if (row >= 2 * armSize + 1) { const armWidth = row - 2 * armSize; if (i < armWidth) arms.SW.push(idx); else if (i >= w - armWidth) arms.SE.push(idx) }
+      const arm = starArmOf(armSize, row, i, w)
+      if (arm) arms[arm].push(idx)
     }
   }
   const s = spacing / STAR_OUTLINE_REF_SPACING * (armSize / STAR_OUTLINE_REF_ARM)
@@ -95,6 +80,18 @@ export function produceStarLayout(colors, render, params) {
       if (img) pieces.push({ tag: 'image', attrs: { href: img, x: hp.x - pieceSz / 2, y: hp.y - pieceSz / 2, width: pieceSz, height: pieceSz } })
       else pieces.push({ tag: 'circle', attrs: { cx: hp.x, cy: hp.y, r: pieceR - 1, fill: color, stroke: 'rgba(255,255,255,0.6)', 'stroke-width': 1.5 } })
     }
+  }
+  // A game in progress: the pieces stand wherever the position puts them,
+  // keyed by hole (`h1`...), not in the arms they started in.
+  const position = render._position || {}
+  for (const [hole, piece] of Object.entries(position)) {
+    const idx = Number(String(hole).slice(1)) - 1
+    const hp = positions[idx]
+    if (!hp || !piece) continue
+    const img = pieceImages[pieceImageKey(piece, pieceImages)] || null
+    const color = STAR_ARM_COLORS[typeof piece === 'object' && Number.isInteger(piece.owner) ? piece.owner : 0]
+    if (img) pieces.push({ tag: 'image', attrs: { href: img, x: hp.x - pieceSz / 2, y: hp.y - pieceSz / 2, width: pieceSz, height: pieceSz, 'pointer-events': 'none' } })
+    else pieces.push({ tag: 'circle', attrs: { cx: hp.x, cy: hp.y, r: pieceR - 1, fill: color, stroke: 'rgba(255,255,255,0.6)', 'stroke-width': 1.5, 'pointer-events': 'none' } })
   }
   ops.push({ op: 'elements', items: pieces })
   const labelPad = spacing * 1.0
