@@ -47,6 +47,10 @@ const MINIMUM_PLAYABLE = {
   // their rulebooks name (engine#153).
   halma: 2,
   'stern-halma': 5,
+  // Two seats that are not mirror images (engine#154): Tafl on the chess
+  // plugin, Asalto on the hop plugin.
+  tafl: 4,
+  asalto: 2,
   // Alquerque's board with capture by approach and withdrawal, played by the
   // draughts plugin its rulebook names (engine#157).
   fanorona: 1,

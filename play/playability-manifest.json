@@ -9,6 +9,24 @@
     "playable": true
   },
   {
+    "family": "asalto",
+    "familyLabel": "Asalto",
+    "variant": "royal-garrison",
+    "key": "royal-garrison",
+    "label": "Royal Garrison",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "asalto",
+    "familyLabel": "Asalto",
+    "variant": "standard",
+    "key": "standard",
+    "label": "Asalto (Standard)",
+    "group": "Other",
+    "playable": true
+  },
+  {
     "family": "backgammon",
     "familyLabel": "Backgammon",
     "variant": "acey-deucey",
@@ -2718,6 +2736,42 @@
     "variant": "standard",
     "key": "standard",
     "label": "Surakarta (Standard)",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "tafl",
+    "familyLabel": "Tafl",
+    "variant": "brandubh",
+    "key": "brandubh",
+    "label": "Brandubh",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "tafl",
+    "familyLabel": "Tafl",
+    "variant": "hnefatafl",
+    "key": "hnefatafl",
+    "label": "Hnefatafl",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "tafl",
+    "familyLabel": "Tafl",
+    "variant": "standard",
+    "key": "standard",
+    "label": "Tablut",
+    "group": "Other",
+    "playable": true
+  },
+  {
+    "family": "tafl",
+    "familyLabel": "Tafl",
+    "variant": "tawlbwrdd",
+    "key": "tawlbwrdd",
+    "label": "Tawlbwrdd",
     "group": "Other",
     "playable": true
   },

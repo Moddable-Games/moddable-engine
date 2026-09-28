@@ -10,7 +10,7 @@ export const CONFIG_KEYS = new Set([
   'dropFirst', 'dropMayNotCheck', 'dropRegion', 'dropRegions', 'dropZone', 'drops', 'custodial', 'dropsCompulsory', 'dropsFor', 'enPassant', 'hexPawnConfig', 'initState', 'moveApply', 'moveFilter', 'noCheck',
   'onTurnEnd', 'pawnCaptureDirections', 'ranks', 'pawnConfig', 'pawnMoveDirections', 'pawnStartRow',
   'pawnDropRanks', 'pawnType', 'placementDistinctColor', 'placementPieces', 'placementZone', 'playerCount',
-  'promotion', 'promotionChoices', 'promotionRegion', 'promotionsKept', 'promotionRow', 'quietLimit', 'regions',
+  'loseWithout', 'promotion', 'promotionChoices', 'promotionRegion', 'promotionsKept', 'promotionRow', 'quietLimit', 'regions',
   'faceoff', 'freeze', 'goal', 'matchEnds', 'promotionZone', 'randomSetup', 'rookType', 'rows', 'royalType', 'setup', 'transfer',
   'stalemateMeaning', 'teams', 'terrain', 'torpedo', 'turnEffects', 'turnLogic', 'visibility', 'winCondition',
 ])
@@ -1566,17 +1566,19 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     // straight line", and only by the move that closes the line - a piece may
     // step between two enemies and stand there.
     //
-    //     custodial: { dirs: orthogonal, displacement: false }
+    //     custodial:
+    //       dirs: orthogonal
+    //       displacement: false   # no capture by moving onto a piece
+    //       hostile: [throne]     # an empty cell here counts as an enemy
+    //       line: 3               # up to three in a row taken at once
+    //       enclose: { piece: king, near: throne }
     //
-    // `displacement: false` means there is no capture by moving onto a piece.
+    // `enclose` is the tafl king: taken only when every side is an enemy or
+    // a hostile cell - everywhere, or with `near` only on or beside that
+    // region, and as any other piece elsewhere.
     if (config.custodial) {
-      for (const dir of topology.getDirections(config.custodial.dirs || 'orthogonal')) {
-        const victimPos = topology.step(move.to, dir)
-        const anchorPos = victimPos === null ? null : topology.step(victimPos, dir)
-        if (anchorPos === null) continue
+      for (const victimPos of custodialVictims(board, move.to, playerIdx)) {
         const victim = getCell(board, victimPos)
-        const anchor = getCell(board, anchorPos)
-        if (!victim || !anchor || victim.owner === playerIdx || anchor.owner !== playerIdx) continue
         setCell(board, victimPos, null)
         halfmoveClock = 0
         if (hands && config.drops && config.capturesTo !== 'none') {
@@ -2049,6 +2051,84 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     return counts[0] > counts[1] ? 0 : 1
   }
 
+  const custodialSpec = config.custodial || {}
+  const custodialDirs = () => topology.getDirections(custodialSpec.dirs || 'orthogonal')
+
+  // Whether `pos` stands against a piece of `victimOwner` as an enemy would:
+  // an enemy piece, or an empty hostile cell.
+  function hostileTo(board, pos, victimOwner) {
+    if (pos === null) return false
+    const cell = getCell(board, pos)
+    if (cell) return cell.owner !== victimOwner
+    return (custodialSpec.hostile || []).some(name => inRegion(name, victimOwner, pos))
+  }
+
+  function enclosedHere(pos) {
+    const rule = custodialSpec.enclose
+    if (!rule.near) return true
+    if (inRegion(rule.near, 0, pos)) return true
+    return custodialDirs().some(dir => {
+      const next = topology.step(pos, dir)
+      return next !== null && inRegion(rule.near, 0, next)
+    })
+  }
+
+  // The pieces the mover's arrival on `to` takes.
+  function custodialVictims(board, to, mover) {
+    const taken = []
+    const enclose = custodialSpec.enclose
+    const longest = Math.max(1, Number(custodialSpec.line) || 1)
+    for (const dir of custodialDirs()) {
+      const run = []
+      let pos = topology.step(to, dir)
+      // The run of enemies next to the mover, as long as a capture may be.
+      while (pos !== null && run.length < longest) {
+        const cell = getCell(board, pos)
+        if (!cell || cell.owner === mover) break
+        run.push(pos)
+        pos = topology.step(pos, dir)
+      }
+      if (!run.length || pos === null) continue
+      // Closed at the far end by one of the mover's, or an empty hostile cell.
+      const end = getCell(board, pos)
+      if (end ? end.owner !== mover : !hostileTo(board, pos, getCell(board, run[0]).owner)) continue
+      for (const victimPos of run) {
+        const victim = getCell(board, victimPos)
+        if (enclose && victim.type === enclose.piece && enclosedHere(victimPos)) continue
+        taken.push(victimPos)
+      }
+    }
+    // An enclosed piece next to the mover is taken when every side is closed.
+    if (enclose) {
+      for (const dir of custodialDirs()) {
+        const pos = topology.step(to, dir)
+        const victim = pos === null ? null : getCell(board, pos)
+        if (!victim || victim.owner === mover || victim.type !== enclose.piece || !enclosedHere(pos)) continue
+        const sides = custodialDirs().map(d => topology.step(pos, d))
+        if (sides.every(side => side !== null && hostileTo(board, side, victim.owner))) taken.push(pos)
+      }
+    }
+    return [...new Set(taken)]
+  }
+
+  // A seat left without a piece of a type it must keep has lost: the tafl
+  // defenders without their king.
+  //
+  //     loseWithout: [null, king]
+  function lostWithout(slice) {
+    const rule = config.loseWithout
+    if (!Array.isArray(rule)) return null
+    for (let seat = 0; seat < rule.length; seat++) {
+      if (!rule[seat]) continue
+      const kept = allPositions().some(pos => {
+        const cell = getCell(slice.board, pos)
+        return cell && cell.owner === seat && cell.type === rule[seat]
+      })
+      if (!kept) return seatCount() === 2 ? 1 - seat : null
+    }
+    return null
+  }
+
   // A goal names the piece that must arrive, or none: in Dou Shou Qi "any one
   // of their pieces" entering the opponent's den wins.
   function isGoalPiece(piece) {
@@ -2118,6 +2198,8 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   function checkWinConditionOnly(slice, playerIdx) {
     const faceoff = faceoffLoser(slice.board, playerIdx)
     if (faceoff !== null) return faceoff
+    const lost = lostWithout(slice)
+    if (lost !== null) return lost
     const goal = goalReached(slice, playerIdx)
     if (goal !== null) return goal
     if (!config.winCondition) return null
@@ -2135,6 +2217,8 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     const faceoff = faceoffLoser(slice.board, playerIdx)
     if (faceoff !== null) return faceoff
 
+    const lost = lostWithout(slice)
+    if (lost !== null) return lost
     const goal = goalReached(slice, playerIdx)
     if (goal !== null) return goal
 

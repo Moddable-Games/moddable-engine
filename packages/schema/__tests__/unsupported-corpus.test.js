@@ -71,8 +71,10 @@ const PLAYABLE_BUT_UNSUPPORTED = [
 
 describe('unsupported declarations (engine#143)', () => {
   // A guard that finds no declarations passes. Assert it read the corpus.
+  // The count falls as declared gaps are closed (23 after engine#150-#154),
+  // so the floor follows it down; it only has to be clearly above none.
   it('reads the declarations the corpus carries', () => {
-    expect(DECLARED.length).toBeGreaterThan(25)
+    expect(DECLARED.length).toBeGreaterThan(15)
   })
 
   it('never names a variant that does not exist', () => {

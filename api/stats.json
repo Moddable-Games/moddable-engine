@@ -1,6 +1,6 @@
 {
   "generated": "2026-09-28",
-  "pieces": 123,
+  "pieces": 124,
   "boards": 335,
   "boardFamilies": 34,
   "tiles": 11,
@@ -9,10 +9,11 @@
     "standard": 1116,
     "variants": 733
   },
-  "playableVariants": 307,
-  "playableFamilies": 28,
+  "playableVariants": 313,
+  "playableFamilies": 30,
   "playableByFamily": {
     "agon": 1,
+    "asalto": 2,
     "backgammon": 8,
     "bavarian-32": 2,
     "chaupar": 1,
@@ -39,10 +40,12 @@
     "standard-dice": 5,
     "stern-halma": 5,
     "surakarta": 1,
+    "tafl": 4,
     "xiangqi": 9
   },
   "variantPluginsByFamily": {
     "agon": 0,
+    "asalto": 0,
     "backgammon": 0,
     "bavarian-32": 0,
     "chaupar": 0,
@@ -69,10 +72,12 @@
     "standard-dice": 0,
     "stern-halma": 0,
     "surakarta": 0,
+    "tafl": 0,
     "xiangqi": 0
   },
   "frontmatterOnlyByFamily": {
     "agon": 1,
+    "asalto": 2,
     "backgammon": 8,
     "bavarian-32": 2,
     "chaupar": 1,
@@ -99,6 +104,7 @@
     "standard-dice": 5,
     "stern-halma": 5,
     "surakarta": 1,
+    "tafl": 4,
     "xiangqi": 9
   },
   "tests": 6887,

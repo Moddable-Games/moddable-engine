@@ -2,6 +2,7 @@ import { warnUnknownConfigKeys } from '../../../core/index.js'
 
 export const CONFIG_KEYS = new Set([
   'directions', 'start', 'goals', 'campLock', 'hop', 'vocabulary', 'setup',
+  'seats', 'noMovesLoses', 'fewerThan',
 ])
 
 // The hopping race games (engine#153): Halma on its square board and
@@ -21,12 +22,23 @@ export const CONFIG_KEYS = new Set([
 //                far away, landing as far beyond it, every cell between empty
 //                (Super Chinese Checkers)
 //   vocabulary   the symbol each seat's pieces are written with
+//   seats        what each seat's pieces may do, where the seats differ
+//                (engine#154, Asalto). Per seat:
+//                  steps: all, or { rows: [...] } - the row changes a step may
+//                    make, so [-1, 0] is forward or sideways towards row 0
+//                  hops: any (over any piece, nothing taken), capture (over an
+//                    enemy only, which is taken; a chain never jumps a piece
+//                    twice), or none
+//   noMovesLoses a side with no move on its turn has lost (the Officers,
+//                hemmed in)
+//   fewerThan    per seat, the number of pieces below which that seat has
+//                lost (the Soldiers, too few to fill the fortress)
 //
 // A move is `{ from, to }`. A step goes one cell. A hop may chain, over any
 // pieces, in any directions, and stop wherever the player likes, so every cell
 // a chain can reach is one move; `path` lists the cells it lands on.
 export function createHopPlugin(variantConfig = {}, context = {}) {
-  const config = { directions: 'all', start: [], goals: [], campLock: false, hop: 'adjacent', ...variantConfig }
+  const config = { directions: 'all', start: [], goals: [], campLock: false, hop: 'adjacent', seats: [], noMovesLoses: false, fewerThan: [], ...variantConfig }
   warnUnknownConfigKeys('hop', variantConfig, CONFIG_KEYS)
 
   const names = context.definition?.players?.names || context.definition?.players || ['white', 'black']
@@ -163,22 +175,64 @@ export function createHopPlugin(variantConfig = {}, context = {}) {
     return true
   }
 
-  function legalMoves(slice) {
-    if (!slice || slice.winner !== null) return []
-    const seat = slice.toMove
+  const seatRules = (seat) => ({ steps: 'all', hops: 'any', ...(config.seats[seat] || {}) })
+
+  // Whether a step's row change is one the seat may make.
+  function stepAllowed(rules, from, to) {
+    if (!rules.steps || rules.steps === 'all') return true
+    const rows = rules.steps.rows
+    if (!Array.isArray(rows) || !topology.toRC) return true
+    const a = topology.toRC(from), b = topology.toRC(to)
+    return Boolean(a && b) && rows.includes(Math.sign(b[0] - a[0]))
+  }
+
+  // Capturing chains: each jump takes the enemy it passes over, and the chain
+  // may stop after any jump. Every sequence is its own move.
+  function captureChains(board, from, seat) {
+    const out = []
+    const walk = (at, current, path, taken) => {
+      for (const ray of lines(at)) {
+        if (ray.length < 2) continue
+        const over = ray[0], land = ray[1]
+        const victim = current[over]
+        if (!victim || victim.owner === seat || current[land]) continue
+        const next = { ...current }
+        delete next[over]
+        next[land] = next[at]
+        delete next[at]
+        const step = { to: land, path: [...path, land], captures: [...taken, over] }
+        out.push(step)
+        walk(land, next, step.path, step.captures)
+      }
+    }
+    walk(from, board, [], [])
+    return out
+  }
+
+  function movesFor(slice, seat) {
+    const rules = seatRules(seat)
     const moves = []
     for (const [key, piece] of Object.entries(slice.board)) {
       if (!piece || piece.owner !== seat) continue
       const from = cellKey(key)
       const seen = new Set()
       for (const to of neighbours(from)) {
-        if (!slice.board[to] && keepsCamp(seat, from, [to])) { moves.push({ from, to }); seen.add(to) }
+        if (!slice.board[to] && stepAllowed(rules, from, to) && keepsCamp(seat, from, [to])) { moves.push({ from, to }); seen.add(to) }
       }
-      for (const [to, path] of chains(slice.board, from)) {
-        if (!seen.has(to) && !slice.board[to] && keepsCamp(seat, from, path)) moves.push({ from, to, path })
+      if (rules.hops === 'capture') {
+        for (const chain of captureChains(slice.board, from, seat)) moves.push({ from, ...chain })
+      } else if (rules.hops !== 'none') {
+        for (const [to, path] of chains(slice.board, from)) {
+          if (!seen.has(to) && !slice.board[to] && keepsCamp(seat, from, path)) moves.push({ from, to, path })
+        }
       }
     }
     return moves
+  }
+
+  function legalMoves(slice) {
+    if (!slice || slice.winner !== null) return []
+    return movesFor(slice, slice.toMove)
   }
 
   let numericCells = true
@@ -193,12 +247,25 @@ export function createHopPlugin(variantConfig = {}, context = {}) {
     return mine > 0
   }
 
+  const piecesOf = (board, seat) => Object.values(board).filter(p => p && p.owner === seat).length
+
   function play(move, slice) {
     const board = { ...slice.board }
     board[move.to] = board[move.from]
     delete board[move.from]
+    for (const cell of move.captures || []) delete board[cell]
     const seat = slice.toMove
-    return { ...slice, board, toMove: (seat + 1) % seats, winner: filled(board, seat) ? seat : null, lastMove: move }
+    const lastBySeat = { ...(slice.lastBySeat || {}), [seat]: { from: move.from, to: move.to } }
+    const next = { ...slice, board, toMove: (seat + 1) % seats, winner: null, lastMove: move, lastBySeat }
+    if (filled(board, seat)) return { ...next, winner: seat }
+    // A seat reduced below its threshold has lost; with two seats, the other
+    // has won.
+    for (let s = 0; s < seats; s++) {
+      const floor = Number(config.fewerThan[s])
+      if (floor && piecesOf(board, s) < floor) return { ...next, winner: seats === 2 ? 1 - s : seat }
+    }
+    if (config.noMovesLoses && !movesFor(next, next.toMove).length) return { ...next, winner: seats === 2 ? 1 - next.toMove : seat }
+    return next
   }
 
   // --- judgement -------------------------------------------------------------------
@@ -220,6 +287,66 @@ export function createHopPlugin(variantConfig = {}, context = {}) {
     return others / (seats - 1) - remaining(slice.board, seat)
   }
 
+  // A game where pieces are taken is judged on more than the race: the
+  // pieces each side has, how far any side with a goal still has to go, and
+  // how much room each side has to move.
+  const fights = config.seats.some(rules => rules && rules.hops === 'capture')
+
+  function fightValue(slice, seat) {
+    if (slice.winner !== null && slice.winner !== undefined) return slice.winner === seat ? 1e6 : -1e6
+    let value = 0
+    for (let s = 0; s < seats; s++) {
+      const sign = s === seat ? 1 : -1
+      value += sign * 30 * piecesOf(slice.board, s)
+      // A side with a goal races for it. A side without one fights for room:
+      // the Soldiers only advance, so counting their own moves would teach
+      // them to hang back, while the Officers live or die by theirs.
+      if (goals[s].size) value -= sign * stillToFill(slice.board, s)
+      else value += sign * 3 * movesFor({ ...slice, toMove: s }, s).length
+    }
+    return value
+  }
+
+  // How far a side is from filling its goal: each open goal cell, and for each
+  // piece outside, the steps to the nearest open one. Distance to the goal as
+  // a whole says nothing once its edge is full - a piece beside a full camp
+  // is "one step away" wherever it stands.
+  function stillToFill(board, seat) {
+    const open = [...goals[seat]].filter(cell => !board[cell])
+    if (!open.length) return 0
+    const toOpen = stepsFrom(open)
+    let total = open.length * 6
+    for (const [key, piece] of Object.entries(board)) {
+      if (!piece || piece.owner !== seat || goals[seat].has(cellKey(key))) continue
+      total += toOpen.get(cellKey(key)) ?? 20
+    }
+    return total
+  }
+
+  // Undoing its own last move gains nothing, and two sides doing it forever
+  // is a game that never ends.
+  const undoes = (slice, seat, move) => {
+    const last = slice.lastBySeat?.[seat]
+    return Boolean(last && last.from === move.to && last.to === move.from)
+  }
+
+  // Two plies: each move, answered by the reply that is worst for this side.
+  function fightPolicy(slice, seat, moves, deep) {
+    let best = moves[0]
+    let bestValue = -Infinity
+    for (const move of moves) {
+      const after = play(move, slice)
+      let value = fightValue(after, seat) - (undoes(slice, seat, move) ? 20 : 0)
+      if (after.winner === null) {
+        const replies = movesFor(after, after.toMove)
+        const answers = deep ? replies : replies.filter(r => r.captures)
+        for (const reply of answers) value = Math.min(value, fightValue(play(reply, after), seat))
+      }
+      if (value > bestValue) { bestValue = value; best = move }
+    }
+    return best
+  }
+
   // The AI races: the move that brings its pieces furthest towards home, a
   // harder one also looking at its own best move after that. Pieces still
   // outside the goal are preferred to shuffling ones already in it.
@@ -227,6 +354,7 @@ export function createHopPlugin(variantConfig = {}, context = {}) {
     if (!moves.length) return null
     const difficulty = opts.difficulty || 'medium'
     if (difficulty === 'beginner') return opts.random ? moves[Math.floor(opts.random() * moves.length)] : moves[0]
+    if (fights) return fightPolicy(slice, seat, moves, difficulty === 'hard' || difficulty === 'expert')
     const deep = difficulty === 'hard' || difficulty === 'expert'
     const lagging = (move) => distanceToGoal[seat].get(move.from) ?? 0
     let best = moves[0]
@@ -244,6 +372,13 @@ export function createHopPlugin(variantConfig = {}, context = {}) {
       if (value > bestValue) { bestValue = value; best = move }
     }
     return best
+  }
+
+  // Two moves from and to the same cells differ only in what they capture.
+  function sameMove(a, b) {
+    if (a.from !== b.from || a.to !== b.to) return false
+    if (!b.captures) return true
+    return (a.captures || []).join(',') === b.captures.join(',')
   }
 
   // --- the plugin ------------------------------------------------------------------
@@ -271,11 +406,11 @@ export function createHopPlugin(variantConfig = {}, context = {}) {
 
     validateMove(move, slice) {
       if (move.action === 'resign') return true
-      return legalMoves(slice).some(m => m.from === move.from && m.to === move.to)
+      return legalMoves(slice).some(m => sameMove(m, move))
     },
 
     applyMove(move, slice) {
-      const legal = legalMoves(slice).find(m => m.from === move.from && m.to === move.to)
+      const legal = legalMoves(slice).find(m => sameMove(m, move))
       if (!legal) return slice
       return { state: play(legal, slice) }
     },

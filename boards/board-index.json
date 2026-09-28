@@ -17,7 +17,7 @@
     "topology": "graph",
     "svg": "svgs/asalto--royal-garrison.svg",
     "rulesUrl": "asalto/variants/royal-garrison/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "asalto",
@@ -27,7 +27,7 @@
     "topology": "graph",
     "svg": "svgs/asalto--standard.svg",
     "rulesUrl": "asalto/variants/standard/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "backgammon",
@@ -3229,7 +3229,7 @@
     "topology": "grid",
     "svg": "svgs/tafl--brandubh.svg",
     "rulesUrl": "tafl/variants/brandubh/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "tafl",
@@ -3239,7 +3239,7 @@
     "topology": "grid",
     "svg": "svgs/tafl--hnefatafl.svg",
     "rulesUrl": "tafl/variants/hnefatafl/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "tafl",
@@ -3249,7 +3249,7 @@
     "topology": "grid",
     "svg": "svgs/tafl--standard.svg",
     "rulesUrl": "tafl/variants/standard/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "tafl",
@@ -3259,7 +3259,7 @@
     "topology": "grid",
     "svg": "svgs/tafl--tawlbwrdd.svg",
     "rulesUrl": "tafl/variants/tawlbwrdd/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "xiangqi",

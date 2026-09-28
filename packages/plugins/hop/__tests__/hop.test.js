@@ -123,3 +123,60 @@ describe('Stern-Halma on the star', () => {
     expect(blocked.getLegalMoves().filter(m => m.from === 'h59' && m.path).map(m => m.to)).not.toContain('h63')
   })
 })
+
+// engine#154. Asalto is the same plugin with seats that differ. Its 33 points
+// are named row by row from the fortress: n1-n3 and n4-n6 the fortress arm,
+// n7-n13, n14-n20 and n21-n27 the wide rows, n28-n33 the arm below. The
+// fortress is n1-n6 and n9-n11.
+describe('Asalto: two seats, two rule sets', () => {
+  const OFFICERS = 0
+  const SOLDIERS = 1
+  const layout = [['n17', OFFICERS], ['n10', SOLDIERS], ['n24', SOLDIERS], ['n1', OFFICERS]]
+
+  it('moves the two seats differently from the same position', () => {
+    const officer = targets(position('asalto', 'standard', layout, OFFICERS), 'n17')
+    const soldier = targets(position('asalto', 'standard', layout, SOLDIERS), 'n24')
+    // The Officer steps any way and jumps both Soldiers, forwards and back.
+    expect(officer).toEqual(expect.arrayContaining(['n16', 'n18', 'n23', 'n25', 'n5', 'n29']))
+    // The Soldier only goes forward or sideways, and jumps nothing.
+    expect(soldier.sort()).toEqual(['n16', 'n18', 'n23', 'n25'])
+  })
+
+  it('takes the Soldiers an Officer jumps, and chains the jumps', () => {
+    const g = position('asalto', 'standard', [['n24', OFFICERS], ['n17', SOLDIERS], ['n9', SOLDIERS], ['n1', OFFICERS], ['n33', SOLDIERS]], OFFICERS)
+    const chain = g.getLegalMoves().find(m => m.from === 'n24' && m.captures?.length === 2)
+    expect(chain).toBeDefined()
+    g.applyMove(chain)
+    const board = g.getState().slice.board
+    for (const cell of chain.captures) expect(board[cell]).toBeUndefined()
+  })
+
+  it('lets the Soldiers win by filling the fortress', () => {
+    const fortress = ['n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n9', 'n10']
+    const soldiers = [...fortress, 'n17', ...['n28', 'n29', 'n30', 'n31', 'n32', 'n33', 'n21', 'n22', 'n23', 'n25', 'n26', 'n27']]
+    const g = position('asalto', 'standard', [...soldiers.map(c => [c, SOLDIERS]), ['n7', OFFICERS], ['n13', OFFICERS]], SOLDIERS)
+    g.applyMove({ from: 'n17', to: 'n11' })
+    expect(g.checkWin()).toBe(SOLDIERS)
+  })
+
+  it('lets the Soldiers win by leaving the Officers no move', () => {
+    // An Officer at n1 steps to n2, n4 or n5, and jumps them to n3, n9 or
+    // n11. With n11 open its only way out is the jump there (and on over n18);
+    // n18 to n11 shuts the last door. Enough Soldiers are left to fill the
+    // fortress, so the game is not already the Officers'.
+    const walls = ['n2', 'n3', 'n4', 'n5', 'n9', 'n18', 'n30', 'n31', 'n32', 'n33']
+    const g = position('asalto', 'standard', [['n1', OFFICERS], ...walls.map(c => [c, SOLDIERS])], SOLDIERS)
+    const open = position('asalto', 'standard', [['n1', OFFICERS], ...walls.map(c => [c, SOLDIERS])], OFFICERS)
+    expect(open.getLegalMoves().length).toBeGreaterThan(0)
+    expect(open.getLegalMoves().every(m => m.path?.[0] === 'n11')).toBe(true)
+    g.applyMove({ from: 'n18', to: 'n11' })
+    expect(g.checkWin()).toBe(SOLDIERS)
+  })
+
+  it('lets the Officers win when too few Soldiers are left to fill the fortress', () => {
+    const soldiers = ['n17', 'n21', 'n22', 'n23', 'n25', 'n26', 'n27', 'n28', 'n29']
+    const g = position('asalto', 'standard', [['n24', OFFICERS], ['n1', OFFICERS], ...soldiers.map(c => [c, SOLDIERS])], OFFICERS)
+    g.applyMove({ from: 'n24', to: 'n10', captures: ['n17'] })
+    expect(g.checkWin()).toBe(OFFICERS)
+  })
+})
