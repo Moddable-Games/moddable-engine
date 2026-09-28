@@ -44,10 +44,6 @@ export function createGraphTopology(config) {
     return mills
   }
 
-  function getNodes() {
-    return [...nodes]
-  }
-
   function neighbours(node) {
     return adjacency.get(node) || []
   }
@@ -425,7 +421,6 @@ export function createGraphTopology(config) {
     serializePosition,
     parsePosition,
     getMills,
-    getNodes,
   }
 }
 
