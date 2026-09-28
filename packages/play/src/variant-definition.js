@@ -79,6 +79,13 @@ export function definitionFromResolved(family, variant, resolved, registryCfg = 
       if (v !== undefined) pluginConfig[k] = v
     }
   }
+  // The position is the variant's `setup`. Seven chess variants repeat it in
+  // their plugin block, and that copy overrode a position a caller had put in
+  // its place, so the game opened at the start instead (engine#202). A plugin
+  // block's setup stands only where the variant declares none of its own.
+  if (typeof resolved.setup === 'string' ? resolved.setup !== '' : resolved.setup != null) {
+    pluginConfig.setup = resolved.setup
+  }
 
   // Who opens and in what order seats move are the game's, not the plugin's,
   // and were dropped here: the page opened every game with the first seat and

@@ -221,13 +221,15 @@ export function createGraphTopology(config) {
     }
   }
 
+  // Written `node:symbol`, the notation the corpus and the renderer use. These
+  // two once wrote `node=symbol`, which nothing else read or wrote.
   function serializePosition(cellStates, vocabulary) {
     const symbolMap = buildGraphSymbolMap(vocabulary)
     const parts = []
     for (const node of getNodes()) {
       const cell = cellStates[node] || (cellStates.get ? cellStates.get(node) : null)
       if (cell !== null && cell !== undefined) {
-        parts.push(`${node}=${symbolMap.toSymbol(cell)}`)
+        parts.push(`${node}:${symbolMap.toSymbol(cell)}`)
       }
     }
     return parts.join(',')
@@ -238,7 +240,7 @@ export function createGraphTopology(config) {
     const cellStates = {}
     if (!notation) return cellStates
     for (const part of notation.split(',')) {
-      const [node, symbol] = part.split('=')
+      const [node, symbol] = part.split(':')
       if (node && symbol) {
         const piece = symbolMap.fromSymbol(symbol.trim())
         if (piece) cellStates[node.trim()] = piece

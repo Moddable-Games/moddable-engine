@@ -8,6 +8,8 @@ export const CONFIG_KEYS = new Set([
   'size', 'swapRule',
 ])
 
+const VOCABULARY = { stone: { symbols: { 0: 'b', 1: 'w' } } }
+
 // Connection games. A turn is one stone on one empty cell, nothing moves and
 // nothing is captured, and the entire game is the question of whether a
 // player's stones join the edges they were asked to join.
@@ -125,7 +127,7 @@ export function createHexPlugin(variantConfig = {}, context = {}) {
     // fails if any of them changes the slice it was given.
     pureApplyMove: true,
     pieceTypes: ['stone'],
-    vocabulary: { stone: { symbols: { 0: 'b', 1: 'w' } } },
+    vocabulary: VOCABULARY,
     config,
     rules: ['placement', 'connection'],
 
@@ -133,7 +135,16 @@ export function createHexPlugin(variantConfig = {}, context = {}) {
       buildBoard(request ? request('core.topology') : null)
       const board = {}
       for (const cell of cells) board[cell] = null
-      return { board, moves: 0, swapped: false, _cells: cells, _edges: Object.keys(edges) }
+      // Stones a written position places, read by the topology that names the
+      // cells (engine#202). Each stone counts as a move already made.
+      let moves = 0
+      if (typeof config.setup === 'string' && config.setup.trim()) {
+        const placed = topology.parsePosition(config.setup, VOCABULARY)
+        for (const [cell, stone] of Object.entries(placed)) {
+          if (cell in board && typeof stone?.owner === 'number') { board[cell] = stone.owner; moves++ }
+        }
+      }
+      return { board, moves, swapped: false, _cells: cells, _edges: Object.keys(edges) }
     },
 
     getLegalMoves(slice, full) {

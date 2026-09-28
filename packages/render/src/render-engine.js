@@ -10,7 +10,7 @@ import { fileLabel } from '../../core/index.js'
  */
 
 import { produceLayout, buildCrossMap, pieceImageKey, pieceImageKeys, symbolToPiece, drawsAsStandIn } from '../../schema/index.js'
-import { parseRankRuns, readPosition } from '../../core/index.js'
+import { parseRankRuns, readPosition, readTokenPositions, isTokenPositions } from '../../core/index.js'
 import { renderGridLayout, renderAnnularLayout } from '../../topologies/grid/index.js'
 import { renderGraphLayout } from '../../topologies/graph/index.js'
 import { renderPitLayout } from '../../topologies/pit/index.js'
@@ -337,11 +337,8 @@ export function renderFromEngine(resolved, opts = {}) {
   if (topo.type === 'track' && resolved.setup && typeof resolved.setup === 'string') {
     // Two different things arrive here. Backgammon writes counts of checkers
     // per point; a track game with one token per player writes `pos-22:p0`.
-    if (/^pos-\d+:p\d+/.test(resolved.setup)) {
-      render._tokens = resolved.setup.split(',').map(entry => {
-        const [square, seat] = entry.trim().split(':')
-        return { square, seat: Number(String(seat).replace('p', '')) }
-      }).filter(t => t.square && Number.isFinite(t.seat))
+    if (isTokenPositions(resolved.setup)) {
+      render._tokens = readTokenPositions(resolved.setup).map(({ square, seat }) => ({ square, seat }))
     } else {
       render._parsedSetup = parseTrackSetup(resolved.setup)
     }

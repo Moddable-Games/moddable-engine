@@ -44,6 +44,8 @@ export function createHopPlugin(variantConfig = {}, context = {}) {
   const names = context.definition?.players?.names || context.definition?.players || ['white', 'black']
   const seats = Math.max(2, Array.isArray(names) ? names.length : 2)
 
+  const vocabulary = config.vocabulary || { piece: { symbols: { 0: 'w', 1: 'b' } } }
+
   let topology = null
   let goals = []
   let distanceToGoal = []
@@ -98,27 +100,34 @@ export function createHopPlugin(variantConfig = {}, context = {}) {
     return dist
   }
 
-  // Where each seat starts: `start` where it is given, or else the `setup`
-  // position written as `cell:symbol` pairs, read with the vocabulary, so the
-  // opening is written once.
-  function starts() {
-    if (Array.isArray(config.start) && config.start.length) return config.start
+  // The cells each seat's pieces stand on in the `setup` position, read by the
+  // board's own notation: a grid's FEN, a graph's `cell:symbol` pairs. Null
+  // where there is no setup or no topology to read it.
+  function placed() {
+    if (typeof config.setup !== 'string' || !config.setup.trim()) return null
+    if (typeof topology?.parsePosition !== 'function') return null
+    const read = topology.parsePosition(config.setup, vocabulary)
     const out = Array.from({ length: seats }, () => [])
-    if (typeof config.setup !== 'string' || !config.setup.includes(':')) return out
-    const owners = new Map()
-    for (const entry of Object.values(config.vocabulary || {})) {
-      for (const [seat, symbol] of Object.entries(entry.symbols || {})) owners.set(String(symbol), Number(seat))
-    }
-    for (const pair of config.setup.split(',')) {
-      const [cell, symbol] = pair.split(':').map(t => t.trim())
-      if (owners.has(symbol)) out[owners.get(symbol)].push(cell)
+    const entries = Array.isArray(read) ? read.map((piece, index) => [index, piece]) : Object.entries(read)
+    for (const [cell, piece] of entries) {
+      if (piece && out[piece.owner]) out[piece.owner].push(cell)
     }
     return out
   }
 
+  // Where each seat starts: `start` where it is given, or else the `setup`
+  // position, so the opening is written once. The AI measures its race from
+  // these cells.
+  function starts() {
+    if (Array.isArray(config.start) && config.start.length) return config.start
+    return placed() || Array.from({ length: seats }, () => [])
+  }
+
+  // The position a game opens on. A setup is read ahead of `start`: a game
+  // created from a written position begins there, not at the camps (engine#202).
   function opening() {
     const board = {}
-    starts().forEach((cells, seat) => {
+    ;(placed() || starts()).forEach((cells, seat) => {
       for (const ref of cells || []) board[cellOf(ref)] = { type: 'piece', owner: seat }
     })
     return { board, toMove: 0, winner: null }
@@ -389,7 +398,7 @@ export function createHopPlugin(variantConfig = {}, context = {}) {
     // handed; `applymove-is-pure.test.js` holds it to that.
     pureApplyMove: true,
     pieceTypes: ['piece'],
-    vocabulary: config.vocabulary || { piece: { symbols: { 0: 'w', 1: 'b' } } },
+    vocabulary,
     config,
 
     init(pluginConfig, { request } = {}) {

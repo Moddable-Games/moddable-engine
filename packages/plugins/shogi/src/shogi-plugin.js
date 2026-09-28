@@ -1,4 +1,4 @@
-import { warnUnknownConfigKeys } from '../../../core/index.js'
+import { warnUnknownConfigKeys, readPosition } from '../../../core/index.js'
 import { fromConfig, betzaToSpec } from '../../../piece-behaviour/index.js'
 // Every config key this plugin reads. Exported so the corpus guard and the
 // authoring docs share one source of truth, and kept separate from `defaults`,
@@ -871,35 +871,22 @@ export function createShogiPlugin(variantConfig = {}, context = {}) {
     }
 
     // Strip the promotion markers so the notation is plain enough for
-    // parsePosition, recording which piece each one applied to.
-    const promotedAt = new Set()
-    let plain = ''
-    let pieceIndex = 0
-    for (const ch of setup) {
-      if (ch === '+') {
-        promotedAt.add(pieceIndex)
-        continue
-      }
-      plain += ch
-      if (ch !== '/' && !(ch >= '0' && ch <= '9')) pieceIndex++
-    }
+    // parsePosition, and find the cells they applied to with core's reader.
+    // Counting characters here put the marker on the wrong piece whenever a
+    // symbol was bracketed, and the serialiser once wrote a promoted pawn as
+    // `[+P]`, so a bracketed marker counts too (engine#202).
+    const board = topology.parsePosition(setup.replace(/\+/g, ''), VOCABULARY)
 
-    const board = topology.parsePosition(plain, VOCABULARY)
-    if (promotedAt.size === 0) return board
+    // Only a FEN has a reading order. A topology whose setup names its cells -
+    // hex writes "-5,5:L,-4,5:N" - has no `+` markers either.
+    if (!setup.includes('+') || !Array.isArray(board)) return board
 
-    // Counting in reading order is only meaningful for a FEN, which is a
-    // sequence. A topology whose setup names its cells - hex writes
-    // "-5,5:L,-4,5:N" - has no reading order and no `+` markers either.
-    if (!Array.isArray(board)) return board
-
-    let seen = 0
-    for (let i = 0; i < board.length; i++) {
-      if (!board[i]) continue
-      if (promotedAt.has(seen)) {
-        const promotedType = getPromotedType(board[i].type)
-        if (promotedType) board[i] = { ...board[i], type: promotedType }
-      }
-      seen++
+    const cols = topology.cols || config.cols
+    for (const cell of readPosition(setup).cells) {
+      if (!cell.promoted && !cell.symbol.startsWith('+')) continue
+      const i = cell.row * cols + cell.col
+      const promotedType = board[i] && getPromotedType(board[i].type)
+      if (promotedType) board[i] = { ...board[i], type: promotedType }
     }
     return board
   }

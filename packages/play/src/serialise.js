@@ -8,7 +8,7 @@
 // worth testing: when it was inline browser code, draughts men serialised to
 // symbols that resolved to chess artwork and nothing caught it.
 
-import { writePosition } from '../../core/index.js'
+import { writePosition, writeTokenPositions } from '../../core/index.js'
 
 export function cellToSymbol(cell, vocabulary = {}) {
   if (cell === null || cell === undefined) return null
@@ -122,6 +122,9 @@ function stackBoardToSetup(board, slice) {
   return [...points.map(p => p[1]), ...extras, ...off].join(',')
 }
 
+// Cell names compared with their numbers as numbers: n2 before n10.
+const cellOrder = new Intl.Collator('en', { numeric: true }).compare
+
 export function boardToSetup(slice, topo = {}, vocabulary = {}, opts = {}) {
   const board = slice.board || []
 
@@ -162,7 +165,7 @@ export function boardToSetup(slice, topo = {}, vocabulary = {}, opts = {}) {
   // Serialising the board gave an empty string, so the renderer was handed a
   // board with nobody on it and drew exactly that.
   if (topo.type === 'track' && Array.isArray(slice?.positions)) {
-    return slice.positions.map((pos, seat) => `pos-${pos}:p${seat}`).join(',')
+    return writeTokenPositions(slice.positions)
   }
 
   // A track that stacks checkers keeps a count on each point, keyed `point-N`,
@@ -181,7 +184,12 @@ export function boardToSetup(slice, topo = {}, vocabulary = {}, opts = {}) {
     Object.keys(board).every(key => /^\d+$/.test(key))
   if (!Array.isArray(board) && !gridIndexed) {
     const entries = []
-    for (const [coord, cell] of Object.entries(board)) {
+    // In the board's cell order, not the order the keys happen to be in. A
+    // board that holds only its occupied cells (the hop games) re-adds a piece
+    // at the end when it moves, so the same position came out as a different
+    // string after a move and again after reloading it (engine#202).
+    for (const coord of Object.keys(board).sort(cellOrder)) {
+      const cell = board[coord]
       // `if (!cell)` drops seat 0, because seat 0 is the number 0. Hex and
       // morris store the owner index directly in the cell, so every one of the
       // first player's stones vanished on the way to the renderer and only the
@@ -219,7 +227,10 @@ export function boardToSetup(slice, topo = {}, vocabulary = {}, opts = {}) {
     for (let c = 0; c < cols; c++) cells.push(cellToSymbol(board[r * cols + c], vocabulary) || null)
     ranks.push(cells)
   }
-  return writePosition(ranks)
+  // A promoted piece is written `+P`, the marker outside any brackets, which
+  // is how the plugins read it. Without `promotion` it came out as `[+P]` and
+  // loaded back unpromoted (engine#202).
+  return writePosition(ranks, { promotion: true })
 }
 
 function boardToFen4(board, rows, cols, vocabulary, players) {

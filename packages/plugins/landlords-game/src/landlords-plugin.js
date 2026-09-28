@@ -1,4 +1,4 @@
-import { warnUnknownConfigKeys } from '../../../core/index.js'
+import { warnUnknownConfigKeys, readTokenPositions } from '../../../core/index.js'
 import BOARDS from '../../../../data/landlords-game-boards.json' with { type: 'json' }
 
 export const CONFIG_KEYS = new Set([
@@ -163,9 +163,16 @@ export function createLandlordsPlugin(variantConfig = {}, context = {}) {
     init(pluginConfig, { request } = {}) {
       rng = request ? request('core.rng') : null
       const count = config.playerCount
+      // Every token starts on the start square unless the setup says where it
+      // stands: a game created from a written position (engine#202). The
+      // string carries the squares only, so cash and holdings start afresh.
+      const positions = new Array(count).fill(startPos)
+      for (const { pos, seat } of readTokenPositions(config.setup)) {
+        if (seat < count && at(pos)) positions[seat] = pos
+      }
       return {
         board: Object.fromEntries(spaces.map(s => [s.pos, null])),
-        positions: new Array(count).fill(startPos),
+        positions,
         cash: new Array(count).fill(config.startingCash),
         owners: {},              // lot pos -> player
         charters: {},            // franchise pos -> player

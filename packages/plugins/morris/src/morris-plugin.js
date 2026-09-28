@@ -8,6 +8,8 @@ export const CONFIG_KEYS = new Set([
   'rings', 'setup', 'winOnMill',
 ])
 
+const VOCABULARY = { man: { symbols: { 0: 'w', 1: 'b' } } }
+
 // The mill family. Every variant shares one shape - place, then move, form a
 // line of three, remove one of theirs - and differs only in the numbers and in
 // which of the four or five optional rules apply. The differences are config:
@@ -164,7 +166,7 @@ export function createMorrisPlugin(variantConfig = {}, context = {}) {
     // fails if any of them changes the slice it was given.
     pureApplyMove: true,
     pieceTypes: ['man'],
-    vocabulary: { man: { symbols: { 0: 'w', 1: 'b' } } },
+    vocabulary: VOCABULARY,
     config,
     rules: ['placement', 'mill.formation', 'mill.capture'],
 
@@ -184,9 +186,19 @@ export function createMorrisPlugin(variantConfig = {}, context = {}) {
       }
       const occupants = {}
       for (const n of board.nodes) occupants[n] = null
+      // Men a written position places, read by the topology that names the
+      // points (engine#202). The string records the board and not how many
+      // men each side has placed or lost, so every man on it counts as placed
+      // and none as removed.
+      const placed = [0, 0]
+      if (typeof config.setup === 'string' && config.setup.trim() && typeof topology?.parsePosition === 'function') {
+        for (const [node, man] of Object.entries(topology.parsePosition(config.setup, VOCABULARY))) {
+          if (node in occupants && (man?.owner === 0 || man?.owner === 1)) { occupants[node] = man.owner; placed[man.owner]++ }
+        }
+      }
       return {
         board: occupants,
-        placed: [0, 0],
+        placed,
         removed: [0, 0],
         _nodes: board.nodes,
         _mills: board.mills,

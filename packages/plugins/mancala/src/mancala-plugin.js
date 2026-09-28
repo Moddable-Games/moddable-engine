@@ -122,7 +122,10 @@ export function createMancalaPlugin(variantConfig = {}, context = {}) {
     })
   }
 
-  function boardFromSetup(setup) {
+  // `held` receives the seeds each player holds aside on a board with no
+  // stores: the serialiser writes them in the store's slot, and dropping them
+  // here lost them from a game created from a written position (engine#202).
+  function boardFromSetup(setup, held = [0, 0]) {
     const cells = new Array(totalPits + (hasStores ? 2 : 0)).fill(0)
     if (!setup) {
       for (let i = 0; i < totalPits; i++) cells[i] = 4
@@ -135,7 +138,7 @@ export function createMancalaPlugin(variantConfig = {}, context = {}) {
       const pits = (parts[cursor++] || '').split(',').map(n => parseInt(n, 10) || 0)
       for (let i = 0; i < pitsPerSide; i++) cells[p * pitsPerSide + i] = pits[i] || 0
       if (hasStores) cells[storeIndex(p)] = parseInt(parts[cursor++], 10) || 0
-      else if (parts[cursor] !== undefined && !String(parts[cursor]).includes(',')) cursor++
+      else if (parts[cursor] !== undefined && !String(parts[cursor]).includes(',')) held[p] = parseInt(parts[cursor++], 10) || 0
     }
     return cells
   }
@@ -421,7 +424,8 @@ export function createMancalaPlugin(variantConfig = {}, context = {}) {
         if (typeof topology.getRowsPerSide === 'function') rowsPerSide = topology.getRowsPerSide()
         if (typeof topology.getCols === 'function') cols = topology.getCols()
       }
-      const state = { board: boardFromSetup(setup), held: [0, 0], _pitsPerSide: pitsPerSide, _hasStores: hasStores, lastLanded: null, lastCaptured: 0 }
+      const held = [0, 0]
+      const state = { board: boardFromSetup(setup, held), held, _pitsPerSide: pitsPerSide, _hasStores: hasStores, lastLanded: null, lastCaptured: 0 }
       // The reserve each player introduces during namua. Declared rather than
       // derived: it is a property of the ruleset, not of the board.
       if (config.namuaReserve) state.reserve = [config.namuaReserve, config.namuaReserve]

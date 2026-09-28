@@ -171,6 +171,7 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-28
+- A position written by the engine loads back as the same board in 271 variants. Hex and morris now read a setup at all; halma reads it ahead of its start camps; hop boards write their cells in a fixed order; the Landlord's Game reads where its tokens stand; seven chess variants no longer let a copy of the opening override the position passed in; Pallanguzhi keeps the seeds held aside; a promoted shogi piece is written `+P` and read back promoted. A test round-trips every playable variant. The race games are still to do
 - Puzzle records name their variant by its play slug (`king-of-the-hill`, `benedict`) in `variantSlug`. Twenty-five chess variants carried the older camelCase key there, so matching a puzzle to the variant it belongs to by slug missed them
 - Hanafuda cards show their back face down: the deck now names the back the hanafuda set already ships
 - Every piece is a picture from the piece gallery. The renderers no longer draw a stone, a draughtsman, a seed or a token as a shape when no picture resolves, and a test plays every board variant part way and checks its pieces are gallery pictures. The Landlord's Game, the one family whose players were drawn in code, now uses a gallery set of its own (`mce-player-tokens`, six pawns drawn by `scripts/gen-token-set.mjs`). A mancala pit holding more seeds than its set draws shows the largest picture with the count on it
