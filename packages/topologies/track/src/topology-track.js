@@ -4,7 +4,14 @@ export const schema = {
 }
 
 export function createTrackTopology(config) {
-  const { positions, circuit = false, branches = {} } = config
+  const { circuit = false, branches = {} } = config
+  // A track declared by its length names its points `point-1` onward, which is
+  // what they are called on the board that draws them. Taken as a list, a
+  // number has no length, so such a track had no points at all and reading a
+  // position onto it threw.
+  const positions = typeof config.positions === 'number'
+    ? Array.from({ length: config.positions }, (_, i) => `point-${i + 1}`)
+    : config.positions
   const posMap = new Map()
 
   for (let i = 0; i < positions.length; i++) {

@@ -37,7 +37,7 @@
     "topology": "track",
     "svg": "svgs/backgammon--acey-deucey.svg",
     "rulesUrl": "backgammon/variants/acey-deucey/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "backgammon",
@@ -47,7 +47,7 @@
     "topology": "track",
     "svg": "svgs/backgammon--chouette.svg",
     "rulesUrl": "backgammon/variants/chouette/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "backgammon",
@@ -57,7 +57,7 @@
     "topology": "track",
     "svg": "svgs/backgammon--fevga.svg",
     "rulesUrl": "backgammon/variants/fevga/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "backgammon",
@@ -67,7 +67,7 @@
     "topology": "track",
     "svg": "svgs/backgammon--hypergammon.svg",
     "rulesUrl": "backgammon/variants/hypergammon/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "backgammon",
@@ -77,7 +77,7 @@
     "topology": "track",
     "svg": "svgs/backgammon--nackgammon.svg",
     "rulesUrl": "backgammon/variants/nackgammon/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "backgammon",
@@ -87,7 +87,7 @@
     "topology": "track",
     "svg": "svgs/backgammon--nardi.svg",
     "rulesUrl": "backgammon/variants/nardi/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "backgammon",
@@ -97,7 +97,7 @@
     "topology": "track",
     "svg": "svgs/backgammon--plakoto.svg",
     "rulesUrl": "backgammon/variants/plakoto/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "backgammon",
@@ -107,7 +107,7 @@
     "topology": "track",
     "svg": "svgs/backgammon--standard.svg",
     "rulesUrl": "backgammon/variants/standard/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "bavarian-32",
@@ -2976,7 +2976,7 @@
     "variantTitle": "4-Player Cribbage (Partnership)",
     "topology": "tableau",
     "svg": "svgs/standard-52--cribbage-four-player.svg",
-    "rulesUrl": "",
+    "rulesUrl": "standard-52/games/four-player-cribbage/index.html",
     "playable": true,
     "playAs": "four-player-cribbage"
   },
@@ -2987,7 +2987,7 @@
     "variantTitle": "3-Player Cribbage",
     "topology": "tableau",
     "svg": "svgs/standard-52--cribbage-three-player.svg",
-    "rulesUrl": "",
+    "rulesUrl": "standard-52/games/three-player-cribbage/index.html",
     "playable": true,
     "playAs": "three-player-cribbage"
   },

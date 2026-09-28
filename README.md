@@ -8,7 +8,7 @@ Every game in the Moddable Games collection — from standard chess to Endless S
 
 ## Status
 
-**Ten families playable today** — chess (135+ variants incl. 6 hex), draughts (13), shogi (13), go (10), hex (8), mancala (6), morris (7), xiangqi (3), reversi (3), landlords-game (1). 198 playable variants total. Non-grid families remaining: backgammon (track), big 2 (tableau), halma (grid), race (track) — topologies registered but no plugins yet (#62).
+**Ten families playable today** — chess (135+ variants incl. 6 hex), draughts (13), shogi (13), go (10), hex (8), mancala (6), morris (7), xiangqi (3), reversi (3), landlords-game (1). 198 playable variants total. Backgammon (8, all frontmatter-only: the doubling cube, hitting, pinning, blocking, Acey-Deucey's chosen doublet, Nardi's head and six-block rules, and Chouette as a session against a rotating team) plays on the track. Remaining: halma (grid), race (track) (#62).
 
 Rules are implemented as plugin hooks — move filters, win conditions, turn logic, post-move effects. A composable rule layer exists in `packages/rule` (registry, dependency resolution, 8 parametric rules). The play surface (interaction, embed protocol, variant registry, SDK) is family-agnostic and lives in `packages/play`.
 
@@ -48,6 +48,7 @@ moddable-engine/
       draughts/          ← 13 variants (all frontmatter-only)
       go/                ← 10 variants (capture-go, gomoku, renju)
       hex/               ← 8 variants (standard + Y, bridge rollout policy)
+      backgammon/        ← 8 variants (dice, bar, bear-off, cube, hit/pin/block, sessions)
       landlords-game/    ← 1 variant (1904 patent, dice roll, circuit win)
       mancala/           ← 6 variants (kalah, oware, congkak, sungka)
       morris/            ← 7 variants (concentric-rings graph, mill removal)

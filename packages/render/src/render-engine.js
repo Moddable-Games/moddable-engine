@@ -758,16 +758,34 @@ function parseHexPositionString(setup, vocabulary = {}) {
 function parseTrackSetup(notation) {
   const dark = new Array(24).fill(0)
   const light = new Array(24).fill(0)
-  if (!notation || notation === 'empty') return { dark, light }
+  const parsed = { dark, light }
+  if (!notation || notation === 'empty') return parsed
   for (const pair of notation.split(',')) {
-    const [posStr, countSymbol] = pair.split(':')
-    if (!countSymbol || posStr === 'home' || posStr === 'bar') continue
-    const match = countSymbol.match(/^(\d+)([WB])$/)
+    const [where, countSymbol] = pair.split(':')
+    if (!countSymbol) continue
+    // Checkers waiting to enter (`home`) enter as a hit checker does, from the
+    // bar, and are drawn there.
+    const posStr = where === 'home' ? 'bar' : where
+    // `5:1W/B` is a light checker holding a dark one pinned beneath it.
+    const match = countSymbol.match(/^(\d+)([WB])(?:\/([WB]))?$/)
     if (!match) continue
-    if (match[2] === 'W') light[parseInt(posStr, 10)] = parseInt(match[1], 10)
-    else dark[parseInt(posStr, 10)] = parseInt(match[1], 10)
+    const count = parseInt(match[1], 10)
+    const colour = match[2] === 'W' ? 'light' : 'dark'
+    // A live position also says who is on the bar and who has borne off.
+    if (posStr === 'bar' || posStr === 'off') {
+      parsed[posStr] = parsed[posStr] || { light: 0, dark: 0 }
+      parsed[posStr][colour] += count
+      continue
+    }
+    const pos = parseInt(posStr, 10)
+    if (colour === 'light') light[pos] = count
+    else dark[pos] = count
+    if (match[3]) {
+      parsed.pinned = parsed.pinned || {}
+      parsed.pinned[pos] = match[3] === 'W' ? 'light' : 'dark'
+    }
   }
-  return { dark, light }
+  return parsed
 }
 
 function parsePitSetup(setup) {

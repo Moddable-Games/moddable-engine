@@ -25,6 +25,9 @@ const MINIMUM_PLAYABLE = {
   // real: corpses, all six pieces, the centre cell and control transfer
   // (engine#131).
   chess: 135,
+  // The tables games from frontmatter keys alone (engine#150), Chouette as a
+  // session of games between the box and a rotating team.
+  backgammon: 8,
   draughts: 13,
   go: 10,
   hex: 8,

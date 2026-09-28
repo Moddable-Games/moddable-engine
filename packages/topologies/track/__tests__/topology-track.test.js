@@ -1,6 +1,16 @@
 import { createTrackTopology } from '../src/topology-track.js'
 
 describe('topology-track', () => {
+  // Every tables variant declares `positions: 24`. Read as a list, a number
+  // has no length and the track had no points.
+  test('a track declared by its length names its points as the board draws them', () => {
+    const track = createTrackTopology({ positions: 24 })
+    expect(track.getCount()).toBe(24)
+    expect(track.isValid('point-1')).toBe(true)
+    expect(track.isValid('point-24')).toBe(true)
+    expect(Object.keys(track.parsePosition('0:2W,23:2B', { checker: { symbols: { 0: 'W', 1: 'B' } } }))).toEqual(['point-1', 'point-24'])
+  })
+
   describe('linear track (backgammon-style)', () => {
     const track = createTrackTopology({
       positions: Array.from({ length: 24 }, (_, i) => `point-${i + 1}`),

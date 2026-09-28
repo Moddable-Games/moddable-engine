@@ -27,6 +27,7 @@ import { createMancalaPlugin } from '../../plugins/mancala/index.js'
 import { createMorrisPlugin } from '../../plugins/morris/index.js'
 import { createHexPlugin } from '../../plugins/hex/index.js'
 import { createLandlordsPlugin } from '../../plugins/landlords-game/index.js'
+import { createBackgammonPlugin } from '../../plugins/backgammon/index.js'
 import { createChessPlugin } from '../../plugins/chess/index.js'
 import { createTableauPluginFor } from '../../plugins/tableau/index.js'
 import { createStandard52Deck } from '../../component-deck/index.js'
@@ -63,6 +64,7 @@ const PLUGIN_FACTORIES = {
   morris: createMorrisPlugin,
   hex: createHexPlugin,
   'landlords-game': createLandlordsPlugin,
+  backgammon: createBackgammonPlugin,
   // The component families: decks, dice, dominoes and tiles. One plugin plays
   // them all, and each game's frontmatter names the shape it takes (engine#176).
   ...Object.fromEntries(COMPONENT_FAMILIES.map(family => [family, createTableauPluginFor(family)])),
