@@ -33,6 +33,7 @@ import { createTableauPluginFor } from '../../plugins/tableau/index.js'
 import { createStandard52Deck } from '../../component-deck/index.js'
 import GENERATED_DEFAULTS from '../../../play/family-defaults.json' with { type: 'json' }
 import { applySettings } from './game-settings.js'
+import { getEvaluator, registerEvaluator } from '../../ai/index.js'
 // The composition root: every family's variant modules and evaluators. Loaded
 // here, by the module that builds games, so every way of building one gets
 // them. Only the play page and the test helper loaded it, so the SDK and every
@@ -68,6 +69,18 @@ const PLUGIN_FACTORIES = {
   // The component families: decks, dice, dominoes and tiles. One plugin plays
   // them all, and each game's frontmatter names the shape it takes (engine#176).
   ...Object.fromEntries(COMPONENT_FAMILIES.map(family => [family, createTableauPluginFor(family)])),
+}
+
+// A family whose rulebook names the plugin that plays it (`engine.plugin:
+// chess`) is played by that plugin, with its own frontmatter as the config.
+// Dou Shou Qi is ranked pieces on terrain, which the chess plugin already
+// reads; a second plugin would be the chess plugin twice. The name comes from
+// the rulebook through the generated defaults, so no family is listed here.
+for (const [family, entry] of Object.entries(GENERATED_DEFAULTS)) {
+  if (!entry.plugin || PLUGIN_FACTORIES[family] || !PLUGIN_FACTORIES[entry.plugin]) continue
+  PLUGIN_FACTORIES[family] = PLUGIN_FACTORIES[entry.plugin]
+  const evaluate = getEvaluator(entry.plugin)
+  if (evaluate && !getEvaluator(family)) registerEvaluator(family, evaluate)
 }
 
 export function registerTopology(type, factory) {

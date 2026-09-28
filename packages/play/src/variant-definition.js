@@ -50,7 +50,7 @@ export function definitionFromVariant(family, config, defaults = {}) {
 
 // The engine keys that are not plugin config. Every other key of a resolved
 // engine block is folded into the plugin's config.
-export const STRUCTURAL_KEYS = new Set(['topology', 'players', 'firstPlayer', 'turnOrder', 'meta', 'surface', 'render', 'components', 'plugins', 'pieces'])
+export const STRUCTURAL_KEYS = new Set(['topology', 'players', 'firstPlayer', 'turnOrder', 'meta', 'surface', 'render', 'components', 'plugins', 'plugin', 'pieces'])
 
 // Keys a registered variant carries for the pages, not for its plugin.
 const REGISTRY_PRESENTATION_KEYS = new Set(['key', 'label', 'title', 'group', 'description', 'rule', 'board', 'extends', 'hidden', 'playerNames', 'definition', 'rows', 'cols', 'size', 'notation', 'topology', 'players'])

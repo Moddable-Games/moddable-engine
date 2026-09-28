@@ -241,6 +241,48 @@ export function warp(allows) {
   }
 }
 
+/**
+ * A leap across a region, landing on the first cell beyond it.
+ *
+ * Dou Shou Qi's Lion and Tiger "jump from a square on one edge of the river to
+ * the next non-water square on the other side", and the jump "is blocked if a
+ * rat of either color currently occupies any of the intervening water
+ * squares". The leap goes only where the first step enters the region; every
+ * cell crossed must be empty, and the landing cell is empty or an enemy.
+ *
+ * `over` is a predicate over a cell, as for `confine`, so this knows nothing
+ * about rivers: the plugin decides what the region is.
+ */
+export function cross(dirs, over) {
+  // Where a ray lands: the first cell past a run of empty region cells that
+  // starts on the ray's first step.
+  function landing(ray, board) {
+    if (!ray.length || !over(ray[0])) return null
+    for (const pos of ray) {
+      if (!over(pos)) return pos
+      if (board[pos]) return null
+    }
+    return null
+  }
+  return {
+    type: 'cross',
+    genMoves(topology, from, board) {
+      const moves = []
+      for (const ray of topology.rays(from, dirs)) {
+        const to = landing(ray, board)
+        if (to === null) continue
+        const occupant = board[to]
+        if (!occupant) moves.push({ from, to })
+        else if (occupant.enemy) moves.push({ from, to, capture: true })
+      }
+      return moves
+    },
+    attacks(topology, from, target, board) {
+      return topology.rays(from, dirs).some(ray => landing(ray, board) === target)
+    },
+  }
+}
+
 export function compose(...primitives) {
   return {
     type: 'compound',

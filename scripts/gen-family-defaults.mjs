@@ -55,9 +55,24 @@ function findDefaultVariant(family) {
   return bestFile
 }
 
+// A family with no plugin of its own may name the plugin that plays it in its
+// rulebook (`engine.plugin: chess`). It gets a default like any other, and the
+// name travels with it so play.js can hand the family to that plugin.
+const RULES_FAMILIES = existsSync(RULES_ROOT)
+  ? readdirSync(RULES_ROOT, { withFileTypes: true }).filter(e => e.isDirectory()).map(e => e.name)
+  : []
+const PLAYED_BY = {}
+for (const family of RULES_FAMILIES) {
+  if (FAMILIES.includes(family)) continue
+  const rulebookPath = join(RULES_ROOT, family, 'content', 'rulebook.md')
+  if (!existsSync(rulebookPath)) continue
+  const plugin = parseFrontmatter(readFileSync(rulebookPath, 'utf8')).meta.engine?.plugin
+  if (plugin && FAMILIES.includes(plugin)) PLAYED_BY[family] = plugin
+}
+
 const defaults = {}
 
-for (const family of FAMILIES) {
+for (const family of [...FAMILIES, ...Object.keys(PLAYED_BY).sort()]) {
   const rulebookPath = join(RULES_ROOT, family, 'content', 'rulebook.md')
   if (!existsSync(rulebookPath)) {
     console.warn(`  ${family}: no rulebook found, skipping`)
@@ -78,13 +93,14 @@ for (const family of FAMILIES) {
   const topology = variantEngine.topology || engine.topology || {}
   const players = variantEngine.players || engine.players || ['white', 'black']
 
-  const pluginBlock = variantEngine.plugins?.[family] || {}
+  const pluginBlock = { ...engine.plugins?.[family], ...variantEngine.plugins?.[family] }
   const setup = pluginBlock.setup || variantEngine.setup
 
   const pluginConfig = { ...pluginBlock }
   if (setup && !pluginConfig.setup) pluginConfig.setup = setup
 
   defaults[family] = {
+    ...(PLAYED_BY[family] ? { plugin: PLAYED_BY[family] } : {}),
     default: {
       title: variantFm.title || family,
       slug: variantFm.slug || defaultVariant.file.replace('.md', ''),

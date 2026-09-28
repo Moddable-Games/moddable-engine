@@ -1677,7 +1677,7 @@
     "topology": "grid",
     "svg": "svgs/dou-shou-qi--standard.svg",
     "rulesUrl": "dou-shou-qi/index.html",
-    "playable": false
+    "playable": true
   },
   {
     "family": "double-six-dominoes",

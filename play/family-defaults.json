@@ -144,6 +144,7 @@
         ],
         "plugins": {
           "go": {
+            "search": "mcts",
             "komi": 6.5,
             "scoring": "territory",
             "superko": true,
@@ -324,6 +325,327 @@
             "flyingGeneralRule": true,
             "cannonJumpToMove": false,
             "setup": "rheakaehr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RHEAKAEHR"
+          }
+        }
+      }
+    }
+  },
+  "dou-shou-qi": {
+    "plugin": "chess",
+    "default": {
+      "title": "Dou Shou Qi (Standard)",
+      "slug": "standard",
+      "parent": "dou-shou-qi",
+      "engine": {
+        "topology": {
+          "type": "grid",
+          "rows": 9,
+          "cols": 7
+        },
+        "players": [
+          "white",
+          "black"
+        ],
+        "plugins": {
+          "dou-shou-qi": {
+            "castling": false,
+            "enPassant": false,
+            "noCheck": true,
+            "stalemateMeaning": "loss",
+            "regions": {
+              "water": {
+                "cells": [
+                  [
+                    3,
+                    1
+                  ],
+                  [
+                    3,
+                    2
+                  ],
+                  [
+                    3,
+                    4
+                  ],
+                  [
+                    3,
+                    5
+                  ],
+                  [
+                    4,
+                    1
+                  ],
+                  [
+                    4,
+                    2
+                  ],
+                  [
+                    4,
+                    4
+                  ],
+                  [
+                    4,
+                    5
+                  ],
+                  [
+                    5,
+                    1
+                  ],
+                  [
+                    5,
+                    2
+                  ],
+                  [
+                    5,
+                    4
+                  ],
+                  [
+                    5,
+                    5
+                  ]
+                ]
+              },
+              "ownDen": {
+                "cells": [
+                  [
+                    [
+                      8,
+                      3
+                    ]
+                  ],
+                  [
+                    [
+                      0,
+                      3
+                    ]
+                  ]
+                ]
+              },
+              "enemyDen": {
+                "cells": [
+                  [
+                    [
+                      0,
+                      3
+                    ]
+                  ],
+                  [
+                    [
+                      8,
+                      3
+                    ]
+                  ]
+                ]
+              },
+              "enemyTraps": {
+                "cells": [
+                  [
+                    [
+                      0,
+                      2
+                    ],
+                    [
+                      0,
+                      4
+                    ],
+                    [
+                      1,
+                      3
+                    ]
+                  ],
+                  [
+                    [
+                      8,
+                      2
+                    ],
+                    [
+                      8,
+                      4
+                    ],
+                    [
+                      7,
+                      3
+                    ]
+                  ]
+                ]
+              },
+              "land": {
+                "not": [
+                  "water",
+                  "ownDen"
+                ]
+              },
+              "notOwnDen": {
+                "not": [
+                  "ownDen"
+                ]
+              }
+            },
+            "goal": {
+              "in": "enemyDen"
+            },
+            "ranks": {
+              "order": {
+                "rat": 1,
+                "cat": 2,
+                "dog": 3,
+                "wolf": 4,
+                "leopard": 5,
+                "tiger": 6,
+                "lion": 7,
+                "elephant": 8
+              },
+              "also": [
+                {
+                  "piece": "rat",
+                  "takes": "elephant"
+                }
+              ],
+              "never": [
+                {
+                  "piece": "elephant",
+                  "takes": "rat"
+                }
+              ]
+            },
+            "terrain": {
+              "weaken": [
+                {
+                  "in": "enemyTraps",
+                  "rank": 0
+                }
+              ],
+              "noCaptureAcross": [
+                "water"
+              ]
+            },
+            "vocabulary": {
+              "rook": {
+                "symbols": {}
+              },
+              "pawn": {
+                "symbols": {}
+              },
+              "elephant": {
+                "symbols": {
+                  "0": "E",
+                  "1": "e"
+                }
+              },
+              "lion": {
+                "symbols": {
+                  "0": "L",
+                  "1": "l"
+                }
+              },
+              "tiger": {
+                "symbols": {
+                  "0": "T",
+                  "1": "t"
+                }
+              },
+              "leopard": {
+                "symbols": {
+                  "0": "P",
+                  "1": "p"
+                }
+              },
+              "wolf": {
+                "symbols": {
+                  "0": "W",
+                  "1": "w"
+                }
+              },
+              "dog": {
+                "symbols": {
+                  "0": "D",
+                  "1": "d"
+                }
+              },
+              "cat": {
+                "symbols": {
+                  "0": "C",
+                  "1": "c"
+                }
+              },
+              "rat": {
+                "symbols": {
+                  "0": "R",
+                  "1": "r"
+                }
+              }
+            },
+            "pieces": {
+              "elephant": {
+                "type": "rider",
+                "dirs": "orthogonal",
+                "maxSteps": 1,
+                "confine": "land"
+              },
+              "leopard": {
+                "type": "rider",
+                "dirs": "orthogonal",
+                "maxSteps": 1,
+                "confine": "land"
+              },
+              "wolf": {
+                "type": "rider",
+                "dirs": "orthogonal",
+                "maxSteps": 1,
+                "confine": "land"
+              },
+              "dog": {
+                "type": "rider",
+                "dirs": "orthogonal",
+                "maxSteps": 1,
+                "confine": "land"
+              },
+              "cat": {
+                "type": "rider",
+                "dirs": "orthogonal",
+                "maxSteps": 1,
+                "confine": "land"
+              },
+              "rat": {
+                "type": "rider",
+                "dirs": "orthogonal",
+                "maxSteps": 1,
+                "confine": "notOwnDen"
+              },
+              "lion": {
+                "type": "compose",
+                "parts": [
+                  {
+                    "type": "rider",
+                    "dirs": "orthogonal",
+                    "maxSteps": 1,
+                    "confine": "land"
+                  },
+                  {
+                    "type": "cross",
+                    "dirs": "orthogonal",
+                    "over": "water"
+                  }
+                ]
+              },
+              "tiger": {
+                "type": "compose",
+                "parts": [
+                  {
+                    "type": "rider",
+                    "dirs": "orthogonal",
+                    "maxSteps": 1,
+                    "confine": "land"
+                  },
+                  {
+                    "type": "cross",
+                    "dirs": "orthogonal",
+                    "over": "water"
+                  }
+                ]
+              }
+            },
+            "setup": "l5t/1d3c1/r1p1w1e/7/7/7/E1W1P1R/1C3D1/T5L"
           }
         }
       }

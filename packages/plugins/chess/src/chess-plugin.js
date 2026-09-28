@@ -1,5 +1,5 @@
 import { warnUnknownConfigKeys } from '../../../core/index.js'
-import { rider, leaper, compose, divergent, confine, positional, reboundRider, targeted, warp, fromConfig, OFFSETS } from '../../../piece-behaviour/index.js'
+import { rider, leaper, compose, divergent, confine, positional, reboundRider, targeted, warp, cross, fromConfig, OFFSETS } from '../../../piece-behaviour/index.js'
 import { randomBackRank } from './variants/chess960.js'
 // Every config key this plugin reads. Exported so the corpus guard and the
 // authoring docs share one source of truth, and kept separate from `defaults`,
@@ -8,7 +8,7 @@ export const CONFIG_KEYS = new Set([
   'actions', 'advancement', 'afterMove', 'capturesTo', 'castling', 'checkThreshold', 'cols', 'demotionMap', 'doubleStep',
   'gating', 'initialHands', 'matedArmy',
   'dropMayNotCheck', 'dropRegion', 'dropZone', 'drops', 'dropsCompulsory', 'dropsFor', 'enPassant', 'hexPawnConfig', 'initState', 'moveApply', 'moveFilter', 'noCheck',
-  'onTurnEnd', 'pawnCaptureDirections', 'pawnConfig', 'pawnMoveDirections', 'pawnStartRow',
+  'onTurnEnd', 'pawnCaptureDirections', 'ranks', 'pawnConfig', 'pawnMoveDirections', 'pawnStartRow',
   'pawnDropRanks', 'pawnType', 'placementDistinctColor', 'placementPieces', 'placementZone', 'playerCount',
   'promotion', 'promotionChoices', 'promotionRegion', 'promotionsKept', 'promotionRow', 'regions',
   'faceoff', 'freeze', 'goal', 'matchEnds', 'promotionZone', 'randomSetup', 'rookType', 'rows', 'royalType', 'setup', 'transfer',
@@ -190,6 +190,13 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       return [Math.floor(local / nCols), local % nCols, Math.floor(pos / plane)]
     }
     const inLayers = (l) => !layers || (l >= layers[0] && l <= layers[1])
+    // Everywhere outside the named regions. Dou Shou Qi's animals walk the
+    // land, which is the board less the water and their own den:
+    //     land: { not: [water, ownDen] }
+    if (spec.not) {
+      const excluded = [].concat(spec.not).map(name => regionPredicate(name, playerIdx)).filter(Boolean)
+      return (pos) => !excluded.some(inside => inside(pos))
+    }
     if (spec.cells) {
       // A list of [row, col] pairs, or a list of two such lists to vary by seat.
       const perSeatCells = Array.isArray(spec.cells[0]) && Array.isArray(spec.cells[0][0])
@@ -215,7 +222,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   // Does this spec, at any depth, need to know which seat it is being built for?
   function needsSeat(spec) {
     if (!spec || typeof spec !== 'object') return false
-    if (spec.directional || spec.confine || spec.type === 'positional') return true
+    if (spec.directional || spec.confine || spec.type === 'positional' || spec.type === 'cross' || spec.type === 'warp') return true
     if (Array.isArray(spec.parts)) return spec.parts.some(needsSeat)
     if (spec.divergent) return needsSeat(spec.divergent.move) || needsSeat(spec.divergent.capture)
     return false
@@ -242,6 +249,13 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     if (spec.type === 'warp') {
       const allows = regionPredicate(spec.to, playerIdx)
       return allows ? warp(allows) : null
+    }
+
+    // A leap over a named region to the first cell beyond it, blocked by any
+    // piece standing in the region on the way.
+    if (spec.type === 'cross') {
+      const over = regionPredicate(spec.over, playerIdx)
+      return over ? cross(spec.dirs || 'orthogonal', over) : null
     }
 
     if (spec.type === 'rebound') {
@@ -854,7 +868,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
         moves[i] = { ...rest, captured: via }
       }
     }
-    return withPromotions(moves, piece.type, playerIdx)
+    return withPromotions(withCaptureRules(moves, slice.board), piece.type, playerIdx)
   }
 
   // Who a dropped piece belongs to. Normally the player dropping it; in
@@ -919,6 +933,78 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
       }
     }
     return false
+  }
+
+  // Capture by rank. A piece takes one of equal or lower rank, with named
+  // exceptions either way, and terrain may change the rank of a piece standing
+  // on it. Dou Shou Qi, where the eight animals are ranked, "the rat can kill
+  // an elephant" while "the elephant cannot kill the rat", and a piece in an
+  // opponent's trap is reduced to rank 0:
+  //
+  //     ranks:
+  //       order: { rat: 1, cat: 2, ..., elephant: 8 }
+  //       also: [{ piece: rat, takes: elephant }]
+  //       never: [{ piece: elephant, takes: rat }]
+  //     terrain:
+  //       weaken: [{ in: enemyTraps, rank: 0 }]   # per seat of the piece standing there
+  //       noCaptureAcross: [water]                # a capture may not cross the edge
+  //
+  // A piece with no rank is outside the order and captures as in chess.
+  const rankSpec = config.ranks || null
+  const rankOrder = rankSpec?.order || {}
+  const rankAlso = new Set((rankSpec?.also || []).map(e => `${e.piece}>${e.takes}`))
+  const rankNever = new Set((rankSpec?.never || []).map(e => `${e.piece}>${e.takes}`))
+  const weakenRules = config.terrain?.weaken || []
+  const captureEdges = [].concat(config.terrain?.noCaptureAcross || [])
+  const captureRulesDeclared = Boolean(rankSpec || captureEdges.length)
+
+  // Built once per region and seat: the search asks this for every capture.
+  const regionCache = new Map()
+  function inRegion(name, playerIdx, pos) {
+    const key = `${name}|${playerIdx}`
+    if (!regionCache.has(key)) regionCache.set(key, regionPredicate(name, playerIdx))
+    const allows = regionCache.get(key)
+    return Boolean(allows && allows(pos))
+  }
+
+  // The rank terrain gives a piece standing on it, or undefined where it gives
+  // none.
+  function terrainRank(piece, pos) {
+    for (const rule of weakenRules) {
+      if (inRegion(rule.in, piece.owner, pos)) return rule.rank
+    }
+    return undefined
+  }
+
+  function rankAt(piece, pos) {
+    const weakened = terrainRank(piece, pos)
+    return weakened === undefined ? rankOrder[piece.type] : weakened
+  }
+
+  function captureAllowed(board, from, victimPos) {
+    const attacker = getCell(board, from)
+    const victim = getCell(board, victimPos)
+    if (!attacker || !victim) return true
+    for (const edge of captureEdges) {
+      if (inRegion(edge, attacker.owner, from) !== inRegion(edge, attacker.owner, victimPos)) return false
+    }
+    if (!rankSpec) return true
+    // A piece the terrain has weakened "may be captured by the defending side
+    // with any piece" that outranks what is left of it, whatever the named
+    // exceptions say.
+    if (terrainRank(victim, victimPos) !== undefined) return rankAt(attacker, from) >= terrainRank(victim, victimPos)
+    const pair = `${attacker.type}>${victim.type}`
+    if (rankNever.has(pair)) return false
+    if (rankAlso.has(pair)) return true
+    const mine = rankAt(attacker, from)
+    const theirs = rankAt(victim, victimPos)
+    if (mine === undefined || theirs === undefined) return true
+    return mine >= theirs
+  }
+
+  function withCaptureRules(moves, board) {
+    if (!captureRulesDeclared) return moves
+    return moves.filter(m => !m.capture || captureAllowed(board, m.from, m.captured ?? m.to))
   }
 
   function generatePawnMoves(from, slice, playerIdx) {
@@ -1197,6 +1283,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
 
     const primitive = buildPieceForPlayer(piece.type, piece.owner)
     if (!primitive) return false
+    if (captureRulesDeclared && getCell(board, target) && !captureAllowed(board, from, target)) return false
 
     return primitive.attacks(topology, from, target, board)
   }
@@ -1890,6 +1977,12 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
   // board's centre, and the sum has to be positive.
   const goalRule = config.goal || null
 
+  // A goal names the piece that must arrive, or none: in Dou Shou Qi "any one
+  // of their pieces" entering the opponent's den wins.
+  function isGoalPiece(piece) {
+    return !goalRule.piece || goalRule.piece === 'any' || piece.type === goalRule.piece
+  }
+
   function goalRegionFor(playerIdx) {
     if (!goalRule) return null
     return regionPredicate(goalRule.in, playerIdx)
@@ -1915,7 +2008,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     if (!state || !state.board) return result
     const mover = full.__players.currentIndex
     const piece = getCell(state.board, move.to)
-    if (!piece || piece.type !== goalRule.piece || piece.owner !== mover) return result
+    if (!piece || !isGoalPiece(piece) || piece.owner !== mover) return result
     const swept = (slice._swept || [0, 0]).slice()
     swept[mover] += sweptAngle(move.from, move.to)
     const tracked = { ...state, _swept: swept }
@@ -1928,7 +2021,7 @@ export function createChessPlugin(variantConfig = {}, context = {}) {
     if (!inGoal) return null
     for (const pos of allPositions()) {
       const cell = getCell(slice.board, pos)
-      if (!cell || cell.owner !== playerIdx || cell.type !== goalRule.piece) continue
+      if (!cell || cell.owner !== playerIdx || !isGoalPiece(cell)) continue
       if (!inGoal(pos)) continue
       if (goalRule.rotation === 'cw' && !((slice._swept || [0, 0])[playerIdx] > 0)) continue
       if (goalRule.rotation === 'ccw' && !((slice._swept || [0, 0])[playerIdx] < 0)) continue
