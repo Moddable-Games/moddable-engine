@@ -276,8 +276,13 @@ export function createGameController(game, opts = {}) {
   }
 
   function findBoardSlice() {
-    if (game.registry && game.registry.getAll) {
-      const plugins = game.registry.getAll()
+    // The registry lists its plugins as `getPlugins`. This asked for
+    // `getAll`, which no registry has, so the board was only ever found by
+    // trying family names as slice names - and a plugin whose slice is not a
+    // family's name (the race games share `race`) had no board to click.
+    const listed = game.registry && (game.registry.getPlugins || game.registry.getAll)
+    if (listed) {
+      const plugins = listed.call(game.registry)
       for (const p of plugins) {
         const state = game.getState(p.sliceName)
         if (state && state.board) return p.sliceName

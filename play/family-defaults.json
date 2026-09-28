@@ -788,6 +788,579 @@
       }
     }
   },
+  "nyout": {
+    "plugin": "race",
+    "default": {
+      "title": "Nyout (Standard)",
+      "slug": "standard",
+      "parent": "nyout",
+      "engine": {
+        "topology": {
+          "type": "graph",
+          "structure": "perimeter-cross"
+        },
+        "players": [
+          "white",
+          "black"
+        ],
+        "plugins": {
+          "nyout": {
+            "vocabulary": {
+              "piece": {
+                "symbols": {
+                  "0": "S",
+                  "1": "s"
+                }
+              }
+            },
+            "pieces": 4,
+            "routes": {
+              "outer": [
+                "n2",
+                "n3",
+                "n4",
+                "n5",
+                "n6",
+                "n7",
+                "n8",
+                "n9",
+                "n10",
+                "n11",
+                "n12",
+                "n13",
+                "n14",
+                "n15",
+                "n16",
+                "n17",
+                "n18",
+                "n19",
+                "n20"
+              ],
+              "first": [
+                "n6",
+                "n29",
+                "n28",
+                "n21",
+                "n27",
+                "n26",
+                "n16",
+                "n17",
+                "n18",
+                "n19",
+                "n20"
+              ],
+              "second": [
+                "n11",
+                "n22",
+                "n23",
+                "n21",
+                "n24",
+                "n25"
+              ],
+              "centre": [
+                "n21",
+                "n24",
+                "n25"
+              ]
+            },
+            "seatRoutes": "outer",
+            "shortcuts": [
+              {
+                "at": "n6",
+                "take": "first"
+              },
+              {
+                "at": "n11",
+                "take": "second"
+              },
+              {
+                "at": "n21",
+                "take": "centre"
+              }
+            ],
+            "throw": {
+              "lots": 4,
+              "scores": {
+                "0": 5
+              },
+              "again": [
+                4,
+                5
+              ],
+              "bank": true
+            },
+            "bearOff": "over",
+            "contact": "capture",
+            "captureRethrow": true,
+            "stack": true
+          }
+        }
+      }
+    }
+  },
+  "royal-ur": {
+    "plugin": "race",
+    "default": {
+      "title": "Royal Game of Ur (Standard)",
+      "slug": "standard",
+      "parent": "royal-ur",
+      "engine": {
+        "topology": {
+          "type": "grid",
+          "rows": 3,
+          "cols": 8
+        },
+        "players": [
+          "white",
+          "black"
+        ],
+        "plugins": {
+          "royal-ur": {
+            "vocabulary": {
+              "piece": {
+                "symbols": {
+                  "0": "M",
+                  "1": "m"
+                }
+              }
+            },
+            "pieces": 7,
+            "routes": {
+              "white": [
+                [
+                  2,
+                  3
+                ],
+                [
+                  2,
+                  2
+                ],
+                [
+                  2,
+                  1
+                ],
+                [
+                  2,
+                  0
+                ],
+                [
+                  1,
+                  0
+                ],
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  2
+                ],
+                [
+                  1,
+                  3
+                ],
+                [
+                  1,
+                  4
+                ],
+                [
+                  1,
+                  5
+                ],
+                [
+                  1,
+                  6
+                ],
+                [
+                  1,
+                  7
+                ],
+                [
+                  2,
+                  7
+                ],
+                [
+                  2,
+                  6
+                ]
+              ],
+              "black": [
+                [
+                  0,
+                  3
+                ],
+                [
+                  0,
+                  2
+                ],
+                [
+                  0,
+                  1
+                ],
+                [
+                  0,
+                  0
+                ],
+                [
+                  1,
+                  0
+                ],
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  2
+                ],
+                [
+                  1,
+                  3
+                ],
+                [
+                  1,
+                  4
+                ],
+                [
+                  1,
+                  5
+                ],
+                [
+                  1,
+                  6
+                ],
+                [
+                  1,
+                  7
+                ],
+                [
+                  0,
+                  7
+                ],
+                [
+                  0,
+                  6
+                ]
+              ]
+            },
+            "seatRoutes": [
+              "white",
+              "black"
+            ],
+            "throw": {
+              "lots": 4
+            },
+            "bearOff": "exact",
+            "contact": "capture",
+            "safe": [
+              [
+                0,
+                0
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                1,
+                3
+              ],
+              [
+                0,
+                6
+              ],
+              [
+                2,
+                6
+              ]
+            ],
+            "rethrow": [
+              [
+                0,
+                0
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                1,
+                3
+              ],
+              [
+                0,
+                6
+              ],
+              [
+                2,
+                6
+              ]
+            ]
+          }
+        }
+      }
+    }
+  },
+  "senet": {
+    "plugin": "race",
+    "default": {
+      "title": "Senet (Kendall Reconstruction)",
+      "slug": "standard",
+      "parent": "senet",
+      "engine": {
+        "topology": {
+          "type": "grid",
+          "rows": 3,
+          "cols": 10
+        },
+        "players": [
+          "white",
+          "black"
+        ],
+        "plugins": {
+          "senet": {
+            "vocabulary": {
+              "piece": {
+                "symbols": {
+                  "0": "M",
+                  "1": "m"
+                }
+              }
+            },
+            "pieces": 5,
+            "routes": {
+              "path": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  1
+                ],
+                [
+                  0,
+                  2
+                ],
+                [
+                  0,
+                  3
+                ],
+                [
+                  0,
+                  4
+                ],
+                [
+                  0,
+                  5
+                ],
+                [
+                  0,
+                  6
+                ],
+                [
+                  0,
+                  7
+                ],
+                [
+                  0,
+                  8
+                ],
+                [
+                  0,
+                  9
+                ],
+                [
+                  1,
+                  9
+                ],
+                [
+                  1,
+                  8
+                ],
+                [
+                  1,
+                  7
+                ],
+                [
+                  1,
+                  6
+                ],
+                [
+                  1,
+                  5
+                ],
+                [
+                  1,
+                  4
+                ],
+                [
+                  1,
+                  3
+                ],
+                [
+                  1,
+                  2
+                ],
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  0
+                ],
+                [
+                  2,
+                  0
+                ],
+                [
+                  2,
+                  1
+                ],
+                [
+                  2,
+                  2
+                ],
+                [
+                  2,
+                  3
+                ],
+                [
+                  2,
+                  4
+                ],
+                [
+                  2,
+                  5
+                ],
+                [
+                  2,
+                  6
+                ],
+                [
+                  2,
+                  7
+                ],
+                [
+                  2,
+                  8
+                ],
+                [
+                  2,
+                  9
+                ]
+              ]
+            },
+            "seatRoutes": "path",
+            "start": [
+              [
+                [
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  2
+                ],
+                [
+                  0,
+                  4
+                ],
+                [
+                  0,
+                  6
+                ],
+                [
+                  0,
+                  8
+                ]
+              ],
+              [
+                [
+                  0,
+                  1
+                ],
+                [
+                  0,
+                  3
+                ],
+                [
+                  0,
+                  5
+                ],
+                [
+                  0,
+                  7
+                ],
+                [
+                  0,
+                  9
+                ]
+              ]
+            ],
+            "throw": {
+              "lots": 4,
+              "scores": {
+                "0": 5
+              },
+              "again": [
+                1,
+                4,
+                5
+              ]
+            },
+            "contact": "swap",
+            "safe": [
+              [
+                2,
+                7
+              ],
+              [
+                2,
+                8
+              ]
+            ],
+            "pairsSafe": true,
+            "blockade": 3,
+            "mustStop": [
+              [
+                2,
+                5
+              ]
+            ],
+            "sendBack": {
+              "from": [
+                2,
+                6
+              ],
+              "to": [
+                1,
+                5
+              ]
+            },
+            "bearOff": "exact",
+            "bearOffFrom": [
+              [
+                2,
+                7
+              ],
+              [
+                2,
+                8
+              ],
+              [
+                2,
+                9
+              ]
+            ],
+            "whenBlocked": "backward",
+            "setup": "MmMmMmMmMm/10/10"
+          }
+        }
+      }
+    }
+  },
   "surakarta": {
     "plugin": "chess",
     "default": {

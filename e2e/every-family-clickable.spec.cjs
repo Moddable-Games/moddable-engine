@@ -111,7 +111,7 @@ test.describe('every playable family answers a click', () => {
       expect(accepted).toBeGreaterThan(0)
 
       const actions = await page.locator('#game-play-root button, .game-play-actions button').allTextContents()
-      const playsFromAButton = actions.some(t => /roll|deal|draw/i.test(t))
+      const playsFromAButton = actions.some(t => /roll|throw|deal|draw/i.test(t))
       if (playsFromAButton) return
 
       // One pass, not a pair of nested loops. Trying every cell against every

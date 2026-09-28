@@ -221,7 +221,11 @@ function topologyFromState(state) {
     if (t.cols) topology.cols = t.cols
   } else if (type === 'graph') {
     topology.structure = t.structure || 'concentric-rings'
-    topology.params = { ...(topology.params || {}), rings: t.rings || 3 }
+    // Rings belong to the ring board. Every graph was written with `rings: 3`,
+    // so Nyout's perimeter-and-cross board came back from the editor with a
+    // parameter it does not have.
+    const hasRings = t.rings !== undefined || topology.structure === 'concentric-rings'
+    topology.params = hasRings ? { ...(topology.params || {}), rings: t.rings || 3 } : { ...(topology.params || {}) }
   } else if (type === 'track') {
     topology.positions = t.positions || 24
   } else if (type === 'pit') {
