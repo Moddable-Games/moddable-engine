@@ -17,7 +17,7 @@
  *
  *   position     the FEN the solver faces (setupMove ? engine(fen, setupMove) : fen)
  *   turn         'white' | 'black', the side to move in `position`
- *   variantSlug  the canonical key from play/playability-manifest.json
+ *   variantSlug  the play slug (`variant`) from play/playability-manifest.json
  *   family       the family that slug belongs to - a slug alone is not unique,
  *                since `standard`, `9x9` and `13x13` are each used by several
  *
@@ -42,7 +42,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
 const CHECK_MODE = process.argv.includes('--check')
 const DATE_ARG = process.argv.find(a => a.startsWith('--date='))
-const DEFAULT_DATE = '2026-08-15'
+const DEFAULT_DATE = '2026-09-28'
 const DATE = (DATE_ARG ? DATE_ARG.slice('--date='.length) : process.env.PUZZLE_DATE) || DEFAULT_DATE
 
 const PUZZLE_FILE = 'api/puzzles/index.json'
@@ -130,10 +130,14 @@ function buildSlugResolver(manifest) {
   // Keys are only unique within a family: "standard" exists in nearly all of
   // them. Resolving against a flattened set would silently map a shogi record
   // onto the chess entry of the same name.
-  const keysByFamily = new Map()
+  // A record may name its variant by either of the manifest's names, the
+  // play slug (`variant`) or the older camelCase `key`; it is written out as
+  // the play slug, the one name every consumer matches on (engine#203).
+  const slugsByFamily = new Map()
   for (const entry of manifest) {
-    if (!keysByFamily.has(entry.family)) keysByFamily.set(entry.family, new Set())
-    keysByFamily.get(entry.family).add(entry.key)
+    if (!slugsByFamily.has(entry.family)) slugsByFamily.set(entry.family, new Map())
+    slugsByFamily.get(entry.family).set(entry.key, entry.variant)
+    slugsByFamily.get(entry.family).set(entry.variant, entry.variant)
   }
   const mappings = new Map()
   const unresolved = new Map()
@@ -141,14 +145,14 @@ function buildSlugResolver(manifest) {
   function resolveSlug(variant, family = DEFAULT_FAMILY) {
     const cacheKey = `${family}/${variant}`
     if (mappings.has(cacheKey)) return mappings.get(cacheKey)
-    const keys = keysByFamily.get(family) || new Set()
-    const match = slugCandidates(variant).find(candidate => keys.has(candidate))
+    const slugs = slugsByFamily.get(family) || new Map()
+    const match = slugCandidates(variant).find(candidate => slugs.has(candidate))
     if (!match) {
       unresolved.set(cacheKey, (unresolved.get(cacheKey) || 0) + 1)
       return null
     }
-    mappings.set(cacheKey, match)
-    return match
+    mappings.set(cacheKey, slugs.get(match))
+    return slugs.get(match)
   }
 
   return { resolveSlug, mappings, unresolved }

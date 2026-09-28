@@ -8,7 +8,7 @@
  *
  * 1. The schema holds — every record carries the three added fields, `position`
  *    differs from `fen` exactly when a `setupMove` is present, and every
- *    `variantSlug` is a real key in play/playability-manifest.json.
+ *    `variantSlug` is a play slug in play/playability-manifest.json.
  *
  * 2. The puzzles are actually correct — the first move of every solution is in
  *    the engine's legal move list for `position`, and for standard chess the
@@ -93,6 +93,12 @@ for (const entry of manifest) {
 }
 
 const variantByKey = new Map(manifest.map(entry => [entry.key, entry.variant]))
+
+const playSlugs = new Map()
+for (const entry of manifest) {
+  if (!playSlugs.has(entry.family)) playSlugs.set(entry.family, new Set())
+  playSlugs.get(entry.family).add(entry.variant)
+}
 
 function familyOf(record) {
   if (record.family) return record.family
@@ -237,6 +243,14 @@ describe('puzzle pool schema (v2)', () => {
       it('every variantSlug is a key in play/playability-manifest.json', () => {
         const unknown = [...new Set(records.filter(r => !knownToManifest(r)).map(r => r.variantSlug))]
         expect(unknown).toEqual([])
+      })
+
+      // engine#203. The manifest gives a variant two names, and the pool wrote
+      // the camelCase `key` for thirty chess variants: a consumer matching a
+      // play slug such as "king-of-the-hill" found none of their puzzles.
+      it('every variantSlug is the play slug, not the camelCase key', () => {
+        const notSlug = [...new Set(records.filter(r => !playSlugs.get(familyOf(r))?.has(r.variantSlug)).map(r => r.variantSlug))]
+        expect(notSlug).toEqual([])
       })
     })
   }

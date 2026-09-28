@@ -738,7 +738,7 @@ export function buildRecord({ family, entry, hit, index, game, dims, playerNames
     id: `${family === 'chess' ? '' : `${family}_`}${variant}_${shape === 'win' ? 'gen' : shape}_${index}`,
     family,
     variant,
-    variantSlug: entry.key,
+    variantSlug: entry.variant,
   }
   if (state) {
     // A position a FEN cannot carry is the engine's snapshot, with the board

@@ -171,6 +171,8 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-09-28
+- Puzzle records name their variant by its play slug (`king-of-the-hill`, `benedict`) in `variantSlug`. Twenty-five chess variants carried the older camelCase key there, so matching a puzzle to the variant it belongs to by slug missed them
+- Hanafuda cards show their back face down: the deck now names the back the hanafuda set already ships
 - Every piece is a picture from the piece gallery. The renderers no longer draw a stone, a draughtsman, a seed or a token as a shape when no picture resolves, and a test plays every board variant part way and checks its pieces are gallery pictures. The Landlord's Game, the one family whose players were drawn in code, now uses a gallery set of its own (`mce-player-tokens`, six pawns drawn by `scripts/gen-token-set.mjs`). A mancala pit holding more seeds than its set draws shows the largest picture with the count on it
 - CI on a push takes the fast tier and the browser tests in parallel, about ten minutes where it took ninety. The slow suites run in their own workflow, each as its own job with the puzzle ratings split six ways: nightly, on main, and on pull requests that touch the AI, piece movement, the plugins or the puzzles. `npm run test:changed` runs only the tests reachable from what changed
 - Every playable family has a showcase page under `/families/`, generated from the rules corpus: a live board, the variants with their rules and play links, a frontmatter excerpt and its SDK docs. A families index lists all thirty, and the site footer names the eight largest with a link to the rest
