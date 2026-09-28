@@ -180,7 +180,8 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 - A Landlord's Game draft, and its preview on the create page, draw the board: both now fetch the board file the variant names
 - "Edit Variant" on the play page is offered for every creatable variant, not only grid boards
 - Surakarta's loops are drawn from the arcs its grid topology declares, round the corners outside the board, where they had sat inside it and half off the frame
-- Boards embedded on family pages no longer overflow their frame: embed mode drops the play page's top margin
+- Boards embedded on family and topology pages sit centred in their frames: embed mode drops the play page's top margin and the hover hint under the board
+- The homepage lays out its eight topologies in two rows of four
 - `renderStateAsSvg` draws what the play page draws, for every family: a board in the variant's own surface and piece set (Backgammon now with its checkers) and a card, tile or dice table as one seat sees it. It takes the piece gallery and an asset base for artwork, highlights cells by id on any board, and asks for a board data file (the Landlord's Game) or the gallery by name rather than drawing an empty board
 - `cardArtwork(family)` in the SDK resolves card, tile and domino artwork through the set the family's frontmatter names
 - Shogi is drawn in squares: every shogi board had put its pieces on line crossings, eight squares a side, since July. The hoshi sit on the crossings after the third and sixth lines, Dobutsu draws its own board, and variants on other board sizes no longer inherit the 9x9 markings

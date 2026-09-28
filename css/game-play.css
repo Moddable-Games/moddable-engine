@@ -461,6 +461,12 @@ body.embed-mode .game-play-sidebar {
   display: none !important;
 }
 
+/* The hover hint took a line under every embedded board, so each sat high in
+   its frame with the space below it; without it the board centres. */
+body.embed-mode .game-play-hint {
+  display: none;
+}
+
 body.embed-mode .game-play-board {
   width: 100%;
   height: 100%;
