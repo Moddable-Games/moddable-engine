@@ -43,7 +43,7 @@ describe('SDK consumer path (no frontmatter, no variant registration)', () => {
     // Families with no plugin yet. Implementing one moves it into
     // EXPECTED_FAMILIES rather than being deleted from here.
     expect(hasFamily('tafl')).toBe(false)
-    expect(hasFamily('halma')).toBe(false)
+    expect(hasFamily('no-such-family')).toBe(false)
   })
 
   describe.each(EXPECTED_FAMILIES)('%s', (family) => {

@@ -1,4 +1,5 @@
 import { starRowWidths, starArmOf } from '../../topologies/graph/index.js'
+import { pieceImageKey } from './piece-symbols.js'
 const STAR_ARMS = ['N', 'NE', 'SE', 'S', 'SW', 'NW']
 
 // Fallback piece appearance per arm, used only when the resolved piece set has
@@ -79,6 +80,18 @@ export function produceStarLayout(colors, render, params) {
       if (img) pieces.push({ tag: 'image', attrs: { href: img, x: hp.x - pieceSz / 2, y: hp.y - pieceSz / 2, width: pieceSz, height: pieceSz } })
       else pieces.push({ tag: 'circle', attrs: { cx: hp.x, cy: hp.y, r: pieceR - 1, fill: color, stroke: 'rgba(255,255,255,0.6)', 'stroke-width': 1.5 } })
     }
+  }
+  // A game in progress: the pieces stand wherever the position puts them,
+  // keyed by hole (`h1`...), not in the arms they started in.
+  const position = render._position || {}
+  for (const [hole, piece] of Object.entries(position)) {
+    const idx = Number(String(hole).slice(1)) - 1
+    const hp = positions[idx]
+    if (!hp || !piece) continue
+    const img = pieceImages[pieceImageKey(piece, pieceImages)] || null
+    const color = STAR_ARM_COLORS[typeof piece === 'object' && Number.isInteger(piece.owner) ? piece.owner : 0]
+    if (img) pieces.push({ tag: 'image', attrs: { href: img, x: hp.x - pieceSz / 2, y: hp.y - pieceSz / 2, width: pieceSz, height: pieceSz, 'pointer-events': 'none' } })
+    else pieces.push({ tag: 'circle', attrs: { cx: hp.x, cy: hp.y, r: pieceR - 1, fill: color, stroke: 'rgba(255,255,255,0.6)', 'stroke-width': 1.5, 'pointer-events': 'none' } })
   }
   ops.push({ op: 'elements', items: pieces })
   const labelPad = spacing * 1.0

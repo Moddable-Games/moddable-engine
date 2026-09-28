@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-27",
+  "generated": "2026-09-28",
   "pieces": 123,
   "boards": 335,
   "boardFamilies": 34,
@@ -9,8 +9,8 @@
     "standard": 1116,
     "variants": 733
   },
-  "playableVariants": 300,
-  "playableFamilies": 26,
+  "playableVariants": 307,
+  "playableFamilies": 28,
   "playableByFamily": {
     "agon": 1,
     "backgammon": 8,
@@ -23,6 +23,7 @@
     "fanorona": 1,
     "flower-48": 4,
     "go": 12,
+    "halma": 2,
     "hex": 8,
     "landlords-game": 1,
     "mahjong": 5,
@@ -36,6 +37,7 @@
     "shogi": 24,
     "standard-52": 20,
     "standard-dice": 5,
+    "stern-halma": 5,
     "surakarta": 1,
     "xiangqi": 9
   },
@@ -51,6 +53,7 @@
     "fanorona": 0,
     "flower-48": 0,
     "go": 3,
+    "halma": 0,
     "hex": 0,
     "landlords-game": 0,
     "mahjong": 0,
@@ -64,6 +67,7 @@
     "shogi": 0,
     "standard-52": 0,
     "standard-dice": 0,
+    "stern-halma": 0,
     "surakarta": 0,
     "xiangqi": 0
   },
@@ -79,6 +83,7 @@
     "fanorona": 1,
     "flower-48": 4,
     "go": 9,
+    "halma": 2,
     "hex": 8,
     "landlords-game": 1,
     "mahjong": 5,
@@ -92,6 +97,7 @@
     "shogi": 24,
     "standard-52": 20,
     "standard-dice": 5,
+    "stern-halma": 5,
     "surakarta": 1,
     "xiangqi": 9
   },
