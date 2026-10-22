@@ -171,6 +171,7 @@ NODE_OPTIONS='--experimental-vm-modules' npx jest
 ## Changelog
 
 #### 2026-10-22
+- Embeds take `labels=0` for a bare board that fills its frame: no coordinates, no margin kept for them, no board padding
 - Embeds honour the `pieces` URL parameter: the requested piece set was dropped because the Pieces menu stays empty until the gallery loads
 
 #### 2026-09-28
