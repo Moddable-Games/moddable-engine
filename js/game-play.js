@@ -1741,7 +1741,9 @@ export async function initGamePlay(container, defaults = {}) {
     container: boardArea,
     handContainer: handEl,
     capturedContainer: capturedEl,
-    pieceSet: pieceSetSelect.value,
+    // The Pieces menu only lists sets once the gallery has loaded, so a set
+    // asked for in the URL (embeds) is taken from the params, not the menu.
+    pieceSet: params.pieces || pieceSetSelect.value || 'auto',
     opponent: opponentSelect.value === 'ai' ? 'ai' : 'human',
     difficulty: difficultySelect.value,
     seat: seatSelect.value,
@@ -1939,7 +1941,7 @@ export async function initGamePlay(container, defaults = {}) {
       }
       return true
     })
-    const current = pieceSetSelect.value
+    const current = config.pieceSet || pieceSetSelect.value
     pieceSetSelect.innerHTML = ''
     const autoOpt = document.createElement('option')
     autoOpt.value = 'auto'
