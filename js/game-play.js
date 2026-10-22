@@ -150,6 +150,7 @@ export function createPlaySession(options = {}) {
     pieceSet = 'auto',
     flags = [],
     embed = null,
+    labels = true,
     draftId = null,
     onStatus = null,
     onCapture = null,
@@ -216,6 +217,9 @@ export function createPlaySession(options = {}) {
       resolvedBoard = await resolveVariantBoard(family, variantCfg, variant, slug)
       frontmatterDef = definitionFromResolved(family, variant, resolvedBoard, variantCfg)
     }
+    // An embed may ask for a bare board (labels=0): the layout then keeps no
+    // margin for coordinates either.
+    if (labels === false) resolvedBoard = { ...resolvedBoard, render: { ...(resolvedBoard.render || {}), labels: false } }
 
     const variantKey = flags.length ? serializeVariantKey(variant, flags) : variant
     const rngSeed = Math.floor(Math.random() * 1000000)
@@ -1750,6 +1754,7 @@ export async function initGamePlay(container, defaults = {}) {
     theme: themeSelect.value,
     legendContainer: legendEl,
     embed: params.embed ? bridge : null,
+    labels: params.labels !== false,
     flipped: !!params.flipped,
     onStatus: updateStatus,
   }

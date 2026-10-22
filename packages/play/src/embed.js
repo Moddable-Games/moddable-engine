@@ -30,6 +30,9 @@ export function parseEmbedParams(search, defaults = {}) {
     pieces: params.get('pieces') || defaults.pieces || null,
     theme: params.get('theme') || defaults.theme || null,
     flipped: params.get('flipped') === '1',
+    // labels=0: no coordinates round the board and no margin kept for them,
+    // so the board fills the frame.
+    labels: params.get('labels') !== '0',
   }
 }
 

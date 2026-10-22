@@ -470,11 +470,18 @@ body.embed-mode .game-play-hint {
 body.embed-mode .game-play-board {
   width: 100%;
   height: 100%;
+  /* The page's board padding kept a margin inside the frame; a bare board
+     (labels=0) sized to the frame's height then ran off its right edge. */
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 body.embed-mode .game-play-board svg {
   width: 100%;
   height: 100%;
+  max-width: 100vw;
   max-height: 100vh;
   object-fit: contain;
 }
